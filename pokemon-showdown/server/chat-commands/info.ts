@@ -3160,7 +3160,7 @@ export const pages: Chat.PageTable = {
 	},
 	credits(query, user) {
 		this.title = "Hackmons Credits";
-		return Utils.html `<div class="pad">
+		return Utils.html`<div class="pad">
 			<h1>Credits</h1>
 
 			<h2><span>Owner</span></h2>
