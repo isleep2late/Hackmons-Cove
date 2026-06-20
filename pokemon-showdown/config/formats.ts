@@ -579,16 +579,6 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 	// name: 'customgame',
 	},
 	{
-		// another CG but its doubles, really could be in either spot
-		name: "[Gen 9] Doubles Custom Game",
-		mod: 'gen9',
-		gameType: 'doubles',
-		searchShow: false,
-		battle: {trunc: Math.trunc},
-		debug: true,
-		ruleset: ['Team Preview', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100'],
-	},
-	{
 		name: "[Gen 9] Mix and Mega Custom Game",
 		desc: `Mega evolve any Pok&eacute;mon with any mega stone, or transform them with Genesect Drives, Primal orbs, Origin orbs, Rusted items, Ogerpon Masks, Arceus Plates, and Silvally Memories with no limit. Mega and Primal boosts based on form changes from gen 7.`,
 		mod: 'mixandmega',
