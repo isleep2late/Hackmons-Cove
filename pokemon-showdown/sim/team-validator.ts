@@ -1654,7 +1654,7 @@ export class TeamValidator {
 				throw new Error(`${species.name} should have a string battleOnly`);
 			}
 			// Set to out-of-battle forme
-			if (dex.currentMod !== 'phnn') set.species = species.battleOnly;
+			if (dex.currentMod !== 'phnn' && dex.currentMod !== 'gen8unified') set.species = species.battleOnly;
 		} else {
 			if (species.requiredAbility) {
 				// Impossible!

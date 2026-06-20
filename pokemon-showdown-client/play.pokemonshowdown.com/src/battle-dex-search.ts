@@ -760,7 +760,7 @@ abstract class BattleTypedSearch<T extends SearchType> {
 
 			for (const id in this.getTable()) {
 				if (!(id in legalityFilter)) {
-					if (this.searchType === 'pokemon' && this.format.includes('nonerfs') && (this.dex.species.get(id).num > 0 || id.startsWith('pokestar')) && !id.endsWith('gmax')) {
+					if (this.searchType === 'pokemon' && (this.format.includes('nonerfs') || this.format.includes('unified')) && (this.dex.species.get(id).num > 0 || id.startsWith('pokestar')) && !id.endsWith('gmax')) {
                       this.baseResults.push([this.searchType, id as ID]);
                       continue;
                     }
@@ -865,6 +865,13 @@ abstract class BattleTypedSearch<T extends SearchType> {
 	}
 	protected canLearn(speciesid: ID, moveid: ID) {
 		const move = this.dex.moves.get(moveid);
+		if (this.format.includes('glitched')) {
+			const glitchSpecies = ['mew', 'ditto', 'jigglypuff', 'wigglytuff', 'mrmime', 'sudowoodo', 'bonsly', 'mimejr', 'chatot', 'caterpie', 'metapod', 'butterfree', 'weedle', 'kakuna', 'beedrill', 'magikarp', 'gyarados', 'unown', 'wobbuffet', 'smeargle', 'wurmple', 'silcoon', 'cascoon', 'wynaut', 'beldum', 'metagross', 'dustox', 'beautifly', 'metang', 'cleffa', 'clefairy', 'clefable', 'igglybuff', 'smoochum', 'jynx', 'skitty', 'delcatty', 'plusle', 'minun', 'spinda', 'riolu', 'lucario', 'happiny', 'chansey', 'blissey', 'mesprit', 'glameow', 'purugly', 'meowth', 'persian', 'drowzee', 'hypno', 'sentret', 'furret', 'sneasel', 'weavile', 'chimchar', 'monferno', 'infernape', 'togepi', 'togetic', 'togekiss', 'munchlax', 'snorlax', 'mankey', 'primeape', 'poliwhirl', 'poliwrath', 'abra', 'kadabra', 'alakazam', 'machop', 'machoke', 'machamp', 'geodude', 'graveler', 'golem', 'gengar', 'hitmonlee', 'hitmonchan', 'mewtwo', 'politoed', 'aipom', 'ambipom', 'snubbull', 'granbull', 'teddiursa', 'ursaring', 'miltank', 'celebi', 'ludicolo', 'makuhita', 'hariyama', 'sableye', 'meditite', 'medicham', 'volbeat', 'illumise', 'kecleon', 'banette', 'dusclops', 'dusknoir', 'jirachi'];
+			const baseid = toID(this.dex.species.get(speciesid).baseSpecies);
+			if ((glitchSpecies.includes(speciesid) || glitchSpecies.includes(baseid)) && move.exists && moveid !== 'chatter' as ID && moveid !== 'struggle' as ID) {
+				return true;
+			}
+		}
 		if (this.formatType === 'natdex' && move.isNonstandard && move.isNonstandard !== 'Past') {
 			return false;
 		}
@@ -1026,7 +1033,7 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 		if (!format) return this.getDefaultResults();
 		const isVGCOrBS = format.startsWith('battlespot') || format.startsWith('bss') ||
 			format.startsWith('battlestadium') || format.startsWith('vgc');
-		const isHackmons = format.includes('hackmons') || format.endsWith('bh');
+		const isHackmons = format.includes('hackmons') || format.endsWith('bh') || format.includes('anyability') || format.includes('glitched') || format.includes('unified');
 		let isDoublesOrBS = isVGCOrBS || this.formatType?.includes('doubles');
 		const dex = this.dex;
 
@@ -1319,7 +1326,7 @@ class BattleAbilitySearch extends BattleTypedSearch<'ability'> {
 	getBaseResults(): SearchRow[] {
 		if (!this.species) return this.getDefaultResults();
 		const format = this.format;
-		const isHackmons = (format.includes('hackmons') || format.endsWith('bh'));
+		const isHackmons = (format.includes('hackmons') || format.endsWith('bh') || format.includes('anyability') || format.includes('unified'));
 		const isAAA = (format === 'almostanyability' || format.includes('aaa'));
 		const dex = this.dex;
 		let species = dex.species.get(this.species);
@@ -1349,6 +1356,7 @@ class BattleAbilitySearch extends BattleTypedSearch<'ability'> {
 				if (ability.gen > dex.gen) continue;
 				abilities.push(ability.id);
 			}
+			if (isHackmons) abilities.push('noability' as ID);
 
 			let goodAbilities: SearchRow[] = [['header', "Abilities"]];
 			let poorAbilities: SearchRow[] = [['header', "Situational Abilities"]];
@@ -1783,7 +1791,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		const dex = this.dex;
 		let species = dex.species.get(this.species);
 		const format = this.format;
-		const isHackmons = (format.includes('hackmons') || format.endsWith('bh'));
+		const isHackmons = (format.includes('hackmons') || format.endsWith('bh') || format.includes('anyability') || format.includes('unified'));
 		const isPHNN = format.includes('nonerfs');
 		const phnnMaxMoves = ['maxguard', 'gmaxdrumsolo', 'gmaxfireball', 'gmaxhydrosnipe'];
 		const isSTABmons = (format.includes('stabmons') || format === 'staaabmons');
@@ -1862,10 +1870,13 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 			}
 			learnsetid = this.nextLearnsetid(learnsetid, species.id, true);
 		}
-		if (sketch || isHackmons) {
+		const glitchList = ['mew', 'ditto', 'jigglypuff', 'wigglytuff', 'mrmime', 'sudowoodo', 'bonsly', 'mimejr', 'chatot', 'caterpie', 'metapod', 'butterfree', 'weedle', 'kakuna', 'beedrill', 'magikarp', 'gyarados', 'unown', 'wobbuffet', 'smeargle', 'wurmple', 'silcoon', 'cascoon', 'wynaut', 'beldum', 'metagross', 'dustox', 'beautifly', 'metang', 'cleffa', 'clefairy', 'clefable', 'igglybuff', 'smoochum', 'jynx', 'skitty', 'delcatty', 'plusle', 'minun', 'spinda', 'riolu', 'lucario', 'happiny', 'chansey', 'blissey', 'mesprit', 'glameow', 'purugly', 'meowth', 'persian', 'drowzee', 'hypno', 'sentret', 'furret', 'sneasel', 'weavile', 'chimchar', 'monferno', 'infernape', 'togepi', 'togetic', 'togekiss', 'munchlax', 'snorlax', 'mankey', 'primeape', 'poliwhirl', 'poliwrath', 'abra', 'kadabra', 'alakazam', 'machop', 'machoke', 'machamp', 'geodude', 'graveler', 'golem', 'gengar', 'hitmonlee', 'hitmonchan', 'mewtwo', 'politoed', 'aipom', 'ambipom', 'snubbull', 'granbull', 'teddiursa', 'ursaring', 'miltank', 'celebi', 'ludicolo', 'makuhita', 'hariyama', 'sableye', 'meditite', 'medicham', 'volbeat', 'illumise', 'kecleon', 'banette', 'dusclops', 'dusknoir', 'jirachi'];
+		const isGlitchedMon = format.includes('glitched') && (glitchList.includes(species.id) || glitchList.includes(toID(species.baseSpecies)));
+		if (sketch || isHackmons || isGlitchedMon) {
 			if (isHackmons) moves = [];
 			for (let id in BattleMovedex) {
 				if (!format.startsWith('cap') && (id === 'paleowave' || id === 'shadowstrike')) continue;
+				if (isGlitchedMon && (id === 'chatter' || id === 'struggle')) continue;
 				const move = dex.moves.get(id);
 				if (move.gen > dex.gen || !move.exists) continue;
 				if (sketch) {

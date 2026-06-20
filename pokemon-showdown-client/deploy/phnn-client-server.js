@@ -119,6 +119,7 @@ function serveStatic(req, res, pathname) {
 	}
 	fs.stat(filePath, (err, stat) => {
 		if (err || !stat.isFile()) {
+			if (!path.extname(rel)) { serveStatic(req, res, '/'); return; }
 			res.writeHead(404, { 'content-type': 'text/plain' });
 			res.end('404 Not Found');
 			return;

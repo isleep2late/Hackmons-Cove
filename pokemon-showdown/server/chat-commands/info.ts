@@ -3160,7 +3160,7 @@ export const pages: Chat.PageTable = {
 	},
 	credits(query, user) {
 		this.title = "Hackmons Credits";
-		return Utils.html `<div class="main credits">
+		return Utils.html `<div class="pad">
 			<h1>Credits</h1>
 
 			<h2><span>Owner</span></h2>
@@ -3184,7 +3184,7 @@ export const pages: Chat.PageTable = {
 			</ul>
 			
 			<h3><span>Also see <a href="https://pokemonshowdown.com/credits" target="_blank"><strong>the main server's developers.</strong></a></span></h3>
-			</div>`
+			</div>`.replace(/\n\s*/g, ' ')
 
 	},
 	battlerules(query, user) {
