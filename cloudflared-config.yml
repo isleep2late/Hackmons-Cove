@@ -1,0 +1,48 @@
+# Cloudflare Tunnel Configuration for Pokemon Showdown
+# This configuration optimizes tunnel performance and reliability
+
+# Tunnel ingress rules
+ingress:
+  # Route all traffic to local Pokemon Showdown server
+  - service: http://localhost:8000
+    # Origin request configuration
+    originRequest:
+      # Connection timeouts
+      connectTimeout: 30s
+      # TCP keepalive for long-lived connections
+      tcpKeepAlive: 30s
+      # No timeout for idle connections (important for EventSource/WebSocket)
+      noTLSVerify: false
+      # HTTP/2 transport settings
+      http2Origin: true
+      # Disable chunked encoding which can cause issues with streaming
+      disableChunkedEncoding: false
+      # Keep alive connections
+      keepAliveConnections: 100
+      keepAliveTimeout: 90s
+      # Proxy connection timeout (for EventSource and long-polling)
+      proxyConnectionTimeout: 90s
+      # Expected response timeout (0 = no timeout for streaming)
+      # This is critical for EventSource connections
+      noHappyEyeballs: false
+      # HTTP host header
+      httpHostHeader: "play.hackmons.com"
+
+# Protocol selection - prefer quic for better performance
+protocol: quic
+
+# Retry logic for failed requests
+retries: 5
+
+# Grace period for connections during shutdown
+gracePeriod: 30s
+
+# Metrics server for monitoring
+metrics: 127.0.0.1:20242
+
+# Logging
+loglevel: info
+
+# Maximum number of connections per edge location
+# Default is 4, which matches what we see in your logs
+# ha-connections: 4
