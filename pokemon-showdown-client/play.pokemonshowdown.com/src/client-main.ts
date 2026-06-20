@@ -53,6 +53,8 @@ export interface PSConfig {
 		replays: string,
 		users: string,
 		teams: string,
+		/** PHNN: optional host to load sprites/audio/fx from (defaults to client) */
+		resourceServer?: string,
 	};
 	customcolors: Record<string, string>;
 	whitelist?: string[];

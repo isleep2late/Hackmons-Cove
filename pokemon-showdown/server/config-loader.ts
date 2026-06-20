@@ -265,6 +265,9 @@ export function watch() {
 			// by battle prefixes manually specified in config.js
 			Chat.plugins['username-prefixes']?.prefixManager.refreshConfig(true);
 			Monitor.notice('Reloaded ../config/config.js');
+			Rooms.global.notifyRooms(
+			['development','upperstaff'] as RoomID[],
+			`|c|~|/log Config settings were refreshed...`);
 		} catch (e: any) {
 			Monitor.adminlog("Error reloading ../config/config.js: " + e.stack);
 		}

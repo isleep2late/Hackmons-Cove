@@ -48,7 +48,7 @@
 				buf += '<p><label class="label" name="partner" style="display:none">';
 				buf += 'Partner:<br />';
 				buf += '<input class="partnerselect" /><button name="partnersubmit">Invite</button></label></p>';
-				buf += '<p><label class="checkbox"><input type="checkbox" name="private" ' + (Storage.prefs('disallowspectators') ? 'checked' : '') + ' /> <abbr title="You can still invite spectators by giving them the URL or using the /invite command">Don\'t allow spectators</abbr></label></p>';
+				
 				buf += '<p><button class="button mainmenu1 big" name="search"><strong>Battle!</strong><br /><small>Find a random opponent</small></button></p></form></div>';
 			}
 
@@ -279,7 +279,7 @@
 			}
 			if (teamFormat) {
 				buf += '<p><label class="label">Team:</label>' + this.renderTeams(teamFormat) + '</p>';
-				buf += '<p><label class="checkbox"><input type="checkbox" name="private" ' + (Storage.prefs('disallowspectators') ? 'checked' : '') + ' /> <abbr title="You can still invite spectators by giving them the URL or using the /invite command">Don\'t allow spectators</abbr></label></p>';
+				
 			}
 			buf += '<p class="buttonbar"><button name="acceptChallenge" class="button"><strong>' + BattleLog.escapeHTML(acceptButtonLabel) + '</strong></button> <button type="button" name="rejectChallenge" class="button">' + BattleLog.escapeHTML(rejectButtonLabel) + '</button></p></form>';
 			$challenge.html(buf);
@@ -814,7 +814,7 @@
 						var buf = '<form class="battleform"><p>' + BattleLog.escapeHTML(name) + ' wants to battle!</p>';
 						buf += '<p><label class="label">Format:</label>' + self.renderFormats(format, true) + '</p>';
 						buf += '<p><label class="label">Team:</label>' + self.renderTeams(format) + '</p>';
-						buf += '<p><label class="checkbox"><input type="checkbox" name="private" ' + (Storage.prefs('disallowspectators') ? 'checked' : '') + ' /> <abbr title="You can still invite spectators by giving them the URL or using the /invite command">Don\'t allow spectators</abbr></label></p>';
+						
 						buf += '<p class="buttonbar"><button name="acceptChallenge" class="button"><strong>Accept</strong></button> <button type="button" name="rejectChallenge" class="button">Reject</button></p></form>';
 						$challenge.html(buf);
 						if (format.substr(0, 4) === 'gen5') atLeastOneGen5 = true;
@@ -914,7 +914,7 @@
 			var buf = '<form class="battleform"><p>Challenge ' + BattleLog.escapeHTML(name) + '?</p>';
 			buf += '<p><label class="label">Format:</label>' + this.renderFormats(format) + '</p>';
 			buf += '<p><label class="label">Team:</label>' + this.renderTeams(format) + '</p>';
-			buf += '<p><label class="checkbox"><input type="checkbox" name="private" ' + (Storage.prefs('disallowspectators') ? 'checked' : '') + ' /> <abbr title="You can still invite spectators by giving them the URL or using the /invite command">Don\'t allow spectators</abbr></label></p>';
+			
 			var bestOfDefault = format && BattleFormats[format] ? BattleFormats[format].bestOfDefault : false;
 			buf += '<p' + (!bestOfDefault ? ' class="hidden">' : '>');
 			buf += '<label class="checkbox"><input type="checkbox" name="bestof" /> <abbr title="Start a team-locked best-of-n series">Best-of-<input name="bestofvalue" type="number" min="3" max="9" step="2" value="3" style="width: 28px; vertical-align: initial;"></abbr></label></p>';
@@ -1281,10 +1281,7 @@
 				// avoiding that decision for now because it requires either an ugly hack
 				// or an overhaul of BattleFormats.
 				this.open = Storage.prefs('openformats') || {
-					"S/V Singles": true, "S/V Doubles": true, "Unofficial Metagames": true, "National Dex": true, "Ladder Spotlight": true,
-					"Other Metagames": true,
-					// For AFD
-					"Random Meta of the Decade": true
+					"All Gens PH": true, "No Nerfs": true, "Wondrous Hackmons": true,
 				};
 			}
 			if (!this.starred) this.starred = Storage.prefs('starredformats') || {};

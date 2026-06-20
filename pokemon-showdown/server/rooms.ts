@@ -1831,6 +1831,28 @@ export class GlobalRoomState {
 			if (curRoom) curRoom.add(message).update();
 		}
 	}
+	sanitizeFilePaths(text: string): string {
+		// Remove absolute file paths to prevent exposing server directory structure
+		// Matches patterns like /home/user/... or C:\Users\... or /var/... etc.
+		return text
+			// Unix-style absolute paths (e.g., /home/user/path/to/file.js)
+			.replace(/\/(?:home|root|var|usr|opt)\/[^\s:)]+/g, (match) => {
+				// Extract just the filename from the path
+				const parts = match.split('/');
+				return parts[parts.length - 1] || 'file';
+			})
+			// Windows-style absolute paths (e.g., C:\Users\username\path\to\file.js)
+			.replace(/[A-Z]:\\(?:Users|Windows|Program Files)[^\s:)]+/gi, (match) => {
+				// Extract just the filename from the path
+				const parts = match.split(/[/\\]/);
+				return parts[parts.length - 1] || 'file';
+			})
+			// Also sanitize any remaining absolute paths that start with /
+			.replace(/\/[a-zA-Z0-9_\-]+\/[a-zA-Z0-9_\-]+\/[^\s:)]+/g, (match) => {
+				const parts = match.split('/');
+				return parts[parts.length - 1] || 'file';
+			});
+	}
 	reportCrash(err: Error | string, crasher = "The server") {
 		const time = Date.now();
 		if (time - this.lastReportedCrash < CRASH_REPORT_THROTTLE) {
@@ -1838,7 +1860,9 @@ export class GlobalRoomState {
 		}
 		this.lastReportedCrash = time;
 
-		const stack = typeof err === 'string' ? err : err?.stack || err?.message || err?.name || '';
+		let stack = typeof err === 'string' ? err : err?.stack || err?.message || err?.name || '';
+		// Sanitize file paths to prevent exposing server directory structure
+		stack = this.sanitizeFilePaths(stack);
 		const [stackFirst, stackRest] = Utils.splitFirst(Utils.escapeHTML(stack), `<br />`);
 		let fullStack = `<b>${crasher} crashed:</b> ` + stackFirst;
 		if (stackRest) fullStack = `<details class="readmore"><summary>${fullStack}</summary>${stackRest}</details>`;
@@ -2121,7 +2145,7 @@ export class GameRoom extends BasicRoom {
 			password,
 		});
 		if (result?.errorip) {
-			connection?.popup(`This server's request IP ${result.errorip} is not a registered server.`);
+			connection?.popup(`Sorry! We don't have replays (yet!).`);
 			return;
 		}
 

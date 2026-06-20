@@ -1,0 +1,22 @@
+[Unit]
+Description=PHNN custom client front server (static client + action.php login proxy)
+After=network.target
+
+[Service]
+Type=simple
+User=gyarados
+WorkingDirectory=/srv/phnn/pokemon-showdown-client
+# Use the Node v22 the client is built with.
+ExecStart=/home/gyarados/.nvm/versions/node/v22.22.2/bin/node /srv/phnn/pokemon-showdown-client/deploy/phnn-client-server.js
+Environment=PHNN_CLIENT_PORT=8100
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
+
+# Install with:
+#   sudo cp deploy/phnn-client.service /etc/systemd/system/phnn-client.service
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now phnn-client
+# Check:  systemctl status phnn-client   |   journalctl -u phnn-client -f

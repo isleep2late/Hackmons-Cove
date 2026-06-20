@@ -1431,7 +1431,12 @@ function toId() {
 						var parenPos = teambuilderFormatName.indexOf('(');
 						if (parenPos > 0 && name.slice(-1) === ')') {
 							// variation of existing tier
-							teambuilderFormatName = $.trim(teambuilderFormatName.slice(0, parenPos));
+							var strippedName = $.trim(teambuilderFormatName.slice(0, parenPos));
+							var strippedId = toID(strippedName);
+							// ...unless the base is its own format in another section
+							if (!(BattleFormats[strippedId] && BattleFormats[strippedId].section && BattleFormats[strippedId].section !== section)) {
+								teambuilderFormatName = strippedName;
+							}
 						}
 						if (teambuilderFormatName !== name) {
 							teambuilderFormat = toID(teambuilderFormatName);
@@ -2097,7 +2102,7 @@ function toId() {
 			if (room.id === this.fragment) this.updateTitle(room);
 		},
 		updateTitle: function (room) {
-			document.title = room.title ? room.title + " - Showdown!" : "Showdown!";
+			document.title = room.title ? room.title + " - Hackmons!" : "Hackmons!";
 		},
 		updateAutojoin: function () {
 			if (!Config.server.registered) return;
@@ -2714,7 +2719,7 @@ function toId() {
 		}
 	});
 
-	Config.groups = Config.groups || {
+	Config.groups = {
 		'#': {
 			name: "Room Owner (#)",
 			type: 'leadership',

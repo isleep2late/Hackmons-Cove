@@ -89,7 +89,7 @@ exports.loginserverpublickey = "-----BEGIN RSA PUBLIC KEY-----\n" +
 
 <p>As a precaution, we are disabling the old login server keys very soon. Third-party server operators must update their <code>config.js</code> file and then restart their servers, or logging in will no longer work on those servers.</p>
 
-<p>Thanks for playing on Pokémon Showdown!</p>
+<p>Thanks for playing on Pokémon Hackmons!</p>
 
 </div>
 <?php

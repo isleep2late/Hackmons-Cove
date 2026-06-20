@@ -384,6 +384,16 @@ export class GlobalAuth extends Auth {
 		const user = Users.get(id, true);
 		if (user) {
 			user.tempGroup = group;
+			// A global rank makes the user trusted (throttle-exempt and lock-immune).
+			// User#setGroup applies this, but raw promotions (/globalpromote and
+			// friends) call globalAuth.set directly, so apply it here too. Without
+			// this, a user promoted while online keeps the untrusted message throttle
+			// until they reconnect. Mirrors the registered/non-default guard in
+			// User#setGroup; full deauth goes through delete(), not set().
+			if (user.registered && group !== Auth.defaultSymbol()) {
+				user.trusted = user.id;
+				user.autoconfirmed = user.id;
+			}
 			user.updateIdentity();
 			username = user.name;
 			Rooms.global.checkAutojoin(user);

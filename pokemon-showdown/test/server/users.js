@@ -182,6 +182,35 @@ describe('Users features', () => {
 					}
 				});
 			});
+
+			describe('global promotion trusted status', () => {
+				let promoted = null;
+				let origSave = null;
+				beforeEach(() => {
+					// Don't write the real config/usergroups.csv during the test.
+					origSave = Users.globalAuth.save;
+					Users.globalAuth.save = () => {};
+				});
+				afterEach(() => {
+					if (promoted) {
+						Users.globalAuth.delete(promoted.id);
+						promoted.disconnectAll();
+						promoted.destroy();
+						promoted = null;
+					}
+					Users.globalAuth.save = origSave;
+				});
+
+				it('should mark a promoted online user trusted immediately', () => {
+					promoted = makeUser('Trusty Mctest', '127.0.0.1');
+					promoted.trusted = '';
+					Users.globalAuth.set(promoted.id, '@');
+					assert.equal(
+						promoted.trusted, promoted.id,
+						'promoting an online user should grant trusted status without a relog'
+					);
+				});
+			});
 		});
 	});
 });

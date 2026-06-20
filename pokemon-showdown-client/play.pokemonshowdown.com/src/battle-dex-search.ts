@@ -656,6 +656,9 @@ abstract class BattleTypedSearch<T extends SearchType> {
 			format = format.slice(9) as ID;
 			if (format.startsWith('vgc') || format.startsWith('bss')) format = 'ubers' as ID;
 		}
+		if (format.includes('nonerfs') && this.dex.gen === 9) {
+			this.dex = Dex.mod('gen9phnn' as ID);
+		}
 		if (format.startsWith('vgc')) {
 			this.formatType = 'doubles';
 			this.isDoubles = true;
@@ -757,6 +760,10 @@ abstract class BattleTypedSearch<T extends SearchType> {
 
 			for (const id in this.getTable()) {
 				if (!(id in legalityFilter)) {
+					if (this.searchType === 'pokemon' && this.format.includes('nonerfs') && (this.dex.species.get(id).num > 0 || id.startsWith('pokestar')) && !id.endsWith('gmax')) {
+                      this.baseResults.push([this.searchType, id as ID]);
+                      continue;
+                    }
 					this.baseIllegalResults.push([this.searchType, id as ID]);
 					this.illegalReasons[id] = 'Illegal';
 				}
@@ -1777,6 +1784,8 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		let species = dex.species.get(this.species);
 		const format = this.format;
 		const isHackmons = (format.includes('hackmons') || format.endsWith('bh'));
+		const isPHNN = format.includes('nonerfs');
+		const phnnMaxMoves = ['maxguard', 'gmaxdrumsolo', 'gmaxfireball', 'gmaxhydrosnipe'];
 		const isSTABmons = (format.includes('stabmons') || format === 'staaabmons');
 		const isTradebacks = format.includes('tradebacks');
 		const regionBornLegality = dex.gen >= 6 &&
@@ -1865,11 +1874,13 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 					if (move.isNonstandard === 'Past' && this.formatType !== 'natdex') continue;
 					sketchMoves.push(move.id);
 				} else {
-					if (!(dex.gen < 8 || this.formatType === 'natdex') && move.isZ) continue;
-					if (typeof move.isMax === 'string') continue;
-					if (move.isMax && dex.gen > 8) continue;
-					if (move.isNonstandard === 'Past' && this.formatType !== 'natdex') continue;
-					if (move.isNonstandard === 'LGPE' && this.formatType !== 'letsgo') continue;
+					const phnnMaxOk = isPHNN && (phnnMaxMoves.includes(move.id) || typeof move.isMax === 'string');
+					const phnnZOk = isPHNN && move.isZ;
+					if (move.isZ && !(dex.gen < 8 || this.formatType === 'natdex' || phnnZOk)) continue;
+					if (typeof move.isMax === 'string' && !phnnMaxOk) continue;
+					if (move.isMax && dex.gen > 8 && !phnnMaxOk) continue;
+					if (move.isNonstandard === 'Past' && this.formatType !== 'natdex' && !isPHNN) continue;
+					if (move.isNonstandard === 'LGPE' && this.formatType !== 'letsgo' && !isPHNN) continue;
 					moves.push(move.id);
 				}
 			}

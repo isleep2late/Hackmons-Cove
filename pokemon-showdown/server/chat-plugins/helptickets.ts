@@ -2246,7 +2246,8 @@ export const commands: Chat.ChatCommands = {
 	helpticket: {
 		'': 'create',
 		create(target, room, user) {
-			if (!this.runBroadcast()) return;
+			return this.sendReplyBox(`Help tickets are disabled on this server.`);
+			/* if (!this.runBroadcast()) return;
 			const meta = this.pmTarget ? `-user-${this.pmTarget.id}` : this.room ? `-room-${this.room.roomid}` : '';
 			if (this.broadcasting) {
 				return this.sendReplyBox(`<button name="joinRoom" value="view-help-request${meta}" class="button"><strong>${this.tr`Request help`}</strong></button>`);
@@ -2255,7 +2256,7 @@ export const commands: Chat.ChatCommands = {
 				return this.parse('/join view-help-request'); // Globals automatically get the form for reference.
 			}
 			if (!user.named) throw new Chat.ErrorMessage(this.tr`You need to choose a username before doing this.`);
-			return this.parse(`/join view-help-request${meta}`);
+			return this.parse(`/join view-help-request${meta}`); */
 		},
 		createhelp: [`/helpticket create - Creates a new ticket requesting help from global staff.`],
 

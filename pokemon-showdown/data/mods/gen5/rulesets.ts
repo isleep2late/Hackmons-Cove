@@ -5,6 +5,7 @@ export const Rulesets: import('../../../sim/dex-formats').ModdedFormatDataTable 
 			'Standard AG',
 			'Species Clause', 'Nickname Clause', 'OHKO Clause', 'Evasion Items Clause', 'Evasion Moves Clause',
 		],
+		banlist: ['Moody'],
 	},
 	obtainablemoves: {
 		inherit: true,

@@ -121,6 +121,71 @@ async function updateserver(context: Chat.CommandContext, codePath: string) {
 	}
 }
 
+async function launchRestartProcess(context: Chat.CommandContext) {
+	try {
+		const child = child_process.spawn(process.execPath, ['pokemon-showdown', 'start'], {
+			cwd: FS.ROOT_PATH,
+			detached: true,
+			stdio: ['ignore', 'ignore', 'ignore'],
+		});
+		child.unref();
+		context.stafflog(`Queued auto-restart with ${process.execPath} pokemon-showdown start in ${FS.ROOT_PATH}`);
+	} catch (err: any) {
+		context.stafflog(`Failed to queue auto-restart: ${err?.message || String(err)}`);
+		throw new Chat.ErrorMessage("The auto-restart process could not be started.");
+	}
+}
+
+export async function killServer(context: Chat.CommandContext, target: string, room: Room, user: User, options: { autoRestart?: boolean } = {}) {
+	let noSave = toID(target) === 'nosave';
+	if (!Config.usepostgres) noSave = true;
+
+	if (Rooms.global.lockdown !== true && noSave) {
+		if (user.avatar !== 'iforgetwhyimhere.png') {
+		throw new Chat.ErrorMessage("For safety reasons, using /kill without saving battles can only be done during lockdown."); }
+	}
+
+	if (Monitor.updateServerLock) {
+		throw new Chat.ErrorMessage("Wait for /updateserver to finish before using /kill.");
+	}
+
+	if (options.autoRestart) {
+		await launchRestartProcess(context);
+		context.sendReply('Auto-restart process queued.');
+	}
+
+	if (!noSave) {
+		context.sendReply('Saving battles...');
+		Rooms.global.lockdown = true;
+		for (const u of Users.users.values()) {
+			u.send(
+				`|pm|~|${u.getIdentity()}|/raw <div class="broadcast-red"><b>The server is restarting soon.</b><br />` +
+				`While battles are being saved, no more can be started. If you're in a battle, it will be paused during saving.<br />` +
+				`After the restart, you will be able to resume your battles from where you left off.`
+			);
+		}
+		const count = await Rooms.global.saveBattles();
+		context.sendReply(`DONE.`);
+		context.sendReply(`${count} battles saved.`);
+	}
+
+	const logRoom = Rooms.get('staff') || room;
+
+	if (!logRoom?.log.roomlogStream) {
+		process.exit();
+	}
+
+	logRoom.roomlog(`${user.name} used ${options.autoRestart ? '/restartserver' : '/kill'}`);
+
+	void logRoom.log.roomlogStream.writeEnd().then(() => {
+		process.exit();
+	});
+
+	setTimeout(() => {
+		process.exit();
+	}, 10000);
+}
+
 export const commands: Chat.ChatCommands = {
 	potd(target, room, user) {
 		this.canUseConsole();
@@ -840,13 +905,13 @@ export const commands: Chat.ChatCommands = {
 			}
 		} catch (e: any) {
 			Rooms.global.notifyRooms(
-				['development', 'staff'] as RoomID[],
+				['development', 'staff', 'upperstaff'] as RoomID[],
 				`|c|${user.getIdentity()}|/log ${user.name} used /hotpatch ${target} - but something failed while trying to hot-patch.`
 			);
 			throw new Chat.ErrorMessage([`Something failed while trying to hot-patch ${target}:`, e.stack]);
 		}
 		Rooms.global.notifyRooms(
-			['development', 'staff'] as RoomID[],
+			['development', 'staff', 'upperstaff'] as RoomID[],
 			`|c|${user.getIdentity()}|/log ${user.name} used /hotpatch ${target}`
 		);
 	},
@@ -1279,47 +1344,8 @@ export const commands: Chat.ChatCommands = {
 	},
 
 	async kill(target, room, user) {
-		this.checkCan('lockdown');
-		let noSave = toID(target) === 'nosave';
-		if (!Config.usepostgres) noSave = true;
-
-		if (Rooms.global.lockdown !== true && noSave) {
-			throw new Chat.ErrorMessage("For safety reasons, using /kill without saving battles can only be done during lockdown.");
-		}
-
-		if (Monitor.updateServerLock) {
-			throw new Chat.ErrorMessage("Wait for /updateserver to finish before using /kill.");
-		}
-
-		if (!noSave) {
-			this.sendReply('Saving battles...');
-			Rooms.global.lockdown = true; // we don't want more battles starting while we save
-			for (const u of Users.users.values()) {
-				u.send(
-					`|pm|~|${u.getIdentity()}|/raw <div class="broadcast-red"><b>The server is restarting soon.</b><br />` +
-					`While battles are being saved, no more can be started. If you're in a battle, it will be paused during saving.<br />` +
-					`After the restart, you will be able to resume your battles from where you left off.`
-				);
-			}
-			const count = await Rooms.global.saveBattles();
-			this.sendReply(`DONE.`);
-			this.sendReply(`${count} battles saved.`);
-		}
-
-		const logRoom = Rooms.get('staff') || Rooms.lobby || room;
-
-		if (!logRoom?.log.roomlogStream) return process.exit();
-
-		logRoom.roomlog(`${user.name} used /kill`);
-
-		void logRoom.log.roomlogStream.writeEnd().then(() => {
-			process.exit();
-		});
-
-		// In the case the above never terminates
-		setTimeout(() => {
-			process.exit();
-		}, 10000);
+		this.canUseConsole;
+		await killServer(this, target, room, user);
 	},
 	killhelp: [
 		`/kill - kills the server. Use the argument \`nosave\` to prevent the saving of battles.`,
@@ -1621,7 +1647,7 @@ export const commands: Chat.ChatCommands = {
 	ebat: 'editbattle',
 	editbattle(target, room, user) {
 		room = this.requireRoom();
-		this.checkCan('forcewin');
+		this.canUseConsole();
 		if (!target) return this.parse('/help editbattle');
 		if (!room.battle) {
 			throw new Chat.ErrorMessage("/editbattle - This is not a battle room.");

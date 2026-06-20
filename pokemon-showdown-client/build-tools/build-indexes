@@ -12,12 +12,13 @@ if (!fs.existsSync('caches/pokemon-showdown')) {
 	child_process.execSync('git clone https://github.com/smogon/pokemon-showdown.git', {
 		cwd: 'caches',
 	});
+	process.stdout.write("Syncing data from Git repository... ");
+	child_process.execSync('git pull', { cwd: 'caches/pokemon-showdown' });
+	child_process.execSync('npm run build', { cwd: 'caches/pokemon-showdown' });
+	console.log("DONE");
+} else {
+	console.log("Using local caches/pokemon-showdown (skipping upstream sync)");
 }
-
-process.stdout.write("Syncing data from Git repository... ");
-child_process.execSync('git pull', { cwd: 'caches/pokemon-showdown' });
-child_process.execSync('npm run build', { cwd: 'caches/pokemon-showdown' });
-console.log("DONE");
 
 const Dex = require('../caches/pokemon-showdown/dist/sim/dex').Dex;
 const CompoundWordNames = require('../caches/pokemon-showdown/dist/data/aliases').CompoundWordNames;
@@ -1318,6 +1319,75 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 
 		const overrideItemData = {};
 		BattleTeambuilderTable[mod].overrideItemData = overrideItemData;
+		for (const id in modData.Items) {
+			const modEntry = modDex.items.get(id);
+			const parentEntry = parentDex.items.get(id);
+			for (const key of overrideItemKeys) {
+				if (JSON.stringify(modEntry[key]) !== JSON.stringify(parentEntry[key])) {
+					if (!overrideItemData[id]) overrideItemData[id] = {};
+					overrideItemData[id][key] = modEntry[key];
+				}
+			}
+		}
+	}
+
+	for (const [clientId, serverMod] of [
+		['gen9phnn', 'phnn'],
+	]) {
+		const modDex = Dex.mod(serverMod);
+		const modData = modDex.data;
+		const parentDex = Dex.forGen(modDex.gen);
+		const baseTable = modDex.gen === 9 ? BattleTeambuilderTable : BattleTeambuilderTable[`gen${modDex.gen}`];
+
+		BattleTeambuilderTable[clientId] = {
+			tiers: baseTable.tiers,
+			items: baseTable.items,
+			formatSlices: baseTable.formatSlices,
+			overrideTier: {},
+		};
+
+		const overrideSpeciesData = {};
+		BattleTeambuilderTable[clientId].overrideSpeciesData = overrideSpeciesData;
+		for (const id in modData.Pokedex) {
+			const modEntry = modDex.species.get(id);
+			const parentEntry = parentDex.species.get(id);
+			for (const key of overrideSpeciesKeys) {
+				if (JSON.stringify(modEntry[key]) !== JSON.stringify(parentEntry[key])) {
+					if (!overrideSpeciesData[id]) overrideSpeciesData[id] = {};
+					overrideSpeciesData[id][key] = modEntry[key];
+				}
+			}
+		}
+
+		const overrideMoveData = {};
+		BattleTeambuilderTable[clientId].overrideMoveData = overrideMoveData;
+		for (const id in modData.Moves) {
+			const modEntry = modDex.moves.get(id);
+			const parentEntry = parentDex.moves.get(id);
+			for (const key of overrideMoveKeys) {
+				if (key === 'category' && modDex.gen <= 3) continue;
+				if (JSON.stringify(modEntry[key]) !== JSON.stringify(parentEntry[key])) {
+					if (!overrideMoveData[id]) overrideMoveData[id] = {};
+					overrideMoveData[id][key] = modEntry[key];
+				}
+			}
+		}
+
+		const overrideAbilityData = {};
+		BattleTeambuilderTable[clientId].overrideAbilityData = overrideAbilityData;
+		for (const id in modData.Abilities) {
+			const modEntry = modDex.abilities.get(id);
+			const parentEntry = parentDex.abilities.get(id);
+			for (const key of overrideAbilityKeys) {
+				if (JSON.stringify(modEntry[key]) !== JSON.stringify(parentEntry[key])) {
+					if (!overrideAbilityData[id]) overrideAbilityData[id] = {};
+					overrideAbilityData[id][key] = modEntry[key];
+				}
+			}
+		}
+
+		const overrideItemData = {};
+		BattleTeambuilderTable[clientId].overrideItemData = overrideItemData;
 		for (const id in modData.Items) {
 			const modEntry = modDex.items.get(id);
 			const parentEntry = parentDex.items.get(id);

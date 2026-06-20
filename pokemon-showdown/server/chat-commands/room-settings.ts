@@ -833,9 +833,6 @@ export const commands: Chat.ChatCommands = {
 	makegroupchat(target, room, user, connection, cmd) {
 		room = this.requireRoom();
 		this.checkChat();
-		if (!user.trusted) {
-			throw new Chat.ErrorMessage("You must be trusted (public room driver or global voice) to make a groupchat.");
-		}
 
 		const groupchatbanned = Punishments.isGroupchatBanned(user);
 		if (groupchatbanned) {
@@ -851,7 +848,8 @@ export const commands: Chat.ChatCommands = {
 			if (room.settings.isPersonal) throw new Chat.ErrorMessage("You cannot create a subroom of a groupchat.");
 		}
 		const parent = cmd === 'subroomgroupchat' || cmd === 'srgc' ? room.roomid : null;
-		// this.checkCan('makegroupchat');
+		// @ts-expect-error ???
+		this.checkCan('makegroupchat');
 
 		// Title defaults to a random 8-digit number.
 		let title = target.trim();

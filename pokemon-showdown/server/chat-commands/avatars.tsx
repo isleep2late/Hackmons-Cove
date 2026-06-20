@@ -93,8 +93,9 @@ export const Avatars = new class {
 	}
 	src(avatar: AvatarID) {
 		if (avatar.includes('.')) return '';
-		const avatarUrl = avatar.startsWith('#') ? `trainers-custom/${avatar.slice(1)}.png` : `trainers/${avatar}.png`;
-		return `https://${Config.routes.client}/sprites/${avatarUrl}`;
+		const avatarUrl = OFFICIAL_AVATARS.has(avatar) ? 
+		`https://play.pokemonshowdown.com/sprites/trainers/${avatar}.png` : `https://play.hackmons.com/avatars/${avatar}.png`;
+		return `${avatarUrl}`;
 	}
 	exists(avatar: string) {
 		if (avatar.includes('.')) {
@@ -987,17 +988,17 @@ export const commands: Chat.ChatCommands = {
 			if (!Users.isUsername(username)) {
 				throw new Chat.ErrorMessage(`Invalid username "${username}"`);
 			}
-			await Avatars.validate('#' + toID(username));
+			await Avatars.validate(toID(username) + '.png');
 		}
 
 		const userids = usernames.map(toID);
 		for (const userid of userids) {
-			const avatar = '#' + userid;
+			const avatar = userid + '.png';
 			Avatars.addPersonal(userid, avatar);
 			this.globalModlog('PERSONAL AVATAR', userid, avatar);
 		}
 		this.sendReplyBox(<div>
-			{userids.map(userid => Avatars.img('#' + userid))}<br />
+			{userids.map(userid => Avatars.img(userid + '.png'))}<br />
 			Added {userids.length} avatars
 		</div>);
 	},

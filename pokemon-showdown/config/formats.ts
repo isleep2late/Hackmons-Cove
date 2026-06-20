@@ -5511,4 +5511,430 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		battle: { trunc: Math.trunc },
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Desync Clause Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100'],
 	},
+{
+	section: "No Nerfs",
+	column: 1,
+},
+{
+	name: "[Gen 9] Pure Hackmons No Nerfs",
+	desc: "The ultimate Pokemon experience where every move is legal, every ability is legal, and every Pokemon can be played at their peak from their strongest generation.",
+	mod: 'phnn',
+	ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview'],
+	unbanlist: ['Past', 'Future', 'Unobtainable'],
+	onBegin() {
+		this.add('raw|<div class="broadcast-blue"><strong>Pure Hackmons No Nerfs</strong><br />Every move is legal, every ability is legal, and every Pokemon across all generations can be played at their peak!</div>');
+	},
+},
+{
+	name: "[Gen 9] Pure Hackmons No Nerfs Doubles",
+	desc: "Pure Hackmons No Nerfs in Doubles format with twice the chaos!",
+	mod: 'phnn',
+	gameType: 'doubles',
+	ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Data Preview'],
+	banlist: [],
+	unbanlist: [
+		'Past', 'Future', 'Unobtainable'
+	],
+	onValidateSet(set, format, setHas, teamHas) {
+		return [];
+	},
+	onValidateTeam(team, format) {
+		return [];
+	},
+	onModifyDamage(damage, source, target, move) {
+		if (move.multihitType === 'parentalbond' && move.hit > 1) {
+			return this.chainModify(2);
+		}
+	},
+		onBegin() {
+			this.add('raw|<div class="broadcast-blue"><strong>Pure Hackmons No Nerfs</strong><br />Every move is legal, every ability is legal, and every Pokemon across all generations can be played at their peak!</div>');
+		},
+},
+{
+	name: "[Gen 9] Pure Hackmons No Nerfs Triples",
+	desc: "Pure Hackmons No Nerfs in Triples format - maximum chaos!",
+	mod: 'phnn',
+	gameType: 'triples',
+	ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Data Preview'],
+	onModifyDamage(damage, source, target, move) {
+		if (move.multihitType === 'parentalbond' && move.hit > 1) {
+			return this.chainModify(2);
+		}
+	},
+	onBegin() {
+		this.add('raw|<div class="broadcast-blue"><strong>Pure Hackmons No Nerfs</strong><br />Every move is legal, every ability is legal, and every Pokemon across all generations can be played at their peak!</div>');
+	},
+},
+{
+	name: "[Gen 9] Pure Hackmons Little Cup No Nerfs",
+	desc: "Pure Hackmons No Nerfs, but only first stages.",
+	mod: 'phnn',
+	ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Adjust Level = 5', 'Data Preview'],
+	onBegin() {
+		this.add('raw|<div class="broadcast-blue"><strong>Pure Hackmons Little Cup No Nerfs</strong><br />Only first-stage Pokemon that can still evolve, played at Level 5 — with every No Nerfs move and ability!</div>');
+	},
+},
+{
+	name: "[Gen 9] Pure Hackmons Little Cup No Nerfs Doubles",
+	desc: "Little Cup Pure Hackmons No Nerfs in the Doubles format.",
+	mod: 'phnn',
+	gameType: 'doubles',
+	ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Little Cup'],
+	unbanlist: ['Past', 'Future', 'Unobtainable'],
+	onModifyDamage(damage, source, target, move) {
+		if (move.multihitType === 'parentalbond' && move.hit > 1) {
+			return this.chainModify(2);
+		}
+	},
+	onBegin() {
+		this.add('raw|<div class="broadcast-blue"><strong>Pure Hackmons Little Cup No Nerfs</strong><br />Only first-stage Pokemon that can still evolve, played at Level 5 — with every No Nerfs move and ability!</div>');
+	},
+},
+{
+	name: "[Gen 9] Pure Hackmons Little Cup No Nerfs Triples",
+	desc: "Little Cup Pure Hackmons No Nerfs in the Triples format.",
+	mod: 'phnn',
+	gameType: 'triples',
+	ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Little Cup'],
+	unbanlist: ['Past', 'Future', 'Unobtainable'],
+	onModifyDamage(damage, source, target, move) {
+		if (move.multihitType === 'parentalbond' && move.hit > 1) {
+			return this.chainModify(2);
+		}
+	},
+	onBegin() {
+		this.add('raw|<div class="broadcast-blue"><strong>Pure Hackmons Little Cup No Nerfs</strong><br />Only first-stage Pokemon that can still evolve, played at Level 5 — with every No Nerfs move and ability!</div>');
+	},
+},
+{
+	name: "[Gen 9] Pure Hackmons Middle Cup No Nerfs",
+	desc: "Pure Hackmons No Nerfs restricted to the middle stage of three-stage evolution lines, played at Level 50.",
+	mod: 'phnn',
+	ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Adjust Level = 50'],
+	unbanlist: ['Past', 'Future', 'Unobtainable'],
+	onValidateSet(set) {
+		const species = this.dex.species.get(set.species || set.name);
+		if (!species.prevo) {
+			return [`${species.name} can't be used in Middle Cup: it has no pre-evolution (it's a first stage).`];
+		}
+		if (this.dex.species.get(species.prevo).prevo) {
+			return [`${species.name} can't be used in Middle Cup: it's the final stage of its evolution line.`];
+		}
+		if (!species.nfe) {
+			return [`${species.name} can't be used in Middle Cup: it can't evolve any further.`];
+		}
+		return [];
+	},
+	onBegin() {
+		this.add('raw|<div class="broadcast-blue"><strong>Pure Hackmons Middle Cup No Nerfs</strong><br />Only the middle stage of three-stage evolution lines, played at Level 50 — with every No Nerfs move and ability!</div>');
+	},
+},
+{
+	name: "[Gen 9] Pure Hackmons Middle Cup No Nerfs Doubles",
+	desc: "Middle Cup Pure Hackmons No Nerfs in the Doubles format.",
+	mod: 'phnn',
+	gameType: 'doubles',
+	ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Adjust Level = 50'],
+	unbanlist: ['Past', 'Future', 'Unobtainable'],
+	onValidateSet(set) {
+		const species = this.dex.species.get(set.species || set.name);
+		if (!species.prevo) {
+			return [`${species.name} can't be used in Middle Cup: it has no pre-evolution (it's a first stage).`];
+		}
+		if (this.dex.species.get(species.prevo).prevo) {
+			return [`${species.name} can't be used in Middle Cup: it's the final stage of its evolution line.`];
+		}
+		if (!species.nfe) {
+			return [`${species.name} can't be used in Middle Cup: it can't evolve any further.`];
+		}
+		return [];
+	},
+	onModifyDamage(damage, source, target, move) {
+		if (move.multihitType === 'parentalbond' && move.hit > 1) {
+			return this.chainModify(2);
+		}
+	},
+	onBegin() {
+		this.add('raw|<div class="broadcast-blue"><strong>Pure Hackmons Middle Cup No Nerfs</strong><br />Only the middle stage of three-stage evolution lines, played at Level 50 — with every No Nerfs move and ability!</div>');
+	},
+},
+{
+	name: "[Gen 9] Pure Hackmons Middle Cup No Nerfs Triples",
+	desc: "Middle Cup Pure Hackmons No Nerfs in the Triples format.",
+	mod: 'phnn',
+	gameType: 'triples',
+	ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Adjust Level = 50'],
+	unbanlist: ['Past', 'Future', 'Unobtainable'],
+	onValidateSet(set) {
+		const species = this.dex.species.get(set.species || set.name);
+		if (!species.prevo) {
+			return [`${species.name} contains no pre-volution.`];
+		}
+		if (this.dex.species.get(species.prevo).prevo) {
+			return [`${species.name} can't be used in Middle Cup: it's the final stage of its evolution line.`];
+		}
+		if (!species.nfe) {
+			return [`${species.name} can't be used in Middle Cup: it can't evolve any further.`];
+		}
+		return [];
+	},
+	onModifyDamage(damage, source, target, move) {
+		if (move.multihitType === 'parentalbond' && move.hit > 1) {
+			return this.chainModify(2);
+		}
+	},
+	onBegin() {
+		this.add('raw|<div class="broadcast-blue"><strong>Pure Hackmons Middle Cup No Nerfs</strong><br />Only the middle stage of three-stage evolution lines, played at Level 50 — with every No Nerfs move and ability!</div>');
+	},
+},
+{
+	name: "[Gen 3] Pure Hackmons No Nerfs",
+	desc: "Gen 3 Pure Hackmons where any ability from the Advanced generation can be used on any Pokemon, as if the Emerald Un-Nerf patch were official.",
+	mod: 'gen3phnn',
+	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', '+No Ability'],
+	banlist: [],
+	onValidateSet(set, format, setHas, teamHas) {
+		return [];
+	},
+	onValidateTeam(team, format) {
+		return [];
+	},
+	onBegin() {
+		this.add('raw|<div class="broadcast-blue"><strong>Gen 3 Pure Hackmons No Nerfs</strong><br />Any ability from the Advanced generation can be used on any Pokemon!</div>');
+	},
+},
+{
+	name: "[Gen 6] Pure Hackmons No Nerfs",
+	desc: "Gen 6 Pure Hackmons without the 510 EV limit. Pokemon can have 252 EVs in all 6 stats!",
+	mod: 'gen6',
+	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Overflow Stat Mod'],
+	banlist: [],
+	onValidateSet(set, format, setHas, teamHas) {
+		return [];
+	},
+	onValidateTeam(team, format) {
+		return [];
+	},
+	onBegin() {
+		this.add('raw|<div class="broadcast-blue"><strong>Gen 6 Pure Hackmons No Nerfs</strong><br />The 510 EV limit has been lifted! Pokemon can have 252 EVs in all 6 stats!</div>');
+	},
+},
+{
+	name: "[Gen 7] Pure Hackmons No Nerfs",
+	desc: "Gen 7 Pure Hackmons with un-nerfed Soul Dew (1.5x SpA/SpD for Lati@s), Parental Bond (50% second hit), Prankster (hits Dark-types), and Gale Wings (works at any HP).",
+	mod: 'gen7phnn',
+	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
+	banlist: [],
+	onValidateSet(set, format, setHas, teamHas) {
+		return [];
+	},
+	onValidateTeam(team, format) {
+		return [];
+	},
+	onModifyDamage(damage, source, target, move) {
+		if (move.multihitType === 'parentalbond' && move.hit > 1) {
+			return this.chainModify(2);
+		}
+	},
+	onBegin() {
+		this.add('raw|<div class="broadcast-blue"><strong>Gen 7 Pure Hackmons No Nerfs</strong><br />Soul Dew grants 1.5x SpA/SpD to Lati@s! Parental Bond hits at 50%! Prankster hits Dark-types! Gale Wings works at any HP!</div>');
+	},
+},
+{
+	name: "[Gen 1] Disguises",
+	desc: "Gen 1 Pure Hackmons, but Pokemon can have any type, disguise as any species, and even start the game pre-statused.",
+	mod: 'gen1phnn',
+	ruleset: ['-Nonexistent', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255'],
+	onBegin() {
+		this.add('raw|<div class="broadcast-blue"><strong>Gen 1 Pure Hackmons</strong><br />Disguise any Pokemon as another sprite and give it any typing — your opponent sees only the sprite and status, never the real species or type. Pre-applied statuses allowed!</div>');
+		for (const side of this.sides) {
+			for (const pokemon of side.pokemon) {
+				if (!pokemon.set.disguise) continue;
+				const disguise = this.dex.species.get(pokemon.set.disguise);
+				if (disguise.exists) {
+					// @ts-expect-error hack
+					pokemon.name = disguise.name;
+					// @ts-expect-error Hack
+					pokemon.fullname = `${pokemon.side.id}: ${disguise.name}`;
+				}
+			}
+		}
+	},
+	onSwitchIn(pokemon) {
+		if (pokemon.set.phType) {
+			const types = pokemon.set.phType.split('/').filter(t => this.dex.types.isName(t));
+			if (types.length) {
+				pokemon.setType(types, true);
+				this.addSplit(pokemon.side.id, [
+					'-start', pokemon, 'typechange', types.join('/'), '[from] format: Gen 1 Pure Hackmons',
+				]);
+			}
+		}
+		if (pokemon.set.startStatus && !pokemon.m.phnnStartStatusApplied) {
+			pokemon.m.phnnStartStatusApplied = true;
+			pokemon.setStatus(pokemon.set.startStatus, pokemon, null, true);
+		}
+	},
+},
+{
+	section: "All Gens PH",
+	column: 1,
+},
+{
+	name: "[Gen 1] Pure Hackmons",
+	desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
+	mod: 'gen1',
+	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255'],
+},
+{
+	name: "[Gen 2] Pure Hackmons",
+	desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
+	mod: 'gen2',
+	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
+},
+{
+	name: "[Gen 3] Pure Hackmons",
+	desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
+	mod: 'gen3',
+	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', '+No Ability'],
+},
+{
+	name: "[Gen 4] Pure Hackmons",
+	desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
+	mod: 'gen4',
+	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
+},
+{
+	name: "[Gen 5] Pure Hackmons",
+	desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
+	mod: 'gen5',
+	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
+},
+{
+	name: "[Gen 6] Pure Hackmons",
+	desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
+	mod: 'gen6',
+	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'EV Limit = 510'],
+},
+{
+	name: "[Gen 7] Pure Hackmons",
+	desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
+	mod: 'gen7',
+	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
+},
+{
+	name: "[Gen 8] Pure Hackmons",
+	desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
+	mod: 'gen8',
+	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
+},
+{
+	name: "[Gen 9] Pure Hackmons",
+	desc: "Anything directly hackable onto a set (EVs, IVs, forme, ability, item, and move) and is usable in local battles is allowed.",
+	mod: 'gen9',
+	ruleset: ['Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Hackmons Forme Legality', 'Species Reveal Clause', 'Endless Battle Clause'],
+},
+{
+	name: "[Gen 7 Let's Go] Pure Hackmons",
+	desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
+	mod: 'gen7letsgo',
+	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
+},
+{
+	name: "[Gen 8 BDSP] Pure Hackmons",
+	desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
+	mod: 'gen8bdsp',
+	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
+},
+{
+	section: "Wondrous Hackmons",
+	column: 2,
+},
+{
+	name: "[Gen 9] Wondrous Hackmons",
+	desc: "A custom Hackmons format with select bans for a balanced experience.",
+	mod: 'gen9',
+	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause',
+		'Forme Clause', 'Freeze Clause Mod', 'Sleep Clause Mod', 'Dry Pass Clause', 'NatDex Mod'],
+	banlist: [
+		'Arena Trap', 'Calyrex-Shadow', 'Innards Out', 'Last Respects', 'Mewtwo-Mega-X', 'Neutralizing Gas', 'Revival Blessing', 'Shadow Tag', 'Shed Tail',
+	],
+},
+{
+	name: "[Gen 8] Wondrous Hackmons",
+	desc: "A custom Hackmons format with select bans for a balanced experience.",
+	mod: 'gen8',
+	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod',
+		'Endless Battle Clause', 'Freeze Clause Mod', 'Sleep Moves Clause'],
+	banlist: [
+		'Arena Trap', 'Eternatus-Eternamax', 'Neutralizing Gas', 'Shadow Tag', 'Zacian-Crowned',
+	],
+},
+	{
+		name: "[Gen 9] Mix and Mega Custom Game",
+		desc: `Mega evolve any Pok&eacute;mon with any mega stone, or transform them with Genesect Drives, Primal orbs, Origin orbs, Rusted items, Ogerpon Masks, Arceus Plates, and Silvally Memories with no limit. Mega and Primal boosts based on form changes from gen 7.`,
+		mod: 'mixandmega',
+		searchShow: false,
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100',
+			'Terastal Clause'],
+		onBegin() {
+			for (const pokemon of this.getAllPokemon()) {
+				pokemon.m.originalSpecies = pokemon.baseSpecies.name;
+			}
+		},
+		onSwitchIn(pokemon) {
+			const originalSpecies = this.dex.species.get((pokemon.species as any).originalSpecies);
+			if (originalSpecies.exists && pokemon.m.originalSpecies !== originalSpecies.baseSpecies) {
+				// Place volatiles on the Pokémon to show its mega-evolved condition and details
+				this.add('-start', pokemon, originalSpecies.requiredItems?.[0] || originalSpecies.requiredItem || originalSpecies.requiredMove, '[silent]');
+				const oSpecies = this.dex.species.get(pokemon.m.originalSpecies);
+				if (oSpecies.types.join('/') !== pokemon.species.types.join('/')) {
+					this.add('-start', pokemon, 'typechange', pokemon.species.types.join('/'), '[silent]', '[from] format: Mix and Mega');
+				}
+			}
+		},
+		onSwitchOut(pokemon) {
+			const originalSpecies = this.dex.species.get((pokemon.species as any).originalSpecies);
+			if (originalSpecies.exists && pokemon.m.originalSpecies !== originalSpecies.baseSpecies) {
+				this.add('-end', pokemon, originalSpecies.requiredItems?.[0] || originalSpecies.requiredItem || originalSpecies.requiredMove, '[silent]');
+			}
+		},
+	},
+	{
+		name: "[Gen 9] Shared Power Custom Game",
+		desc: `Once a Pok&eacute;mon switches in, its ability is shared with the rest of the team.`,
+		mod: 'sharedpower',
+		searchShow: false,
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100'],
+		onValidateRule() {
+			if (this.format.gameType !== 'singles') {
+				throw new Error(`Shared Power currently does not support ${this.format.gameType} battles.`);
+			}
+		},
+		getSharedPower(pokemon) {
+			const sharedPower = new Set<string>();
+			for (const ally of pokemon.side.pokemon) {
+				if (pokemon.battle.ruleTable.isRestricted(`ability:${ally.baseAbility}`)) continue;
+				if (ally.previouslySwitchedIn > 0) {
+					if (pokemon.battle.dex.currentMod !== 'sharedpower' && ['trace', 'mirrorarmor'].includes(ally.baseAbility)) {
+						sharedPower.add('noability');
+						continue;
+					}
+					sharedPower.add(ally.baseAbility);
+				}
+			}
+			sharedPower.delete(pokemon.baseAbility);
+			return sharedPower;
+		},
+		onBeforeSwitchIn(pokemon) {
+			let format = this.format;
+			if (!format.getSharedPower) format = this.dex.formats.get('gen9sharedpower');
+			for (const ability of format.getSharedPower!(pokemon)) {
+				const effect = 'ability:' + this.toID(ability);
+				pokemon.volatiles[effect] = this.initEffectState({ id: effect, target: pokemon });
+				if (!pokemon.m.abils) pokemon.m.abils = [];
+				if (!pokemon.m.abils.includes(effect)) pokemon.m.abils.push(effect);
+			}
+		},
+	},
 ];

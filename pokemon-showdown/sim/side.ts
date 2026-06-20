@@ -247,7 +247,10 @@ export class Side {
 		this.faintedThisTurn = null;
 		this.totalFainted = 0;
 		this.zMoveUsed = false;
-		this.dynamaxUsed = this.battle.gen !== 8;
+		// In Gen 8 (and the Pure Hackmons No Nerfs Gen 9 mod) Dynamax is available, so a side starts
+		// the battle not having used it yet. canDynamaxNow() reads this flag, and the core sets it true
+		// after a Dynamax (see sim/battle.ts), preserving the once-per-battle rule.
+		this.dynamaxUsed = this.battle.gen !== 8 && this.battle.dex.currentMod !== 'phnn';
 
 		this.sideConditions = {};
 		this.slotConditions = [];

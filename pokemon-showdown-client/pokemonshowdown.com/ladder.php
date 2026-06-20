@@ -102,10 +102,10 @@ if (isset($_REQUEST['json'])) {
 
 if (!$formatid) {
 	$panels->setPageTitle('Ladder');
-	$panels->setPageDescription('Ladder records from Pokémon Showdown!');
+	$panels->setPageDescription('Ladder records from Pokémon Hackmons!');
 } else {
 	$panels->setPageTitle($format.' ladder');
-	$panels->setPageDescription('Ladder records from the ' . $format . ' format on Pokémon Showdown!');
+	$panels->setPageDescription('Ladder records from the ' . $format . ' format on Pokémon Hackmons!');
 
 	$ladder = new NTBBLadder($formatid);
 }

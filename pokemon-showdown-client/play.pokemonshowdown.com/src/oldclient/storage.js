@@ -863,12 +863,19 @@ Storage.packTeam = function (team) {
 			buf += '|';
 		}
 
-		if (set.pokeball || (set.hpType && !hasHP) || set.gigantamax || (set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10) || set.teraType) {
+		if (set.pokeball || (set.hpType && !hasHP) || set.gigantamax || (set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10) || set.teraType ||
+			set.phType || set.disguise || set.startStatus) {
 			buf += ',' + (set.hpType || '');
 			buf += ',' + toID(set.pokeball);
 			buf += ',' + (set.gigantamax ? 'G' : '');
 			buf += ',' + (set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10 ? set.dynamaxLevel : '');
 			buf += ',' + (set.teraType || '');
+			// PHNN Gen 1 fields
+			if (set.phType || set.disguise || set.startStatus) {
+				buf += ',' + ((set.phType || '').replace(/\//g, '-'));
+				buf += ',' + toID(set.disguise);
+				buf += ',' + (set.startStatus || '');
+			}
 		}
 	}
 
@@ -978,9 +985,9 @@ Storage.fastUnpackTeam = function (buf) {
 		j = buf.indexOf(']', i);
 		var misc = undefined;
 		if (j < 0) {
-			if (i < buf.length) misc = buf.substring(i).split(',', 6);
+			if (i < buf.length) misc = buf.substring(i).split(',', 9);
 		} else {
-			if (i !== j) misc = buf.substring(i, j).split(',', 6);
+			if (i !== j) misc = buf.substring(i, j).split(',', 9);
 		}
 		if (misc) {
 			set.happiness = (misc[0] ? Number(misc[0]) : 255);
@@ -989,6 +996,10 @@ Storage.fastUnpackTeam = function (buf) {
 			set.gigantamax = !!misc[3];
 			set.dynamaxLevel = (misc[4] ? Number(misc[4]) : 10);
 			set.teraType = misc[5];
+			// PHNN Gen 1 fields
+			if (misc[6]) set.phType = misc[6].replace(/-/g, '/');
+			if (misc[7]) set.disguise = misc[7];
+			if (misc[8]) set.startStatus = misc[8];
 		}
 		if (j < 0) break;
 		i = j + 1;
@@ -1101,9 +1112,9 @@ Storage.unpackTeam = function (buf) {
 		j = buf.indexOf(']', i);
 		var misc = undefined;
 		if (j < 0) {
-			if (i < buf.length) misc = buf.substring(i).split(',', 6);
+			if (i < buf.length) misc = buf.substring(i).split(',', 9);
 		} else {
-			if (i !== j) misc = buf.substring(i, j).split(',', 6);
+			if (i !== j) misc = buf.substring(i, j).split(',', 9);
 		}
 		if (misc) {
 			set.happiness = (misc[0] ? Number(misc[0]) : 255);
@@ -1112,6 +1123,10 @@ Storage.unpackTeam = function (buf) {
 			set.gigantamax = !!misc[3];
 			set.dynamaxLevel = (misc[4] ? Number(misc[4]) : 10);
 			set.teraType = misc[5];
+			// PHNN Gen 1 fields
+			if (misc[6]) set.phType = misc[6].replace(/-/g, '/');
+			if (misc[7]) set.disguise = misc[7];
+			if (misc[8]) set.startStatus = misc[8];
 		}
 		if (j < 0 || buf.indexOf('|', j) < 0) break;
 		i = j + 1;
@@ -1294,6 +1309,13 @@ Storage.importTeam = function (buffer, teams) {
 		} else if (line.substr(0, 11) === 'Tera Type: ') {
 			line = line.substr(11);
 			curSet.teraType = line;
+		} else if (line.substr(0, 8) === 'Sprite: ') {
+			curSet.disguise = line.substr(8).trim();
+		} else if (line.substr(0, 7) === 'Types: ') {
+			curSet.phType = line.substr(7).split('/').map(function (s) { return $.trim(s); }).join('/');
+		} else if (line.substr(0, 8) === 'Status: ') {
+			var phStatusCodes = { burn: 'brn', paralysis: 'par', sleep: 'slp', poison: 'psn', freeze: 'frz', brn: 'brn', par: 'par', slp: 'slp', psn: 'psn', frz: 'frz' };
+			curSet.startStatus = phStatusCodes[toID(line.substr(8))] || '';
 		} else if (line.substr(0, 15) === 'Dynamax Level: ') {
 			line = line.substr(15);
 			curSet.dynamaxLevel = +line;
@@ -1402,6 +1424,17 @@ Storage.exportTeam = function (team, hidestats) {
 		text += "  \n";
 		if (curSet.ability) {
 			text += 'Ability: ' + curSet.ability + "  \n";
+		}
+		// PHNN Gen 1 desync fields: Sprite, Types, Status
+		if (curSet.disguise) {
+			text += 'Sprite: ' + curSet.disguise + "  \n";
+		}
+		if (curSet.phType) {
+			text += 'Types: ' + curSet.phType.split('/').join(' / ') + "  \n";
+		}
+		if (curSet.startStatus) {
+			var phStatusNames = { brn: 'Burn', par: 'Paralysis', slp: 'Sleep', psn: 'Poison', frz: 'Freeze' };
+			text += 'Status: ' + (phStatusNames[curSet.startStatus] || curSet.startStatus) + "  \n";
 		}
 		if (curSet.level && curSet.level !== 100) {
 			text += 'Level: ' + curSet.level + "  \n";

@@ -706,13 +706,18 @@ export class TeamValidator {
 		}
 		if ((this.gen === 9 && !dex.currentMod.startsWith('champions') && !ruleTable.has('terastalclause')) ||
 			ruleTable.has('bonustypemod')) {
-			const type = dex.types.get(set.teraType || species.requiredTeraType || species.types[0]);
-			if (!type.exists || type.isNonstandard) {
-				problems.push(`${name}'s Terastal type (${set.teraType}) is invalid.`);
-			} else if (species.requiredTeraType && species.requiredTeraType !== type.name && ruleTable.has('obtainablemisc')) {
-				problems.push(`${species.name}'s Terastal type needs to be ${species.requiredTeraType}.`);
+			// PHNN: an empty Tera type stays empty as the Dynamax signal (see data/mods/phnn/scripts.ts).
+			if (dex.currentMod === 'phnn' && !set.teraType) {
+				delete set.teraType;
+			} else {
+				const type = dex.types.get(set.teraType || species.requiredTeraType || species.types[0]);
+				if (!type.exists || type.isNonstandard) {
+					problems.push(`${name}'s Terastal type (${set.teraType}) is invalid.`);
+				} else if (species.requiredTeraType && species.requiredTeraType !== type.name && ruleTable.has('obtainablemisc')) {
+					problems.push(`${species.name}'s Terastal type needs to be ${species.requiredTeraType}.`);
+				}
+				set.teraType = type.name;
 			}
-			set.teraType = type.name;
 		} else {
 			delete set.teraType;
 		}
@@ -1649,7 +1654,7 @@ export class TeamValidator {
 				throw new Error(`${species.name} should have a string battleOnly`);
 			}
 			// Set to out-of-battle forme
-			set.species = species.battleOnly;
+			if (dex.currentMod !== 'phnn') set.species = species.battleOnly;
 		} else {
 			if (species.requiredAbility) {
 				// Impossible!

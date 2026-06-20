@@ -550,7 +550,17 @@ export class Pokemon {
 			);
 		}
 		if (this.terastallized) details += `, tera:${this.terastallized}`;
-		return { side: health.side, secret: `${details}|${health.secret}`, shared: `${details}|${health.shared}` };
+		let sharedDetails = details;
+		if (this.set.disguise && !this.illusion) {
+			const disguise = this.battle.dex.species.get(this.set.disguise);
+			if (disguise.exists) {
+				sharedDetails = disguise.name +
+					(this.level === 100 ? '' : `, L${this.level}`) +
+					(this.gender === '' ? '' : `, ${this.gender}`) +
+					(this.set.shiny ? ', shiny' : '');
+			}
+		}
+		return { side: health.side, secret: `${details}|${health.secret}`, shared: `${sharedDetails}|${health.shared}` };
 	};
 
 	updateSpeed() {

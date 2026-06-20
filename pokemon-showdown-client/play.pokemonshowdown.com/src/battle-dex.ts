@@ -234,12 +234,14 @@ export const Dex = new class implements ModdedDex {
 	resourcePrefix = (() => {
 		let prefix = '';
 		if (window.document?.location?.protocol !== 'http:') prefix = 'https:';
-		return `${prefix}//${window.Config ? Config.routes.client : 'play.pokemonshowdown.com'}/`;
+		const host = window.Config ? (Config.routes.resourceServer || Config.routes.client) : 'play.pokemonshowdown.com';
+		return `${prefix}//${host}/`;
 	})();
 
 	fxPrefix = (() => {
 		const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
-		return `${protocol}//${window.Config ? Config.routes.client : 'play.pokemonshowdown.com'}/fx/`;
+		const host = window.Config ? (Config.routes.resourceServer || Config.routes.client) : 'play.pokemonshowdown.com';
+		return `${protocol}//${host}/fx/`;
 	})();
 
 	loadedSpriteData = { xy: 1, bw: 0 };
@@ -295,11 +297,9 @@ export const Dex = new class implements ModdedDex {
 		if (avatar.startsWith('#')) {
 			return Dex.resourcePrefix + 'sprites/trainers-custom/' + toID(avatar.substr(1)) + '.png';
 		}
-		if (avatar.includes('.') && window.Config?.server?.registered) {
-			// custom avatar served by the server
-			const protocol = (Config.server.port === 443) ? 'https' : 'http';
-			const server = `${protocol}://${Config.server.host}:${Config.server.port}`;
-			return `${server}/avatars/${encodeURIComponent(avatar).replace(/%3F/g, '?')}`;
+		if (avatar.includes('.')) {
+			const prefix = (window.document?.location?.protocol === 'http:') ? '' : 'https:';
+			return `${prefix}//${Config.routes.client}/avatars/${encodeURIComponent(avatar).replace(/%3F/g, '?')}`;
 		}
 		return Dex.resourcePrefix + 'sprites/trainers/' + Dex.sanitizeName(avatar || 'unknown') + '.png';
 	}

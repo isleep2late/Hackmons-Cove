@@ -40,6 +40,9 @@ export declare namespace Teams {
 		gigantamax?: boolean;
 		/** Defaults to the primary type */
 		teraType?: string;
+		phType?: string;
+		disguise?: string;
+		startStatus?: string;
 	}
 	export interface PokemonSet extends Partial<FullPokemonSet> {
 		/** Defaults to species name (not including forme), like in games */
@@ -116,12 +119,18 @@ export const Teams = new class {
 			buf += `|${set.happiness !== undefined && set.happiness !== 255 ? set.happiness : ''}`;
 
 			if (set.pokeball || set.hpType || set.gigantamax ||
-				(set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10) || set.teraType) {
+				(set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10) || set.teraType ||
+				set.phType || set.disguise || set.startStatus) {
 				buf += `,${set.hpType || ''}`;
 				buf += `,${this.packName(set.pokeball || '')}`;
 				buf += `,${set.gigantamax ? 'G' : ''}`;
 				buf += `,${set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10 ? set.dynamaxLevel : ''}`;
 				buf += `,${set.teraType || ''}`;
+				if (set.phType || set.disguise || set.startStatus) {
+					buf += `,${(set.phType || '').replace(/\//g, '-')}`;
+					buf += `,${this.packName(set.disguise || '')}`;
+					buf += `,${set.startStatus || ''}`;
+				}
 			}
 		}
 
@@ -247,9 +256,9 @@ export const Teams = new class {
 			j = buf.indexOf(']', i);
 			let misc;
 			if (j < 0) {
-				if (i < buf.length) misc = buf.substring(i).split(',', 6);
+				if (i < buf.length) misc = buf.substring(i).split(',', 9);
 			} else {
-				if (i !== j) misc = buf.substring(i, j).split(',', 6);
+				if (i !== j) misc = buf.substring(i, j).split(',', 9);
 			}
 			if (misc) {
 				set.happiness = (misc[0] ? Number(misc[0]) : undefined);
@@ -258,6 +267,10 @@ export const Teams = new class {
 				set.gigantamax = !!misc[3] || undefined;
 				set.dynamaxLevel = (misc[4] ? Number(misc[4]) : undefined);
 				set.teraType = misc[5] || undefined;
+				// PHNN Gen 1 fields
+				if (misc[6]) set.phType = misc[6].replace(/-/g, '/');
+				if (misc[7]) set.disguise = misc[7];
+				if (misc[8]) set.startStatus = misc[8];
 			}
 			i = j + 1;
 			if (j < 0 || i <= lastI) break;

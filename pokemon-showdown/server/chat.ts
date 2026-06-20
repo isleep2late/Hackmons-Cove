@@ -1041,7 +1041,7 @@ export class CommandContext extends MessageContext {
 	}
 	canUseConsole() {
 		if (!this.user.hasConsoleAccess(this.connection)) {
-			throw new Chat.ErrorMessage(`${(this.cmdToken + this.fullCmd).trim()} - Requires console access, please set up \`Config.consoleips\`.`);
+			throw new Chat.ErrorMessage(`${(this.cmdToken + this.fullCmd).trim()} - Requires console access.`);
 		}
 		return true;
 	}

@@ -1151,12 +1151,14 @@ export const commands: Chat.ChatCommands = {
 
 	uploadreplay: 'savereplay',
 	async savereplay(target, room, user, connection) {
-		if (!room?.battle) {
+		throw new Chat.ErrorMessage(this.tr`You cannot upload replays from this server`);
+	/*	if (!room?.battle) {
 			throw new Chat.ErrorMessage(this.tr`You can only save replays for battles.`);
 		}
 
 		const options = (target === 'forpunishment' || target === 'silent') ? target : undefined;
 		await room.uploadReplay(user, connection, options);
+	*/
 	},
 	savereplayhelp: [`/savereplay - Saves the replay for the current battle.`],
 
@@ -1429,9 +1431,9 @@ export const commands: Chat.ChatCommands = {
 	],
 
 	forcetie: 'forcewin',
-	forcewin(target, room, user) {
+	forcewin(target, room, user, connection, cmd) {
 		room = this.requireRoom();
-		this.checkCan('forcewin');
+		if (!cmd.endsWith('tie')) { this.canUseConsole; } else { this.checkCan('forcewin'); }
 		if (
 			!room.battle &&
 			!(room.game && typeof (room.game as any).tie === 'function' && typeof (room.game as any).win === 'function')

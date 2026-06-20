@@ -1957,9 +1957,7 @@ export const commands: Chat.ChatCommands = {
 			} else {
 				const genID = ['rb', 'gs', 'rs', 'dp', 'bw', 'xy', 'sm', 'ss', 'sv'];
 				const gen = Dex.forFormat(format).gen;
-				descHtml.push(`This format has no resources linked on its <a href="https://www.smogon.com/dex/${genID[gen - 1] || 'sv'}/formats/">Smogon Dex page</a>. ` +
-					`Please contact a <a href="https://www.smogon.com/forums/forums/757/">C&amp;C Leader</a> to resolve this. ` +
-					`Alternatively, if this format can't have a page on the Smogon Dex, message <username>dhelmise</username>.<br />`);
+				descHtml.push(`This format has no resources linked.`);
 			}
 			return this.sendReplyBox(`<h2>${format.name}</h2><hr />${formatDesc ? formatDesc + '<hr />' : ''}${descHtml.join("<br />")}${rulesetHtml ? `<br />${rulesetHtml}` : ''}`);
 		}
@@ -3159,6 +3157,35 @@ export const pages: Chat.PageTable = {
 		}
 		buf += `</ul></div>`;
 		return buf;
+	},
+	credits(query, user) {
+		this.title = "Hackmons Credits";
+		return Utils.html `<div class="main credits">
+			<h1>Credits</h1>
+
+			<h2><span>Owner</span></h2>
+
+			<ul>
+				<li><p><a href="https://hackmons.com/" target="_blank" class="subtle"><strong>isleep2late</strong></a> <small>&ndash; Development, Sysadmin</small></p></li>
+			</ul>
+
+			<h2><span>Staff</span></h2>
+
+			<ul>
+				<li><p><a href="https://github.com/iforgetwhyimhere" target="_blank" class="subtle"><strong>iforgetwhyimhere</strong></a> <small>&ndash; Development, Sysadmin, Staff</small></p></li>
+				<li><p><strong>Electra102</strong> <small>&ndash; Development</small></p></li>
+				<li><p><strong>CottonCandyReal</strong><small>&ndash; Development</small></p></li></ul>
+
+			<h2><span>Contributors</span></h2>
+
+			<ul>
+				<li><p><strong>psim tseng</strong><small>&ndash; Art (Avatars)</small></p></li>
+				<li><p><a href="https://www.prokameron.com/" target="_blank" class="subtle"><strong>ProKameron</strong></a><small>&ndash; Automation (ProKameronBot)</small></p></li>
+			</ul>
+			
+			<h3><span>Also see <a href="https://pokemonshowdown.com/credits" target="_blank"><strong>the main server's developers.</strong></a></span></h3>
+			</div>`
+
 	},
 	battlerules(query, user) {
 		const rules = Object.values(Dex.data.Rulesets).filter(rule => rule.effectType !== "Format");

@@ -1,4 +1,9 @@
 export const Aliases: import('../sim/dex').AliasesTable = {
+
+	// various phnn aliases
+	phnn: "[Gen 9] Pure Hackmons No Nerfs",
+	disguises: "[Gen 1] Disguises",
+	mnmcg: "[Gen 9] Mix and Mega Custom Game",
 	// formats
 	randbats: "[Gen 9] Random Battle",
 	randbat: "[Gen 9] Random Battle",

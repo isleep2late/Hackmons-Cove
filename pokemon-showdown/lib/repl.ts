@@ -154,9 +154,15 @@ export const Repl = new class {
 		});
 
 		const pathname = path.resolve(FS.ROOT_PATH, Config.replsocketprefix || 'logs/repl', filename);
+		const dir = path.dirname(pathname);
+		try {
+			fs.mkdirSync(dir, {recursive: true});
+		} catch {}
 		try {
 			server.listen(pathname, () => {
-				fs.chmodSync(pathname, Config.replsocketmode || 0o600);
+				try {
+					fs.chmodSync(pathname, Config.replsocketmode || 0o600);
+				} catch {}
 				Repl.socketPathnames.add(pathname);
 			});
 

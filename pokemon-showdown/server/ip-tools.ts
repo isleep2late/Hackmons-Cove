@@ -480,7 +480,16 @@ export const IPTools = new class {
 			}
 
 			const ipNumber = IPTools.ipToNumber(ip);
-			if (ipNumber === null) throw new Error(`Bad IP address: '${ip}'`);
+			if (ipNumber === null) {
+				// IPv6 addresses are not fully supported, but we handle them gracefully
+				// instead of crashing. Return a generic host for IPv6.
+				if (ip.includes(':')) {
+					resolve('[ipv6]');
+				} else {
+					resolve('[unknown]');
+				}
+				return;
+			}
 			for (const range of IPTools.ranges) {
 				if (ipNumber >= range.minIP && ipNumber <= range.maxIP) {
 					resolve(range.host);

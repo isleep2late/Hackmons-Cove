@@ -53,6 +53,7 @@ Config.version = ${JSON.stringify(version)};
 Config.routes = {
 	root: '${routes.root}',
 	client: '${routes.client}',
+	resourceServer: '${routes.resourceServer || routes.client}',
 	dex: '${routes.dex}',
 	replays: '${routes.replays}',
 	users: '${routes.users}',

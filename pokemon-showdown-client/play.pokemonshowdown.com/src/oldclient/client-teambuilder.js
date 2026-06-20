@@ -33,6 +33,9 @@
 				if (this.curTeam.format.includes('champions')) {
 					this.curTeam.dex = Dex.mod('champions');
 				}
+				if (this.curTeam.format.includes('nonerfs') && this.curTeam.gen === 9) {
+					this.curTeam.dex = Dex.mod('gen9phnn');
+				}
 				Storage.activeSetList = this.curSetList;
 			}
 		},
@@ -761,6 +764,9 @@
 			if (this.curTeam.format.includes('champions')) {
 				this.curTeam.dex = Dex.mod('champions');
 			}
+			if (this.curTeam.format.includes('nonerfs') && this.curTeam.gen === 9) {
+				this.curTeam.dex = Dex.mod('gen9phnn');
+			}
 			Storage.activeSetList = this.curSetList = Storage.unpackTeam(this.curTeam.team);
 			this.curTeamIndex = i;
 			this.update();
@@ -1358,8 +1364,18 @@
 					}
 				}
 				if (this.curTeam.gen === 9 && !isChampions) {
-					buf += '<span class="detailcell"><label>Tera Type</label>' + (set.teraType || species.requiredTeraType || species.types[0]) + '</span>';
+					buf += '<span class="detailcell"><label>Tera Type</label>' + (set.teraType || (this.curTeam.format.includes('nonerfs') ? 'None / Dyna' : (species.requiredTeraType || species.types[0]))) + '</span>';
 				}
+			}
+			if (this.curTeam.gen === 9 && !isChampions) {
+				buf += '<span class="detailcell"><label>Tera Type</label>' + (set.teraType || (this.curTeam.format.includes('nonerfs') ? 'None / Dyna' : (species.requiredTeraType || species.types[0]))) + '</span>';
+			}
+			if (this.curTeam.gen === 1 && this.curTeam.format.includes('disguises')) {
+				var phT = (set.phType || '').split('/');
+				buf += '<span class="detailcell"><label>Type 1</label>' + (phT[0] || species.types[0]) + '</span>';
+				buf += '<span class="detailcell"><label>Type 2</label>' + (phT[1] || species.types[1] || '(none)') + '</span>';
+				buf += '<span class="detailcell"><label>Disguise</label>' + (set.disguise ? this.curTeam.dex.species.get(set.disguise).name : '(none)') + '</span>';
+				buf += '<span class="detailcell"><label>Status</label>' + (set.startStatus || 'None') + '</span>';
 			}
 			buf += '</button></div></div>';
 
@@ -1415,6 +1431,9 @@
 				}
 				if (isLC) {
 					highestStat = j === 'hp' ? 45 : 29;
+				}
+				if (this.curTeam.gen === 1 && (set.level || 100) > 100) {
+					highestStat = Math.floor(highestStat * (set.level || 100) / 100);
 				}
 				var width = stats[j] * 75 / highestStat;
 				if (width > 75) width = 75;
@@ -1629,6 +1648,9 @@
 			}
 			if (this.curTeam.format.includes('champions')) {
 				this.curTeam.dex = Dex.mod('champions');
+			}
+			if (this.curTeam.format.includes('nonerfs') && this.curTeam.gen === 9) {
+				this.curTeam.dex = Dex.mod('gen9phnn');
 			}
 			this.save();
 			if (this.curTeam.gen === 5 && !Dex.loadedSpriteData['bw']) Dex.loadSpriteData('bw');
@@ -2101,6 +2123,9 @@
 				if (isLC) {
 					highestStat = stat === 'hp' ? 45 : 29;
 				}
+				if (this.curTeam.gen === 1 && (set.level || 100) > 100) {
+					highestStat = Math.floor(highestStat * (set.level || 100) / 100);
+				}
 				var width = stats[stat] * 75 / highestStat;
 				if (width > 75) width = 75;
 				var color = Math.floor(stats[stat] * 180 / highestStat);
@@ -2129,6 +2154,9 @@
 				}
 				if (isLC) {
 					highestStat = stat === 'hp' ? 45 : 29;
+				}
+				if (this.curTeam.gen === 1 && (set.level || 100) > 100) {
+					highestStat = Math.floor(highestStat * (set.level || 100) / 100);
 				}
 				var width = stats[stat] * 180 / highestStat;
 				if (width > 179) width = 179;
@@ -2324,6 +2352,15 @@
 			var guessedEVs = guess.evs;
 			var guessedPlus = guess.plusStat;
 			var guessedMinus = guess.minusStat;
+			if (this.curTeam.format.includes('nonerfs') && role !== '?') {
+				guessedEVs = { hp: 252, atk: 252, def: 252, spa: 252, spd: 252, spe: 252 };
+				var self = this;
+				var usesPhysical = (set.moves || []).some(function (m) {
+					var mv = self.curTeam.dex.moves.get(m);
+					return mv.exists && mv.category === 'Physical' && mv.basePower > 1;
+				});
+				if (!usesPhysical) guessedEVs.atk = 0;
+			}
 			buf += '<p class="suggested"><small>Guessed spread:';
 			if (role === '?') {
 				buf += ' (Please choose 4 moves to get a guessed spread) (<a target="_blank" href="' + this.smogdexLink(species) + '">Smogon&nbsp;analysis</a>)</small></p>';
@@ -2397,6 +2434,9 @@
 				}
 				if (isLC) {
 					highestStat = i === 'hp' ? 45 : 29;
+				}
+				if (this.curTeam.gen === 1 && (set.level || 100) > 100) {
+					highestStat = Math.floor(highestStat * (set.level || 100) / 100);
 				}
 				var width = stats[i] * 180 / highestStat;
 				if (width > 179) width = 179;
@@ -2904,7 +2944,7 @@
 			buf += '<form class="detailsform">';
 
 			buf += '<div class="formrow"><label class="formlabel">Level:</label><div>' +
-				'<input type="number" min="1" max="100" step="1" name="level" value="' +
+				'<input type="number" min="1" max="' + ((this.curTeam.gen === 1 && this.curTeam.format.includes('disguises')) ? 255 : 100) + '" step="1" name="level" value="' +
 				(typeof set.level === 'number' ? set.level : 100) +
 				'" class="textbox inputform numform"' +
 				(isChampions ? ' disabled' : '') +
@@ -2980,9 +3020,51 @@
 				buf += '<div class="formrow"><label class="formlabel" title="Tera Type">Tera Type:</label><div>';
 				buf += '<select name="teratype" class="button">';
 				var types = Dex.types.all();
-				var teraType = set.teraType || species.requiredTeraType || species.types[0];
+				var isPHNN9 = this.curTeam.format.includes('nonerfs');
+				var teraType = set.teraType || (isPHNN9 ? '' : (species.requiredTeraType || species.types[0]));
+				if (isPHNN9) {
+					buf += '<option value=""' + (!teraType ? ' selected="selected"' : '') + '>None / Dyna</option>';
+				}
 				for (var i = 0; i < types.length; i++) {
 					buf += '<option value="' + types[i].name + '"' + (teraType === types[i].name ? ' selected="selected"' : '') + '>' + types[i].name + '</option>';
+				}
+				buf += '</select></div></div>';
+			}
+
+			// PHNN Gen 1: custom type / disguise / status
+			var isGen1PHNN = this.curTeam.gen === 1 && this.curTeam.format.includes('disguises');
+			if (isGen1PHNN) {
+				var phTypeList = ['Normal', 'Fighting', 'Flying', 'Poison', 'Ground', 'Rock', 'Bug', 'Ghost', 'Fire', 'Water', 'Grass', 'Electric', 'Psychic', 'Ice', 'Dragon'];
+				var phTypes = (set.phType || '').split('/');
+				buf += '<div class="formrow"><label class="formlabel" title="Custom type used in battle (hidden from the opponent)">Type 1:</label><div><select name="phtype1" class="button">';
+				buf += '<option value=""' + (!phTypes[0] ? ' selected="selected"' : '') + '>(species default)</option>';
+				for (var phi = 0; phi < phTypeList.length; phi++) {
+					buf += '<option value="' + phTypeList[phi] + '"' + (phTypes[0] === phTypeList[phi] ? ' selected="selected"' : '') + '>' + phTypeList[phi] + '</option>';
+				}
+				buf += '</select></div></div>';
+				buf += '<div class="formrow"><label class="formlabel" title="Optional second custom type">Type 2:</label><div><select name="phtype2" class="button">';
+				buf += '<option value=""' + (!phTypes[1] ? ' selected="selected"' : '') + '>(none)</option>';
+				for (var phj = 0; phj < phTypeList.length; phj++) {
+					buf += '<option value="' + phTypeList[phj] + '"' + (phTypes[1] === phTypeList[phj] ? ' selected="selected"' : '') + '>' + phTypeList[phj] + '</option>';
+				}
+				buf += '</select></div></div>';
+				buf += '<div class="formrow"><label class="formlabel" title="The Pokemon sprite your opponent and spectators see in place of the real one">Disguise:</label><div><select name="disguise" class="button">';
+				buf += '<option value=""' + (!set.disguise ? ' selected="selected"' : '') + '>(none — show real sprite)</option>';
+				var disguiseMons = [];
+				for (var dexid in BattlePokedex) {
+					var dsp = this.curTeam.dex.species.get(dexid);
+					if (dsp.exists && dsp.num >= 1 && dsp.num <= 151 && !dsp.forme) disguiseMons.push(dsp);
+				}
+				disguiseMons.sort(function (a, b) { return a.num - b.num; });
+				var curDisguiseId = toID(set.disguise);
+				for (var dgi = 0; dgi < disguiseMons.length; dgi++) {
+					buf += '<option value="' + disguiseMons[dgi].id + '"' + (curDisguiseId === disguiseMons[dgi].id ? ' selected="selected"' : '') + '>' + disguiseMons[dgi].name + '</option>';
+				}
+				buf += '</select></div></div>';
+				buf += '<div class="formrow"><label class="formlabel" title="Bring this Pokemon in already afflicted with a status">Status:</label><div><select name="startstatus" class="button">';
+				var phStatuses = [['', 'None'], ['psn', 'Poisoned'], ['par', 'Paralyzed'], ['slp', 'Asleep'], ['brn', 'Burned'], ['frz', 'Frozen']];
+				for (var phk = 0; phk < phStatuses.length; phk++) {
+					buf += '<option value="' + phStatuses[phk][0] + '"' + ((set.startStatus || '') === phStatuses[phk][0] ? ' selected="selected"' : '') + '>' + phStatuses[phk][1] + '</option>';
 				}
 				buf += '</select></div></div>';
 			}
@@ -3007,7 +3089,9 @@
 
 			// level
 			var level = parseInt(this.$chart.find('input[name=level]').val(), 10);
-			if (!level || level > 100 || level < 1) level = 100;
+			var maxLevel = (this.curTeam.gen === 1 && this.curTeam.format.includes('disguises')) ? 255 : 100;
+			if (!level || level < 1) level = 100;
+			if (level > maxLevel) level = maxLevel;
 			if (level !== 100 || set.level) set.level = level;
 
 			// happiness
@@ -3070,6 +3154,30 @@
 				delete set.teraType;
 			}
 
+			// PHNN Gen 1: custom type / disguise / status
+			if (this.curTeam.gen === 1 && this.curTeam.format.includes('disguises')) {
+				var phType1 = this.$chart.find('select[name=phtype1]').val();
+				var phType2 = this.$chart.find('select[name=phtype2]').val();
+				if (phType1) {
+					set.phType = phType2 ? (phType1 + '/' + phType2) : phType1;
+				} else {
+					delete set.phType;
+				}
+				var disguiseInput = this.$chart.find('select[name=disguise]').val();
+				var disguiseSpecies = this.curTeam.dex.species.get(disguiseInput);
+				if (disguiseInput && disguiseSpecies.exists) {
+					set.disguise = disguiseSpecies.name;
+				} else {
+					delete set.disguise;
+				}
+				var startStatus = this.$chart.find('select[name=startstatus]').val();
+				if (['psn', 'par', 'slp', 'brn', 'frz'].indexOf(startStatus) >= 0) {
+					set.startStatus = startStatus;
+				} else {
+					delete set.startStatus;
+				}
+			}
+
 			// update details cell
 			var buf = '';
 			var GenderChart = {
@@ -3095,9 +3203,16 @@
 						buf += '<span class="detailcell"><label>Gmax</label>' + (set.gigantamax || species.forme === 'Gmax' ? 'Yes' : 'No') + '</span>';
 					}
 				}
-				if (this.curTeam.gen === 9 && !isChampions) {
-					buf += '<span class="detailcell"><label>Tera Type</label>' + (set.teraType || species.requiredTeraType || species.types[0]) + '</span>';
-				}
+			}
+			if (this.curTeam.gen === 9 && !isChampions) {
+				buf += '<span class="detailcell"><label>Tera Type</label>' + (set.teraType || (this.curTeam.format.includes('nonerfs') ? 'None / Dyna' : (species.requiredTeraType || species.types[0]))) + '</span>';
+			}
+			if (this.curTeam.gen === 1 && this.curTeam.format.includes('disguises')) {
+				var phT = (set.phType || '').split('/');
+				buf += '<span class="detailcell"><label>Type 1</label>' + (phT[0] || species.types[0]) + '</span>';
+				buf += '<span class="detailcell"><label>Type 2</label>' + (phT[1] || species.types[1] || '(none)') + '</span>';
+				buf += '<span class="detailcell"><label>Disguise</label>' + (set.disguise ? this.curTeam.dex.species.get(set.disguise).name : '(none)') + '</span>';
+				buf += '<span class="detailcell"><label>Status</label>' + (set.startStatus || 'None') + '</span>';
 			}
 			this.$('button[name=details]').html(buf);
 
@@ -3347,6 +3462,7 @@
 						set.level = 50;
 					}
 					if (baseFormat.startsWith('lc') || baseFormat.endsWith('lc')) set.level = 5;
+					if (this.curTeam.gen === 1 && this.curTeam.format.includes('disguises')) set.level = 255;
 				}
 				set.gender = 'F';
 				if (set.happiness) delete set.happiness;
@@ -3382,6 +3498,7 @@
 						set.level = 50;
 					}
 					if (baseFormat.startsWith('lc') || baseFormat.endsWith('lc')) set.level = 5;
+					if (this.curTeam.gen === 1 && this.curTeam.format.includes('disguises')) set.level = 255;
 				}
 				if (set.happiness) delete set.happiness;
 				if (set.shiny) delete set.shiny;
@@ -3614,6 +3731,7 @@
 						baseFormat.substr(0, 3) === 'bss' || baseFormat.substr(0, 3) === 'vgc' ||
 						baseFormat.substr(0, 14) === 'battlefestival') set.level = 50;
 					if (baseFormat.startsWith('lc') || baseFormat.endsWith('lc')) set.level = 5;
+					if (this.curTeam.gen === 1 && this.curTeam.format.includes('disguises')) set.level = 255;
 					if (baseFormat.substr(0, 19) === 'battlespotspecial17') set.level = 1;
 					if (format && format.teambuilderLevel) {
 						set.level = format.teambuilderLevel;

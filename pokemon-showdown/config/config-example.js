@@ -78,11 +78,19 @@ Main's SSL deploy script from Let's Encrypt looks like:
  * proxyip - proxy IPs with trusted X-Forwarded-For headers
  *   This can be either false (meaning not to trust any proxies) or an array
  *   of strings. Each string should be either an IP address or a subnet given
- *   in CIDR notation. You should usually leave this as `false` unless you
- *   know what you are doing
+ *   in CIDR notation.
+ *
+ *   IMPORTANT: If you're using Cloudflare Tunnel, nginx, or another reverse
+ *   proxy running on localhost, you MUST set this to trust localhost:
+ *   exports.proxyip = ['127.0.0.1', '::1'];
+ *
+ *   This allows the server to read the real client IP from X-Forwarded-For
+ *   headers. Without this, all connections will appear to come from localhost
+ *   and may cause 404 errors or connection issues.
+ *
  * @type {false | string[]}.
  */
-exports.proxyip = false;
+exports.proxyip = ['127.0.0.1', '::1'];
 
 // subprocesses - the number of child processes to use for various tasks.
 //   Can be set to `0` instead of `{...}` to stop using subprocesses, if you're running out of RAM.
