@@ -574,8 +574,79 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		banlist: ['Uber'],
 	},
 	{
-	section: "Custom Game",
+	section: "PS! Misc",
 	column: 3,
+	// name: 'showdowntiers',
+	},
+	{
+		name: "[Gen 9] LC",
+		mod: 'gen9',
+		searchShow: false,
+		ruleset: ['Little Cup', 'Standard'],
+		banlist: [
+			'Aipom', 'Basculin-White-Striped', 'Cutiefly', 'Diglett-Base', 'Dunsparce', 'Duraludon', 'Flittle', 'Gastly', 'Girafarig', 'Gligar',
+			'Meditite', 'Misdreavus', 'Murkrow', 'Porygon', 'Qwilfish-Hisui', 'Rufflet', 'Scraggy', 'Scyther', 'Sneasel', 'Sneasel-Hisui',
+			'Snivy', 'Stantler', 'Vulpix', 'Vulpix-Alola', 'Yanma', 'Moody', 'Baton Pass', 'Sticky Web',
+		],
+	},
+	{
+		name: "[Gen 9] Anything Goes",
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3710911/">AG Metagame Discussion</a>`,
+		],
+		mod: 'gen9',
+		searchShow: false,
+		ruleset: ['Min Source Gen = 9', 'Obtainable', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
+	},
+	{
+		name: "[Gen 9] Triples",
+		mod: 'gen9',
+		gameType: 'triples',
+		searchShow: false,
+		ruleset: ['Standard Doubles', 'Evasion Abilities Clause'],
+		banlist: [
+			'Annihilape', 'Arceus', 'Calyrex-Ice', 'Calyrex-Shadow', 'Darkrai', 'Dialga', 'Dialga-Origin', 'Eternatus', 'Flutter Mane', 'Giratina', 'Giratina-Origin',
+			'Groudon', 'Ho-Oh', 'Indeedee', 'Indeedee-F', 'Koraidon', 'Kyogre', 'Kyurem-Black', 'Kyurem-White', 'Lugia', 'Lunala', 'Magearna', 'Mewtwo', 'Miraidon',
+			'Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane', 'Palkia', 'Palkia-Origin', 'Rayquaza', 'Reshiram', 'Solgaleo', 'Terapagos', 'Urshifu', 'Urshifu-Rapid-Strike',
+			'Zacian', 'Zacian-Crowned', 'Zamazenta', 'Zamazenta-Crowned', 'Zekrom', 'Moody', 'Shadow Tag', 'Bright Powder', 'King\'s Rock', 'Razor Fang',
+		],
+	},
+	{
+		name: "[Gen 9] Doubles OU",
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3710876/">Doubles OU Sample Teams</a>`,
+		],
+		searchShow: false,
+		mod: 'gen9',
+		gameType: 'doubles',
+		ruleset: ['Standard Doubles', 'Evasion Abilities Clause'],
+		banlist: ['DUber', 'Shadow Tag', 'Commander'],
+	},
+	{
+		name: "[Gen 9] National Dex",
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3710848/">National Dex Metagame Discussion</a>`,
+		],
+		searchShow: false,
+		mod: 'gen9',
+		ruleset: ['Standard NatDex', 'Terastal Clause'],
+		banlist: [
+			'ND Uber', 'ND AG', 'Arena Trap', 'Moody', 'Power Construct', 'Shadow Tag', 'King\'s Rock',
+			'Quick Claw', 'Razor Fang', 'Assist', 'Baton Pass', 'Last Respects', 'Shed Tail',
+		],
+	},
+	{
+		name: "[Gen 9] National Dex AG",
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3672423/">National Dex AG</a>`,
+		],
+		searchShow: false,
+		mod: 'gen9',
+		ruleset: ['Standard AG', 'NatDex Mod'],
+	},
+	{
+	section: "Custom Game",
+	column: 4,
 	// name: 'customgame',
 	},
 	{
@@ -720,7 +791,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 
 	{
 	section: "Custom Game Doubles",
-	column: 3,
+	column: 4,
 	// name: 'customgame',
 	},
 	{
@@ -803,76 +874,5 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		debug: true,
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100'],
-	},
-	{
-	section: "PS! Misc",
-	column: 3,
-	// name: 'showdowntiers',
-	},
-	{
-		name: "[Gen 9] LC",
-		mod: 'gen9',
-		searchShow: false,
-		ruleset: ['Little Cup', 'Standard'],
-		banlist: [
-			'Aipom', 'Basculin-White-Striped', 'Cutiefly', 'Diglett-Base', 'Dunsparce', 'Duraludon', 'Flittle', 'Gastly', 'Girafarig', 'Gligar',
-			'Meditite', 'Misdreavus', 'Murkrow', 'Porygon', 'Qwilfish-Hisui', 'Rufflet', 'Scraggy', 'Scyther', 'Sneasel', 'Sneasel-Hisui',
-			'Snivy', 'Stantler', 'Vulpix', 'Vulpix-Alola', 'Yanma', 'Moody', 'Baton Pass', 'Sticky Web',
-		],
-	},
-	{
-		name: "[Gen 9] Anything Goes",
-		threads: [
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3710911/">AG Metagame Discussion</a>`,
-		],
-		mod: 'gen9',
-		searchShow: false,
-		ruleset: ['Min Source Gen = 9', 'Obtainable', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
-	},
-	{
-		name: "[Gen 9] Triples",
-		mod: 'gen9',
-		gameType: 'triples',
-		searchShow: false,
-		ruleset: ['Standard Doubles', 'Evasion Abilities Clause'],
-		banlist: [
-			'Annihilape', 'Arceus', 'Calyrex-Ice', 'Calyrex-Shadow', 'Darkrai', 'Dialga', 'Dialga-Origin', 'Eternatus', 'Flutter Mane', 'Giratina', 'Giratina-Origin',
-			'Groudon', 'Ho-Oh', 'Indeedee', 'Indeedee-F', 'Koraidon', 'Kyogre', 'Kyurem-Black', 'Kyurem-White', 'Lugia', 'Lunala', 'Magearna', 'Mewtwo', 'Miraidon',
-			'Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane', 'Palkia', 'Palkia-Origin', 'Rayquaza', 'Reshiram', 'Solgaleo', 'Terapagos', 'Urshifu', 'Urshifu-Rapid-Strike',
-			'Zacian', 'Zacian-Crowned', 'Zamazenta', 'Zamazenta-Crowned', 'Zekrom', 'Moody', 'Shadow Tag', 'Bright Powder', 'King\'s Rock', 'Razor Fang',
-		],
-	},
-	{
-		name: "[Gen 9] Doubles OU",
-		threads: [
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3710876/">Doubles OU Sample Teams</a>`,
-		],
-		searchShow: false,
-		mod: 'gen9',
-		gameType: 'doubles',
-		ruleset: ['Standard Doubles', 'Evasion Abilities Clause'],
-		banlist: ['DUber', 'Shadow Tag', 'Commander'],
-	},
-	{
-		name: "[Gen 9] National Dex",
-		threads: [
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3710848/">National Dex Metagame Discussion</a>`,
-		],
-		searchShow: false,
-		mod: 'gen9',
-		ruleset: ['Standard NatDex', 'Terastal Clause'],
-		banlist: [
-			'ND Uber', 'ND AG', 'Arena Trap', 'Moody', 'Power Construct', 'Shadow Tag', 'King\'s Rock',
-			'Quick Claw', 'Razor Fang', 'Assist', 'Baton Pass', 'Last Respects', 'Shed Tail',
-		],
-	},
-	{
-		name: "[Gen 9] National Dex AG",
-		threads: [
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3672423/">National Dex AG</a>`,
-		],
-		searchShow: false,
-		mod: 'gen9',
-		ruleset: ['Standard AG', 'NatDex Mod'],
 	},
 ];
