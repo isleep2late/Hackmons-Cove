@@ -70,6 +70,13 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 	},
 },
 {
+	name: "[Gen 5] Pure Hackmons",
+	desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
+	mod: 'gen5phnn',
+	searchShow: false,
+	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
+},
+{
 	name: "[Gen 4] Glitch Anything Goes",
 	desc: "Gen 4 Anything Goes with the Rage glitch: Smeargle-reachable Pokemon can learn any move except Chatter and Struggle.",
 	mod: 'gen4',
