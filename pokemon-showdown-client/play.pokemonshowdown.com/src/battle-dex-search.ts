@@ -656,7 +656,7 @@ abstract class BattleTypedSearch<T extends SearchType> {
 			format = format.slice(9) as ID;
 			if (format.startsWith('vgc') || format.startsWith('bss')) format = 'ubers' as ID;
 		}
-		if (format.includes('nonerfs') && this.dex.gen === 9) {
+		if ((format.includes('nonerfs') || format.includes('phnn')) && this.dex.gen === 9) {
 			this.dex = Dex.mod('gen9phnn' as ID);
 		}
 		if (format.startsWith('vgc')) {
@@ -760,7 +760,7 @@ abstract class BattleTypedSearch<T extends SearchType> {
 
 			for (const id in this.getTable()) {
 				if (!(id in legalityFilter)) {
-					if (this.searchType === 'pokemon' && (this.format.includes('nonerfs') || this.format.includes('unified')) && (this.dex.species.get(id).num > 0 || id.startsWith('pokestar')) && !id.endsWith('gmax')) {
+					if (this.searchType === 'pokemon' && (this.format.includes('nonerfs') || this.format.includes('unified') || this.format.includes('phnn')) && (this.dex.species.get(id).num > 0 || id.startsWith('pokestar')) && !id.endsWith('gmax')) {
                       this.baseResults.push([this.searchType, id as ID]);
                       continue;
                     }
@@ -1033,7 +1033,7 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 		if (!format) return this.getDefaultResults();
 		const isVGCOrBS = format.startsWith('battlespot') || format.startsWith('bss') ||
 			format.startsWith('battlestadium') || format.startsWith('vgc');
-		const isHackmons = format.includes('hackmons') || format.endsWith('bh') || format.includes('anyability') || format.includes('glitched') || format.includes('unified');
+		const isHackmons = (format.includes('hackmons') || format.includes('phnn')) || format.endsWith('bh') || format.includes('anyability') || format.includes('glitched') || format.includes('unified');
 		let isDoublesOrBS = isVGCOrBS || this.formatType?.includes('doubles');
 		const dex = this.dex;
 
@@ -1326,7 +1326,7 @@ class BattleAbilitySearch extends BattleTypedSearch<'ability'> {
 	getBaseResults(): SearchRow[] {
 		if (!this.species) return this.getDefaultResults();
 		const format = this.format;
-		const isHackmons = (format.includes('hackmons') || format.endsWith('bh') || format.includes('anyability') || format.includes('unified'));
+		const isHackmons = ((format.includes('hackmons') || format.includes('phnn')) || format.endsWith('bh') || format.includes('anyability') || format.includes('unified'));
 		const isAAA = (format === 'almostanyability' || format.includes('aaa'));
 		const dex = this.dex;
 		let species = dex.species.get(this.species);
@@ -1791,8 +1791,8 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		const dex = this.dex;
 		let species = dex.species.get(this.species);
 		const format = this.format;
-		const isHackmons = (format.includes('hackmons') || format.endsWith('bh') || format.includes('anyability') || format.includes('unified'));
-		const isPHNN = format.includes('nonerfs');
+		const isHackmons = ((format.includes('hackmons') || format.includes('phnn')) || format.endsWith('bh') || format.includes('anyability') || format.includes('unified'));
+		const isPHNN = format.includes('nonerfs') || format.includes('phnn');
 		const phnnMaxMoves = ['maxguard', 'gmaxdrumsolo', 'gmaxfireball', 'gmaxhydrosnipe'];
 		const isSTABmons = (format.includes('stabmons') || format === 'staaabmons');
 		const isTradebacks = format.includes('tradebacks');

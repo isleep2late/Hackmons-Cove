@@ -33,7 +33,7 @@
 				if (this.curTeam.format.includes('champions')) {
 					this.curTeam.dex = Dex.mod('champions');
 				}
-				if (this.curTeam.format.includes('nonerfs') && this.curTeam.gen === 9) {
+				if ((this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')) && this.curTeam.gen === 9) {
 					this.curTeam.dex = Dex.mod('gen9phnn');
 				}
 				Storage.activeSetList = this.curSetList;
@@ -160,7 +160,7 @@
 					return this.updateTeamView();
 				}
 				this.ignoreEVLimits = (this.curTeam.gen < 3 ||
-					((this.curTeam.format.includes('hackmons') || this.curTeam.format.endsWith('bh')) && this.curTeam.gen !== 6) ||
+					(((this.curTeam.format.includes('hackmons') || this.curTeam.format.includes('phnn')) || this.curTeam.format.endsWith('bh')) && this.curTeam.gen !== 6) ||
 					this.curTeam.format.includes('metronomebattle'));
 				if (this.curSet) {
 					return this.updateSetView();
@@ -764,7 +764,7 @@
 			if (this.curTeam.format.includes('champions')) {
 				this.curTeam.dex = Dex.mod('champions');
 			}
-			if (this.curTeam.format.includes('nonerfs') && this.curTeam.gen === 9) {
+			if ((this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')) && this.curTeam.gen === 9) {
 				this.curTeam.dex = Dex.mod('gen9phnn');
 			}
 			Storage.activeSetList = this.curSetList = Storage.unpackTeam(this.curTeam.team);
@@ -1364,11 +1364,11 @@
 					}
 				}
 				if (this.curTeam.gen === 9 && !isChampions) {
-					buf += '<span class="detailcell"><label>Tera Type</label>' + (set.teraType || (this.curTeam.format.includes('nonerfs') ? 'None / Dyna' : (species.requiredTeraType || species.types[0]))) + '</span>';
+					buf += '<span class="detailcell"><label>Tera Type</label>' + (set.teraType || ((this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')) ? 'None / Dyna' : (species.requiredTeraType || species.types[0]))) + '</span>';
 				}
 			}
 			if (this.curTeam.gen === 9 && !isChampions) {
-				buf += '<span class="detailcell"><label>Tera Type</label>' + (set.teraType || (this.curTeam.format.includes('nonerfs') ? 'None / Dyna' : (species.requiredTeraType || species.types[0]))) + '</span>';
+				buf += '<span class="detailcell"><label>Tera Type</label>' + (set.teraType || ((this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')) ? 'None / Dyna' : (species.requiredTeraType || species.types[0]))) + '</span>';
 			}
 			if (this.curTeam.gen === 1 && this.curTeam.format.includes('disguises')) {
 				var phT = (set.phType || '').split('/');
@@ -1652,7 +1652,7 @@
 			if (this.curTeam.format.includes('champions')) {
 				this.curTeam.dex = Dex.mod('champions');
 			}
-			if (this.curTeam.format.includes('nonerfs') && this.curTeam.gen === 9) {
+			if ((this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')) && this.curTeam.gen === 9) {
 				this.curTeam.dex = Dex.mod('gen9phnn');
 			}
 			this.save();
@@ -2355,7 +2355,7 @@
 			var guessedEVs = guess.evs;
 			var guessedPlus = guess.plusStat;
 			var guessedMinus = guess.minusStat;
-			if ((this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('510')) && role !== '?') {
+			if (((this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')) || this.curTeam.format.includes('510')) && role !== '?') {
 				guessedEVs = { hp: 252, atk: 252, def: 252, spa: 252, spd: 252, spe: 252 };
 				var self = this;
 				var usesPhysical = (set.moves || []).some(function (m) {
@@ -2940,7 +2940,7 @@
 			var isLetsGo = this.curTeam.format.includes('letsgo');
 			var isBDSP = this.curTeam.format.includes('bdsp');
 			var isNatDex = this.curTeam.format.includes('nationaldex') || this.curTeam.format.includes('natdex');
-			var isHackmons = this.curTeam.format.includes('hackmons') || this.curTeam.format.endsWith('bh');
+			var isHackmons = (this.curTeam.format.includes('hackmons') || this.curTeam.format.includes('phnn')) || this.curTeam.format.endsWith('bh');
 			var species = this.curTeam.dex.species.get(set.species);
 			if (!set) return;
 			buf += '<div class="resultheader"><h3>Details</h3></div>';
@@ -3023,7 +3023,7 @@
 				buf += '<div class="formrow"><label class="formlabel" title="Tera Type">Tera Type:</label><div>';
 				buf += '<select name="teratype" class="button">';
 				var types = Dex.types.all();
-				var isPHNN9 = this.curTeam.format.includes('nonerfs');
+				var isPHNN9 = (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn'));
 				var teraType = set.teraType || (isPHNN9 ? '' : (species.requiredTeraType || species.types[0]));
 				if (isPHNN9) {
 					buf += '<option value=""' + (!teraType ? ' selected="selected"' : '') + '>None / Dyna</option>';
@@ -3224,7 +3224,7 @@
 				}
 			}
 			if (this.curTeam.gen === 9 && !isChampions) {
-				buf += '<span class="detailcell"><label>Tera Type</label>' + (set.teraType || (this.curTeam.format.includes('nonerfs') ? 'None / Dyna' : (species.requiredTeraType || species.types[0]))) + '</span>';
+				buf += '<span class="detailcell"><label>Tera Type</label>' + (set.teraType || ((this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')) ? 'None / Dyna' : (species.requiredTeraType || species.types[0]))) + '</span>';
 			}
 			if (this.curTeam.gen === 1 && this.curTeam.format.includes('disguises')) {
 				var phT = (set.phType || '').split('/');
@@ -3767,7 +3767,7 @@
 			if (set.dynamaxLevel) delete set.dynamaxLevel;
 			if (set.gigantamax) delete set.gigantamax;
 			if (set.teraType) delete set.teraType;
-			if (!(this.curTeam.format.includes('hackmons') || this.curTeam.format.endsWith('bh')) && species.requiredItems.length === 1) {
+			if (!((this.curTeam.format.includes('hackmons') || this.curTeam.format.includes('phnn')) || this.curTeam.format.endsWith('bh')) && species.requiredItems.length === 1) {
 				set.item = species.requiredItems[0];
 			} else {
 				set.item = '';
