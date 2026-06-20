@@ -70,7 +70,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 	},
 },
 {
-	name: "[Gen 5] Pure Hackmons",
+	name: "[Gen 5] Pure Hackmons No Nerfs",
 	desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
 	mod: 'gen5phnn',
 	searchShow: false,
