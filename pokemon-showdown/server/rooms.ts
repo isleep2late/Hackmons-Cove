@@ -1653,19 +1653,38 @@ export class GlobalRoomState {
 			}
 		}
 		if (Config.reportbattles) {
-			if (typeof Config.reportbattles === 'string') {
-				Config.reportbattles = [Config.reportbattles];
-			} else if (Config.reportbattles === true) {
-				Config.reportbattles = ['lobby'];
+			const reportRooms = new Set<string>();
+			const isTourGame = room.battle?.challengeType === 'tour';
+
+			if (isTourGame) return;
+
+			reportRooms.add('lobby');
+
+			// Format-specific reporting
+			const format = Dex.formats.get(room.format);
+			const formatName = format.name;
+
+			if (formatName.includes('Pure Hackmons')) {
+				reportRooms.add('purehackmons');
 			}
-			for (const roomid of Config.reportbattles) {
+
+			if (
+				formatName.includes('Balanced Hackmons') ||
+				formatName.includes('BH')
+			) {
+				reportRooms.add('balancedhackmons');
+			}
+
+			if (formatName.includes('No Nerfs')) {
+				reportRooms.add('nonerfs');
+			}
+
+			// Send reports
+			const reportPlayers = players.map(player => player.getIdentity()).join('|');
+			for (const roomid of reportRooms) {
 				const reportRoom = Rooms.get(roomid);
-				if (reportRoom) {
-					const reportPlayers = players.map(p => p.getIdentity()).join('|');
-					reportRoom
-						.add(`|b|${room.roomid}|${reportPlayers}`)
-						.update();
-				}
+					if (!reportRoom) continue;
+				reportRoom.add(`|b|${room.roomid}|${reportPlayers}`).update();
 			}
 		}
 		if (Config.logladderip && options.rated) {
