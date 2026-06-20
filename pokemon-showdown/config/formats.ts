@@ -28,9 +28,6 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 	mod: 'phnn',
 	ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview'],
 	unbanlist: ['Past', 'Future', 'Unobtainable'],
-	onBegin() {
-		this.add('Pure Hackmons No Nerfs. Every move is legal, every ability is legal, and every Pokemon across all generations can be played at their peak!');
-	},
 },
 {
 	name: "[Gen 9] Pure Hackmons No Nerfs Doubles",
@@ -42,20 +39,6 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 	unbanlist: [
 		'Past', 'Future', 'Unobtainable'
 	],
-	onValidateSet(set, format, setHas, teamHas) {
-		return [];
-	},
-	onValidateTeam(team, format) {
-		return [];
-	},
-	onModifyDamage(damage, source, target, move) {
-		if (move.multihitType === 'parentalbond' && move.hit > 1) {
-			return this.chainModify(2);
-		}
-	},
-		onBegin() {
-			this.add('Pure Hackmons No Nerfs. Every move is legal, every ability is legal, and every Pokemon across all generations can be played at their peak!');
-		},
 },
 {
 	name: "[Gen 9] Pure Hackmons No Nerfs Triples",
@@ -64,18 +47,17 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 	gameType: 'triples',
 	searchShow: false,
 	ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Data Preview'],
-	onModifyDamage(damage, source, target, move) {
-		if (move.multihitType === 'parentalbond' && move.hit > 1) {
-			return this.chainModify(2);
-		}
-	},
-	onBegin() {
-		this.add('Pure Hackmons No Nerfs. Every move is legal, every ability is legal, and every Pokemon across all generations can be played at their peak!');
-	},
 },
 {
 	section: "Glitchmons",
 	column: 1,
+},
+{
+	name: "[Gen 8] Pure Hackmons Unified",
+	desc: "Gen 8 Pure Hackmons unified with every BDSP Pokemon.",
+	mod: 'gen8unified',
+	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
+	unbanlist: ['Past', 'Future', 'Unobtainable'],
 },
 {
 	name: "[Gen 6] No Limit Hackmons",

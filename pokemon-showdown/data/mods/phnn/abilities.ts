@@ -199,21 +199,7 @@ export const Abilities: import('../../../sim/dex-abilities').ModdedAbilityDataTa
 		desc: "At the end of each turn, this Pokemon raises a random stat by 2 stages and lowers a different random stat by 1 stage. Evasion and accuracy can be selected.",
 	},
 	parentalbond: {
-		onPrepareHit(source, target, move) {
-			if (['iceball', 'rollout'].includes(move.id)) return;
-			if (move.category === 'Status') return;
-			if (move.isZ) {
-			} else if (move.selfdestruct || move.multihit) {
-				return;
-			}
-			if (['endeavor', 'fling', 'flail', 'reversal'].includes(move.id)) return;
-			if (move.flags['charge'] || move.flags['recharge'] || move.spreadHit) return;
-			move.multihit = 2;
-			move.multihitType = 'parentalbond';
-		},
-		name: "Parental Bond",
-		rating: 4.5,
-		num: 185,
+		inherit: true,
 		shortDesc: "This Pokemon's damaging moves hit twice; second hit deals 50% damage.",
 		desc: "This Pokemon's damaging moves become multi-hit moves that hit twice. The second hit has its damage multiplied by 0.5. This also applies to Z-Moves.",
 	},
