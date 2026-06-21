@@ -57,7 +57,7 @@ Now open your eyes. **Welcome to Pokémon Pure Hackmons: No Nerfs**, the format 
 - **Classic broken mechanics return** (Toxic/Leech Seed exploit, Paraconfusion buff, Permafreeze, etc.)
 - **Support for Singles, Doubles, and Triples**
 
-> *Note: Dynamax/Gigantamax and Terastallization coexist in Gen 9 PHNN, but each Pokémon may only do one of them per battle (they are mutually exclusive). The choice is made through the Tera type: set a Pokémon's Tera type to **Stellar** to have it **Dynamax** instead of Terastallizing; any other Tera type (including its own primary type) Terastallizes as normal. The one exception is **Terapagos**, which keeps its natural Stellar Terastallization and therefore cannot Dynamax. Mega-Evolving / Ultra-Necrozma'ing still takes priority and will NOT allow an additional Terastallize or Dynamax afterwards.
+> *Note: Dynamax/Gigantamax and Terastallization coexist in Gen 9 PHNN, but each Pokémon may only do one of them per battle (they are mutually exclusive). The choice is made through the Tera type: leave a Pokémon's Tera type **unset** to have it **Dynamax**, or assign it **any** Tera type (including Stellar or its own primary type) to **Terastallize** instead. **Terapagos**, which has a natural Stellar Tera type, therefore Terastallizes and cannot Dynamax. Mega-Evolving / Ultra-Necrozma'ing still takes priority and will NOT allow an additional Terastallize or Dynamax afterwards.
 
 ---
 
@@ -691,13 +691,13 @@ All signature Z-moves are back:
 
 #### G-Max Moves (Gen 8)
 
-The following G-Max moves for Galar starters are now properly implemented with their correct stats:
+All G-Max moves are available. Every Gigantamax-capable Pokémon can use its G-Max move via Dynamax, and the three Galar-starter signature G-Max moves are additionally enhanced with their correct stats:
 
 - **G-Max Drum Solo** (Rillaboom): 160 BP, 5 PP, ignores abilities
 - **G-Max Fireball** (Cinderace): 160 BP, 5 PP, ignores abilities
 - **G-Max Hydrosnipe** (Inteleon): 160 BP, 5 PP, ignores abilities
 
-These signature Gigantamax moves now deal proper damage and ignore defensive abilities like Solid Rock, Filter, and Multiscale.
+These three signature Gigantamax moves deal proper damage and ignore defensive abilities like Solid Rock, Filter, and Multiscale.
 
 **Special Mechanics:**
 - These moves break through Protect, Detect, King's Shield, Spiky Shield, Baneful Bunker, and Obstruct, dealing **25% damage** through the protection
@@ -733,7 +733,7 @@ These signature Gigantamax moves now deal proper damage and ignore defensive abi
 
 - **Aerilate/Pixilate/Refrigerate**: Restore original 1.3x damage multiplier (was reduced to 1.2x in Gen 7)
 - **Gale Wings (Talonflame)**: Remove HP requirement - restore unlimited priority to Flying moves
-- **Parental Bond (Kangaskhan)**: 25% second hit → 50% second hit. EXPERIMENTAL: Z-moves also hit twice, AND Clangorous Soulblaze's stat boosts will trigger x2! (*Currently the second attack will not be boosted.)
+- **Parental Bond (Kangaskhan)**: 25% second hit → 50% second hit. Z-moves and Max/G-Max moves also hit twice (second hit deals 50% damage and rolls its secondary effect again).
 - **Prankster**: Remove Dark-type immunity - restore full effectiveness vs all types
 
 #### Generation 5→6 Ability Nerfs Reversed
@@ -947,7 +947,7 @@ So why Will-O-Wisp, and why now? We actually put this to a vote, and while we wi
 
 It might be inconsistent or arbitrary for us to only serve Will-O-Wisp, but ultimately this was interesting enough of an idea for the community that we're trying it out. It's the same notion for Overflow. We put Emax to a vote, and most everyone unanimously wanted Overflow banned but it was OK to keep Emax, even though Dynamaxed Pokemon is not something that is easy to implement in Gen 9.
 
-The three Galar starter G-Max moves (Drum Solo, Fireball, and Hydrosnipe) have been implemented with 160 BP and ability-ignoring properties. Other G-Max moves are still under exploration and may be added in future updates.
+The three Galar starter G-Max moves (Drum Solo, Fireball, and Hydrosnipe) have been implemented with 160 BP and ability-ignoring properties. All other G-Max moves are also available through standard Gigantamax during Dynamax.
 
 Another comment about design philosophy: We are not against the idea of implementing Glitches. There are several Glitchmons such as MissingNo. or glitch moves or items that we could definitely consider. Stat Overflow is an unintended glitch that was never meant to happen, but glitches are fair game, though they are still relegated to Theorymon-level PHNN due to practicality.
 

@@ -1,0 +1,409 @@
+@use 'config/colors';
+@use 'config/fonts';
+@use 'functions/color';
+@use 'mixins/flex';
+@use 'mixins/font';
+@use 'mixins/position';
+@use 'mixins/spacing';
+@use 'mixins/transition';
+
+$settings-icon-size: 36px;
+$close-icon-size: 28px;
+
+.container {
+  @include position.absolute($x: 0, $top: 0, $bottom: 73px); // 73px = height of Hellodex footer
+  // backdrop-filter: blur(2px); // causes scrolling lag due to blurred pixel recalculations
+  @include transition.apply(color, background-color);
+  overflow: hidden;
+  z-index: 1;
+
+  &.light {
+    color: colors.$black;
+    background-color: color.alpha(colors.$white, 0.94);
+
+    &.mina {
+      background-color: color.alpha(#F5DAE3, 0.88);
+    }
+  }
+
+  &.dark {
+    color: colors.$white;
+    background-color: color.alpha(colors.$gray-darkest, 0.94);
+
+    &.mina {
+      background-color: color.alpha(#2D0D1C, 0.94);
+    }
+  }
+
+  &.glassy {
+    backdrop-filter: blur(4px);
+
+    &.light {
+      background-color: color.alpha(colors.$white, 0.64);
+
+      &.mina {
+        background-color: color.alpha(#F5DAE3, 0.64);
+      }
+    }
+
+    &.dark {
+      background-color: color.alpha(colors.$gray-darkest, 0.8);
+
+      &.mina {
+        background-color: color.alpha(#2D0D1C, 0.8);
+      }
+    }
+  }
+
+  code {
+    @include font.apply(fonts.$mono);
+  }
+}
+
+.contentContainer {
+  @include position.absolute-fill;
+  overflow-x: hidden;
+}
+
+.content {
+  @include spacing.padding($all: 16px);
+}
+
+.header {
+  @include flex.row-between;
+  @include spacing.padding($x: 12px, $top: 4px, $bottom: 6px);
+  @include transition.apply(padding);
+  user-select: none;
+
+  .inBattle & {
+    @include spacing.padding($x: 6px);
+  }
+
+  &:hover .settingsIcon {
+    transform: rotateZ(360deg);
+  }
+
+  .left {
+    @include flex.row-start;
+    opacity: 0.88;
+
+    .settingsIcon {
+      width: $settings-icon-size;
+      min-width: $settings-icon-size;
+      height: $settings-icon-size;
+      min-height: $settings-icon-size;
+      @include transition.apply((transform, 10s));
+    }
+
+    .title {
+      @include spacing.margin($left: 12px);
+      font-weight: 500;
+      font-size: 14px;
+      text-transform: uppercase;
+    }
+  }
+
+  .right {
+    @include flex.row-end;
+
+    .actionButton {
+      position: relative;
+      font-family: inherit;
+      font-weight: 500;
+      font-size: 10px;
+      color: inherit;
+      text-transform: uppercase;
+
+      &:not(.undoButton):hover {
+        .light & {
+          color: color.shade(colors.$blue, 15%);
+        }
+
+        .dark & {
+          color: colors.$blue;
+        }
+      }
+
+      &:not(:last-of-type) {
+        @include spacing.margin($right: 8px);
+      }
+
+      .inBattle &:not(:last-of-type) {
+        @include spacing.margin($right: 2px);
+      }
+
+      &:last-of-type {
+        @include spacing.margin($right: 16px);
+      }
+    }
+
+    .importButton {
+      &.undoButton {
+        .light & {
+          color: color.shade(colors.$red, 16%);
+        }
+
+        .dark & {
+          color: colors.$red;
+        }
+      }
+    }
+
+    .defaultsButton {
+      @include spacing.margin($right: 16px);
+
+      .inBattle & {
+        @include spacing.margin($right: 8px);
+      }
+    }
+  }
+}
+
+.importTooltip {
+  position: relative;
+
+  .importBadge {
+    @include position.absolute($top: -16px, $left: 50%);
+  }
+}
+
+.closePlaceholder {
+  width: $close-icon-size;
+  min-width: $close-icon-size;
+  height: 1px;
+  pointer-events: none;
+}
+
+.closeButton {
+  @include position.absolute($top: 24px, $right: 24px);
+  color: inherit;
+  z-index: 2;
+
+  .light & {
+    color: colors.$gray-dark;
+  }
+
+  .closeIcon {
+    width: $close-icon-size;
+    min-width: $close-icon-size;
+    height: $close-icon-size;
+    min-height: $close-icon-size;
+  }
+}
+
+.notice {
+  @include spacing.padding($x: 12px, $top: 12px);
+  font-size: 12px;
+  text-align: center;
+  opacity: 0.6;
+  user-select: none;
+
+  .face {
+    font-size: 16px;
+  }
+}
+
+.settingsGroup {
+  @include spacing.margin($y: 12px);
+  @include spacing.padding($x: 12px, $top: 20px, $bottom: 24px);
+  border-radius: 12px;
+  @include transition.apply(background-color, box-shadow);
+
+  .light & {
+    background-color: color.alpha(colors.$white, 0.8);
+    box-shadow: (
+      0 0 1px color.alpha(colors.$black, 0.16),
+      0 0 16px color.alpha(colors.$gray-dark, 0.16),
+    );
+  }
+
+  .light.mina & {
+    background-color: color.alpha(#FFF7FA, 0.8);
+    box-shadow: (
+      0 0 1px color.alpha(#770629, 0.32),
+      0 0 16px color.alpha(#9F1641, 0.16),
+    );
+  }
+
+  .dark & {
+    background-color: color.alpha(colors.$gray-darkest, 0.8);
+    box-shadow: (
+      0 0 1px color.alpha(colors.$white, 0.32),
+      0 0 8px color.alpha(colors.$gray-dark, 0.48),
+    );
+  }
+
+  .dark.mina & {
+    background-color: color.alpha(#100206, 0.48);
+  }
+
+  .glassy & {
+    backdrop-filter: blur(4px);
+  }
+
+  .glassy.light & {
+    background-color: color.alpha(colors.$white, 0.24);
+  }
+
+  .glassy.light.mina & {
+    background-color: color.alpha(#FFF7FA, 0.4);
+  }
+
+  .glassy.dark & {
+    background-color: color.alpha(colors.$black, 0.24);
+  }
+
+  .glassy.dark.mina & {
+    background-color: color.alpha(#100206, 0.24);
+  }
+}
+
+.settingsGroupTitle {
+  @include spacing.margin($bottom: 16px);
+  @include spacing.padding($x: 12px);
+  font-weight: 500;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  @include transition.apply(color);
+  user-select: none;
+
+  .light & {
+    color: color.alpha(colors.$black, 0.84);
+  }
+
+  .dark & {
+    color: color.alpha(colors.$white, 0.84);
+  }
+}
+
+.settingsGroupFields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr)); // note: 0 must come first before 1fr in minmax()
+  column-gap: 12px;
+  row-gap: 12px;
+  @include spacing.padding($x: 16px);
+
+  .inBattle & {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 12px;
+  }
+
+  .settingsGroupTitle {
+    grid-area: span 1 / span 2;
+    @include spacing.margin($top: 16px, $bottom: 6px);
+    @include spacing.padding($x: 0);
+    font-size: 12px;
+
+    .inBattle & {
+      grid-area: span 1 / span 1;
+      @include spacing.margin($left: -0.5px); // matches letter-spacing of .settingsGroupTitle
+      text-align: center;
+    }
+
+    .light & {
+      color: color.alpha(colors.$black, 0.64);
+    }
+
+    .dark & {
+      color: color.alpha(colors.$white, 0.64);
+    }
+  }
+
+  .field {
+    grid-area: span 1 / span 1;
+    align-self: center;
+  }
+
+  // fixes tooltips appearing in empty spaces, which could get annoying
+  // (otherwise, it'll extend like `width: 100%` !!)
+  .switchField {
+    width: fit-content;
+  }
+
+  .singleColumn {
+    grid-area: span 1 / span 2;
+  }
+}
+
+// this is basically a container for a pseudo-component frankensteined
+// from other components (namely the NHKO fields)
+// (should typically be applied with .field)
+.customField {
+  @include spacing.padding($x: 5px, $y: 2px);
+}
+
+// mimics the labels of form components
+.customFieldLabel {
+  font-weight: 500;
+  font-size: 12px;
+  user-select: none;
+
+  .inBattle & {
+    text-align: center;
+  }
+
+  &.top {
+    @include spacing.margin($bottom: 3px);
+  }
+
+  &.right {
+    @include spacing.margin($left: 10px);
+  }
+
+  &.bottom {
+    @include spacing.margin($top: 3px);
+  }
+
+  &.left {
+    @include spacing.margin($right: 10px);
+  }
+}
+
+.customFieldRow {
+  @include flex.row($align: center);
+  @include spacing.margin($top: 7px);
+
+  &.centered {
+    justify-content: center;
+  }
+
+  .customFieldInput:not(:last-child) {
+    @include spacing.margin($right: 5px);
+  }
+}
+
+.textField {
+  @include spacing.padding($x: 3px, $y: 5px);
+  font-size: 10px;
+
+  &.nhkoLabelField {
+    max-width: 75px;
+  }
+
+  &.nhkoColorField {
+    max-width: 70px;
+  }
+
+  .textFieldInput {
+    text-align: center;
+  }
+}
+
+.tooltipContent {
+  max-width: 248px;
+  font-size: 10px;
+  text-align: center;
+  line-height: 12px;
+  white-space: normal;
+  user-select: none;
+}
+
+// these are primarily used for the defaultAutoPreset Field in AutoFeaturesSettingsPane
+.strongText {
+  font-weight: 600;
+}
+
+.blueColor {
+  color: colors.$blue;
+}

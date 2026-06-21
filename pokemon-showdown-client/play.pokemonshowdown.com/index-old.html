@@ -33,6 +33,9 @@ https://psim.us/dev
 <link rel="stylesheet" href="//play.pokemonshowdown.com/style/sim-types.css?" />
 <link rel="stylesheet" href="//play.pokemonshowdown.com/style/utilichart.css?" />
 <link rel="stylesheet" href="//play.pokemonshowdown.com/style/font-awesome.css?" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&display=swap" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <link rel="manifest" href="/manifest.json" />
 <!--[if lte IE 8]><script>document.location.replace('http://pokemonshowdown.com/autodownload/win');</script><![endif]-->
@@ -135,3 +138,18 @@ https://psim.us/dev
 
 <script src="//play.pokemonshowdown.com/data/aliases.js?" async></script>
 <script src="//play.pokemonshowdown.com/js/oldclient/clean-cookies.php" async></script>
+
+<script>
+(function(){
+	function loadShowdex(){
+		if(!window.app||!window.Dex||typeof window.Dex.forGen!=='function'){return setTimeout(loadShowdex,100);}
+		if(document.getElementById('showdex-script-main')){return;}
+		var s=document.createElement('script');
+		s.id='showdex-script-main';
+		s.src='/showdex/main.js';
+		s.async=true;
+		document.body.appendChild(s);
+	}
+	if(document.readyState==='complete'){loadShowdex();}else{window.addEventListener('load',loadShowdex);}
+})();
+</script>

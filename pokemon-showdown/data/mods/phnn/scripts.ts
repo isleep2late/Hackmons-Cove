@@ -54,18 +54,34 @@ export const Scripts: ModdedBattleScriptsData = {
 		modifyDamage(
 			baseDamage: number, pokemon: Pokemon, target: Pokemon, move: ActiveMove, suppressMessages = false
 		) {
+			let damage = Object.getPrototypeOf(this).modifyDamage.call(this, baseDamage, pokemon, target, move, suppressMessages);
 			if (move.multihitType === 'parentalbond' && move.hit > 1) {
-				this.battle.debug(`Parental Bond modifier: 0.5`);
-				baseDamage = this.battle.modify(baseDamage, 0.5);
+				damage = this.battle.modify(damage, 2);
 			}
+			return damage;
 		},
 
-		// Psywave damage calculation (Gen 1)
 		getDamage(this: BattleActions, source: Pokemon, target: Pokemon, move: string | number | ActiveMove, suppressMessages = false) {
-			if (typeof move !== 'string' && typeof move !== 'number' && move.id === 'psywave') {
-				const minDamage = source.level;
-				const maxDamage = Math.floor(source.level * 1.5);
-				return this.battle.random(minDamage, maxDamage + 1);
+			if (typeof move !== 'string' && typeof move !== 'number') {
+				if (move.id === 'psywave') {
+					const minDamage = source.level;
+					const maxDamage = Math.floor(source.level * 1.5);
+					return this.battle.random(minDamage, maxDamage + 1);
+				}
+				if (move.category !== 'Status' && !move.ohko && move.willCrit === undefined) {
+					let critChance = Math.floor(source.species.baseStats.spe / 2);
+					critChance = this.battle.clampIntRange(critChance * 2, 1, 255);
+					if (source.volatiles['focusenergy']) {
+						critChance = this.battle.clampIntRange(critChance * 2, 1, 255);
+					}
+					const critRatio = move.critRatio || 1;
+					if (critRatio === 1) {
+						critChance = Math.floor(critChance / 2);
+					} else if (critRatio >= 2) {
+						critChance = this.battle.clampIntRange(critChance * 4, 1, 255);
+					}
+					move.willCrit = critChance > 0 ? this.battle.randomChance(critChance, 256) : false;
+				}
 			}
 
 			return Object.getPrototypeOf(this).getDamage.call(this, source, target, move, suppressMessages);

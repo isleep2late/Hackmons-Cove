@@ -126,4 +126,12 @@ export const Conditions: import('../../../sim/dex-conditions').ModdedConditionDa
 			}
 		},
 	},
+	partiallytrapped: {
+		inherit: true,
+		onBeforeMovePriority: 11,
+		onBeforeMove(pokemon) {
+			this.add('cant', pokemon, 'partiallytrapped');
+			return false;
+		},
+	},
 };
