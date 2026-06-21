@@ -18,252 +18,283 @@ The column value will be ignored for repeat sections.
 */
 
 export const Formats: import('../sim/dex-formats').FormatList = [
-{
-	section: "No Nerfs",
-	column: 1,
-},
-{
-	name: "[Gen 9] Pure Hackmons No Nerfs",
-	desc: "The ultimate Pokemon experience where every move is legal, every ability is legal, and every Pokemon can be played at their peak from their strongest generation.",
-	mod: 'phnn',
-	ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview'],
-	unbanlist: ['Past', 'Future', 'Unobtainable'],
-},
-{
-	name: "[Gen 9] PHNN Doubles",
-	desc: "Pure Hackmons No Nerfs in Doubles format with twice the chaos!",
-	mod: 'phnn',
-	gameType: 'doubles',
-	ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview'],
-	banlist: [],
-	unbanlist: [
-		'Past', 'Future', 'Unobtainable'
-	],
-},
-{
-	name: "[Gen 9] PHNN Triples",
-	desc: "Pure Hackmons No Nerfs in Triples format - maximum chaos!",
-	mod: 'phnn',
-	gameType: 'triples',
-	ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview'],
-},
-{
-	name: "[Gen 9] PHNN Multi",
-	mod: 'phnn',
-	gameType: 'multi',
-	ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview'],
-	unbanlist: ['Past', 'Future', 'Unobtainable'],
-},
-{
-	name: "[Gen 9] PHNN Free-for-All",
-	mod: 'phnn',
-	gameType: 'freeforall',
-	ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview'],
-	unbanlist: ['Past', 'Future', 'Unobtainable'],
-},
-{
-	section: "Discord Formats",
-	column: 1,
-},
-{
-	name: "[Gen 8] Pure Hackmons Unified",
-	desc: "Gen 8 Pure Hackmons unified with every BDSP Pokemon.",
-	mod: 'gen8unified',
-	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Overflow Stat Mod'],
-	unbanlist: ['Past', 'Future', 'Unobtainable'],
-},
-{
-	name: "[Gen 6] No Limit Hackmons",
-	desc: "Gen 6 Pure Hackmons without the 510 EV limit.",
-	mod: 'gen6',
-	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Overflow Stat Mod'],
-	onBegin() {
-		this.add('-rule', 'No Limits: Pokemon can max all EVs');
+		
+		//////////////////////////////////
+		///// Pure Hackmons No Nerfs /////
+		//////////////////////////////////
+	{
+		section: "Pure Hackmons No Nerfs",
+		column: 1,
 	},
-},
-{
-	name: "[Gen 5] Pure Hackmons No Nerfs",
-	desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
-	mod: 'gen5phnn',
-	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Overflow Stat Mod'],
-},
-{
-	name: "[Gen 4] Glitch Anything Goes",
-	desc: "Gen 4 Anything Goes with the Rage glitch: Smeargle-reachable Pokemon can learn any move except Chatter and Struggle.",
-	mod: 'gen4',
-	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
-	checkCanLearn(move, species, setSources, set) {
-		const glitch = ['mew','ditto','jigglypuff','wigglytuff','mrmime','sudowoodo','bonsly','mimejr','chatot','caterpie','metapod','butterfree','weedle','kakuna','beedrill','magikarp','gyarados','unown','wobbuffet','smeargle','wurmple','silcoon','cascoon','wynaut','beldum','metagross','dustox','beautifly','metang','cleffa','clefairy','clefable','igglybuff','smoochum','jynx','skitty','delcatty','plusle','minun','spinda','riolu','lucario','happiny','chansey','blissey','mesprit','glameow','purugly','meowth','persian','drowzee','hypno','sentret','furret','sneasel','weavile','chimchar','monferno','infernape','togepi','togetic','togekiss','munchlax','snorlax','mankey','primeape','poliwhirl','poliwrath','abra','kadabra','alakazam','machop','machoke','machamp','geodude','graveler','golem','gengar','hitmonlee','hitmonchan','mewtwo','politoed','aipom','ambipom','snubbull','granbull','teddiursa','ursaring','miltank','celebi','ludicolo','makuhita','hariyama','sableye','meditite','medicham','volbeat','illumise','kecleon','banette','dusclops','dusknoir','jirachi'];
-		if (glitch.includes(this.toID(species.baseSpecies)) && move.id !== 'chatter' && move.id !== 'struggle') {
-			return null;
-		}
-		return this.checkCanLearn(move, species, setSources, set);
+	{
+		name: "[Gen 9] Pure Hackmons No Nerfs",
+		desc: "Pure Hackmons, but Pokemon are at the highest power level across all their available generations.",
+		mod: 'phnn',
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview'],
+		unbanlist: ['Past', 'Future', 'Unobtainable'],
 	},
-},
-{
-	name: "[Gen 3] Any Ability",
-	desc: "Gen 3 Pure Hackmons where any Pokemon can have any ability.",
-	mod: 'gen3phnn',
-	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', '+No Ability'],
-	onBegin() {
-		this.add('Gen 3 Any Ability. Any Pokemon can have any ability!');
+	{
+		name: "[Gen 9] PHNN Doubles",
+		desc: "Pure Hackmons No Nerfs in Doubles format with twice the chaos!",
+		mod: 'phnn',
+		gameType: 'doubles',
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview'],
+		unbanlist: [
+			'Past', 'Future', 'Unobtainable'
+		],
 	},
-},
-{
-	name: "[Gen 2] Statuses",
-	desc: "Gen 2 Pure Hackmons, but Pokemon can start the battle pre-statused.",
-	mod: 'gen2',
-	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255'],
-	onSwitchIn(pokemon) {
-		if (pokemon.set.startStatus && !pokemon.m.phnnStartStatusApplied) {
-			pokemon.m.phnnStartStatusApplied = true;
-			pokemon.setStatus(pokemon.set.startStatus, pokemon, null, true);
-		}
+	{
+		name: "[Gen 9] PHNN Triples",
+		desc: "Pure Hackmons No Nerfs in Triples format - maximum chaos!",
+		mod: 'phnn',
+		gameType: 'triples',
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview'],
 	},
-},
-{
-	name: "[Gen 1] Disguises",
-	desc: "Gen 1 Pure Hackmons, but Pokemon can have any type, disguise as any species, and even start the game pre-statused.",
-	mod: 'gen1phnn',
-	ruleset: ['-Nonexistent', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255'],
-	onBegin() {
-		this.add('Gen 1 Pure Hackmons. Disguise any Pokemon as another sprite and give it any typing. Your opponent sees only the sprite and status, never the real species or type. No Cleric Clause!');
-		for (const side of this.sides) {
-			for (const pokemon of side.pokemon) {
-				if (!pokemon.set.disguise) continue;
-				const disguise = this.dex.species.get(pokemon.set.disguise);
-				if (disguise.exists) {
-					// @ts-expect-error hack
-					pokemon.name = disguise.name;
-					// @ts-expect-error Hack
-					pokemon.fullname = `${pokemon.side.id}: ${disguise.name}`;
+	{
+		name: "[Gen 9] PHNN Multi",
+		mod: 'phnn',
+		gameType: 'multi',
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview'],
+		unbanlist: ['Past', 'Future', 'Unobtainable'],
+	},
+	{
+		name: "[Gen 9] PHNN Free-for-All",
+		mod: 'phnn',
+		gameType: 'freeforall',
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview'],
+		unbanlist: ['Past', 'Future', 'Unobtainable'],
+	},
+	{
+		name: "[Gen 9] PHNN Little Cup",
+		mod: 'phnn',
+		searchShow: false,
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 5'],
+		unbanlist: ['Past', 'Future', 'Unobtainable'],
+	},
+	{
+		name: "[Gen 9] PHNN Middle Cup",
+		mod: 'phnn',
+		searchShow: false,
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 50'],
+		unbanlist: ['Past', 'Future', 'Unobtainable'],
+	},
+
+	//////////////////////////////////
+	////// Miscellaneous Tiers ///////
+	//////////////////////////////////
+	{
+		section: "Hackmons Other Tiers",
+		column: 1,
+	},
+	{
+		name: "[Gen 8] Pure Hackmons Unified",
+		desc: "Gen 8 Pure Hackmons unified with every BDSP Pokemon.",
+		mod: 'gen8unified',
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Overflow Stat Mod'],
+		unbanlist: ['Past', 'Future', 'Unobtainable'],
+	},
+	{
+		name: "[Gen 6] No Limit Hackmons",
+		desc: "Gen 6 Pure Hackmons without the 510 EV limit.",
+		mod: 'gen6',
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Overflow Stat Mod'],
+		onBegin() {
+			this.add('-rule', 'No Limits: Pokemon can max all EVs');
+		},
+	},
+	{
+		name: "[Gen 5] Pure Hackmons No Nerfs",
+		desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
+		mod: 'gen5phnn',
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Overflow Stat Mod'],
+	},
+	{
+		name: "[Gen 4] Glitch Anything Goes",
+		desc: "Gen 4 Anything Goes with the Rage glitch: Smeargle-reachable Pokemon can learn any move except Chatter and Struggle.",
+		mod: 'gen4',
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
+		checkCanLearn(move, species, setSources, set) {
+			const glitch = ['mew','ditto','jigglypuff','wigglytuff','mrmime','sudowoodo','bonsly','mimejr','chatot','caterpie','metapod','butterfree','weedle','kakuna','beedrill','magikarp','gyarados','unown','wobbuffet','smeargle','wurmple','silcoon','cascoon','wynaut','beldum','metagross','dustox','beautifly','metang','cleffa','clefairy','clefable','igglybuff','smoochum','jynx','skitty','delcatty','plusle','minun','spinda','riolu','lucario','happiny','chansey','blissey','mesprit','glameow','purugly','meowth','persian','drowzee','hypno','sentret','furret','sneasel','weavile','chimchar','monferno','infernape','togepi','togetic','togekiss','munchlax','snorlax','mankey','primeape','poliwhirl','poliwrath','abra','kadabra','alakazam','machop','machoke','machamp','geodude','graveler','golem','gengar','hitmonlee','hitmonchan','mewtwo','politoed','aipom','ambipom','snubbull','granbull','teddiursa','ursaring','miltank','celebi','ludicolo','makuhita','hariyama','sableye','meditite','medicham','volbeat','illumise','kecleon','banette','dusclops','dusknoir','jirachi'];
+			if (glitch.includes(this.toID(species.baseSpecies)) && move.id !== 'chatter' && move.id !== 'struggle') {
+				return null;
+			}
+			return this.checkCanLearn(move, species, setSources, set);
+		},
+	},
+	{
+		name: "[Gen 3] Any Ability",
+		desc: "Gen 3 Pure Hackmons, but any Pokemon can have any ability.",
+		mod: 'gen3phnn',
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', '+No Ability'],
+		onBegin() {
+			this.add('Gen 3 Any Ability. Any Pokemon can have any ability!');
+		},
+	},
+	{
+		name: "[Gen 2] Statuses",
+		desc: "Gen 2 Pure Hackmons, but Pokemon can start the battle pre-statused.",
+		mod: 'gen2',
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255'],
+		onSwitchIn(pokemon) {
+			if (pokemon.set.startStatus && !pokemon.m.phnnStartStatusApplied) {
+				pokemon.m.phnnStartStatusApplied = true;
+				pokemon.setStatus(pokemon.set.startStatus, pokemon, null, true);
+			}
+		},
+	},
+	{
+		name: "[Gen 1] Disguises",
+		desc: "Gen 1 Pure Hackmons, but Pokemon can have any type, disguise as any species, and even start the game pre-statused.",
+		mod: 'gen1phnn',
+		ruleset: ['-Nonexistent', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255'],
+		onBegin() {
+			this.add('Gen 1 Pure Hackmons. Disguise any Pokemon as another sprite and give it any typing. Your opponent sees only the sprite and status, never the real species or type. No Cleric Clause!');
+			for (const side of this.sides) {
+				for (const pokemon of side.pokemon) {
+					if (!pokemon.set.disguise) continue;
+					const disguise = this.dex.species.get(pokemon.set.disguise);
+					if (disguise.exists) {
+						// @ts-expect-error hack
+						pokemon.name = disguise.name;
+						// @ts-expect-error Hack
+						pokemon.fullname = `${pokemon.side.id}: ${disguise.name}`;
+					}
 				}
 			}
-		}
-	},
-	onSwitchIn(pokemon) {
-		if (pokemon.set.phType) {
-			const types = pokemon.set.phType.split('/').filter(t => this.dex.types.isName(t));
-			if (types.length) {
-				pokemon.setType(types, true);
-				this.addSplit(pokemon.side.id, [
-					'-start', pokemon, 'typechange', types.join('/'), '[from] format: Gen 1 Pure Hackmons',
-				]);
+		},
+		onSwitchIn(pokemon) {
+			if (pokemon.set.phType) {
+				const types = pokemon.set.phType.split('/').filter(t => this.dex.types.isName(t));
+				if (types.length) {
+					pokemon.setType(types, true);
+					this.addSplit(pokemon.side.id, [
+						'-start', pokemon, 'typechange', types.join('/'), '[from] format: Gen 1 Pure Hackmons',
+					]);
+				}
 			}
-		}
-		if (pokemon.set.startStatus && !pokemon.m.phnnStartStatusApplied) {
-			pokemon.m.phnnStartStatusApplied = true;
-			pokemon.setStatus(pokemon.set.startStatus, pokemon, null, true);
-		}
+			if (pokemon.set.startStatus && !pokemon.m.phnnStartStatusApplied) {
+				pokemon.m.phnnStartStatusApplied = true;
+				pokemon.setStatus(pokemon.set.startStatus, pokemon, null, true);
+			}
+		},
 	},
-},
-{
-	section: "Wondrous Hackmons",
-	column: 1,
-},
-{
-	name: "[Gen 9] Wondrous Hackmons",
-	desc: "A custom Hackmons format with select bans for a balanced experience.",
-	mod: 'gen9',
-	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause',
-		'Forme Clause', 'Freeze Clause Mod', 'Sleep Clause Mod', 'Dry Pass Clause', 'NatDex Mod'],
-	banlist: [
-		'Arena Trap', 'Calyrex-Shadow', 'Innards Out', 'Last Respects', 'Mewtwo-Mega-X', 'Neutralizing Gas', 'Revival Blessing', 'Shadow Tag', 'Shed Tail',
-	],
-},
-{
-	name: "[Gen 8] Wondrous Hackmons",
-	desc: "A custom Hackmons format with select bans for a balanced experience.",
-	mod: 'gen8',
-	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod',
-		'Endless Battle Clause', 'Freeze Clause Mod', 'Sleep Moves Clause'],
-	banlist: [
-		'Arena Trap', 'Eternatus-Eternamax', 'Neutralizing Gas', 'Shadow Tag', 'Zacian-Crowned',
-	],
-},
-{
-	section: "Pure Hackmons",
-	column: 2,
-},
-{
-	name: "[Gen 1] Pure Hackmons",
-	desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
-	mod: 'gen1',
-	searchShow: false,
-	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255'],
-},
-{
-	name: "[Gen 2] Pure Hackmons",
-	desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
-	mod: 'gen2',
-	searchShow: false,
-	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
-},
-{
-	name: "[Gen 3] Pure Hackmons",
-	desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
-	mod: 'gen3',
-	searchShow: false,
-	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', '+No Ability'],
-},
-{
-	name: "[Gen 4] Pure Hackmons",
-	desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
-	mod: 'gen4',
-	searchShow: false,
-	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
-},
-{
-	name: "[Gen 5] Pure Hackmons",
-	desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
-	mod: 'gen5',
-	searchShow: false,
-	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
-},
-{
-	name: "[Gen 6] Pure Hackmons",
-	desc: `Anything that can be hacked in-game and is usable in local battles is allowed.`,
-	mod: 'gen6',
-	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'EV limit = 510'],
-},
-{
-	name: "[Gen 7] Pure Hackmons",
-	desc: `Anything that can be hacked in-game and is usable in local battles is allowed.`,
-	mod: 'gen7',
-	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
-},
-{
-	name: "[Gen 7 Let's Go] Pure Hackmons",
-	desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
-	mod: 'gen7letsgo',
-	searchShow: false,
-	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
-},
-{
-	name: "[Gen 8] Pure Hackmons",
-	desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
-	mod: 'gen8',
-	searchShow: false,
-	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
-},
-{
-	name: "[Gen 8 BDSP] Pure Hackmons",
-	desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
-	mod: 'gen8bdsp',
-	searchShow: false,
-	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
-},
-{
-	name: "[Gen 9] Pure Hackmons",
-	desc: `Anything directly hackable onto a set (EVs, IVs, forme, ability, item, and move) and is usable in local battles is allowed.`,
-	mod: 'gen9',
-	searchShow: false,
-	ruleset: ['Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Hackmons Forme Legality', 'Species Reveal Clause', 'Endless Battle Clause'],
-},
-{
-	section: "Balanced Hackmons",
-	column: 2,
-},
+	//////////////////////////////////
+	/////// Wondrous Hackmons ////////
+	//////////////////////////////////
+	{
+		section: "Wondrous Hackmons",
+		column: 1,
+	},
+	{
+		name: "[Gen 9] Wondrous Hackmons",
+		desc: "A custom Hackmons format with select bans for a balanced experience.",
+		mod: 'gen9',
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause',
+			'Forme Clause', 'Freeze Clause Mod', 'Sleep Clause Mod', 'Dry Pass Clause', 'NatDex Mod'],
+		banlist: [
+			'Arena Trap', 'Calyrex-Shadow', 'Innards Out', 'Last Respects', 'Mewtwo-Mega-X', 'Neutralizing Gas', 'Revival Blessing', 'Shadow Tag', 'Shed Tail',
+		],
+	},
+	{
+		name: "[Gen 8] Wondrous Hackmons",
+		desc: "A custom Hackmons format with select bans for a balanced experience.",
+		mod: 'gen8',
+		searchShow: false,
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod',
+			'Endless Battle Clause', 'Freeze Clause Mod', 'Sleep Moves Clause'],
+		banlist: [
+			'Arena Trap', 'Eternatus-Eternamax', 'Neutralizing Gas', 'Shadow Tag', 'Zacian-Crowned',
+		],
+	},
+	//////////////////////////////////
+	///// All Gens Pure Hackmons /////
+	//////////////////////////////////
+	{
+		section: "Pure Hackmons",
+		column: 2,
+	},
+	{
+		name: "[Gen 1] Pure Hackmons",
+		desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
+		mod: 'gen1',
+		searchShow: false,
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255'],
+	},
+	{
+		name: "[Gen 2] Pure Hackmons",
+		desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
+		mod: 'gen2',
+		searchShow: false,
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
+	},
+	{
+		name: "[Gen 3] Pure Hackmons",
+		desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
+		mod: 'gen3',
+		searchShow: false,
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', '+No Ability', 'Obtainable Abilities'],
+	},
+	{
+		name: "[Gen 4] Pure Hackmons",
+		desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
+		mod: 'gen4',
+		searchShow: false,
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
+	},
+	{
+		name: "[Gen 5] Pure Hackmons",
+		desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
+		mod: 'gen5',
+		searchShow: false,
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
+	},
+	{
+		name: "[Gen 6] Pure Hackmons",
+		desc: `Anything that can be hacked in-game and is usable in local battles is allowed.`,
+		mod: 'gen6',
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'EV limit = 510'],
+	},
+	{
+		name: "[Gen 7] Pure Hackmons",
+		desc: `Anything that can be hacked in-game and is usable in local battles is allowed.`,
+		mod: 'gen7',
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
+	},
+	{
+		name: "[Gen 7 Let's Go] Pure Hackmons",
+		desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
+		mod: 'gen7letsgo',
+		searchShow: false,
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
+	},
+	{
+		name: "[Gen 8] Pure Hackmons",
+		desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
+		mod: 'gen8',
+		searchShow: false,
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
+	},
+	{
+		name: "[Gen 8 BDSP] Pure Hackmons",
+		desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
+		mod: 'gen8bdsp',
+		searchShow: false,
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
+	},
+	{
+		name: "[Gen 9] Pure Hackmons",
+		desc: `Anything directly hackable onto a set (EVs, IVs, forme, ability, item, and move) and is usable in local battles is allowed.`,
+		mod: 'gen9',
+		searchShow: false,
+		ruleset: ['Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Hackmons Forme Legality', 'Species Reveal Clause', 'Endless Battle Clause'],
+	},
+	//////////////////////////////////
+	/////// Balanced Hackmons ////////
+	//////////////////////////////////
+	{
+		section: "Balanced Hackmons",
+		column: 2,
+	},
 	{
 		name: "[Gen 9] Balanced Hackmons",
 		desc: `Anything directly hackable onto a set (EVs, IVs, forme, ability, item, and move) and is usable in local battles is allowed.`,
@@ -315,88 +346,9 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 			}
 		},
 	},
-	{
-		section: "Fringemons",
-		column: 2,
-	},
-	{
-		name: "[Gen 9] PHNN Little Cup",
-		mod: 'phnn',
-		searchShow: false,
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 5'],
-		unbanlist: ['Past', 'Future', 'Unobtainable'],
-	},
-	{
-		name: "[Gen 9] PHNN LC Doubles",
-		mod: 'phnn',
-		gameType: 'doubles',
-		searchShow: false,
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 5'],
-		unbanlist: ['Past', 'Future', 'Unobtainable'],
-	},
-	{
-		name: "[Gen 9] PHNN LC Triples",
-		mod: 'phnn',
-		gameType: 'triples',
-		searchShow: false,
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 5'],
-		unbanlist: ['Past', 'Future', 'Unobtainable'],
-	},
-	{
-		name: "[Gen 9] PHNN LC Multi",
-		mod: 'phnn',
-		gameType: 'multi',
-		searchShow: false,
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 5'],
-		unbanlist: ['Past', 'Future', 'Unobtainable'],
-	},
-	{
-		name: "[Gen 9] PHNN LC Free-for-All",
-		mod: 'phnn',
-		gameType: 'freeforall',
-		searchShow: false,
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 5'],
-		unbanlist: ['Past', 'Future', 'Unobtainable'],
-	},
-	{
-		name: "[Gen 9] PHNN Middle Cup",
-		mod: 'phnn',
-		searchShow: false,
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 50'],
-		unbanlist: ['Past', 'Future', 'Unobtainable'],
-	},
-	{
-		name: "[Gen 9] PHNN MC Doubles",
-		mod: 'phnn',
-		gameType: 'doubles',
-		searchShow: false,
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 50'],
-		unbanlist: ['Past', 'Future', 'Unobtainable'],
-	},
-	{
-		name: "[Gen 9] PHNN MC Triples",
-		mod: 'phnn',
-		gameType: 'triples',
-		searchShow: false,
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 50'],
-		unbanlist: ['Past', 'Future', 'Unobtainable'],
-	},
-	{
-		name: "[Gen 9] PHNN MC Multi",
-		mod: 'phnn',
-		gameType: 'multi',
-		searchShow: false,
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 50'],
-		unbanlist: ['Past', 'Future', 'Unobtainable'],
-	},
-	{
-		name: "[Gen 9] PHNN MC Free-for-All",
-		mod: 'phnn',
-		gameType: 'freeforall',
-		searchShow: false,
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 50'],
-		unbanlist: ['Past', 'Future', 'Unobtainable'],
-	},
+	//////////////////////////////////
+	//// Random Hackmons Formats /////
+	//////////////////////////////////
 	{
 		section: "Random Hackmons",
 		column: 2,
@@ -423,7 +375,6 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 	{
 		name: "[Gen 9] Broken Cup",
 		desc: `[Gen 9] Hackmons Cup but with only the most powerful Pok&eacute;mon, moves, abilities, and items.`,
-
 		team: 'randomHC',
 		bestOfDefault: true,
 		ruleset: ['HP Percentage Mod', 'Cancel Mod'],
@@ -572,11 +523,14 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 			}
 		},
 	},
-{
-	section: "Smogon OU",
-	column: 3,
-	// name: "smogonofficials",
-},
+	//////////////////////////////////
+	///////// All Gens OU ////////////
+	//////////////////////////////////
+	{
+		section: "Smogon OU",
+		column: 3,
+		// name: "smogonofficials",
+	},
 	{
 		name: "[Gen 9] OU",
 		threads: [
@@ -693,10 +647,13 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		ruleset: ['Standard'],
 		banlist: ['Uber'],
 	},
+	//////////////////////////////////
+	////// Showdown Top Picks ////////
+	//////////////////////////////////
 	{
-	section: "PS! Misc",
-	column: 3,
-	// name: 'showdowntiers',
+		section: "Non-Hackmons Other Tiers",
+		column: 3,
+		// name: 'showdowntiers',
 	},
 	{
 		name: "[Gen 9] LC",
@@ -717,19 +674,6 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'gen9',
 		searchShow: false,
 		ruleset: ['Min Source Gen = 9', 'Obtainable', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
-	},
-	{
-		name: "[Gen 9] Triples",
-		mod: 'gen9',
-		gameType: 'triples',
-		searchShow: false,
-		ruleset: ['Standard Doubles', 'Evasion Abilities Clause'],
-		banlist: [
-			'Annihilape', 'Arceus', 'Calyrex-Ice', 'Calyrex-Shadow', 'Darkrai', 'Dialga', 'Dialga-Origin', 'Eternatus', 'Flutter Mane', 'Giratina', 'Giratina-Origin',
-			'Groudon', 'Ho-Oh', 'Indeedee', 'Indeedee-F', 'Koraidon', 'Kyogre', 'Kyurem-Black', 'Kyurem-White', 'Lugia', 'Lunala', 'Magearna', 'Mewtwo', 'Miraidon',
-			'Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane', 'Palkia', 'Palkia-Origin', 'Rayquaza', 'Reshiram', 'Solgaleo', 'Terapagos', 'Urshifu', 'Urshifu-Rapid-Strike',
-			'Zacian', 'Zacian-Crowned', 'Zamazenta', 'Zamazenta-Crowned', 'Zekrom', 'Moody', 'Shadow Tag', 'Bright Powder', 'King\'s Rock', 'Razor Fang',
-		],
 	},
 	{
 		name: "[Gen 9] Doubles OU",
@@ -764,9 +708,12 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'gen9',
 		ruleset: ['Standard AG', 'NatDex Mod'],
 	},
+	//////////////////////////////////
+	////// Singles Custom Game ///////
+	//////////////////////////////////
 	{
-	section: "Custom Game",
-	column: 4,
+		section: "Custom Game",
+		column: 4,
 	},
 	{
 		name: "[Gen 9] Custom Game",
@@ -906,11 +853,13 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 				if (!pokemon.m.abils.includes(effect)) pokemon.m.abils.push(effect);
 			}
 		},
-	},	
-
+	},
+	//////////////////////////////////
+	////// Doubles Custom Game ///////
+	//////////////////////////////////
 	{
-	section: "Custom Game Doubles",
-	column: 4,
+		section: "Custom Game Doubles",
+		column: 4,
 	},
 	{
 		name: "[Gen 9] Doubles Custom Game",
@@ -975,9 +924,12 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Desync Clause Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100'],
 	},
+	//////////////////////////////////
+	////// Triples Custom Game ///////
+	//////////////////////////////////
 	{
-	section: "Triples Custom Game",
-	column: 4,
+		section: "Triples Custom Game",
+		column: 4,
 	},	
 	{
 		name: "[Gen 9] Triples Custom Game",
