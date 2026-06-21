@@ -19,7 +19,8 @@ export const Scripts: ModdedBattleScriptsData = {
 
 	pokemon: {
 
-		// Gimmick priority: Mega/Ultra Burst/Z > Tera (any assigned Tera type) > Dynamax (no Tera assigned).
+		// Priority: Mega/Ultra Burst/Z move -> Terastalization
+		// (any assigned Tera type) > Dynamax (no Tera assigned).
 		getDynamaxRequest(skipChecks?: boolean) {
 			if (!skipChecks) {
 				if (!this.side.canDynamaxNow()) return;
@@ -62,7 +63,6 @@ export const Scripts: ModdedBattleScriptsData = {
 		// Psywave damage calculation (Gen 1)
 		getDamage(this: BattleActions, source: Pokemon, target: Pokemon, move: string | number | ActiveMove, suppressMessages = false) {
 			if (typeof move !== 'string' && typeof move !== 'number' && move.id === 'psywave') {
-				// Deals damage between 100-150% of level
 				const minDamage = source.level;
 				const maxDamage = Math.floor(source.level * 1.5);
 				return this.battle.random(minDamage, maxDamage + 1);
@@ -71,19 +71,10 @@ export const Scripts: ModdedBattleScriptsData = {
 			return Object.getPrototypeOf(this).getDamage.call(this, source, target, move, suppressMessages);
 		},
 
-		// Seismic Toss/Night Shade/SonicBoom/Counter/Bide hit immunities
 		tryMoveHit(this: BattleActions, target: Pokemon, pokemon: Pokemon, move: ActiveMove) {
 			// Make these moves hit normally immune types
-			if (['seismictoss', 'nightshade'].includes(move.id)) {
-				// Hits Ghost types
-				move.type = '???';
-			}
-			if (move.id === 'sonicboom') {
-				// Hits Psychic types
-				move.type = '???';
-			}
-			if (['counter', 'bide'].includes(move.id)) {
-				// Hit normally immune types
+			if (['seismictoss', 'nightshade', 'sonicboom', 'counter', 'bide'
+			].includes(move.id)) {
 				move.type = '???';
 			}
 
