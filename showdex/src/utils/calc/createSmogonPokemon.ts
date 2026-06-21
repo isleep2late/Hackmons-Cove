@@ -35,6 +35,8 @@ const l = logger('@showdex/utils/calc/createSmogonPokemon()');
  *
  * @since 0.1.0
  */
+import { getPhnnArceusTypes, getPhnnBaseStats } from '@showdex/phnn';
+
 export const createSmogonPokemon = (
   format: string,
   gameType: GameType,
@@ -183,6 +185,7 @@ export const createSmogonPokemon = (
       // update (2022/11/06): now allowing base stat editing as a setting
       baseStats: {
         ...(pokemon.baseStats as Required<Showdown.StatsTable>),
+        ...(getPhnnBaseStats(format, pokemon.speciesForme) || {}),
 
         // only spread non-negative numerical values
         ...Object.entries(pokemon.dirtyBaseStats || {}).reduce((prev, [stat, value]) => {
@@ -202,7 +205,7 @@ export const createSmogonPokemon = (
       // can 'typechange' into ['Poison'], but passing in only ['Poison'] here causes expand()
       // to merge ['Water', 'Dark'] and ['Poison'] into ['Poison', 'Dark'] ... oh noo :o
       types: [
-        ...(pokemon.dirtyTypes?.length ? pokemon.dirtyTypes : pokemon.types),
+        ...(pokemon.dirtyTypes?.length ? pokemon.dirtyTypes : (getPhnnArceusTypes(format, pokemon.speciesForme, pokemon.dirtyItem ?? pokemon.item) || pokemon.types)),
         null,
         null, // update (2022/11/02): hmm... don't think @smogon/calc supports 3 types lol
       ].slice(0, 2) as SmogonPokemonOverrides['types'],

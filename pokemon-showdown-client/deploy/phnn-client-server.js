@@ -36,6 +36,7 @@ const LOGIN_ORIGIN = process.env.PHNN_LOGIN_ORIGIN || 'https://play.pokemonshowd
 const AVATARS_DIR = path.resolve(__dirname, process.env.PHNN_AVATARS_DIR || '../../pokemon-showdown/config/avatars');
 const GAME_HOST = process.env.PHNN_GAME_HOST || 'localhost';
 const GAME_PORT = Number(process.env.PHNN_GAME_PORT || 8000);
+const REPLAYS_DIR = process.env.PHNN_REPLAYS_DIR || path.join('/mnt/hdd2/showdown-replays', path.basename(path.resolve(__dirname, '../..')));
 
 const MIME = {
 	'.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
@@ -57,6 +58,10 @@ function proxyLogin(req, res, reqUrl) {
 	req.on('data', c => chunks.push(c));
 	req.on('end', () => {
 		const body = Buffer.concat(chunks);
+		try {
+			const params = new URLSearchParams(body.toString('utf8'));
+			if (params.get('act') === 'uploadreplay') { saveReplay(params, res); return; }
+		} catch (e) {}
 		const headers = {
 			'content-type': req.headers['content-type'] || 'application/x-www-form-urlencoded',
 			'user-agent': req.headers['user-agent'] || 'phnn-client',
@@ -162,6 +167,62 @@ function serveAvatar(res, pathname) {
 	});
 }
 
+function saveReplay(params, res) {
+	const id = (params.get('id') || '').toLowerCase().replace(/[^a-z0-9-]/g, '');
+	const log = params.get('log') || '';
+	if (!id || !log) {
+		res.writeHead(200, { 'content-type': 'text/plain' });
+		res.end('invalid id');
+		return;
+	}
+	try {
+		fs.mkdirSync(REPLAYS_DIR, { recursive: true });
+		fs.writeFileSync(path.join(REPLAYS_DIR, id + '.log'), log);
+	} catch (err) {
+		res.writeHead(200, { 'content-type': 'text/plain' });
+		res.end('error: ' + err.message);
+		return;
+	}
+	res.writeHead(200, { 'content-type': 'text/plain' });
+	res.end('success:' + id);
+}
+
+function serveReplay(req, res, reqUrl) {
+	let rel = decodeURIComponent(reqUrl.pathname).slice('/replays'.length).replace(/^\/+/, '');
+	let ext = '';
+	if (rel.endsWith('.log')) { ext = 'log'; rel = rel.slice(0, -4); }
+	else if (rel.endsWith('.json')) { ext = 'json'; rel = rel.slice(0, -5); }
+	const id = rel.toLowerCase().replace(/[^a-z0-9-]/g, '');
+	if (!id) {
+		res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' });
+		res.end('<!DOCTYPE html><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Replays - Hackmons!</title><body style="font-family:Verdana,sans-serif;max-width:640px;margin:40px auto;padding:0 16px"><h2>Hackmons Replays</h2><p>Open a replay using its share link, e.g. <code>/replays/&lt;id&gt;</code>. Add <code>.log</code> or <code>.json</code> to a replay URL to get its raw data.</p></body>');
+		return;
+	}
+	const file = path.join(REPLAYS_DIR, id + '.log');
+	if (!file.startsWith(REPLAYS_DIR)) { res.writeHead(403); res.end('forbidden'); return; }
+	fs.readFile(file, 'utf8', (err, log) => {
+		if (err) {
+			res.writeHead(404, { 'content-type': 'text/plain' });
+			res.end('Replay not found.');
+			return;
+		}
+		if (ext === 'log') {
+			res.writeHead(200, { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store' });
+			res.end(log);
+			return;
+		}
+		if (ext === 'json') {
+			res.writeHead(200, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' });
+			res.end(JSON.stringify({ id, log }));
+			return;
+		}
+		const safeLog = log.replace(/<\//g, '<\\/');
+		const html = '<!DOCTYPE html><html><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width" /><title>Replay - Hackmons!</title></head><body>\n<script type="text/plain" class="battle-log-data">\n' + safeLog + '\n</script>\n<script src="/js/replay-embed.js"></script>\n</body></html>';
+		res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' });
+		res.end(html);
+	});
+}
+
 const server = http.createServer((req, res) => {
 	const reqUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
 	if (isLoginPath(reqUrl.pathname)) {
@@ -170,6 +231,8 @@ const server = http.createServer((req, res) => {
 		proxyGame(req, res, reqUrl);
 	} else if (reqUrl.pathname.startsWith('/avatars/')) {
 		serveAvatar(res, reqUrl.pathname);
+	} else if (reqUrl.pathname === '/replays' || reqUrl.pathname.startsWith('/replays/')) {
+		serveReplay(req, res, reqUrl);
 	} else {
 		serveStatic(req, res, reqUrl.pathname);
 	}

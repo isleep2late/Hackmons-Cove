@@ -19,8 +19,7 @@ export const Scripts: ModdedBattleScriptsData = {
 
 	pokemon: {
 
-		// Priority: Mega/Ultra Burst/Z move -> Terastalization
-		// (any assigned Tera type) > Dynamax (no Tera assigned).
+		// Gimmick priority: Mega/Ultra Burst/Z > Tera (any assigned Tera type) > Dynamax (no Tera assigned).
 		getDynamaxRequest(skipChecks?: boolean) {
 			if (!skipChecks) {
 				if (!this.side.canDynamaxNow()) return;
@@ -87,10 +86,19 @@ export const Scripts: ModdedBattleScriptsData = {
 			return Object.getPrototypeOf(this).getDamage.call(this, source, target, move, suppressMessages);
 		},
 
+		// Seismic Toss/Night Shade/SonicBoom/Counter/Bide hit immunities
 		tryMoveHit(this: BattleActions, target: Pokemon, pokemon: Pokemon, move: ActiveMove) {
 			// Make these moves hit normally immune types
-			if (['seismictoss', 'nightshade', 'sonicboom', 'counter', 'bide'
-			].includes(move.id)) {
+			if (['seismictoss', 'nightshade'].includes(move.id)) {
+				// Hits Ghost types
+				move.type = '???';
+			}
+			if (move.id === 'sonicboom') {
+				// Hits Psychic types
+				move.type = '???';
+			}
+			if (['counter', 'bide'].includes(move.id)) {
+				// Hit normally immune types
 				move.type = '???';
 			}
 
