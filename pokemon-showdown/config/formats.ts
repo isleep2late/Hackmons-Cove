@@ -26,40 +26,70 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 	name: "[Gen 9] Pure Hackmons No Nerfs",
 	desc: "The ultimate Pokemon experience where every move is legal, every ability is legal, and every Pokemon can be played at their peak from their strongest generation.",
 	mod: 'phnn',
-	ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview'],
+	ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 255'],
 	unbanlist: ['Past', 'Future', 'Unobtainable'],
+	onSwitchIn(pokemon) {
+		if (pokemon.set.startStatus && !pokemon.m.phnnStartStatusApplied) {
+			pokemon.m.phnnStartStatusApplied = true;
+			pokemon.setStatus(pokemon.set.startStatus, pokemon, null, true);
+		}
+	},
 },
 {
 	name: "[Gen 9] PHNN Doubles",
 	desc: "Pure Hackmons No Nerfs in Doubles format with twice the chaos!",
 	mod: 'phnn',
 	gameType: 'doubles',
-	ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview'],
+	ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 255'],
 	banlist: [],
 	unbanlist: [
 		'Past', 'Future', 'Unobtainable'
 	],
+	onSwitchIn(pokemon) {
+		if (pokemon.set.startStatus && !pokemon.m.phnnStartStatusApplied) {
+			pokemon.m.phnnStartStatusApplied = true;
+			pokemon.setStatus(pokemon.set.startStatus, pokemon, null, true);
+		}
+	},
 },
 {
 	name: "[Gen 9] PHNN Triples",
 	desc: "Pure Hackmons No Nerfs in Triples format - maximum chaos!",
 	mod: 'phnn',
 	gameType: 'triples',
-	ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview'],
+	ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 255'],
+	onSwitchIn(pokemon) {
+		if (pokemon.set.startStatus && !pokemon.m.phnnStartStatusApplied) {
+			pokemon.m.phnnStartStatusApplied = true;
+			pokemon.setStatus(pokemon.set.startStatus, pokemon, null, true);
+		}
+	},
 },
 {
 	name: "[Gen 9] PHNN Multi",
 	mod: 'phnn',
 	gameType: 'multi',
-	ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview'],
+	ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 255'],
 	unbanlist: ['Past', 'Future', 'Unobtainable'],
+	onSwitchIn(pokemon) {
+		if (pokemon.set.startStatus && !pokemon.m.phnnStartStatusApplied) {
+			pokemon.m.phnnStartStatusApplied = true;
+			pokemon.setStatus(pokemon.set.startStatus, pokemon, null, true);
+		}
+	},
 },
 {
 	name: "[Gen 9] PHNN Free-for-All",
 	mod: 'phnn',
 	gameType: 'freeforall',
-	ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview'],
+	ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 255'],
 	unbanlist: ['Past', 'Future', 'Unobtainable'],
+	onSwitchIn(pokemon) {
+		if (pokemon.set.startStatus && !pokemon.m.phnnStartStatusApplied) {
+			pokemon.m.phnnStartStatusApplied = true;
+			pokemon.setStatus(pokemon.set.startStatus, pokemon, null, true);
+		}
+	},
 },
 {
 	section: "Discord Formats",

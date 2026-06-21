@@ -1,0 +1,56 @@
+{
+  "--meta": {
+    "name": "honkdex",
+    "version": "1.0.2",
+    "locale": "en",
+    "created": "2024-01-08T15:45:10.164Z",
+    "updated": "2025-09-27T14:00:15.217Z"
+  },
+
+  "contextMenu": {
+    "save": "$t(common:labels.save)",
+    "saving": "$t(common:labels.saving)...",
+    "saved": "$t(common:labels.saved)",
+    "dupeHonkdex": "$t(common:labels.duplicate)",
+    "openHellodex": "$t(common:products.hellodex_one)",
+    "close": "$t(common:labels.close)"
+  },
+
+  "battle": {
+    "gen": {
+      "aria": "Generation Selector",
+      "optionAria": "Switch to Generation {{gen}}",
+      "locked": "Switching the gen with Pokémon in the calc will open a <strong>new</strong>, <strong>blank</strong> $t(common:products.honkdex_one).",
+      "friendlyLabel": "Gen {{gen}}"
+    },
+    "name": {
+      "hint": "name this $t(common:products.honk_one) to save this $t(common:products.honk_one)",
+      "dupe": "Copy of {{name}}",
+      "friends": "friends"
+    },
+    "format": {
+      "aria": "Battle Format Selector",
+      "hint": "???",
+      "empty": "No Formats"
+    },
+    "save": {
+      "unsaved": "$t(common:labels.save)",
+      "saving": "$t(common:labels.saving)...",
+      "savedRecently": "Now $t(common:labels.saved)",
+      "savedAgo": "$t(common:labels.saved) {{ago}} ago"
+    },
+    "dupe": {
+      "label": "$t(common:labels.duplicate)",
+      "tooltip": "Duplicate Honk"
+    },
+    "close": {
+      "label": "$t(common:labels.close)",
+      "tooltip": "Instantly Close $t(common:products.honkdex_one)<br />(without saving!)"
+    }
+  },
+
+  "sideControls": {
+    "activeLabel": "$t(common:labels.active)",
+    "dupeLabel": "Dupe"
+  }
+}

@@ -1,0 +1,210 @@
+@use 'sass:map';
+@use 'config/colors';
+@use 'config/fonts';
+@use 'functions/color';
+@use 'mixins/flex';
+@use 'mixins/font';
+@use 'mixins/spacing';
+@use 'mixins/transition';
+
+$container: (
+  padding-x: 20px,
+  padding-y: 7px,
+  border-radius: 30px,
+  glassy-blur: 4px,
+
+  background-color: (
+    light: color.alpha(colors.$white, 0.88),
+    dark: color.alpha(colors.$black, 0.76),
+
+    mina: (
+      light: color.alpha(#FAEAEF, 0.94),
+      dark: color.alpha(#270917, 0.76),
+    ),
+
+    glassy: (
+      light: color.alpha(colors.$white, 0.32),
+      dark: color.alpha(colors.$black, 0.24),
+
+      mina: (
+        light: color.alpha(#FAEAEF, 0.32),
+        dark: color.alpha(#270917, 0.24),
+      ),
+    ),
+  ),
+
+  box-shadow: (
+    light: (
+      0 0 1px color.alpha(colors.$black, 0.16),
+      0 0 4px color.alpha(colors.$gray-dark, 0.32),
+    ),
+
+    dark: (
+      0 0 1px color.alpha(colors.$white, 0.32),
+      0 0 4px color.alpha(colors.$black, 0.48),
+    ),
+
+    mina: (
+      light: (
+        0 0 1px color.alpha(#770629, 0.32),
+        0 0 4px color.alpha(#D76D8E, 0.16),
+      ),
+    ),
+  ),
+);
+
+$record-separator: (
+  width: 1px,
+  height: 10px,
+  spacing: 16px,
+
+  background-color: (
+    light: color.alpha(colors.$black, 0.28),
+    dark: color.alpha(colors.$white, 0.28),
+  ),
+);
+
+$record-value: (
+  font-size: 17px,
+
+  color: (
+    default: (
+      light: color.alpha(colors.$black, 0.94),
+      dark: color.alpha(colors.$white, 0.94),
+    ),
+
+    zero: (
+      light: color.alpha(colors.$black, 0.48),
+      dark: color.alpha(colors.$white, 0.48),
+    ),
+  ),
+);
+
+$record-label: (
+  spacing-win: 10px,
+  spacing-loss: 12px,
+  font-weight: 500,
+  font-size: 12px,
+
+  color: (
+    light: color.alpha(colors.$black, 0.5),
+    dark: color.alpha(colors.$white, 0.5),
+  ),
+);
+
+.container {
+  position: relative;
+  @include spacing.padding($x: map.get($container, padding-x), $y: map.get($container, padding-y));
+  border-radius: map.get($container, border-radius);
+  @include transition.apply(background-color, box-shadow);
+
+  &.light {
+    background-color: map.get($container, background-color, light);
+    box-shadow: map.get($container, box-shadow, light);
+
+    &.mina {
+      background-color: map.get($container, background-color, mina, light);
+      box-shadow: map.get($container, box-shadow, mina, light);
+    }
+  }
+
+  &.dark {
+    background-color: map.get($container, background-color, dark);
+    box-shadow: map.get($container, box-shadow, dark);
+
+    &.mina {
+      background-color: map.get($container, background-color, mina, dark);
+    }
+  }
+
+  &.glassy {
+    backdrop-filter: blur(map.get($container, glassy-blur));
+
+    &.light {
+      background-color: map.get($container, background-color, glassy, light);
+
+      &.mina {
+        background-color: map.get($container, background-color, glassy, mina, light);
+      }
+    }
+
+    &.dark {
+      background-color: map.get($container, background-color, glassy, dark);
+
+      &.mina {
+        background-color: map.get($container, background-color, glassy, mina, dark);
+      }
+    }
+  }
+}
+
+.records {
+  @include flex.row($align: center);
+  user-select: none;
+}
+
+.recordValue {
+  @include font.apply(fonts.$mono);
+  font-size: map.get($record-value, font-size);
+  @include transition.apply(color);
+
+  .light & {
+    color: map.get($record-value, color, default, light);
+  }
+
+  .dark & {
+    color: map.get($record-value, color, default, dark);
+  }
+
+  &.zero {
+    .light & {
+      color: map.get($record-value, color, zero, light);
+    }
+
+    .dark & {
+      color: map.get($record-value, color, zero, dark);
+    }
+  }
+}
+
+.recordLabel {
+  font-weight: map.get($record-label, font-weight);
+  font-size: map.get($record-label, font-size);
+  text-transform: uppercase;
+  @include transition.apply(color);
+  // user-select: none;
+  // pointer-events: none;
+
+  &.win {
+    @include spacing.margin($left: map.get($record-label, spacing-win));
+  }
+
+  &.loss {
+    @include spacing.margin($right: map.get($record-label, spacing-loss));
+  }
+
+  .light & {
+    color: map.get($record-label, color, light);
+  }
+
+  .dark & {
+    color: map.get($record-label, color, dark);
+  }
+}
+
+.recordSeparator {
+  width: map.get($record-separator, width);
+  height: map.get($record-separator, height);
+  @include spacing.margin($x: map.get($record-separator, spacing));
+  @include transition.apply(background-color);
+  // user-select: none;
+  pointer-events: none;
+
+  .light & {
+    background-color: map.get($record-separator, background-color, light);
+  }
+
+  .dark & {
+    background-color: map.get($record-separator, background-color, dark);
+  }
+}

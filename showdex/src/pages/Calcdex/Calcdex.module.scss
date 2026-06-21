@@ -1,0 +1,193 @@
+///
+/// @group Calcdex
+/// @access private
+/// @author Keith Choison <keith@tize.io>
+/// @since 0.1.0
+///
+
+@use 'config/colors';
+@use 'functions/color';
+@use 'mixins/aria';
+@use 'mixins/device';
+@use 'mixins/flex';
+@use 'mixins/font';
+@use 'mixins/position';
+@use 'mixins/spacing';
+@use 'mixins/transition';
+
+.overlayContainer {
+  // positioning based off of those of .battle-log
+  // (except for bottom: 40px cause it'll overlay on top of the .battle-log-add)
+  // (also + 1px for the border-width)
+  @include position.abs($y: 0, $r: 0, $l: 640px + 1px);
+  z-index: 15;
+
+  @include device.for-tablet-lg {
+    right: 0;
+    left: 0;
+  }
+}
+
+.container {
+  // initially added this as a potential fix for the closing dropdown bug on mouse-up,
+  // but turns out it was an issue with the .singleValue, which I just added pointer-events: none;,
+  // which seemed to do the trick lol. leaving this here, but it does nothing I don't think.
+  &.overlay {
+    @include position.rel;
+    @include position.unset-all;
+    width: 100%;
+    height: 100%;
+    z-index: unset;
+  }
+
+  &[data-showdex-scheme='light'] {
+    &.overlay::before {
+      background-color: colors.$showdown-background-light;
+    }
+
+    &[data-showdex-theme='mina'].overlay::before {
+      background-color: #FFF7FA;
+    }
+  }
+
+  &[data-showdex-scheme='dark'] {
+    &.overlay::before {
+      background-color: colors.$gray-darkest;
+    }
+
+    &[data-showdex-theme='mina'].overlay::before {
+      background-color: #2D0D1C;
+    }
+  }
+
+  &[data-showdex-terrain='glassy'] {
+    &[data-showdex-scheme='light'] {
+      &.overlay::before {
+        background-color: color.alpha(colors.$showdown-background-light, 0.56);
+      }
+
+      &[data-showdex-theme='mina'].overlay::before {
+        background-color: color.alpha(#F5DAE3, 0.64);
+      }
+    }
+
+    &[data-showdex-scheme='dark'] {
+      &.overlay::before {
+        background-color: color.alpha(colors.$gray-darkest, 0.8);
+      }
+
+      &[data-showdex-theme='mina'].overlay::before {
+        background-color: color.alpha(#2D0D1C, 0.8);
+      }
+    }
+  }
+}
+
+.content {
+  @include spacing.p($a: 16px, $t: 12px);
+
+  .overlay:not(.verySmol) & {
+    @include spacing.pt(32px);
+  }
+}
+
+.playerCalc {
+  .overlay:not(.mobile) & {
+    @include spacing.mt(16px);
+  }
+}
+
+.fieldCalc {
+  max-width: 448px;
+  @include spacing.mx-auto;
+  @include spacing.mt(16px);
+
+  .container:not(.skinnyBoi) & {
+    @include spacing.px(24px);
+  }
+}
+
+.opponentCalc {
+  @include spacing.mt(12px);
+}
+
+.overlayCloseButton {
+  @include position.abs($t: 8px, $r: 8px);
+  @include flex.row-center;
+  width: 24px;
+  height: 24px;
+  font-size: 13px;
+  border-radius: 100px;
+  @include transition.apply(color, background-color);
+
+  i {
+    line-height: 12px;
+  }
+
+  [data-showdex-scheme='light'] & {
+    color: color.alpha(colors.$gray-darkest, 0.72);
+  }
+
+  [data-showdex-scheme='dark'] & {
+    color: color.alpha(colors.$white, 0.72);
+  }
+
+  @include aria.outline(
+    $position: null,
+    $radius: 100px,
+  );
+
+  &:hover {
+    [data-showdex-scheme='light'] & {
+      color: colors.$gray-darkest;
+      background-color: color.alpha(colors.$black, 0.08);
+
+      &::after {
+        @include aria.outline-hover;
+      }
+    }
+
+    [data-showdex-scheme='dark'] & {
+      color: colors.$white;
+      background-color: color.alpha(colors.$white, 0.08);
+
+      &::after {
+        @include aria.outline-hover($color: colors.$white);
+      }
+    }
+  }
+
+  &:focus::after {
+    @include aria.outline-show;
+  }
+}
+
+div.mobileCloseButton {
+  &.top {
+    justify-content: flex-start;
+    @include spacing.m($t: 2px, $b: 6px);
+  }
+
+  &.bottom {
+    @include spacing.m($t: 16px, $b: 8px);
+  }
+}
+
+// update (2024/09/28): why did I remove this? LMAO oopsies
+// (was the cause of the massive player title icons in the FFA player dropdowns HAHA)
+.playerOption {
+  @include flex.row($align: center);
+
+  .label {
+    @include font.primary(500);
+  }
+
+  .icon {
+    width: 12px;
+    min-width: 12px;
+    height: 12px;
+    min-height: 12px;
+    @include spacing.ml(1px);
+    color: inherit;
+  }
+}
