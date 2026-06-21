@@ -164,9 +164,14 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
     nihillight: {
 		inherit: true,
 		basePower: 200,
+		ignoreEvasion: false,
         ignoreImmunity: { 'Dragon': true },
-		shortDesc: "Ignores the target's stat and Sp. Def boosts; hits Dragon types.",
-		desc: "Damage is calculated ignoring the target's stat stage changes and Special Defense boosts, and this move ignores Dragon-type immunity (it can hit Dragon types and Fairy types).",
+		shortDesc: "Ignores target's stat/Sp. Def boosts; ignores Fairy's immunity to Dragon (hits Fairy types).",
+		desc: "Damage ignores the target's stat stage changes and Special Defense boosts. Ignores Fairy's immunity to Dragon, so it can hit Fairy types; a Fairy/Dragon target is treated as Dragon-only and takes super-effective damage.",
+	},
+	highjumpkick: {
+		inherit: true,
+		pp: 20,
 	},
 	surf: {
 		inherit: true,
