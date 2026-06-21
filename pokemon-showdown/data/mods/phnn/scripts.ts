@@ -53,10 +53,11 @@ export const Scripts: ModdedBattleScriptsData = {
 		modifyDamage(
 			baseDamage: number, pokemon: Pokemon, target: Pokemon, move: ActiveMove, suppressMessages = false
 		) {
+			let damage = Object.getPrototypeOf(this).modifyDamage.call(this, baseDamage, pokemon, target, move, suppressMessages);
 			if (move.multihitType === 'parentalbond' && move.hit > 1) {
-				this.battle.debug(`Parental Bond modifier: 0.5`);
-				baseDamage = this.battle.modify(baseDamage, 0.5);
+				damage = this.battle.modify(damage, 2);
 			}
+			return damage;
 		},
 
 		// Psywave damage calculation (Gen 1)
