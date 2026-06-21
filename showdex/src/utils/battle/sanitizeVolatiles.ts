@@ -1,6 +1,8 @@
 import { type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { formatId } from '@showdex/utils/core';
 
+/* eslint-disable @typescript-eslint/indent */
+
 /**
  * Pokemon `volatiles` require special love & attention before they get Redux'd.
  *
@@ -41,3 +43,5 @@ export const sanitizeVolatiles = <
 
   return volatiles;
 }, {} as CalcdexPokemon['volatiles']);
+
+/* eslint-enable @typescript-eslint/indent */

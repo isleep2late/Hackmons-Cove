@@ -10,10 +10,9 @@ import TerserPlugin from 'terser-webpack-plugin';
 import ZipPlugin from 'zip-webpack-plugin';
 import CircularDependencyPlugin from 'circular-dependency-plugin';
 import VisualizerPlugin from 'webpack-visualizer-plugin2';
-import manifest from './src/manifest.json' with { type: 'json' };
-import pkg from './package.json' with { type: 'json' };
+import manifest from './src/manifest' assert { type: 'json' };
 
-// todo: turn this into ts (I miss you)
+// todo: import your dank node-babel-loader & turn this into ts (I miss you)
 
 const __DEV__ = process.env.NODE_ENV !== 'production';
 const mode = __DEV__ ? 'development' : 'production';
@@ -49,16 +48,17 @@ const finalEnv = {
   BUILD_TARGET: sanitizeEnv(process.env.BUILD_TARGET, buildTargets[0] || 'chrome'),
   DEV_HOSTNAME: process.env.DEV_HOSTNAME || envFile.DEV_HOSTNAME,
   DEV_PORT: process.env.DEV_PORT || envFile.DEV_PORT,
+  DEV_BABEL_CACHE_ENABLED: process.env.DEV_BABEL_CACHE_ENABLED || envFile.DEV_BABEL_CACHE_ENABLED,
   DEV_WEBPACK_CACHE_ENABLED: process.env.DEV_WEBPACK_CACHE_ENABLED || envFile.DEV_WEBPACK_CACHE_ENABLED,
   DEV_SPRING_CLEANING: process.env.DEV_SPRING_CLEANING || envFile.DEV_SPRING_CLEANING,
   PROD_ANALYZE_BUNDLES: process.env.PROD_ANALYZE_BUNDLES || envFile.PROD_ANALYZE_BUNDLES,
   NODE_ENV: mode,
-  PACKAGE_AUTHOR_EMAIL: pkg.author?.split('<')[1]?.replace('>', '').trim(),
-  PACKAGE_AUTHOR_NAME: pkg.author?.split('<')[0]?.trim(),
-  PACKAGE_DESCRIPTION: pkg.description,
-  PACKAGE_NAME: pkg.name || 'showdex',
-  PACKAGE_URL: pkg.homepage,
-  PACKAGE_VERSION: pkg.version,
+  PACKAGE_AUTHOR_EMAIL: process.env.npm_package_author_email,
+  PACKAGE_AUTHOR_NAME: process.env.npm_package_author_name,
+  PACKAGE_DESCRIPTION: process.env.npm_package_description,
+  PACKAGE_NAME: process.env.npm_package_name || 'showdex',
+  PACKAGE_URL: process.env.npm_package_homepage,
+  PACKAGE_VERSION: process.env.npm_package_version,
   PACKAGE_VERSION_SUFFIX: sanitizeEnv(process.env.PACKAGE_VERSION_SUFFIX),
 };
 
@@ -146,8 +146,6 @@ const moduleRules = [
           modules: {
             auto: true, // only files ending in .module.s?css will be treated as CSS modules
             localIdentName: '[name]-[local]--[hash:base64:5]', // e.g., 'Caldex-module-content--mvN2w'
-            namedExport: false, // keep default-export object (v7 changed default to true)
-            exportLocalsConvention: 'as-is', // v7 + namedExport:false defaults to camel-case-only, breaking styles['top-right'] etc.
           },
         },
       },
@@ -167,7 +165,7 @@ const moduleRules = [
           sourceMap: true,
           sassOptions: {
             // allows for `@use 'mixins/flex';` instead of `@use '../../../styles/mixins/flex';`
-            loadPaths: [path.join(__dirname, 'src', 'styles')],
+            includePaths: [path.join(__dirname, 'src', 'styles')],
           },
         },
       },
@@ -188,33 +186,12 @@ const moduleRules = [
     test: /\.(?:jsx?|tsx?)$/i,
     use: [
       {
-        loader: 'swc-loader',
+        loader: 'babel-loader',
         options: {
-          sync: false,
-          parseMap: true,
-          jsc: {
-            parser: {
-              syntax: 'typescript',
-              tsx: true,
-              decorators: false,
-              dynamicImport: true,
-            },
-            transform: {
-              react: {
-                runtime: 'automatic',
-                development: __DEV__,
-                refresh: false,
-              },
-            },
-            loose: false,
-          },
-          module: {
-            type: 'es6',
-          },
-          env: {
-            targets: 'defaults, > 1%, last 2 versions, last 3 iOS versions',
-          },
-          sourceMaps: true,
+          cacheDirectory: __DEV__
+            && finalEnv.DEV_BABEL_CACHE_ENABLED === 'true'
+            && path.join(__dirname, 'node_modules', '.cache', 'babel'), // default: false
+          // cacheCompression: false, // default: true
         },
       },
       'source-map-loader',
@@ -595,17 +572,6 @@ const envConfig = {
   }),
 };
 
-// silence Sass if() deprecation until CSS if() has broad browser support and we can safely migrate
-const ignoreWarnings = [
-  (warning) => {
-    const msg = String(warning.message || '');
-    const inner = String(warning.error?.message || '');
-    // filter the individual if() deprecation warnings AND their "N omitted" summary lines
-    return msg.includes('if() syntax') || inner.includes('if() syntax')
-      || msg.includes('repetitive deprecation warnings omitted');
-  },
-];
-
 export const config = {
   mode,
   entry,
@@ -613,7 +579,6 @@ export const config = {
   module: { rules: moduleRules },
   resolve,
   plugins,
-  ignoreWarnings,
   ...envConfig,
 };
 

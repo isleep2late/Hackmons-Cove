@@ -69,7 +69,7 @@ export const SettingsPane = ({
   className,
   style,
   onRequestClose,
-}: SettingsPaneProps): React.JSX.Element => {
+}: SettingsPaneProps): JSX.Element => {
   const { t, i18n } = useTranslation('settings');
   const colorScheme = useColorScheme();
   const colorTheme = useColorTheme();
@@ -334,7 +334,7 @@ export const SettingsPane = ({
           position="top-right"
         />
 
-        <Form<ShowdexSettings>
+        <Form<ShowdexSettings, DeepPartial<ShowdexSettings>>
           initialValues={settings}
           onSubmit={() => {}}
         >

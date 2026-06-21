@@ -76,9 +76,9 @@ export const FooterButton = React.forwardRef<ButtonElement, FooterButtonProps>((
           />
         ) : null}
 
-        <span className={cx(styles.label, labelClassName)}>
+        <label className={cx(styles.label, labelClassName)}>
           {label}
-        </span>
+        </label>
       </BaseButton>
 
       <Tooltip

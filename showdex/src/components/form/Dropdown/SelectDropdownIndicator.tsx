@@ -4,6 +4,8 @@ import type { DropdownIndicatorProps, GroupBase } from 'react-select';
 import type { DropdownOption } from './Dropdown';
 import styles from './Dropdown.module.scss';
 
+/* eslint-disable @typescript-eslint/indent */
+
 export const SelectDropdownIndicator = <
   Option extends DropdownOption,
   Multi extends boolean,
@@ -13,7 +15,7 @@ export const SelectDropdownIndicator = <
   isFocused,
   innerProps,
   children,
-}: DropdownIndicatorProps<Option, Multi, Group>): React.JSX.Element => (
+}: DropdownIndicatorProps<Option, Multi, Group>): JSX.Element => (
   <div
     className={cx(
       styles.indicator,
@@ -26,3 +28,5 @@ export const SelectDropdownIndicator = <
     {children || <i className="fa fa-chevron-down" />}
   </div>
 );
+
+/* eslint-enable @typescript-eslint/indent */

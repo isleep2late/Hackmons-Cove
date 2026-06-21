@@ -31,6 +31,8 @@ const getDexMoveTrack = (
   ] as [move: Showdown.Move, ppUsed: number])
   .filter(([move]) => move?.exists && !!move.name);
 
+/* eslint-disable @typescript-eslint/indent */
+
 /**
  * Sanitizes the `moveTrack[]` from the passed-in `pokemon` and constructs the `revealedMoves[]` & `transformedMoves[]`, if any.
  *
@@ -90,3 +92,5 @@ export const sanitizeMoveTrack = <
 
   return output;
 };
+
+/* eslint-enable @typescript-eslint/indent */

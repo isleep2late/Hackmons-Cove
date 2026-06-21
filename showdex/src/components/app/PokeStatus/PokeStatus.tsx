@@ -34,7 +34,7 @@ export const PokeStatus = ({
   reverseColorScheme,
   containerSize,
   highlight = true,
-}: PokeStatusProps): React.JSX.Element => {
+}: PokeStatusProps): JSX.Element => {
   const { t } = useTranslation('pokedex');
   const currentColorScheme = useColorScheme();
   const colorScheme = determineColorScheme(currentColorScheme, reverseColorScheme);

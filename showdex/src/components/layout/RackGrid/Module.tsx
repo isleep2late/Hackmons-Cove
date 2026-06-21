@@ -12,8 +12,6 @@ export interface ModuleProps extends Omit<React.ComponentPropsWithRef<'div'>, 's
   children: React.ReactNode;
 }
 
-const AnimatedDiv = animated.div;
-
 /* eslint-disable jsx-a11y/no-noninteractive-tabindex */
 
 export const Module = React.forwardRef<HTMLDivElement, ModuleProps>(({
@@ -24,8 +22,8 @@ export const Module = React.forwardRef<HTMLDivElement, ModuleProps>(({
   sizeManually,
   children,
   ...props
-}: ModuleProps, forwardedRef): React.JSX.Element => (
-  <AnimatedDiv
+}: ModuleProps, forwardedRef): JSX.Element => (
+  <animated.div
     ref={forwardedRef}
     {...props}
     className={cx(styles.container, className)}
@@ -35,5 +33,5 @@ export const Module = React.forwardRef<HTMLDivElement, ModuleProps>(({
     }}
   >
     {children}
-  </AnimatedDiv>
+  </animated.div>
 ));

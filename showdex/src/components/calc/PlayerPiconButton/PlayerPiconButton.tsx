@@ -33,7 +33,7 @@ export const PlayerPiconButton = React.forwardRef<ButtonElement, PlayerPiconButt
   nativeProps,
   onPress,
   onContextMenu,
-}, forwardedRef): React.JSX.Element => {
+}, forwardedRef): JSX.Element => {
   const { t } = useTranslation('calcdex');
   const colorScheme = useColorScheme();
 

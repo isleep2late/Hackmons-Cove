@@ -17,7 +17,7 @@ export interface SelectCustomProps {
   inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode'];
   active?: boolean;
   scrollState?: [scrolling: boolean, setScrolling: React.Dispatch<React.SetStateAction<boolean>>];
-  optionTooltip?: (props: SelectOptionTooltipProps) => React.JSX.Element;
+  optionTooltip?: (props: SelectOptionTooltipProps) => JSX.Element;
   optionTooltipProps?: SelectOptionTooltipProps;
   optionTooltipDelay?: number;
 }
@@ -26,7 +26,6 @@ export interface SelectOptionTooltipProps<
   TValue extends DropdownSingleValue = DropdownSingleValue,
 > extends DropdownOption<TValue> {
   hidden?: boolean;
-  [key: string]: unknown;
 }
 
 export type SelectProps<
@@ -61,6 +60,8 @@ export type SelectContainerProps<
   selectProps: SelectProps<Option, Multi, Group>;
 }>;
 
+/* eslint-disable @typescript-eslint/indent */
+
 export const SelectContainer = <
   Option extends DropdownOption,
   Multi extends boolean,
@@ -76,7 +77,7 @@ export const SelectContainer = <
     containerStyle,
   } = {},
   children,
-}: SelectContainerProps<Option, Multi, Group>): React.JSX.Element => (
+}: SelectContainerProps<Option, Multi, Group>): JSX.Element => (
   <div
     className={cx(
       containerClassName,
@@ -91,3 +92,5 @@ export const SelectContainer = <
     {children}
   </div>
 );
+
+/* eslint-enable @typescript-eslint/indent */

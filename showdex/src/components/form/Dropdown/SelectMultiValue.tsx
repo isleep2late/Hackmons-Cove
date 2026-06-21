@@ -4,6 +4,8 @@ import type { GroupBase, MultiValueProps } from 'react-select';
 import type { DropdownOption } from './Dropdown';
 import styles from './Dropdown.module.scss';
 
+/* eslint-disable @typescript-eslint/indent */
+
 export const SelectMultiValue = <
   Option extends DropdownOption,
   Multi extends boolean,
@@ -23,7 +25,7 @@ export const SelectMultiValue = <
   selectProps,
   innerProps,
   children,
-}: MultiValueProps<Option, Multi, Group>): React.JSX.Element => (
+}: MultiValueProps<Option, Multi, Group>): JSX.Element => (
   <Container
     innerProps={{
       className: cx(
@@ -64,3 +66,5 @@ export const SelectMultiValue = <
     />
   </Container>
 );
+
+/* eslint-enable @typescript-eslint/indent */

@@ -25,7 +25,7 @@ export const BattleRecord = ({
   className,
   style,
   onContextMenu,
-}: BattleRecordProps): React.JSX.Element => {
+}: BattleRecordProps): JSX.Element => {
   const { t } = useTranslation('hellodex');
   const colorScheme = useColorScheme();
   const colorTheme = useColorTheme();

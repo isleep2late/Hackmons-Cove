@@ -46,7 +46,7 @@ export const PatronagePane = ({
   style,
   onUserPopup,
   onRequestClose,
-}: PatronagePaneProps): React.JSX.Element => {
+}: PatronagePaneProps): JSX.Element => {
   const { t } = useTranslation('hellodex');
   const state = useHellodexState();
   const colorScheme = useColorScheme();

@@ -91,7 +91,7 @@ export const SortableModule = ({
   // gridSpecs,
   children: childrenFromProps,
   ...props
-}: SortableModuleProps): React.JSX.Element => {
+}: SortableModuleProps): JSX.Element => {
   const moduleRef = React.useRef<HTMLDivElement>(null);
 
   // calculate the pixel height of the module's content to translate into size.h

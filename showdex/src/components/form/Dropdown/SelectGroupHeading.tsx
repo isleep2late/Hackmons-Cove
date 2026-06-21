@@ -5,6 +5,8 @@ import type { DropdownOption } from './Dropdown';
 import { clearCommonProps } from './clearCommonProps';
 import styles from './Dropdown.module.scss';
 
+/* eslint-disable @typescript-eslint/indent */
+
 export const SelectGroupHeading = <
   Option extends DropdownOption,
   Multi extends boolean,
@@ -12,7 +14,7 @@ export const SelectGroupHeading = <
 >({
   className,
   ...props
-}: GroupHeadingProps<Option, Multi, Group>): React.JSX.Element => {
+}: GroupHeadingProps<Option, Multi, Group>): JSX.Element => {
   const {
     data, // unused
     ...innerProps

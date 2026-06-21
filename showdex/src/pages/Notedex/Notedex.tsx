@@ -41,7 +41,7 @@ export const Notedex = ({
   updateDebounce = 1000,
   onRequestNotedex,
   onLeaveRoom,
-}: NotedexProps): React.JSX.Element => {
+}: NotedexProps): JSX.Element => {
   const { t } = useTranslation('notedex');
   const state = useNotedexInstance(instanceId);
   const dispatch = useDispatch();
@@ -170,15 +170,12 @@ export const Notedex = ({
         <InlineField
           className={styles.noteName}
           hint={state?.defaultName || t('toolbar.name.hint', 'name this note to maybe save this note')}
-          meta={{}}
           input={{
             name: `${l.scope}:${instanceId}:Name`,
             value: state?.name,
             onChange: (value: string) => void debouncyUpdateNote({
               name: value,
             }, `${l.scope}:${instanceId}:Name~InlineField:input.onChange()`),
-            onBlur: () => void 0,
-            onFocus: () => void 0,
           }}
         />
 
@@ -234,15 +231,12 @@ export const Notedex = ({
         inputClassName="autofocus" // by the PSRoomPanel.focus() method
         hint={t('editor.hint', 'Type something...')}
         initialEditorState={state?.editorState}
-        meta={{}}
         input={{
           name: `${l.scope}:${instanceId}:EditorState`,
           value: state?.editorState,
           onChange: (value: string) => void debouncyUpdateNote({
             editorState: value,
           }, `${l.scope}:${instanceId}:EditorState~Composer:input.onChange()`),
-          onBlur: () => void 0,
-          onFocus: () => void 0,
         }}
       />
     </PageContainer>

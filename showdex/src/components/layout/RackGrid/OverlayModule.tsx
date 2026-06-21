@@ -17,7 +17,7 @@ export const OverlayModule = React.forwardRef<HTMLDivElement, OverlayModuleProps
   gridSpecs,
   children,
   ...props
-}: OverlayModuleProps, forwardedRef): React.JSX.Element => {
+}: OverlayModuleProps, forwardedRef): JSX.Element => {
   const { toPixels } = createModuleLayoutUtils(gridSpecs);
 
   const width = toPixels(w) || 0;

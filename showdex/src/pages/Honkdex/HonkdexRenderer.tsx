@@ -22,7 +22,7 @@ export const HonkdexRenderer = ({
   store,
   instanceId,
   ...props
-}: HonkdexRendererProps): React.JSX.Element => (
+}: HonkdexRendererProps): JSX.Element => (
   <ReduxProvider store={store}>
     <ErrorBoundary
       component={CalcdexErrorBoundary}

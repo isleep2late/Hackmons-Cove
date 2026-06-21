@@ -18,6 +18,8 @@ import { detectToggledAbility } from './detectToggledAbility';
 import { sanitizeMoveTrack } from './sanitizeMoveTrack';
 import { sanitizeVolatiles } from './sanitizeVolatiles';
 
+/* eslint-disable @typescript-eslint/indent */
+
 /**
  * Essentially converts a `Showdown.Pokemon` into our custom `CalcdexPokemon`.
  *
@@ -408,3 +410,5 @@ export const sanitizePokemon = <
 
   return sanitizedPokemon;
 };
+
+/* eslint-enable @typescript-eslint/indent */

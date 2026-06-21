@@ -13,6 +13,8 @@ export type SelectValueContainerProps<
   selectProps: SelectProps<Option, Multi, Group>;
 }>;
 
+/* eslint-disable @typescript-eslint/indent */
+
 export const SelectValueContainer = <
   Option extends DropdownOption,
   Multi extends boolean,
@@ -27,7 +29,7 @@ export const SelectValueContainer = <
     menuIsOpen,
   } = {},
   children,
-}: SelectValueContainerProps<Option, Multi, Group>): React.JSX.Element => (
+}: SelectValueContainerProps<Option, Multi, Group>): JSX.Element => (
   <div
     className={cx(
       styles.valueContainer,
@@ -49,3 +51,5 @@ export const SelectValueContainer = <
     </div>
   </div>
 );
+
+/* eslint-enable @typescript-eslint/indent */

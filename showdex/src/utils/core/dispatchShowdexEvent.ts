@@ -1,5 +1,7 @@
 import { type ShowdexEventDetail, createShowdexEvent, getShowdexEventName } from './createShowdexEvent';
 
+/* eslint-disable @typescript-eslint/indent */
+
 /**
  * Dispatches a Showdex `CustomEvent` and listens for the `'showdexresponse'`.
  *
@@ -33,3 +35,5 @@ export const dispatchShowdexEvent = <T = string>(
   window.addEventListener(showdexEventName, handleResponse);
   window.dispatchEvent(createShowdexEvent('request', detail));
 });
+
+/* eslint-enable @typescript-eslint/indent */

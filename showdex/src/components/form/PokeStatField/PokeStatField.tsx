@@ -60,7 +60,7 @@ export const PokeStatField = React.forwardRef<ButtonElement, PokeStatFieldProps>
   absoluteHover,
   readOnly,
   disabled,
-}, forwardedRef): React.JSX.Element => {
+}, forwardedRef): JSX.Element => {
   const containerRef = React.useRef<ButtonElement>(null);
 
   React.useImperativeHandle(

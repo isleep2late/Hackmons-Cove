@@ -12,7 +12,7 @@ export const ContextMenuSeparator = ({
   className,
   style,
   hidden,
-}: ContextMenuSeparatorProps): React.JSX.Element => (hidden ? null : (
+}: ContextMenuSeparatorProps): JSX.Element => (hidden ? null : (
   <div
     className={cx(styles.separator, className)}
     style={style}

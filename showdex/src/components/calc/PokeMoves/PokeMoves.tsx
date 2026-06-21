@@ -52,7 +52,7 @@ const l = logger('@showdex/components/calc/PokeMoves');
 export const PokeMoves = ({
   className,
   style,
-}: PokeMovesProps): React.JSX.Element => {
+}: PokeMovesProps): JSX.Element => {
   const { t } = useTranslation('calcdex');
 
   const {
@@ -114,7 +114,7 @@ export const PokeMoves = ({
   ]);
 
   const moveOptionsFilter = React.useMemo(
-    () => createAliasFilter(t('pokedex:moveAliases', { returnObjects: true }) as Record<string, string>),
+    () => createAliasFilter(t('pokedex:moveAliases', { returnObjects: true })),
     [t],
   );
 
@@ -467,9 +467,9 @@ export const PokeMoves = ({
               <div className={styles.moveProperty}>
                 <ValueField
                   className={styles.valueField}
-                  label={t('poke.moves.editor.faintCounter.aria', { pokemon: friendlyPokemonName }) as string}
+                  label={t('poke.moves.editor.faintCounter.aria', { pokemon: friendlyPokemonName }) as React.ReactNode}
                   hideLabel
-                  hint={String(pokemon.dirtyFaintCounter ?? (pokemon.faintCounter || 0))}
+                  hint={pokemon.dirtyFaintCounter ?? (pokemon.faintCounter || 0)}
                   fallbackValue={pokemon.faintCounter || 0}
                   min={0}
                   max={(
@@ -482,7 +482,6 @@ export const PokeMoves = ({
                   shiftStep={2}
                   clearOnFocus
                   absoluteHover
-                  meta={{}}
                   input={{
                     name: `${l.scope}:${pokemonKey}:FaintCounter`,
                     value: pokemon.dirtyFaintCounter ?? (pokemon.faintCounter || 0),
@@ -491,8 +490,6 @@ export const PokeMoves = ({
                         ? null
                         : value,
                     }, `${l.scope}:ValueField~FaintCounter:input.onChange()`),
-                    onBlur: () => void 0,
-                    onFocus: () => void 0,
                   }}
                 />
 
@@ -762,8 +759,8 @@ export const PokeMoves = ({
                 aria-label={t('poke.moves.slot.aria', {
                   count: i + 1,
                   pokemon: friendlyPokemonName,
-                }) as string}
-                hint={t('poke.moves.slot.hint') as string}
+                }) as React.ReactNode}
+                hint={t('poke.moves.slot.hint') as React.ReactNode}
                 optionTooltip={PokeMoveOptionTooltip}
                 optionTooltipProps={{
                   format,
@@ -772,16 +769,13 @@ export const PokeMoves = ({
                   field,
                   hidden: !settings?.showMoveTooltip,
                 }}
-                meta={{}}
                 input={{
                   name: `${l.scope}:${pokemonKey}:Moves:${i}`,
                   value: moveName,
                   onChange: (name: MoveName) => handleMoveChange(name, i),
-                  onBlur: () => void 0,
-                  onFocus: () => void 0,
                 }}
                 options={moveOptions}
-                noOptionsMessage={t('poke.moves.slot.empty') as string}
+                noOptionsMessage={t('poke.moves.slot.empty') as React.ReactNode}
                 filterOption={moveOptionsFilter}
                 disabled={!pokemon?.speciesForme}
               />
@@ -791,7 +785,6 @@ export const PokeMoves = ({
               <TableGridItem className={styles.editorItem}>
                 <div className={styles.editorLeft}>
                   <PokeTypeField
-                    meta={{}}
                     input={{
                       name: `${l.scope}:${pokemonKey}:MoveOverrides:${moveName}:Type`,
                       value: moveOverrides.type,
@@ -800,8 +793,6 @@ export const PokeMoves = ({
                           [moveName]: { type: value },
                         },
                       }, `${l.scope}:PokeTypeField:input.onChange()`),
-                      onBlur: () => void 0,
-                      onFocus: () => void 0,
                     }}
                   />
 
@@ -809,18 +800,15 @@ export const PokeMoves = ({
                     ariaLabel={t('poke.moves.editor.category.aria', {
                       move: moveName,
                       pokemon: friendlyPokemonName,
-                    }) as string}
+                    }) as React.ReactNode}
                     overrideLabel={(dynamicCategoryMove && !hasOverrides && t('common:labels.auto', 'Auto') as string) || null}
                     format={format}
-                    meta={{}}
                     input={{
                       name: `${l.scope}:${pokemonKey}:MoveOverrides:${moveName}:Category`,
                       value: moveOverrides,
                       onChange: (value: Partial<CalcdexMoveOverride>) => updatePokemon({
                         moveOverrides: { [moveName]: value },
                       }, `${l.scope}:MoveCategoryField:input.onChange()`),
-                      onBlur: () => void 0,
-                      onFocus: () => void 0,
                     }}
                     nullable={dynamicCategoryMove}
                     readOnly={moveOverrides.category === 'Status'}
@@ -880,16 +868,15 @@ export const PokeMoves = ({
                         label={t('poke.moves.editor.hits.aria', {
                           move: moveName,
                           pokemon: friendlyPokemonName,
-                        }) as string}
+                        }) as React.ReactNode}
                         hideLabel
-                        hint={String(moveOverrides.hits)}
+                        hint={moveOverrides.hits}
                         fallbackValue={moveDefaults.hits}
                         min={moveDefaults.minHits === moveDefaults.hits ? 1 : moveDefaults.minHits}
                         max={moveDefaults.maxHits}
                         step={1}
                         clearOnFocus
                         absoluteHover
-                        meta={{}}
                         input={{
                           name: `${l.scope}:${pokemonKey}:MoveOverrides:${moveName}:Hits`,
                           value: moveOverrides.hits,
@@ -904,8 +891,6 @@ export const PokeMoves = ({
                               },
                             },
                           }, `${l.scope}:ValueField~Hits:input.onChange()`),
-                          onBlur: () => void 0,
-                          onFocus: () => void 0,
                         }}
                       />
 
@@ -927,7 +912,7 @@ export const PokeMoves = ({
                               hit: j + 1,
                               hits: moveOverrides.hits,
                               pokemon: friendlyPokemonName,
-                            }) as string}
+                            }) as React.ReactNode}
                             hideLabel
                             hint={(moveOverrides.hitBasePowers[j] ?? defaultHitBp ?? fallbackBasePower).toString()}
                             fallbackValue={defaultHitBp ?? fallbackBasePower}
@@ -937,12 +922,9 @@ export const PokeMoves = ({
                             shiftStep={10}
                             clearOnFocus
                             absoluteHover
-                            meta={{}}
                             input={{
                               name: `${l.scope}:${pokemonKey}:MoveOverrides:${moveName}:HitBasePowers:${j}`,
                               value: moveOverrides.hitBasePowers[j] ?? defaultHitBp,
-                              onBlur: () => void 0,
-                              onFocus: () => void 0,
                               onChange: (value: number) => updatePokemon({
                                 moveOverrides: {
                                   [moveName]: {
@@ -970,7 +952,7 @@ export const PokeMoves = ({
                           label={t('poke.moves.editor.bp.aria', {
                             move: moveName,
                             pokemon: friendlyPokemonName,
-                          }) as string}
+                          }) as React.ReactNode}
                           hideLabel
                           hint={String(moveOverrides[basePowerKey] || t('common:labels.auto', 'Auto')).toUpperCase()}
                           fallbackValue={fallbackBasePower}
@@ -980,7 +962,6 @@ export const PokeMoves = ({
                           shiftStep={10}
                           clearOnFocus
                           absoluteHover
-                          meta={{}}
                           input={{
                             name: `${l.scope}:${pokemonKey}:MoveOverrides:${moveName}:BasePower`,
                             value: moveOverrides[basePowerKey],
@@ -989,8 +970,6 @@ export const PokeMoves = ({
                                 [moveName]: { [basePowerKey]: clamp(0, value, 999) },
                               },
                             }, `${l.scope}:ValueField~BasePower:input.onChange()`),
-                            onBlur: () => void 0,
-                            onFocus: () => void 0,
                           }}
                         />
 
@@ -1065,16 +1044,15 @@ export const PokeMoves = ({
                         label={t('poke.moves.editor.hits.aria', {
                           move: moveName,
                           pokemon: friendlyPokemonName,
-                        }) as string}
+                        }) as React.ReactNode}
                         hideLabel
-                        hint={String(moveOverrides.hits)}
+                        hint={moveOverrides.hits}
                         fallbackValue={moveDefaults.hits}
                         min={moveDefaults.minHits === moveDefaults.hits ? 1 : moveDefaults.minHits}
                         max={moveDefaults.maxHits}
                         step={1}
                         clearOnFocus
                         absoluteHover
-                        meta={{}}
                         input={{
                           name: `${l.scope}:${pokemonKey}:MoveOverrides:${moveName}:Hits`,
                           value: moveOverrides.hits,
@@ -1089,8 +1067,6 @@ export const PokeMoves = ({
                               },
                             },
                           }, `${l.scope}:ValueField~Hits:input.onChange()`),
-                          onBlur: () => void 0,
-                          onFocus: () => void 0,
                         }}
                       />
 

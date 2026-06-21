@@ -25,7 +25,7 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(({
   style,
   hideBackground,
   children,
-}, forwardedRef): React.JSX.Element => (
+}, forwardedRef): JSX.Element => (
   <div
     ref={forwardedRef}
     className={cx(

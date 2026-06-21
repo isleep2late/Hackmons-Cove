@@ -9,7 +9,6 @@ import cx from 'classnames';
 import {
   format,
   formatDuration,
-  type Duration,
   intervalToDuration,
   isValid,
 } from 'date-fns';
@@ -45,7 +44,7 @@ export const HomieButton = ({
   alwaysActive,
   updated,
   onUserPopup,
-}: HomieButtonProps): React.JSX.Element => {
+}: HomieButtonProps): JSX.Element => {
   const colorSchemeFromStore = useColorScheme();
   const colorScheme = colorSchemeFromProps || colorSchemeFromStore;
   const tooltipColorScheme = determineColorScheme(colorScheme, true);

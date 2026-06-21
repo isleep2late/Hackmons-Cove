@@ -36,7 +36,7 @@ export const PresetsSettingsPane = ({
   presets,
   inBattle,
   clearing,
-}: PresetsSettingsPaneProps): React.JSX.Element => {
+}: PresetsSettingsPaneProps): JSX.Element => {
   const { t } = useTranslation('settings');
 
   return (

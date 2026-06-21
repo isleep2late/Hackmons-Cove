@@ -1,5 +1,7 @@
 import { type CalcdexPokemonAlt } from '@showdex/interfaces/calc';
 
+/* eslint-disable @typescript-eslint/indent */
+
 /**
  * Sorts the alternative abilities/items/moves by their usage percentage in descending order
  * (i.e., highest usage first).
@@ -29,3 +31,5 @@ export const sortUsageAlts = <
 
   return 0;
 };
+
+/* eslint-enable @typescript-eslint/indent */

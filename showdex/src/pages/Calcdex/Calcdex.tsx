@@ -47,7 +47,7 @@ export const Calcdex = ({
   onSwitchViewpoint,
   onCloseOverlay,
   onLeaveRoom,
-}: CalcdexProps): React.JSX.Element => {
+}: CalcdexProps): JSX.Element => {
   const containerRef = React.useRef<HTMLDivElement>(null);
 
   useCalcdexSize(containerRef);

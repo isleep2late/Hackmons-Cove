@@ -1,4 +1,6 @@
 import * as React from 'react';
+import { type AriaButtonProps } from '@react-types/button';
+import { type ButtonAria as ButtonAriaInterface, useButton } from '@react-aria/button';
 import { type AnimatedProps, animated, useSpring } from '@react-spring/web';
 import { type Handler as GestureHandler, useGesture } from '@use-gesture/react';
 import cx from 'classnames';
@@ -7,17 +9,22 @@ import styles from './BaseButton.module.scss';
 export type ButtonElement = HTMLButtonElement & HTMLDivElement;
 export type ButtonElementType = Extract<React.ElementType, 'button' | 'div'>;
 
-export interface CommonButtonProps extends React.AriaAttributes {
+export interface ButtonAria<
+  T extends HTMLButtonElement = ButtonElement,
+> extends Omit<ButtonAriaInterface<T>, 'buttonProps'> {
+  buttonProps: Omit<React.HTMLAttributes<T>, 'dangerouslySetInnerHTML'>;
+}
+
+export interface CommonButtonProps<
+  T extends ButtonElementType = 'button',
+> extends Omit<AriaButtonProps<T>, 'elementType' | 'isDisabled'> {
   className?: string;
   style?: React.CSSProperties;
 
   /**
    * `'inline'` renders `<button>`, `'block'` renders `<div>`.
    *
-   * @default
-   * ```ts
-   * 'inline'
-   * ```
+   * @default 'inline'
    * @since 0.1.0
    */
   display?: 'inline' | 'block';
@@ -41,21 +48,6 @@ export interface CommonButtonProps extends React.AriaAttributes {
   disabled?: boolean;
 
   /**
-   * Click handler. Takes precedence over `onPress` if both are provided.
-   *
-   * @since 0.1.0
-   */
-  onClick?: React.MouseEventHandler<ButtonElement>;
-
-  /**
-   * Alias for `onClick`. Exists for legacy RN-style compat.
-   * Ignored if `onClick` is also provided.
-   *
-   * @since 1.2.0
-   */
-  onPress?: React.MouseEventHandler<ButtonElement>;
-
-  /**
    * Optional callback to trigger when the user invokes the context menu.
    *
    * @since 1.2.3
@@ -63,8 +55,12 @@ export interface CommonButtonProps extends React.AriaAttributes {
   onContextMenu?: (event: React.MouseEvent<ButtonElement>) => void;
 }
 
-export interface BaseButtonProps extends Omit<CommonButtonProps, 'style'> {
-  style?: AnimatedProps<{ style: React.CSSProperties; }>['style'];
+/* eslint-disable @typescript-eslint/indent -- this rule is broken af. see Issue #1824 in the typescript-eslint GitHub repo. */
+
+export interface BaseButtonProps<
+  T extends ButtonElementType = 'button',
+> extends Omit<CommonButtonProps<T>, 'style'> {
+  style?: AnimatedProps<CommonButtonProps<T>>['style'];
   initScale?: number;
   hoverScale?: number;
   activeScale?: number;
@@ -87,7 +83,11 @@ export const BaseButtonScaleConfig: Record<'init' | 'hover' | 'active', number> 
   active: 0.95,
 };
 
-export const BaseButton = React.forwardRef<ButtonElement, BaseButtonProps>(({
+/* eslint-disable react/prop-types -- this rule is hard tripping rn */
+
+export const BaseButton = React.forwardRef<ButtonElement, BaseButtonProps>(<
+  T extends ButtonElementType = 'button',
+>({
   className,
   style,
   display = 'inline',
@@ -97,14 +97,19 @@ export const BaseButton = React.forwardRef<ButtonElement, BaseButtonProps>(({
   activeScale = BaseButtonScaleConfig.active,
   disabled,
   children,
-  onClick,
-  onPress,
   onHover,
   onContextMenu,
   ...props
-}: BaseButtonProps, forwardedRef: React.ForwardedRef<ButtonElement>): React.JSX.Element => {
+}: BaseButtonProps<T>, forwardedRef: React.ForwardedRef<ButtonElement>): JSX.Element => {
   const elementType = display === 'inline' ? 'button' : 'div';
   const ref = React.useRef<ButtonElement>(null);
+
+  const { buttonProps } = useButton({
+    ...props,
+    elementType,
+    isDisabled: disabled,
+    // children,
+  }, ref) as ButtonAria<ButtonElement>;
 
   React.useImperativeHandle(
     forwardedRef,
@@ -130,7 +135,7 @@ export const BaseButton = React.forwardRef<ButtonElement, BaseButtonProps>(({
         return;
       }
 
-      void springApi.start({
+      springApi.start({
         scale: event?.hovering ? hoverScale : activeScale,
       });
     },
@@ -138,32 +143,29 @@ export const BaseButton = React.forwardRef<ButtonElement, BaseButtonProps>(({
     target: ref,
     eventOptions: { passive: true },
     enabled: !disabled,
+    // drag: { preventDefault: true, filterTaps: true },
+    // hover: { preventDefault: true, filterTaps: true },
   });
 
   const Component = animated[elementType];
-  const handleClick = (!disabled && (onClick || onPress)) || null;
 
   return (
     <Component
       ref={ref}
-      {...props}
+      {...buttonProps}
       tabIndex={disabled ? -1 : tabIndex}
       className={cx(
         styles.container,
         disabled && styles.disabled,
         className,
       )}
-      {...(elementType === 'button' ? {
-        ...(typeof disabled === 'boolean' && { disabled }),
-      } : {
-        role: 'button',
-        ...(typeof disabled === 'boolean' && { 'aria-disabled': disabled }),
-      })}
       style={{ ...style, scale }}
-      {...(typeof handleClick === 'function' && { onClick: handleClick })}
-      {...(typeof onContextMenu === 'function' && { onContextMenu })}
+      onContextMenu={onContextMenu}
     >
       {children}
     </Component>
   );
 });
+
+/* eslint-enable react/prop-types */
+/* eslint-enable @typescript-eslint/indent */

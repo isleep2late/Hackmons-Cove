@@ -24,7 +24,7 @@ export const AutoFeaturesSettingsPane = ({
   style,
   value,
   inBattle,
-}: AutoFeaturesSettingsPaneProps): React.JSX.Element => {
+}: AutoFeaturesSettingsPaneProps): JSX.Element => {
   const { t } = useTranslation('settings');
 
   return (

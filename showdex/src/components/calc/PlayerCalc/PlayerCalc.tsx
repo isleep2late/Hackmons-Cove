@@ -40,7 +40,7 @@ export const PlayerCalc = ({
   playerOptions,
   mobile,
   onUserPopup,
-}: PlayerCalcProps): React.JSX.Element => {
+}: PlayerCalcProps): JSX.Element => {
   const { t } = useTranslation('calcdex');
   const colorScheme = useColorScheme();
 

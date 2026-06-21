@@ -23,7 +23,7 @@ export const BuildInfo = ({
   style,
   position = 'top-right',
   hideCredits,
-}: BuildInfoProps): React.JSX.Element => {
+}: BuildInfoProps): JSX.Element => {
   const colorScheme = useColorScheme();
 
   return (

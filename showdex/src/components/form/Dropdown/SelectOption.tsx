@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { type GroupBase, type OptionProps } from 'react-select';
-import { useDebouncyEffect as useDebouncy } from 'use-debouncy';
+import useDebouncy from 'use-debouncy/lib/effect';
 import cx from 'classnames';
 import { Tooltip } from '@showdex/components/ui';
 import { type DropdownOption } from './Dropdown';
-import { type SelectOptionTooltipProps, type SelectProps } from './SelectContainer';
+import { type SelectProps } from './SelectContainer';
 import styles from './Dropdown.module.scss';
 
 export type SelectOptionProps<
@@ -14,6 +14,8 @@ export type SelectOptionProps<
 > = Modify<OptionProps<Option, Multi, Group>, {
   selectProps: SelectProps<Option, Multi, Group>;
 }>;
+
+/* eslint-disable @typescript-eslint/indent */
 
 export const SelectOption = <
   Option extends DropdownOption,
@@ -36,7 +38,7 @@ export const SelectOption = <
     optionTooltipDelay,
   } = {},
   children,
-}: SelectOptionProps<Option, Multi, Group>): React.JSX.Element => {
+}: SelectOptionProps<Option, Multi, Group>): JSX.Element => {
   const containerRef = React.useRef<HTMLDivElement>(null);
 
   React.useImperativeHandle(
@@ -177,7 +179,8 @@ export const SelectOption = <
           reference={containerRef}
           content={(
             <OptionTooltip
-              {...({ ...optionTooltipProps, ...data } as SelectOptionTooltipProps)}
+              {...optionTooltipProps}
+              {...data}
             />
           )}
           placement="right"
@@ -190,3 +193,5 @@ export const SelectOption = <
     </>
   );
 };
+
+/* eslint-enable @typescript-eslint/indent */

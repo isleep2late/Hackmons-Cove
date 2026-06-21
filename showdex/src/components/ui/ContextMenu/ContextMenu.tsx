@@ -84,7 +84,7 @@ export const ContextMenu = ({
   disabled,
   children,
   ...props
-}: ContextMenuProps): React.JSX.Element => {
+}: ContextMenuProps): JSX.Element => {
   const currentColorScheme = useColorScheme();
   const colorScheme = determineColorScheme(currentColorScheme, reverseColorScheme);
 
@@ -105,23 +105,23 @@ export const ContextMenu = ({
           return null;
         }
 
-        const itemKey = `${itemKeyPrefix || 'ContextMenu'}:Item:${item.entity}:${item.key}`;
-        const itemProps: ContextMenuItemProps = {
+        const itemProps: ContextMenuItemProps & { key: string } = {
+          key: `${itemKeyPrefix || 'ContextMenu'}:Item:${item.entity}:${item.key}`,
           label: '???',
           ...item.props,
         };
 
         switch (item.entity) {
           case 'submenu': {
-            return <ContextSubmenu key={itemKey} {...itemProps} />;
+            return <ContextSubmenu {...itemProps} />;
           }
 
           case 'item': {
-            return <ContextMenuItem key={itemKey} {...itemProps} />;
+            return <ContextMenuItem {...itemProps} />;
           }
 
           case 'separator': {
-            return <ContextMenuSeparator key={itemKey} {...itemProps} />;
+            return <ContextMenuSeparator {...itemProps} />;
           }
 
           default: {

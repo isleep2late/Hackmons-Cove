@@ -82,7 +82,7 @@ export const Hellodex = ({
   onCloseCalcdex,
   onRemoveHonkdex,
   onRemoveNotedex,
-}: HellodexProps): React.JSX.Element => {
+}: HellodexProps): JSX.Element => {
   const { t } = useTranslation('hellodex');
   const contentRef = React.useRef<HTMLDivElement>(null);
   const instanceRefs = React.useRef<Record<string, InstanceButtonRef>>({});

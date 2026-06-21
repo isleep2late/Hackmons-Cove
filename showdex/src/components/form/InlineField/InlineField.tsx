@@ -45,7 +45,7 @@ export const InlineField = React.forwardRef<HTMLSpanElement, InlineFieldProps>((
   meta,
   disabled,
   onContextMenu,
-}: InlineFieldProps, forwardedRef): React.JSX.Element => {
+}: InlineFieldProps, forwardedRef): JSX.Element => {
   const colorScheme = useColorScheme();
   const containerRef = React.useRef<HTMLSpanElement>(null);
 
@@ -94,7 +94,7 @@ export const InlineField = React.forwardRef<HTMLSpanElement, InlineFieldProps>((
     e?.preventDefault?.();
     e?.stopImmediatePropagation?.();
 
-    switch (handler.keys?.[0]) {
+    switch (handler.key) {
       // revert to the initial value
       case 'esc': {
         containerRef.current.innerText = initialValue.current;

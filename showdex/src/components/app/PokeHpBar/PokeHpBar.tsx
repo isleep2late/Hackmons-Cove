@@ -35,7 +35,7 @@ export const PokeHpBar = ({
   hp = 0,
   width = 100,
   reverseColorScheme,
-}: PokeHpBarProps): React.JSX.Element => {
+}: PokeHpBarProps): JSX.Element => {
   const currentColorScheme = useColorScheme();
   const colorScheme = determineColorScheme(currentColorScheme, reverseColorScheme);
 

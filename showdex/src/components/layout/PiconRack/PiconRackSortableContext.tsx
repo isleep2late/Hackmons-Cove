@@ -12,7 +12,7 @@ export interface PiconRackSortableContextProps {
 export const PiconRackSortableContext = ({
   playerKey,
   children,
-}: PiconRackSortableContextProps): React.JSX.Element => {
+}: PiconRackSortableContextProps): JSX.Element => {
   const ctx = React.useContext(PiconRackContext);
 
   // const sortingStrategy = React.useMemo(

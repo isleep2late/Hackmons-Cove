@@ -39,7 +39,7 @@ export const InstanceButton = React.forwardRef<InstanceButtonRef, InstanceButton
   onContextMenu,
   onRequestRemove,
   ...props
-}: InstanceButtonProps, forwardedRef): React.JSX.Element => {
+}: InstanceButtonProps, forwardedRef): JSX.Element => {
   const { t } = useTranslation('pokedex');
   const containerRef = React.useRef<ButtonElement>(null);
   const colorScheme = useColorScheme();

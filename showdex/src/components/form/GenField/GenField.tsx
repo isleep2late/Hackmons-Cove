@@ -60,7 +60,7 @@ export const GenField = React.forwardRef<ButtonElement, GenFieldProps>(({
   hideDescription,
   readOnly,
   disabled,
-}, forwardedRef): React.JSX.Element => {
+}, forwardedRef): JSX.Element => {
   const containerRef = React.useRef<ButtonElement>(null);
 
   React.useImperativeHandle(
