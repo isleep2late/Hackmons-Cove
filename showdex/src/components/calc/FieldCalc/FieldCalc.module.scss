@@ -1,0 +1,146 @@
+@use 'config/colors';
+@use 'config/fonts';
+@use 'functions/color';
+@use 'mixins/flex';
+@use 'mixins/font';
+@use 'mixins/spacing';
+@use 'mixins/transition';
+
+.container {
+  grid-template-columns: minmax(0, 1fr) repeat(2, minmax(0, 1.1fr)) minmax(0, 1fr);
+  column-gap: 10px;
+
+  &.expanded {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 6px;
+
+    &.skinnyBoi {
+      @include spacing.padding($x: 12px);
+    }
+  }
+}
+
+.label {
+  @include spacing.margin($bottom: 4px);
+  @include font.apply(fonts.$primary, ( font-weight: 500 ));
+  @include transition.apply(color);
+
+  .light & {
+    color: color.alpha(colors.$black, 0.8);
+
+    &.legacy {
+      color: color.alpha(colors.$black, 0.32);
+    }
+  }
+
+  .dark & {
+    color: color.alpha(colors.$white, 0.8);
+
+    &.legacy {
+      color: color.alpha(colors.$white, 0.32);
+    }
+  }
+}
+
+.dropdownLabel {
+  @include flex.row-center;
+
+  .expanded & {
+    @include spacing.margin($bottom: 0);
+
+    &.weatherLabel {
+      grid-area: 1 / 1;
+      @include spacing.margin($left: 12px);
+    }
+
+    &.terrainLabel {
+      grid-area: 1 / 2;
+      @include spacing.margin($right: 12px);
+    }
+  }
+
+  button.labelToggleButton {
+    @include spacing.margin($left: 8px);
+    font-size: 8px;
+  }
+}
+
+.leftFieldLabel {
+  @include spacing.margin($left: 8px);
+
+  &.spectating {
+    @include spacing.margin($left: 4px);
+  }
+
+  .expanded & {
+    grid-area: 3 / 1;
+    @include spacing.margin($top: 4px, $bottom: 1px, $left: 10px);
+  }
+}
+
+.leftFieldInput {
+  .expanded & {
+    grid-area: 4 / 1;
+    @include spacing.margin($top: 1px);
+  }
+}
+
+.weatherInput {
+  align-self: flex-start;
+  // max-width: 152px;
+  @include spacing.margin($x: auto);
+
+  .expanded & {
+    grid-area: 2 / 1;
+    @include spacing.margin($top: 4px, $right: 0, $bottom: 10px, $left: 12px);
+  }
+}
+
+.terrainInput {
+  align-self: flex-start;
+  // max-width: 152px;
+  @include spacing.margin($x: auto);
+
+  .expanded & {
+    grid-area: 2 / 2;
+    @include spacing.margin($top: 4px, $right: 12px, $bottom: 10px, $left: 0);
+  }
+}
+
+.rightFieldLabel {
+  @include spacing.margin($right: 8px);
+
+  &.spectating {
+    @include spacing.margin($right: 4px);
+  }
+
+  .expanded & {
+    grid-area: 3 / 2;
+    @include spacing.margin($top: 4px, $right: 10px, $bottom: 1px);
+  }
+}
+
+.rightFieldInput {
+  .expanded & {
+    grid-area: 4 / 2;
+    @include spacing.margin($top: 1px);
+  }
+}
+
+button.toggleButton {
+  min-width: 60px;
+  @include spacing.margin($all: 1px);
+  @include spacing.padding($x: 4px);
+  font-size: 10px;
+  text-transform: none;
+}
+
+.tooltipContent {
+  text-align: center;
+  white-space: normal;
+  user-select: none;
+}
+
+.descTooltip {
+  max-width: 165px;
+}

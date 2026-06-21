@@ -1367,9 +1367,6 @@
 					buf += '<span class="detailcell"><label>Tera Type</label>' + (set.teraType || ((this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')) ? 'None / Dyna' : (species.requiredTeraType || species.types[0]))) + '</span>';
 				}
 			}
-			if (this.curTeam.gen === 9 && !isChampions) {
-				buf += '<span class="detailcell"><label>Tera Type</label>' + (set.teraType || ((this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')) ? 'None / Dyna' : (species.requiredTeraType || species.types[0]))) + '</span>';
-			}
 			if (this.curTeam.gen === 1 && this.curTeam.format.includes('disguises')) {
 				var phT = (set.phType || '').split('/');
 				buf += '<span class="detailcell"><label>Type 1</label>' + (phT[0] || species.types[0]) + '</span>';
@@ -1377,7 +1374,7 @@
 				buf += '<span class="detailcell"><label>Disguise</label>' + (set.disguise ? this.curTeam.dex.species.get(set.disguise).name : '(none)') + '</span>';
 				buf += '<span class="detailcell"><label>Status</label>' + (set.startStatus || 'None') + '</span>';
 			}
-			if (this.curTeam.gen === 2 && (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses'))) {
+			if ((this.curTeam.gen === 2 && (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses'))) || (this.curTeam.gen === 9 && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) {
 				buf += '<span class="detailcell"><label>Status</label>' + (set.startStatus || 'None') + '</span>';
 			}
 			buf += '</button></div></div>';
@@ -2947,7 +2944,7 @@
 			buf += '<form class="detailsform">';
 
 			buf += '<div class="formrow"><label class="formlabel">Level:</label><div>' +
-				'<input type="number" min="1" max="' + (((this.curTeam.gen === 1 && this.curTeam.format.includes('disguises')) || (this.curTeam.gen === 2 && (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses')))) ? 255 : 100) + '" step="1" name="level" value="' +
+				'<input type="number" min="1" max="' + (((this.curTeam.gen === 1 && this.curTeam.format.includes('disguises')) || (this.curTeam.gen === 2 && (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses'))) || (this.curTeam.gen === 9 && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) ? 255 : 100) + '" step="1" name="level" value="' +
 				(typeof set.level === 'number' ? set.level : 100) +
 				'" class="textbox inputform numform"' +
 				(isChampions ? ' disabled' : '') +
@@ -3071,7 +3068,7 @@
 				}
 				buf += '</select></div></div>';
 			}
-			if (this.curTeam.gen === 2 && (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses'))) {
+			if ((this.curTeam.gen === 2 && (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses'))) || (this.curTeam.gen === 9 && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) {
 				buf += '<div class="formrow"><label class="formlabel" title="Bring this Pokemon in already afflicted with a status">Status:</label><div><select name="startstatus" class="button">';
 				var phStatuses2 = [['', 'None'], ['psn', 'Poisoned'], ['par', 'Paralyzed'], ['slp', 'Asleep'], ['brn', 'Burned'], ['frz', 'Frozen']];
 				for (var pk2 = 0; pk2 < phStatuses2.length; pk2++) {
@@ -3100,7 +3097,7 @@
 
 			// level
 			var level = parseInt(this.$chart.find('input[name=level]').val(), 10);
-			var maxLevel = (this.curTeam.gen === 1 && this.curTeam.format.includes('disguises')) ? 255 : 100;
+			var maxLevel = ((this.curTeam.gen === 1 && this.curTeam.format.includes('disguises')) || (this.curTeam.gen === 2 && (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses'))) || (this.curTeam.gen === 9 && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) ? 255 : 100;
 			if (!level || level < 1) level = 100;
 			if (level > maxLevel) level = maxLevel;
 			if (level !== 100 || set.level) set.level = level;
@@ -3188,7 +3185,7 @@
 					delete set.startStatus;
 				}
 			}
-			if (this.curTeam.gen === 2 && (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses'))) {
+			if ((this.curTeam.gen === 2 && (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses'))) || (this.curTeam.gen === 9 && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) {
 				var startStatus2 = this.$chart.find('select[name=startstatus]').val();
 				if (['psn', 'par', 'slp', 'brn', 'frz'].indexOf(startStatus2) >= 0) {
 					set.startStatus = startStatus2;
@@ -3233,7 +3230,7 @@
 				buf += '<span class="detailcell"><label>Disguise</label>' + (set.disguise ? this.curTeam.dex.species.get(set.disguise).name : '(none)') + '</span>';
 				buf += '<span class="detailcell"><label>Status</label>' + (set.startStatus || 'None') + '</span>';
 			}
-			if (this.curTeam.gen === 2 && (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses'))) {
+			if ((this.curTeam.gen === 2 && (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses'))) || (this.curTeam.gen === 9 && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) {
 				buf += '<span class="detailcell"><label>Status</label>' + (set.startStatus || 'None') + '</span>';
 			}
 			this.$('button[name=details]').html(buf);
@@ -3484,7 +3481,7 @@
 						set.level = 50;
 					}
 					if (baseFormat.startsWith('lc') || baseFormat.endsWith('lc')) set.level = 5;
-					if (this.curTeam.format.includes('disguises') || (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses'))) set.level = 255;
+					if (this.curTeam.format.includes('disguises') || (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses')) || (this.curTeam.gen === 9 && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) set.level = 255;
 				}
 				set.gender = 'F';
 				if (set.happiness) delete set.happiness;
@@ -3520,7 +3517,7 @@
 						set.level = 50;
 					}
 					if (baseFormat.startsWith('lc') || baseFormat.endsWith('lc')) set.level = 5;
-					if (this.curTeam.format.includes('disguises') || (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses'))) set.level = 255;
+					if (this.curTeam.format.includes('disguises') || (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses')) || (this.curTeam.gen === 9 && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) set.level = 255;
 				}
 				if (set.happiness) delete set.happiness;
 				if (set.shiny) delete set.shiny;
@@ -3753,7 +3750,7 @@
 						baseFormat.substr(0, 3) === 'bss' || baseFormat.substr(0, 3) === 'vgc' ||
 						baseFormat.substr(0, 14) === 'battlefestival') set.level = 50;
 					if (baseFormat.startsWith('lc') || baseFormat.endsWith('lc')) set.level = 5;
-					if (this.curTeam.format.includes('disguises') || (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses'))) set.level = 255;
+					if (this.curTeam.format.includes('disguises') || (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses')) || (this.curTeam.gen === 9 && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) set.level = 255;
 					if (baseFormat.substr(0, 19) === 'battlespotspecial17') set.level = 1;
 					if (format && format.teambuilderLevel) {
 						set.level = format.teambuilderLevel;
