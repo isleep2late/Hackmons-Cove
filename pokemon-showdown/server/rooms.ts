@@ -1654,11 +1654,8 @@ export class GlobalRoomState {
 		}
 		if (Config.reportbattles) {
 			const reportRooms = new Set<string>();
-			const isTourGame = room.battle?.challengeType === 'tour';
-
-			if (isTourGame) return;
-
-			reportRooms.add('lobby');
+			const isRated = room.battle?.challengeType === 'rated';
+			if (isRated) reportRooms.add('lobby');
 
 			// Format-specific reporting
 			const format = Dex.formats.get(room.format);
