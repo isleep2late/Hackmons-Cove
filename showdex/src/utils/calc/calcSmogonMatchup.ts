@@ -14,6 +14,7 @@ import {
 import { type ShowdexSettings } from '@showdex/interfaces/app';
 import { type CalcdexBattleState, type CalcdexPlayerKey, CalcdexPlayerKeys as AllPlayerKeys } from '@showdex/interfaces/calc';
 import { logger } from '@showdex/utils/debug';
+import { setPhnnCalcContext } from '@showdex/phnn';
 import { getGenDexForFormat } from '@showdex/utils/dex';
 import { createSmogonField } from './createSmogonField';
 import { createSmogonMove } from './createSmogonMove';
@@ -205,6 +206,8 @@ export const calcSmogonMatchup = (
     allPlayers,
     field,
   );
+
+  setPhnnCalcContext(format);
 
   try {
     const result = calculate(
