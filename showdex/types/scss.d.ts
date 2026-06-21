@@ -9,6 +9,3 @@ declare module '*.module.scss' {
 
   export default styles;
 }
-
-// side-effect imports of non-module scss files (e.g. global.scss) — declare so TS2882 doesn't fire
-declare module '*.scss' {}

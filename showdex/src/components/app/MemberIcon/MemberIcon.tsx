@@ -32,7 +32,7 @@ export const MemberIcon = ({
   member,
   defaultSrc,
   reverseColorScheme,
-}: MemberIconProps): React.JSX.Element => {
+}: MemberIconProps): JSX.Element => {
   const currentColorScheme = useColorScheme();
   const colorScheme = determineColorScheme(currentColorScheme, reverseColorScheme);
 

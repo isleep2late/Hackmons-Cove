@@ -6,10 +6,8 @@
 
 import {
   type Action,
-  type Dispatch,
-  type UnknownAction,
+  type AnyAction,
   type ConfigureStoreOptions,
-  type ThunkDispatch,
   configureStore,
 } from '@reduxjs/toolkit';
 // import { setupListeners } from '@reduxjs/toolkit/query/react';
@@ -22,9 +20,7 @@ import { type ShowdexSliceState, showdexSlice } from './showdexSlice';
 import { type TeamdexSliceState, teamdexSlice } from './teamdexSlice';
 
 export type RootStore = ReturnType<typeof createStore>;
-// RTK v2: configureStore's inferred dispatch may not preserve ThunkDispatch through the options spread —
-// explicitly include ThunkDispatch so async thunk actions can be dispatched via RootDispatch.
-export type RootDispatch = ThunkDispatch<ReturnType<RootStore['getState']>, unknown, UnknownAction> & Dispatch<UnknownAction>;
+export type RootDispatch = RootStore['dispatch'];
 
 export interface RootState extends ReturnType<RootStore['getState']> {
   [showdexSlice.name]: ShowdexSliceState;
@@ -41,7 +37,7 @@ export interface RootState extends ReturnType<RootStore['getState']> {
  */
 export type CreateReduxStoreOptions<
   TState = unknown,
-  TAction extends Action = UnknownAction,
+  TAction extends Action = AnyAction,
   // TMiddlewares extends Middlewares<TState> = Middlewares<TState>,
 > = Omit<Partial<ConfigureStoreOptions<TState, TAction>>, 'middleware' | 'reducer'>;
 
@@ -53,7 +49,7 @@ const l = logger('@showdex/redux/store/createStore()');
  * @example
  * ```tsx
  * const store = createStore();
- * const App = ({ Component, pageProps }: AppProps): React.JSX.Element => (
+ * const App = ({ Component, pageProps }: AppProps): JSX.Element => (
  *   <Provider store={store}>
  *     <Component {...pageProps} />
  *   </Provider>

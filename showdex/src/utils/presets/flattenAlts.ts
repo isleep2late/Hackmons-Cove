@@ -1,5 +1,7 @@
 import { type CalcdexPokemonAlt } from '@showdex/interfaces/calc';
 
+/* eslint-disable @typescript-eslint/indent */
+
 /**
  * Flattens a single alternative ability/item/move.
  *
@@ -21,3 +23,5 @@ export const flattenAlts = <
 >(
   alts: CalcdexPokemonAlt<T>[],
 ): T[] => alts?.map?.(flattenAlt) ?? [];
+
+/* eslint-enable @typescript-eslint/indent */

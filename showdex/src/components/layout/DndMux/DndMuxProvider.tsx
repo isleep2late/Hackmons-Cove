@@ -48,7 +48,7 @@ export interface DndMuxProviderProps {
  */
 export const DndMuxProvider = ({
   children,
-}: DndMuxProviderProps): React.JSX.Element => {
+}: DndMuxProviderProps): JSX.Element => {
   // dnd context sensors
   const sensors = useSensors(
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),

@@ -97,6 +97,8 @@ const formatEndpointFormat = (
   return replacements;
 };
 
+/* eslint-disable @typescript-eslint/indent */
+
 /**
  * RTK Query factory for fetching `CalcdexPokemonPreset`'s, or if available & still fresh,
  * use the cached `CalcdexPokemonPreset`'s from `LocalStorage`.
@@ -215,3 +217,5 @@ export const buildPresetQuery = <
     return { data: output };
   };
 };
+
+/* eslint-enable @typescript-eslint/indent */

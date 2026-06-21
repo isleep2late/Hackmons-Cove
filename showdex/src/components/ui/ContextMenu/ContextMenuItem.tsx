@@ -49,7 +49,7 @@ export const ContextMenuItem = ({
   children,
   onPress,
   ...props
-}: ContextMenuItemProps): React.JSX.Element => (
+}: ContextMenuItemProps): JSX.Element => (
   <Item
     {...props}
     className={cx(

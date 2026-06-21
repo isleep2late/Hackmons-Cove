@@ -28,7 +28,7 @@ export const SwitchTrack = ({
   // input,
   // disabled,
   children,
-}: SwitchTrackProps): React.JSX.Element => {
+}: SwitchTrackProps): JSX.Element => {
   const { setNodeRef } = useDroppable({
     id: `Switch:${name || '???'}:SwitchTrack:Droppable`,
   });

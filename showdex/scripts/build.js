@@ -1,11 +1,13 @@
 import webpack from 'webpack';
-import { buildTargets, config, env } from '../webpack.config.js';
+import { buildTargets, config, env } from '../webpack.config';
 
 if (!env.PACKAGE_VERSION) {
-  console.error('Please run this script through pnpm.');
+  console.error('Please run this script through npm or yarn.');
   process.exit(1);
 }
 
+// note: this doesn't apply to the webpack config since it's imported before
+process.env.BABEL_ENV = 'production';
 process.env.NODE_ENV = 'production';
 
 if (!buildTargets.includes(env.BUILD_TARGET)) {

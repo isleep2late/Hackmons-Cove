@@ -55,7 +55,7 @@ export const SpikesField = React.forwardRef<ButtonElement, SpikesFieldProps>(({
   absoluteHover,
   readOnly,
   disabled,
-}, forwardedRef): React.JSX.Element => {
+}, forwardedRef): JSX.Element => {
   const containerRef = React.useRef<ButtonElement>(null);
 
   React.useImperativeHandle(

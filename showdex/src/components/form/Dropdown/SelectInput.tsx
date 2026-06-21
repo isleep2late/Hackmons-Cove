@@ -14,6 +14,8 @@ export type SelectInputProps<
   selectProps: SelectProps<Option, Multi, Group>;
 }>;
 
+/* eslint-disable @typescript-eslint/indent */
+
 export const SelectInput = <
   Option extends DropdownOption,
   Multi extends boolean,
@@ -25,7 +27,7 @@ export const SelectInput = <
   hasValue,
   selectProps,
   ...props
-}: SelectInputProps<Option, Multi, Group>): React.JSX.Element => {
+}: SelectInputProps<Option, Multi, Group>): JSX.Element => {
   const {
     innerRef,
     inputClassName,
@@ -60,3 +62,5 @@ export const SelectInput = <
     </div>
   );
 };
+
+/* eslint-enable @typescript-eslint/indent */

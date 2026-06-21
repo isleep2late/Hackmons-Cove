@@ -23,7 +23,7 @@ export const VisibilitySettingsPane = ({
   style,
   value,
   inBattle,
-}: VisibilitySettingsPaneProps): React.JSX.Element => {
+}: VisibilitySettingsPaneProps): JSX.Element => {
   const { t } = useTranslation('settings');
 
   return (

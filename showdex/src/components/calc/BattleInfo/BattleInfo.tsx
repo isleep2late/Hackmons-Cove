@@ -40,7 +40,7 @@ export const BattleInfo = ({
   style,
   onRequestHonkdex,
   onLeaveRoom,
-}: BattleInfoProps): React.JSX.Element => {
+}: BattleInfoProps): JSX.Element => {
   const { t } = useTranslation('honkdex');
   const colorScheme = useColorScheme();
   const reversedColorScheme = determineColorScheme(colorScheme, true);
@@ -120,7 +120,7 @@ export const BattleInfo = ({
   ]);
 
   const formatOptionsFilter = React.useMemo(
-    () => createAliasFilter(t('pokedex:formatAliases', { returnObjects: true }) as Record<string, string>),
+    () => createAliasFilter(t('pokedex:formatAliases', { returnObjects: true })),
     [t],
   );
 
@@ -160,7 +160,7 @@ export const BattleInfo = ({
           genLocked && styles.genLocked,
         )}
         optionLabelClassName={styles.label}
-        label={t('battle.gen.aria') as string}
+        label={t('battle.gen.aria') as React.ReactNode}
         tooltipPrefix={genLocked ? (
           <div
             className={cx(
@@ -178,13 +178,10 @@ export const BattleInfo = ({
             </div>
           </div>
         ) : null}
-        meta={{}}
         input={{
           name: `${l.scope}:${battleId}:Gen`,
           value: gen,
           onChange: handleGenChange,
-          onBlur: () => void 0,
-          onFocus: () => void 0,
         }}
         readOnly={genLocked && typeof onRequestHonkdex !== 'function'}
       />
@@ -192,35 +189,29 @@ export const BattleInfo = ({
       <div className={styles.honkInfo}>
         <InlineField
           className={styles.honkName}
-          hint={defaultName || t('battle.name.hint') as string}
-          meta={{}}
+          hint={defaultName || t('battle.name.hint') as React.ReactNode}
           input={{
             name: `${l.scope}:${battleId}:Name`,
             value: name,
             onChange: (value: string) => debouncyUpdate({
               name: value,
             }, `${l.scope}:${battleId}:Name~InlineField:input.onChange()`),
-            onBlur: () => void 0,
-            onFocus: () => void 0,
           }}
         />
 
         <div className={styles.honkProps}>
           <Dropdown
-            aria-label={t('battle.format.aria') as string}
+            aria-label={t('battle.format.aria') as React.ReactNode}
             hint="???"
-            meta={{}}
             input={{
               name: `${l.scope}:${battleId}:Format`,
               value: format,
               onChange: (value: string) => updateBattle({
                 format: value,
               }, `${l.scope}:${battleId}:Format~Dropdown:input.onChange()`),
-              onBlur: () => void 0,
-              onFocus: () => void 0,
             }}
             options={formatOptions}
-            noOptionsMessage={t('battle.format.empty') as string}
+            noOptionsMessage={t('battle.format.empty') as React.ReactNode}
             filterOption={formatOptionsFilter}
             clearable={false}
             disabled={operatingMode !== 'standalone'}

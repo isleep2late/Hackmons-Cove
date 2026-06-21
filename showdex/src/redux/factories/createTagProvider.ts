@@ -1,6 +1,8 @@
 import { type ReduxProvidedTag, type ReduxTagType } from '@showdex/redux/services';
 import { type ReduxBasePayload } from './buildQueryUrl';
 
+/* eslint-disable @typescript-eslint/indent */
+
 export const createTagProvider = <TPayload extends ReduxBasePayload>(
   tagType: ReduxTagType,
   additionalTags?: ReduxProvidedTag[] | ((result: TPayload[]) => ReduxProvidedTag[]),
@@ -30,3 +32,5 @@ export const createTagProvider = <TPayload extends ReduxBasePayload>(
     },
   ].filter(Boolean);
 };
+
+/* eslint-enable @typescript-eslint/indent */

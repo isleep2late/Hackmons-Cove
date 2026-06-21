@@ -46,7 +46,7 @@ export const CalcdexErrorBoundary = ({
   style,
   error,
   battleId,
-}: CalcdexErrorBoundaryProps): React.JSX.Element => {
+}: CalcdexErrorBoundaryProps): JSX.Element => {
   // const colorScheme = useColorScheme();
 
   const state = useCalcdexBattleState(battleId);
@@ -110,7 +110,7 @@ export const CalcdexErrorBoundary = ({
 
   const handlePayloadDownload = () => {
     const compressed = LzString.compressToUint8Array(JSON.stringify(payload));
-    const blob = new Blob([compressed as Uint8Array<ArrayBuffer>]);
+    const blob = new Blob([compressed]);
 
     FileSaver.saveAs(blob, [
       env('build-name'),
@@ -204,7 +204,7 @@ export const CalcdexErrorBoundary = ({
             >
               <Scrollable className={styles.errorStackContainer}>
                 <div className={styles.errorStack}>
-                  {sanitizedStack || error?.toString()}
+                  {sanitizedStack || error}
                 </div>
               </Scrollable>
 

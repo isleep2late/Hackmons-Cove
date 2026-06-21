@@ -10,7 +10,7 @@ export const PokeGlanceOptionTooltip = ({
   value,
   hidden,
   ...props
-}: PokeGlanceOptionTooltipProps): React.JSX.Element => {
+}: PokeGlanceOptionTooltipProps): JSX.Element => {
   if (!value || hidden) {
     return null;
   }

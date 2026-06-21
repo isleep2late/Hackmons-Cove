@@ -5,11 +5,14 @@ import { type TooltipProps, Tooltip } from '../Tooltip';
 import {
   type BaseButtonProps,
   type ButtonElement,
+  type ButtonElementType,
   BaseButton,
 } from './BaseButton';
 import styles from './Button.module.scss';
 
-export interface ButtonProps extends BaseButtonProps {
+export interface ButtonProps<
+  T extends ButtonElementType = 'button',
+> extends BaseButtonProps<T> {
   labelClassName?: string;
   labelStyle?: React.CSSProperties;
   forceColorScheme?: Showdown.ColorScheme;
@@ -29,7 +32,12 @@ export interface ButtonProps extends BaseButtonProps {
   childrenFirst?: boolean;
 }
 
-export const Button = React.forwardRef<ButtonElement, ButtonProps>(({
+/* eslint-disable @typescript-eslint/indent -- this rule is broken af. see Issue #1824 in the typescript-eslint GitHub repo. */
+/* eslint-disable react/prop-types */
+
+export const Button = React.forwardRef<ButtonElement, ButtonProps>(<
+  T extends ButtonElementType = 'button',
+>({
   className,
   labelClassName,
   labelStyle,
@@ -51,7 +59,7 @@ export const Button = React.forwardRef<ButtonElement, ButtonProps>(({
   disabled,
   children,
   ...props
-}: ButtonProps, forwardedRef: React.ForwardedRef<ButtonElement>): React.JSX.Element => {
+}: ButtonProps<T>, forwardedRef: React.ForwardedRef<ButtonElement>): JSX.Element => {
   const ref = React.useRef<ButtonElement>(null);
 
   const currentColorScheme = useColorScheme();
@@ -86,12 +94,12 @@ export const Button = React.forwardRef<ButtonElement, ButtonProps>(({
 
         {
           ((!!label || childrenLabel) && !hideLabel) &&
-          <span
+          <label
             className={cx(styles.label, labelClassName)}
             style={labelStyle}
           >
             {label || childrenLabel}
-          </span>
+          </label>
         }
 
         {suffix}
@@ -112,3 +120,6 @@ export const Button = React.forwardRef<ButtonElement, ButtonProps>(({
     </>
   );
 });
+
+/* eslint-enable react/prop-types */
+/* eslint-enable @typescript-eslint/indent */

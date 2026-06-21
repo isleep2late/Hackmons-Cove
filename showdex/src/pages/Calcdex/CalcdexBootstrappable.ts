@@ -15,7 +15,7 @@ import {
   CalcdexPlayerKeys as AllPlayerKeys,
 } from '@showdex/interfaces/calc';
 import { syncBattle } from '@showdex/redux/actions';
-import { type RootDispatch, calcdexSlice, hellodexSlice } from '@showdex/redux/store';
+import { calcdexSlice, hellodexSlice } from '@showdex/redux/store';
 import {
   clonePlayerSideConditions,
   sanitizePlayerSide,
@@ -46,6 +46,8 @@ const battleRecordReducerNameFor = (
     ? 'recordWin'
     : 'recordLoss'
 );
+
+/* eslint-disable @typescript-eslint/indent */
 
 /**
  * putting the *java* in *java*script
@@ -323,7 +325,7 @@ export const MixinCalcdexBootstrappable = <
 
       // note: syncBattle() is no longer async, but since it's still wrapped in an async thunky,
       // we're keeping the `void` to keep TypeScript happy lol (`void` does nothing here btw)
-      void (Adapter.store.dispatch as RootDispatch)(syncBattle({
+      void Adapter.store.dispatch(syncBattle({
         battle: this.battle,
         request: this.battleRequest,
         onAcceptOts: (id) => void CalcdexBootstrappableMixin.acceptBattleOts(id),
@@ -661,6 +663,8 @@ export const MixinCalcdexBootstrappable = <
 
   return CalcdexBootstrappableMixin;
 };
+
+/* eslint-enable @typescript-eslint/indent */
 
 export abstract class CalcdexBootstrappable extends MixinCalcdexBootstrappable(BootdexBootstrappable) {
   public static override readonly scope = l.scope;

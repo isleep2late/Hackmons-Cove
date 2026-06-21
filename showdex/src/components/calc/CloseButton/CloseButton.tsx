@@ -6,6 +6,8 @@ import styles from './CloseButton.module.scss';
 
 export type CloseButtonProps = Omit<ButtonProps, 'label' | 'hoverScale' | 'absoluteHover' | 'children'>;
 
+/* eslint-disable @typescript-eslint/indent */
+
 /**
  * Note that this button should only be rendered in the Calcdex for mobile overlays only.
  *
@@ -51,3 +53,5 @@ export const CloseButton = React.forwardRef<ButtonElement, CloseButtonProps>(({
     </Button>
   );
 });
+
+/* eslint-enable @typescript-eslint/indent */

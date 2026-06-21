@@ -82,7 +82,7 @@ const l = logger('@showdex/components/calc/PokeInfo');
 export const PokeInfo = ({
   className,
   style,
-}: PokeInfoProps): React.JSX.Element => {
+}: PokeInfoProps): JSX.Element => {
   const { t } = useTranslation('calcdex');
 
   const {
@@ -157,7 +157,7 @@ export const PokeInfo = ({
   ]);
 
   const abilityOptionsFilter = React.useMemo(
-    () => createAliasFilter(t('pokedex:abilityAliases', { returnObjects: true }) as Record<string, string>),
+    () => createAliasFilter(t('pokedex:abilityAliases', { returnObjects: true })),
     [t],
   );
 
@@ -275,7 +275,7 @@ export const PokeInfo = ({
   ]);
 
   const itemOptionsFilter = React.useMemo(
-    () => createAliasFilter(t('pokedex:itemAliases', { returnObjects: true }) as Record<string, string>),
+    () => createAliasFilter(t('pokedex:itemAliases', { returnObjects: true })),
     [t],
   );
 
@@ -338,7 +338,7 @@ export const PokeInfo = ({
 
   const formeOptionsFilter = React.useMemo(() => (
     operatingMode === 'standalone'
-      && createAliasFilter(t('pokedex:speciesAliases', { returnObjects: true }) as Record<string, string>)
+      && createAliasFilter(t('pokedex:speciesAliases', { returnObjects: true }))
   ) || null, [
     operatingMode,
     t,
@@ -577,11 +577,10 @@ export const PokeInfo = ({
             {operatingMode === 'standalone' ? (
               <Dropdown
                 className={styles.formeDropdown}
-                aria-label={t('poke.info.forme.aria') as string}
-                hint={t('pokedex:species.missingno', 'MissingNo.') as string}
+                aria-label={t('poke.info.forme.aria') as React.ReactNode}
+                hint={t('pokedex:species.missingno', 'MissingNo.') as React.ReactNode}
                 optionTooltip={PokeGlanceOptionTooltip}
                 optionTooltipProps={{ format }}
-                meta={{}}
                 input={{
                   name: `${l.scope}:${pokemonKey}:SpeciesForme`,
                   value: pokemon?.speciesForme,
@@ -598,12 +597,10 @@ export const PokeInfo = ({
 
                     updatePokemon({ speciesForme: value }, s);
                   },
-                  onBlur: () => void 0,
-                  onFocus: () => void 0,
                 }}
                 inputMode="text"
                 options={formeOptions}
-                noOptionsMessage={t('poke.info.forme.empty', 'No Pokémon') as string}
+                noOptionsMessage={t('poke.info.forme.empty', 'No Pokémon') as React.ReactNode}
                 filterOption={formeOptionsFilter}
                 clearable
                 highlight={!pokemon?.speciesForme}
@@ -673,12 +670,12 @@ export const PokeInfo = ({
                     !pokemon?.speciesForme && styles.disabled,
                   )}
                   inputClassName={styles.levelInputField}
-                  label={t('poke.info.level.aria', { pokemon: friendlyPokemonName }) as string}
+                  label={t('poke.info.level.aria', { pokemon: friendlyPokemonName }) as React.ReactNode}
                   hideLabel
                   hint={(
                     pokemon?.speciesForme
-                      ? String(pokemon.level ?? defaultLevel)
-                      : t('poke.info.level.hint') as string
+                      ? (pokemon.level?.toString() || defaultLevel)
+                      : t('poke.info.level.hint') as React.ReactNode
                   )}
                   fallbackValue={pokemon?.speciesForme ? defaultLevel : null}
                   min={1}
@@ -687,15 +684,12 @@ export const PokeInfo = ({
                   shiftStep={10}
                   clearOnFocus
                   absoluteHover
-                  meta={{}}
                   input={{
                     name: `${l.scope}:${pokemonKey}:Level`,
                     value: (!!pokemon?.speciesForme && (pokemon.level || defaultLevel)) || null,
                     onChange: (value: number) => updatePokemon({
                       level: value,
                     }, `${l.scope}:ValueField~Level:input.onChange()`),
-                    onBlur: () => void 0,
-                    onFocus: () => void 0,
                   }}
                   disabled={!pokemon?.speciesForme}
                 />
@@ -704,17 +698,14 @@ export const PokeInfo = ({
 
             <PokeTypeField
               className={styles.typesField}
-              label={t('poke.info.types.aria', { pokemon: friendlyPokemonName }) as string}
+              label={t('poke.info.types.aria', { pokemon: friendlyPokemonName }) as React.ReactNode}
               multi
-              meta={{}}
               input={{
                 name: `${l.scope}:${pokemonKey}:Types`,
-                value: [...(pokemon?.dirtyTypes || [])] as unknown as Showdown.TypeName,
+                value: [...(pokemon?.dirtyTypes || [])],
                 onChange: (types: Showdown.TypeName[]) => updatePokemon({
                   dirtyTypes: [...(types || [])],
                 }, `${l.scope}:PokeTypeField:input.onChange()`),
-                onBlur: () => void 0,
-                onFocus: () => void 0,
               }}
               tooltipPlacement="bottom-start"
               containerSize={(
@@ -734,9 +725,8 @@ export const PokeInfo = ({
               (!!pokemon?.speciesForme && gen > 8) &&
               <PokeTypeField
                 className={cx(styles.typesField, styles.teraTypeField)}
-                label={t('poke.info.teraType.aria', { pokemon: friendlyPokemonName }) as string}
-                title={t('poke.info.teraType.label', 'Tera Type') as string}
-                meta={{}}
+                label={t('poke.info.teraType.aria', { pokemon: friendlyPokemonName }) as React.ReactNode}
+                title={t('poke.info.teraType.label', 'Tera Type') as React.ReactNode}
                 input={{
                   name: `${l.scope}:${pokemonKey}:TeraType`,
                   value: pokemon?.dirtyTeraType || pokemon?.teraType || '???',
@@ -744,11 +734,9 @@ export const PokeInfo = ({
                     dirtyTeraType: type,
                     terastallized: !!type && type !== '???' && pokemon?.terastallized,
                   }, `${l.scope}:PokeTypeField~Tera:input.onChange()`),
-                  onBlur: () => void 0,
-                  onFocus: () => void 0,
                 }}
                 tooltipPlacement="bottom-start"
-                defaultTypeLabel={t('poke.info.teraType.emptyLabel', 'TERA') as string}
+                defaultTypeLabel={t('poke.info.teraType.emptyLabel', 'TERA') as React.ReactNode}
                 teraTyping
                 containerSize={containerWidth < 360 || (
                   pokemon?.dirtyTypes?.length
@@ -926,7 +914,7 @@ export const PokeInfo = ({
           </div>
 
           <Dropdown
-            aria-label={t('poke.info.preset.aria', { pokemon: friendlyPokemonName }) as string}
+            aria-label={t('poke.info.preset.aria', { pokemon: friendlyPokemonName }) as React.ReactNode}
             hint={(
               presetsLoading
                 ? t('common:labels.loading', 'Loading')
@@ -934,14 +922,13 @@ export const PokeInfo = ({
                   `poke.info.preset.${pokemon?.speciesForme ? 'none' : 'hint'}`,
                   pokemon?.speciesForme ? 'None' : '???',
                 )
-            ) as string}
+            ) as React.ReactNode}
             optionTooltip={PokePresetOptionTooltip}
             optionTooltipProps={{
               format,
               presets,
               hidden: !settings?.showPresetTooltip,
             }}
-            meta={{}}
             input={{
               name: `${l.scope}:${pokemonKey}:${pokemonKey}:Preset`,
               value: pokemon?.presetId,
@@ -954,10 +941,10 @@ export const PokeInfo = ({
               ),
             }}
             options={presetOptions}
-            noOptionsMessage={t('poke.info.preset.empty', 'No Sets') as string}
+            noOptionsMessage={t('poke.info.preset.empty', 'No Sets') as React.ReactNode}
             clearable={false}
             loading={presetsLoading}
-            loadingMessage={t('poke.info.preset.loading', 'Loading') as string}
+            loadingMessage={t('poke.info.preset.loading', 'Loading') as React.ReactNode}
             disabled={!pokemon?.speciesForme || presetsLoading || !presetOptions.length}
           />
         </div>
@@ -1005,9 +992,8 @@ export const PokeInfo = ({
                 showBoostedStat &&
                 <PokeStatField
                   className={styles.toggleButton}
-                  label={t(`poke.info.ability.${pokemon.dirtyBoostedStat || pokemon.boostedStat ? 'b' : 'autoB'}oostedStatLabel`) as string}
-                  override={pokemon.dirtyBoostedStat || pokemon.boostedStat ? undefined : t('poke.info.ability.autoBoostedStat') as string}
-                  meta={{}}
+                  label={t(`poke.info.ability.${pokemon.dirtyBoostedStat || pokemon.boostedStat ? 'b' : 'autoB'}oostedStatLabel`) as React.ReactNode}
+                  override={pokemon.dirtyBoostedStat || pokemon.boostedStat ? undefined : t('poke.info.ability.autoBoostedStat') as React.ReactNode}
                   headerSuffix={((
                     pokemon.boostedStat
                       && pokemon.dirtyBoostedStat
@@ -1032,8 +1018,6 @@ export const PokeInfo = ({
                     onChange: (value: Showdown.StatNameNoHp) => updatePokemon({
                       dirtyBoostedStat: value,
                     }, `${l.scope}:PokeStatField~DirtyBoostedStat:input.onChange()`),
-                    onBlur: () => void 0,
-                    onFocus: () => void 0,
                   }}
                   format={format}
                   omitHpStat
@@ -1070,25 +1054,22 @@ export const PokeInfo = ({
             </div>
 
             <Dropdown
-              aria-label={t('poke.info.ability.aria', { pokemon: friendlyPokemonName }) as string}
-              hint={t(`poke.info.ability.${legacy ? 'legacyH' : 'h'}int`) as string}
+              aria-label={t('poke.info.ability.aria', { pokemon: friendlyPokemonName }) as React.ReactNode}
+              hint={t(`poke.info.ability.${legacy ? 'legacyH' : 'h'}int`) as React.ReactNode}
               optionTooltip={PokeAbilityOptionTooltip}
               optionTooltipProps={{
                 format,
                 hidden: !settings?.showAbilityTooltip,
               }}
-              meta={{}}
               input={{
                 name: `${l.scope}:${pokemonKey}:Ability`,
                 value: legacy ? null : abilityName,
                 onChange: (value: AbilityName) => updatePokemon({
                   dirtyAbility: value,
                 }, `${l.scope}:Dropdown~DirtyAbility:input.onChange()`),
-                onBlur: () => void 0,
-                onFocus: () => void 0,
               }}
               options={abilityOptions}
-              noOptionsMessage={t('poke.info.ability.empty', 'No Abilities') as string}
+              noOptionsMessage={t('poke.info.ability.empty', 'No Abilities') as React.ReactNode}
               filterOption={abilityOptionsFilter}
               clearable={false}
               highlight={pokemon?.abilityToggled}
@@ -1138,13 +1119,12 @@ export const PokeInfo = ({
             <Dropdown
               aria-label={t(`poke.info.nature.${showPresetSpreads ? 'spreadA' : 'a'}ria`, {
                 pokemon: friendlyPokemonName,
-              }) as string}
+              }) as React.ReactNode}
               hint={(
                 (legacy && t('poke.info.nature.legacyHint'))
                   || (showPresetSpreads && (currentSpread || t('poke.info.nature.customHint')))
                   || t('poke.info.nature.hint')
-              ) as string}
-              meta={{}}
+              ) as React.ReactNode}
               input={{
                 name: `${l.scope}:${pokemonKey}:${pokemonKey}:${showPresetSpreads ? 'Spreads' : 'Natures'}`,
                 value: legacy ? null : (showPresetSpreads ? currentSpread : pokemon?.nature),
@@ -1154,14 +1134,12 @@ export const PokeInfo = ({
                     : { nature: name as Showdown.NatureName },
                   `${l.scope}:Dropdown~${showPresetSpreads ? 'Spread' : 'Nature'}:input.onChange()`,
                 ),
-                onBlur: () => void 0,
-                onFocus: () => void 0,
               }}
               options={showPresetSpreads ? spreadOptions : natureOptions}
               noOptionsMessage={t(
                 `poke.info.nature.${showPresetSpreads ? 'spreadE' : 'e'}mpty`,
                 `No ${showPresetSpreads ? 'Spreads' : 'Natures'}`,
-              ) as string}
+              ) as React.ReactNode}
               clearable={false}
               disabled={legacy || !pokemon?.speciesForme}
             />
@@ -1213,9 +1191,8 @@ export const PokeInfo = ({
             </div>
 
             <Dropdown
-              aria-label={t('poke.info.item.aria', { pokemon: friendlyPokemonName }) as string}
-              hint={t(`poke.info.item.${gen === 1 ? 'legacyH' : 'h'}int`) as string}
-              meta={{}}
+              aria-label={t('poke.info.item.aria', { pokemon: friendlyPokemonName }) as React.ReactNode}
+              hint={t(`poke.info.item.${gen === 1 ? 'legacyH' : 'h'}int`) as React.ReactNode}
               tooltip={pokemon?.itemEffect || pokemon?.prevItem ? (
                 <div
                   className={cx(
@@ -1257,11 +1234,9 @@ export const PokeInfo = ({
                 onChange: (name: ItemName) => updatePokemon({
                   dirtyItem: name ?? ('' as ItemName),
                 }, `${l.scope}:Dropdown~DirtyItem:input.onChange()`),
-                onBlur: () => void 0,
-                onFocus: () => void 0,
               }}
               options={itemOptions}
-              noOptionsMessage={t('poke.info.item.empty', 'No Items') as string}
+              noOptionsMessage={t('poke.info.item.empty', 'No Items') as React.ReactNode}
               filterOption={itemOptionsFilter}
               disabled={gen === 1 || !pokemon?.speciesForme}
             />

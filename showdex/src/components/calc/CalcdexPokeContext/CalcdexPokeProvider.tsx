@@ -58,7 +58,7 @@ export const CalcdexPokeProvider = ({
   playerKey,
   movesCount = 4,
   children,
-}: CalcdexPokeProviderProps): React.JSX.Element => {
+}: CalcdexPokeProviderProps): JSX.Element => {
   const ctx = React.useContext(CalcdexContext);
 
   const {

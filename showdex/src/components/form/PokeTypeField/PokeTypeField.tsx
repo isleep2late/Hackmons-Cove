@@ -44,6 +44,8 @@ export interface PokeTypeFieldProps<
   disabled?: boolean;
 }
 
+/* eslint-disable @typescript-eslint/indent */
+
 export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>(<
   Multi extends boolean = false,
 >({
@@ -67,7 +69,7 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
   input,
   readOnly,
   disabled,
-}: PokeTypeFieldProps<Multi>, forwardedRef: React.ForwardedRef<ButtonElement>): React.JSX.Element => {
+}: PokeTypeFieldProps<Multi>, forwardedRef: React.ForwardedRef<ButtonElement>): JSX.Element => {
   const containerRef = React.useRef<ButtonElement>(null);
 
   React.useImperativeHandle(
@@ -364,3 +366,5 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
     </Tooltip>
   );
 });
+
+/* eslint-enable @typescript-eslint/indent */

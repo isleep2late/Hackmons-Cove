@@ -5,6 +5,8 @@ import { showdexedDb } from './openIndexedDb';
 const metaName = env('indexed-db-meta-store-name');
 const l = logger('@showdex/utils/storage/readMetaDb()');
 
+/* eslint-disable @typescript-eslint/indent */
+
 /**
  * Builds the arbitrary payload object of the requested `keys[]` from Showdex's meta store.
  *
@@ -69,3 +71,5 @@ export const readMetaDb = <
     reject(error);
   };
 });
+
+/* eslint-enable @typescript-eslint/indent */

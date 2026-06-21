@@ -7,6 +7,7 @@
 import {
   type Draft,
   type PayloadAction,
+  type SliceCaseReducers,
   createSlice,
   current,
 } from '@reduxjs/toolkit';
@@ -95,7 +96,7 @@ export interface ShowdexSliceState {
  *
  * @since 1.0.2
  */
-export interface ShowdexSliceReducers {
+export interface ShowdexSliceReducers extends SliceCaseReducers<ShowdexSliceState> {
   /**
    * Sets the `authUsername`.
    *
@@ -160,7 +161,7 @@ export interface ShowdexSliceReducers {
 
 const l = logger('@showdex/redux/store/showdexSlice');
 
-export const showdexSlice = createSlice({
+export const showdexSlice = createSlice<ShowdexSliceState, ShowdexSliceReducers, 'showdex'>({
   name: 'showdex',
 
   initialState: {

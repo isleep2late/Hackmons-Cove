@@ -1,5 +1,7 @@
 import { env } from '@showdex/utils/core';
 
+/* eslint-disable @typescript-eslint/indent */
+
 /**
  * Retrieves the stored item with the specified `envKey` in `LocalStorage`.
  *
@@ -26,6 +28,8 @@ export const readLocalStorageItem = <
 
   return localStorage.getItem(key) as T || null;
 };
+
+/* eslint-enable @typescript-eslint/indent */
 
 /**
  * Sets the stored item with the specified `envKey` to `value` in `LocalStorage`.

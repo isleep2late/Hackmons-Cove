@@ -42,7 +42,7 @@ export const PlayerInfo = ({
   playerOptions,
   mobile,
   onUserPopup,
-}: PlayerInfoProps): React.JSX.Element => {
+}: PlayerInfoProps): JSX.Element => {
   const { t } = useTranslation('calcdex');
   const colorScheme = useColorScheme();
 
@@ -142,7 +142,7 @@ export const PlayerInfo = ({
     >
       {playerOptions?.length ? (
         <Dropdown
-          aria-label={t('player.user.aria', { position: capitalize(position) }) as string}
+          aria-label={t('player.user.aria', { position: capitalize(position) }) as React.ReactNode}
           hint={name || defaultName}
           tooltip={settings?.showUiTooltips ? (
             <Trans
@@ -154,7 +154,6 @@ export const PlayerInfo = ({
               values={{ position: capitalize(position) }}
             />
           ) : null}
-          meta={{}}
           input={{
             name: `PlayerInfo:${position}:Dropdown`,
             value: playerKey,
@@ -166,11 +165,9 @@ export const PlayerInfo = ({
               key,
               `${l.scope}:Dropdown~PlayerKey-${position}:input.onChange()`,
             ),
-            onBlur: () => void 0,
-            onFocus: () => void 0,
           }}
           options={playerOptions}
-          noOptionsMessage={t('player.user.empty') as string}
+          noOptionsMessage={t('player.user.empty') as React.ReactNode}
           clearable={false}
           disabled={!playerKey}
         />

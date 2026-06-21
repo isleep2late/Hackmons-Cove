@@ -24,7 +24,7 @@ export const CircularBarPath = ({
   radius,
   strokeWidth,
   reverse,
-}: CircularBarPathProps): React.JSX.Element => {
+}: CircularBarPathProps): JSX.Element => {
   const circumference = 2 * Math.PI * radius;
   const arcLength = (1 - arcPercentage) * circumference;
 

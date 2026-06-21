@@ -3,6 +3,8 @@ import { getDexForFormat } from '@showdex/utils/dex';
 import { getPresetFormes } from '@showdex/utils/presets';
 import { parsePokemonDetails } from './parsePokemonDetails';
 
+/* eslint-disable @typescript-eslint/indent */
+
 /**
  * Determines if `pokemonA` & `pokemonB` are possibly the same Pokemon based on their `details` property.
  *
@@ -139,3 +141,5 @@ export const similarPokemon = <
         || shinyA === shinyB
     );
 };
+
+/* eslint-enable @typescript-eslint/indent */

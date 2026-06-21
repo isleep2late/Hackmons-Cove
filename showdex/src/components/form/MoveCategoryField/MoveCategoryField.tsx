@@ -50,7 +50,7 @@ export const MoveCategoryField = React.forwardRef<ButtonElement, MoveCategoryFie
   nullable,
   format,
   disabled,
-}: MoveCategoryFieldProps, forwardedRef): React.JSX.Element => {
+}: MoveCategoryFieldProps, forwardedRef): JSX.Element => {
   const containerRef = React.useRef<ButtonElement>(null);
 
   React.useImperativeHandle(

@@ -1,20 +1,27 @@
 import * as React from 'react';
 import { type FieldRenderProps } from 'react-final-form';
+import { type AriaTextFieldProps } from '@react-types/textfield';
+import { type TextFieldAria as TextFieldAriaInterface, useTextField } from '@react-aria/textfield';
 import cx from 'classnames';
+// import { useTextFieldHandle } from './useTextFieldHandle';
 import styles from './BaseTextField.module.scss';
 
 export type TextFieldElement = HTMLInputElement | HTMLTextAreaElement;
 export type TextFieldValue = string | number;
 
+export type TextFieldAria<
+  T extends TextFieldElement = HTMLInputElement,
+> = Modify<TextFieldAriaInterface, {
+  inputProps: Omit<React.DetailedHTMLProps<T extends HTMLInputElement ? React.InputHTMLAttributes<T> : React.TextareaHTMLAttributes<T>, T>, 'dangerouslySetInnerHTML'>;
+  labelProps: Omit<React.DetailedHTMLProps<React.LabelHTMLAttributes<HTMLLabelElement>, HTMLLabelElement>, 'dangerouslySetInnerHTML'>;
+}>;
+
 export interface CommonTextFieldProps<
   FieldValue extends TextFieldValue = string,
   T extends TextFieldElement = HTMLInputElement,
-> extends FieldRenderProps<FieldValue, T> {
+> extends Omit<AriaTextFieldProps, 'placeholder' | 'isDisabled'>, FieldRenderProps<FieldValue, T> {
   tabIndex?: number;
-  label?: string;
   hint?: string;
-  autoFocus?: boolean;
-  autoComplete?: string;
   disabled?: boolean;
 }
 
@@ -25,12 +32,16 @@ export interface BaseTextFieldProps<
   labelStyle?: React.CSSProperties;
   inputClassName?: string;
   inputStyle?: React.CSSProperties;
+  label?: string;
   min?: number;
   max?: number;
   step?: number;
   monospace?: boolean;
   hideLabel?: boolean;
 }
+
+/* eslint-disable @typescript-eslint/indent -- this rule is broken af. see Issue #1824 in the typescript-eslint GitHub repo. */
+/* eslint-disable react/prop-types -- this rule is tripping balls rn, probably because of all the generics lmao. */
 
 export const BaseTextField = React.forwardRef<HTMLInputElement, BaseTextFieldProps>(<
   FieldValue extends TextFieldValue = string,
@@ -50,18 +61,45 @@ export const BaseTextField = React.forwardRef<HTMLInputElement, BaseTextFieldPro
   monospace = true,
   hideLabel = false,
   input,
-  meta: _meta,
+  meta,
   disabled = false,
-}: BaseTextFieldProps<FieldValue>, forwardedRef: React.ForwardedRef<HTMLInputElement>): React.JSX.Element => {
-  const inputId = input?.name ? `field-${input.name}` : undefined;
+  ...props
+}: BaseTextFieldProps<FieldValue>, forwardedRef: React.ForwardedRef<HTMLInputElement>): JSX.Element => {
+  const inputRef = React.useRef<HTMLInputElement>(null);
+
+  const { labelProps, inputProps } = useTextField({
+    ...props,
+    inputElementType: 'input',
+    type: input?.type,
+    name: input?.name,
+    label,
+    placeholder: hint,
+    value: String(input?.value),
+    autoFocus,
+    autoComplete,
+    isDisabled: disabled,
+    onChange: input?.onChange,
+    onFocus: input?.onFocus,
+    onBlur: input?.onBlur,
+  }, inputRef) as TextFieldAria;
+
+  // useTextFieldHandle(inputRef, forwardedRef, input);
+
+  React.useImperativeHandle(
+    forwardedRef,
+    () => inputRef.current,
+  );
 
   return (
     <>
       {
         (!hideLabel && !!label) &&
         <label
-          htmlFor={inputId}
-          className={cx(styles.label, labelClassName)}
+          {...labelProps}
+          className={cx(
+            styles.label,
+            labelClassName,
+          )}
           style={labelStyle}
         >
           {label}
@@ -69,19 +107,8 @@ export const BaseTextField = React.forwardRef<HTMLInputElement, BaseTextFieldPro
       }
 
       <input
-        ref={forwardedRef}
-        id={inputId}
-        type={input?.type ?? 'text'}
-        name={input?.name}
-        value={String(input?.value ?? '')}
-        autoFocus={autoFocus}
-        autoComplete={autoComplete}
-        placeholder={hint}
-        disabled={disabled}
-        aria-label={!label ? hint : undefined}
-        onChange={(e) => input?.onChange?.(e.target.value as FieldValue & string)}
-        onFocus={input?.onFocus}
-        onBlur={input?.onBlur}
+        ref={inputRef}
+        {...inputProps}
         className={cx(
           styles.input,
           monospace && styles.monospace,
@@ -96,3 +123,6 @@ export const BaseTextField = React.forwardRef<HTMLInputElement, BaseTextFieldPro
     </>
   );
 });
+
+/* eslint-enable react/prop-types */
+/* eslint-enable @typescript-eslint/indent */

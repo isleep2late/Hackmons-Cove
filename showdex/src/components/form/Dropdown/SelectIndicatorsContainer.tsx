@@ -4,6 +4,8 @@ import type { GroupBase, IndicatorsContainerProps } from 'react-select';
 import type { DropdownOption } from './Dropdown';
 import styles from './Dropdown.module.scss';
 
+/* eslint-disable @typescript-eslint/indent */
+
 export const SelectIndicatorsContainer = <
   Option extends DropdownOption,
   Multi extends boolean,
@@ -13,7 +15,7 @@ export const SelectIndicatorsContainer = <
   innerProps,
   isMulti,
   children,
-}: IndicatorsContainerProps<Option, Multi, Group>): React.JSX.Element => (
+}: IndicatorsContainerProps<Option, Multi, Group>): JSX.Element => (
   <div
     className={cx(
       styles.indicatorsContainer,
@@ -25,3 +27,5 @@ export const SelectIndicatorsContainer = <
     {children}
   </div>
 );
+
+/* eslint-enable @typescript-eslint/indent */

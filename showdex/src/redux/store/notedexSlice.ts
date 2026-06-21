@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import {
   type Draft,
   type PayloadAction,
+  type SliceCaseReducers,
   createSlice,
   current,
 } from '@reduxjs/toolkit';
@@ -132,7 +133,7 @@ export interface NotedexSliceState {
  *
  * @since 1.3.0
  */
-export interface NotedexSliceReducers {
+export interface NotedexSliceReducers extends SliceCaseReducers<NotedexSliceState> {
   /**
    * Initializes an empty Notedex state.
    *
@@ -199,7 +200,7 @@ export interface NotedexSliceReducers {
 
 const l = logger('@showdex/redux/store/notedexSlice');
 
-export const notedexSlice = createSlice({
+export const notedexSlice = createSlice<NotedexSliceState, NotedexSliceReducers, 'notedex'>({
   name: 'notedex',
 
   initialState: {

@@ -39,7 +39,7 @@ export const PageContainer = React.forwardRef<HTMLDivElement, PageContainerProps
   contentScrollable,
   children,
   ...props
-}, forwardedRef): React.JSX.Element => {
+}, forwardedRef): JSX.Element => {
   const colorScheme = useColorScheme();
   const colorTheme = useColorTheme();
   const glassyTerrain = useGlassyTerrain();

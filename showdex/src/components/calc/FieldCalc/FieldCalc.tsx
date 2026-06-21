@@ -29,7 +29,7 @@ export const FieldCalc = ({
   style,
   playerKey = 'p1',
   opponentKey = 'p2',
-}: FieldCalcProps): React.JSX.Element => {
+}: FieldCalcProps): JSX.Element => {
   const { t } = useTranslation('calcdex');
 
   const {
@@ -208,15 +208,12 @@ export const FieldCalc = ({
           key={toggleKey}
           className={styles.toggleButton}
           // headerPrefix={tooltipContent}
-          meta={{}}
           input={{
             name: `${l.scope}:${pkey}:${sideKey}`,
             value: currentSide?.spikes || null,
             onChange: (value: number) => updateSide(pkey, {
               [sideKey]: value || null,
             }, `${l.scope}:${pkey}:SpikesField~${sideKey}:input.onChange()`),
-            onBlur: () => void 0,
-            onFocus: () => void 0,
           }}
           togglePrimary
           toggleActive={active}
@@ -397,25 +394,22 @@ export const FieldCalc = ({
       <TableGridItem className={styles.weatherInput}>
         <Dropdown
           style={{ textAlign: 'left' }}
-          aria-label={t('field.weather.aria') as string}
-          hint={t(`field.weather.${gen === 1 ? 'legacyH' : 'h'}int`) as string}
-          optionTooltip={weatherTooltip as never}
+          aria-label={t('field.weather.aria') as React.ReactNode}
+          hint={t(`field.weather.${gen === 1 ? 'legacyH' : 'h'}int`) as React.ReactNode}
+          optionTooltip={weatherTooltip}
           optionTooltipProps={{ hidden: !settings?.showFieldTooltips }}
-          meta={{}}
           input={{
             name: `FieldCalc:${battleId || '???'}:Weather:Dropdown`,
             value: weather,
             onChange: (value: Weather) => updateField({
               dirtyWeather: value || (autoWeather || currentWeather ? '' as Weather : null),
             }, `${l.scope}:Dropdown~Weather:input.onChange()`),
-            onBlur: () => void 0,
-            onFocus: () => void 0,
           }}
           options={getWeatherConditions(format).map((name: Weather) => ({
             label: t(`pokedex:weather.${formatId(name)}.label`, name),
             value: name,
           }))}
-          noOptionsMessage={t('field.weather.empty') as string}
+          noOptionsMessage={t('field.weather.empty') as React.ReactNode}
           highlight={!!weather}
           disabled={disabled || !battleId || gen === 1}
         />
@@ -425,25 +419,22 @@ export const FieldCalc = ({
       <TableGridItem className={styles.terrainInput}>
         <Dropdown
           style={{ textAlign: 'left' }}
-          aria-label={t('field.terrain.aria') as string}
-          hint={t(`field.terrain.${gen < 6 ? 'legacyH' : 'h'}int`) as string}
-          optionTooltip={terrainTooltip as never}
+          aria-label={t('field.terrain.aria') as React.ReactNode}
+          hint={t(`field.terrain.${gen < 6 ? 'legacyH' : 'h'}int`) as React.ReactNode}
+          optionTooltip={terrainTooltip}
           optionTooltipProps={{ hidden: !settings?.showFieldTooltips }}
-          meta={{}}
           input={{
             name: `FieldCalc:${battleId || '???'}:Terrain:Dropdown`,
             value: terrain,
             onChange: (value: Terrain) => updateField({
               dirtyTerrain: value || (autoTerrain || currentTerrain ? '' as Terrain : null),
             }, `${l.scope}:Dropdown~Terrain:input.onChange()`),
-            onBlur: () => void 0,
-            onFocus: () => void 0,
           }}
           options={TerrainNames.map((name) => ({
             label: t(`pokedex:terrain.${formatId(name)}.label`, name),
             value: name,
           }))}
-          noOptionsMessage={t('field.terrain.empty') as string}
+          noOptionsMessage={t('field.terrain.empty') as React.ReactNode}
           highlight={!!terrain}
           disabled={disabled || !battleId || gen < 6}
         />

@@ -3,6 +3,8 @@ import { formatId } from '@showdex/utils/core';
 import { percentage } from '@showdex/utils/humanize';
 import { detectUsageAlt } from './detectUsageAlt';
 
+/* eslint-disable @typescript-eslint/indent */
+
 /**
  * Factory that creates a function for finding the usage percent of the passed-in `name`.
  *
@@ -46,3 +48,5 @@ export const usageAltPercentFinder = <
     return String(humanize ? percentage(usage, usage === 1 ? 0 : 2) : usage);
   };
 };
+
+/* eslint-enable @typescript-eslint/indent */

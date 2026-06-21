@@ -13,7 +13,7 @@ export const ItemIcon = ({
   className,
   style,
   item,
-}: ItemIconProps): React.JSX.Element => {
+}: ItemIconProps): JSX.Element => {
   const css = item ? Dex?.getItemIcon(item) : null;
   const background = css?.replace(/^background:/, '');
 

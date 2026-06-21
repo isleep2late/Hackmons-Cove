@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/indent */
+
 /**
  * Attempts to find the `speciesForme` of the provided `pokemon`.
  *
@@ -17,3 +19,5 @@ export const detectSpeciesForme = <
   || pokemon?.details?.split?.(', ')[0] // 'Zygarde, L100, N' -> 'Zygarde' (normally just 'Zygarde' tho)
   || pokemon?.searchid?.split?.('|')[1] // 'p1: Zygarde|Zygarde-Complete' -> 'Zygarde-Complete'
   || pokemon?.ident?.split?.(': ')[1]; // 'p1: Zygarde' -> 'Zygarde'
+
+/* eslint-enable @typescript-eslint/indent */

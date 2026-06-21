@@ -1,5 +1,9 @@
 import * as React from 'react';
 import { type FieldRenderProps } from 'react-final-form';
+import { type AriaSwitchProps } from '@react-types/switch';
+import { useSwitch } from '@react-aria/switch';
+import { VisuallyHidden } from '@react-aria/visually-hidden';
+import { useToggleState } from '@react-stately/toggle';
 import {
   type DragEndEvent,
   type DragMoveEvent,
@@ -21,14 +25,24 @@ import { SwitchHandle } from './SwitchHandle';
 import { SwitchTrack } from './SwitchTrack';
 import styles from './Switch.module.scss';
 
+/* eslint-disable @typescript-eslint/indent */
+
+export type SwitchAriaProps = Omit<AriaSwitchProps,
+  | 'defaultSelected'
+  | 'isDisabled'
+  | 'isReadOnly'
+  | 'isSelected'
+>;
+
+/* eslint-enable @typescript-eslint/indent */
+
 export interface CommonToggleFieldProps<
   FieldValue = boolean,
   T extends HTMLElement = HTMLInputElement,
-> extends FieldRenderProps<FieldValue, T> {
+> extends SwitchAriaProps, FieldRenderProps<FieldValue, T> {
   tabIndex?: number;
   readOnly?: boolean;
   disabled?: boolean;
-  'aria-label'?: string;
 }
 
 export interface SwitchProps<
@@ -61,20 +75,6 @@ export interface SwitchProps<
   width?: number;
 }
 
-// visually hidden styles (replaces @react-aria/visually-hidden)
-const visuallyHiddenStyle: React.CSSProperties = {
-  border: 0,
-  clip: 'rect(0 0 0 0)',
-  clipPath: 'inset(50%)',
-  height: 1,
-  margin: '0 -1px -1px 0',
-  overflow: 'hidden',
-  padding: 0,
-  position: 'absolute',
-  width: 1,
-  whiteSpace: 'nowrap',
-};
-
 export const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(({
   className,
   style,
@@ -98,10 +98,27 @@ export const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(({
   meta,
   readOnly,
   disabled,
-  'aria-label': ariaLabel,
-}: SwitchProps, forwardedRef): React.JSX.Element => {
+  ...props
+}: SwitchProps, forwardedRef): JSX.Element => {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const ref = React.useRef<HTMLInputElement>(null);
+
+  const ariaProps: AriaSwitchProps = {
+    ...props,
+    'aria-label': label || `${input?.name || 'Switch'} Switch`,
+    name: input?.name,
+    value: input?.value?.toString?.(),
+    isSelected: input?.value,
+    autoFocus,
+    isReadOnly: readOnly,
+    isDisabled: disabled,
+    onChange: input?.onChange,
+    onFocus: input?.onFocus,
+    onBlur: input?.onBlur,
+  };
+
+  const toggleState = useToggleState(ariaProps);
+  const { inputProps } = useSwitch(ariaProps, toggleState, ref);
 
   React.useImperativeHandle(
     forwardedRef,
@@ -172,23 +189,16 @@ export const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(({
           )}
           style={fieldStyle}
         >
-          <span style={visuallyHiddenStyle}>
+          <VisuallyHidden
+            elementType="span"
+            isFocusable={false}
+          >
             <input
               ref={ref}
-              type="checkbox"
-              role="switch"
-              name={input?.name}
-              checked={!!input?.value}
-              autoFocus={autoFocus}
-              disabled={disabled}
-              readOnly={readOnly}
-              aria-label={ariaLabel || label || `${input?.name || 'Switch'} Switch`}
+              {...inputProps}
               tabIndex={disabled ? -1 : tabIndex}
-              onChange={(e) => input?.onChange?.(e.target.checked)}
-              onFocus={input?.onFocus}
-              onBlur={input?.onBlur}
             />
-          </span>
+          </VisuallyHidden>
 
           <DndContext
             id={`Switch:${input?.name || '???'}:DndContext`}
@@ -225,7 +235,10 @@ export const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(({
           {
             hasLabel &&
             <span
-              className={cx(styles.label, labelClassName)}
+              className={cx(
+                styles.label,
+                labelClassName,
+              )}
               style={labelStyle}
             >
               {label}

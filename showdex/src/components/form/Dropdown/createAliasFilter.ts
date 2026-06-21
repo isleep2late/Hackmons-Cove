@@ -1,6 +1,8 @@
 import { formatId, nonEmptyObject } from '@showdex/utils/core';
 import { type DropdownOption } from './Dropdown';
 
+/* eslint-disable @typescript-eslint/indent */
+
 // it's the same filter, but we just slapped a 2 on it
 const f2 = <TOption extends DropdownOption>(
   o: TOption,
@@ -46,3 +48,5 @@ export const createAliasFilter = (
       || f2(option, input);
   };
 };
+
+/* eslint-enable @typescript-eslint/indent */

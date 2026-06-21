@@ -36,7 +36,7 @@ export const PatronageTierRenderer = (
 ) => (
   tier: ShowdexSupporterTier,
   index?: number,
-): React.JSX.Element => {
+): JSX.Element => {
   const {
     colorScheme = 'light',
     showTitles,

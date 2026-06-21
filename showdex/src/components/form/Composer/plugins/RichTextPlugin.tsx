@@ -25,7 +25,7 @@ export const RichTextPlugin = React.forwardRef<HTMLDivElement, RichTextPluginPro
   hint,
   onFocus,
   onBlur,
-}, forwardedRef): React.JSX.Element => (
+}, forwardedRef): JSX.Element => (
   <LexicalRichTextPlugin
     contentEditable={(
       <LexicalContentEditable
