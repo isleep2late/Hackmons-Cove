@@ -1150,15 +1150,11 @@ export const commands: Chat.ChatCommands = {
 	],
 
 	uploadreplay: 'savereplay',
-	async savereplay(target, room, user, connection) {
-		throw new Chat.ErrorMessage(this.tr`You cannot upload replays from this server`);
-	/*	if (!room?.battle) {
-			throw new Chat.ErrorMessage(this.tr`You can only save replays for battles.`);
-		}
-
-		const options = (target === 'forpunishment' || target === 'silent') ? target : undefined;
-		await room.uploadReplay(user, connection, options);
-	*/
+	savereplay(target, room, user, connection) {
+		if (!room?.battle) throw new Chat.ErrorMessage(this.tr`You can only save replays for battles.`);
+		const log = room.getLog(room.battle.ended ? -1 : 0);
+		const { id } = room.getReplayData();
+		connection.send(`|queryresponse|savereplay|${JSON.stringify({ id, log })}`);
 	},
 	savereplayhelp: [`/savereplay - Saves the replay for the current battle.`],
 
