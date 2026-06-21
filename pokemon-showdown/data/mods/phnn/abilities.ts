@@ -201,7 +201,29 @@ export const Abilities: import('../../../sim/dex-abilities').ModdedAbilityDataTa
 	parentalbond: {
 		inherit: true,
 		shortDesc: "This Pokemon's damaging moves hit twice; second hit deals 50% damage.",
-		desc: "This Pokemon's damaging moves become multi-hit moves that hit twice. The second hit has its damage multiplied by 0.5. This also applies to Z-Moves.",
+		desc: "This Pokemon's damaging moves become multi-hit moves that hit twice. The second hit has its damage multiplied by 0.5. This also applies to Z-Moves and Max/G-Max moves.",
+		onPrepareHit(source, target, move) {
+			if (move.category === 'Status' || move.multihit || move.flags['noparentalbond'] || move.flags['charge'] ||
+				move.flags['futuremove'] || move.spreadHit) return;
+			move.multihit = 2;
+			move.multihitType = 'parentalbond';
+		},
+	},
+	protosynthesis: {
+		inherit: true,
+		flags: { failroleplay: 1, noreceiver: 1, noentrain: 1, notrace: 1, failskillswap: 1, notransform: 1, cantsuppress: 1 },
+	},
+	quarkdrive: {
+		inherit: true,
+		flags: { failroleplay: 1, noreceiver: 1, noentrain: 1, notrace: 1, failskillswap: 1, notransform: 1, cantsuppress: 1 },
+	},
+	hadronengine: {
+		inherit: true,
+		flags: { cantsuppress: 1 },
+	},
+	orichalcumpulse: {
+		inherit: true,
+		flags: { cantsuppress: 1 },
 	},
 	pixilate: {
 		inherit: true,
