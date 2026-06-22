@@ -18,282 +18,596 @@ The column value will be ignored for repeat sections.
 */
 
 export const Formats: import('../sim/dex-formats').FormatList = [
-{
-	section: "No Nerfs",
-	column: 1,
-},
-{
-	name: "[Gen 9] Pure Hackmons No Nerfs",
-	desc: "The ultimate Pokemon experience where every move is legal, every ability is legal, and every Pokemon can be played at their peak from their strongest generation.",
-	mod: 'phnn',
-	ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 255'],
-	unbanlist: ['Past', 'Future', 'Unobtainable'],
-	onSwitchIn(pokemon) {
-		if (pokemon.set.startStatus && !pokemon.m.phnnStartStatusApplied) {
-			pokemon.m.phnnStartStatusApplied = true;
-			pokemon.setStatus(pokemon.set.startStatus, pokemon, null, true);
-		}
+		
+	//////////////////////////////////
+	///// All Gens Pure Hackmons /////
+	//////////////////////////////////
+	{
+		section: "Pure Hackmons",
+		column: 1,
 	},
-},
-{
-	name: "[Gen 9] PHNN Doubles",
-	desc: "Pure Hackmons No Nerfs in Doubles format with twice the chaos!",
-	mod: 'phnn',
-	gameType: 'doubles',
-	ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 255'],
-	banlist: [],
-	unbanlist: [
-		'Past', 'Future', 'Unobtainable'
-	],
-	onSwitchIn(pokemon) {
-		if (pokemon.set.startStatus && !pokemon.m.phnnStartStatusApplied) {
-			pokemon.m.phnnStartStatusApplied = true;
-			pokemon.setStatus(pokemon.set.startStatus, pokemon, null, true);
-		}
+	{
+		name: "[Gen 1] Pure Hackmons",
+		desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
+		mod: 'gen1',
+		searchShow: false,
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255'],
 	},
-},
-{
-	name: "[Gen 9] PHNN Triples",
-	desc: "Pure Hackmons No Nerfs in Triples format - maximum chaos!",
-	mod: 'phnn',
-	gameType: 'triples',
-	ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 255'],
-	onSwitchIn(pokemon) {
-		if (pokemon.set.startStatus && !pokemon.m.phnnStartStatusApplied) {
-			pokemon.m.phnnStartStatusApplied = true;
-			pokemon.setStatus(pokemon.set.startStatus, pokemon, null, true);
-		}
+	{
+		name: "[Gen 2] Pure Hackmons",
+		desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
+		mod: 'gen2',
+		searchShow: false,
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
 	},
-},
-{
-	name: "[Gen 9] PHNN Multi",
-	mod: 'phnn',
-	gameType: 'multi',
-	ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 255'],
-	unbanlist: ['Past', 'Future', 'Unobtainable'],
-	onSwitchIn(pokemon) {
-		if (pokemon.set.startStatus && !pokemon.m.phnnStartStatusApplied) {
-			pokemon.m.phnnStartStatusApplied = true;
-			pokemon.setStatus(pokemon.set.startStatus, pokemon, null, true);
-		}
+	{
+		name: "[Gen 3] Pure Hackmons",
+		desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
+		mod: 'gen3',
+		searchShow: false,
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', '+No Ability', 'Obtainable Abilities'],
 	},
-},
-{
-	name: "[Gen 9] PHNN Free-for-All",
-	mod: 'phnn',
-	gameType: 'freeforall',
-	ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 255'],
-	unbanlist: ['Past', 'Future', 'Unobtainable'],
-	onSwitchIn(pokemon) {
-		if (pokemon.set.startStatus && !pokemon.m.phnnStartStatusApplied) {
-			pokemon.m.phnnStartStatusApplied = true;
-			pokemon.setStatus(pokemon.set.startStatus, pokemon, null, true);
-		}
+	{
+		name: "[Gen 4] Pure Hackmons",
+		desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
+		mod: 'gen4',
+		searchShow: false,
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
 	},
-},
-{
-	section: "Discord Formats",
-	column: 1,
-},
-{
-	name: "[Gen 8] Pure Hackmons Unified",
-	desc: "Gen 8 Pure Hackmons unified with every BDSP Pokemon.",
-	mod: 'gen8unified',
-	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Overflow Stat Mod'],
-	unbanlist: ['Past', 'Future', 'Unobtainable'],
-},
-{
-	name: "[Gen 6] No Limit Hackmons",
-	desc: "Gen 6 Pure Hackmons without the 510 EV limit.",
-	mod: 'gen6',
-	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Overflow Stat Mod'],
-	onBegin() {
-		this.add('-rule', 'No Limits: Pokemon can max all EVs');
+	{
+		name: "[Gen 5] Pure Hackmons",
+		desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
+		mod: 'gen5',
+		searchShow: false,
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
 	},
-},
-{
-	name: "[Gen 5] Pure Hackmons No Nerfs",
-	desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
-	mod: 'gen5phnn',
-	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Overflow Stat Mod'],
-},
-{
-	name: "[Gen 4] Glitch Anything Goes",
-	desc: "Gen 4 Anything Goes with the Rage glitch: Smeargle-reachable Pokemon can learn any move except Chatter and Struggle.",
-	mod: 'gen4',
-	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
-	checkCanLearn(move, species, setSources, set) {
-		const glitch = ['mew','ditto','jigglypuff','wigglytuff','mrmime','sudowoodo','bonsly','mimejr','chatot','caterpie','metapod','butterfree','weedle','kakuna','beedrill','magikarp','gyarados','unown','wobbuffet','smeargle','wurmple','silcoon','cascoon','wynaut','beldum','metagross','dustox','beautifly','metang','cleffa','clefairy','clefable','igglybuff','smoochum','jynx','skitty','delcatty','plusle','minun','spinda','riolu','lucario','happiny','chansey','blissey','mesprit','glameow','purugly','meowth','persian','drowzee','hypno','sentret','furret','sneasel','weavile','chimchar','monferno','infernape','togepi','togetic','togekiss','munchlax','snorlax','mankey','primeape','poliwhirl','poliwrath','abra','kadabra','alakazam','machop','machoke','machamp','geodude','graveler','golem','gengar','hitmonlee','hitmonchan','mewtwo','politoed','aipom','ambipom','snubbull','granbull','teddiursa','ursaring','miltank','celebi','ludicolo','makuhita','hariyama','sableye','meditite','medicham','volbeat','illumise','kecleon','banette','dusclops','dusknoir','jirachi'];
-		if (glitch.includes(this.toID(species.baseSpecies)) && move.id !== 'chatter' && move.id !== 'struggle') {
-			return null;
-		}
-		return this.checkCanLearn(move, species, setSources, set);
+	{
+		name: "[Gen 6] Pure Hackmons",
+		desc: `Anything that can be hacked in-game and is usable in local battles is allowed.`,
+		mod: 'gen6',
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'EV limit = 510'],
 	},
-},
-{
-	name: "[Gen 3] Any Ability",
-	desc: "Gen 3 Pure Hackmons where any Pokemon can have any ability.",
-	mod: 'gen3phnn',
-	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', '+No Ability'],
-	onBegin() {
-		this.add('Gen 3 Any Ability. Any Pokemon can have any ability!');
+	{
+		name: "[Gen 7] Pure Hackmons",
+		desc: `Anything that can be hacked in-game and is usable in local battles is allowed.`,
+		mod: 'gen7',
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
 	},
-},
-{
-	name: "[Gen 2] Statuses",
-	desc: "Gen 2 Pure Hackmons, but Pokemon can start the battle pre-statused.",
-	mod: 'gen2',
-	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255'],
-	onSwitchIn(pokemon) {
-		if (pokemon.set.startStatus && !pokemon.m.phnnStartStatusApplied) {
-			pokemon.m.phnnStartStatusApplied = true;
-			pokemon.setStatus(pokemon.set.startStatus, pokemon, null, true);
-		}
+	{
+		name: "[Gen 7 Let's Go] Pure Hackmons",
+		desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
+		mod: 'gen7letsgo',
+		searchShow: false,
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
 	},
-},
-{
-	name: "[Gen 1] Disguises",
-	desc: "Gen 1 Pure Hackmons, but Pokemon can have any type, disguise as any species, and even start the game pre-statused.",
-	mod: 'gen1phnn',
-	ruleset: ['-Nonexistent', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255'],
-	onBegin() {
-		this.add('Gen 1 Pure Hackmons. Disguise any Pokemon as another sprite and give it any typing. Your opponent sees only the sprite and status, never the real species or type. No Cleric Clause!');
-		for (const side of this.sides) {
-			for (const pokemon of side.pokemon) {
-				if (!pokemon.set.disguise) continue;
-				const disguise = this.dex.species.get(pokemon.set.disguise);
-				if (disguise.exists) {
-					// @ts-expect-error hack
-					pokemon.name = disguise.name;
-					// @ts-expect-error Hack
-					pokemon.fullname = `${pokemon.side.id}: ${disguise.name}`;
+	{
+		name: "[Gen 8] Pure Hackmons",
+		desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
+		mod: 'gen8',
+		searchShow: false,
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
+	},
+	{
+		name: "[Gen 8 BDSP] Pure Hackmons",
+		desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
+		mod: 'gen8bdsp',
+		searchShow: false,
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
+	},
+	{
+		name: "[Gen 9] Pure Hackmons",
+		desc: `Anything directly hackable onto a set (EVs, IVs, forme, ability, item, and move) and is usable in local battles is allowed.`,
+		mod: 'gen9',
+		searchShow: false,
+		ruleset: ['Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Hackmons Forme Legality', 'Species Reveal Clause', 'Endless Battle Clause'],
+	},
+	{
+		name: "[Gen 9] National Dex Pure Hackmons",
+		desc: `Anything directly hackable onto a set (EVs, IVs, forme, ability, item, and move) and is usable in local battles is allowed.`,
+		mod: 'gen9',
+		searchShow: false,
+		ruleset: ['Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Hackmons Forme Legality', 'Species Reveal Clause', 'Endless Battle Clause', 'NatDex Mod'],
+	},
+	//////////////////////////////////
+	////////// OM Hackmons ///////////
+	//////////////////////////////////
+	{
+		section: "Hackmons Other Metas",
+		column: 1,
+	},
+	{
+		name: "[Gen 9] Mix and Mega Pure Hackmons",
+		desc: `Mega evolve any Pok&eacute;mon with any mega stone, or transform them with Genesect Drives, Primal orbs, Origin orbs, Rusted items, Ogerpon Masks, Arceus Plates, and Silvally Memories with no limit. Mega and Primal boosts based on form changes from gen 7.`,
+		mod: 'mixandmega',
+		searchShow: false,
+		ruleset: ['Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Hackmons Forme Legality', 'Species Reveal Clause', 'Endless Battle Clause', 'Terastal Clause'],
+		onBegin() {
+			for (const pokemon of this.getAllPokemon()) {
+				pokemon.m.originalSpecies = pokemon.baseSpecies.name;
+			}
+		},
+		onSwitchIn(pokemon) {
+			const originalSpecies = this.dex.species.get((pokemon.species as any).originalSpecies);
+			if (originalSpecies.exists && pokemon.m.originalSpecies !== originalSpecies.baseSpecies) {
+				// Place volatiles on the Pokémon to show its mega-evolved condition and details
+				this.add('-start', pokemon, originalSpecies.requiredItems?.[0] || originalSpecies.requiredItem || originalSpecies.requiredMove, '[silent]');
+				const oSpecies = this.dex.species.get(pokemon.m.originalSpecies);
+				if (oSpecies.types.join('/') !== pokemon.species.types.join('/')) {
+					this.add('-start', pokemon, 'typechange', pokemon.species.types.join('/'), '[silent]', '[from] format: Mix and Mega');
 				}
 			}
-		}
-	},
-	onSwitchIn(pokemon) {
-		if (pokemon.set.phType) {
-			const types = pokemon.set.phType.split('/').filter(t => this.dex.types.isName(t));
-			if (types.length) {
-				pokemon.setType(types, true);
-				this.addSplit(pokemon.side.id, [
-					'-start', pokemon, 'typechange', types.join('/'), '[from] format: Gen 1 Pure Hackmons',
-				]);
+		},
+		onSwitchOut(pokemon) {
+			const originalSpecies = this.dex.species.get((pokemon.species as any).originalSpecies);
+			if (originalSpecies.exists && pokemon.m.originalSpecies !== originalSpecies.baseSpecies) {
+				this.add('-end', pokemon, originalSpecies.requiredItems?.[0] || originalSpecies.requiredItem || originalSpecies.requiredMove, '[silent]');
 			}
-		}
-		if (pokemon.set.startStatus && !pokemon.m.phnnStartStatusApplied) {
-			pokemon.m.phnnStartStatusApplied = true;
-			pokemon.setStatus(pokemon.set.startStatus, pokemon, null, true);
-		}
+		},
 	},
-},
-{
-	section: "Wondrous Hackmons",
-	column: 1,
-},
-{
-	name: "[Gen 9] Wondrous Hackmons",
-	desc: "A custom Hackmons format with select bans for a balanced experience.",
-	mod: 'gen9',
-	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause',
-		'Forme Clause', 'Freeze Clause Mod', 'Sleep Clause Mod', 'Dry Pass Clause', 'NatDex Mod'],
-	banlist: [
-		'Arena Trap', 'Calyrex-Shadow', 'Innards Out', 'Last Respects', 'Mewtwo-Mega-X', 'Neutralizing Gas', 'Revival Blessing', 'Shadow Tag', 'Shed Tail',
-	],
-},
-{
-	name: "[Gen 8] Wondrous Hackmons",
-	desc: "A custom Hackmons format with select bans for a balanced experience.",
-	mod: 'gen8',
-	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod',
-		'Endless Battle Clause', 'Freeze Clause Mod', 'Sleep Moves Clause'],
-	banlist: [
-		'Arena Trap', 'Eternatus-Eternamax', 'Neutralizing Gas', 'Shadow Tag', 'Zacian-Crowned',
-	],
-},
-{
-	section: "Pure Hackmons",
-	column: 2,
-},
-{
-	name: "[Gen 1] Pure Hackmons",
-	desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
-	mod: 'gen1',
-	searchShow: false,
-	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255'],
-},
-{
-	name: "[Gen 2] Pure Hackmons",
-	desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
-	mod: 'gen2',
-	searchShow: false,
-	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
-},
-{
-	name: "[Gen 3] Pure Hackmons",
-	desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
-	mod: 'gen3',
-	searchShow: false,
-	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', '+No Ability'],
-},
-{
-	name: "[Gen 4] Pure Hackmons",
-	desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
-	mod: 'gen4',
-	searchShow: false,
-	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
-},
-{
-	name: "[Gen 5] Pure Hackmons",
-	desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
-	mod: 'gen5',
-	searchShow: false,
-	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
-},
-{
-	name: "[Gen 6] Pure Hackmons",
-	desc: `Anything that can be hacked in-game and is usable in local battles is allowed.`,
-	mod: 'gen6',
-	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'EV limit = 510'],
-},
-{
-	name: "[Gen 7] Pure Hackmons",
-	desc: `Anything that can be hacked in-game and is usable in local battles is allowed.`,
-	mod: 'gen7',
-	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
-},
-{
-	name: "[Gen 7 Let's Go] Pure Hackmons",
-	desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
-	mod: 'gen7letsgo',
-	searchShow: false,
-	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
-},
-{
-	name: "[Gen 8] Pure Hackmons",
-	desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
-	mod: 'gen8',
-	searchShow: false,
-	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
-},
-{
-	name: "[Gen 8 BDSP] Pure Hackmons",
-	desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
-	mod: 'gen8bdsp',
-	searchShow: false,
-	ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
-},
-{
-	name: "[Gen 9] Pure Hackmons",
-	desc: `Anything directly hackable onto a set (EVs, IVs, forme, ability, item, and move) and is usable in local battles is allowed.`,
-	mod: 'gen9',
-	searchShow: false,
-	ruleset: ['Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Hackmons Forme Legality', 'Species Reveal Clause', 'Endless Battle Clause'],
-},
-{
-	section: "Balanced Hackmons",
-	column: 2,
-},
+	{
+		name: "[Gen 9] Shared Power Pure Hackmons",
+		desc: `Once a Pok&eacute;mon switches in, its ability is shared with the rest of the team.`,
+		mod: 'sharedpower',
+		searchShow: false,
+		ruleset: ['Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Hackmons Forme Legality', 'Species Reveal Clause', 'Endless Battle Clause'],
+		onValidateRule() {
+			if (this.format.gameType !== 'singles') {
+				throw new Error(`Shared Power currently does not support ${this.format.gameType} battles.`);
+			}
+		},
+		getSharedPower(pokemon) {
+			const sharedPower = new Set<string>();
+			for (const ally of pokemon.side.pokemon) {
+				if (pokemon.battle.ruleTable.isRestricted(`ability:${ally.baseAbility}`)) continue;
+				if (ally.previouslySwitchedIn > 0) {
+					if (pokemon.battle.dex.currentMod !== 'sharedpower' && ['trace', 'mirrorarmor'].includes(ally.baseAbility)) {
+						sharedPower.add('noability');
+						continue;
+					}
+					sharedPower.add(ally.baseAbility);
+				}
+			}
+			sharedPower.delete(pokemon.baseAbility);
+			return sharedPower;
+		},
+		onBeforeSwitchIn(pokemon) {
+			let format = this.format;
+			if (!format.getSharedPower) format = this.dex.formats.get('gen9sharedpower');
+			for (const ability of format.getSharedPower!(pokemon)) {
+				const effect = 'ability:' + this.toID(ability);
+				pokemon.volatiles[effect] = this.initEffectState({ id: effect, target: pokemon });
+				if (!pokemon.m.abils) pokemon.m.abils = [];
+				if (!pokemon.m.abils.includes(effect)) pokemon.m.abils.push(effect);
+			}
+		},
+	},
+	
+	{
+		name: "[Gen 9] Bio Mech Mons Pure Hackmons",
+		desc: `Items, abilities, and moves a Pok&eacute;mon has access to can be put in any item/move/ability slot.`,
+		mod: 'biomechmons',
+		searchShow: false,
+		ruleset: ['Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Hackmons Forme Legality', 'Species Reveal Clause', 'Endless Battle Clause'],
+		validateSet(set, teamHas) {
+			const dex = this.dex;
+			let species = dex.species.get(set.species);
+			let requiredItems: string[] = [];
+			let requiredMove = '';
+			let requiredAbility = '';
+			if (species.requiredItems) requiredItems = species.requiredItems;
+			if (species.requiredMove) requiredMove = species.requiredMove;
+			if (species.requiredAbility) requiredAbility = species.requiredAbility;
+			if (species.battleOnly) species = dex.species.get(species.battleOnly as string);
+
+			const effectFunctions = [dex.abilities, dex.items, dex.moves];
+			if (
+				!effectFunctions.some(f => f.get(set.ability).exists) &&
+				!(set.item && effectFunctions.some(f => f.get(set.item).exists)) &&
+				!set.moves.every(move => effectFunctions.some(f => f.get(move).exists))
+			) {
+				return this.validateSet(set, teamHas);
+			}
+			const allThings = [set.ability, set.item, ...set.moves].filter(e => e.length);
+			for (const thing of allThings) {
+				if (this.toID(thing) === 'trace' || this.toID(thing) === 'neutralizinggas') {
+					return [`${thing} is currently bugged and is banned.`];
+				}
+				if (!dex.moves.get(thing).exists && !dex.abilities.get(thing).exists && !dex.items.get(thing).exists) {
+					return [`${thing} does not exist.`];
+				}
+			}
+			if (
+				allThings.some(y => effectFunctions.some(x => x.get(y).isNonstandard &&
+					!this.ruleTable.has(`+pokemontag:${this.toID(x.get(y).isNonstandard)}`)))
+			) {
+				return this.validateSet(set, teamHas);
+			}
+			const moves = allThings.map(e => this.dex.moves.get(e)).filter(thing => thing.id !== 'metronome' && thing.exists);
+			for (const m of moves) {
+				if (this.ruleTable.isBanned(`move:${m.id}`)) return [`${set.species}'s move ${m.name} is banned.`];
+			}
+
+			const abilities = allThings.map(e => this.dex.abilities.get(e)).filter(thing => thing.exists);
+			for (const a of abilities) {
+				if (this.ruleTable.isBanned(`ability:${a.id}`)) return [`${set.species}'s ability ${a.name} is banned.`];
+			}
+
+			const items = allThings.map(e => this.dex.items.get(e)).filter(thing => thing.exists);
+			for (const i of items) {
+				if (this.ruleTable.isBanned(`item:${i.id}`)) return [`${set.species}'s item ${i.name} is banned.`];
+			}
+
+			const setHas: { [k: string]: true } = {};
+			for (const thing of [...moves, ...items, ...abilities]) {
+				if (setHas[thing.id]) return [`${set.species} has multiple copies of ${thing.name}.`];
+				setHas[thing.id] = true;
+			}
+			const normalAbility = set.ability;
+			if (!abilities.length) {
+				set.ability = 'noability';
+			} else {
+				set.ability = abilities[0].id;
+			}
+			if (abilities.some(abil => !Object.values(species.abilities).map(this.toID).includes(abil.id)) &&
+				this.ruleTable.has('obtainableabilities')
+			) {
+				if (set.ability !== 'noability') return [`${set.species} has illegal abilities.`];
+			}
+			if (requiredAbility && !abilities.map(a => a.id).includes(this.toID(requiredAbility))) {
+				return [`${set.species} requires ${requiredAbility} on its set.`];
+			}
+			if (!moves.length) {
+				return [`${set.species} requires at least one move.`];
+			}
+			if (set.moves.length > this.ruleTable.maxMoveCount) {
+				return [`${set.name} has ${set.moves.length} moves, which is more than the limit of ${this.ruleTable.maxMoveCount}.`];
+			}
+			const normalMoves = set.moves;
+			set.moves = [moves[0].id];
+			if (moves.some(move => this.checkCanLearn(move, species)) && this.ruleTable.has('obtainablemoves')) {
+				return [`${set.species} has illegal moves.`];
+			}
+			if (requiredMove && !moves.map(m => m.id).includes(this.toID(requiredMove))) {
+				return [`${set.species} requires ${requiredMove} on its set.`];
+			}
+			if (!items.length && requiredItems.length) {
+				return [`${set.species} requires ${requiredItems.join(', ')} on its set.`];
+			}
+			const normalItem = set.item;
+			if (items.length) {
+				set.item = (items.find(i => i.forcedForme || i.itemUser) || items[0]).id;
+			} else {
+				set.item = '';
+			}
+			if (!this.ruleTable.has('+ability:noability')) {
+				this.ruleTable.set('+ability:noability', '');
+			}
+			for (const curMove of moves) {
+				set.moves = [curMove.id];
+				if (requiredMove && moves.map(m => m.id).includes(curMove.id) &&
+					curMove.id !== this.toID(requiredMove)) {
+					set.moves.push(requiredMove);
+				}
+				let problems = this.validateSet(set, teamHas);
+				if (problems) problems = problems.filter(p => !p.endsWith('needs to have an ability.'));
+				if (problems?.length) return problems;
+			}
+			set.ability = normalAbility;
+			set.item = normalItem;
+			set.moves = normalMoves;
+			return null;
+		},
+		onBeforeSwitchIn(pokemon) {
+			let ngas = false;
+			for (const poke of this.getAllActive()) {
+				if (this.toID(poke.ability) === ('neutralizinggas' as ID)) {
+					ngas = true;
+					break;
+				}
+			}
+			if (pokemon.hasItem('abilityshield') ||
+				pokemon.m.scrambled.items.some((e: { thing: string }) => this.toID(e.thing) === 'abilityshield')) {
+				ngas = false;
+			}
+			for (const ability of pokemon.m.scrambled.abilities) {
+				if (this.field.getPseudoWeather('magicroom') && ability.inSlot === 'Item') continue;
+				const effect = 'ability:' + this.toID(ability.thing);
+				pokemon.volatiles[effect] = this.initEffectState({ id: effect, target: pokemon });
+				pokemon.volatiles[effect].inSlot = ability.inSlot;
+			}
+			for (const item of pokemon.m.scrambled.items) {
+				if (ngas && item.inSlot === 'Ability') continue;
+				const effect = 'item:' + this.toID(item.thing);
+				pokemon.volatiles[effect] = this.initEffectState({ id: effect, target: pokemon });
+				pokemon.volatiles[effect].inSlot = item.inSlot;
+			}
+			if (ngas) {
+				if ((pokemon.m.scrambled.moves as { inSlot: string }[]).findIndex(e => e.inSlot === 'Ability') >= 0) {
+					const isMove = (pokemon.m.scrambled.moves as { inSlot: string }[]).findIndex(e => e.inSlot === 'Ability');
+					const indexOfMove = pokemon.moveSlots.findIndex(m => this.toID(pokemon.m.scrambled.moves[isMove].thing) === m.id);
+					if (indexOfMove >= 0) pokemon.moveSlots.splice(indexOfMove, 1);
+				}
+			}
+			if (this.field.getPseudoWeather('magicroom')) {
+				if ((pokemon.m.scrambled.moves as { inSlot: string }[]).findIndex(e => e.inSlot === 'Item') >= 0) {
+					const isMove = (pokemon.m.scrambled.moves as { inSlot: string }[]).findIndex(e => e.inSlot === 'Item');
+					const indexOfMove = pokemon.moveSlots.findIndex(m => this.toID(pokemon.m.scrambled.moves[isMove].thing) === m.id);
+					if (indexOfMove >= 0) pokemon.moveSlots.splice(indexOfMove, 1);
+				}
+			}
+		},
+		onBegin() {
+			for (const pokemon of this.getAllPokemon()) {
+				// for everything not in the correct slot
+				pokemon.m.scrambled = {
+					abilities: [] as object[],
+					items: [] as object[],
+					moves: [] as object[],
+				};
+
+				if (this.dex.items.get(pokemon.set.ability).exists) {
+					pokemon.m.scrambled.items.push({ thing: this.dex.items.get(pokemon.set.ability).name, inSlot: 'Ability' });
+				} else if (this.dex.moves.get(pokemon.set.ability).exists) {
+					pokemon.m.scrambled.moves.push({ thing: this.dex.moves.get(pokemon.set.ability).name, inSlot: 'Ability' });
+				}
+
+				if (this.dex.abilities.get(pokemon.set.item).exists) {
+					pokemon.m.scrambled.abilities.push({ thing: this.dex.abilities.get(pokemon.set.item).name, inSlot: 'Item' });
+				} else if (this.dex.moves.get(pokemon.set.item).exists && this.dex.moves.get(pokemon.set.item).id !== 'metronome') {
+					pokemon.m.scrambled.moves.push({ thing: this.dex.moves.get(pokemon.set.item).name, inSlot: 'Item' });
+				}
+
+				for (const move of pokemon.set.moves) {
+					if (this.dex.moves.get(move).id === 'metronome') continue;
+					if (this.dex.abilities.get(move).exists) {
+						pokemon.m.scrambled.abilities.push({ thing: this.dex.abilities.get(move).name, inSlot: 'Move' });
+					} else if (this.dex.items.get(move).exists) {
+						pokemon.m.scrambled.items.push({ thing: this.dex.items.get(move).name, inSlot: 'Move' });
+					}
+				}
+
+				const newMoveSlots = [];
+				for (const moveSlot of pokemon.baseMoveSlots) {
+					if (moveSlot.id === 'metronome') {
+						const TeamValidator: typeof import('../sim/team-validator').TeamValidator =
+							require('../sim/team-validator').TeamValidator;
+						const cantMetronome = TeamValidator.get(this.format).checkCanLearn(this.dex.moves.get('metronome'), pokemon.species);
+						if (!cantMetronome) {
+							newMoveSlots.push(moveSlot);
+						} else {
+							pokemon.m.scrambled.items.push({ thing: this.dex.items.get('metronome').name, inSlot: 'Move' });
+						}
+						continue;
+					}
+					if (!this.dex.moves.get(moveSlot.id).exists) continue;
+					newMoveSlots.push(moveSlot);
+				}
+
+				(pokemon as any).baseMoveSlots = newMoveSlots;
+
+				for (const scrambledMove of pokemon.m.scrambled.moves) {
+					const move = this.dex.moves.get(scrambledMove.thing);
+					const ppUps = move.noPPBoosts ? 0 : 3;
+					const basePP = this.calculatePP(move, ppUps);
+					const newMove = {
+						move: move.name,
+						id: move.id,
+						pp: basePP,
+						maxpp: basePP,
+						target: move.target,
+						disabled: false,
+						used: false,
+					};
+					pokemon.baseMoveSlots.push(newMove);
+					pokemon.ppUps.push(ppUps);
+				}
+				pokemon.moveSlots = pokemon.baseMoveSlots.slice();
+			}
+		},
+	},
+
+	//////////////////////////////////
+	////// Miscellaneous Tiers ///////
+	//////////////////////////////////
+	{
+		section: "Hackmons Other Tiers",
+		column: 1,
+	},
+	{
+		name: "[Gen 8] Pure Hackmons Unified",
+		desc: "Gen 8 Pure Hackmons unified with every BDSP Pokemon.",
+		mod: 'gen8unified',
+		searchShow: false,
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Overflow Stat Mod'],
+		unbanlist: ['Past', 'Future', 'Unobtainable'],
+	},
+	{
+		name: "[Gen 6] No Limit Hackmons",
+		desc: "Gen 6 Pure Hackmons without the 510 EV limit.",
+		mod: 'gen6',
+		searchShow: false,
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Overflow Stat Mod'],
+		onBegin() {
+			this.add('-rule', 'No Limits: Pokemon can max all EVs');
+		},
+	},
+	{
+		name: "[Gen 4] Glitch Anything Goes",
+		desc: "Gen 4 Anything Goes with the Rage glitch: Smeargle-reachable Pokemon can learn any move except Chatter and Struggle.",
+		mod: 'gen4',
+		searchShow: false,
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
+		checkCanLearn(move, species, setSources, set) {
+			const glitch = ['mew','ditto','jigglypuff','wigglytuff','mrmime','sudowoodo','bonsly','mimejr','chatot','caterpie','metapod','butterfree','weedle','kakuna','beedrill','magikarp','gyarados','unown','wobbuffet','smeargle','wurmple','silcoon','cascoon','wynaut','beldum','metagross','dustox','beautifly','metang','cleffa','clefairy','clefable','igglybuff','smoochum','jynx','skitty','delcatty','plusle','minun','spinda','riolu','lucario','happiny','chansey','blissey','mesprit','glameow','purugly','meowth','persian','drowzee','hypno','sentret','furret','sneasel','weavile','chimchar','monferno','infernape','togepi','togetic','togekiss','munchlax','snorlax','mankey','primeape','poliwhirl','poliwrath','abra','kadabra','alakazam','machop','machoke','machamp','geodude','graveler','golem','gengar','hitmonlee','hitmonchan','mewtwo','politoed','aipom','ambipom','snubbull','granbull','teddiursa','ursaring','miltank','celebi','ludicolo','makuhita','hariyama','sableye','meditite','medicham','volbeat','illumise','kecleon','banette','dusclops','dusknoir','jirachi'];
+			if (glitch.includes(this.toID(species.baseSpecies)) && move.id !== 'chatter' && move.id !== 'struggle') {
+				return null;
+			}
+			return this.checkCanLearn(move, species, setSources, set);
+		},
+	},
+	{
+		name: "[Gen 3] Any Ability",
+		desc: "Gen 3 Pure Hackmons, but any Pokemon can have any ability.",
+		mod: 'gen3phnn',
+		searchShow: false,
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', '+No Ability'],
+		onBegin() {
+			this.add('Gen 3 Any Ability. Any Pokemon can have any ability!');
+		},
+	},
+	{
+		name: "[Gen 2] Statuses",
+		desc: "Gen 2 Pure Hackmons, but Pokemon can start the battle pre-statused.",
+		mod: 'gen2',
+		searchShow: false,
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255'],
+		onSwitchIn(pokemon) {
+			if (pokemon.set.startStatus && !pokemon.m.phnnStartStatusApplied) {
+				pokemon.m.phnnStartStatusApplied = true;
+				pokemon.setStatus(pokemon.set.startStatus, pokemon, null, true);
+			}
+		},
+	},
+	{
+		name: "[Gen 1] Disguises",
+		desc: "Gen 1 Pure Hackmons, but Pokemon can have any type, disguise as any species, and even start the game pre-statused.",
+		mod: 'gen1phnn',
+		ruleset: ['-Nonexistent', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255'],
+		onBegin() {
+			this.add('Gen 1 Pure Hackmons. Disguise any Pokemon as another sprite and give it any typing. Your opponent sees only the sprite and status, never the real species or type. No Cleric Clause!');
+			for (const side of this.sides) {
+				for (const pokemon of side.pokemon) {
+					if (!pokemon.set.disguise) continue;
+					const disguise = this.dex.species.get(pokemon.set.disguise);
+					if (disguise.exists) {
+						// @ts-expect-error hack
+						pokemon.name = disguise.name;
+						// @ts-expect-error Hack
+						pokemon.fullname = `${pokemon.side.id}: ${disguise.name}`;
+					}
+				}
+			}
+		},
+		onSwitchIn(pokemon) {
+			if (pokemon.set.phType) {
+				const types = pokemon.set.phType.split('/').filter(t => this.dex.types.isName(t));
+				if (types.length) {
+					pokemon.setType(types, true);
+					this.addSplit(pokemon.side.id, [
+						'-start', pokemon, 'typechange', types.join('/'), '[from] format: Gen 1 Pure Hackmons',
+					]);
+				}
+			}
+			if (pokemon.set.startStatus && !pokemon.m.phnnStartStatusApplied) {
+				pokemon.m.phnnStartStatusApplied = true;
+				pokemon.setStatus(pokemon.set.startStatus, pokemon, null, true);
+			}
+		},
+	},
+	//////////////////////////////////
+	///// Pure Hackmons No Nerfs /////
+	//////////////////////////////////
+	{
+		section: "Pure Hackmons No Nerfs",
+		column: 2,
+	},
+	{
+		name: "[Gen 9] Pure Hackmons No Nerfs",
+		desc: "Pure Hackmons, but Pokemon are at the highest power level across all their available generations.",
+		mod: 'phnn',
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview'],
+		unbanlist: ['Past', 'Future', 'Unobtainable'],
+	},
+	{
+		name: "[Gen 9] PHNN Doubles",
+		desc: "Pure Hackmons No Nerfs in Doubles format with twice the chaos!",
+		mod: 'phnn',
+		gameType: 'doubles',
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview'],
+		unbanlist: [
+			'Past', 'Future', 'Unobtainable'
+		],
+	},
+	{
+		name: "[Gen 9] PHNN Triples",
+		desc: "Pure Hackmons No Nerfs in Triples format - maximum chaos!",
+		mod: 'phnn',
+		searchShow: false,
+		gameType: 'triples',
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview'],
+	},
+	{
+		name: "[Gen 9] PHNN Multi Battle",
+		mod: 'phnn',
+		searchShow: false,
+		gameType: 'multi',
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview'],
+		unbanlist: ['Past', 'Future', 'Unobtainable'],
+	},
+	{
+		name: "[Gen 9] PHNN Free-for-All",
+		mod: 'phnn',
+		searchShow: false,
+		gameType: 'freeforall',
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview'],
+		unbanlist: ['Past', 'Future', 'Unobtainable'],
+	},
+	{
+		name: "[Gen 9] PHNN Little Cup",
+		mod: 'phnn',
+		searchShow: false,
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 5'],
+		unbanlist: ['Past', 'Future', 'Unobtainable'],
+	},
+	{
+		name: "[Gen 9] PHNN Middle Cup",
+		mod: 'phnn',
+		searchShow: false,
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 50'],
+		unbanlist: ['Past', 'Future', 'Unobtainable'],
+	},
+	{
+		name: "[Gen 5] Pure Hackmons No Nerfs",
+		desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
+		mod: 'gen5phnn',
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Overflow Stat Mod'],
+	},
+	//////////////////////////////////
+	/////// Wondrous Hackmons ////////
+	//////////////////////////////////
+	{
+		section: "Wondrous Hackmons",
+		column: 2,
+	},
+	{
+		name: "[Gen 9] Wondrous Hackmons",
+		desc: "A custom Hackmons format with select bans for a balanced experience.",
+		mod: 'gen9',
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause',
+			'Forme Clause', 'Freeze Clause Mod', 'Sleep Clause Mod', 'Dry Pass Clause', 'NatDex Mod'],
+		banlist: [
+			'Arena Trap', 'Calyrex-Shadow', 'Innards Out', 'Last Respects', 'Mewtwo-Mega-X', 'Neutralizing Gas', 'Revival Blessing', 'Shadow Tag', 'Shed Tail',
+		],
+	},
+	{
+		name: "[Gen 8] Wondrous Hackmons",
+		desc: "A custom Hackmons format with select bans for a balanced experience.",
+		mod: 'gen8',
+		searchShow: false,
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod',
+			'Endless Battle Clause', 'Freeze Clause Mod', 'Sleep Moves Clause'],
+		banlist: [
+			'Arena Trap', 'Eternatus-Eternamax', 'Neutralizing Gas', 'Shadow Tag', 'Zacian-Crowned',
+		],
+	},
+	
+	//////////////////////////////////
+	/////// Balanced Hackmons ////////
+	//////////////////////////////////
+	{
+		section: "Balanced Hackmons",
+		column: 2,
+	},
 	{
 		name: "[Gen 9] Balanced Hackmons",
 		desc: `Anything directly hackable onto a set (EVs, IVs, forme, ability, item, and move) and is usable in local battles is allowed.`,
@@ -345,88 +659,9 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 			}
 		},
 	},
-	{
-		section: "Fringemons",
-		column: 2,
-	},
-	{
-		name: "[Gen 9] PHNN Little Cup",
-		mod: 'phnn',
-		searchShow: false,
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 5'],
-		unbanlist: ['Past', 'Future', 'Unobtainable'],
-	},
-	{
-		name: "[Gen 9] PHNN LC Doubles",
-		mod: 'phnn',
-		gameType: 'doubles',
-		searchShow: false,
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 5'],
-		unbanlist: ['Past', 'Future', 'Unobtainable'],
-	},
-	{
-		name: "[Gen 9] PHNN LC Triples",
-		mod: 'phnn',
-		gameType: 'triples',
-		searchShow: false,
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 5'],
-		unbanlist: ['Past', 'Future', 'Unobtainable'],
-	},
-	{
-		name: "[Gen 9] PHNN LC Multi",
-		mod: 'phnn',
-		gameType: 'multi',
-		searchShow: false,
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 5'],
-		unbanlist: ['Past', 'Future', 'Unobtainable'],
-	},
-	{
-		name: "[Gen 9] PHNN LC Free-for-All",
-		mod: 'phnn',
-		gameType: 'freeforall',
-		searchShow: false,
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 5'],
-		unbanlist: ['Past', 'Future', 'Unobtainable'],
-	},
-	{
-		name: "[Gen 9] PHNN Middle Cup",
-		mod: 'phnn',
-		searchShow: false,
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 50'],
-		unbanlist: ['Past', 'Future', 'Unobtainable'],
-	},
-	{
-		name: "[Gen 9] PHNN MC Doubles",
-		mod: 'phnn',
-		gameType: 'doubles',
-		searchShow: false,
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 50'],
-		unbanlist: ['Past', 'Future', 'Unobtainable'],
-	},
-	{
-		name: "[Gen 9] PHNN MC Triples",
-		mod: 'phnn',
-		gameType: 'triples',
-		searchShow: false,
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 50'],
-		unbanlist: ['Past', 'Future', 'Unobtainable'],
-	},
-	{
-		name: "[Gen 9] PHNN MC Multi",
-		mod: 'phnn',
-		gameType: 'multi',
-		searchShow: false,
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 50'],
-		unbanlist: ['Past', 'Future', 'Unobtainable'],
-	},
-	{
-		name: "[Gen 9] PHNN MC Free-for-All",
-		mod: 'phnn',
-		gameType: 'freeforall',
-		searchShow: false,
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 50'],
-		unbanlist: ['Past', 'Future', 'Unobtainable'],
-	},
+	//////////////////////////////////
+	//// Random Hackmons Formats /////
+	//////////////////////////////////
 	{
 		section: "Random Hackmons",
 		column: 2,
@@ -453,7 +688,6 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 	{
 		name: "[Gen 9] Broken Cup",
 		desc: `[Gen 9] Hackmons Cup but with only the most powerful Pok&eacute;mon, moves, abilities, and items.`,
-
 		team: 'randomHC',
 		bestOfDefault: true,
 		ruleset: ['HP Percentage Mod', 'Cancel Mod'],
@@ -602,201 +836,12 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 			}
 		},
 	},
-{
-	section: "Smogon OU",
-	column: 3,
-	// name: "smogonofficials",
-},
+	//////////////////////////////////
+	////// Singles Custom Game ///////
+	//////////////////////////////////
 	{
-		name: "[Gen 9] OU",
-		threads: [
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3732644/">SV OU Metagame Discussion</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3712513/">SV OU Sample Teams</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3734134/">SV OU Viability Rankings</a>`,
-		],
-		mod: 'gen9',
-		searchShow: false,
-		ruleset: ['Standard', 'Evasion Abilities Clause', 'Sleep Moves Clause', '!Sleep Clause Mod'],
-		banlist: ['Uber', 'AG', 'Arena Trap', 'Moody', 'Shadow Tag', 'King\'s Rock', 'Razor Fang', 'Baton Pass', 'Last Respects', 'Shed Tail'],
-	},
-	{
-		name: "[Gen 8] OU",
-		threads: [
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3710887/">SS OU Metagame Discussion</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3710892/">SS OU Sample Teams</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3717979/">SS OU Viability Rankings</a>`,
-		],
-
-		mod: 'gen8',
-		searchShow: false,
-		ruleset: ['Standard', 'Dynamax Clause'],
-		banlist: ['Uber', 'AG', 'Arena Trap', 'Moody', 'Power Construct', 'Sand Veil', 'Shadow Tag', 'Snow Cloak', 'King\'s Rock', 'Baton Pass'],
-	},
-	{
-		name: "[Gen 7] OU",
-		threads: [
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3685980/">USM OU Metagame Discussion</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3695427/">USM OU Sample Teams</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3667522/">USM OU Viability Rankings</a>`,
-		],
-
-		mod: 'gen7',
-		searchShow: false,
-		ruleset: ['Standard'],
-		banlist: ['Uber', 'Arena Trap', 'Power Construct', 'Shadow Tag', 'Baton Pass'],
-	},
-	{
-		name: "[Gen 6] OU",
-		threads: [
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3719305/">ORAS OU Metagame Discussion</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3694551/">ORAS OU Sample Teams</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3623399/">ORAS OU Viability Rankings</a>`,
-		],
-
-		mod: 'gen6',
-		searchShow: false,
-		ruleset: ['Standard'],
-		banlist: ['Uber', 'Arena Trap', 'Shadow Tag', 'Soul Dew', 'Baton Pass', 'Swagger'],
-	},
-	{
-		name: "[Gen 5] OU",
-		threads: [
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3666724/">BW2 OU Metagame Discussion</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3686880/">BW2 OU Sample Teams</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3668699/">BW2 OU Viability Rankings</a>`,
-		],
-
-		mod: 'gen5',
-		searchShow: false,
-		ruleset: ['Standard', 'Evasion Abilities Clause', 'Sleep Moves Clause', 'Gems Clause', 'Baton Pass Stat Clause'],
-		banlist: ['Uber', 'Arena Trap', 'Drizzle ++ Swift Swim', 'Drought ++ Chlorophyll', 'Sand Rush', 'Shadow Tag', 'King\'s Rock', 'Razor Fang', 'Soul Dew', 'Assist', 'Swagger'],
-	},
-	{
-		name: "[Gen 4] OU",
-		threads: [
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3685887/">DPP OU Metagame Discussion</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3687351/">DPP OU Sample Teams</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3683332/">DPP OU Viability Rankings</a>`,
-		],
-
-		mod: 'gen4',
-		searchShow: false,
-		ruleset: ['Standard', 'Evasion Abilities Clause', 'Baton Pass Stat Trap Clause', 'Freeze Clause Mod'],
-		banlist: ['AG', 'Uber', 'Arena Trap', 'Quick Claw', 'Soul Dew', 'Swagger'],
-	},
-	{
-		name: "[Gen 3] OU",
-		threads: [
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3687814/">ADV OU Metagame Discussion</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3687813/">ADV OU Sample Teams</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3503019/">ADV OU Viability Rankings</a>`,
-		],
-
-		mod: 'gen3',
-		searchShow: false,
-		ruleset: ['Standard', 'One Boost Passer Clause', 'Freeze Clause Mod'],
-		banlist: ['Uber', 'Smeargle + Ingrain', 'Sand Veil', 'Soundproof', 'Assist', 'Baton Pass + Block', 'Baton Pass + Mean Look', 'Baton Pass + Spider Web', 'Swagger'],
-	},
-	{
-		name: "[Gen 2] OU",
-		threads: [
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3688141/">GSC OU Metagame Discussion</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3688523/">GSC OU Sample Teams</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3633233/">GSC OU Viability Rankings</a>`,
-		],
-
-		mod: 'gen2',
-		searchShow: false,
-		ruleset: ['Standard'],
-		banlist: ['Uber', 'Mean Look + Baton Pass', 'Spider Web + Baton Pass'],
-	},
-	{
-		name: "[Gen 1] OU",
-		threads: [
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3685846/">RBY OU Metagame Discussion</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3689726/">RBY OU Sample Teams</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3685861/">RBY OU Viability Rankings</a>`,
-		],
-
-		mod: 'gen1',
-		searchShow: false,
-		ruleset: ['Standard'],
-		banlist: ['Uber'],
-	},
-	{
-	section: "PS! Misc",
-	column: 3,
-	// name: 'showdowntiers',
-	},
-	{
-		name: "[Gen 9] LC",
-		mod: 'gen9',
-		searchShow: false,
-		ruleset: ['Little Cup', 'Standard'],
-		banlist: [
-			'Aipom', 'Basculin-White-Striped', 'Cutiefly', 'Diglett-Base', 'Dunsparce', 'Duraludon', 'Flittle', 'Gastly', 'Girafarig', 'Gligar',
-			'Meditite', 'Misdreavus', 'Murkrow', 'Porygon', 'Qwilfish-Hisui', 'Rufflet', 'Scraggy', 'Scyther', 'Sneasel', 'Sneasel-Hisui',
-			'Snivy', 'Stantler', 'Vulpix', 'Vulpix-Alola', 'Yanma', 'Moody', 'Baton Pass', 'Sticky Web',
-		],
-	},
-	{
-		name: "[Gen 9] Anything Goes",
-		threads: [
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3710911/">AG Metagame Discussion</a>`,
-		],
-		mod: 'gen9',
-		searchShow: false,
-		ruleset: ['Min Source Gen = 9', 'Obtainable', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
-	},
-	{
-		name: "[Gen 9] Triples",
-		mod: 'gen9',
-		gameType: 'triples',
-		searchShow: false,
-		ruleset: ['Standard Doubles', 'Evasion Abilities Clause'],
-		banlist: [
-			'Annihilape', 'Arceus', 'Calyrex-Ice', 'Calyrex-Shadow', 'Darkrai', 'Dialga', 'Dialga-Origin', 'Eternatus', 'Flutter Mane', 'Giratina', 'Giratina-Origin',
-			'Groudon', 'Ho-Oh', 'Indeedee', 'Indeedee-F', 'Koraidon', 'Kyogre', 'Kyurem-Black', 'Kyurem-White', 'Lugia', 'Lunala', 'Magearna', 'Mewtwo', 'Miraidon',
-			'Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane', 'Palkia', 'Palkia-Origin', 'Rayquaza', 'Reshiram', 'Solgaleo', 'Terapagos', 'Urshifu', 'Urshifu-Rapid-Strike',
-			'Zacian', 'Zacian-Crowned', 'Zamazenta', 'Zamazenta-Crowned', 'Zekrom', 'Moody', 'Shadow Tag', 'Bright Powder', 'King\'s Rock', 'Razor Fang',
-		],
-	},
-	{
-		name: "[Gen 9] Doubles OU",
-		threads: [
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3710876/">Doubles OU Sample Teams</a>`,
-		],
-		searchShow: false,
-		mod: 'gen9',
-		gameType: 'doubles',
-		ruleset: ['Standard Doubles', 'Evasion Abilities Clause'],
-		banlist: ['DUber', 'Shadow Tag', 'Commander'],
-	},
-	{
-		name: "[Gen 9] National Dex",
-		threads: [
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3710848/">National Dex Metagame Discussion</a>`,
-		],
-		searchShow: false,
-		mod: 'gen9',
-		ruleset: ['Standard NatDex', 'Terastal Clause'],
-		banlist: [
-			'ND Uber', 'ND AG', 'Arena Trap', 'Moody', 'Power Construct', 'Shadow Tag', 'King\'s Rock',
-			'Quick Claw', 'Razor Fang', 'Assist', 'Baton Pass', 'Last Respects', 'Shed Tail',
-		],
-	},
-	{
-		name: "[Gen 9] National Dex AG",
-		threads: [
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3672423/">National Dex AG</a>`,
-		],
-		searchShow: false,
-		mod: 'gen9',
-		ruleset: ['Standard AG', 'NatDex Mod'],
-	},
-	{
-	section: "Custom Game",
-	column: 4,
+		section: "Custom Game",
+		column: 3,
 	},
 	{
 		name: "[Gen 9] Custom Game",
@@ -871,76 +916,12 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100'],
 	},
+	//////////////////////////////////
+	////// Doubles Custom Game ///////
+	//////////////////////////////////
 	{
-		name: "[Gen 9] Mix and Mega Custom Game",
-		desc: `Mega evolve any Pok&eacute;mon with any mega stone, or transform them with Genesect Drives, Primal orbs, Origin orbs, Rusted items, Ogerpon Masks, Arceus Plates, and Silvally Memories with no limit. Mega and Primal boosts based on form changes from gen 7.`,
-		mod: 'mixandmega',
-		searchShow: false,
-		ruleset: ['Team Preview', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Terastal Clause'],
-		onBegin() {
-			for (const pokemon of this.getAllPokemon()) {
-				pokemon.m.originalSpecies = pokemon.baseSpecies.name;
-			}
-		},
-		onSwitchIn(pokemon) {
-			const originalSpecies = this.dex.species.get((pokemon.species as any).originalSpecies);
-			if (originalSpecies.exists && pokemon.m.originalSpecies !== originalSpecies.baseSpecies) {
-				// Place volatiles on the Pokémon to show its mega-evolved condition and details
-				this.add('-start', pokemon, originalSpecies.requiredItems?.[0] || originalSpecies.requiredItem || originalSpecies.requiredMove, '[silent]');
-				const oSpecies = this.dex.species.get(pokemon.m.originalSpecies);
-				if (oSpecies.types.join('/') !== pokemon.species.types.join('/')) {
-					this.add('-start', pokemon, 'typechange', pokemon.species.types.join('/'), '[silent]', '[from] format: Mix and Mega');
-				}
-			}
-		},
-		onSwitchOut(pokemon) {
-			const originalSpecies = this.dex.species.get((pokemon.species as any).originalSpecies);
-			if (originalSpecies.exists && pokemon.m.originalSpecies !== originalSpecies.baseSpecies) {
-				this.add('-end', pokemon, originalSpecies.requiredItems?.[0] || originalSpecies.requiredItem || originalSpecies.requiredMove, '[silent]');
-			}
-		},
-	},
-	{
-		name: "[Gen 9] Shared Power Custom Game",
-		desc: `Once a Pok&eacute;mon switches in, its ability is shared with the rest of the team.`,
-		mod: 'sharedpower',
-		searchShow: false,
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100'],
-		onValidateRule() {
-			if (this.format.gameType !== 'singles') {
-				throw new Error(`Shared Power currently does not support ${this.format.gameType} battles.`);
-			}
-		},
-		getSharedPower(pokemon) {
-			const sharedPower = new Set<string>();
-			for (const ally of pokemon.side.pokemon) {
-				if (pokemon.battle.ruleTable.isRestricted(`ability:${ally.baseAbility}`)) continue;
-				if (ally.previouslySwitchedIn > 0) {
-					if (pokemon.battle.dex.currentMod !== 'sharedpower' && ['trace', 'mirrorarmor'].includes(ally.baseAbility)) {
-						sharedPower.add('noability');
-						continue;
-					}
-					sharedPower.add(ally.baseAbility);
-				}
-			}
-			sharedPower.delete(pokemon.baseAbility);
-			return sharedPower;
-		},
-		onBeforeSwitchIn(pokemon) {
-			let format = this.format;
-			if (!format.getSharedPower) format = this.dex.formats.get('gen9sharedpower');
-			for (const ability of format.getSharedPower!(pokemon)) {
-				const effect = 'ability:' + this.toID(ability);
-				pokemon.volatiles[effect] = this.initEffectState({ id: effect, target: pokemon });
-				if (!pokemon.m.abils) pokemon.m.abils = [];
-				if (!pokemon.m.abils.includes(effect)) pokemon.m.abils.push(effect);
-			}
-		},
-	},	
-
-	{
-	section: "Custom Game Doubles",
-	column: 4,
+		section: "Custom Game Doubles",
+		column: 3,
 	},
 	{
 		name: "[Gen 9] Doubles Custom Game",
@@ -1005,9 +986,12 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Desync Clause Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100'],
 	},
+	//////////////////////////////////
+	////// Triples Custom Game ///////
+	//////////////////////////////////
 	{
-	section: "Triples Custom Game",
-	column: 4,
+		section: "Triples Custom Game",
+		column: 3,
 	},	
 	{
 		name: "[Gen 9] Triples Custom Game",
