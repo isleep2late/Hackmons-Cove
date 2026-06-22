@@ -360,17 +360,14 @@ export const applyPreset = (
       && pokemon.source === 'client'
       && !revealingPreset
       && !transformed
-      && (output.evs?.hp || 0) === 0
   ) {
-    const presetAtk = output.evs?.atk || 0;
-    const presetSpa = output.evs?.spa || 0;
-    const offStat = presetAtk > presetSpa
-      ? 'atk'
-      : presetSpa > presetAtk
-        ? 'spa'
-        : ((pokemon.baseStats?.atk || 0) >= (pokemon.baseStats?.spa || 0) ? 'atk' : 'spa');
+    output.evs = populateStatsTable({
+      hp: 252, atk: 252, def: 252, spa: 252, spd: 252, spe: 252,
+    }, { spread: 'ev', format });
 
-    output.evs = populateStatsTable({ hp: 252, [offStat]: 252, spe: 4 }, { spread: 'ev', format });
+    output.ivs = populateStatsTable({
+      hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31,
+    }, { spread: 'iv', format });
   }
 
   // update (2023/10/15): only apply the presetId if we have a complete preset (in case we're applying an OTS preset,

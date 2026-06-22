@@ -54,7 +54,7 @@ export const calcPokemonStat = (
   const parsedIv = iv ?? getDefaultSpreadValue('iv', format);
   const actualIv = clamp(0, parsedIv - (legacy && parsedIv % 2 === 1 ? 1 : 0));
   const actualEv = clamp(0, ev ?? getDefaultSpreadValue('ev', format));
-  const actualLevel = clamp(0, level, 100);
+  const actualLevel = clamp(0, level);
 
   if (stat === 'hp') {
     if (base === 1) {
