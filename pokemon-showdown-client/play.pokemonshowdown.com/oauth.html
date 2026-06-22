@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex, nofollow" />
+<link rel="icon" href="/favicon.ico" />
+<title>Signing in&hellip; &mdash; Hackmons!</title>
+<style>
+	body { font-family: Verdana, Helvetica, Arial, sans-serif; max-width: 520px; margin: 64px auto; padding: 0 20px; text-align: center; color: #1d1d1d; }
+	h2 { font-weight: 600; margin: 0 0 6px; }
+	p { color: #777; font-size: 10.5pt; line-height: 1.5; margin-top: 0; }
+	.spinner { width: 26px; height: 26px; margin: 0 auto 18px; border: 3px solid #d4d4d4; border-top-color: #4b7bd4; border-radius: 50%; animation: spin 0.8s linear infinite; }
+	@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+	<div class="spinner" id="spinner"></div>
+	<h2 id="msg">Signing you in&hellip;</h2>
+	<p id="sub">This window should close automatically.</p>
+	<script>
+	(function () {
+		var TOKEN_KEY = 'ps-token';
+
+		function getParam(name) {
+			try {
+				var q = new URLSearchParams(window.location.search || '');
+				if (q.has(name)) return q.get(name);
+				var h = new URLSearchParams((window.location.hash || '').replace(/^#/, ''));
+				if (h.has(name)) return h.get(name);
+			} catch (e) {}
+			return null;
+		}
+
+		function show(title, subtext, stopSpinner) {
+			var m = document.getElementById('msg');
+			var s = document.getElementById('sub');
+			var sp = document.getElementById('spinner');
+			if (m) m.textContent = title;
+			if (s) s.textContent = subtext || '';
+			if (stopSpinner && sp) sp.style.display = 'none';
+		}
+
+		var assertion = getParam('assertion');
+		var token = getParam('token');
+
+		if (token) {
+			try { localStorage.setItem(TOKEN_KEY, token); } catch (e) {}
+		}
+
+		if (!assertion && !token) {
+			show('Sign-in didn’t complete', 'No login info was returned. Close this window and try signing in again.', true);
+			return;
+		}
+
+		var payload = { source: 'hackmons-oauth', assertion: assertion || null, token: token || null };
+
+		if (window.opener && !window.opener.closed) {
+			try { window.opener.postMessage(payload, window.location.origin); } catch (e) {}
+			show('Signed in!', 'You can close this window.', true);
+			setTimeout(function () { try { window.close(); } catch (e) {} }, 400);
+			return;
+		}
+
+		try {
+			if (assertion) sessionStorage.setItem('ps-oauth-assertion', assertion);
+		} catch (e) {}
+		show('Signed in!', 'Returning to Hackmons…', true);
+		setTimeout(function () { window.location.replace('/'); }, 700);
+	})();
+	</script>
+</body>
+</html>

@@ -37,6 +37,7 @@ const AVATARS_DIR = path.resolve(__dirname, process.env.PHNN_AVATARS_DIR || '../
 const GAME_HOST = process.env.PHNN_GAME_HOST || 'localhost';
 const GAME_PORT = Number(process.env.PHNN_GAME_PORT || 8000);
 const REPLAYS_DIR = process.env.PHNN_REPLAYS_DIR || '/mnt/hdd2/showdown-replays';
+const OAUTH_HOST = (process.env.PHNN_OAUTH_HOST || 'play.hackmons.com').toLowerCase();
 
 const MIME = {
 	'.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
@@ -251,6 +252,11 @@ const server = http.createServer((req, res) => {
 	const reqUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
 	const host = (req.headers.host || '').toLowerCase().split(':')[0];
 	const replayHost = host.startsWith('replay.');
+	if (reqUrl.pathname === '/oauth.html' && host !== OAUTH_HOST) {
+		res.writeHead(404, { 'content-type': 'text/plain' });
+		res.end('404 Not Found');
+		return;
+	}
 	if (isLoginPath(reqUrl.pathname)) {
 		proxyLogin(req, res, reqUrl);
 	} else if (reqUrl.pathname.startsWith('/showdown')) {
