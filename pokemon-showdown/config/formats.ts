@@ -414,7 +414,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		column: 1,
 	},
 	{
-		name: "[Gen 8] Pure Hackmons Unified",
+		name: "[Gen 8] Unified",
 		desc: "Gen 8 Pure Hackmons unified with every BDSP Pokemon.",
 		mod: 'gen8unified',
 		searchShow: false,
@@ -422,7 +422,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		unbanlist: ['Past', 'Future', 'Unobtainable'],
 	},
 	{
-		name: "[Gen 6] No Limit Hackmons",
+		name: "[Gen 6] No Limit",
 		desc: "Gen 6 Pure Hackmons without the 510 EV limit.",
 		mod: 'gen6',
 		searchShow: false,
@@ -432,7 +432,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		},
 	},
 	{
-		name: "[Gen 4] Glitch Anything Goes",
+		name: "[Gen 4] Glitches",
 		desc: "Gen 4 Anything Goes with the Rage glitch: Smeargle-reachable Pokemon can learn any move except Chatter and Struggle.",
 		mod: 'gen4',
 		searchShow: false,

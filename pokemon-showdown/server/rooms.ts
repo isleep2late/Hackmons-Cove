@@ -1654,9 +1654,9 @@ export class GlobalRoomState {
 		}
 		if (Config.reportbattles) {
 			const reportRooms = new Set<string>();
-			const isTourGame = room.battle?.challengeType === 'tour';
+			const isTourorChallenge = room.battle?.challengeType === 'challenge' || room.battle?.challengeType === 'tour';
 
-			if (isTourGame) return;
+			if (isTourorChallenge) return;
 
 			reportRooms.add('lobby');
 
