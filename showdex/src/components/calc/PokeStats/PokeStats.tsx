@@ -21,6 +21,7 @@ import {
 } from '@showdex/utils/calc';
 import { clamp, env, formatId } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
+import { detectPhnnKey } from '@showdex/phnn';
 import { getDefaultSpreadValue, legalLockedFormat } from '@showdex/utils/dex';
 import { useRandomUuid } from '@showdex/utils/hooks';
 import { detectStatBoostDelta, formatStatBoost } from '@showdex/utils/ui';
@@ -113,7 +114,9 @@ export const PokeStats = ({
     || (settings?.allowIllegalSpreads === 'meta' && !legalLockedFormat(format));
 
   const totalEvs = Object.values(pokemon?.evs || {}).reduce((sum, ev) => sum + (ev || 0), 0);
-  const maxLegalEvs = env.int(format?.includes('random') ? 'calcdex-pokemon-max-legal-randoms-evs' : 'calcdex-pokemon-max-legal-evs');
+  const maxLegalEvs = detectPhnnKey(format)
+    ? (6 * 252)
+    : env.int(format?.includes('random') ? 'calcdex-pokemon-max-legal-randoms-evs' : 'calcdex-pokemon-max-legal-evs');
   const transformedLegalEvs = pokemon?.transformedForme ? pokemon?.evs?.hp ?? 0 : 0;
 
   const defaultIv = React.useMemo(() => getDefaultSpreadValue('iv', format), [format]);
