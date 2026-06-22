@@ -142,4 +142,23 @@ export const similarPokemon = <
     );
 };
 
+export const samePokemonForme = <
+  TPokemonA extends Partial<Showdown.PokemonDetails>,
+  TPokemonB extends Partial<Showdown.PokemonDetails>,
+>(
+  pokemonA: TPokemonA,
+  pokemonB: TPokemonB,
+  format?: string | GenerationNum,
+): boolean => {
+  if (!pokemonA?.details || !pokemonB?.details) {
+    return false;
+  }
+
+  const dex = getDexForFormat(format);
+  const dexA = dex.species.get(parsePokemonDetails(pokemonA.details).speciesForme);
+  const dexB = dex.species.get(parsePokemonDetails(pokemonB.details).speciesForme);
+
+  return !!dexA?.exists && !!dexB?.exists && dexA.name === dexB.name;
+};
+
 /* eslint-enable @typescript-eslint/indent */

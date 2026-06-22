@@ -36,6 +36,7 @@ import {
   mergeRevealedMoves,
   parsePokemonDetails,
   sanitizePlayerSide,
+  samePokemonForme,
   sanitizePokemon,
   sanitizeVolatiles,
   similarPokemon,
@@ -397,6 +398,8 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         : player.pokemon
     ) || [];
 
+    const consumedCalcdexIds = new Set<string>();
+
     const currentOrder = initialPokemon.map((
       pokemon: Showdown.ServerPokemon | Showdown.Pokemon,
     ) => {
@@ -413,23 +416,35 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       if (!pokemon.calcdexId) {
         // update (2022/10/18): found a case where the client Pokemon was given before
         // the ServerPokemon for the myPokemon[] side rip lol
+        const idCandidates = [
+          ...(myPokemon || []),
+          ...(player.pokemon || []),
+          ...(playerState.pokemon || []),
+        ];
+
+        const idMatcher = (p: typeof idCandidates[number]) => (
+          !!p?.calcdexId
+            && !consumedCalcdexIds.has(p.calcdexId)
+            && !!p.details
+            && similarPokemon(pokemon, p, {
+              format: battleState.format,
+              normalizeFormes: 'fucked',
+              // ignoreMega: true,
+            })
+        );
+
         pokemon.calcdexId = (
           isMyPokemonSide
             && !!pokemon.details // update (2023/07/27): might be guaranteed to exist actually :o
-            && [
-              ...(myPokemon || []),
-              ...(player.pokemon || []),
-              ...(playerState.pokemon || []),
-            ].find((p) => (
-              !!p?.calcdexId
-                && !!p.details
-                && similarPokemon(pokemon, p, {
-                  format: battleState.format,
-                  normalizeFormes: 'fucked',
-                  // ignoreMega: true,
-                })
-            ))?.calcdexId
+            && (
+              idCandidates.find((p) => idMatcher(p) && samePokemonForme(pokemon, p, battleState.format))
+                || idCandidates.find(idMatcher)
+            )?.calcdexId
         ) || calcPokemonCalcdexId(pokemon, playerKey);
+
+        if (pokemon.calcdexId) {
+          consumedCalcdexIds.add(pokemon.calcdexId);
+        }
 
         l.debug(
           'Assigned calcdexId to the', clientSourced ? 'client' : 'server', pokemon.speciesForme, 'for player', playerKey,
@@ -442,14 +457,16 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
       }
 
       if (isMyPokemonSide && hasMyPokemon && !clientSourced) {
-        const clientPokemon = player.pokemon
-          .find((p) => !p.calcdexId && !!p.details && (
-            similarPokemon(pokemon, p, {
-              format: battleState.format,
-              normalizeFormes: 'fucked',
-              // ignoreMega: true,
-            })
-          ));
+        const clientMatcher = (p: typeof player.pokemon[number]) => !p.calcdexId && !!p.details && (
+          similarPokemon(pokemon, p, {
+            format: battleState.format,
+            normalizeFormes: 'fucked',
+            // ignoreMega: true,
+          })
+        );
+
+        const clientPokemon = player.pokemon.find((p) => clientMatcher(p) && samePokemonForme(pokemon, p, battleState.format))
+          || player.pokemon.find(clientMatcher);
 
         if (clientPokemon) {
           clientPokemon.calcdexId = pokemon.calcdexId;

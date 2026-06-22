@@ -36,7 +36,7 @@ const LOGIN_ORIGIN = process.env.PHNN_LOGIN_ORIGIN || 'https://play.pokemonshowd
 const AVATARS_DIR = path.resolve(__dirname, process.env.PHNN_AVATARS_DIR || '../../pokemon-showdown/config/avatars');
 const GAME_HOST = process.env.PHNN_GAME_HOST || 'localhost';
 const GAME_PORT = Number(process.env.PHNN_GAME_PORT || 8000);
-const REPLAYS_DIR = process.env.PHNN_REPLAYS_DIR || path.join('/mnt/hdd2/showdown-replays', path.basename(path.resolve(__dirname, '../..')));
+const REPLAYS_DIR = process.env.PHNN_REPLAYS_DIR || '/mnt/hdd2/showdown-replays';
 
 const MIME = {
 	'.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
@@ -168,7 +168,7 @@ function serveAvatar(res, pathname) {
 }
 
 function saveReplay(params, res) {
-	const id = (params.get('id') || '').toLowerCase().replace(/[^a-z0-9-]/g, '');
+	const id = (params.get('id') || '').toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/^[a-z0-9]+-(?=gen\d)/, '');
 	const log = params.get('log') || '';
 	if (!id || !log) {
 		res.writeHead(200, { 'content-type': 'text/plain' });
@@ -187,15 +187,35 @@ function saveReplay(params, res) {
 	res.end('success:' + id);
 }
 
-function serveReplay(req, res, reqUrl) {
-	let rel = decodeURIComponent(reqUrl.pathname).slice('/replays'.length).replace(/^\/+/, '');
+const EMBED_SRC = process.env.PHNN_REPLAY_EMBED || 'https://play.hackmons.com/js/replay-embed.js';
+
+function replayViewerHtml(id, log, downloadBar) {
+	const safeLog = log.replace(/<\//g, '<\\/');
+	const bar = downloadBar
+		? '<div style="max-width:1180px;margin:10px auto 0;padding:0 12px;font-family:Verdana,Helvetica,Arial,sans-serif;font-size:10pt;text-align:right"><a href="/' + id + '.html" download="' + id + '.html" style="margin-right:14px">Download replay</a><a href="/' + id + '.log" download="' + id + '.log">Download .log</a></div>\n'
+		: '';
+	return '<!DOCTYPE html><html><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width" /><title>' + id + ' - Hackmons Replay</title></head><body>\n'
+		+ bar
+		+ '<input type="hidden" name="replayid" value="' + id + '" />\n'
+		+ '<script type="text/plain" class="battle-log-data">\n' + safeLog + '\n</script>\n'
+		+ '<script src="' + EMBED_SRC + '"></script>\n</body></html>';
+}
+
+function replayIndexHtml() {
+	return '<!DOCTYPE html><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Replays - Hackmons!</title><body style="font-family:Verdana,sans-serif;max-width:640px;margin:40px auto;padding:0 16px"><h2>Hackmons Replays</h2><p>Open a replay using its share link, e.g. <code>replay.hackmons.com/&lt;id&gt;</code>. Add <code>.log</code> or <code>.json</code> to a replay URL to get its raw data, or <code>.html</code> to download a standalone copy.</p></body>';
+}
+
+function serveReplay(req, res, reqUrl, root) {
+	let rel = decodeURIComponent(reqUrl.pathname);
+	rel = (root ? rel : rel.slice('/replays'.length)).replace(/^\/+/, '');
 	let ext = '';
 	if (rel.endsWith('.log')) { ext = 'log'; rel = rel.slice(0, -4); }
 	else if (rel.endsWith('.json')) { ext = 'json'; rel = rel.slice(0, -5); }
+	else if (rel.endsWith('.html')) { ext = 'html'; rel = rel.slice(0, -5); }
 	const id = rel.toLowerCase().replace(/[^a-z0-9-]/g, '');
 	if (!id) {
 		res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' });
-		res.end('<!DOCTYPE html><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Replays - Hackmons!</title><body style="font-family:Verdana,sans-serif;max-width:640px;margin:40px auto;padding:0 16px"><h2>Hackmons Replays</h2><p>Open a replay using its share link, e.g. <code>/replays/&lt;id&gt;</code>. Add <code>.log</code> or <code>.json</code> to a replay URL to get its raw data.</p></body>');
+		res.end(replayIndexHtml());
 		return;
 	}
 	const file = path.join(REPLAYS_DIR, id + '.log');
@@ -207,7 +227,7 @@ function serveReplay(req, res, reqUrl) {
 			return;
 		}
 		if (ext === 'log') {
-			res.writeHead(200, { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store' });
+			res.writeHead(200, { 'content-type': 'text/plain; charset=utf-8', 'content-disposition': 'attachment; filename="' + id + '.log"', 'cache-control': 'no-store' });
 			res.end(log);
 			return;
 		}
@@ -216,23 +236,35 @@ function serveReplay(req, res, reqUrl) {
 			res.end(JSON.stringify({ id, log }));
 			return;
 		}
-		const safeLog = log.replace(/<\//g, '<\\/');
-		const html = '<!DOCTYPE html><html><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width" /><title>Replay - Hackmons!</title></head><body>\n<script type="text/plain" class="battle-log-data">\n' + safeLog + '\n</script>\n<script src="/js/replay-embed.js"></script>\n</body></html>';
+		if (ext === 'html') {
+			res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'content-disposition': 'attachment; filename="' + id + '.html"', 'cache-control': 'no-store' });
+			res.end(replayViewerHtml(id, log, false));
+			return;
+		}
 		res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' });
-		res.end(html);
+		res.end(replayViewerHtml(id, log, true));
 	});
 }
 
 const server = http.createServer((req, res) => {
 	const reqUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+	const host = (req.headers.host || '').toLowerCase().split(':')[0];
+	const replayHost = host.startsWith('replay.');
 	if (isLoginPath(reqUrl.pathname)) {
 		proxyLogin(req, res, reqUrl);
 	} else if (reqUrl.pathname.startsWith('/showdown')) {
 		proxyGame(req, res, reqUrl);
 	} else if (reqUrl.pathname.startsWith('/avatars/')) {
 		serveAvatar(res, reqUrl.pathname);
+	} else if (replayHost) {
+		const seg = decodeURIComponent(reqUrl.pathname).replace(/^\/+/, '');
+		if (!seg || /^[a-z0-9-]+(\.(log|json|html))?$/i.test(seg)) {
+			serveReplay(req, res, reqUrl, true);
+		} else {
+			serveStatic(req, res, reqUrl.pathname);
+		}
 	} else if (reqUrl.pathname === '/replays' || reqUrl.pathname.startsWith('/replays/')) {
-		serveReplay(req, res, reqUrl);
+		serveReplay(req, res, reqUrl, false);
 	} else {
 		serveStatic(req, res, reqUrl.pathname);
 	}
