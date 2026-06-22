@@ -13,6 +13,7 @@ import {
   determineDefaultLevel,
   legalLockedFormat,
 } from '@showdex/utils/dex';
+import { detectPhnnKey } from '@showdex/phnn';
 import { detectCompletePreset } from './detectCompletePreset';
 import { detectUsageAlt, detectUsageAlts } from './detectUsageAlt';
 import { flattenAlt, flattenAlts } from './flattenAlts';
@@ -42,12 +43,14 @@ export const applyPreset = (
     format: string;
     usage?: CalcdexPokemonPreset;
     alwaysMergeMoves?: boolean;
+    auto?: boolean;
   },
 ): Partial<CalcdexPokemon> => {
   const {
     format,
     usage,
     alwaysMergeMoves,
+    auto,
   } = { ...config };
 
   const gen = detectGenFromFormat(format);
@@ -348,6 +351,26 @@ export const applyPreset = (
     } else if (typeof output.evs.spd === 'number') {
       output.evs.spa = output.evs.spd;
     }
+  }
+
+  if (
+    auto
+      && !legacy
+      && !!detectPhnnKey(format)
+      && pokemon.source === 'client'
+      && !revealingPreset
+      && !transformed
+      && (output.evs?.hp || 0) === 0
+  ) {
+    const presetAtk = output.evs?.atk || 0;
+    const presetSpa = output.evs?.spa || 0;
+    const offStat = presetAtk > presetSpa
+      ? 'atk'
+      : presetSpa > presetAtk
+        ? 'spa'
+        : ((pokemon.baseStats?.atk || 0) >= (pokemon.baseStats?.spa || 0) ? 'atk' : 'spa');
+
+    output.evs = populateStatsTable({ hp: 252, [offStat]: 252, spe: 4 }, { spread: 'ev', format });
   }
 
   // update (2023/10/15): only apply the presetId if we have a complete preset (in case we're applying an OTS preset,

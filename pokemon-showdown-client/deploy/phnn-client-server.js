@@ -192,7 +192,7 @@ const EMBED_SRC = process.env.PHNN_REPLAY_EMBED || 'https://play.hackmons.com/js
 function replayViewerHtml(id, log, downloadBar) {
 	const safeLog = log.replace(/<\//g, '<\\/');
 	const bar = downloadBar
-		? '<div style="max-width:1180px;margin:10px auto 0;padding:0 12px;font-family:Verdana,Helvetica,Arial,sans-serif;font-size:10pt;text-align:right"><a href="/' + id + '.html" download="' + id + '.html" style="margin-right:14px">Download replay</a><a href="/' + id + '.log" download="' + id + '.log">Download .log</a></div>\n'
+		? '<div style="max-width:1180px;margin:10px auto 0;padding:0 12px;font-family:Verdana,Helvetica,Arial,sans-serif;font-size:10pt;text-align:right"><a href="' + id + '.html" download="' + id + '.html" style="margin-right:14px">Download replay</a><a href="' + id + '.log" download="' + id + '.log">Download .log</a></div>\n'
 		: '';
 	return '<!DOCTYPE html><html><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width" /><title>' + id + ' - Hackmons Replay</title></head><body>\n'
 		+ bar
