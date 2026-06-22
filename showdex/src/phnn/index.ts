@@ -49,6 +49,31 @@ export const detectPhnnKey = (format: string): PhnnKey | null => {
   return (key in phnnData ? key : null);
 };
 
+export const detectMaxEvsFormat = (format: string): boolean => {
+  if (!format) {
+    return false;
+  }
+
+  const f = format.toLowerCase();
+
+  if (f.includes('phnn') || f.includes('nonerfs') || f.includes('unified')) {
+    return true;
+  }
+
+  if (!f.includes('hackmons') || f.includes('hackmonscup')) {
+    return false;
+  }
+
+  const genMatch = f.match(/gen(\d+)/);
+  const gen = genMatch ? Number(genMatch[1]) : 9;
+
+  return gen !== 6;
+};
+
+export const getMaxStatEv = (format: string | number): number => (
+  typeof format === 'string' && format.toLowerCase().includes('letsgo') ? 200 : 252
+);
+
 export const getPhnnMoveOverrides = (
   format: string,
   moveName: string,
