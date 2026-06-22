@@ -604,7 +604,7 @@ export const useCalcdexPresets = (
           ...(
             pokemon.presetId !== preset.calcdexId
               // && (!usage?.calcdexId || pokemon.usageId !== usage.calcdexId)
-              && applyPreset(pokemon, preset, { format: state.format, usage })
+              && applyPreset(pokemon, preset, { format: state.format, usage, auto: true })
           ),
         };
 
