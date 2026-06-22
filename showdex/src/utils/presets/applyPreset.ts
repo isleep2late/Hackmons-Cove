@@ -13,7 +13,7 @@ import {
   determineDefaultLevel,
   legalLockedFormat,
 } from '@showdex/utils/dex';
-import { detectPhnnKey } from '@showdex/phnn';
+import { detectMaxEvsFormat, getMaxStatEv } from '@showdex/phnn';
 import { detectCompletePreset } from './detectCompletePreset';
 import { detectUsageAlt, detectUsageAlts } from './detectUsageAlt';
 import { flattenAlt, flattenAlts } from './flattenAlts';
@@ -356,13 +356,15 @@ export const applyPreset = (
   if (
     auto
       && !legacy
-      && !!detectPhnnKey(format)
+      && detectMaxEvsFormat(format)
       && pokemon.source === 'client'
       && !revealingPreset
       && !transformed
   ) {
+    const ev = getMaxStatEv(format);
+
     output.evs = populateStatsTable({
-      hp: 252, atk: 252, def: 252, spa: 252, spd: 252, spe: 252,
+      hp: ev, atk: ev, def: ev, spa: ev, spd: ev, spe: ev,
     }, { spread: 'ev', format });
 
     output.ivs = populateStatsTable({
