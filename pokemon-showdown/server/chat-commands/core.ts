@@ -1508,11 +1508,6 @@ export const commands: Chat.ChatCommands = {
 		if (!user.named) {
 			return this.popupReply(this.tr`You must choose a username before you challenge someone.`);
 		}
-		if (Config.pmmodchat && !user.hasSysopAccess() && !Users.globalAuth.atLeast(user, Config.pmmodchat as GroupSymbol)) {
-			const groupName = Config.groups[Config.pmmodchat].name || Config.pmmodchat;
-			this.popupReply(this.tr`This server requires you to be rank ${groupName} or higher to challenge users.`);
-			return false;
-		}
 		return Ladders(formatName).makeChallenge(connection, targetUser);
 	},
 	challengehelp: [
