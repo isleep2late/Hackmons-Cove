@@ -132,6 +132,7 @@ function serveStatic(req, res, pathname) {
 		const headers = {
 			'content-type': MIME[path.extname(filePath)] || 'application/octet-stream',
 			'cache-control': 'no-store',
+			'access-control-allow-origin': '*',
 		};
 		if (isIndex) {
 			fs.readFile(filePath, 'utf8', (e, html) => {
