@@ -515,7 +515,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		name: "[Gen 9] Pure Hackmons No Nerfs",
 		desc: "Pure Hackmons, but Pokemon are at the highest power level across all their available generations.",
 		mod: 'phnn',
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 255'],
 		unbanlist: ['Past', 'Future', 'Unobtainable'],
 	},
 	{
@@ -523,7 +523,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		desc: "Pure Hackmons No Nerfs in Doubles format with twice the chaos!",
 		mod: 'phnn',
 		gameType: 'doubles',
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 255'],
 		unbanlist: [
 			'Past', 'Future', 'Unobtainable'
 		],
@@ -534,14 +534,14 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'phnn',
 		searchShow: false,
 		gameType: 'triples',
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 255'],
 	},
 	{
 		name: "[Gen 9] PHNN Multi Battle",
 		mod: 'phnn',
 		searchShow: false,
 		gameType: 'multi',
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 255'],
 		unbanlist: ['Past', 'Future', 'Unobtainable'],
 	},
 	{
@@ -549,7 +549,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'phnn',
 		searchShow: false,
 		gameType: 'freeforall',
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 255'],
 		unbanlist: ['Past', 'Future', 'Unobtainable'],
 	},
 	{
