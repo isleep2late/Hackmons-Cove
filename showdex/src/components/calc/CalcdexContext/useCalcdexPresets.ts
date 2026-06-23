@@ -20,6 +20,7 @@ import {
 import { formatId, nonEmptyObject } from '@showdex/utils/core';
 import { logger, runtimer } from '@showdex/utils/debug';
 import { determineTerrain, determineWeather, getGenlessFormat } from '@showdex/utils/dex';
+import { detectMaxEvsFormat, getMaxStatEv } from '@showdex/phnn';
 import {
   type CalcdexBattlePresetsHookValue,
   applyPreset,
@@ -561,8 +562,15 @@ export const useCalcdexPresets = (
           }
 
           pokemon.nature = state.legacy ? 'Hardy' : 'Adamant';
+
+          const maxEv = !state.legacy && detectMaxEvsFormat(state.format)
+            ? getMaxStatEv(state.format)
+            : null;
+
           pokemon.ivs = populateStatsTable({}, { spread: 'iv', format: state.format });
-          pokemon.evs = populateStatsTable({}, { spread: 'ev', format: state.format });
+          pokemon.evs = populateStatsTable(maxEv ? {
+            hp: maxEv, atk: maxEv, def: maxEv, spa: maxEv, spd: maxEv, spe: maxEv,
+          } : {}, { spread: 'ev', format: state.format });
           pokemon.altTeraTypes = [];
           pokemon.altAbilities = [];
           pokemon.altItems = [];

@@ -215,7 +215,7 @@ export class Battle {
 		this.deserialized = !!options.deserialized;
 		this.strictChoices = !!options.strictChoices;
 		this.formatData = this.initEffectState({ id: format.id });
-		this.gameType = (format.gameType || 'singles');
+		this.gameType = ((this.ruleTable.valueRules.get('gametype') as GameType) || format.gameType || 'singles');
 		this.field = new Field(this);
 		this.sides = Array(format.playerCount).fill(null) as any;
 		this.activePerHalf = this.gameType === 'triples' ? 3 :
@@ -2591,7 +2591,7 @@ export class Battle {
 			}
 		}
 
-		if (this.gen <= 1) {
+		if (this.gen <= 1 && this.gameType === 'singles') {
 			// in gen 1, fainting skips the rest of the turn
 			// residuals don't exist in gen 1
 			this.queue.clear();

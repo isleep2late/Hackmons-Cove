@@ -60,6 +60,18 @@ export const detectMaxEvsFormat = (format: string): boolean => {
     return true;
   }
 
+  if (f.includes('disguises') || f.includes('statuses') || f.includes('glitches') || f.includes('nolimit')) {
+    return true;
+  }
+
+  if (f.includes('customgame')) {
+    return true;
+  }
+
+  if (f.includes('anyability') && !f.includes('almostanyability')) {
+    return true;
+  }
+
   if (!f.includes('hackmons') || f.includes('hackmonscup')) {
     return false;
   }

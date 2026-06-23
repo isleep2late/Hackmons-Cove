@@ -760,10 +760,21 @@ abstract class BattleTypedSearch<T extends SearchType> {
 
 			for (const id in this.getTable()) {
 				if (!(id in legalityFilter)) {
-					if (this.searchType === 'pokemon' && (this.format.includes('nonerfs') || this.format.includes('unified') || this.format.includes('phnn')) && (this.dex.species.get(id).num > 0 || id.startsWith('pokestar')) && !id.endsWith('gmax')) {
-                      this.baseResults.push([this.searchType, id as ID]);
-                      continue;
-                    }
+					const isOpenCustom = this.format.includes('customdisguises') || this.format.includes('customgame');
+					const isNoNerfs = this.format.includes('nonerfs') || this.format.includes('phnn') || this.format.includes('unified');
+					const allowMissingno = isOpenCustom || isNoNerfs || this.format.includes('disguises');
+					if (isOpenCustom) {
+						this.baseResults.push([this.searchType, id as ID]);
+						continue;
+					}
+					if (this.searchType === 'pokemon' && id === 'missingno' && allowMissingno) {
+						this.baseResults.push([this.searchType, id as ID]);
+						continue;
+					}
+					if (isNoNerfs && (this.searchType !== 'pokemon' || this.dex.species.get(id).num > 0 || id.startsWith('pokestar'))) {
+						this.baseResults.push([this.searchType, id as ID]);
+						continue;
+					}
 					this.baseIllegalResults.push([this.searchType, id as ID]);
 					this.illegalReasons[id] = 'Illegal';
 				}

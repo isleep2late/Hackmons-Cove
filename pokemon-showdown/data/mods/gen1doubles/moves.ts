@@ -1,0 +1,18 @@
+export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
+	acid: { inherit: true, target: "allAdjacentFoes" },
+	blizzard: { inherit: true, target: "allAdjacentFoes" },
+	bubble: { inherit: true, target: "allAdjacentFoes" },
+	earthquake: { inherit: true, target: "allAdjacent" },
+	explosion: { inherit: true, target: "allAdjacent" },
+	haze: { inherit: true, target: "all" },
+	leer: { inherit: true, target: "allAdjacentFoes" },
+	mist: { inherit: true, target: "allySide" },
+	razorleaf: { inherit: true, target: "allAdjacentFoes" },
+	razorwind: { inherit: true, target: "allAdjacentFoes" },
+	rockslide: { inherit: true, target: "allAdjacentFoes" },
+	selfdestruct: { inherit: true, target: "allAdjacent" },
+	stringshot: { inherit: true, target: "allAdjacentFoes" },
+	surf: { inherit: true, target: "allAdjacentFoes" },
+	swift: { inherit: true, target: "allAdjacentFoes" },
+	tailwhip: { inherit: true, target: "allAdjacentFoes" },
+};
