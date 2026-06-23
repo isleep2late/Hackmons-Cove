@@ -108,6 +108,14 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: false,
 		ruleset: ['Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Hackmons Forme Legality', 'Species Reveal Clause', 'Endless Battle Clause', 'NatDex Mod'],
 	},
+	{
+		name: "[Gen 9 Champions] Pure Hackmons",
+		desc: `A theoretical Pure Hackmons-based metagame in the Champions scene.`,
+		mod: 'champions',
+		searchShow: false,
+		ruleset: ['Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Hackmons Forme Legality', 'Species Reveal Clause', 'Endless Battle Clause'],
+	},
+
 	//////////////////////////////////
 	////////// OM Hackmons ///////////
 	//////////////////////////////////
@@ -415,7 +423,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 	},
 	{
 		name: "[Gen 8] Unified",
-		desc: "Gen 8 Pure Hackmons unified with every BDSP Pokemon.",
+		desc: "Gen 8 Pure Hackmons with every BDSP Pokemon.",
 		mod: 'gen8unified',
 		searchShow: false,
 		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Overflow Stat Mod'],
@@ -432,14 +440,14 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		},
 	},
 	{
-		name: "[Gen 4] Glitches",
-		desc: "Gen 4 Anything Goes with the Rage glitch: Smeargle-reachable Pokemon can learn any move except Chatter and Struggle.",
+		name: "[Gen 4] Rage",
+		desc: "Gen 4 Anything Goes, but any Pokemon that connects to Smeargle via breeding can learn any move except Chatter and Struggle.",
 		mod: 'gen4',
 		searchShow: false,
 		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
 		checkCanLearn(move, species, setSources, set) {
-			const glitch = ['mew','ditto','jigglypuff','wigglytuff','mrmime','sudowoodo','bonsly','mimejr','chatot','caterpie','metapod','butterfree','weedle','kakuna','beedrill','magikarp','gyarados','unown','wobbuffet','smeargle','wurmple','silcoon','cascoon','wynaut','beldum','metagross','dustox','beautifly','metang','cleffa','clefairy','clefable','igglybuff','smoochum','jynx','skitty','delcatty','plusle','minun','spinda','riolu','lucario','happiny','chansey','blissey','mesprit','glameow','purugly','meowth','persian','drowzee','hypno','sentret','furret','sneasel','weavile','chimchar','monferno','infernape','togepi','togetic','togekiss','munchlax','snorlax','mankey','primeape','poliwhirl','poliwrath','abra','kadabra','alakazam','machop','machoke','machamp','geodude','graveler','golem','gengar','hitmonlee','hitmonchan','mewtwo','politoed','aipom','ambipom','snubbull','granbull','teddiursa','ursaring','miltank','celebi','ludicolo','makuhita','hariyama','sableye','meditite','medicham','volbeat','illumise','kecleon','banette','dusclops','dusknoir','jirachi'];
-			if (glitch.includes(this.toID(species.baseSpecies)) && move.id !== 'chatter' && move.id !== 'struggle') {
+			const glitchEligible = ['mew','ditto','jigglypuff','wigglytuff','mrmime','sudowoodo','bonsly','mimejr','chatot','caterpie','metapod','butterfree','weedle','kakuna','beedrill','magikarp','gyarados','unown','wobbuffet','smeargle','wurmple','silcoon','cascoon','wynaut','beldum','metagross','dustox','beautifly','metang','cleffa','clefairy','clefable','igglybuff','smoochum','jynx','skitty','delcatty','plusle','minun','spinda','riolu','lucario','happiny','chansey','blissey','mesprit','glameow','purugly','meowth','persian','drowzee','hypno','sentret','furret','sneasel','weavile','chimchar','monferno','infernape','togepi','togetic','togekiss','munchlax','snorlax','mankey','primeape','poliwhirl','poliwrath','abra','kadabra','alakazam','machop','machoke','machamp','geodude','graveler','golem','gengar','hitmonlee','hitmonchan','mewtwo','politoed','aipom','ambipom','snubbull','granbull','teddiursa','ursaring','miltank','celebi','ludicolo','makuhita','hariyama','sableye','meditite','medicham','volbeat','illumise','kecleon','banette','dusclops','dusknoir','jirachi'];
+			if (glitchEligible.includes(this.toID(species.baseSpecies)) && move.id !== 'chatter' && move.id !== 'struggle') {
 				return null;
 			}
 			return this.checkCanLearn(move, species, setSources, set);
@@ -448,12 +456,9 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 	{
 		name: "[Gen 3] Any Ability",
 		desc: "Gen 3 Pure Hackmons, but any Pokemon can have any ability.",
-		mod: 'gen3phnn',
+		mod: 'gen3',
 		searchShow: false,
-		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', '+No Ability'],
-		onBegin() {
-			this.add('Gen 3 Any Ability. Any Pokemon can have any ability!');
-		},
+		ruleset: ['[Gen 3] Pure Hackmons', '!Obtainable Abilities'],
 	},
 	{
 		name: "[Gen 2] Statuses",
@@ -468,42 +473,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 			}
 		},
 	},
-	{
-		name: "[Gen 1] Disguises",
-		desc: "Gen 1 Pure Hackmons, but Pokemon can have any type, disguise as any species, and even start the game pre-statused.",
-		mod: 'gen1phnn',
-		ruleset: ['-Nonexistent', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255'],
-		onBegin() {
-			this.add('Gen 1 Pure Hackmons. Disguise any Pokemon as another sprite and give it any typing. Your opponent sees only the sprite and status, never the real species or type. No Cleric Clause!');
-			for (const side of this.sides) {
-				for (const pokemon of side.pokemon) {
-					if (!pokemon.set.disguise) continue;
-					const disguise = this.dex.species.get(pokemon.set.disguise);
-					if (disguise.exists) {
-						// @ts-expect-error hack
-						pokemon.name = disguise.name;
-						// @ts-expect-error Hack
-						pokemon.fullname = `${pokemon.side.id}: ${disguise.name}`;
-					}
-				}
-			}
-		},
-		onSwitchIn(pokemon) {
-			if (pokemon.set.phType) {
-				const types = pokemon.set.phType.split('/').filter(t => this.dex.types.isName(t));
-				if (types.length) {
-					pokemon.setType(types, true);
-					this.addSplit(pokemon.side.id, [
-						'-start', pokemon, 'typechange', types.join('/'), '[from] format: Gen 1 Pure Hackmons',
-					]);
-				}
-			}
-			if (pokemon.set.startStatus && !pokemon.m.phnnStartStatusApplied) {
-				pokemon.m.phnnStartStatusApplied = true;
-				pokemon.setStatus(pokemon.set.startStatus, pokemon, null, true);
-			}
-		},
-	},
+
 	//////////////////////////////////
 	///// Pure Hackmons No Nerfs /////
 	//////////////////////////////////
@@ -525,28 +495,16 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'phnn',
 		gameType: 'doubles',
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 255'],
-		unbanlist: [
-			'Past', 'Future', 'Unobtainable'
-		],
+		ruleset: ['[Gen 9] Pure Hackmons No Nerfs'],
 	},
 	{
 		name: "[Gen 9] PHNN Triples",
-		desc: "Pure Hackmons No Nerfs in Triples format - maximum chaos!",
+		desc: "Pure Hackmons No Nerfs, but Triples.",
 		mod: 'phnn',
 		searchShow: false,
 		gameType: 'triples',
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 255'],
-	},
-	{
-		name: "[Gen 9] PHNN Multi Battle",
-		mod: 'phnn',
-		searchShow: false,
-		gameType: 'multi',
-		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 255'],
-		unbanlist: ['Past', 'Future', 'Unobtainable'],
+		ruleset: ['[Gen 9] Pure Hackmons No Nerfs'],
 	},
 	{
 		name: "[Gen 9] PHNN Free-for-All",
@@ -554,24 +512,36 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: false,
 		gameType: 'freeforall',
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 255'],
-		unbanlist: ['Past', 'Future', 'Unobtainable'],
+		ruleset: ['[Gen 9] Pure Hackmons No Nerfs'],
+	},
+	{
+		name: "[Gen 9] PHNN Multi Battle",
+		mod: 'phnn',
+		searchShow: false,
+		gameType: 'multi',
+		battle: {trunc: Math.trunc},
+		ruleset: ['[Gen 9] Pure Hackmons No Nerfs'],
 	},
 	{
 		name: "[Gen 9] PHNN Little Cup",
 		mod: 'phnn',
 		searchShow: false,
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 5'],
-		unbanlist: ['Past', 'Future', 'Unobtainable'],
+		ruleset: ['[Gen 9] Pure Hackmons No Nerfs'],
 	},
 	{
 		name: "[Gen 9] PHNN Middle Cup",
 		mod: 'phnn',
 		searchShow: false,
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Overflow Stat Mod', 'Data Preview', 'Max Level = 50'],
-		unbanlist: ['Past', 'Future', 'Unobtainable'],
+		ruleset: ['[Gen 9] Pure Hackmons No Nerfs'],
+		onValidateTeam(team, format, teamHas) {
+			for (const set of team) {
+				const species = this.dex.species.get(set.species);
+				if (!(species.prevo || species.evos)) return
+				`${species} is missing a pre-evolution or evolution.`;
+			}
+		},
 	},
 	{
 		name: "[Gen 5] Pure Hackmons No Nerfs",
@@ -579,6 +549,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'gen5phnn',
 		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Overflow Stat Mod'],
 	},
+
 	//////////////////////////////////
 	/////// Wondrous Hackmons ////////
 	//////////////////////////////////
@@ -666,6 +637,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 			}
 		},
 	},
+
 	//////////////////////////////////
 	//// Random Hackmons Formats /////
 	//////////////////////////////////
@@ -844,95 +816,22 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		},
 	},
 	//////////////////////////////////
-	////// Singles Custom Game ///////
+	//////////// Diguises ////////////
 	//////////////////////////////////
 	{
-		section: "Custom Disguises",
+		section: "Disguises",
 		column: 2,
 	},
 	{
 		name: "[Gen 9] No Nerfs Custom Disguises",
 		mod: 'phnn',
 		searchShow: false,
-		debug: true,
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
 	},
 	{
-		name: "[Gen 9] No Nerfs Custom Disguises Doubles",
-		mod: 'phnn',
-		gameType: 'doubles',
-		searchShow: false,
-		debug: true,
-		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
-	},
-	{
-		name: "[Gen 9] No Nerfs Custom Disguises Triples",
-		mod: 'phnn',
-		gameType: 'triples',
-		searchShow: false,
-		debug: true,
-		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
-	},
-	{
-		name: "[Gen 9] No Nerfs Custom Disguises Multi",
-		mod: 'phnn',
-		gameType: 'multi',
-		searchShow: false,
-		debug: true,
-		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
-	},
-	{
-		name: "[Gen 9] No Nerfs Custom Disguises Free-for-All",
-		mod: 'phnn',
-		gameType: 'freeforall',
-		searchShow: false,
-		debug: true,
-		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
-	},
-	{
-		name: "[Gen 9] Custom Disguises",
+		name: "[Gen 9] Disguises",
 		mod: 'gen9',
-		searchShow: false,
-		debug: true,
-		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
-	},
-	{
-		name: "[Gen 9] Custom Disguises Doubles",
-		mod: 'gen9',
-		gameType: 'doubles',
-		searchShow: false,
-		debug: true,
-		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
-	},
-	{
-		name: "[Gen 9] Custom Disguises Triples",
-		mod: 'gen9',
-		gameType: 'triples',
-		searchShow: false,
-		debug: true,
-		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
-	},
-	{
-		name: "[Gen 9] Custom Disguises Multi",
-		mod: 'gen9',
-		gameType: 'multi',
-		searchShow: false,
-		debug: true,
-		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
-	},
-	{
-		name: "[Gen 9] Custom Disguises Free-for-All",
-		mod: 'gen9',
-		gameType: 'freeforall',
 		searchShow: false,
 		debug: true,
 		battle: {trunc: Math.trunc},
@@ -947,43 +846,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
 	},
 	{
-		name: "[Gen 8] Custom Disguises Doubles",
-		mod: 'gen8',
-		gameType: 'doubles',
-		searchShow: false,
-		debug: true,
-		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
-	},
-	{
-		name: "[Gen 8] Custom Disguises Triples",
-		mod: 'gen8',
-		gameType: 'triples',
-		searchShow: false,
-		debug: true,
-		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
-	},
-	{
-		name: "[Gen 8] Custom Disguises Multi",
-		mod: 'gen8',
-		gameType: 'multi',
-		searchShow: false,
-		debug: true,
-		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
-	},
-	{
-		name: "[Gen 8] Custom Disguises Free-for-All",
-		mod: 'gen8',
-		gameType: 'freeforall',
-		searchShow: false,
-		debug: true,
-		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
-	},
-	{
-		name: "[Gen 8] BDSP Custom Disguises",
+		name: "[Gen 8 BDSP] Disguises",
 		mod: 'gen8bdsp',
 		searchShow: false,
 		debug: true,
@@ -991,34 +854,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
 	},
 	{
-		name: "[Gen 8] BDSP Custom Disguises Doubles",
-		mod: 'gen8bdsp',
-		gameType: 'doubles',
-		searchShow: false,
-		debug: true,
-		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
-	},
-	{
-		name: "[Gen 8] BDSP Custom Disguises Multi",
-		mod: 'gen8bdsp',
-		gameType: 'multi',
-		searchShow: false,
-		debug: true,
-		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
-	},
-	{
-		name: "[Gen 8] BDSP Custom Disguises Free-for-All",
-		mod: 'gen8bdsp',
-		gameType: 'freeforall',
-		searchShow: false,
-		debug: true,
-		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
-	},
-	{
-		name: "[Gen 7] Custom Disguises",
+		name: "[Gen 7] Disguises",
 		mod: 'gen7',
 		searchShow: false,
 		debug: true,
@@ -1026,43 +862,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
 	},
 	{
-		name: "[Gen 7] Custom Disguises Doubles",
-		mod: 'gen7',
-		gameType: 'doubles',
-		searchShow: false,
-		debug: true,
-		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
-	},
-	{
-		name: "[Gen 7] Custom Disguises Triples",
-		mod: 'gen7',
-		gameType: 'triples',
-		searchShow: false,
-		debug: true,
-		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
-	},
-	{
-		name: "[Gen 7] Custom Disguises Multi",
-		mod: 'gen7',
-		gameType: 'multi',
-		searchShow: false,
-		debug: true,
-		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
-	},
-	{
-		name: "[Gen 7] Custom Disguises Free-for-All",
-		mod: 'gen7',
-		gameType: 'freeforall',
-		searchShow: false,
-		debug: true,
-		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
-	},
-	{
-		name: "[Gen 7] Let's Go Custom Disguises",
+		name: "[Gen 7 Let's Go] Disguises",
 		mod: 'gen7letsgo',
 		searchShow: false,
 		debug: true,
@@ -1070,7 +870,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
 	},
 	{
-		name: "[Gen 6] Custom Disguises",
+		name: "[Gen 6] Disguises",
 		mod: 'gen6',
 		searchShow: false,
 		debug: true,
@@ -1078,43 +878,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
 	},
 	{
-		name: "[Gen 6] Custom Disguises Doubles",
-		mod: 'gen6',
-		gameType: 'doubles',
-		searchShow: false,
-		debug: true,
-		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
-	},
-	{
-		name: "[Gen 6] Custom Disguises Triples",
-		mod: 'gen6',
-		gameType: 'triples',
-		searchShow: false,
-		debug: true,
-		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
-	},
-	{
-		name: "[Gen 6] Custom Disguises Multi",
-		mod: 'gen6',
-		gameType: 'multi',
-		searchShow: false,
-		debug: true,
-		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
-	},
-	{
-		name: "[Gen 6] Custom Disguises Free-for-All",
-		mod: 'gen6',
-		gameType: 'freeforall',
-		searchShow: false,
-		debug: true,
-		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
-	},
-	{
-		name: "[Gen 5] Custom Disguises",
+		name: "[Gen 5] Disguises",
 		mod: 'gen5',
 		searchShow: false,
 		debug: true,
@@ -1122,43 +886,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
 	},
 	{
-		name: "[Gen 5] Custom Disguises Doubles",
-		mod: 'gen5',
-		gameType: 'doubles',
-		searchShow: false,
-		debug: true,
-		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
-	},
-	{
-		name: "[Gen 5] Custom Disguises Triples",
-		mod: 'gen5',
-		gameType: 'triples',
-		searchShow: false,
-		debug: true,
-		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
-	},
-	{
-		name: "[Gen 5] Custom Disguises Multi",
-		mod: 'gen5',
-		gameType: 'multi',
-		searchShow: false,
-		debug: true,
-		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
-	},
-	{
-		name: "[Gen 5] Custom Disguises Free-for-All",
-		mod: 'gen5',
-		gameType: 'freeforall',
-		searchShow: false,
-		debug: true,
-		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
-	},
-	{
-		name: "[Gen 4] Custom Disguises",
+		name: "[Gen 4] Disguises",
 		mod: 'gen4',
 		searchShow: false,
 		debug: true,
@@ -1166,34 +894,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
 	},
 	{
-		name: "[Gen 4] Custom Disguises Doubles",
-		mod: 'gen4',
-		gameType: 'doubles',
-		searchShow: false,
-		debug: true,
-		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
-	},
-	{
-		name: "[Gen 4] Custom Disguises Multi",
-		mod: 'gen4',
-		gameType: 'multi',
-		searchShow: false,
-		debug: true,
-		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
-	},
-	{
-		name: "[Gen 4] Custom Disguises Free-for-All",
-		mod: 'gen4',
-		gameType: 'freeforall',
-		searchShow: false,
-		debug: true,
-		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
-	},
-	{
-		name: "[Gen 3] Custom Disguises",
+		name: "[Gen 3]  Disguises",
 		mod: 'gen3',
 		searchShow: false,
 		debug: true,
@@ -1201,34 +902,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Desync Clause Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
 	},
 	{
-		name: "[Gen 3] Custom Disguises Doubles",
-		mod: 'gen3',
-		gameType: 'doubles',
-		searchShow: false,
-		debug: true,
-		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Desync Clause Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
-	},
-	{
-		name: "[Gen 3] Custom Disguises Multi",
-		mod: 'gen3',
-		gameType: 'multi',
-		searchShow: false,
-		debug: true,
-		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Desync Clause Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
-	},
-	{
-		name: "[Gen 3] Custom Disguises Free-for-All",
-		mod: 'gen3',
-		gameType: 'freeforall',
-		searchShow: false,
-		debug: true,
-		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Desync Clause Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
-	},
-	{
-		name: "[Gen 2] Custom Disguises",
+		name: "[Gen 2] Disguises",
 		mod: 'gen2',
 		searchShow: false,
 		debug: true,
@@ -1236,67 +910,17 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Desync Clause Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
 	},
 	{
-		name: "[Gen 2] Custom Disguises Doubles",
-		mod: 'gen2doubles',
-		gameType: 'doubles',
-		searchShow: false,
-		debug: true,
-		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Desync Clause Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
-	},
-	{
-		name: "[Gen 2] Custom Disguises Multi",
-		mod: 'gen2doubles',
-		gameType: 'multi',
-		searchShow: false,
-		debug: true,
-		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Desync Clause Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
-	},
-	{
-		name: "[Gen 2] Custom Disguises Free-for-All",
-		mod: 'gen2doubles',
-		gameType: 'freeforall',
-		searchShow: false,
-		debug: true,
-		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Desync Clause Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
-	},
-	{
-		name: "[Gen 1] Custom Disguises",
+		name: "[Gen 1] Disguises",
 		mod: 'gen1',
 		searchShow: false,
 		debug: true,
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Desync Clause Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
 	},
-	{
-		name: "[Gen 1] Custom Disguises Doubles",
-		mod: 'gen1doubles',
-		gameType: 'doubles',
-		searchShow: false,
-		debug: true,
-		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Desync Clause Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
-	},
-	{
-		name: "[Gen 1] Custom Disguises Multi",
-		mod: 'gen1doubles',
-		gameType: 'multi',
-		searchShow: false,
-		debug: true,
-		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Desync Clause Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
-	},
-	{
-		name: "[Gen 1] Custom Disguises Free-for-All",
-		mod: 'gen1doubles',
-		gameType: 'freeforall',
-		searchShow: false,
-		debug: true,
-		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Desync Clause Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
-	},
+
+	//////////////////////////////////
+	////// Singles Custom Game ///////
+	//////////////////////////////////
 	{
 		section: "Custom Game",
 		column: 3,
