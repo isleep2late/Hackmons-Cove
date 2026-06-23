@@ -1957,6 +1957,7 @@ export const commands: Chat.ChatCommands = {
 			} else {
 				const genID = ['rb', 'gs', 'rs', 'dp', 'bw', 'xy', 'sm', 'ss', 'sv'];
 				const gen = Dex.forFormat(format).gen;
+				descHtml.push(`This format has no resources linked.`);
 			}
 			return this.sendReplyBox(`<h2>${format.name}</h2><hr />${formatDesc ? formatDesc + '<hr />' : ''}${descHtml.join("<br />")}${rulesetHtml ? `<br />${rulesetHtml}` : ''}`);
 		}

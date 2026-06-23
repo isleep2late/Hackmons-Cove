@@ -307,7 +307,7 @@ export const unpackStorageTeam = (
     }
 
     if (level) {
-      preset.level = clamp(0, parseInt(level, 10) || 100, 100);
+      preset.level = clamp(0, parseInt(level, 10) || 100);
     }
 
     if (packedProps?.includes(',')) {

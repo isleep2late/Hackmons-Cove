@@ -895,6 +895,53 @@
 			}
 		},
 
+		cdModeListMain: function () {
+			return [
+				{ id: 'gen9nonerfs', name: 'No Nerfs', gts: ['', 'doubles', 'triples', 'multi', 'freeforall'] },
+				{ id: 'gen9', name: 'Gen 9', gts: ['', 'doubles', 'triples', 'multi', 'freeforall'] },
+				{ id: 'gen8', name: 'Gen 8', gts: ['', 'doubles', 'triples', 'multi', 'freeforall'] },
+				{ id: 'gen8bdsp', name: 'BDSP', gts: ['', 'doubles', 'multi', 'freeforall'] },
+				{ id: 'gen7', name: 'Gen 7', gts: ['', 'doubles', 'triples', 'multi', 'freeforall'] },
+				{ id: 'gen7letsgo', name: "Let's Go", gts: [''] },
+				{ id: 'gen6', name: 'Gen 6', gts: ['', 'doubles', 'triples', 'multi', 'freeforall'] },
+				{ id: 'gen5', name: 'Gen 5', gts: ['', 'doubles', 'triples', 'multi', 'freeforall'] },
+				{ id: 'gen4', name: 'Gen 4', gts: ['', 'doubles', 'multi', 'freeforall'] },
+				{ id: 'gen3', name: 'Gen 3', gts: ['', 'doubles', 'multi', 'freeforall'] },
+				{ id: 'gen2', name: 'Gen 2', gts: ['', 'doubles', 'multi', 'freeforall'] },
+				{ id: 'gen1', name: 'Gen 1', gts: ['', 'doubles', 'multi', 'freeforall'] },
+			];
+		},
+		renderCdModeChallenge: function (format) {
+			format = '' + (format || '');
+			var atIdx = format.indexOf('@@@');
+			var baseFormat = atIdx >= 0 ? format.slice(0, atIdx) : format;
+			var idx = baseFormat.indexOf('customdisguises');
+			if (idx < 0) return '<span class="cdmodewrap"></span>';
+			var prefix = baseFormat.slice(0, idx);
+			var modes = this.cdModeListMain();
+			var name = prefix;
+			for (var i = 0; i < modes.length; i++) {
+				if (modes[i].id === prefix) { name = modes[i].name; break; }
+			}
+			return '<span class="cdmodewrap"><p><label class="label">Generation:</label> <button class="select cdmodeselect" name="cdMode">' + name + '</button></p></span>';
+		},
+		cdMode: function (i, button) {
+			var self = this;
+			var $form = $(button).closest('form');
+			var $fmtBtn = $form.find('button[name=format]');
+			var format = '' + $fmtBtn.val();
+			var idx = format.indexOf('customdisguises');
+			if (idx < 0) return;
+			var suffix = format.slice(idx + 15);
+			app.addPopup(CdModePopup, { format: format, sourceEl: button, onselect: function (modeId) {
+				var newFormat = modeId + 'customdisguises' + suffix;
+				$fmtBtn.val(newFormat).html(BattleLog.escapeFormat(newFormat));
+				self.curFormat = newFormat;
+				var $teamButton = $form.find('button[name=team]');
+				if ($teamButton.length) $teamButton.replaceWith(self.renderTeams(newFormat));
+			} });
+		},
+
 		// challenge buttons
 		challenge: function (name, format, team) {
 			var userid = toID(name);
@@ -914,7 +961,8 @@
 			var buf = '<form class="battleform"><p>Challenge ' + BattleLog.escapeHTML(name) + '?</p>';
 			buf += '<p><label class="label">Format:</label>' + this.renderFormats(format) + '</p>';
 			buf += '<p><label class="label">Team:</label>' + this.renderTeams(format) + '</p>';
-			
+			buf += this.renderCdModeChallenge(format);
+
 			var bestOfDefault = format && BattleFormats[format] ? BattleFormats[format].bestOfDefault : false;
 			buf += '<p' + (!bestOfDefault ? ' class="hidden">' : '>');
 			buf += '<label class="checkbox"><input type="checkbox" name="bestof" /> <abbr title="Start a team-locked best-of-n series">Best-of-<input name="bestofvalue" type="number" min="3" max="9" step="2" value="3" style="width: 28px; vertical-align: initial;"></abbr></label></p>';
@@ -1402,6 +1450,7 @@
 			this.update();
 		},
 		shouldDisplayFormat: function (format) {
+			if (/customdisguises/.test(format.id) && !/^gen9nonerfscustomdisguises(doubles|triples|multi|freeforall)?$/.test(format.id)) return false;
 			if (this.selectType === 'teambuilder') {
 				if (!format.isTeambuilderFormat) return false;
 			} else {
@@ -1420,6 +1469,8 @@
 				app.rooms[''].curTeamIndex = -1;
 				var $teamButton = $form.find('button[name=team]');
 				if ($teamButton.length) $teamButton.replaceWith(app.rooms[''].renderTeams(format));
+				var $cdwrap = $form.find('.cdmodewrap');
+				if ($cdwrap.length) $cdwrap.replaceWith(app.rooms[''].renderCdModeChallenge(format));
 
 				var $bestOfCheckbox = $form.find('input[name=bestof]');
 				var $bestOfValueInput = $form.find('input[name=bestofvalue]');

@@ -1235,6 +1235,7 @@
 				if (exports.BattleFormats) {
 					buf += '<li class="format-select">';
 					buf += '<label class="label">Format:</label><button class="select formatselect teambuilderformatselect" name="format" value="' + this.curTeam.format + '">' + (isGenericFormat(this.curTeam.format) ? '<em>Select a format</em>' : BattleLog.escapeFormat(this.curTeam.format)) + '</button>';
+					buf += this.renderCdModeSelect();
 					var btnClass = 'button' + (!this.curSetList.length || app.isDisconnected ? ' disabled' : '');
 					buf += ' <button name="validate" class="' + btnClass + '"><i class="fa fa-check"></i> Validate</button></li>';
 				}
@@ -1367,14 +1368,14 @@
 					buf += '<span class="detailcell"><label>Tera Type</label>' + (set.teraType || ((this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')) ? 'None / Dyna' : (species.requiredTeraType || species.types[0]))) + '</span>';
 				}
 			}
-			if (this.curTeam.gen === 1 && this.curTeam.format.includes('disguises')) {
+			if (this.curTeam.format.includes('disguises')) {
 				var phT = (set.phType || '').split('/');
 				buf += '<span class="detailcell"><label>Type 1</label>' + (phT[0] || species.types[0]) + '</span>';
 				buf += '<span class="detailcell"><label>Type 2</label>' + (phT[1] || species.types[1] || '(none)') + '</span>';
-				buf += '<span class="detailcell"><label>Disguise</label>' + (set.disguise ? this.curTeam.dex.species.get(set.disguise).name : '(none)') + '</span>';
+				buf += '<span class="detailcell"><label>Disguise</label>' + (set.disguise ? Dex.species.get(set.disguise).name : '(none)') + '</span>';
 				buf += '<span class="detailcell"><label>Status</label>' + (set.startStatus || 'None') + '</span>';
 			}
-			if ((this.curTeam.gen === 2 && (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses'))) || (this.curTeam.gen === 9 && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) {
+			if (((this.curTeam.gen === 2 && (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses'))) || (this.curTeam.gen === 9 && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) && !this.curTeam.format.includes('disguises')) {
 				buf += '<span class="detailcell"><label>Status</label>' + (set.startStatus || 'None') + '</span>';
 			}
 			buf += '</button></div></div>';
@@ -1655,6 +1656,45 @@
 			this.save();
 			if (this.curTeam.gen === 5 && !Dex.loadedSpriteData['bw']) Dex.loadSpriteData('bw');
 			this.update();
+		},
+		cdModeList: function () {
+			return [
+				{ id: 'gen9nonerfs', name: 'No Nerfs', gts: ['', 'doubles', 'triples', 'multi', 'freeforall'] },
+				{ id: 'gen9', name: 'Gen 9', gts: ['', 'doubles', 'triples', 'multi', 'freeforall'] },
+				{ id: 'gen8', name: 'Gen 8', gts: ['', 'doubles', 'triples', 'multi', 'freeforall'] },
+				{ id: 'gen8bdsp', name: 'BDSP', gts: ['', 'doubles', 'multi', 'freeforall'] },
+				{ id: 'gen7', name: 'Gen 7', gts: ['', 'doubles', 'triples', 'multi', 'freeforall'] },
+				{ id: 'gen7letsgo', name: "Let's Go", gts: [''] },
+				{ id: 'gen6', name: 'Gen 6', gts: ['', 'doubles', 'triples', 'multi', 'freeforall'] },
+				{ id: 'gen5', name: 'Gen 5', gts: ['', 'doubles', 'triples', 'multi', 'freeforall'] },
+				{ id: 'gen4', name: 'Gen 4', gts: ['', 'doubles', 'multi', 'freeforall'] },
+				{ id: 'gen3', name: 'Gen 3', gts: ['', 'doubles', 'multi', 'freeforall'] },
+				{ id: 'gen2', name: 'Gen 2', gts: ['', 'doubles', 'multi', 'freeforall'] },
+				{ id: 'gen1', name: 'Gen 1', gts: ['', 'doubles', 'multi', 'freeforall'] },
+			];
+		},
+		parseCdFormat: function (format) {
+			var idx = ('' + format).indexOf('customdisguises');
+			if (idx < 0) return null;
+			return { prefix: format.slice(0, idx), suffix: format.slice(idx + 15) };
+		},
+		renderCdModeSelect: function () {
+			var parsed = this.parseCdFormat(this.curTeam.format);
+			if (!parsed) return '';
+			var modes = this.cdModeList();
+			var name = parsed.prefix;
+			for (var i = 0; i < modes.length; i++) {
+				if (modes[i].id === parsed.prefix) { name = modes[i].name; break; }
+			}
+			return ' <label class="label">Generation:</label> <button class="select cdmodeselect" name="cdMode">' + name + '</button>';
+		},
+		cdMode: function (i, button) {
+			var self = this;
+			var parsed = this.parseCdFormat(this.curTeam.format);
+			if (!parsed) return;
+			app.addPopup(CdModePopup, { format: this.curTeam.format, sourceEl: button, onselect: function (modeId) {
+				self.changeFormat(modeId + 'customdisguises' + parsed.suffix);
+			} });
 		},
 		nicknameChange: function (e) {
 			var i = +$(e.currentTarget).closest('li').attr('value');
@@ -2944,7 +2984,7 @@
 			buf += '<form class="detailsform">';
 
 			buf += '<div class="formrow"><label class="formlabel">Level:</label><div>' +
-				'<input type="number" min="1" max="' + (((this.curTeam.gen === 1 && this.curTeam.format.includes('disguises')) || (this.curTeam.gen === 2 && (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses'))) || (this.curTeam.gen === 9 && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) ? 255 : 100) + '" step="1" name="level" value="' +
+				'<input type="number" min="1" max="' + (this.curTeam.format.includes('customdisguises') ? 9999 : (((this.curTeam.gen === 1 && this.curTeam.format.includes('disguises')) || (this.curTeam.gen === 2 && (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses'))) || (this.curTeam.gen === 9 && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) ? 255 : 100)) + '" step="1" name="level" value="' +
 				(typeof set.level === 'number' ? set.level : 100) +
 				'" class="textbox inputform numform"' +
 				(isChampions ? ' disabled' : '') +
@@ -3032,9 +3072,9 @@
 			}
 
 			// PHNN Gen 1: custom type / disguise / status
-			var isGen1PHNN = this.curTeam.gen === 1 && this.curTeam.format.includes('disguises');
-			if (isGen1PHNN) {
-				var phTypeList = ['Normal', 'Fighting', 'Flying', 'Poison', 'Ground', 'Rock', 'Bug', 'Ghost', 'Fire', 'Water', 'Grass', 'Electric', 'Psychic', 'Ice', 'Dragon'];
+			var isDisguise = this.curTeam.format.includes('disguises');
+			if (isDisguise) {
+				var phTypeList = Dex.types.all().map(function (t) { return t.name; });
 				var phTypes = (set.phType || '').split('/');
 				buf += '<div class="formrow"><label class="formlabel" title="Custom type used in battle (hidden from the opponent)">Type 1:</label><div><select name="phtype1" class="button">';
 				buf += '<option value=""' + (!phTypes[0] ? ' selected="selected"' : '') + '>(species default)</option>';
@@ -3052,8 +3092,8 @@
 				buf += '<option value=""' + (!set.disguise ? ' selected="selected"' : '') + '>(none — show real sprite)</option>';
 				var disguiseMons = [];
 				for (var dexid in BattlePokedex) {
-					var dsp = this.curTeam.dex.species.get(dexid);
-					if (dsp.exists && dsp.num >= 1 && dsp.num <= 151 && !dsp.forme) disguiseMons.push(dsp);
+					var dsp = Dex.species.get(dexid);
+					if (dsp.exists && dsp.num >= 1 && !dsp.forme) disguiseMons.push(dsp);
 				}
 				disguiseMons.sort(function (a, b) { return a.num - b.num; });
 				var curDisguiseId = toID(set.disguise);
@@ -3068,7 +3108,7 @@
 				}
 				buf += '</select></div></div>';
 			}
-			if ((this.curTeam.gen === 2 && (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses'))) || (this.curTeam.gen === 9 && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) {
+			if (((this.curTeam.gen === 2 && (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses'))) || (this.curTeam.gen === 9 && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) && !this.curTeam.format.includes('disguises')) {
 				buf += '<div class="formrow"><label class="formlabel" title="Bring this Pokemon in already afflicted with a status">Status:</label><div><select name="startstatus" class="button">';
 				var phStatuses2 = [['', 'None'], ['psn', 'Poisoned'], ['par', 'Paralyzed'], ['slp', 'Asleep'], ['brn', 'Burned'], ['frz', 'Frozen']];
 				for (var pk2 = 0; pk2 < phStatuses2.length; pk2++) {
@@ -3097,7 +3137,7 @@
 
 			// level
 			var level = parseInt(this.$chart.find('input[name=level]').val(), 10);
-			var maxLevel = ((this.curTeam.gen === 1 && this.curTeam.format.includes('disguises')) || (this.curTeam.gen === 2 && (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses'))) || (this.curTeam.gen === 9 && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) ? 255 : 100;
+			var maxLevel = this.curTeam.format.includes('customdisguises') ? 9999 : (((this.curTeam.gen === 1 && this.curTeam.format.includes('disguises')) || (this.curTeam.gen === 2 && (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses'))) || (this.curTeam.gen === 9 && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) ? 255 : 100);
 			if (!level || level < 1) level = 100;
 			if (level > maxLevel) level = maxLevel;
 			if (level !== 100 || set.level) set.level = level;
@@ -3163,7 +3203,7 @@
 			}
 
 			// PHNN Gen 1: custom type / disguise / status
-			if (this.curTeam.gen === 1 && this.curTeam.format.includes('disguises')) {
+			if (this.curTeam.format.includes('disguises')) {
 				var phType1 = this.$chart.find('select[name=phtype1]').val();
 				var phType2 = this.$chart.find('select[name=phtype2]').val();
 				if (phType1) {
@@ -3172,7 +3212,7 @@
 					delete set.phType;
 				}
 				var disguiseInput = this.$chart.find('select[name=disguise]').val();
-				var disguiseSpecies = this.curTeam.dex.species.get(disguiseInput);
+				var disguiseSpecies = Dex.species.get(disguiseInput);
 				if (disguiseInput && disguiseSpecies.exists) {
 					set.disguise = disguiseSpecies.name;
 				} else {
@@ -3185,7 +3225,7 @@
 					delete set.startStatus;
 				}
 			}
-			if ((this.curTeam.gen === 2 && (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses'))) || (this.curTeam.gen === 9 && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) {
+			if (((this.curTeam.gen === 2 && (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses'))) || (this.curTeam.gen === 9 && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) && !this.curTeam.format.includes('disguises')) {
 				var startStatus2 = this.$chart.find('select[name=startstatus]').val();
 				if (['psn', 'par', 'slp', 'brn', 'frz'].indexOf(startStatus2) >= 0) {
 					set.startStatus = startStatus2;
@@ -3223,14 +3263,14 @@
 			if (this.curTeam.gen === 9 && !isChampions) {
 				buf += '<span class="detailcell"><label>Tera Type</label>' + (set.teraType || ((this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')) ? 'None / Dyna' : (species.requiredTeraType || species.types[0]))) + '</span>';
 			}
-			if (this.curTeam.gen === 1 && this.curTeam.format.includes('disguises')) {
+			if (this.curTeam.format.includes('disguises')) {
 				var phT = (set.phType || '').split('/');
 				buf += '<span class="detailcell"><label>Type 1</label>' + (phT[0] || species.types[0]) + '</span>';
 				buf += '<span class="detailcell"><label>Type 2</label>' + (phT[1] || species.types[1] || '(none)') + '</span>';
-				buf += '<span class="detailcell"><label>Disguise</label>' + (set.disguise ? this.curTeam.dex.species.get(set.disguise).name : '(none)') + '</span>';
+				buf += '<span class="detailcell"><label>Disguise</label>' + (set.disguise ? Dex.species.get(set.disguise).name : '(none)') + '</span>';
 				buf += '<span class="detailcell"><label>Status</label>' + (set.startStatus || 'None') + '</span>';
 			}
-			if ((this.curTeam.gen === 2 && (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses'))) || (this.curTeam.gen === 9 && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) {
+			if (((this.curTeam.gen === 2 && (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses'))) || (this.curTeam.gen === 9 && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) && !this.curTeam.format.includes('disguises')) {
 				buf += '<span class="detailcell"><label>Status</label>' + (set.startStatus || 'None') + '</span>';
 			}
 			this.$('button[name=details]').html(buf);
@@ -3851,6 +3891,44 @@
 			if (format.substr(0, 3) !== 'gen') return 6;
 			return parseInt(format.substr(3, 1), 10) || 6;
 		}
+	});
+
+	var CdModePopup = exports.CdModePopup = Popup.extend({
+		initialize: function (data) {
+			this.onselect = data.onselect;
+			var format = '' + (data.format || '');
+			var atIdx = format.indexOf('@@@');
+			var baseFormat = atIdx >= 0 ? format.slice(0, atIdx) : format;
+			var idx = baseFormat.indexOf('customdisguises');
+			var prefix = idx >= 0 ? baseFormat.slice(0, idx) : '';
+			var suffix = idx >= 0 ? baseFormat.slice(idx + 15) : '';
+			var modes = [
+				{ id: 'gen9nonerfs', name: 'No Nerfs', gts: ['', 'doubles', 'triples', 'multi', 'freeforall'] },
+				{ id: 'gen9', name: 'Gen 9', gts: ['', 'doubles', 'triples', 'multi', 'freeforall'] },
+				{ id: 'gen8', name: 'Gen 8', gts: ['', 'doubles', 'triples', 'multi', 'freeforall'] },
+				{ id: 'gen8bdsp', name: 'BDSP', gts: ['', 'doubles', 'multi', 'freeforall'] },
+				{ id: 'gen7', name: 'Gen 7', gts: ['', 'doubles', 'triples', 'multi', 'freeforall'] },
+				{ id: 'gen7letsgo', name: "Let's Go", gts: [''] },
+				{ id: 'gen6', name: 'Gen 6', gts: ['', 'doubles', 'triples', 'multi', 'freeforall'] },
+				{ id: 'gen5', name: 'Gen 5', gts: ['', 'doubles', 'triples', 'multi', 'freeforall'] },
+				{ id: 'gen4', name: 'Gen 4', gts: ['', 'doubles', 'multi', 'freeforall'] },
+				{ id: 'gen3', name: 'Gen 3', gts: ['', 'doubles', 'multi', 'freeforall'] },
+				{ id: 'gen2', name: 'Gen 2', gts: ['', 'doubles', 'multi', 'freeforall'] },
+				{ id: 'gen1', name: 'Gen 1', gts: ['', 'doubles', 'multi', 'freeforall'] },
+			];
+			var buf = '<ul class="popupmenu">';
+			for (var i = 0; i < modes.length; i++) {
+				if (modes[i].gts.indexOf(suffix) < 0) continue;
+				buf += '<li><button name="selectCdMode" value="' + modes[i].id + '" class="option' + (modes[i].id === prefix ? ' sel' : '') + '">' + modes[i].name + '</button></li>';
+			}
+			buf += '</ul>';
+			this.$el.html(buf);
+		},
+		selectCdMode: function (value) {
+			var cb = this.onselect;
+			this.close();
+			if (cb) cb(value);
+		},
 	});
 
 	var MoveSetPopup = exports.MoveSetPopup = Popup.extend({

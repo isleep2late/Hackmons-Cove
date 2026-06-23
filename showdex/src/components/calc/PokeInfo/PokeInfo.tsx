@@ -679,7 +679,7 @@ export const PokeInfo = ({
                   )}
                   fallbackValue={pokemon?.speciesForme ? defaultLevel : null}
                   min={1}
-                  max={100}
+                  max={9999}
                   step={1}
                   shiftStep={10}
                   clearOnFocus

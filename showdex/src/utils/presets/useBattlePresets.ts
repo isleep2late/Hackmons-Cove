@@ -17,6 +17,7 @@ import {
   legalLockedFormat,
   parseBattleFormat,
 } from '@showdex/utils/dex';
+import { detectMaxEvsFormat } from '@showdex/phnn';
 import { type CalcdexPokemonUsageAltSorter, usageAltPercentFinder, usageAltPercentSorter } from '@showdex/utils/presets';
 
 /**
@@ -210,9 +211,11 @@ export const useBattlePresets = (
     teamdexPresets,
   ]);
 
+  const noStandardSets = detectMaxEvsFormat(format);
+
   const shouldSkipAny = disabled || !gen || !genlessFormat;
   const shouldSkipBundles = shouldSkipAny || !includePresetsBundles?.length;
-  const shouldSkipFormats = shouldSkipAny || randoms || !downloadSmogonPresets;
+  const shouldSkipFormats = shouldSkipAny || randoms || !downloadSmogonPresets || noStandardSets;
   const shouldSkipFormatStats = shouldSkipAny || randoms || !downloadUsageStats;
   const shouldSkipRandoms = shouldSkipAny || !randoms || !downloadRandomsPresets;
   const shouldSkipRandomsStats = shouldSkipAny || !randoms || !downloadUsageStats;

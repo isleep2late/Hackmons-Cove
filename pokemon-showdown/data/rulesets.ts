@@ -154,6 +154,54 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 			}
 		},
 	},
+	gametype: {
+		effectType: 'Rule',
+		name: 'Gametype',
+		desc: "Overrides the battle's game type. Usage: Gametype = [Singles/Doubles/Triples], e.g. \"Gametype = Doubles\". Multi and Free-for-All require their dedicated formats.",
+		hasValue: true,
+		onValidateRule(value) {
+			const gameType = value.toLowerCase().trim();
+			if (gameType !== 'singles' && gameType !== 'doubles' && gameType !== 'triples') {
+				throw new Error(`Invalid Gametype "${value}"; use Singles, Doubles, or Triples (Multi and Free-for-All have dedicated formats).`);
+			}
+			if (gameType === 'triples' && this.dex.gen < 5) {
+				throw new Error(`Triples battles are not supported before Generation 5.`);
+			}
+			return gameType;
+		},
+	},
+	disguisemod: {
+		effectType: 'Rule',
+		name: 'Disguise Mod',
+		desc: "Pok&eacute;mon may disguise as another species' sprite, take on any typing, and start the battle pre-statused; opponents only ever see the disguise sprite and status.",
+		onBegin() {
+			for (const side of this.sides) {
+				for (const pokemon of side.pokemon) {
+					if (!pokemon.set.disguise) continue;
+					const disguise = this.dex.species.get(pokemon.set.disguise);
+					if (disguise.exists) {
+						(pokemon as any).name = disguise.name;
+						(pokemon as any).fullname = `${pokemon.side.id}: ${disguise.name}`;
+					}
+				}
+			}
+		},
+		onSwitchIn(pokemon) {
+			if (pokemon.set.phType) {
+				const types = pokemon.set.phType.split('/').filter((t: string) => this.dex.types.isName(t));
+				if (types.length) {
+					pokemon.setType(types, true);
+					this.addSplit(pokemon.side.id, [
+						'-start', pokemon, 'typechange', types.join('/'), '[from] rule: Disguise Mod',
+					]);
+				}
+			}
+			if (pokemon.set.startStatus && !pokemon.m.phnnStartStatusApplied) {
+				pokemon.m.phnnStartStatusApplied = true;
+				pokemon.setStatus(pokemon.set.startStatus, pokemon, null, true);
+			}
+		},
+	},
 	standarddraft: {
 		effectType: 'ValidatorRule',
 		name: 'Standard Draft',
