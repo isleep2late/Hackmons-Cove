@@ -2042,7 +2042,7 @@ function toId() {
 					this.roomList.splice(newIndex, 0, room);
 					this.topbar.updateTabbar();
 				}
-				room.focusText();
+				if (room.focusText) room.focusText();
 				if (room.type === 'chat') this.updateAutojoin();
 				return true;
 			}
@@ -2059,7 +2059,7 @@ function toId() {
 					this.sideRoomList.splice(newIndex, 0, room);
 					this.topbar.updateTabbar();
 				}
-				room.focusText();
+				if (room.focusText) room.focusText();
 				if (room.type === 'chat') this.updateAutojoin();
 				return true;
 			}

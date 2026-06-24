@@ -294,7 +294,9 @@
 
 		dragEnterRoom: function (e) {
 			if (!app.dragging || typeof app.dragging !== 'string') return;
-			var roomid = $(e.currentTarget).attr('href').slice(1);
+			var roomHref = $(e.currentTarget).attr('href');
+			if (!roomHref) return;
+			var roomid = roomHref.slice(1);
 			if (app.dragging.slice(1) === roomid) return;
 			var i = app.draggingRoomList.indexOf(roomid);
 			var iPipe = app.draggingRoomList.indexOf('|');
@@ -360,6 +362,12 @@
 			// console.log('dragend: ' + app.dragging);
 
 			var room = app.rooms[app.dragging.slice(1)];
+			if (!room) {
+				app.dragging = null;
+				if (app.$dragging) app.$dragging.remove();
+				app.draggingRoomList = null;
+				return;
+			}
 			var iPipe = app.draggingRoomList.indexOf('|');
 
 			if (app.draggingLoc < iPipe && app.draggingSideRoom) {
