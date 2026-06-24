@@ -969,7 +969,7 @@ export class Side {
 		}
 		if (slot >= this.pokemon.length) {
 			return this.emitChoiceError(`Can't switch: You do not have a Pokémon in slot ${slot + 1} to switch to`);
-		} else if (slot < this.activeAndSubActives().length && !this.slotConditions[pokemon.position]['revivalblessing']) {
+		} else if ((this.battle.gameType === 'rotation' ? slot === index : slot < this.activeAndSubActives().length) && !this.slotConditions[pokemon.position]['revivalblessing']) {
 			return this.emitChoiceError(`Can't switch: You can't switch to an active Pokémon`);
 		} else if (this.choice.switchIns.has(slot)) {
 			return this.emitChoiceError(`Can't switch: The Pokémon in slot ${slot + 1} can only switch in once`);
