@@ -966,7 +966,7 @@
 			buf += '<p><label class="label">Format:</label>' + this.renderFormats(format) + '</p>';
 			buf += '<p><label class="label">Team:</label>' + this.renderTeams(format) + '</p>';
 			buf += this.renderCdModeChallenge(format);
-			buf += '<p><label class="label">Custom rules:</label> <input type="text" name="customRules" class="textbox" placeholder="e.g. Gametype = Doubles …" style="width: 230px; box-sizing: border-box;" autocomplete="off" /></p>';
+			buf += '<p><label class="label">Custom rules:</label> <input type="text" name="customRules" class="textbox" placeholder="e.g. Gametype = Doubles …" style="width: 230px; box-sizing: border-box;" maxlength="9000" autocomplete="off" /></p>';
 
 			var bestOfDefault = format && BattleFormats[format] ? BattleFormats[format].bestOfDefault : false;
 			buf += '<p' + (!bestOfDefault ? ' class="hidden">' : '>');
