@@ -202,6 +202,17 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 			}
 		},
 	},
+	prestatus: {
+		effectType: 'Rule',
+		name: 'Prestatus',
+		desc: "Pok&eacute;mon may start the battle with a status condition set in the teambuilder.",
+		onSwitchIn(pokemon) {
+			if (pokemon.set.startStatus && !pokemon.m.phnnStartStatusApplied) {
+				pokemon.m.phnnStartStatusApplied = true;
+				pokemon.setStatus(pokemon.set.startStatus, pokemon, null, true);
+			}
+		},
+	},
 	standarddraft: {
 		effectType: 'ValidatorRule',
 		name: 'Standard Draft',

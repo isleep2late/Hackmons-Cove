@@ -499,7 +499,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		desc: "Pure Hackmons, but Pokemon are at the highest power level across all their available generations.",
 		mod: 'phnn',
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Data Preview', 'Max Level = 255', 'Default Level = 100'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Data Preview', 'Max Level = 255', 'Default Level = 100', 'Prestatus'],
 		unbanlist: ['Past', 'Future', 'Unobtainable'],
 	},
 	{
@@ -508,7 +508,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'phnn',
 		gameType: 'doubles',
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Data Preview', 'Max Level = 255', 'Default Level = 100'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Data Preview', 'Max Level = 255', 'Default Level = 100', 'Prestatus'],
 		unbanlist: [
 			'Past', 'Future', 'Unobtainable'
 		],
@@ -520,7 +520,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: false,
 		gameType: 'triples',
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Data Preview', 'Max Level = 255', 'Default Level = 100'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Data Preview', 'Max Level = 255', 'Default Level = 100', 'Prestatus'],
 	},
 	{
 		name: "[Gen 9] PHNN Rotation",
@@ -529,7 +529,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: false,
 		gameType: 'rotation',
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Data Preview', 'Max Level = 255', 'Default Level = 100'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Data Preview', 'Max Level = 255', 'Default Level = 100', 'Prestatus'],
 		unbanlist: ['Past', 'Future', 'Unobtainable'],
 	},
 	{
@@ -538,7 +538,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: false,
 		gameType: 'multi',
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Data Preview', 'Max Level = 255', 'Default Level = 100'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Data Preview', 'Max Level = 255', 'Default Level = 100', 'Prestatus'],
 		unbanlist: ['Past', 'Future', 'Unobtainable'],
 	},
 	{
@@ -547,7 +547,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: false,
 		gameType: 'freeforall',
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Data Preview', 'Max Level = 255', 'Default Level = 100'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Data Preview', 'Max Level = 255', 'Default Level = 100', 'Prestatus'],
 		unbanlist: ['Past', 'Future', 'Unobtainable'],
 	},
 	{
@@ -555,7 +555,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'phnn',
 		searchShow: false,
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Data Preview', 'Max Level = 5'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Data Preview', 'Max Level = 5', 'Prestatus'],
 		unbanlist: ['Past', 'Future', 'Unobtainable'],
 	},
 	{
@@ -563,14 +563,14 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'phnn',
 		searchShow: false,
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Data Preview', 'Max Level = 50'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Data Preview', 'Max Level = 50', 'Prestatus'],
 		unbanlist: ['Past', 'Future', 'Unobtainable'],
 	},
 	{
 		name: "[Gen 5] Pure Hackmons No Nerfs",
 		desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
 		mod: 'gen5phnn',
-		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Overflow Stat Mod'],
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Overflow Stat Mod', 'Prestatus'],
 	},
 	//////////////////////////////////
 	/////// Wondrous Hackmons ////////
