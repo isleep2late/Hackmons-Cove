@@ -1573,7 +1573,8 @@ export class Battle {
 		if (!side.pokemonLeft) return [];
 
 		const canSwitchIn = [];
-		for (let i = side.activeAndSubActives().length; i < side.pokemon.length; i++) {
+		const startIndex = this.gameType === 'rotation' ? side.active.length : side.activeAndSubActives().length;
+		for (let i = startIndex; i < side.pokemon.length; i++) {
 			const pokemon = side.pokemon[i];
 			if (!pokemon.fainted) {
 				canSwitchIn.push(pokemon);
