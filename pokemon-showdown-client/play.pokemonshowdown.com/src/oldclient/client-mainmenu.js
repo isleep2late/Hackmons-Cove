@@ -623,6 +623,9 @@
 		},
 		chatHistories: {},
 		clickPMBackground: function (e) {
+			if ($(e.target).closest('button, input, select, textarea, a, .select').length) {
+				return;
+			}
 			if (!e.shiftKey && !e.cmdKey && !e.ctrlKey) {
 				if (window.getSelection && !window.getSelection().isCollapsed) {
 					return;
