@@ -290,7 +290,8 @@ export class Side {
 	}
 
 	subActives() {
-		return this.battle.gameType === 'rotation' ? this.pokemon.slice(1, 3) : [];
+		if (this.battle.gameType !== 'rotation') return [];
+		return this.pokemon.slice(1, 3).map(pokemon => (pokemon && !pokemon.fainted ? pokemon : null));
 	}
 
 	activeAndSubActives() {

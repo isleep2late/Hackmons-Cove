@@ -1171,7 +1171,7 @@ export class Pokemon {
 			ident: this.fullname,
 			details: this.details,
 			condition: this.getHealth().secret,
-			active: this.position < this.side.active.length,
+			active: this.position < (this.battle.gameType === 'rotation' ? 3 : this.side.active.length),
 			stats: {
 				atk: this.baseStoredStats['atk'],
 				def: this.baseStoredStats['def'],

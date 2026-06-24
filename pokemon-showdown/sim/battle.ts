@@ -2720,6 +2720,7 @@ export class Battle {
 					}
 				}
 				for (const pokemon of side.subActives()) {
+					if (!pokemon) continue;
 					pokemon.isActive = true;
 					this.runEvent('BeforeSwitchIn', pokemon);
 					this.add('switch', pokemon, pokemon.getFullDetails);

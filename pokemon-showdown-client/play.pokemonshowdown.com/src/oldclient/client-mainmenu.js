@@ -48,7 +48,7 @@
 				buf += '<p><label class="label" name="partner" style="display:none">';
 				buf += 'Partner:<br />';
 				buf += '<input class="partnerselect" /><button name="partnersubmit">Invite</button></label></p>';
-				
+
 				buf += '<p><button class="button mainmenu1 big" name="search"><strong>Battle!</strong><br /><small>Find a random opponent</small></button></p></form></div>';
 			}
 
@@ -279,7 +279,7 @@
 			}
 			if (teamFormat) {
 				buf += '<p><label class="label">Team:</label>' + this.renderTeams(teamFormat) + '</p>';
-				
+
 			}
 			buf += '<p class="buttonbar"><button name="acceptChallenge" class="button"><strong>' + BattleLog.escapeHTML(acceptButtonLabel) + '</strong></button> <button type="button" name="rejectChallenge" class="button">' + BattleLog.escapeHTML(rejectButtonLabel) + '</button></p></form>';
 			$challenge.html(buf);
@@ -817,7 +817,7 @@
 						var buf = '<form class="battleform"><p>' + BattleLog.escapeHTML(name) + ' wants to battle!</p>';
 						buf += '<p><label class="label">Format:</label>' + self.renderFormats(format, true) + '</p>';
 						buf += '<p><label class="label">Team:</label>' + self.renderTeams(format) + '</p>';
-						
+
 						buf += '<p class="buttonbar"><button name="acceptChallenge" class="button"><strong>Accept</strong></button> <button type="button" name="rejectChallenge" class="button">Reject</button></p></form>';
 						$challenge.html(buf);
 						if (format.substr(0, 4) === 'gen5') atLeastOneGen5 = true;
@@ -901,7 +901,7 @@
 		cdModeListMain: function () {
 			return [
 				{ id: 'gen9champions', name: 'Champions', gts: ['', 'doubles', 'triples', 'rotation', 'multi', 'freeforall'] },
-				{ id: 'gen9phnn', name: 'No Nerfs', gts: ['', 'doubles', 'triples', 'rotation', 'multi', 'freeforall'] },
+				{ id: 'gen9nonerfs', name: 'No Nerfs', gts: ['', 'doubles', 'triples', 'rotation', 'multi', 'freeforall'] },
 				{ id: 'gen9', name: 'Gen 9', gts: ['', 'doubles', 'triples', 'rotation', 'multi', 'freeforall'] },
 				{ id: 'gen8', name: 'Gen 8', gts: ['', 'doubles', 'triples', 'rotation', 'multi', 'freeforall'] },
 				{ id: 'gen8bdsp', name: 'BDSP', gts: ['', 'doubles', 'multi', 'freeforall'] },
@@ -912,7 +912,7 @@
 				{ id: 'gen4', name: 'Gen 4', gts: ['', 'doubles', 'multi', 'freeforall'] },
 				{ id: 'gen3', name: 'Gen 3', gts: ['', 'doubles', 'multi', 'freeforall'] },
 				{ id: 'gen2', name: 'Gen 2', gts: ['', 'doubles', 'multi', 'freeforall'] },
-				{ id: 'gen1', name: 'Gen 1', gts: ['', 'doubles', 'multi', 'freeforall'] },
+				{ id: 'gen1', name: 'Gen 1', gts: ['', 'doubles', 'multi', 'freeforall'] }
 			];
 		},
 		renderCdModeChallenge: function (format) {
@@ -937,12 +937,14 @@
 			var idx = format.indexOf('customdisguises');
 			if (idx < 0) return;
 			var suffix = format.slice(idx + 15);
-			app.addPopup(CdModePopup, { format: format, sourceEl: button, onselect: function (modeId) {
+			app.addPopup(window.CdModePopup, { format: format, sourceEl: button, onselect: function (modeId) {
 				var newFormat = modeId + 'customdisguises' + suffix;
 				$fmtBtn.val(newFormat).html(BattleLog.escapeFormat(newFormat));
 				self.curFormat = newFormat;
 				var $teamButton = $form.find('button[name=team]');
 				if ($teamButton.length) $teamButton.replaceWith(self.renderTeams(newFormat));
+				var $cdwrap = $form.find('.cdmodewrap');
+				if ($cdwrap.length) $cdwrap.replaceWith(self.renderCdModeChallenge(newFormat));
 			} });
 		},
 
@@ -1339,7 +1341,7 @@
 				// avoiding that decision for now because it requires either an ugly hack
 				// or an overhaul of BattleFormats.
 				this.open = Storage.prefs('openformats2') || {
-					"All Gens PH": true, "No Nerfs": true, "Wondrous Hackmons": true,
+					"All Gens PH": true, "No Nerfs": true, "Wondrous Hackmons": true
 				};
 			}
 			if (!this.starred) this.starred = Storage.prefs('starredformats') || {};

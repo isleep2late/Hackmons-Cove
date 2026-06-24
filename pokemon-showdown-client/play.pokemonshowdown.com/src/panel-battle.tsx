@@ -581,13 +581,13 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 	renderRotationControls(request: BattleMoveRequest, choices: BattleChoiceBuilder) {
 		const battle = this.props.room.battle;
 
-		const pokemonLeft = request.side.pokemon[0];
-		const pokemonCenter = request.side.pokemon[1];
-		const pokemonRight = request.side.pokemon[2];
+		const pokemonLeft = request.side.pokemon[2];
+		const pokemonCenter = request.side.pokemon[0];
+		const pokemonRight = request.side.pokemon[1];
 
-		const activeLeft = request.active[0];
-		const activeCenter = request.active[1];
-		const activeRight = request.active[2];
+		const activeLeft = request.active[2];
+		const activeCenter = request.active[0];
+		const activeRight = request.active[1];
 
 		const showLeft = !!(activeLeft && pokemonLeft && !pokemonLeft.fainted);
 		const showRight = !!(activeRight && pokemonRight && !pokemonRight.fainted);
@@ -609,16 +609,16 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 
 		let currentPokemon = pokemonCenter;
 		let currentActiveData = activeCenter;
-		let currentSlotIndex = 1;
+		let currentSlotIndex = 0;
 
 		if (currentSelection === 'left' && showLeft) {
 			currentPokemon = pokemonLeft;
 			currentActiveData = activeLeft;
-			currentSlotIndex = 0;
+			currentSlotIndex = 2;
 		} else if (currentSelection === 'right' && showRight) {
 			currentPokemon = pokemonRight;
 			currentActiveData = activeRight;
-			currentSlotIndex = 2;
+			currentSlotIndex = 1;
 		}
 
 		if (!currentActiveData) {
@@ -691,14 +691,14 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 		const onMoveClick = (moveIndex: number) => {
 			let chooseString = '';
 			if (currentSelection === 'left') {
-				chooseString = `shift,move ${moveIndex}${specialSuffix},pass`;
+				chooseString = `rotate left move ${moveIndex}${specialSuffix}`;
 			} else if (currentSelection === 'right') {
-				chooseString = `pass,move ${moveIndex}${specialSuffix},shift`;
+				chooseString = `rotate right move ${moveIndex}${specialSuffix}`;
 			} else {
-				chooseString = `pass,move ${moveIndex}${specialSuffix},pass`;
+				chooseString = `move ${moveIndex}${specialSuffix}`;
 			}
 			this.send(`/choose ${chooseString}`);
-			
+
 			choices.current = {
 				choiceType: 'move',
 				move: 0,
@@ -714,7 +714,7 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 		};
 
 		let movesListToRender = currentActiveData.moves;
-		if (isMaxChecked || (currentActiveData.maxMoves && !currentActiveData.canDynamax)) {
+		if ((isMaxChecked || (currentActiveData.maxMoves && !currentActiveData.canDynamax)) && !isMegaChecked && !isMegaXChecked && !isMegaYChecked) {
 			movesListToRender = currentActiveData.maxMoves || [];
 		} else if (isZChecked) {
 			movesListToRender = (currentActiveData.zMoves as any) || [];
@@ -857,7 +857,7 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 		const valueTracker = new ModifiableValue(battle, battle.nearSide.active[activeIndex]!, serverPokemon);
 		const tooltips = (battle.scene as BattleScene).tooltips;
 
-		if (choices.current.max || (active.maxMoves && !active.canDynamax)) {
+		if ((choices.current.max || (active.maxMoves && !active.canDynamax)) && !choices.current.mega && !choices.current.megax && !choices.current.megay) {
 			if (!active.maxMoves) {
 				return <div class="message-error">Maxed with no max moves</div>;
 			}

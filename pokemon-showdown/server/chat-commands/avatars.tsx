@@ -92,6 +92,7 @@ export const Avatars = new class {
 		saveCustomAvatars(instant);
 	}
 	src(avatar: AvatarID) {
+		if (avatar.includes('.')) return '';
 		const avatarUrl = OFFICIAL_AVATARS.has(avatar) ? 
 		`https://play.pokemonshowdown.com/sprites/trainers/${avatar}.png` : `https://play.hackmons.com/avatars/${avatar}.png`;
 		return `${avatarUrl}`;
@@ -801,7 +802,7 @@ export const commands: Chat.ChatCommands = {
 			}
 		}
 		if (!out.length) {
-			out.push(<p>The user ${user.id} does not have any custom avatars.</p>);
+			out.push(<p>Custom avatars require you to be a contributor/staff or win a tournament prize.</p>);
 		}
 
 		this.sendReplyBox(<>

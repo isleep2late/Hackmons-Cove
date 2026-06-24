@@ -1,3 +1,5 @@
+import { type MoveName } from '@smogon/calc';
+import { getDexForFormat, getMaxMove } from '@showdex/utils/dex';
 import phnnData from './phnn-data';
 
 const toPhnnId = (text: string): string => String(text || '').toLowerCase().replace(/[^a-z0-9]+/g, '');
@@ -138,10 +140,27 @@ export const getPhnnMoveOverrides = (
 
 const PHNN_FIXED_GMAX = ['gmaxdrumsolo', 'gmaxfireball', 'gmaxhydrosnipe'];
 
+const phnnGmaxBasePower = (
+  dexMove: { basePower?: number; maxMove?: { basePower?: number } },
+  gmaxId: string,
+  gmaxDexBasePower?: number,
+): number => {
+  if (!dexMove?.maxMove?.basePower) {
+    return dexMove?.basePower || 100;
+  }
+
+  if (!PHNN_FIXED_GMAX.includes(gmaxId)) {
+    return dexMove.maxMove.basePower;
+  }
+
+  return gmaxDexBasePower || dexMove.basePower || 100;
+};
+
 export const getPhnnGmaxMoveOverride = (
   format: string,
   moveName: string,
-  physical: boolean,
+  pokemon?: { speciesForme?: string; altFormes?: string[]; ability?: string; dirtyAbility?: string },
+  physical?: boolean,
 ): Record<string, unknown> | null => {
   if (!format || !moveName || !detectMaxEvsFormat(format)) {
     return null;
@@ -149,13 +168,44 @@ export const getPhnnGmaxMoveOverride = (
 
   const id = toPhnnId(moveName);
 
-  if (!id.startsWith('gmax') || PHNN_FIXED_GMAX.includes(id)) {
+  if (id.startsWith('gmax')) {
+    if (PHNN_FIXED_GMAX.includes(id)) {
+      return null;
+    }
+
+    return {
+      basePower: 130,
+      category: physical ? 'Physical' : 'Special',
+    };
+  }
+
+  const speciesForme = pokemon?.speciesForme;
+
+  if (!speciesForme?.includes('-Gmax')) {
+    return null;
+  }
+
+  const dex = getDexForFormat(format);
+  const dexMove = dex?.moves.get(moveName);
+
+  if (!dexMove?.exists || dexMove.category === 'Status') {
+    return null;
+  }
+
+  const gmaxName = getMaxMove(moveName as MoveName, {
+    moveType: dexMove.type,
+    speciesForme,
+    altFormes: pokemon?.altFormes,
+    ability: (pokemon?.dirtyAbility ?? pokemon?.ability) as Parameters<typeof getMaxMove>[1]['ability'],
+  });
+
+  if (!gmaxName || !/^G-Max/.test(gmaxName)) {
     return null;
   }
 
   return {
-    basePower: 130,
-    category: physical ? 'Physical' : 'Special',
+    basePower: phnnGmaxBasePower(dexMove, toPhnnId(gmaxName), dex?.moves.get(gmaxName)?.basePower),
+    category: dexMove.category,
   };
 };
 

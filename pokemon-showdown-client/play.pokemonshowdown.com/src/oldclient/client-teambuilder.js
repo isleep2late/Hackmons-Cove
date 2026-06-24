@@ -1652,7 +1652,7 @@
 		cdModeList: function () {
 			return [
 				{ id: 'gen9champions', name: 'Champions', gts: ['', 'doubles', 'triples', 'multi', 'freeforall'] },
-				{ id: 'gen9phnn', name: 'No Nerfs', gts: ['', 'doubles', 'triples', 'multi', 'freeforall'] },
+				{ id: 'gen9nonerfs', name: 'No Nerfs', gts: ['', 'doubles', 'triples', 'rotation', 'multi', 'freeforall'] },
 				{ id: 'gen9', name: 'Gen 9', gts: ['', 'doubles', 'triples', 'multi', 'freeforall'] },
 				{ id: 'gen8', name: 'Gen 8', gts: ['', 'doubles', 'triples', 'multi', 'freeforall'] },
 				{ id: 'gen8bdsp', name: 'BDSP', gts: ['', 'doubles', 'multi', 'freeforall'] },
@@ -1663,7 +1663,7 @@
 				{ id: 'gen4', name: 'Gen 4', gts: ['', 'doubles', 'multi', 'freeforall'] },
 				{ id: 'gen3', name: 'Gen 3', gts: ['', 'doubles', 'multi', 'freeforall'] },
 				{ id: 'gen2', name: 'Gen 2', gts: ['', 'doubles', 'multi', 'freeforall'] },
-				{ id: 'gen1', name: 'Gen 1', gts: ['', 'doubles', 'multi', 'freeforall'] },
+				{ id: 'gen1', name: 'Gen 1', gts: ['', 'doubles', 'multi', 'freeforall'] }
 			];
 		},
 		parseCdFormat: function (format) {
@@ -3490,7 +3490,7 @@
 						set.level = 50;
 					}
 					if (baseFormat.startsWith('lc') || baseFormat.endsWith('lc')) set.level = 5;
-					if (this.curTeam.format.includes('disguises') || (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses')) || (this.curTeam.gen === 9 && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) set.level = 255;
+					if (this.curTeam.format.includes('disguises') || (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses')) || (this.curTeam.gen === 9 && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) set.level = this.curTeam.format.includes('customdisguises') ? 9999 : 255;
 				}
 				set.gender = 'F';
 				if (set.happiness) delete set.happiness;
@@ -3526,7 +3526,7 @@
 						set.level = 50;
 					}
 					if (baseFormat.startsWith('lc') || baseFormat.endsWith('lc')) set.level = 5;
-					if (this.curTeam.format.includes('disguises') || (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses')) || (this.curTeam.gen === 9 && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) set.level = 255;
+					if (this.curTeam.format.includes('disguises') || (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses')) || (this.curTeam.gen === 9 && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) set.level = this.curTeam.format.includes('customdisguises') ? 9999 : 255;
 				}
 				if (set.happiness) delete set.happiness;
 				if (set.shiny) delete set.shiny;
@@ -3760,7 +3760,7 @@
 						baseFormat.substr(0, 3) === 'bss' || baseFormat.substr(0, 3) === 'vgc' ||
 						baseFormat.substr(0, 14) === 'battlefestival') set.level = 50;
 					if (baseFormat.startsWith('lc') || baseFormat.endsWith('lc')) set.level = 5;
-					if (phnnLevelFormat && !set.level) set.level = 255;
+					if (phnnLevelFormat && !set.level) set.level = this.curTeam.format.includes('customdisguises') ? 9999 : 255;
 					if (baseFormat.substr(0, 19) === 'battlespotspecial17') set.level = 1;
 					if (format && format.teambuilderLevel) {
 						set.level = format.teambuilderLevel;
@@ -3902,7 +3902,7 @@
 			var suffix = idx >= 0 ? baseFormat.slice(idx + 15) : '';
 			var modes = [
 				{ id: 'gen9champions', name: 'Champions', gts: ['', 'doubles', 'triples', 'rotation', 'multi', 'freeforall'] },
-				{ id: 'gen9phnn', name: 'No Nerfs', gts: ['', 'doubles', 'triples', 'rotation', 'multi', 'freeforall'] },
+				{ id: 'gen9nonerfs', name: 'No Nerfs', gts: ['', 'doubles', 'triples', 'rotation', 'multi', 'freeforall'] },
 				{ id: 'gen9', name: 'Gen 9', gts: ['', 'doubles', 'triples', 'rotation', 'multi', 'freeforall'] },
 				{ id: 'gen8', name: 'Gen 8', gts: ['', 'doubles', 'triples', 'rotation', 'multi', 'freeforall'] },
 				{ id: 'gen8bdsp', name: 'BDSP', gts: ['', 'doubles', 'multi', 'freeforall'] },
@@ -3913,7 +3913,7 @@
 				{ id: 'gen4', name: 'Gen 4', gts: ['', 'doubles', 'multi', 'freeforall'] },
 				{ id: 'gen3', name: 'Gen 3', gts: ['', 'doubles', 'multi', 'freeforall'] },
 				{ id: 'gen2', name: 'Gen 2', gts: ['', 'doubles', 'multi', 'freeforall'] },
-				{ id: 'gen1', name: 'Gen 1', gts: ['', 'doubles', 'multi', 'freeforall'] },
+				{ id: 'gen1', name: 'Gen 1', gts: ['', 'doubles', 'multi', 'freeforall'] }
 			];
 			var buf = '<ul class="popupmenu">';
 			for (var i = 0; i < modes.length; i++) {
@@ -3927,7 +3927,7 @@
 			var cb = this.onselect;
 			this.close();
 			if (cb) cb(value);
-		},
+		}
 	});
 
 	var MoveSetPopup = exports.MoveSetPopup = Popup.extend({
