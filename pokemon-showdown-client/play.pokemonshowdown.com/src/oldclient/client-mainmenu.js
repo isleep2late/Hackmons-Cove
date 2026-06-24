@@ -897,14 +897,15 @@
 
 		cdModeListMain: function () {
 			return [
-				{ id: 'gen9nonerfs', name: 'No Nerfs', gts: ['', 'doubles', 'triples', 'multi', 'freeforall'] },
-				{ id: 'gen9', name: 'Gen 9', gts: ['', 'doubles', 'triples', 'multi', 'freeforall'] },
-				{ id: 'gen8', name: 'Gen 8', gts: ['', 'doubles', 'triples', 'multi', 'freeforall'] },
+				{ id: 'gen9champions', name: 'Champions', gts: ['', 'doubles', 'triples', 'rotation', 'multi', 'freeforall'] },
+				{ id: 'gen9phnn', name: 'No Nerfs', gts: ['', 'doubles', 'triples', 'rotation', 'multi', 'freeforall'] },
+				{ id: 'gen9', name: 'Gen 9', gts: ['', 'doubles', 'triples', 'rotation', 'multi', 'freeforall'] },
+				{ id: 'gen8', name: 'Gen 8', gts: ['', 'doubles', 'triples', 'rotation', 'multi', 'freeforall'] },
 				{ id: 'gen8bdsp', name: 'BDSP', gts: ['', 'doubles', 'multi', 'freeforall'] },
-				{ id: 'gen7', name: 'Gen 7', gts: ['', 'doubles', 'triples', 'multi', 'freeforall'] },
+				{ id: 'gen7', name: 'Gen 7', gts: ['', 'doubles', 'triples', 'rotation', 'multi', 'freeforall'] },
 				{ id: 'gen7letsgo', name: "Let's Go", gts: [''] },
-				{ id: 'gen6', name: 'Gen 6', gts: ['', 'doubles', 'triples', 'multi', 'freeforall'] },
-				{ id: 'gen5', name: 'Gen 5', gts: ['', 'doubles', 'triples', 'multi', 'freeforall'] },
+				{ id: 'gen6', name: 'Gen 6', gts: ['', 'doubles', 'triples', 'rotation', 'multi', 'freeforall'] },
+				{ id: 'gen5', name: 'Gen 5', gts: ['', 'doubles', 'triples', 'rotation', 'multi', 'freeforall'] },
 				{ id: 'gen4', name: 'Gen 4', gts: ['', 'doubles', 'multi', 'freeforall'] },
 				{ id: 'gen3', name: 'Gen 3', gts: ['', 'doubles', 'multi', 'freeforall'] },
 				{ id: 'gen2', name: 'Gen 2', gts: ['', 'doubles', 'multi', 'freeforall'] },
@@ -962,6 +963,7 @@
 			buf += '<p><label class="label">Format:</label>' + this.renderFormats(format) + '</p>';
 			buf += '<p><label class="label">Team:</label>' + this.renderTeams(format) + '</p>';
 			buf += this.renderCdModeChallenge(format);
+			buf += '<p><label class="label">Custom rules:</label> <input type="text" name="customRules" class="textbox" placeholder="e.g. Gametype = Doubles …" style="width: 230px; box-sizing: border-box;" autocomplete="off" /></p>';
 
 			var bestOfDefault = format && BattleFormats[format] ? BattleFormats[format].bestOfDefault : false;
 			buf += '<p' + (!bestOfDefault ? ' class="hidden">' : '>');
@@ -1015,6 +1017,11 @@
 			var format = $pmWindow.find('button[name=format]').val();
 			var teamIndex = $pmWindow.find('button[name=team]').val();
 			var privacy = this.adjustPrivacy($pmWindow.find('input[name=private]').is(':checked'));
+
+			var customRules = ('' + ($pmWindow.find('input[name=customRules]').val() || '')).trim();
+			if (customRules) {
+				format += (format.includes('@@@') ? ', ' : '@@@') + customRules;
+			}
 
 			var bestOf = $pmWindow.find('input[name=bestof]').is(':checked');
 			var bestOfValue = $pmWindow.find('input[name=bestofvalue]').val();
@@ -1450,7 +1457,7 @@
 			this.update();
 		},
 		shouldDisplayFormat: function (format) {
-			if (/customdisguises/.test(format.id) && !/^gen9nonerfscustomdisguises(doubles|triples|multi|freeforall)?$/.test(format.id)) return false;
+			if (/customdisguises/.test(format.id) && !/^gen9customdisguises(doubles|triples|rotation|multi|freeforall)?$/.test(format.id)) return false;
 			if (this.selectType === 'teambuilder') {
 				if (!format.isTeambuilderFormat) return false;
 			} else {

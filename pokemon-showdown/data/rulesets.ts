@@ -186,21 +186,6 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 				}
 			}
 		},
-		onSwitchIn(pokemon) {
-			if (pokemon.set.phType) {
-				const types = pokemon.set.phType.split('/').filter((t: string) => this.dex.types.isName(t));
-				if (types.length) {
-					pokemon.setType(types, true);
-					this.addSplit(pokemon.side.id, [
-						'-start', pokemon, 'typechange', types.join('/'), '[from] rule: Disguise Mod',
-					]);
-				}
-			}
-			if (pokemon.set.startStatus && !pokemon.m.phnnStartStatusApplied) {
-				pokemon.m.phnnStartStatusApplied = true;
-				pokemon.setStatus(pokemon.set.startStatus, pokemon, null, true);
-			}
-		},
 	},
 	standarddraft: {
 		effectType: 'ValidatorRule',

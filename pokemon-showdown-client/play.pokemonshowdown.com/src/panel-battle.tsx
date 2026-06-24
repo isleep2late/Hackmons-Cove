@@ -309,6 +309,7 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 	}
 	/** last displayed team. will not show the most recent request until the last one is gone. */
 	team: ServerPokemon[] | null = null;
+	rotationSelection: 'center' | 'left' | 'right' = 'center';
 	send = (text: string, elem?: HTMLElement) => {
 		this.props.room.send(text, elem);
 	};
@@ -576,6 +577,220 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 			}
 			{!props.noHPBar && pokemon.status && <span class={`status ${pokemon.status}`}></span>}
 		</button>;
+	}
+	renderRotationControls(request: BattleMoveRequest, choices: BattleChoiceBuilder) {
+		const battle = this.props.room.battle;
+
+		const pokemonLeft = request.side.pokemon[0];
+		const pokemonCenter = request.side.pokemon[1];
+		const pokemonRight = request.side.pokemon[2];
+
+		const activeLeft = request.active[0];
+		const activeCenter = request.active[1];
+		const activeRight = request.active[2];
+
+		const showLeft = !!(activeLeft && pokemonLeft && !pokemonLeft.fainted);
+		const showRight = !!(activeRight && pokemonRight && !pokemonRight.fainted);
+
+		const currentSelection = this.rotationSelection || 'center';
+
+		const selectLeft = () => {
+			this.rotationSelection = 'left';
+			this.forceUpdate();
+		};
+		const selectCenter = () => {
+			this.rotationSelection = 'center';
+			this.forceUpdate();
+		};
+		const selectRight = () => {
+			this.rotationSelection = 'right';
+			this.forceUpdate();
+		};
+
+		let currentPokemon = pokemonCenter;
+		let currentActiveData = activeCenter;
+		let currentSlotIndex = 1;
+
+		if (currentSelection === 'left' && showLeft) {
+			currentPokemon = pokemonLeft;
+			currentActiveData = activeLeft;
+			currentSlotIndex = 0;
+		} else if (currentSelection === 'right' && showRight) {
+			currentPokemon = pokemonRight;
+			currentActiveData = activeRight;
+			currentSlotIndex = 2;
+		}
+
+		if (!currentActiveData) {
+			return <div class="controls">Error: No active move data for the selected slot.</div>;
+		}
+
+		const tabs = (
+			<div class="rotation-tabs" style={{ marginBottom: '10px', display: 'flex', gap: '8px' }}>
+				{showLeft && (
+					<button
+						class={`button${currentSelection === 'left' ? ' cur' : ''}`}
+						onClick={selectLeft}
+						style={{ flex: 1, padding: '6px', fontWeight: 'bold' }}
+					>
+						Rotate Left<br />
+						<span style={{ fontSize: '0.85em', fontWeight: 'normal' }}>({pokemonLeft.name})</span>
+					</button>
+				)}
+				<button
+					class={`button${currentSelection === 'center' ? ' cur' : ''}`}
+					onClick={selectCenter}
+					style={{ flex: 1, padding: '6px', fontWeight: 'bold' }}
+				>
+					Stay Active<br />
+					<span style={{ fontSize: '0.85em', fontWeight: 'normal' }}>({pokemonCenter.name})</span>
+				</button>
+				{showRight && (
+					<button
+						class={`button${currentSelection === 'right' ? ' cur' : ''}`}
+						onClick={selectRight}
+						style={{ flex: 1, padding: '6px', fontWeight: 'bold' }}
+					>
+						Rotate Right<br />
+						<span style={{ fontSize: '0.85em', fontWeight: 'normal' }}>({pokemonRight.name})</span>
+					</button>
+				)}
+			</div>
+		);
+
+		const dex = battle.dex;
+		const activeIndex = battle.mySide.n > 1 ? currentSlotIndex + battle.pokemonControlled : currentSlotIndex;
+		const valueTracker = new ModifiableValue(battle, battle.nearSide.active[activeIndex]!, currentPokemon);
+		const tooltips = (battle.scene as BattleScene).tooltips;
+
+		const canDynamax = currentActiveData.canDynamax && !choices.alreadyMax;
+		const canMegaEvo = currentActiveData.canMegaEvo && !choices.alreadyMega;
+		const canMegaEvoX = currentActiveData.canMegaEvoX && !choices.alreadyMega;
+		const canMegaEvoY = currentActiveData.canMegaEvoY && !choices.alreadyMega;
+		const canZMove = currentActiveData.zMoves && !choices.alreadyZ;
+		const canUltraBurst = currentActiveData.canUltraBurst;
+		const canTerastallize = currentActiveData.canTerastallize;
+
+		const isMegaChecked = choices.current.mega;
+		const isMegaXChecked = choices.current.megax;
+		const isMegaYChecked = choices.current.megay;
+		const isZChecked = choices.current.z;
+		const isMaxChecked = choices.current.max;
+		const isTeraChecked = choices.current.tera;
+		const isUltraChecked = choices.current.ultra;
+
+		let specialSuffix = '';
+		if (isMegaChecked) specialSuffix = ' mega';
+		else if (isMegaXChecked) specialSuffix = ' megax';
+		else if (isMegaYChecked) specialSuffix = ' megay';
+		else if (isZChecked) specialSuffix = ' zmove';
+		else if (isMaxChecked) specialSuffix = ' dynamax';
+		else if (isTeraChecked) specialSuffix = ' terastallize';
+		else if (isUltraChecked) specialSuffix = ' ultra';
+
+		const onMoveClick = (moveIndex: number) => {
+			let chooseString = '';
+			if (currentSelection === 'left') {
+				chooseString = `shift,move ${moveIndex}${specialSuffix},pass`;
+			} else if (currentSelection === 'right') {
+				chooseString = `pass,move ${moveIndex}${specialSuffix},shift`;
+			} else {
+				chooseString = `pass,move ${moveIndex}${specialSuffix},pass`;
+			}
+			this.send(`/choose ${chooseString}`);
+			
+			choices.current = {
+				choiceType: 'move',
+				move: 0,
+				targetLoc: 0,
+				mega: false,
+				megax: false,
+				megay: false,
+				ultra: false,
+				z: false,
+				max: false,
+				tera: false,
+			};
+		};
+
+		let movesListToRender = currentActiveData.moves;
+		if (isMaxChecked || (currentActiveData.maxMoves && !currentActiveData.canDynamax)) {
+			movesListToRender = currentActiveData.maxMoves || [];
+		} else if (isZChecked) {
+			movesListToRender = (currentActiveData.zMoves as any) || [];
+		}
+
+		const renderedMoves = movesListToRender.map((moveData, i) => {
+			if (!moveData) return <button class="movebutton" disabled>&nbsp;</button>;
+			const move = dex.moves.get(moveData.name);
+			const [moveType, tags] = tooltips.getMoveTypeText(move, valueTracker, isMaxChecked);
+			const tooltip = isMaxChecked ? `maxmove|${moveData.name}|${currentSlotIndex}` : isZChecked ? `zmove|${moveData.name}|${currentSlotIndex}` : `move|${moveData.name}|${currentSlotIndex}`;
+
+			const pp = moveData.maxpp ? `${moveData.pp}/${moveData.maxpp}` : '\u2014';
+			return (
+				<button
+					onClick={() => onMoveClick(i + 1)}
+					data-tooltip={tooltip}
+					class={`movebutton has-tooltip ${moveData.disabled ? 'disabled' : `type-${moveType}`}`}
+					aria-disabled={moveData.disabled}
+					disabled={moveData.disabled}
+				>
+					{move.name}<br />
+					<small class="type">{moveType} <span class="effectiveness-icon">{tags}</span></small>
+					<small class="pp">{pp}</small>&nbsp;
+				</button>
+			);
+		});
+
+		return (
+			<div class="controls">
+				<div class="whatdo">
+					{currentSelection === 'center' ? (
+						<span>Choose an action for <strong>{pokemonCenter.name}</strong>:</span>
+					) : currentSelection === 'left' ? (
+						<span>Rotate to <strong>{pokemonLeft.name}</strong> and attack:</span>
+					) : (
+						<span>Rotate to <strong>{pokemonRight.name}</strong> and attack:</span>
+					)}
+				</div>
+				{tabs}
+				<div class="movemenu">
+					<div class="movebuttons-container" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+						{renderedMoves}
+					</div>
+					<div class="megaevo-box" style={{ marginTop: '8px' }}>
+						{canDynamax && <label class={`megaevo${isMaxChecked ? ' cur' : ''}`}>
+							<input type="checkbox" name="max" checked={isMaxChecked} onChange={this.toggleBoostedMove} /> {}
+							{currentActiveData.gigantamax ? 'Gigantamax' : 'Dynamax'}
+						</label>}
+						{canMegaEvo && <label class={`megaevo${isMegaChecked ? ' cur' : ''}`}>
+							<input type="checkbox" name="mega" checked={isMegaChecked} onChange={this.toggleBoostedMove} /> {}
+							Mega Evolution
+						</label>}
+						{canMegaEvoX && <label class={`megaevo${isMegaXChecked ? ' cur' : ''}`}>
+							<input type="checkbox" name="megax" checked={isMegaXChecked} onChange={this.toggleBoostedMove} /> {}
+							Mega Evolution X
+						</label>}
+						{canMegaEvoY && <label class={`megaevo${isMegaYChecked ? ' cur' : ''}`}>
+							<input type="checkbox" name="megay" checked={isMegaYChecked} onChange={this.toggleBoostedMove} /> {}
+							Mega Evolution Y
+						</label>}
+						{canUltraBurst && <label class={`megaevo${isUltraChecked ? ' cur' : ''}`}>
+							<input type="checkbox" name="ultra" checked={isUltraChecked} onChange={this.toggleBoostedMove} /> {}
+							Ultra Burst
+						</label>}
+						{canZMove && <label class={`megaevo${isZChecked ? ' cur' : ''}`}>
+							<input type="checkbox" name="z" checked={isZChecked} onChange={this.toggleBoostedMove} /> {}
+							Z-Power
+						</label>}
+						{canTerastallize && <label class={`megaevo${isTeraChecked ? ' cur' : ''}`}>
+							<input type="checkbox" name="tera" checked={isTeraChecked} onChange={this.toggleBoostedMove} /> {}
+							Terastallize<br /><span dangerouslySetInnerHTML={{ __html: Dex.getTypeIcon(canTerastallize) }} />
+						</label>}
+					</div>
+				</div>
+			</div>
+		);
 	}
 	renderMoveMenu(choices: BattleChoiceBuilder) {
 		const moveRequest = choices.currentMoveRequest()!;
@@ -919,6 +1134,7 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 		if (choices.request !== request) {
 			choices = new BattleChoiceBuilder(request);
 			room.choices = choices;
+			this.rotationSelection = 'center';
 		}
 
 		if (choices.isDone()) {
@@ -939,6 +1155,9 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 		}
 		switch (request.requestType) {
 		case 'move': {
+			if (room.battle.gameType === 'rotation') {
+				return this.renderRotationControls(request, choices);
+			}
 			const index = choices.index();
 			const pokemon = request.side.pokemon[index];
 

@@ -20,6 +20,8 @@ export const DefaultText: { [id: IDEntry]: DefaultText } = {
 		faint: "[POKEMON] fainted!",
 		swap: "[POKEMON] and [TARGET] switched places!",
 		swapCenter: "[POKEMON] moved to the center!",
+		rotateRight: "[TRAINER]'s Pokémon rotated to the right!",
+		rotateLeft: "[TRAINER]'s Pokémon rotated to the left!",
 
 		// Multi Battles only
 		canDynamax: "  [TRAINER] can dynamax now!",

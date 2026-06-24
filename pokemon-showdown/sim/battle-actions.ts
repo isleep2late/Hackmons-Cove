@@ -141,6 +141,19 @@ export class BattleActions {
 		}
 		pokemon.abilityState = this.battle.initEffectState({ id: pokemon.ability, target: pokemon });
 		pokemon.itemState = this.battle.initEffectState({ id: pokemon.item, target: pokemon });
+		if (pokemon.set.phType) {
+			const types = pokemon.set.phType.split('/').filter((t: string) => this.battle.dex.types.isName(t));
+			if (types.length) {
+				pokemon.setType(types, true);
+				this.battle.addSplit(pokemon.side.id, [
+					'-start', pokemon, 'typechange', types.join('/'), '[from] rule: Disguise Mod',
+				]);
+			}
+		}
+		if (pokemon.set.startStatus && !pokemon.m.phnnStartStatusApplied) {
+			pokemon.m.phnnStartStatusApplied = true;
+			pokemon.setStatus(pokemon.set.startStatus, pokemon, null, true);
+		}
 		this.battle.runEvent('BeforeSwitchIn', pokemon);
 		if (sourceEffect) {
 			this.battle.add(isDrag ? 'drag' : 'switch', pokemon, pokemon.getFullDetails, `[from] ${sourceEffect}`);
@@ -158,6 +171,25 @@ export class BattleActions {
 		}
 
 		return true;
+	}
+	rotateIn(pokemon: Pokemon) {
+		const side = pokemon.side;
+		side.active[0].isActive = false;
+		side.active[0] = pokemon;
+		pokemon.isActive = true;
+		switch (pokemon.position) {
+		case 1:
+			side.pokemon.unshift(...side.pokemon.splice(1, 2));
+			this.battle.add('rotate', 'right', side);
+			break;
+		case 2:
+			side.pokemon.unshift(...side.pokemon.splice(2, 1));
+			this.battle.add('rotate', 'left', side);
+			break;
+		}
+		for (let i = 0; i < side.pokemon.length; i++) {
+			side.pokemon[i].position = i;
+		}
 	}
 	dragIn(side: Side, pos: number) {
 		const pokemon = this.battle.getRandomSwitchable(side);

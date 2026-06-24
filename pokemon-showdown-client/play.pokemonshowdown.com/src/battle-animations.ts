@@ -1534,6 +1534,9 @@ export class BattleScene implements BattleSceneStub {
 	animDragOut(pokemon: Pokemon) {
 		return pokemon.sprite.animDragOut(pokemon);
 	}
+	animRotate(pokemon: Pokemon) {
+		return pokemon.sprite.animRotate(pokemon);
+	}
 	resetStatbar(pokemon: Pokemon, startHidden?: boolean) {
 		return pokemon.sprite.resetStatbar(pokemon, startHidden);
 	}
@@ -2272,6 +2275,16 @@ export class PokemonSprite extends Sprite {
 				this.$el.appendTo(this.$el.parent());
 			}
 		}
+	}
+	animRotate(pokemon: Pokemon) {
+		if (!this.scene.animating) return;
+		this.recalculatePos(pokemon.slot);
+		this.anim({
+			x: this.x,
+			y: this.y,
+			z: this.z,
+			time: 400 / this.scene.acceleration,
+		});
 	}
 	animSummon(pokemon: Pokemon, slot: number, instant?: boolean) {
 		if (!this.scene.animating) return;

@@ -136,6 +136,29 @@ export const getPhnnMoveOverrides = (
   return out;
 };
 
+const PHNN_FIXED_GMAX = ['gmaxdrumsolo', 'gmaxfireball', 'gmaxhydrosnipe'];
+
+export const getPhnnGmaxMoveOverride = (
+  format: string,
+  moveName: string,
+  physical: boolean,
+): Record<string, unknown> | null => {
+  if (!format || !moveName || !detectMaxEvsFormat(format)) {
+    return null;
+  }
+
+  const id = toPhnnId(moveName);
+
+  if (!id.startsWith('gmax') || PHNN_FIXED_GMAX.includes(id)) {
+    return null;
+  }
+
+  return {
+    basePower: 130,
+    category: physical ? 'Physical' : 'Special',
+  };
+};
+
 export const getPhnnBaseStats = (
   format: string,
   speciesForme: string,

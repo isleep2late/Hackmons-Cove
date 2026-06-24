@@ -27,7 +27,7 @@ import { toID } from './dex';
 
 /** A single action that can be chosen. Choices will have one Action for each pokemon. */
 export interface ChosenAction {
-	choice: 'move' | 'switch' | 'instaswitch' | 'revivalblessing' | 'team' | 'shift' | 'pass';// action type
+	choice: 'move' | 'switch' | 'instaswitch' | 'revivalblessing' | 'team' | 'shift' | 'rotate' | 'pass';// action type
 	pokemon?: Pokemon; // the pokemon doing the action
 	targetLoc?: number; // relative location of the target to pokemon (move action only)
 	moveid?: string; // a move to use (move action only)
@@ -58,6 +58,7 @@ export interface Choice {
 	ultra: boolean; // true if an ultra burst has already been selected
 	dynamax: boolean; // true if a dynamax has already been selected
 	terastallize: boolean; // true if a terastallization has already been inputted
+	willRotate: null | 'left' | 'right';
 }
 
 export interface PokemonSwitchRequestData {
@@ -235,7 +236,7 @@ export class Side {
 		case 'doubles':
 			this.active = [null!, null!];
 			break;
-		case 'triples': case 'rotation':
+		case 'triples':
 			this.active = [null!, null!, null!];
 			break;
 		default:
@@ -270,6 +271,7 @@ export class Side {
 			ultra: false,
 			dynamax: false,
 			terastallize: false,
+			willRotate: null,
 		};
 
 		// old-gens
@@ -285,6 +287,14 @@ export class Side {
 		if (this.activeRequest.teamPreview) return 'teampreview';
 		if (this.activeRequest.forceSwitch) return 'switch';
 		return 'move';
+	}
+
+	subActives() {
+		return this.battle.gameType === 'rotation' ? this.pokemon.slice(1, 3) : [];
+	}
+
+	activeAndSubActives() {
+		return this.active.concat(this.subActives());
 	}
 
 	addPokemon(set: PokemonSet) {
@@ -323,7 +333,7 @@ export class Side {
 				if (action.zmove) details += ` zmove`;
 				if (action.maxMove) details += ` dynamax`;
 				if (action.terastallize) details += ` terastallize`;
-				return `move ${action.moveid}${details}`;
+				return `${this.choice.willRotate ? `rotate ${this.choice.willRotate} ` : ``}move ${action.moveid}${details}`;
 			case 'switch':
 			case 'instaswitch':
 			case 'revivalblessing':
@@ -548,7 +558,16 @@ export class Side {
 			return this.emitChoiceError(`Can't move: You sent more choices than unfainted Pokémon.`);
 		}
 		const autoChoose = !moveText;
-		const pokemon: Pokemon = this.active[index];
+		let pokemon: Pokemon;
+		if (this.choice.willRotate) {
+			if (this.active[0].getLockedMove()) {
+				return this.emitChoiceError(`Can't rotate: Your ${this.active[0].name} is locked into a move`);
+			}
+			pokemon = this.pokemon[this.choice.willRotate === 'right' ? 1 : 2];
+			if (pokemon.fainted) return this.emitChoiceError(`Can't rotate: Your ${pokemon.name} has fainted`);
+		} else {
+			pokemon = this.active[index];
+		}
 
 		// Parse moveText (name or index)
 		// If the move is not found, the action is invalid without requiring further inspection.
@@ -774,7 +793,7 @@ export class Side {
 			return this.emitChoiceError(`Can't move: You can only ultra burst once per battle`);
 		}
 		let dynamax = (event === 'dynamax');
-		const canDynamax = (this.activeRequest as MoveRequest)?.active[this.active.indexOf(pokemon)].canDynamax;
+		const canDynamax = (this.activeRequest as MoveRequest)?.active[this.pokemon.indexOf(pokemon)].canDynamax;
 		if (dynamax && (this.choice.dynamax || !canDynamax)) {
 			if (pokemon.volatiles['dynamax']) {
 				dynamax = false;
@@ -830,6 +849,14 @@ export class Side {
 		if (zMove) this.choice.zMove = true;
 		if (dynamax) this.choice.dynamax = true;
 		if (terastallize) this.choice.terastallize = true;
+
+		if (this.choice.willRotate) {
+			this.choice.actions.push({
+				choice: 'rotate',
+				pokemon: this.active[0],
+				target: pokemon,
+			} as ChosenAction);
+		}
 
 		return true;
 	}
@@ -920,8 +947,9 @@ export class Side {
 				while (!this.pokemon[slot].fainted) slot++;
 			} else {
 				if (!this.choice.forcedSwitchesLeft) return this.choosePass();
-				slot = this.active.length;
-				while (this.choice.switchIns.has(slot) || this.pokemon[slot].fainted) slot++;
+				slot = this.activeAndSubActives().length;
+				while (slot < this.pokemon.length && (this.choice.switchIns.has(slot) || this.pokemon[slot].fainted)) slot++;
+				if (slot >= this.pokemon.length) return this.choosePass();
 			}
 		} else {
 			slot = parseInt(slotText) - 1;
@@ -941,7 +969,7 @@ export class Side {
 		}
 		if (slot >= this.pokemon.length) {
 			return this.emitChoiceError(`Can't switch: You do not have a Pokémon in slot ${slot + 1} to switch to`);
-		} else if (slot < this.active.length && !this.slotConditions[pokemon.position]['revivalblessing']) {
+		} else if (slot < this.activeAndSubActives().length && !this.slotConditions[pokemon.position]['revivalblessing']) {
 			return this.emitChoiceError(`Can't switch: You can't switch to an active Pokémon`);
 		} else if (this.choice.switchIns.has(slot)) {
 			return this.emitChoiceError(`Can't switch: The Pokémon in slot ${slot + 1} can only switch in once`);
@@ -1111,6 +1139,7 @@ export class Side {
 			ultra: false,
 			dynamax: false,
 			terastallize: false,
+			willRotate: null,
 		};
 	}
 
@@ -1176,6 +1205,15 @@ export class Side {
 			}
 
 			switch (choiceType) {
+			case 'rotate':
+				if (this.battle.gameType !== 'rotation') return this.emitChoiceError("Can't rotate: Not a rotation battle");
+				let direction;
+				[direction, data] = Utils.splitFirst(data, ' ');
+				data = data.trim();
+				if (!['left', 'right'].includes(direction)) return this.emitChoiceError(`Rotation direction must be "left" or "right"`);
+				if (!data.startsWith('move ')) return this.emitChoiceError("Rotations must be followed by a move choice");
+				data = Utils.splitFirst(data, ' ')[1].trim();
+				this.choice.willRotate = direction as 'left' | 'right';
 			case 'move':
 				const original = data;
 				const error = () => this.emitChoiceError(`Conflicting arguments for "move": ${original}`);
