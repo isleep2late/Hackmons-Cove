@@ -491,11 +491,11 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 	///// Pure Hackmons No Nerfs /////
 	//////////////////////////////////
 	{
-		section: "Pure Hackmons No Nerfs",
+		section: "No Nerfs",
 		column: 2,
 	},
 	{
-		name: "[Gen 9] Pure Hackmons No Nerfs",
+		name: "[Gen 9 No Nerfs] Pure Hackmons",
 		desc: "Pure Hackmons, but Pokemon are at the highest power level across all their available generations.",
 		mod: 'phnn',
 		battle: {trunc: Math.trunc},
@@ -503,7 +503,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		unbanlist: ['Past', 'Future', 'Unobtainable'],
 	},
 	{
-		name: "[Gen 9] PHNN Doubles",
+		name: "[Gen 9 No Nerfs] Doubles",
 		desc: "Pure Hackmons No Nerfs in Doubles format with twice the chaos!",
 		mod: 'phnn',
 		gameType: 'doubles',
@@ -514,7 +514,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		],
 	},
 	{
-		name: "[Gen 9] PHNN Triples",
+		name: "[Gen 9 No Nerfs] Triples",
 		desc: "Pure Hackmons No Nerfs in Triples format - maximum chaos!",
 		mod: 'phnn',
 		searchShow: false,
@@ -523,7 +523,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Data Preview', 'Max Level = 255', 'Default Level = 100', 'Prestatus'],
 	},
 	{
-		name: "[Gen 9] PHNN Rotation",
+		name: "[Gen 9 No Nerfs] Rotation",
 		desc: "Pure Hackmons No Nerfs in Rotation format!",
 		mod: 'phnn',
 		searchShow: false,
@@ -533,7 +533,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		unbanlist: ['Past', 'Future', 'Unobtainable'],
 	},
 	{
-		name: "[Gen 9] PHNN Multi Battle",
+		name: "[Gen 9 No Nerfs] Multi Battle",
 		mod: 'phnn',
 		searchShow: false,
 		gameType: 'multi',
@@ -542,7 +542,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		unbanlist: ['Past', 'Future', 'Unobtainable'],
 	},
 	{
-		name: "[Gen 9] PHNN Free-for-All",
+		name: "[Gen 9 No Nerfs] Free-for-All",
 		mod: 'phnn',
 		searchShow: false,
 		gameType: 'freeforall',
@@ -551,7 +551,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		unbanlist: ['Past', 'Future', 'Unobtainable'],
 	},
 	{
-		name: "[Gen 9] PHNN Little Cup",
+		name: "[Gen 9 No Nerfs] Little Cup",
 		mod: 'phnn',
 		searchShow: false,
 		battle: {trunc: Math.trunc},
@@ -559,7 +559,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		unbanlist: ['Past', 'Future', 'Unobtainable'],
 	},
 	{
-		name: "[Gen 9] PHNN Middle Cup",
+		name: "[Gen 9 No Nerfs] Middle Cup",
 		mod: 'phnn',
 		searchShow: false,
 		battle: {trunc: Math.trunc},
@@ -897,7 +897,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
 	},
 	{
-		name: "[Gen 9 PHNN] Custom Disguises",
+		name: "[Gen 9 No Nerfs] Custom Disguises",
 		mod: 'phnn',
 		searchShow: false,
 		debug: true,
@@ -905,7 +905,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
 	},
 	{
-		name: "[Gen 9 PHNN] Custom Disguises Doubles",
+		name: "[Gen 9 No Nerfs] Custom Disguises Doubles",
 		mod: 'phnn',
 		gameType: 'doubles',
 		searchShow: false,
@@ -914,7 +914,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
 	},
 	{
-		name: "[Gen 9 PHNN] Custom Disguises Triples",
+		name: "[Gen 9 No Nerfs] Custom Disguises Triples",
 		mod: 'phnn',
 		gameType: 'triples',
 		searchShow: false,
@@ -923,7 +923,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
 	},
 	{
-		name: "[Gen 9 PHNN] Custom Disguises Rotation",
+		name: "[Gen 9 No Nerfs] Custom Disguises Rotation",
 		mod: 'phnn',
 		gameType: 'rotation',
 		searchShow: false,
@@ -932,7 +932,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
 	},
 	{
-		name: "[Gen 9 PHNN] Custom Disguises Multi",
+		name: "[Gen 9 No Nerfs] Custom Disguises Multi",
 		mod: 'phnn',
 		gameType: 'multi',
 		searchShow: false,
@@ -941,7 +941,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod'],
 	},
 	{
-		name: "[Gen 9 PHNN] Custom Disguises Free-for-All",
+		name: "[Gen 9 No Nerfs] Custom Disguises Free-for-All",
 		mod: 'phnn',
 		gameType: 'freeforall',
 		searchShow: false,

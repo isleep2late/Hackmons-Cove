@@ -70,6 +70,7 @@ export class BattleActions {
 			throw new Error(`Invalid switch position ${pos} / ${side.active.length}`);
 		}
 		const oldActive = side.active[pos];
+		const oldPosition = pokemon.position;
 		const unfaintedActive = oldActive?.hp ? oldActive : null;
 		if (unfaintedActive) {
 			oldActive.beingCalledBack = true;
@@ -122,15 +123,28 @@ export class BattleActions {
 			oldActive.usedItemThisTurn = false;
 			oldActive.statsRaisedThisTurn = false;
 			oldActive.statsLoweredThisTurn = false;
-			oldActive.position = pokemon.position;
 			if (oldActive.fainted) oldActive.status = '';
 			if (this.battle.gen <= 4) {
 				pokemon.lastItem = oldActive.lastItem;
 				oldActive.lastItem = '';
 			}
-			pokemon.position = pos;
-			side.pokemon[pokemon.position] = pokemon;
-			side.pokemon[oldActive.position] = oldActive;
+			if (this.battle.gameType === 'rotation' && (oldPosition === 1 || oldPosition === 2)) {
+				if (oldPosition === 1) {
+					side.pokemon.unshift(...side.pokemon.splice(1, 2));
+					this.battle.add('rotate', 'right', side);
+				} else if (oldPosition === 2) {
+					side.pokemon.unshift(...side.pokemon.splice(2, 1));
+					this.battle.add('rotate', 'left', side);
+				}
+				for (let i = 0; i < side.pokemon.length; i++) {
+					side.pokemon[i].position = i;
+				}
+			} else {
+				oldActive.position = pokemon.position;
+				pokemon.position = pos;
+				side.pokemon[pokemon.position] = pokemon;
+				side.pokemon[oldActive.position] = oldActive;
+			}
 		}
 		pokemon.isActive = true;
 		side.active[pos] = pokemon;
@@ -155,10 +169,13 @@ export class BattleActions {
 			pokemon.setStatus(pokemon.set.startStatus, pokemon, null, true);
 		}
 		this.battle.runEvent('BeforeSwitchIn', pokemon);
-		if (sourceEffect) {
-			this.battle.add(isDrag ? 'drag' : 'switch', pokemon, pokemon.getFullDetails, `[from] ${sourceEffect}`);
+		if (this.battle.gameType === 'rotation' && (oldPosition === 1 || oldPosition === 2)) {
 		} else {
-			this.battle.add(isDrag ? 'drag' : 'switch', pokemon, pokemon.getFullDetails);
+			if (sourceEffect) {
+				this.battle.add(isDrag ? 'drag' : 'switch', pokemon, pokemon.getFullDetails, `[from] ${sourceEffect}`);
+			} else {
+				this.battle.add(isDrag ? 'drag' : 'switch', pokemon, pokemon.getFullDetails);
+			}
 		}
 		if (isDrag && this.battle.gen === 2) pokemon.draggedIn = this.battle.turn;
 		pokemon.previouslySwitchedIn++;

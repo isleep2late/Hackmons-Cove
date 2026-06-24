@@ -56,7 +56,6 @@ export const buildMoveOptions = (
     translateHeader: translateHeaderFromConfig,
   } = { ...config };
 
-  const translate = (v: MoveName) => translateFromConfig?.(v) || v;
   const translateHeader = (v: string, d?: string) => translateHeaderFromConfig?.(v) || d || v;
 
   const dex = getDexForFormat(format);
@@ -81,6 +80,34 @@ export const buildMoveOptions = (
     useZ,
     useMax,
   } = pokemon;
+
+  const phnnGmaxForme = !!speciesForme && speciesForme.includes('-Gmax');
+  const phnnGmaxMovesetIds = phnnGmaxForme
+    ? new Set(
+      [...(moves || []), ...(serverMoves || []), ...(revealedMoves || []), ...(transformedMoves || [])]
+        .filter(Boolean)
+        .map((n) => formatId(n)),
+    )
+    : null;
+
+  const translate = (v: MoveName) => {
+    let name = v;
+
+    if (phnnGmaxForme && phnnGmaxMovesetIds.has(formatId(v))) {
+      const gmaxName = getMaxMove(v, {
+        moveType: getDynamicMoveType(pokemon, v, { format, field }),
+        speciesForme,
+        altFormes,
+        ability,
+      });
+
+      if (gmaxName && /^G-Max/.test(gmaxName)) {
+        name = gmaxName;
+      }
+    }
+
+    return translateFromConfig?.(name) || name;
+  };
 
   // keep track of what moves we have so far to avoid duplicate options
   const filterMoves: MoveName[] = [];

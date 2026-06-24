@@ -10,6 +10,7 @@ import {
   similarArrays,
 } from '@showdex/utils/core';
 import { detectGenFromFormat, detectLegacyGen, getDexForFormat } from '@showdex/utils/dex';
+import { detectMaxEvsFormat } from '@showdex/phnn';
 import { flattenAlts } from '@showdex/utils/presets';
 import { detectPlayerKeyFromPokemon } from './detectPlayerKey';
 import { detectPokemonIdent } from './detectPokemonIdent';
@@ -285,11 +286,14 @@ export const sanitizePokemon = <
   // check if this Pokemon can Dynamax
   sanitizedPokemon.dmaxable = !species.cannotDynamax;
 
+  const phnnFormat = typeof format === 'string' && detectMaxEvsFormat(format);
+
   // attempt to populate all other formes based on the base forme
   // (or determined base forme from the current other forme)
   sanitizedPokemon.altFormes = transformedBaseSpecies?.otherFormes?.length && (
     transformedBaseSpecies.otherFormes.includes(sanitizedPokemon.transformedForme)
       || transformedBaseForme === sanitizedPokemon.transformedForme
+      || phnnFormat
   )
     ? [
       transformedBaseForme,
@@ -300,6 +304,7 @@ export const sanitizePokemon = <
       ...(baseSpecies?.otherFormes?.length && (
         baseSpecies.otherFormes.includes(sanitizedPokemon.speciesForme)
           || baseSpeciesForme === sanitizedPokemon.speciesForme
+          || phnnFormat
       ) ? baseSpecies.otherFormes : []),
     ];
 

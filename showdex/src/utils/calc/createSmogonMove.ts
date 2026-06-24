@@ -88,6 +88,7 @@ export const createSmogonMove = (
   const phnnGmaxOverride = getPhnnGmaxMoveOverride(
     format,
     moveName,
+    pokemon,
     (pokemon.spreadStats?.atk || 0) >= (pokemon.spreadStats?.spa || 0),
   ) as CalcdexMoveOverride;
 
