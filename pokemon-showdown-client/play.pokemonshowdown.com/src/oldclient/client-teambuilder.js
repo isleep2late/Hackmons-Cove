@@ -1416,6 +1416,7 @@
 			buf += '<span class="statrow statrow-head"><label></label> <span class="statgraph"></span> <em>' + (isChampions ? 'Points' : !isLetsGo ? 'EV' : 'AV') + '</em></span>';
 			var stats = {};
 			var defaultEV = (this.curTeam.gen > 2 ? 0 : 252);
+			var statRefs = this.statbarRefs(set, baseFormat);
 			for (var j in BattleStatNames) {
 				if (j === 'spd' && this.curTeam.gen === 1) continue;
 				stats[j] = this.getStat(j, set);
@@ -1426,16 +1427,7 @@
 				} else if (BattleNatures[set.nature] && BattleNatures[set.nature].minus === j) {
 					evBuf += '<small>&minus;</small>';
 				}
-				var highestStat = j === 'hp' ? 714 : 499;
-				if (isChampions || isVGC) {
-					highestStat = j === 'hp' ? 362 : 252;
-				}
-				if (isLC) {
-					highestStat = j === 'hp' ? 45 : 29;
-				}
-				if ((set.level || 100) > 100) {
-					highestStat = Math.floor(highestStat * (set.level || 100) / 100);
-				}
+				var highestStat = j === 'hp' ? statRefs.hp : statRefs.other;
 				var width = stats[j] * 75 / highestStat;
 				if (width > 75) width = 75;
 				var color = Math.floor(stats[j] * 180 / highestStat);
@@ -1659,7 +1651,8 @@
 		},
 		cdModeList: function () {
 			return [
-				{ id: 'gen9nonerfs', name: 'No Nerfs', gts: ['', 'doubles', 'triples', 'multi', 'freeforall'] },
+				{ id: 'gen9champions', name: 'Champions', gts: ['', 'doubles', 'triples', 'multi', 'freeforall'] },
+				{ id: 'gen9phnn', name: 'No Nerfs', gts: ['', 'doubles', 'triples', 'multi', 'freeforall'] },
 				{ id: 'gen9', name: 'Gen 9', gts: ['', 'doubles', 'triples', 'multi', 'freeforall'] },
 				{ id: 'gen8', name: 'Gen 8', gts: ['', 'doubles', 'triples', 'multi', 'freeforall'] },
 				{ id: 'gen8bdsp', name: 'BDSP', gts: ['', 'doubles', 'multi', 'freeforall'] },
@@ -2142,6 +2135,7 @@
 			var isVGC = baseFormat.includes('battlespot') || baseFormat.includes('bss') ||
 				baseFormat.includes('vgc') || baseFormat.includes('battlefestival');
 			var isLC = baseFormat.startsWith('lc') || baseFormat.endsWith('lc');
+			var statRefs = this.statbarRefs(set, baseFormat);
 
 			// stat cell
 			var buf = '<span class="statrow statrow-head"><label></label> <span class="statgraph"></span> <em>' + (usesStatPoints ? 'Points' : supportsEVs ? 'EV' : 'AV') + '</em></span>';
@@ -2156,16 +2150,7 @@
 				} else if (BattleNatures[set.nature] && BattleNatures[set.nature].minus === stat) {
 					evBuf += '<small>&minus;</small>';
 				}
-				var highestStat = stat === 'hp' ? 714 : 499;
-				if (usesStatPoints || isVGC) {
-					highestStat = stat === 'hp' ? 362 : 252;
-				}
-				if (isLC) {
-					highestStat = stat === 'hp' ? 45 : 29;
-				}
-				if ((set.level || 100) > 100) {
-					highestStat = Math.floor(highestStat * (set.level || 100) / 100);
-				}
+				var highestStat = stat === 'hp' ? statRefs.hp : statRefs.other;
 				var width = stats[stat] * 75 / highestStat;
 				if (width > 75) width = 75;
 				var color = Math.floor(stats[stat] * 180 / highestStat);
@@ -2188,16 +2173,7 @@
 			var totalev = 0;
 			for (var stat in stats) {
 				if (stat === 'spd' && this.curTeam.gen === 1) continue;
-				var highestStat = stat === 'hp' ? 714 : 499;
-				if (usesStatPoints || isVGC) {
-					highestStat = stat === 'hp' ? 362 : 252;
-				}
-				if (isLC) {
-					highestStat = stat === 'hp' ? 45 : 29;
-				}
-				if ((set.level || 100) > 100) {
-					highestStat = Math.floor(highestStat * (set.level || 100) / 100);
-				}
+				var highestStat = stat === 'hp' ? statRefs.hp : statRefs.other;
 				var width = stats[stat] * 180 / highestStat;
 				if (width > 179) width = 179;
 				var color = Math.floor(stats[stat] * 180 / highestStat);
@@ -2447,6 +2423,7 @@
 			var isVGC = baseFormat.includes('battlespot') || baseFormat.includes('bss') ||
 				baseFormat.includes('vgc') || baseFormat.includes('battlefestival');
 			var isLC = baseFormat.startsWith('lc') || baseFormat.endsWith('lc');
+			var statRefs = this.statbarRefs(set, baseFormat);
 
 			// label column
 			buf += '<div class="col labelcol"><div></div>';
@@ -2468,16 +2445,7 @@
 			buf += '<div class="col graphcol"><div></div>';
 			for (var i in stats) {
 				stats[i] = this.getStat(i);
-				var highestStat = i === 'hp' ? 714 : 499;
-				if (usesStatPoints || isVGC) {
-					highestStat = i === 'hp' ? 362 : 252;
-				}
-				if (isLC) {
-					highestStat = i === 'hp' ? 45 : 29;
-				}
-				if ((set.level || 100) > 100) {
-					highestStat = Math.floor(highestStat * (set.level || 100) / 100);
-				}
+				var highestStat = i === 'hp' ? statRefs.hp : statRefs.other;
 				var width = stats[i] * 180 / highestStat;
 				if (width > 179) width = 179;
 				var color = Math.floor(stats[i] * 180 / highestStat);
@@ -3073,6 +3041,7 @@
 
 			// PHNN Gen 1: custom type / disguise / status
 			var isDisguise = this.curTeam.format.includes('disguises');
+			var isCustomDisguise = this.curTeam.format.includes('customdisguises');
 			if (isDisguise) {
 				var phTypeList = Dex.types.all().map(function (t) { return t.name; });
 				var phTypes = (set.phType || '').split('/');
@@ -3093,7 +3062,7 @@
 				var disguiseMons = [];
 				for (var dexid in BattlePokedex) {
 					var dsp = Dex.species.get(dexid);
-					if (dsp.exists && dsp.num >= 1 && !dsp.forme) disguiseMons.push(dsp);
+					if (isCustomDisguise ? dsp.exists : (dsp.exists && dsp.num >= 1 && !dsp.forme)) disguiseMons.push(dsp);
 				}
 				disguiseMons.sort(function (a, b) { return a.num - b.num; });
 				var curDisguiseId = toID(set.disguise);
@@ -3774,7 +3743,8 @@
 
 			set.name = "";
 			set.species = val;
-			if (set.level) delete set.level;
+			var phnnLevelFormat = this.curTeam.format.includes('disguises') || this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses') || (this.curTeam.gen === 9 && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')));
+			if (set.level && !phnnLevelFormat) delete set.level;
 			if (this.curTeam && this.curTeam.format) {
 				var baseFormat = this.curTeam.format;
 				var format = window.BattleFormats && window.BattleFormats[baseFormat];
@@ -3790,7 +3760,7 @@
 						baseFormat.substr(0, 3) === 'bss' || baseFormat.substr(0, 3) === 'vgc' ||
 						baseFormat.substr(0, 14) === 'battlefestival') set.level = 50;
 					if (baseFormat.startsWith('lc') || baseFormat.endsWith('lc')) set.level = 5;
-					if (this.curTeam.format.includes('disguises') || (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses')) || (this.curTeam.gen === 9 && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) set.level = 255;
+					if (phnnLevelFormat && !set.level) set.level = 255;
 					if (baseFormat.substr(0, 19) === 'battlespotspecial17') set.level = 1;
 					if (format && format.teambuilderLevel) {
 						set.level = format.teambuilderLevel;
@@ -3825,6 +3795,34 @@
 
 		// Stat calculator
 
+		statbarRefs: function (set, baseFormat) {
+			var hp = 714, other = 499;
+			if (baseFormat.includes('champions') ||
+				baseFormat.includes('battlespot') || baseFormat.includes('bss') ||
+				baseFormat.includes('vgc') || baseFormat.includes('battlefestival')) {
+				hp = 362;
+				other = 252;
+			}
+			if (baseFormat.startsWith('lc') || baseFormat.endsWith('lc')) {
+				hp = 45;
+				other = 29;
+			}
+			var level = (set && set.level) || 100;
+			if (level > 100) {
+				hp = Math.floor(hp * level / 100);
+				other = Math.floor(other * level / 100);
+			}
+			for (var s in BattleStatNames) {
+				if (s === 'spd' && this.curTeam.gen === 1) continue;
+				var v = this.getStat(s, set);
+				if (s === 'hp') {
+					if (v > hp) hp = v;
+				} else if (v > other) {
+					other = v;
+				}
+			}
+			return { hp: hp, other: other };
+		},
 		getStat: function (stat, set, evOverride, natureOverride) {
 			var usesStatPoints = this.curTeam.format.includes('champions');
 			var supportsEVs = !this.curTeam.format.includes('letsgo') && !usesStatPoints;
@@ -3903,14 +3901,15 @@
 			var prefix = idx >= 0 ? baseFormat.slice(0, idx) : '';
 			var suffix = idx >= 0 ? baseFormat.slice(idx + 15) : '';
 			var modes = [
-				{ id: 'gen9nonerfs', name: 'No Nerfs', gts: ['', 'doubles', 'triples', 'multi', 'freeforall'] },
-				{ id: 'gen9', name: 'Gen 9', gts: ['', 'doubles', 'triples', 'multi', 'freeforall'] },
-				{ id: 'gen8', name: 'Gen 8', gts: ['', 'doubles', 'triples', 'multi', 'freeforall'] },
+				{ id: 'gen9champions', name: 'Champions', gts: ['', 'doubles', 'triples', 'rotation', 'multi', 'freeforall'] },
+				{ id: 'gen9phnn', name: 'No Nerfs', gts: ['', 'doubles', 'triples', 'rotation', 'multi', 'freeforall'] },
+				{ id: 'gen9', name: 'Gen 9', gts: ['', 'doubles', 'triples', 'rotation', 'multi', 'freeforall'] },
+				{ id: 'gen8', name: 'Gen 8', gts: ['', 'doubles', 'triples', 'rotation', 'multi', 'freeforall'] },
 				{ id: 'gen8bdsp', name: 'BDSP', gts: ['', 'doubles', 'multi', 'freeforall'] },
-				{ id: 'gen7', name: 'Gen 7', gts: ['', 'doubles', 'triples', 'multi', 'freeforall'] },
+				{ id: 'gen7', name: 'Gen 7', gts: ['', 'doubles', 'triples', 'rotation', 'multi', 'freeforall'] },
 				{ id: 'gen7letsgo', name: "Let's Go", gts: [''] },
-				{ id: 'gen6', name: 'Gen 6', gts: ['', 'doubles', 'triples', 'multi', 'freeforall'] },
-				{ id: 'gen5', name: 'Gen 5', gts: ['', 'doubles', 'triples', 'multi', 'freeforall'] },
+				{ id: 'gen6', name: 'Gen 6', gts: ['', 'doubles', 'triples', 'rotation', 'multi', 'freeforall'] },
+				{ id: 'gen5', name: 'Gen 5', gts: ['', 'doubles', 'triples', 'rotation', 'multi', 'freeforall'] },
 				{ id: 'gen4', name: 'Gen 4', gts: ['', 'doubles', 'multi', 'freeforall'] },
 				{ id: 'gen3', name: 'Gen 3', gts: ['', 'doubles', 'multi', 'freeforall'] },
 				{ id: 'gen2', name: 'Gen 2', gts: ['', 'doubles', 'multi', 'freeforall'] },

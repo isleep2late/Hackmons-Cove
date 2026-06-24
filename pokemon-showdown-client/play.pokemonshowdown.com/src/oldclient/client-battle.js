@@ -56,7 +56,8 @@
 			'change input[name=megaevox]': 'uncheckMegaEvoY',
 			'change input[name=megaevoy]': 'uncheckMegaEvoX',
 			'change input[name=zmove]': 'updateZMove',
-			'change input[name=dynamax]': 'updateMaxMove'
+			'change input[name=dynamax]': 'updateMaxMove',
+			'change input.rotgimmick': 'updateRotationGimmick'
 		},
 		battleEnded: false,
 		join: function () {
@@ -539,6 +540,19 @@
 				this.$('.movebuttons-z').hide();
 			}
 		},
+		updateRotationGimmick: function (e) {
+			var cb = e.currentTarget || e.target;
+			var mon = cb.getAttribute('data-mon');
+			var $alt = this.$('.rotmove-alt-' + mon);
+			if (!$alt.length) return;
+			if (cb.checked) {
+				this.$('.rotmove-base-' + mon).hide();
+				$alt.show();
+			} else {
+				this.$('.rotmove-base-' + mon).show();
+				$alt.hide();
+			}
+		},
 		updateTimer: function () {
 			this.$('.timerbutton').replaceWith(this.getTimerHTML());
 		},
@@ -547,6 +561,11 @@
 		},
 		updateMoveControls: function (type) {
 			var switchables = this.request && this.request.side ? this.battle.myPokemon : [];
+
+			if (this.battle.gameType === 'rotation' && type !== 'movetarget' &&
+				this.request && this.request.requestType === 'move' && this.request.active) {
+				return this.renderRotationControls(switchables);
+			}
 
 			if (type !== 'movetarget') {
 				while (
@@ -773,11 +792,13 @@
 				);
 
 				var shiftControls = '';
-				if (this.battle.gameType === 'triples' && pos !== 1) {
+				if ((this.battle.gameType === 'triples' || this.battle.gameType === 'rotation') && pos !== 1) {
+					var shiftLabel = this.battle.gameType === 'rotation' ? 'Rotate' : 'Shift';
+					var shiftCenterLabel = this.battle.gameType === 'rotation' ? 'Rotate to Center' : 'Shift to Center';
 					shiftControls = (
 						'<div class="shiftcontrols">' +
-						'<div class="shiftselect"><button name="chooseShift">Shift</button></div>' +
-						'<div class="switchmenu"><button name="chooseShift">Shift to Center</button><div style="clear:left"></div></div>' +
+						'<div class="shiftselect"><button name="chooseShift">' + shiftLabel + '</button></div>' +
+						'<div class="switchmenu"><button name="chooseShift">' + shiftCenterLabel + '</button><div style="clear:left"></div></div>' +
 						'</div>'
 					);
 				}
@@ -805,6 +826,77 @@
 					'</div>'
 				);
 			}
+		},
+		renderRotationControls: function (switchables) {
+			var active = this.request.active;
+			var labels = ['Center &mdash; attacks', 'Rotate Right &#8634;', '&#8635; Rotate Left'];
+			var panel = '';
+			for (var i = 0; i < active.length; i++) {
+				var poke = switchables[i];
+				var a = active[i];
+				if (!poke || poke.fainted || !a || !a.moves) continue;
+				panel += '<div class="rotation-slot" style="display:inline-block;vertical-align:top;width:170px;margin:3px;padding:4px;border:1px solid #aaa;border-radius:6px;' + (i === 0 ? 'background:#e8f4ff;' : '') + '">';
+				panel += '<div style="text-align:center;font-size:10px;color:#777;">' + labels[i] + '</div>';
+				panel += '<div style="text-align:center;font-weight:bold;margin-bottom:3px;">' + BattleLog.escapeHTML(poke.name) + '</div>';
+				var gimSuffix = '', gimLabel = '';
+				if (a.canMegaEvo) { gimSuffix = 'mega'; gimLabel = 'Mega Evo'; }
+				else if (a.canMegaEvoX) { gimSuffix = 'megax'; gimLabel = 'Mega Evo X'; }
+				else if (a.canMegaEvoY) { gimSuffix = 'megay'; gimLabel = 'Mega Evo Y'; }
+				else if (a.canUltraBurst) { gimSuffix = 'ultra'; gimLabel = 'Ultra Burst'; }
+				else if (a.canZMove) { gimSuffix = 'zmove'; gimLabel = 'Z-Power'; }
+				else if (a.canDynamax) { gimSuffix = 'dynamax'; gimLabel = (a.maxMoves && a.maxMoves.gigantamax) ? 'Gigantamax' : 'Dynamax'; }
+				else if (a.canTerastallize) { gimSuffix = 'terastallize'; gimLabel = 'Tera ' + a.canTerastallize; }
+				if (gimSuffix) {
+					panel += '<label style="display:block;text-align:center;font-size:11px;margin-bottom:3px;cursor:pointer;"><input type="checkbox" class="rotgimmick" data-mon="' + i + '" data-suffix="' + gimSuffix + '" /> ' + gimLabel + '</label>';
+				}
+				for (var j = 0; j < a.moves.length; j++) {
+					var move = a.moves[j];
+					if (!move) continue;
+					var moveData = Dex.moves.get(move.id || move.move);
+					var dis = move.disabled ? ' disabled' : '';
+					var pp = (move.pp !== undefined) ? (move.pp + '/' + move.maxpp) : '';
+					panel += '<button class="movebutton type-' + moveData.type + ' rotmove-base-' + i + '"' + dis + ' name="chooseRotationMove" value="' + i + ',' + (j + 1) + '" style="display:block;width:100%;margin-bottom:2px;text-align:left;">' + BattleLog.escapeHTML(move.move) + ' <small class="type">' + moveData.type + '</small> <small class="pp">' + pp + '</small></button>';
+				}
+				if (gimSuffix === 'dynamax' && a.maxMoves && a.maxMoves.maxMoves) {
+					for (var dm = 0; dm < a.moves.length; dm++) {
+						if (!a.moves[dm]) continue;
+						var mm = a.maxMoves.maxMoves[dm];
+						var mmData = Dex.moves.get(mm ? mm.move : (a.moves[dm].id || a.moves[dm].move));
+						panel += '<button class="movebutton type-' + mmData.type + ' rotmove-alt-' + i + '" name="chooseRotationMove" value="' + i + ',' + (dm + 1) + '" style="display:none;width:100%;margin-bottom:2px;text-align:left;">' + BattleLog.escapeHTML(mmData.name) + ' <small class="type">' + mmData.type + '</small></button>';
+					}
+				} else if (gimSuffix === 'zmove' && a.canZMove) {
+					for (var zk = 0; zk < a.moves.length; zk++) {
+						if (!a.moves[zk]) continue;
+						var zm = a.canZMove[zk];
+						var zType = Dex.moves.get(a.moves[zk].id || a.moves[zk].move).type;
+						var zName = zm ? Dex.moves.get(zm.move).name : a.moves[zk].move;
+						panel += '<button class="movebutton type-' + zType + ' rotmove-alt-' + i + '" name="chooseRotationMove" value="' + i + ',' + (zk + 1) + '" style="display:none;width:100%;margin-bottom:2px;text-align:left;">' + BattleLog.escapeHTML(zName) + ' <small class="type">' + zType + '</small></button>';
+					}
+				}
+				panel += '</div>';
+			}
+			this.$controls.html(
+				'<div class="controls">' +
+				'<div class="whatdo">Rotation &mdash; check a Pok&eacute;mon\'s gimmick (Mega/Dynamax/Tera/etc.) if you want it, then pick its move. The center attacks directly; an edge Pok&eacute;mon rotates to the center first.' + this.getTimerHTML() + '</div>' +
+				'<div class="movecontrols"><div class="movemenu" style="display:block;text-align:center;">' + panel + '</div></div>' +
+				'</div>'
+			);
+		},
+		chooseRotationMove: function (value) {
+			if (!this.choice) return;
+			this.tooltips.hideTooltip();
+			var parts = ('' + value).split(',');
+			var monPos = parseInt(parts[0], 10);
+			var moveIndex = parseInt(parts[1], 10);
+			var suffix = '';
+			var $gim = this.$('.rotgimmick[data-mon="' + monPos + '"]');
+			if ($gim.length && $gim[0].checked) suffix = ' ' + $gim.attr('data-suffix');
+			var choiceStr;
+			if (monPos === 1) choiceStr = 'rotate right move ' + moveIndex + suffix;
+			else if (monPos === 2) choiceStr = 'rotate left move ' + moveIndex + suffix;
+			else choiceStr = 'move ' + moveIndex + suffix;
+			this.choice.choices = [choiceStr];
+			this.endChoice();
 		},
 		displayParty: function (switchables, trapped) {
 			var party = '';

@@ -1440,7 +1440,7 @@ export class Battle {
 			for (let i = 0; i < this.sides.length; i++) {
 				const side = this.sides[i];
 				if (!side.pokemonLeft) continue;
-				const activeData = side.active.map(pokemon => pokemon?.getMoveRequestData());
+				const activeData = side.activeAndSubActives().map(pokemon => pokemon?.getMoveRequestData());
 				requests[i] = { active: activeData, side: side.getRequestData() };
 				if (side.allySide) {
 					(requests[i] as MoveRequest).ally = side.allySide.getRequestData(true);
@@ -1573,7 +1573,7 @@ export class Battle {
 		if (!side.pokemonLeft) return [];
 
 		const canSwitchIn = [];
-		for (let i = side.active.length; i < side.pokemon.length; i++) {
+		for (let i = side.activeAndSubActives().length; i < side.pokemon.length; i++) {
 			const pokemon = side.pokemon[i];
 			if (!pokemon.fainted) {
 				canSwitchIn.push(pokemon);
@@ -2718,6 +2718,25 @@ export class Battle {
 						this.actions.switchIn(side.pokemon[i], i);
 					}
 				}
+				for (const pokemon of side.subActives()) {
+					pokemon.isActive = true;
+					this.runEvent('BeforeSwitchIn', pokemon);
+					this.add('switch', pokemon, pokemon.getFullDetails);
+					if (pokemon.set.phType) {
+						const types = pokemon.set.phType.split('/').filter((t: string) => this.dex.types.isName(t));
+						if (types.length) {
+							pokemon.setType(types, true);
+							this.addSplit(pokemon.side.id, [
+								'-start', pokemon, 'typechange', types.join('/'), '[from] rule: Disguise Mod',
+							]);
+						}
+					}
+					if (pokemon.set.startStatus && !pokemon.m.phnnStartStatusApplied) {
+						pokemon.m.phnnStartStatusApplied = true;
+						pokemon.setStatus(pokemon.set.startStatus, pokemon, null, true);
+					}
+					pokemon.isActive = false;
+				}
 			}
 			this.midTurn = true;
 			break;
@@ -2824,6 +2843,10 @@ export class Battle {
 			if (!action.pokemon.isActive) return false;
 			if (action.pokemon.fainted) return false;
 			this.swapPosition(action.pokemon, 1);
+			break;
+
+		case 'rotate':
+			this.actions.rotateIn(action.target!);
 			break;
 
 		case 'beforeTurn':

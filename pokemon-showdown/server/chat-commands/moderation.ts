@@ -1493,7 +1493,7 @@ export const commands: Chat.ChatCommands = {
 			this.globalModlog(`GLOBAL ${groupName.toUpperCase()}`, userid, `(demote)`);
 			if (targetUser) targetUser.popup(`You were demoted to Global ${groupName} by ${user.name}.`);
 		} else {
-			this.addGlobalModAction(`${name} was promoted to Global ${groupName} by ${user.name}.`);
+			if (nextGroup !== '+') this.addGlobalModAction(`${name} was promoted to Global ${groupName} by ${user.name}.`);
 			this.globalModlog(`GLOBAL ${groupName.toUpperCase()}`, userid);
 			if (targetUser) targetUser.popup(`You were promoted to Global ${groupName} by ${user.name}.`);
 		}

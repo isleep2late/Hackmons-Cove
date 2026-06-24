@@ -683,6 +683,23 @@ export class Side {
 		return this.z + (!this.isFar ? -1 : 1) * offset;
 	}
 
+	rotate(direction: string) {
+		switch (direction) {
+		case 'right':
+			this.active.unshift(...this.active.splice(1, 2));
+			break;
+		case 'left':
+			this.active.unshift(...this.active.splice(2, 1));
+			break;
+		}
+		for (let i = 0; i < this.active.length; i++) {
+			if (this.active[i]) {
+				this.active[i]!.slot = i;
+				this.battle.scene.animRotate(this.active[i]!);
+			}
+		}
+	}
+
 	clearPokemon() {
 		for (const pokemon of this.pokemon) pokemon.destroy();
 		this.pokemon = [];
@@ -3554,9 +3571,13 @@ export class Battle {
 				this.farSide.active = [null, null];
 				break;
 			case 'triples':
+				this.nearSide.active = [null, null, null];
+				this.farSide.active = [null, null, null];
+				break;
 			case 'rotation':
 				this.nearSide.active = [null, null, null];
 				this.farSide.active = [null, null, null];
+				this.pokemonControlled = 1;
 				break;
 			default:
 				for (const side of this.sides) side.active = [null];
@@ -3775,6 +3796,11 @@ export class Battle {
 			let poke = this.getPokemon(args[1])!;
 			poke.side.faint(poke);
 			this.log(args, kwArgs);
+			break;
+		}
+		case 'rotate': {
+			const side = this.getSide(args[2]);
+			side.rotate(args[1]);
 			break;
 		}
 		case 'swap': {

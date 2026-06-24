@@ -2,7 +2,7 @@ import { type AbilityName, type MoveName, Move as SmogonMove } from '@smogon/cal
 import { MOVES } from '@smogon/calc/dist/data/moves';
 import { type CalcdexBattleField, type CalcdexMoveOverride, type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { clamp } from '@showdex/utils/core';
-import { getPhnnMoveOverrides } from '@showdex/phnn';
+import { getPhnnGmaxMoveOverride, getPhnnMoveOverrides } from '@showdex/phnn';
 import {
   detectGenFromFormat,
   determineCriticalHit,
@@ -85,8 +85,14 @@ export const createSmogonMove = (
     overrides.drain = [...smogonMoveData.drain];
   }
 
+  const phnnGmaxOverride = getPhnnGmaxMoveOverride(
+    format,
+    moveName,
+    (pokemon.spreadStats?.atk || 0) >= (pokemon.spreadStats?.spa || 0),
+  ) as CalcdexMoveOverride;
+
   // check if the user specified any overrides for this move
-  const calcdexOverrides: CalcdexMoveOverride = { ...defaultOverrides, ...(getPhnnMoveOverrides(format, moveName, pokemon.ivs) as CalcdexMoveOverride), ...moveOverrides?.[moveName] };
+  const calcdexOverrides: CalcdexMoveOverride = { ...defaultOverrides, ...(getPhnnMoveOverrides(format, moveName, pokemon.ivs) as CalcdexMoveOverride), ...(phnnGmaxOverride || {}), ...moveOverrides?.[moveName] };
   const {
     type: typeOverride,
     category: categoryOverride,
