@@ -2051,6 +2051,7 @@ function toId() {
 				var newIndex = index + amount;
 				if (newIndex >= this.sideRoomList.length) return false;
 				if (newIndex < 0) {
+					if (!room.focusText) return false;
 					this.sideRoomList.splice(index, 1);
 					this.roomList.push(room);
 					this.focusRoomLeft(room.id);
