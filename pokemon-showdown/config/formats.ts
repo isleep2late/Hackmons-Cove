@@ -111,7 +111,10 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		name: "[Gen 9 Champions] Pure Hackmons",
 		desc: `A theoretical Pure Hackmons-based metagame in the Champions scene.`,
 		mod: 'champions',
-		ruleset: ['Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Hackmons Forme Legality', 'Species Reveal Clause', 'Endless Battle Clause'],
+		ruleset: ['Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Hackmons Forme Legality', 'Species Reveal Clause', 'Endless Battle Clause',
+			'Max Level = 50', 'EV Limit = 192', 'EV Limits = Atk 0-32 / Def 0-32 / SpA 0-32 / SpD 0-32 / Spe 0-32 / HP 0-32',
+			'-Nonexistent', '-Past'
+		],
 	},
 	//////////////////////////////////
 	////////// OM Hackmons ///////////
