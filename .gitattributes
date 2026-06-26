@@ -1,1 +1,8 @@
 pokemon-showdown/config/formats.ts merge=ours
+pokemon-showdown/data/rulesets.ts merge=ours
+pokemon-showdown/sim/battle.ts merge=ours
+pokemon-showdown/server/room-battle.ts merge=ours
+pokemon-showdown-client/play.pokemonshowdown.com/src/oldclient/client-battle.js merge=ours
+pokemon-showdown-client/play.pokemonshowdown.com/src/oldclient/client-chat.js merge=ours
+pokemon-showdown-client/play.pokemonshowdown.com/src/oldclient/client-mainmenu.js merge=ours
+pokemon-showdown-client/play.pokemonshowdown.com/src/oldclient/client-rooms.js merge=ours

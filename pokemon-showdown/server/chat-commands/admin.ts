@@ -21,9 +21,9 @@ interface ProcessData {
 	ram?: string;
 }
 
-export function isUpperStaff(user: User) {
-	const usRoom = Rooms.get('upperstaff');
-	return usRoom && Users.Auth.atLeast(usRoom.auth.getDirect(user.id), '+');
+function hasDevAuth(user: User) {
+	const devRoom = Rooms.get('development');
+	return devRoom && Users.Auth.atLeast(devRoom.auth.getDirect(user.id), '%');
 }
 
 function bash(command: string, context: Chat.CommandContext, cwd?: string): Promise<[number, string, string]> {
@@ -647,7 +647,7 @@ export const commands: Chat.ChatCommands = {
 
 	memusage: 'memoryusage',
 	memoryusage(target, room, user) {
-		if (!isUpperStaff(user)) this.checkCan('lockdown');
+		if (!hasDevAuth(user)) this.checkCan('lockdown');
 		const memUsage = process.memoryUsage();
 		const resultNums = [memUsage.rss, memUsage.heapUsed, memUsage.heapTotal];
 		const units = ["B", "KiB", "MiB", "GiB", "TiB"];
@@ -981,7 +981,7 @@ export const commands: Chat.ChatCommands = {
 	],
 
 	async processes(target, room, user) {
-		if (!isUpperStaff(user)) this.checkCan('lockdown');
+		if (!hasDevAuth(user)) this.checkCan('lockdown');
 
 		const processes = new Map<string, ProcessData>();
 		const ramUnits = ["KiB", "MiB", "GiB", "TiB"];
@@ -1402,15 +1402,10 @@ export const commands: Chat.ChatCommands = {
 				success = await updateserver(this, Config.privatecodepath);
 			}
 			success = success && await updateserver(this, FS.ROOT_PATH);
+			this.addGlobalModAction(`${user.name} used /updateserver${target === 'public' ? ' public' : ''}`);
 		}
 
-		if (!success) {
-			this.sendReply(`FAILED, old changes restored.`);
-			this.addGlobalModAction(`${user.name} used /updateserver - but something failed.`);
-		} else {
-			this.sendReply(`DONE`);
-			this.addGlobalModAction(`${user.name} used /updateserver${target === 'public' ? ' public' : ''}`);
-		};
+		this.sendReply(success ? `DONE` : `FAILED, old changes restored.`);
 
 		Monitor.updateServerLock = false;
 	},
