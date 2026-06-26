@@ -180,11 +180,7 @@ export const getPhnnGmaxMoveOverride = (
     if (PHNN_FIXED_GMAX.includes(id)) {
       return null;
     }
-
-    return {
-      basePower: 130,
-      category: physical ? 'Physical' : 'Special',
-    };
+    return { basePower: 10 };
   }
 
   const speciesForme = pokemon?.speciesForme;
