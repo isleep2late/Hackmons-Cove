@@ -23,6 +23,7 @@ To reload chat commands:
 
 */
 
+import { isUpperStaff } from './chat-commands/admin';
 import type { RoomPermission, GlobalPermission } from './user-groups';
 import type { Punishment } from './punishments';
 import type { PartialModlogEntry } from './modlog';
@@ -1280,7 +1281,7 @@ export class CommandContext extends MessageContext {
 		if (room) {
 			const normalized = message.trim();
 			if (
-				!user.can('bypassall') && (['help', 'lobby'].includes(room.roomid)) && (normalized === user.lastMessage) &&
+				!isUpperStaff && (['help', 'lobby'].includes(room.roomid)) && (normalized === user.lastMessage) &&
 				((Date.now() - user.lastMessageTime) < MESSAGE_COOLDOWN) && !Config.nothrottle
 			) {
 				throw new Chat.ErrorMessage(this.tr`You can't send the same message again so soon.`);

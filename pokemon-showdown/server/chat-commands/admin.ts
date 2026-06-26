@@ -21,9 +21,9 @@ interface ProcessData {
 	ram?: string;
 }
 
-function hasDevAuth(user: User) {
-	const devRoom = Rooms.get('development');
-	return devRoom && Users.Auth.atLeast(devRoom.auth.getDirect(user.id), '%');
+export function isUpperStaff(user: User) {
+	const usRoom = Rooms.get('upperstaff');
+	return usRoom && Users.Auth.atLeast(usRoom.auth.getDirect(user.id), '+');
 }
 
 function bash(command: string, context: Chat.CommandContext, cwd?: string): Promise<[number, string, string]> {
@@ -647,7 +647,7 @@ export const commands: Chat.ChatCommands = {
 
 	memusage: 'memoryusage',
 	memoryusage(target, room, user) {
-		if (!hasDevAuth(user)) this.checkCan('lockdown');
+		if (!isUpperStaff(user)) this.checkCan('lockdown');
 		const memUsage = process.memoryUsage();
 		const resultNums = [memUsage.rss, memUsage.heapUsed, memUsage.heapTotal];
 		const units = ["B", "KiB", "MiB", "GiB", "TiB"];
@@ -981,7 +981,7 @@ export const commands: Chat.ChatCommands = {
 	],
 
 	async processes(target, room, user) {
-		if (!hasDevAuth(user)) this.checkCan('lockdown');
+		if (!isUpperStaff(user)) this.checkCan('lockdown');
 
 		const processes = new Map<string, ProcessData>();
 		const ramUnits = ["KiB", "MiB", "GiB", "TiB"];
