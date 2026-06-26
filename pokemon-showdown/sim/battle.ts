@@ -2626,6 +2626,24 @@ export class Battle {
 	}
 
 	checkWin(faintData?: Battle['faintQueue'][0]) {
+		if (this.ruleTable.has('infinitemod')) {
+			for (const side of this.sides) {
+				if (!side.pokemonLeft && !(side as any).infiniteWaiting) {
+					const totalSlots = 1;
+					const clientSlots = 1;
+					(side as any).infiniteWaiting = true;
+					(side as any).infiniteSlotsNeeded = totalSlots;
+					(side as any).infiniteInitialSlots = totalSlots;
+					(side as any).infiniteQueue = [];
+					const slotsMsg = clientSlots === 1
+						? 'Paste a Pokémon set into the chat to keep battling, or close the tab to forfeit.'
+						: `Paste ${clientSlots} Pokémon sets (one at a time) into the chat to keep battling, or close the tab to forfeit.`;
+					this.add('-message', `Your team is out of Pokémon! ${slotsMsg}`);
+					this.add('infinite', side.id, clientSlots);
+				}
+			}
+			if (this.sides.some((side: Side) => (side as any).infiniteWaiting)) return;
+		}
 		if (this.sides.every(side => !side.pokemonLeft)) {
 			this.win(faintData && this.gen > 4 ? faintData.target.side : null);
 			return true;
@@ -2635,6 +2653,139 @@ export class Battle {
 				this.win(side);
 				return true;
 			}
+		}
+	}
+
+	infiniteSubmit(sideId: SideID, data: string) {
+		const side = this.getSide(sideId);
+		if (!(side as any).infiniteWaiting) return;
+
+		data = data.replace(/\\n/g, '\n');
+
+		if (data === 'defer') {
+			(side as any).infiniteSlotsNeeded--;
+		} else if (data.startsWith('existing ')) {
+			const pos = parseInt(data.slice(9)) - 1;
+			const candidate = side.pokemon[pos];
+			if (candidate && candidate.fainted) {
+				candidate.fainted = false;
+				candidate.hp = Math.max(1, Math.floor(candidate.maxhp / 2));
+				candidate.status = '' as ID;
+				side.pokemonLeft++;
+				(side as any).infiniteQueue.push(candidate);
+			}
+			(side as any).infiniteSlotsNeeded--;
+		} else {
+			let spriteValue = '';
+			let typesValue = '';
+			const cleaned = data.split('\n').filter((line: string) => {
+				const trimmed = line.trimStart();
+				const lower = trimmed.toLowerCase();
+				if (lower.startsWith('sprite:')) {
+					spriteValue = trimmed.slice(7).trim();
+					return false;
+				}
+				if (lower.startsWith('types:')) {
+					typesValue = trimmed.slice(6).trim();
+					return false;
+				}
+				return true;
+			}).join('\n');
+			let sets: any;
+			try {
+				sets = Teams.import(cleaned);
+			} catch (e) {
+				sets = null;
+			}
+			if (!sets || sets.length === 0) {
+				this.add('-message', `That doesn't look like a valid Pokémon set. Try again.`);
+				this.add('infinite', side.id, 1);
+				return;
+			}
+			if (spriteValue) {
+				const disguiseSpecies = this.dex.species.get(spriteValue);
+				if (disguiseSpecies.exists) sets[0].disguise = disguiseSpecies.name;
+			}
+			if (typesValue) {
+				sets[0].phType = typesValue.replace(/\s*\/\s*/g, '/');
+			}
+			let newPokemon: any;
+			try {
+				newPokemon = side.addPokemon(sets[0]);
+			} catch (e) {
+				const msg = (e instanceof Error) ? e.message : String(e);
+				console.error('[infiniteSubmit] addPokemon failed:', msg);
+				this.add('-message', `That Pokémon couldn't be added. Try again.`);
+				this.add('infinite', side.id, 1);
+				return;
+			}
+			if (newPokemon) (side as any).infiniteQueue.push(newPokemon);
+			(side as any).infiniteSlotsNeeded--;
+		}
+
+		const remaining = (side as any).infiniteSlotsNeeded as number;
+		if (remaining > 0) {
+			const initial = (side as any).infiniteInitialSlots as number;
+			const handled = initial - remaining;
+			const ordinals = ['second', 'third', 'fourth', 'fifth'];
+			const ordinal = ordinals[handled - 1] || `${handled + 1}th`;
+			this.add('-message', `Set accepted! A ${ordinal} set is needed to continue.`);
+		}
+
+		if ((side as any).infiniteSlotsNeeded <= 0) {
+			(side as any).infiniteWaiting = false;
+
+			const queue: Pokemon[] = ((side as any).infiniteQueue as Pokemon[]) || [];
+			let qIdx = 0;
+			for (let i = 0; i < side.active.length && qIdx < queue.length; i++) {
+				const oldActive = side.active[i];
+				if (!oldActive || oldActive.fainted) {
+					const pokemon = queue[qIdx++];
+					if (oldActive && oldActive !== pokemon) {
+						oldActive.isActive = false;
+						const oldPos = pokemon.position;
+						pokemon.position = i;
+						oldActive.position = oldPos;
+						side.pokemon[pokemon.position] = pokemon;
+						side.pokemon[oldActive.position] = oldActive;
+					}
+					side.active[i] = pokemon;
+					pokemon.isActive = true;
+					pokemon.activeTurns = 0;
+					pokemon.activeMoveActions = 0;
+					if (pokemon.set.disguise) {
+						const disguise = this.dex.species.get(pokemon.set.disguise);
+						if (disguise.exists) {
+							(pokemon as any).name = disguise.name;
+							(pokemon as any).fullname = `${pokemon.side.id}: ${disguise.name}`;
+						}
+					}
+					this.add('switch', pokemon, pokemon.getFullDetails);
+					if (pokemon.set.phType) {
+						const types = (pokemon.set.phType as string).split('/').filter((t: string) => this.dex.types.isName(t));
+						if (types.length) {
+							pokemon.setType(types, true);
+							this.addSplit(pokemon.side.id, ['-start', pokemon, 'typechange', types.join('/'), '[from] rule: Disguise Mod']);
+						}
+					}
+					if (pokemon.set.startStatus && !pokemon.m.phnnStartStatusApplied) {
+						pokemon.m.phnnStartStatusApplied = true;
+						pokemon.setStatus(pokemon.set.startStatus, pokemon, null, true);
+					}
+				}
+			}
+			(side as any).infiniteQueue = [];
+
+			const activeData = side.activeAndSubActives().map(
+				(p: Pokemon | null) => p?.getMoveRequestData()!
+			);
+			const request: MoveRequest = { active: activeData, side: side.getRequestData() };
+			side.activeRequest = request;
+			side.clearChoice();
+			side.emitRequest(request);
+
+			this.sendUpdates();
+			if (this.allChoicesDone()) this.commitChoices();
 		}
 	}
 
@@ -3106,6 +3257,7 @@ export class Battle {
 	allChoicesDone() {
 		let totalActions = 0;
 		for (const side of this.sides) {
+			if ((side as any).infiniteWaiting) continue;
 			if (side.isChoiceDone()) {
 				if (!this.supportCancel) side.choice.cantUndo = true;
 				totalActions++;

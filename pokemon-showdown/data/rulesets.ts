@@ -186,21 +186,11 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 				}
 			}
 		},
-		onSwitchIn(pokemon) {
-			if (pokemon.set.phType) {
-				const types = pokemon.set.phType.split('/').filter((t: string) => this.dex.types.isName(t));
-				if (types.length) {
-					pokemon.setType(types, true);
-					this.addSplit(pokemon.side.id, [
-						'-start', pokemon, 'typechange', types.join('/'), '[from] rule: Disguise Mod',
-					]);
-				}
-			}
-			if (pokemon.set.startStatus && !pokemon.m.phnnStartStatusApplied) {
-				pokemon.m.phnnStartStatusApplied = true;
-				pokemon.setStatus(pokemon.set.startStatus, pokemon, null, true);
-			}
-		},
+	},
+	infinitemod: {
+		effectType: 'Rule',
+		name: 'Infinite Mod',
+		desc: "When a player runs out of Pok&eacute;mon, instead of losing they may submit a new Pok&eacute;mon to continue the battle indefinitely.",
 	},
 	prestatus: {
 		effectType: 'Rule',

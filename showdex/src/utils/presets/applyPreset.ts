@@ -5,7 +5,7 @@ import {
 } from '@showdex/interfaces/calc';
 import { mergeRevealedMoves, sanitizePokemon } from '@showdex/utils/battle';
 import { calcPokemonSpreadStats, populateStatsTable } from '@showdex/utils/calc';
-import { formatId } from '@showdex/utils/core';
+import { formatId, nonEmptyObject } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
 import {
   detectGenFromFormat,
@@ -357,7 +357,7 @@ export const applyPreset = (
     auto
       && !legacy
       && detectMaxEvsFormat(format)
-      && pokemon.source === 'client'
+      && (pokemon.source === 'client' || !nonEmptyObject(pokemon.serverStats))
       && !revealingPreset
       && !transformed
   ) {

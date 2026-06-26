@@ -118,6 +118,13 @@ export class BattleStream extends Streams.ObjectReadWriteStream<string> {
 		case 'tiebreak':
 			this.battle!.tiebreak();
 			break;
+		case 'infinite': {
+			const spaceIdx = message.indexOf(' ');
+			const sideId = spaceIdx >= 0 ? message.slice(0, spaceIdx) : message;
+			const data = spaceIdx >= 0 ? message.slice(spaceIdx + 1) : '';
+			this.battle!.infiniteSubmit(sideId as SideID, data);
+			break;
+		}
 		case 'chat-inputlogonly':
 			this.battle!.inputLog.push(`>chat ${message}`);
 			break;

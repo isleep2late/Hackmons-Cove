@@ -4,11 +4,75 @@ const SKIP_LASTDAMAGE = new Set([
 	'splash', 'stunspore', 'substitute', 'supersonic', 'teleport', 'thunderwave', 'toxic', 'transform',
 ]);
 
+const TWO_TURN_MOVES = ['dig', 'fly', 'razorwind', 'skullbash', 'skyattack', 'solarbeam'];
+
 export const Scripts: ModdedBattleScriptsData = {
 	inherit: 'gen1',
 	gen: 1,
 	actions: {
 		inherit: true,
+		runMove(moveOrMoveName, pokemon, targetLoc, options) {
+			let sourceEffect = options?.sourceEffect;
+			const target = this.battle.getTarget(pokemon, moveOrMoveName, targetLoc);
+			let move = this.battle.dex.getActiveMove(moveOrMoveName);
+			if (move.id !== 'struggle') {
+				const changedMove = this.battle.runEvent('OverrideAction', pokemon, target, move);
+				if (changedMove && changedMove !== true) {
+					move = this.battle.dex.getActiveMove(changedMove);
+				}
+			}
+
+			const abortMove = () => {
+				this.battle.clearActiveMove(true);
+				this.battle.runEvent('AfterMoveSelf', pokemon, target, move);
+			};
+
+			if (move.id === 'cannotmove') {
+				if (pokemon.status === 'slp') {
+					this.battle.hint(
+						"In Gen 1, if a Pokémon spends a turn partially trapped and switches to a Pokémon that is asleep, " +
+						"the sleep counter will not decrease until you select a move with a different Pokémon."
+					);
+				} else if (pokemon.getLockedMove()) {
+					this.battle.hint(
+						"In Gen 1, when Haze cures the sleep/freeze status of a Pokémon during a multi-turn move, " +
+						"that Pokémon will become soft-locked."
+					);
+				} else if (pokemon.getSemiLockedMove()) {
+					this.battle.hint(
+						"In Gen 1, when Haze cures the sleep/freeze status of a Pokémon during Bide, " +
+						"the move execution will never resolve."
+					);
+				}
+				abortMove();
+				return;
+			}
+
+			if (target?.subFainted) target.subFainted = null;
+
+			this.battle.setActiveMove(move, pokemon, target);
+
+			if (pokemon.moveThisTurn || !this.battle.runEvent('BeforeMove', pokemon, target, move)) {
+				abortMove();
+				return;
+			}
+			if (move.beforeMoveCallback?.call(this.battle, pokemon, target, move)) {
+				abortMove();
+				return;
+			}
+
+			if (move.id !== 'struggle') {
+				const lockedMove = pokemon.getLockedMove() || pokemon.getSemiLockedMove();
+				if (lockedMove) sourceEffect = move;
+
+				if ((!lockedMove && !TWO_TURN_MOVES.includes(move.id)) || pokemon.volatiles['twoturnmove']) {
+					const moveSlot = pokemon.moveSlots.find((ms: any) => ms.id === move.id);
+					if (moveSlot) pokemon.deductPP(moveSlot.id, null, target);
+				}
+			}
+
+			this.useMove(move, pokemon, { target, sourceEffect });
+		},
 		useMoveInner(moveOrMoveName, pokemon, options) {
 			let sourceEffect = options?.sourceEffect;
 			let target = options?.target;

@@ -158,7 +158,11 @@ export const createSmogonPokemon = (
     // update: actually, `stats` would've worked (since I internally passed it to this.rawStats of the Pokemon class anyway),
     // but I just had forgot purge the webpack cache for Showdex ... sooo don't forget to run `yarn cache:purge` when you
     // change anything in node_modules lol
-    rawStats: { ...pokemon.spreadStats } as SmogonPokemonOptions['rawStats'],
+    rawStats: (
+      pokemon.source === 'server' && nonEmptyObject(pokemon.serverStats)
+        ? { ...pokemon.serverStats }
+        : { ...pokemon.spreadStats }
+    ) as SmogonPokemonOptions['rawStats'],
 
     // update (2024/01/24): by this point, the EVs & IVs should be fully populated, so no need to repeat this logic
     ivs: { ...pokemon.ivs },
@@ -205,9 +209,13 @@ export const createSmogonPokemon = (
       // can 'typechange' into ['Poison'], but passing in only ['Poison'] here causes expand()
       // to merge ['Water', 'Dark'] and ['Poison'] into ['Poison', 'Dark'] ... oh noo :o
       types: [
-        ...(pokemon.dirtyTypes?.length ? pokemon.dirtyTypes : (getPhnnArceusTypes(format, pokemon.speciesForme, pokemon.dirtyItem ?? pokemon.item) || pokemon.types)),
+        ...(pokemon.dirtyTypes?.length ? pokemon.dirtyTypes : (
+          (!pokemon.terastallized && (pokemon.volatiles?.typechange?.[1] as string))
+            ? (pokemon.volatiles.typechange[1] as string).split('/')
+            : (getPhnnArceusTypes(format, pokemon.speciesForme, pokemon.dirtyItem ?? pokemon.item) || pokemon.types)
+        )),
         null,
-        null, // update (2022/11/02): hmm... don't think @smogon/calc supports 3 types lol
+        null,
       ].slice(0, 2) as SmogonPokemonOverrides['types'],
     },
   };
@@ -222,7 +230,6 @@ export const createSmogonPokemon = (
   // (in gen 2, they're separate boosts)
   if (gen === 1) {
     options.evs.spd = options.evs.spa;
-    options.boosts.spd = options.boosts.spa;
 
     if (options.overrides.baseStats.spd !== options.overrides.baseStats.spa) {
       (options.overrides as DeepWritable<SmogonPokemonOverrides>).baseStats.spd = options.overrides.baseStats.spa;
