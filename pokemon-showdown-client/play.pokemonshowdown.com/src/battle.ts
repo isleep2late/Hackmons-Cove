@@ -695,7 +695,7 @@ export class Side {
 		for (let i = 0; i < this.active.length; i++) {
 			if (this.active[i]) {
 				this.active[i]!.slot = i;
-				this.battle.scene.animRotate(this.active[i]!);
+				if ((this.battle.scene as any).animRotate) (this.battle.scene as any).animRotate(this.active[i]!);
 			}
 		}
 	}
