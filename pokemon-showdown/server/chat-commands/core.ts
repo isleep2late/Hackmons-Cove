@@ -1149,6 +1149,15 @@ export const commands: Chat.ChatCommands = {
 		`/undo - Reverts the last move of the player in the current game, if it supports it.`,
 	],
 
+	infinitesubmit(target, room, user) {
+		room = this.requireRoom();
+		if (!room.battle) throw new Chat.ErrorMessage(this.tr`This isn't a battle room.`);
+		room.battle.infiniteSubmit(user, target);
+	},
+	infinitesubmithelp: [
+		`/infinitesubmit [data] - Submit a Pokémon for the Infinite battle mode.`,
+	],
+
 	uploadreplay: 'savereplay',
 	savereplay(target, room, user, connection) {
 		if (!room?.battle) throw new Chat.ErrorMessage(this.tr`You can only save replays for battles.`);

@@ -84,6 +84,14 @@ export const detectMaxEvsFormat = (format: string): boolean => {
   return gen !== 6;
 };
 
+export const detectDisguiseFormat = (format: string): boolean => {
+  if (!format) {
+    return false;
+  }
+
+  return format.toLowerCase().includes('disguise');
+};
+
 export const getMaxStatEv = (format: string | number): number => (
   typeof format === 'string' && format.toLowerCase().includes('letsgo') ? 200 : 252
 );

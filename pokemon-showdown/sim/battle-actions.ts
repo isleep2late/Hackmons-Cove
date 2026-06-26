@@ -155,6 +155,15 @@ export class BattleActions {
 		}
 		pokemon.abilityState = this.battle.initEffectState({ id: pokemon.ability, target: pokemon });
 		pokemon.itemState = this.battle.initEffectState({ id: pokemon.item, target: pokemon });
+		this.battle.runEvent('BeforeSwitchIn', pokemon);
+		if (this.battle.gameType === 'rotation' && (oldPosition === 1 || oldPosition === 2)) {
+		} else {
+			if (sourceEffect) {
+				this.battle.add(isDrag ? 'drag' : 'switch', pokemon, pokemon.getFullDetails, `[from] ${sourceEffect}`);
+			} else {
+				this.battle.add(isDrag ? 'drag' : 'switch', pokemon, pokemon.getFullDetails);
+			}
+		}
 		if (pokemon.set.phType) {
 			const types = pokemon.set.phType.split('/').filter((t: string) => this.battle.dex.types.isName(t));
 			if (types.length) {
@@ -167,15 +176,6 @@ export class BattleActions {
 		if (pokemon.set.startStatus && !pokemon.m.phnnStartStatusApplied) {
 			pokemon.m.phnnStartStatusApplied = true;
 			pokemon.setStatus(pokemon.set.startStatus, pokemon, null, true);
-		}
-		this.battle.runEvent('BeforeSwitchIn', pokemon);
-		if (this.battle.gameType === 'rotation' && (oldPosition === 1 || oldPosition === 2)) {
-		} else {
-			if (sourceEffect) {
-				this.battle.add(isDrag ? 'drag' : 'switch', pokemon, pokemon.getFullDetails, `[from] ${sourceEffect}`);
-			} else {
-				this.battle.add(isDrag ? 'drag' : 'switch', pokemon, pokemon.getFullDetails);
-			}
 		}
 		if (isDrag && this.battle.gen === 2) pokemon.draggedIn = this.battle.turn;
 		pokemon.previouslySwitchedIn++;

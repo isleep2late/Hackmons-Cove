@@ -516,6 +516,17 @@ export const Teams = new class Teams {
 			set.teraType = aggressive ? line.replace(/[^a-zA-Z0-9]/g, '') : line;
 		} else if (line === 'Gigantamax: Yes') {
 			set.gigantamax = true;
+		} else if (line.startsWith('Status: ')) {
+			const raw = line.slice(8).trim().toLowerCase();
+			const STATUS_MAP: Record<string, string> = {
+				par: 'par', paralysis: 'par', paralyzed: 'par',
+				brn: 'brn', burn: 'brn', burned: 'brn',
+				slp: 'slp', sleep: 'slp', asleep: 'slp',
+				psn: 'psn', poison: 'psn', poisoned: 'psn',
+				tox: 'tox', toxic: 'tox', badlypoison: 'tox', badlypoisoned: 'tox',
+				frz: 'frz', freeze: 'frz', frozen: 'frz',
+			};
+			if (STATUS_MAP[raw]) set.startStatus = STATUS_MAP[raw];
 		} else if (line.startsWith('EVs: ')) {
 			line = line.slice(5);
 			const evLines = line.split('/');

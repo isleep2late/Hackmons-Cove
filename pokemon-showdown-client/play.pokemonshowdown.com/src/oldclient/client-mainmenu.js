@@ -927,7 +927,8 @@
 			for (var i = 0; i < modes.length; i++) {
 				if (modes[i].id === prefix) { name = modes[i].name; break; }
 			}
-			return '<span class="cdmodewrap"><p><label class="label">Generation:</label> <button class="select cdmodeselect" name="cdMode">' + name + '</button></p></span>';
+			var infiniteChecked = (format.indexOf('Infinite Mod') >= 0 || format.indexOf('infinitemod') >= 0) ? ' checked' : '';
+			return '<span class="cdmodewrap"><p><label class="label">Generation:</label> <button class="select cdmodeselect" name="cdMode">' + name + '</button></p><p><label class="checkbox"><input type="checkbox" name="infiniteMode"' + infiniteChecked + ' /> <abbr title="When a player runs out of Pokémon they can submit a new one instead of losing">Infinite Mod</abbr></label></p></span>';
 		},
 		cdMode: function (i, button) {
 			var self = this;
@@ -938,6 +939,7 @@
 			if (idx < 0) return;
 			var suffix = format.slice(idx + 15);
 			app.addPopup(window.CdModePopup, { format: format, sourceEl: button, onselect: function (modeId) {
+				var infiniteChecked = $form.find('input[name=infiniteMode]').is(':checked');
 				var newFormat = modeId + 'customdisguises' + suffix;
 				$fmtBtn.val(newFormat).html(BattleLog.escapeFormat(newFormat));
 				self.curFormat = newFormat;
@@ -945,6 +947,7 @@
 				if ($teamButton.length) $teamButton.replaceWith(self.renderTeams(newFormat));
 				var $cdwrap = $form.find('.cdmodewrap');
 				if ($cdwrap.length) $cdwrap.replaceWith(self.renderCdModeChallenge(newFormat));
+				if (infiniteChecked) $form.find('input[name=infiniteMode]').prop('checked', true);
 			} });
 		},
 
@@ -1026,6 +1029,16 @@
 			var customRules = ('' + ($pmWindow.find('input[name=customRules]').val() || '')).trim();
 			if (customRules) {
 				format += (format.includes('@@@') ? ', ' : '@@@') + customRules;
+			}
+
+			var atIdx = format.indexOf('@@@');
+			if (atIdx >= 0) {
+				var cleanRules = format.slice(atIdx + 3).split(',').map(function (r) { return r.trim(); }).filter(function (r) { return r.toLowerCase().replace(/\s/g, '') !== 'infinitemod'; }).join(', ');
+				format = cleanRules ? format.slice(0, atIdx + 3) + cleanRules : format.slice(0, atIdx);
+			}
+			var infiniteMode = $pmWindow.find('input[name=infiniteMode]').is(':checked');
+			if (infiniteMode) {
+				format += (format.includes('@@@') ? ', ' : '@@@') + 'Infinite Mod';
 			}
 
 			var bestOf = $pmWindow.find('input[name=bestof]').is(':checked');
@@ -1481,8 +1494,10 @@
 				app.rooms[''].curTeamIndex = -1;
 				var $teamButton = $form.find('button[name=team]');
 				if ($teamButton.length) $teamButton.replaceWith(app.rooms[''].renderTeams(format));
+				var infiniteWasChecked = $form.find('input[name=infiniteMode]').is(':checked');
 				var $cdwrap = $form.find('.cdmodewrap');
 				if ($cdwrap.length) $cdwrap.replaceWith(app.rooms[''].renderCdModeChallenge(format));
+				if (infiniteWasChecked) $form.find('input[name=infiniteMode]').prop('checked', true);
 
 				var $bestOfCheckbox = $form.find('input[name=bestof]');
 				var $bestOfValueInput = $form.find('input[name=bestofvalue]');

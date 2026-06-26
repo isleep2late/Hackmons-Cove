@@ -14,7 +14,7 @@ import {
 import { type ShowdexSettings } from '@showdex/interfaces/app';
 import { type CalcdexBattleState, type CalcdexPlayerKey, CalcdexPlayerKeys as AllPlayerKeys } from '@showdex/interfaces/calc';
 import { logger } from '@showdex/utils/debug';
-import { setPhnnCalcContext } from '@showdex/phnn';
+import { detectDisguiseFormat, setPhnnCalcContext } from '@showdex/phnn';
 import { getGenDexForFormat } from '@showdex/utils/dex';
 import { createSmogonField } from './createSmogonField';
 import { createSmogonMove } from './createSmogonMove';
@@ -186,6 +186,11 @@ export const calcSmogonMatchup = (
       || (operatingMode === 'standalone' && !settings?.honkdex?.includeEotDamage),
   };
 
+  if (detectDisguiseFormat(format)) {
+    matchup.damageRange = '???';
+    return matchup;
+  }
+
   const smogonField = createSmogonField(format, gameType, field, player, opponent, allPlayers);
 
   matchup.attacker = createSmogonPokemon(format, gameType, playerPokemon, playerMove, opponentPokemon);
@@ -195,7 +200,27 @@ export const calcSmogonMatchup = (
     hitBasePowers: showdexMods.hitBasePowers,
   }] = createSmogonMove(format, playerPokemon, playerMove, opponentPokemon, field);
 
-  // pretty much only used for Beat Up lmao
+  {
+    const r1 = matchup.attacker?.rawStats;
+    const r2 = matchup.defender?.rawStats;
+    if (r1 && r2) {
+      const lf = Math.floor((2 * (matchup.attacker.level ?? 100)) / 5 + 2);
+      const maxOff = Math.max(r1.atk, r1.spa);
+      if (lf * 300 * maxOff > 4294967295) {
+        const k = Math.ceil(lf * 300 * maxOff / 4294967295);
+        const sc = (v: number) => Math.max(1, Math.round(v / k));
+        r1.atk = sc(r1.atk);
+        r1.def = sc(r1.def);
+        r1.spa = sc(r1.spa);
+        r1.spd = sc(r1.spd);
+        r2.atk = sc(r2.atk);
+        r2.def = sc(r2.def);
+        r2.spa = sc(r2.spa);
+        r2.spd = sc(r2.spd);
+      }
+    }
+  }
+
   showdexMods.strikes = determineMoveStrikes(
     format,
     playerMove,
