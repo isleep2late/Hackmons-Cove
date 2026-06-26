@@ -1402,10 +1402,15 @@ export const commands: Chat.ChatCommands = {
 				success = await updateserver(this, Config.privatecodepath);
 			}
 			success = success && await updateserver(this, FS.ROOT_PATH);
-			this.addGlobalModAction(`${user.name} used /updateserver${target === 'public' ? ' public' : ''}`);
 		}
 
-		this.sendReply(success ? `DONE` : `FAILED, old changes restored.`);
+		if (!success) {
+			this.sendReply(`FAILED, old changes restored.`);
+			this.addGlobalModAction(`${user.name} used /updateserver - but something failed.`);
+		} else {
+			this.sendReply(`DONE`);
+			this.addGlobalModAction(`${user.name} used /updateserver${target === 'public' ? ' public' : ''}`);
+		};
 
 		Monitor.updateServerLock = false;
 	},
