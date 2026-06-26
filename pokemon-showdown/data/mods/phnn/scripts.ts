@@ -4,7 +4,6 @@ export const Scripts: ModdedBattleScriptsData = {
 
 	init() {
 
-		// Enable all battle mechanics (Mega, Z-moves, Dynamax, etc.)
 		for (const id in this.data.Items) {
 			const item = this.data.Items[id];
 			if (item.megaStone) {
@@ -12,6 +11,16 @@ export const Scripts: ModdedBattleScriptsData = {
 			}
 			if (item.zMove || item.zMoveType) {
 				item.isNonstandard = null;
+			}
+		}
+
+		for (const id in this.data.Moves) {
+			const move = this.data.Moves[id];
+			if (id.startsWith('gmax') || move.isMax) {
+				move.isNonstandard = null;
+			}
+			if (id.startsWith('gmax')) {
+				move.isMax = false;
 			}
 		}
 
@@ -48,6 +57,7 @@ export const Scripts: ModdedBattleScriptsData = {
 
 		getMoves(lockedMove?: ID | null, restrictData?: boolean) {
 			const moves = Object.getPrototypeOf(this).getMoves.call(this, lockedMove, restrictData);
+			if (!this.volatiles.dynamax) return moves;
 			const isGmax = this.species.forme === 'Gmax' || this.baseSpecies.forme === 'Gmax' || this.gigantamax;
 			const canGmax = this.species.canGigantamax || (this.species.changesFrom ? this.battle.dex.species.get(this.species.changesFrom).canGigantamax : null);
 			if (isGmax && canGmax) {
