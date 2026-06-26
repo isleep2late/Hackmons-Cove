@@ -1027,6 +1027,11 @@ export class RoomBattle extends RoomGame<RoomBattlePlayer> {
 	tiebreak() {
 		void this.stream.write(`>tiebreak`);
 	}
+	infiniteSubmit(user: User, data: string) {
+		const player = this.playerTable[user.id];
+		if (!player) return;
+		void this.stream.write(`>infinite ${player.slot} ${data}`);
+	}
 	override forfeit(user: User | string, message = '') {
 		if (typeof user !== 'string') user = user.id;
 		else user = toID(user);

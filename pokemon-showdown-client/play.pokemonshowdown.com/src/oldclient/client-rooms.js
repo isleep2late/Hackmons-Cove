@@ -226,6 +226,7 @@
 			var buf = '<div class="pad"><button class="button" style="float:right;font-size:10pt;margin-top:3px" name="close"><i class="fa fa-times"></i> Close</button><div class="roomlist"><p><button class="button" name="refresh"><i class="fa fa-refresh"></i> Refresh</button> <span style="' + Dex.getPokemonIcon('meloetta-pirouette') + ';display:inline-block;vertical-align:middle" class="picon" title="Meloetta is PS\'s mascot! The Pirouette forme is Fighting-type, and represents our battles."></span></p>';
 
 			buf += '<p><label class="label">Format:</label><button class="select formatselect" name="selectFormat">(All formats)</button></p>';
+			buf += '<span class="cdmodewrap-watch"></span>';
 			buf += '<label>Minimum Elo: <select name="elofilter" class="button"><option value="none">None</option><option value="1000">1000</option><option value="1100">1100</option><option value="1300">1300</option><option value="1500">1500</option><option value="1700">1700</option><option value="1900">1900</option></select></label>';
 			buf += '<p><form class="search"><input type="text" name="prefixsearch" class="textbox" value="' + BattleLog.escapeHTML(this.usernamePrefix) + '" placeholder="username prefix"/><button type="submit" class="button">Search</button></form></p>';
 			buf += '<div class="list"><p>Loading...</p></div>';
@@ -245,15 +246,51 @@
 				return;
 			}
 			var self = this;
-			app.addPopup(FormatPopup, { format: format, sourceEl: button, selectType: 'watch', onselect: function (newFormat) {
+			app.addPopup(FormatPopup, { format: this.format, sourceEl: button, selectType: 'watch', onselect: function (newFormat) {
 				self.changeFormat(newFormat);
 			} });
 		},
 		changeFormat: function (format) {
 			this.format = format;
 			this.data = null;
+			this.$('button[name=selectFormat]').html(format ? BattleLog.escapeFormat(format) : '(All formats)');
+			this.$('.cdmodewrap-watch').html(this.renderCdModeWatch(format));
 			this.update();
 			this.refresh();
+		},
+		renderCdModeWatch: function (format) {
+			if (!format || format.indexOf('customdisguises') < 0) return '';
+			var idx = format.indexOf('customdisguises');
+			var prefix = format.slice(0, idx);
+			var modes = [
+				{ id: 'gen9champions', name: 'Champions' },
+				{ id: 'gen9nonerfs', name: 'No Nerfs' },
+				{ id: 'gen9', name: 'Gen 9' },
+				{ id: 'gen8', name: 'Gen 8' },
+				{ id: 'gen8bdsp', name: 'BDSP' },
+				{ id: 'gen7', name: 'Gen 7' },
+				{ id: 'gen7letsgo', name: "Let's Go" },
+				{ id: 'gen6', name: 'Gen 6' },
+				{ id: 'gen5', name: 'Gen 5' },
+				{ id: 'gen4', name: 'Gen 4' },
+				{ id: 'gen3', name: 'Gen 3' },
+				{ id: 'gen2', name: 'Gen 2' },
+				{ id: 'gen1', name: 'Gen 1' }
+			];
+			var name = prefix;
+			for (var i = 0; i < modes.length; i++) {
+				if (modes[i].id === prefix) { name = modes[i].name; break; }
+			}
+			return '<p><label class="label">Generation:</label> <button class="select" name="cdModeWatch">' + BattleLog.escapeHTML(name) + '</button></p>';
+		},
+		cdModeWatch: function (i, button) {
+			var self = this;
+			var format = this.format || '';
+			app.addPopup(window.CdModePopup, { format: format, sourceEl: button, onselect: function (modeId) {
+				var idx = format.indexOf('customdisguises');
+				var suffix = idx >= 0 ? format.slice(idx + 15) : '';
+				self.changeFormat(modeId + 'customdisguises' + suffix);
+			} });
 		},
 		focus: function (e) {
 			if (e && $(e.target).is('input')) return;

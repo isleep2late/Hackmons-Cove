@@ -81,11 +81,11 @@ export const calcPokemonStat = (
     ] = PokemonNatureBoosts[nature];
 
     if (plus && stat === plus) {
-      return tr(tr(value * 110, 16) / 100);
+      return tr(value * 1.1);
     }
 
     if (minus && stat === minus) {
-      return tr(tr(value * 90, 16) / 100);
+      return tr(value * 0.9);
     }
   }
 

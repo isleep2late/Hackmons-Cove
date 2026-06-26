@@ -174,7 +174,7 @@
 			var margin = 0;
 			if (sideBuf) {
 				if (app.curSideRoom) {
-					margin = app.curSideRoom.leftWidth - 144;
+					margin = app.curSideRoom.leftWidth - 258;
 					buf += '<ul class="siderooms" style="float:none;margin-left:' + margin + 'px">' + sideBuf + '</ul>';
 				} else {
 					buf += '<ul>' + sideBuf + '</ul>';

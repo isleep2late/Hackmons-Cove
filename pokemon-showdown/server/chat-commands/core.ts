@@ -185,7 +185,8 @@ export const commands: Chat.ChatCommands = {
 		try {
 			gitVersion = (await ProcessManager.exec(['git', 'rev-parse', '--short', 'HEAD'])).stdout.trim();
 		} catch {}
-		this.sendReplyBox(this.tr`Server version: <b>${version}${gitVersion ? ` (commit ${gitVersion})` : ''}</b>`);
+		this.sendReplyBox(this.tr`Server version: <b>${version}` +
+			`${gitVersion ? ` (commit <a href="https://github.com/smogon/pokemon-showdown/commits/${gitVersion}">${gitVersion}</a>)` : ''}</b>`);
 	},
 	versionhelp: [
 		`/version - Get the current server version.`,
@@ -1147,6 +1148,15 @@ export const commands: Chat.ChatCommands = {
 	},
 	undohelp: [
 		`/undo - Reverts the last move of the player in the current game, if it supports it.`,
+	],
+
+	infinitesubmit(target, room, user) {
+		room = this.requireRoom();
+		if (!room.battle) throw new Chat.ErrorMessage(this.tr`This isn't a battle room.`);
+		room.battle.infiniteSubmit(user, target);
+	},
+	infinitesubmithelp: [
+		`/infinitesubmit [data] - Submit a Pokémon for the Infinite battle mode.`,
 	],
 
 	uploadreplay: 'savereplay',

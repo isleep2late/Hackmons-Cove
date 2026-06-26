@@ -141,6 +141,29 @@
 			this.tabComplete.reset();
 			this.chatHistory.push(text);
 			text = this.parseCommand(text);
+			if (this.infiniteWaiting > 0) {
+				this.infiniteWaiting--;
+				var submitTxt = text.trim();
+				var encoded = submitTxt.replace(/\r?\n/g, '\\n');
+				if (submitTxt === 'defer') {
+					this.send('/infinitesubmit defer');
+				} else if (submitTxt.startsWith('/infinitesubmit')) {
+					this.send(encoded);
+				} else {
+					this.send('/infinitesubmit ' + encoded);
+				}
+				this.$chatbox.val('');
+				if (this.infiniteWaiting > 0 && this.infiniteTotalSlots) {
+					var submitted = this.infiniteTotalSlots - this.infiniteWaiting;
+					var ordinals = ['second', 'third', 'fourth', 'fifth'];
+					var ordinal = ordinals[submitted - 1] || (submitted + 1) + 'th';
+					this.$chatbox.attr('placeholder', 'Paste a ' + ordinal + ' set here — Shift+Enter for newline, Enter to submit…');
+				} else {
+					this.$chatbox.attr('placeholder', '');
+				}
+				this.$chatbox.trigger('keyup');
+				return;
+			}
 			if (
 				this.battle && this.battle.ignoreSpects &&
 				app.user.get('userid') !== this.battle.p1.id && app.user.get('userid') !== this.battle.p2.id &&

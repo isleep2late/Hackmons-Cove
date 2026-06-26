@@ -225,6 +225,13 @@
 					this.battle.stepQueue.push(logLine);
 				} else if (logLine.substr(0, 6) === '|chat|' || logLine.substr(0, 3) === '|c|' || logLine.substr(0, 4) === '|c:|' || logLine.substr(0, 9) === '|chatmsg|' || logLine.substr(0, 10) === '|inactive|') {
 					this.battle.instantAdd(logLine);
+				} else if (logLine.substr(0, 10) === '|infinite|') {
+					var infParts = logLine.substr(10).split('|');
+					var infSideId = infParts[0];
+					var infSlots = parseInt(infParts[1]) || 1;
+					if (infSideId === this.side) {
+						this.showInfiniteSubmit(infSlots);
+					}
 				} else {
 					this.battle.stepQueue.push(logLine);
 				}
@@ -246,6 +253,49 @@
 				$messages.show();
 			}
 		},
+		showInfiniteSubmit: function (slotsNeeded) {
+			var self = this;
+			this.infiniteWaiting = slotsNeeded;
+			this.infiniteTotalSlots = slotsNeeded;
+			var myPokemon = this.battle.myPokemon || [];
+			var teamPickerHTML = '';
+			for (var i = 0; i < myPokemon.length; i++) {
+				var p = myPokemon[i];
+				if (!p || !p.fainted) continue;
+				var picon = '<span class="picon" style="' + Dex.getPokemonIcon(p) + '"></span>';
+				teamPickerHTML += '<button class="button" name="infiniteExisting" value="' + (i + 1) + '">' + picon + BattleLog.escapeHTML(p.name) + '</button> ';
+			}
+			var html = '<div class="infinite-submit" style="padding:8px">';
+			if (slotsNeeded > 1) {
+				html += '<p>Or type <code>defer</code> to skip a slot.</p>';
+			}
+			if (teamPickerHTML) {
+				html += '<p><strong>Quick-revive a fainted team member:</strong></p>';
+				html += '<p>' + teamPickerHTML + '</p>';
+			}
+			html += '</div>';
+			this.$controls.html(html);
+			this.$controls.find('[name=infiniteExisting]').on('click', function () {
+				var pos = $(this).val();
+				self.infiniteWaiting = Math.max(0, (self.infiniteWaiting || 1) - 1);
+				self.send('/infinitesubmit existing ' + pos);
+				if (self.infiniteWaiting > 0) {
+					var submitted = (self.infiniteTotalSlots || 1) - self.infiniteWaiting;
+					var ordinals = ['second', 'third', 'fourth', 'fifth'];
+					var ordinal = ordinals[submitted - 1] || (submitted + 1) + 'th';
+					self.$controls.html('<p>Revived! Now paste a ' + ordinal + ' Pokémon set in the chat — Shift+Enter for newline, Enter to submit.</p>');
+					if (self.$chatbox) self.$chatbox.attr('placeholder', 'Paste a ' + ordinal + ' set here — Shift+Enter for newline, Enter to submit…');
+				} else {
+					self.$controls.html('<p>Reviving Pokémon… waiting for battle to continue.</p>');
+					if (self.$chatbox) self.$chatbox.attr('placeholder', '');
+				}
+			});
+			if (this.$chatbox) {
+				this.$chatbox.attr('placeholder', 'Paste a Pokémon set here — Shift+Enter for newline, Enter to submit…');
+				this.$chatbox.focus();
+			}
+		},
+
 		setHardcoreMode: function (mode) {
 			this.battle.setHardcoreMode(mode);
 			var id = '#' + this.el.id + ' ';
