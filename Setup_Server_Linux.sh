@@ -125,6 +125,7 @@ cat > "$TOOLS/client-override.js" <<'JS'
 		var isHttps = loc.protocol === 'https:';
 		var port = loc.port ? Number(loc.port) : (isHttps ? 443 : 80);
 		var hostport = loc.host; // includes :port for local http access
+		Config.testclient = true; // skip PS's cross-origin storage iframe (never loads when self-hosted -> "Loading client..." hang)
 		Config.routes = Config.routes || {};
 		Config.routes.root = hostport;
 		Config.routes.client = hostport;
