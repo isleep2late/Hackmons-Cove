@@ -1,19 +1,4 @@
 #!/usr/bin/env bash
-# ============================================================================
-#  PURE HACKMONS / Pokémon Showdown — ONE-CLICK SELF-HOST  (macOS)
-#
-#  Double-click this file in Finder. It opens Terminal and, start to finish:
-#    1. Downloads a private copy of Node.js if needed (no admin).
-#    2. Builds the game server and the web client.
-#    3. Points the client at THIS Mac (connects to your own server).
-#    4. Downloads cloudflared and opens a FREE public https URL (trycloudflare).
-#    5. Prints the URL. Share it. Keep the window open to stay live.
-#
-#  Press Ctrl+C to stop everything. Safe to re-run anytime.
-#  First time: if macOS blocks it, right-click → Open, or run:
-#       chmod +x Setup_Server_macOS.command
-#  Optional knobs (env vars):  PHNN_GAME_PORT (8000)  PHNN_CLIENT_PORT (8080)
-# ============================================================================
 set -uo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
@@ -47,7 +32,7 @@ case "$OS" in
 esac
 case "$ARCH" in
   x86_64|amd64) NODE_ARCH="x64"; CF_ARCH="amd64";;
-  arm64|aarch64) NODE_ARCH="arm64"; CF_ARCH="arm64";;
+  arm64|aarch64) NODE_ARCH="arm64"; CF_ARCH="amd64";;
   *) NODE_ARCH="x64"; CF_ARCH="amd64";;
 esac
 
@@ -81,8 +66,6 @@ c_cyan "[1/4] Building the game server (npm install + node build)… this can ta
 ( cd pokemon-showdown && npm install --no-audit --no-fund && node build ) || die "Game-server build failed (see output above)."
 echo
 
-# point the client's data cache at OUR built server (it has the PHNN mod); otherwise the
-# client build clones a fresh upstream Showdown (no 'phnn' mod) and crashes on Dex.mod('phnn').
 c_cyan "      linking the client data cache to the PHNN server (prevents an upstream re-clone)…"
 mkdir -p pokemon-showdown-client/caches
 PS_CACHE="$HERE/pokemon-showdown-client/caches/pokemon-showdown"
@@ -91,8 +74,6 @@ if [ ! -e "$PS_CACHE/data/mods/phnn" ]; then
   ln -s ../../pokemon-showdown "$PS_CACHE"
 fi
 
-# the client build (build-tools/update) requires config/routes.json, gitignored and absent on fresh
-# clones. The runtime override (step 3) replaces client/root/replays with the page origin.
 if [ ! -f pokemon-showdown-client/config/routes.json ]; then
   mkdir -p pokemon-showdown-client/config
   printf '%s\n' '{ "root": "pokemonshowdown.com", "client": "localhost", "resourceServer": "play.pokemonshowdown.com", "dex": "dex.pokemonshowdown.com", "replays": "localhost", "users": "pokemonshowdown.com/users", "teams": "teams.pokemonshowdown.com" }' > pokemon-showdown-client/config/routes.json
@@ -115,6 +96,7 @@ cat > "$TOOLS/client-override.js" <<'JS'
 		var isHttps = loc.protocol === 'https:';
 		var port = loc.port ? Number(loc.port) : (isHttps ? 443 : 80);
 		var hostport = loc.host;
+		Config.testclient = true;
 		Config.routes = Config.routes || {};
 		Config.routes.root = hostport;
 		Config.routes.client = hostport;

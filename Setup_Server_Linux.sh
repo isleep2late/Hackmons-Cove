@@ -1,20 +1,4 @@
 #!/usr/bin/env bash
-# ============================================================================
-#  PURE HACKMONS / Pokémon Showdown — ONE-CLICK SELF-HOST  (Linux & macOS)
-#
-#  What it does, start to finish, from a fresh clone of this repo:
-#    1. Downloads a private copy of Node.js if you don't have one (no admin).
-#    2. Builds the game server and the web client.
-#    3. Points the client at THIS machine (so it connects to your own server).
-#    4. Downloads cloudflared and opens a FREE public https URL (trycloudflare).
-#    5. Prints the URL. Share it with anyone. Keep the window open to stay live.
-#
-#  Just run it:  double-click it (choose "Run in Terminal"), or in a terminal:
-#       ./Setup_Server_Linux.sh
-#  Press Ctrl+C to stop everything. Safe to re-run anytime.
-#
-#  Optional knobs (env vars):  PHNN_GAME_PORT (8000)  PHNN_CLIENT_PORT (8080)
-# ============================================================================
 set -uo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
@@ -33,14 +17,12 @@ c_yellow(){ printf '\033[1;33m%s\033[0m\n' "$*"; }
 c_red(){ printf '\033[1;31m%s\033[0m\n' "$*"; }
 die(){ c_red "ERROR: $*"; echo; read -r -p "Press Enter to close this window." _; exit 1; }
 
-# --- download helper: curl or wget ---
-dl(){ # dl <url> <outfile>
+dl(){
   if command -v curl >/dev/null 2>&1; then curl -fL --retry 3 "$1" -o "$2"
   elif command -v wget >/dev/null 2>&1; then wget -q "$1" -O "$2"
   else die "Need 'curl' or 'wget' installed to download Node/cloudflared."; fi
 }
 
-# --- detect OS + CPU arch ---
 OS="$(uname -s 2>/dev/null || echo unknown)"
 ARCH="$(uname -m 2>/dev/null || echo x86_64)"
 case "$OS" in
@@ -60,7 +42,6 @@ c_cyan "   Pure Hackmons — One-Click Self-Host  ($NODE_OS/$NODE_ARCH)"
 c_cyan "=============================================================="
 echo
 
-# ---------- 0. Node.js ----------
 have_node(){ command -v node >/dev/null 2>&1 && [ "$(node -p 'parseInt(process.versions.node,10)' 2>/dev/null || echo 0)" -ge 16 ]; }
 [ -x "$NODE_DIR/bin/node" ] && export PATH="$NODE_DIR/bin:$PATH"
 if ! have_node; then
@@ -76,20 +57,15 @@ have_node || die "Node.js is still unavailable."
 c_cyan "      Node $(node -v)  |  npm $(npm -v)"
 echo
 
-# ---------- server config.js (fresh clones may only ship the example) ----------
 if [ ! -f pokemon-showdown/config/config.js ]; then
   cp pokemon-showdown/config/config-example.js pokemon-showdown/config/config.js 2>/dev/null \
     && c_yellow "      created pokemon-showdown/config/config.js from the example"
 fi
 
-# ---------- 1. build the game server ----------
 c_cyan "[1/4] Building the game server (npm install + node build)… this can take a few minutes"
 ( cd pokemon-showdown && npm install --no-audit --no-fund && node build ) || die "Game-server build failed (see output above)."
 echo
 
-# ---------- point the client's data cache at OUR built server (it has the PHNN mod) ----------
-# Without this, the client build clones a FRESH upstream Showdown into caches/ — which has
-# no 'phnn' mod, so building the teambuilder tables crashes on Dex.mod('phnn').
 c_cyan "      linking the client data cache to the PHNN server (prevents an upstream re-clone)…"
 mkdir -p pokemon-showdown-client/caches
 PS_CACHE="$HERE/pokemon-showdown-client/caches/pokemon-showdown"
@@ -98,20 +74,15 @@ if [ ! -e "$PS_CACHE/data/mods/phnn" ]; then
   ln -s ../../pokemon-showdown "$PS_CACHE"
 fi
 
-# the client build (build-tools/update) requires config/routes.json, which is gitignored and so
-# absent on fresh clones. Our runtime override (step 3) replaces client/root/replays with the page
-# origin, so these are placeholders; resourceServer stays the official CDN so sprites still load.
 if [ ! -f pokemon-showdown-client/config/routes.json ]; then
   mkdir -p pokemon-showdown-client/config
   printf '%s\n' '{ "root": "pokemonshowdown.com", "client": "localhost", "resourceServer": "play.pokemonshowdown.com", "dex": "dex.pokemonshowdown.com", "replays": "localhost", "users": "pokemonshowdown.com/users", "teams": "teams.pokemonshowdown.com" }' > pokemon-showdown-client/config/routes.json
 fi
 
-# ---------- 2. build the web client ----------
 c_cyan "[2/4] Building the web client (npm install + build)…"
 ( cd pokemon-showdown-client && npm install --no-audit --no-fund && node build full ) || die "Client build failed (see output above)."
 echo
 
-# ---------- 3. point the client at THIS server ----------
 c_cyan "[3/4] Pointing the client at this machine (origin-relative connect)…"
 CFG="pokemon-showdown-client/config/config.js"
 [ -f "$CFG" ] || cp pokemon-showdown-client/config/config-example.js "$CFG" 2>/dev/null || true
@@ -124,13 +95,13 @@ cat > "$TOOLS/client-override.js" <<'JS'
 		var loc = window.location;
 		var isHttps = loc.protocol === 'https:';
 		var port = loc.port ? Number(loc.port) : (isHttps ? 443 : 80);
-		var hostport = loc.host; // includes :port for local http access
+		var hostport = loc.host;
+		Config.testclient = true;
 		Config.routes = Config.routes || {};
 		Config.routes.root = hostport;
 		Config.routes.client = hostport;
 		Config.routes.replays = hostport;
 		Config.routes.users = hostport + '/users';
-		// Sprites / sounds / dex data still come from the official CDN:
 		if (!Config.routes.resourceServer) Config.routes.resourceServer = 'play.pokemonshowdown.com';
 		if (!Config.routes.dex) Config.routes.dex = 'dex.pokemonshowdown.com';
 		if (!Config.routes.teams) Config.routes.teams = 'teams.pokemonshowdown.com';
@@ -156,7 +127,6 @@ node "$TOOLS/merge-config.js" "$CFG" "$TOOLS/client-override.js" || die "Could n
 echo "      done"
 echo
 
-# ---------- 4. cloudflared + launch everything ----------
 CF="$TOOLS/cloudflared"
 if [ ! -x "$CF" ]; then
   c_cyan "[4/4] Downloading cloudflared (free public-tunnel tool)…"
@@ -169,7 +139,6 @@ if [ ! -x "$CF" ]; then
   chmod +x "$CF" 2>/dev/null || true
 fi
 
-# stop anything we left running on these ports from a previous run
 stop_port(){ local pids; pids="$(lsof -ti tcp:"$1" 2>/dev/null || true)"; [ -n "$pids" ] && kill $pids 2>/dev/null || true; }
 stop_port "$GAME_PORT"; stop_port "$FRONT_PORT"; sleep 1
 
@@ -183,7 +152,6 @@ FRONT_PID=$!
 cleanup(){ echo; c_yellow "Shutting down server + tunnel…"; kill "${TUNNEL_PID:-0}" "$FRONT_PID" "$GAME_PID" 2>/dev/null || true; }
 trap cleanup EXIT INT TERM
 
-# wait for the web server to answer
 for _ in $(seq 1 40); do curl -s "http://localhost:$FRONT_PORT" >/dev/null 2>&1 && break; sleep 1; done
 
 c_cyan "      opening Cloudflare tunnel…"
