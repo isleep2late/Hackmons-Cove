@@ -1911,7 +1911,6 @@ export class GlobalRoomState {
 		if (devRoom) {
 			devRoom.add(crashMessage).update();
 		} else {
-			Rooms.lobby?.add(crashMessage).update();
 			Rooms.get('staff')?.add(crashMessage).update();
 		}
 		if (privateCrashMessage) {
