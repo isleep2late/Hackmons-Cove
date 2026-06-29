@@ -20,12 +20,11 @@
 - [Introduction](#introduction)
 - [Repository Structure](#repository-structure)
 - [Installation](#installation)
-  - [Prerequisites](#prerequisits)
+  - [Easiest: One-Click Setup](#-easiest-one-click-setup-recommended)
+  - [Prerequisites](#prerequisites)
   - [Option A — Local](#option-a--local)
   - [Option B — Cloudflare](#option-b--cloudflare)
   - [Option C — Domain](#option-c--domain)
-  - [Keeping Up with Upstream Showdown]
-  - [Summary: files you need to edit]
 - [Contributors](#contributors)
 - [Additional Information](#additional-information)
 
@@ -61,8 +60,9 @@ PureHackmonsNoNerfs/
 │   ├── sim/
 │   └── ...                        # All other upstream showdown files
 ├── pokemon-showdown-client/       # The Pokémon Showdown web client (now part of this repo)
-├── showdown-cloudflare.*          # Start Cloudflare tunnel (.sh / .bat / .command)
-├── type_node_pokemon-showdown.*   # Start the showdown server (.sh / .bat / .command)
+├── Setup_Server_Linux.sh          # One-click: build everything + free public tunnel (Linux)
+├── Setup_Server_macOS.command     # One-click setup + public tunnel (macOS)
+├── Setup_Server_Windows.bat       # One-click setup + public tunnel (Windows)
 └── README.md
 ```
 
@@ -73,13 +73,53 @@ This repo bundles the Pokémon Showdown **server** and **web client** into a sin
 | `pokemon-showdown/` | [smogon/pokemon-showdown](https://github.com/smogon/pokemon-showdown) | The game server. Our PHNN mod (`data/mods/phnn/`) and custom `config/formats.ts` are applied on top. |
 | `pokemon-showdown-client/` | [smogon/pokemon-showdown-client](https://github.com/smogon/pokemon-showdown-client) | The official Showdown web client, now included directly in this repo (as a regular folder, not a submodule) for PHNN-specific client/UI work. |
 
-Both live as regular folders in this repository. If you fork or clone this repo, see [**MAINTENANCE.md**](MAINTENANCE.md) for how to pull upstream updates.
+Both live as regular folders in this repository. If you fork or clone this repo, see [Keeping Up with Upstream Showdown](#keeping-up-with-upstream-showdown) for how to pull upstream updates.
 
-> **The leftovers-again AI bot has been removed** from this repo — the server now runs a different, improved bot. Leftovers-again may return later as its **own separate repository**. If you still want the old bot code in the meantime, contact **isleep2late** (see [Contributors](#contributors) or the [Discord](https://discord.gg/mTwgNNtE6a)).
+> **The leftovers-again AI bot has been removed** from this repo — the server now runs a different, improved bot. Leftovers-again may return later as its **own separate repository**. If you still want the old bot code in the meantime, contact **isleep2late** (see [Contributors](#contributors) or the [Discord](https://discord.gg/hackmons)).
 
 ---
 
 ## Installation
+
+### 🚀 Easiest: One-Click Setup (recommended)
+
+Want your own server online in minutes with **zero setup**? Just:
+
+1. **Download the code** — grab this repo as a ZIP and unzip it (or `git clone` it).
+2. **Double-click the file for your operating system:**
+
+   | OS | Double-click |
+   |----|--------------|
+   | **Windows** | `Setup_Server_Windows.bat` |
+   | **macOS** | `Setup_Server_macOS.command` |
+   | **Linux** | `Setup_Server_Linux.sh` |
+
+That's it. The first run downloads everything it needs (a private copy of Node.js and
+cloudflared — **no admin rights, nothing installed system-wide**), builds the game
+server **and** the web client, and opens a **free public link**:
+
+```
+YOUR SERVER IS LIVE
+Public (share this):  https://random-words-here.trycloudflare.com
+On this computer:      http://localhost:8080
+```
+
+Share the `https://…trycloudflare.com` link — anyone who opens it plays on your
+server. **Keep the window open** to stay online; press **Ctrl+C** (or close the window
+on Windows) to stop. Re-running makes a fresh link each time.
+
+> **Good to know:**
+> - The temporary `trycloudflare.com` URL changes every run — for a permanent custom
+>   domain, follow **Option C** below.
+> - Players can play as guests or log in with their normal Pokémon Showdown account.
+> - Everything downloaded lives in `./.tools/`; logs are in `./.selfhost-logs/`. Change
+>   ports with `PHNN_GAME_PORT` / `PHNN_CLIENT_PORT`.
+> - On Linux, if double-clicking opens a text editor, run `./Setup_Server_Linux.sh` in a
+>   terminal. On macOS, right-click → **Open** the first time.
+
+---
+
+### Prefer to set things up by hand? Use the manual steps below.
 
 ### Prerequisites
 
@@ -382,7 +422,7 @@ sudo systemctl start phnn-game phnn-client
 Everything else — the PHNN mod, the formats, the client code — works out of the box.
 
 
-## 👥 Contributors
+## Contributors
 
 **Main Contributors:**
 - **isleep2late** - Community Indentured Servant
@@ -397,7 +437,7 @@ Everything else — the PHNN mod, the formats, the client code — works out of 
 - **rby2k20** - Gen 1/2 Doubles implementation: https://github.com/rby2k20/pokemon-showdown
 - **MathyFurret** - Rotations implementation: https://github.com/smogon/pokemon-showdown-client/pull/1944 https://github.com/smogon/pokemon-showdown/pull/8677
 
-## [**Join our Discord**](https://discord.gg/mTwgNNtE6a)
+## [**Join our Discord**](https://discord.gg/hackmons)
 
 **Special Thanks:**
 - **Siphonaptera** for leading the [Gen 8] Unified project
@@ -410,7 +450,7 @@ Everything else — the PHNN mod, the formats, the client code — works out of 
 
 ---
 
-## 📚 Additional Information
+## Additional Information
 
 ### Important Notes
 
@@ -420,13 +460,7 @@ This document is subject to constant updates/changes, especially as new games/ge
 
 ### 🔧 Forking & Maintaining Your Own Copy
 
-If you fork this repo, the **server** and **client** are both bundled in directly (no submodules). To keep your fork up to date and understand how everything fits together, **please read [`MAINTENANCE.md`](MAINTENANCE.md)**. It covers:
-
-- How the bundled upstream code is tracked
-- Exact commands to pull the latest updates from upstream Pokémon Showdown
-- How to set up the required git remote after a fresh clone (it doesn't travel with the repo)
-- How to resolve merge conflicts when upstream Showdown changes touch our customizations
-- Troubleshooting common issues
+If you fork this repo, the **server** and **client** are both bundled in directly (no submodules). To keep your fork up to date, see [Keeping Up with Upstream Showdown](#keeping-up-with-upstream-showdown) below — it covers pulling the latest upstream Pokémon Showdown changes, how our custom files are protected during the merge, and resolving conflicts when upstream touches our customizations.
 
 **After cloning/forking, set up the upstream remote for the server:**
 
@@ -444,7 +478,7 @@ git subtree pull --prefix=pokemon-showdown https://github.com/smogon/pokemon-sho
 
 Our custom files (`config/formats.ts` and `data/mods/phnn/`) are protected and won't be overwritten unless there's a direct conflict. If there is one, always keep our version. After pulling, run `cd pokemon-showdown && npm install` in case dependencies changed.
 
-> **⚠️ Never copy `formats.ts` alone to production.** The Custom Disguises feature spans `formats.ts` + `data/mods/gen1doubles/` + `data/mods/gen2doubles/` + `data/rulesets.ts` + `sim/battle.ts` + the client files. Always deploy via `git pull`. See [`MAINTENANCE.md`](MAINTENANCE.md) for the full runbook.
+> **⚠️ Never copy `formats.ts` alone to production.** The Custom Disguises feature spans `formats.ts` + `data/mods/gen1doubles/` + `data/mods/gen2doubles/` + `data/rulesets.ts` + `sim/battle.ts` + the client files. Always deploy via `git pull`.
 
 
 *Please note that upstream updates may or may not break your server. For best practice, I suggest you pull from this repo directly as we constantly maintain it.*
