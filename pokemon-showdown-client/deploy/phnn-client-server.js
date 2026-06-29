@@ -138,6 +138,12 @@ function serveStatic(req, res, pathname) {
 		if (isIndex) {
 			fs.readFile(filePath, 'utf8', (e, html) => {
 				if (e) { res.writeHead(500); res.end('read error'); return; }
+				// Self-host: the client build bakes script/style URLs as //<routes.client>/...
+				// When routes.client is "localhost" (the one-click setup default) those point at
+				// port 80 and never load. Rewrite them origin-relative so they load from whatever
+				// host/port the page is actually served on (localhost:8080 or the tunnel). No-op
+				// for a real domain like beta.hackmons.com.
+				html = html.replace(/\/\/localhost\//g, '/');
 				html = html.replace(/config\/config\.js\?/g, `config/config.js?cb=${START_TOKEN}&`);
 				res.writeHead(200, headers);
 				res.end(html);
