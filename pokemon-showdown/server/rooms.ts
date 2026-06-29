@@ -1654,29 +1654,28 @@ export class GlobalRoomState {
 		}
 		if (Config.reportbattles) {
 			const reportRooms = new Set<string>();
-			const isTourorChallenge = room.battle?.challengeType === 'challenge' || room.battle?.challengeType === 'tour';
+			const isRated = room.battle?.challengeType === 'rated';
 
-			if (isTourorChallenge) return;
+			reportRooms.add('battlelog');
+			
+			if (isRated) {
+				reportRooms.add('lobby');
+				// Format-specific reporting
+				const format = Dex.formats.get(room.format);
+				const formatName = format.name;
 
-			reportRooms.add('lobby');
-
-			// Format-specific reporting
-			const format = Dex.formats.get(room.format);
-			const formatName = format.name;
-
-			if (formatName.includes('Pure Hackmons')) {
-				reportRooms.add('purehackmons');
-			}
-
-			if (
-				formatName.includes('Balanced Hackmons') ||
-				formatName.includes('BH')
-			) {
-				reportRooms.add('balancedhackmons');
-			}
-
-			if (formatName.includes('No Nerfs')) {
-				reportRooms.add('nonerfs');
+				if (formatName.includes('Pure Hackmons')) {
+					reportRooms.add('purehackmons');
+				}
+				if (
+					formatName.includes('Balanced Hackmons') ||
+					formatName.includes('BH')
+				) {
+					reportRooms.add('balancedhackmons');
+				}
+				if (formatName.includes('No Nerfs')) {
+					reportRooms.add('nonerfs');
+				}
 			}
 
 			// Send reports
