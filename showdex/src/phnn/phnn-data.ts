@@ -95,12 +95,6 @@ export default {
 			"superfang": {
 				"ignoreImmunity": true
 			},
-			"selfdestruct": {
-				"overrideDefensiveStat": "spd"
-			},
-			"explosion": {
-				"overrideDefensiveStat": "spd"
-			},
 			"hiddenpower": {
 				"basePower": 0
 			},
