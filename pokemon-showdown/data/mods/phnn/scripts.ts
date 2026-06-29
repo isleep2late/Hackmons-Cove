@@ -136,7 +136,7 @@ export const Scripts: ModdedBattleScriptsData = {
 			event: 'mega' | 'megax' | 'megay' | 'zmove' | 'ultra' | 'dynamax' | 'terastallize' | '' = ''
 		) {
 			const index = this.getChoiceIndex();
-			if (index < this.active.length) {
+			if (index < this.active.length && this.active[index]) {
 				const pokemon = this.active[index];
 				const isGmax = pokemon.species.forme === 'Gmax' || pokemon.baseSpecies.forme === 'Gmax' || pokemon.gigantamax;
 				const canGmax = pokemon.species.canGigantamax || (pokemon.species.changesFrom ? this.battle.dex.species.get(pokemon.species.changesFrom).canGigantamax : null);

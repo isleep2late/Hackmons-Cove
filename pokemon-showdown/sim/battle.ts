@@ -3075,6 +3075,24 @@ export class Battle {
 			side => side.active.some(pokemon => pokemon && !!pokemon.switchFlag)
 		);
 
+		if (this.gameType === 'rotation') {
+			for (let i = 0; i < this.sides.length; i++) {
+				if (!switches[i]) continue;
+				const side = this.sides[i];
+				const front = side.active[0];
+				if (!front || !front.fainted) continue;
+				const benchStart = side.activeAndSubActives().length;
+				const hasBench = side.pokemon.slice(benchStart).some(p => p && !p.fainted);
+				if (hasBench) continue;
+				const promote = side.subActives().find(p => p && !p.fainted);
+				if (promote) {
+					front.switchFlag = false;
+					this.actions.rotateIn(promote);
+					switches[i] = side.active.some(p => p && !!p.switchFlag);
+				}
+			}
+		}
+
 		for (let i = 0; i < this.sides.length; i++) {
 			let reviveSwitch = false; // Used to ignore the fake switch for Revival Blessing
 			if (switches[i] && !this.canSwitch(this.sides[i])) {

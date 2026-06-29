@@ -1124,7 +1124,8 @@ export class Side {
 		let forcedPasses = 0;
 		if (this.battle.requestState === 'switch') {
 			const canSwitchOut = this.active.filter(pokemon => pokemon?.switchFlag).length;
-			const canSwitchIn = this.pokemon.slice(this.active.length).filter(pokemon => pokemon && !pokemon.fainted).length;
+			const benchStart = this.battle.gameType === 'rotation' ? this.activeAndSubActives().length : this.active.length;
+			const canSwitchIn = this.pokemon.slice(benchStart).filter(pokemon => pokemon && !pokemon.fainted).length;
 			forcedSwitches = Math.min(canSwitchOut, canSwitchIn);
 			forcedPasses = canSwitchOut - forcedSwitches;
 		}

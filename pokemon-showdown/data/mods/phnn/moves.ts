@@ -650,15 +650,21 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 
 	selfdestruct: {
 		inherit: true,
-		overrideDefensiveStat: 'spd',
-		shortDesc: "User faints. Damage is dealt against the target's Sp. Def.",
-		desc: "The user faints after using this move, even if it misses or fails. Damage is calculated using the target's Special Defense instead of its Defense, effectively halving the target's defenses.",
+		onBasePowerPriority: 6,
+		onBasePower(basePower, attacker, defender, move) {
+			return this.chainModify(2);
+		},
+		shortDesc: "User faints. Target's defenses are halved (2x damage).",
+		desc: "The user faints after using this move, even if it misses or fails. The target's defenses are halved, effectively doubling this move's power.",
 	},
 	explosion: {
 		inherit: true,
-		overrideDefensiveStat: 'spd',
-		shortDesc: "User faints. Damage is dealt against the target's Sp. Def.",
-		desc: "The user faints after using this move, even if it misses or fails. Damage is calculated using the target's Special Defense instead of its Defense, effectively halving the target's defenses.",
+		onBasePowerPriority: 6,
+		onBasePower(basePower, attacker, defender, move) {
+			return this.chainModify(2);
+		},
+		shortDesc: "User faints. Target's defenses are halved (2x damage).",
+		desc: "The user faints after using this move, even if it misses or fails. The target's defenses are halved, effectively doubling this move's power.",
 	},
 
 	hiddenpower: {
