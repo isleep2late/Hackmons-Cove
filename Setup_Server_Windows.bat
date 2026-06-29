@@ -3,20 +3,6 @@ setlocal enabledelayedexpansion
 title Pure Hackmons - One-Click Self-Host (Windows)
 cd /d "%~dp0"
 
-REM ============================================================================
-REM  PURE HACKMONS / Pokemon Showdown - ONE-CLICK SELF-HOST (Windows)
-REM
-REM  Double-click this file. Start to finish it will:
-REM    1. Download a private copy of Node.js if you don't have one (no admin).
-REM    2. Build the game server and the web client.
-REM    3. Point the client at THIS PC (connects to your own server).
-REM    4. Download cloudflared and open a FREE public https URL (trycloudflare).
-REM    5. Print the URL + open it in your browser. Keep this window open.
-REM
-REM  Close the window (or press a key when prompted) to stop everything.
-REM  Optional: set PHNN_GAME_PORT / PHNN_CLIENT_PORT before running to change ports.
-REM ============================================================================
-
 if not defined PHNN_GAME_PORT set "PHNN_GAME_PORT=8000"
 if not defined PHNN_CLIENT_PORT set "PHNN_CLIENT_PORT=8080"
 set "GAME_PORT=%PHNN_GAME_PORT%"
@@ -33,7 +19,6 @@ echo    Pure Hackmons - One-Click Self-Host (Windows)
 echo ==============================================================
 echo.
 
-REM ---------- 0. Node.js ----------
 if exist "%NODEDIR%\node.exe" set "PATH=%NODEDIR%;%PATH%"
 set "NODEMAJOR=0"
 for /f "delims=" %%v in ('node -p "parseInt(process.versions.node,10)" 2^>nul') do set "NODEMAJOR=%%v"
@@ -52,10 +37,8 @@ node -v >nul 2>nul || goto :fail_node
 for /f "delims=" %%v in ('node -v') do echo       Node %%v
 echo.
 
-REM ---------- server config.js ----------
 if not exist "pokemon-showdown\config\config.js" copy "pokemon-showdown\config\config-example.js" "pokemon-showdown\config\config.js" >nul 2>nul
 
-REM ---------- 1. build the game server ----------
 echo [1/4] Building the game server ^(npm install + node build^)... this can take a few minutes
 pushd pokemon-showdown
 call npm install --no-audit --no-fund || (popd & goto :fail_build)
@@ -63,15 +46,10 @@ call node build || (popd & goto :fail_build)
 popd
 echo.
 
-REM ---------- point the client's data cache at OUR built server (it has the PHNN mod) ----------
-REM Without this, the client build clones a fresh upstream Showdown (no phnn mod) into caches\
-REM and crashes building the teambuilder tables on Dex.mod('phnn').
 echo       linking the client data cache to the PHNN server ^(prevents an upstream re-clone^)...
 if not exist "%~dp0pokemon-showdown-client\caches" mkdir "%~dp0pokemon-showdown-client\caches"
 set "PS_CACHE=%~dp0pokemon-showdown-client\caches\pokemon-showdown"
 if exist "%PS_CACHE%\data\mods\phnn" goto :cache_ready
-REM force-remove a leftover upstream clone (git pack files are read-only, so rmdir /s /q fails on them).
-REM Safe: we only get here when it's NOT our PHNN junction (the goto above skips that case).
 if exist "%PS_CACHE%" powershell -NoProfile -Command "Remove-Item -LiteralPath '%PS_CACHE%' -Recurse -Force -ErrorAction SilentlyContinue"
 if exist "%PS_CACHE%" rmdir /s /q "%PS_CACHE%" >nul 2>nul
 mklink /J "%PS_CACHE%" "%~dp0pokemon-showdown" >nul 2>nul
@@ -83,12 +61,10 @@ if errorlevel 1 (
 :cache_ready
 echo.
 
-REM ---------- create config\routes.json (gitignored, so absent on fresh clones; the client build needs it) ----------
 if not exist "%~dp0pokemon-showdown-client\config" mkdir "%~dp0pokemon-showdown-client\config"
 if not exist "%~dp0pokemon-showdown-client\config\routes.json" powershell -NoProfile -Command "[IO.File]::WriteAllText('%~dp0pokemon-showdown-client\config\routes.json',[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('eyAicm9vdCI6ICJwb2tlbW9uc2hvd2Rvd24uY29tIiwgImNsaWVudCI6ICJsb2NhbGhvc3QiLCAicmVzb3VyY2VTZXJ2ZXIiOiAicGxheS5wb2tlbW9uc2hvd2Rvd24uY29tIiwgImRleCI6ICJkZXgucG9rZW1vbnNob3dkb3duLmNvbSIsICJyZXBsYXlzIjogImxvY2FsaG9zdCIsICJ1c2VycyI6ICJwb2tlbW9uc2hvd2Rvd24uY29tL3VzZXJzIiwgInRlYW1zIjogInRlYW1zLnBva2Vtb25zaG93ZG93bi5jb20iIH0=')))"
 echo.
 
-REM ---------- 2. build the web client ----------
 echo [2/4] Building the web client ^(npm install + build^)...
 pushd pokemon-showdown-client
 call npm install --no-audit --no-fund || (popd & goto :fail_build)
@@ -96,7 +72,6 @@ call node build full || (popd & goto :fail_build)
 popd
 echo.
 
-REM ---------- 3. point the client at THIS PC ----------
 echo [3/4] Pointing the client at this machine...
 set "CFG=pokemon-showdown-client\config\config.js"
 if not exist "%CFG%" copy "pokemon-showdown-client\config\config-example.js" "%CFG%" >nul 2>nul
@@ -106,7 +81,6 @@ call node "%TOOLS%\merge-config.js" "%CFG%" "%TOOLS%\client-override.js" || goto
 echo       done
 echo.
 
-REM ---------- 4. cloudflared + launch ----------
 set "CF=%TOOLS%\cloudflared.exe"
 if not exist "%CF%" (
   echo [4/4] Downloading cloudflared ^(free public-tunnel tool^)...
