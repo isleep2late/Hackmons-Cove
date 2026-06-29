@@ -21,7 +21,7 @@ cd "$HERE" || exit 1
 
 GAME_PORT="${PHNN_GAME_PORT:-8000}"
 FRONT_PORT="${PHNN_CLIENT_PORT:-8080}"
-NODE_VERSION="v20.18.1"
+NODE_VERSION="v22.12.0"
 TOOLS="$HERE/.tools"
 NODE_DIR="$TOOLS/node"
 LOG_DIR="$HERE/.selfhost-logs"
@@ -80,6 +80,16 @@ fi
 c_cyan "[1/4] Building the game server (npm install + node build)… this can take a few minutes"
 ( cd pokemon-showdown && npm install --no-audit --no-fund && node build ) || die "Game-server build failed (see output above)."
 echo
+
+# point the client's data cache at OUR built server (it has the PHNN mod); otherwise the
+# client build clones a fresh upstream Showdown (no 'phnn' mod) and crashes on Dex.mod('phnn').
+c_cyan "      linking the client data cache to the PHNN server (prevents an upstream re-clone)…"
+mkdir -p pokemon-showdown-client/caches
+PS_CACHE="$HERE/pokemon-showdown-client/caches/pokemon-showdown"
+if [ ! -e "$PS_CACHE/data/mods/phnn" ]; then
+  rm -rf "$PS_CACHE"
+  ln -s ../../pokemon-showdown "$PS_CACHE"
+fi
 
 c_cyan "[2/4] Building the web client (npm install + build)…"
 ( cd pokemon-showdown-client && npm install --no-audit --no-fund && node build full ) || die "Client build failed (see output above)."
