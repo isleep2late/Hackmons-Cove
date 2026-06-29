@@ -81,7 +81,7 @@ Both live as regular folders in this repository. If you fork or clone this repo,
 
 ## Installation
 
-### 🚀 Easiest: One-Click Setup (recommended)
+### Easiest: One-Click Setup (recommended)
 
 Want your own server online in minutes with **zero setup**? Just:
 
