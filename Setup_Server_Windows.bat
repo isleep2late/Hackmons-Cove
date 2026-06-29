@@ -21,7 +21,7 @@ if not defined PHNN_GAME_PORT set "PHNN_GAME_PORT=8000"
 if not defined PHNN_CLIENT_PORT set "PHNN_CLIENT_PORT=8080"
 set "GAME_PORT=%PHNN_GAME_PORT%"
 set "FRONT_PORT=%PHNN_CLIENT_PORT%"
-set "NODE_VERSION=v20.18.1"
+set "NODE_VERSION=v22.12.0"
 set "TOOLS=%~dp0.tools"
 set "LOGDIR=%~dp0.selfhost-logs"
 set "NODEDIR=%TOOLS%\node"
@@ -61,6 +61,23 @@ pushd pokemon-showdown
 call npm install --no-audit --no-fund || (popd & goto :fail_build)
 call node build || (popd & goto :fail_build)
 popd
+echo.
+
+REM ---------- point the client's data cache at OUR built server (it has the PHNN mod) ----------
+REM Without this, the client build clones a fresh upstream Showdown (no phnn mod) into caches\
+REM and crashes building the teambuilder tables on Dex.mod('phnn').
+echo       linking the client data cache to the PHNN server ^(prevents an upstream re-clone^)...
+if not exist "%~dp0pokemon-showdown-client\caches" mkdir "%~dp0pokemon-showdown-client\caches"
+set "PS_CACHE=%~dp0pokemon-showdown-client\caches\pokemon-showdown"
+if exist "%PS_CACHE%\data\mods\phnn" goto :cache_ready
+if exist "%PS_CACHE%" rmdir /s /q "%PS_CACHE%"
+mklink /J "%PS_CACHE%" "%~dp0pokemon-showdown" >nul 2>nul
+if errorlevel 1 (
+  echo       junction unavailable - copying server data instead ^(one-time, slower^)...
+  xcopy /e /i /q /y "%~dp0pokemon-showdown\dist" "%PS_CACHE%\dist" >nul
+  xcopy /e /i /q /y "%~dp0pokemon-showdown\data" "%PS_CACHE%\data" >nul
+)
+:cache_ready
 echo.
 
 REM ---------- 2. build the web client ----------
