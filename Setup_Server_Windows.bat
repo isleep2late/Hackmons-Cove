@@ -70,7 +70,10 @@ echo       linking the client data cache to the PHNN server ^(prevents an upstre
 if not exist "%~dp0pokemon-showdown-client\caches" mkdir "%~dp0pokemon-showdown-client\caches"
 set "PS_CACHE=%~dp0pokemon-showdown-client\caches\pokemon-showdown"
 if exist "%PS_CACHE%\data\mods\phnn" goto :cache_ready
-if exist "%PS_CACHE%" rmdir /s /q "%PS_CACHE%"
+REM force-remove a leftover upstream clone (git pack files are read-only, so rmdir /s /q fails on them).
+REM Safe: we only get here when it's NOT our PHNN junction (the goto above skips that case).
+if exist "%PS_CACHE%" powershell -NoProfile -Command "Remove-Item -LiteralPath '%PS_CACHE%' -Recurse -Force -ErrorAction SilentlyContinue"
+if exist "%PS_CACHE%" rmdir /s /q "%PS_CACHE%" >nul 2>nul
 mklink /J "%PS_CACHE%" "%~dp0pokemon-showdown" >nul 2>nul
 if errorlevel 1 (
   echo       junction unavailable - copying server data instead ^(one-time, slower^)...
