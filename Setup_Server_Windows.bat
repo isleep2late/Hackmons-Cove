@@ -83,6 +83,11 @@ if errorlevel 1 (
 :cache_ready
 echo.
 
+REM ---------- create config\routes.json (gitignored, so absent on fresh clones; the client build needs it) ----------
+if not exist "%~dp0pokemon-showdown-client\config" mkdir "%~dp0pokemon-showdown-client\config"
+if not exist "%~dp0pokemon-showdown-client\config\routes.json" powershell -NoProfile -Command "[IO.File]::WriteAllText('%~dp0pokemon-showdown-client\config\routes.json',[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('eyAicm9vdCI6ICJwb2tlbW9uc2hvd2Rvd24uY29tIiwgImNsaWVudCI6ICJsb2NhbGhvc3QiLCAicmVzb3VyY2VTZXJ2ZXIiOiAicGxheS5wb2tlbW9uc2hvd2Rvd24uY29tIiwgImRleCI6ICJkZXgucG9rZW1vbnNob3dkb3duLmNvbSIsICJyZXBsYXlzIjogImxvY2FsaG9zdCIsICJ1c2VycyI6ICJwb2tlbW9uc2hvd2Rvd24uY29tL3VzZXJzIiwgInRlYW1zIjogInRlYW1zLnBva2Vtb25zaG93ZG93bi5jb20iIH0=')))"
+echo.
+
 REM ---------- 2. build the web client ----------
 echo [2/4] Building the web client ^(npm install + build^)...
 pushd pokemon-showdown-client

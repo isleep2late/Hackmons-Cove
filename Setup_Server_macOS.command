@@ -91,6 +91,13 @@ if [ ! -e "$PS_CACHE/data/mods/phnn" ]; then
   ln -s ../../pokemon-showdown "$PS_CACHE"
 fi
 
+# the client build (build-tools/update) requires config/routes.json, gitignored and absent on fresh
+# clones. The runtime override (step 3) replaces client/root/replays with the page origin.
+if [ ! -f pokemon-showdown-client/config/routes.json ]; then
+  mkdir -p pokemon-showdown-client/config
+  printf '%s\n' '{ "root": "pokemonshowdown.com", "client": "localhost", "resourceServer": "play.pokemonshowdown.com", "dex": "dex.pokemonshowdown.com", "replays": "localhost", "users": "pokemonshowdown.com/users", "teams": "teams.pokemonshowdown.com" }' > pokemon-showdown-client/config/routes.json
+fi
+
 c_cyan "[2/4] Building the web client (npm install + build)…"
 ( cd pokemon-showdown-client && npm install --no-audit --no-fund && node build full ) || die "Client build failed (see output above)."
 echo
