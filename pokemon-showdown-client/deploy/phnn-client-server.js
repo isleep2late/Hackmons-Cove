@@ -138,6 +138,7 @@ function serveStatic(req, res, pathname) {
 		if (isIndex) {
 			fs.readFile(filePath, 'utf8', (e, html) => {
 				if (e) { res.writeHead(500); res.end('read error'); return; }
+				html = html.replace(/\/\/localhost\//g, '/');
 				html = html.replace(/config\/config\.js\?/g, `config/config.js?cb=${START_TOKEN}&`);
 				res.writeHead(200, headers);
 				res.end(html);
