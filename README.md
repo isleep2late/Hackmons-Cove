@@ -65,4 +65,4 @@ The server and client are both included as regular folders rather than submodule
 
 ## License
 
-This project is a modification of Pokémon Showdown and Showdex and is licensed under AGPL-3.0. Pokémon and all related properties are (c) Nintendo / Creatures Inc. / GAME FREAK inc.
+This project is a modification of Pokémon Showdown and Showdex and is licensed under AGPL-3.0. Pokémon and all related properties are (c) The Pokemon Company / Nintendo / Creatures Inc. / GAME FREAK inc.
