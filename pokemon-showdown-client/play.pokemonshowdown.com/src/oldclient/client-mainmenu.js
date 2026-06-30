@@ -915,6 +915,19 @@
 				{ id: 'gen1', name: 'Gen 1', gts: ['', 'doubles', 'multi', 'freeforall'] }
 			];
 		},
+		cdModeListGame: function () {
+			return [
+				{ id: 'gen9', name: 'Gen 9' },
+				{ id: 'gen8', name: 'Gen 8' },
+				{ id: 'gen7', name: 'Gen 7' },
+				{ id: 'gen6', name: 'Gen 6' },
+				{ id: 'gen5', name: 'Gen 5' },
+				{ id: 'gen4', name: 'Gen 4' },
+				{ id: 'gen3', name: 'Gen 3' },
+				{ id: 'gen2', name: 'Gen 2' },
+				{ id: 'gen1', name: 'Gen 1' }
+			];
+		},
 		renderCdModeChallenge: function (format) {
 			format = '' + (format || '');
 			var atIdx = format.indexOf('@@@');
@@ -922,29 +935,34 @@
 			var rulesStr = atIdx >= 0 ? format.slice(atIdx + 3) : '';
 			var rulesLc = rulesStr.toLowerCase();
 
-			var idx = baseFormat.indexOf('customdisguises');
-			var isDisguises = idx >= 0;
+			var cdKw = '', cdPrefix = '', cdModes = null;
+			var diIdx = baseFormat.indexOf('customdisguises');
+			var cgIdx = baseFormat.indexOf('customgame');
+			if (diIdx >= 0) { cdKw = 'customdisguises'; cdPrefix = baseFormat.slice(0, diIdx); cdModes = this.cdModeListMain(); }
+			else if (cgIdx >= 0) { cdKw = 'customgame'; cdPrefix = baseFormat.slice(0, cgIdx); cdModes = this.cdModeListGame(); }
 			var genHtml = '';
-			if (isDisguises) {
-				var prefix = baseFormat.slice(0, idx);
-				var modes = this.cdModeListMain();
-				var name = prefix;
-				for (var i = 0; i < modes.length; i++) {
-					if (modes[i].id === prefix) { name = modes[i].name; break; }
+			if (cdKw) {
+				var name = cdPrefix;
+				for (var i = 0; i < cdModes.length; i++) {
+					if (cdModes[i].id === cdPrefix) { name = cdModes[i].name; break; }
 				}
 				genHtml = '<p><label class="label">Generation:</label> <button class="select cdmodeselect" name="cdMode">' + name + '</button></p>';
 			}
 
 			var infiniteChecked = (rulesLc.indexOf('infinitemod') >= 0 || rulesLc.indexOf('infinite mod') >= 0) ? ' checked' : '';
 
+			var genMatch = baseFormat.match(/^gen(\d+)/);
+			var genNum = genMatch ? +genMatch[1] : 9;
 			var gametypeOpts = [
 				{ value: '', label: 'Singles' },
-				{ value: 'Doubles', label: 'Doubles' },
-				{ value: 'Triples', label: 'Triples' },
-				{ value: 'Rotation', label: 'Rotation' },
-				{ value: 'Multi', label: 'Multi' },
-				{ value: 'Freeforall', label: 'Free-for-All' }
+				{ value: 'Doubles', label: 'Doubles' }
 			];
+			if (genNum >= 5) {
+				gametypeOpts.push({ value: 'Triples', label: 'Triples' });
+				gametypeOpts.push({ value: 'Rotation', label: 'Rotation' });
+			}
+			gametypeOpts.push({ value: 'Multi', label: 'Multi' });
+			gametypeOpts.push({ value: 'Freeforall', label: 'Free-for-All' });
 			var selectedGt = '';
 			var gtMatch = rulesStr.match(/(?:^|,)\s*gametype\s*=\s*([A-Za-z-]+)/i);
 			if (gtMatch) {
@@ -972,13 +990,16 @@
 			var $form = $(button).closest('form');
 			var $fmtBtn = $form.find('button[name=format]');
 			var format = '' + $fmtBtn.val();
-			var idx = format.indexOf('customdisguises');
-			if (idx < 0) return;
-			var suffix = format.slice(idx + 15);
+			var kw = '', kwLen = 0;
+			if (format.indexOf('customdisguises') >= 0) { kw = 'customdisguises'; kwLen = 15; }
+			else if (format.indexOf('customgame') >= 0) { kw = 'customgame'; kwLen = 10; }
+			else return;
+			var idx = format.indexOf(kw);
+			var suffix = format.slice(idx + kwLen);
 			app.addPopup(window.CdModePopup, { format: format, sourceEl: button, onselect: function (modeId) {
 				var infiniteChecked = $form.find('input[name=infiniteMode]').is(':checked');
 				var prevGametype = $form.find('select[name=gameTypeSelect]').val();
-				var newFormat = modeId + 'customdisguises' + suffix;
+				var newFormat = modeId + kw + suffix;
 				$fmtBtn.val(newFormat).html(BattleLog.escapeFormat(newFormat));
 				self.curFormat = newFormat;
 				var $teamButton = $form.find('button[name=team]');
@@ -1523,6 +1544,8 @@
 			this.update();
 		},
 		shouldDisplayFormat: function (format) {
+			if (/customdisguises/.test(format.id) && format.id !== 'gen9nonerfscustomdisguises') return false;
+			if (/customgame/.test(format.id) && format.id !== 'gen9customgame') return false;
 			if (this.selectType === 'teambuilder') {
 				if (!format.isTeambuilderFormat) return false;
 			} else {
