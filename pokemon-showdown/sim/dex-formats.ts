@@ -543,6 +543,23 @@ export class Format extends BasicEffect implements Readonly<BasicEffect> {
 		this.debug = !!data.debug;
 		this.rated = (typeof data.rated === 'string' ? data.rated : data.rated !== false);
 		this.gameType = data.gameType || 'singles';
+		if (data.customRules) {
+			for (const rule of data.customRules) {
+				const gtMatch = /^\s*gametype\s*=\s*(.+)$/i.exec(rule);
+				if (!gtMatch) continue;
+				let gt = gtMatch[1].toLowerCase().replace(/[^a-z]/g, '');
+				if (gt === 'rotations') gt = 'rotation';
+				if (gt === 'ffa') gt = 'freeforall';
+				if (['singles', 'doubles', 'triples', 'rotation', 'multi', 'freeforall'].includes(gt)) {
+					this.gameType = gt as GameType;
+				}
+			}
+		}
+		if (this.gameType === 'doubles' || this.gameType === 'multi' || this.gameType === 'freeforall') {
+			if (this.mod === 'gen1phnn') this.mod = 'gen1phnndoubles';
+			else if (this.mod === 'gen1') this.mod = 'gen1doubles';
+			else if (this.mod === 'gen2') this.mod = 'gen2doubles';
+		}
 		this.ruleset = data.ruleset || [];
 		this.baseRuleset = data.baseRuleset || [];
 		this.banlist = data.banlist || [];

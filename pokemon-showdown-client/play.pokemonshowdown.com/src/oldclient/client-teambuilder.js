@@ -1666,15 +1666,32 @@
 				{ id: 'gen1', name: 'Gen 1', gts: ['', 'doubles', 'multi', 'freeforall'] }
 			];
 		},
+		cdModeListGame: function () {
+			return [
+				{ id: 'gen9', name: 'Gen 9' },
+				{ id: 'gen8', name: 'Gen 8' },
+				{ id: 'gen7', name: 'Gen 7' },
+				{ id: 'gen6', name: 'Gen 6' },
+				{ id: 'gen5', name: 'Gen 5' },
+				{ id: 'gen4', name: 'Gen 4' },
+				{ id: 'gen3', name: 'Gen 3' },
+				{ id: 'gen2', name: 'Gen 2' },
+				{ id: 'gen1', name: 'Gen 1' }
+			];
+		},
 		parseCdFormat: function (format) {
-			var idx = ('' + format).indexOf('customdisguises');
-			if (idx < 0) return null;
-			return { prefix: format.slice(0, idx), suffix: format.slice(idx + 15) };
+			format = '' + format;
+			var kw = '', kwLen = 0;
+			if (format.indexOf('customdisguises') >= 0) { kw = 'customdisguises'; kwLen = 15; }
+			else if (format.indexOf('customgame') >= 0) { kw = 'customgame'; kwLen = 10; }
+			else return null;
+			var idx = format.indexOf(kw);
+			return { kw: kw, prefix: format.slice(0, idx), suffix: format.slice(idx + kwLen) };
 		},
 		renderCdModeSelect: function () {
 			var parsed = this.parseCdFormat(this.curTeam.format);
 			if (!parsed) return '';
-			var modes = this.cdModeList();
+			var modes = (parsed.kw === 'customgame') ? this.cdModeListGame() : this.cdModeList();
 			var name = parsed.prefix;
 			for (var i = 0; i < modes.length; i++) {
 				if (modes[i].id === parsed.prefix) { name = modes[i].name; break; }
@@ -1686,7 +1703,7 @@
 			var parsed = this.parseCdFormat(this.curTeam.format);
 			if (!parsed) return;
 			app.addPopup(CdModePopup, { format: this.curTeam.format, sourceEl: button, onselect: function (modeId) {
-				self.changeFormat(modeId + 'customdisguises' + parsed.suffix);
+				self.changeFormat(modeId + parsed.kw + parsed.suffix);
 			} });
 		},
 		nicknameChange: function (e) {
@@ -2952,7 +2969,7 @@
 			buf += '<form class="detailsform">';
 
 			buf += '<div class="formrow"><label class="formlabel">Level:</label><div>' +
-				'<input type="number" min="1" max="' + (this.curTeam.format.includes('customdisguises') ? 9999 : (((this.curTeam.gen === 1 && this.curTeam.format.includes('disguises')) || (this.curTeam.gen === 2 && (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses'))) || (this.curTeam.gen === 9 && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) ? 255 : 100)) + '" step="1" name="level" value="' +
+				'<input type="number" min="1" max="' + ((this.curTeam.format.includes('customdisguises') || this.curTeam.format.includes('customgame')) ? 9999 : (((this.curTeam.gen === 1 && this.curTeam.format.includes('disguises')) || (this.curTeam.gen === 2 && (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses'))) || (this.curTeam.gen === 9 && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) ? 255 : 100)) + '" step="1" name="level" value="' +
 				(typeof set.level === 'number' ? set.level : 100) +
 				'" class="textbox inputform numform"' +
 				(isChampions ? ' disabled' : '') +
@@ -3106,7 +3123,7 @@
 
 			// level
 			var level = parseInt(this.$chart.find('input[name=level]').val(), 10);
-			var maxLevel = this.curTeam.format.includes('customdisguises') ? 9999 : (((this.curTeam.gen === 1 && this.curTeam.format.includes('disguises')) || (this.curTeam.gen === 2 && (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses'))) || (this.curTeam.gen === 9 && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) ? 255 : 100);
+			var maxLevel = (this.curTeam.format.includes('customdisguises') || this.curTeam.format.includes('customgame')) ? 9999 : (((this.curTeam.gen === 1 && this.curTeam.format.includes('disguises')) || (this.curTeam.gen === 2 && (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses'))) || (this.curTeam.gen === 9 && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) ? 255 : 100);
 			if (!level || level < 1) level = 100;
 			if (level > maxLevel) level = maxLevel;
 			if (level !== 100 || set.level) set.level = level;
@@ -3897,27 +3914,44 @@
 			var format = '' + (data.format || '');
 			var atIdx = format.indexOf('@@@');
 			var baseFormat = atIdx >= 0 ? format.slice(0, atIdx) : format;
-			var idx = baseFormat.indexOf('customdisguises');
+			var kw = '', kwLen = 0, modes;
+			if (baseFormat.indexOf('customdisguises') >= 0) {
+				kw = 'customdisguises'; kwLen = 15;
+				modes = [
+					{ id: 'gen9champions', name: 'Champions' },
+					{ id: 'gen9nonerfs', name: 'No Nerfs' },
+					{ id: 'gen9', name: 'Gen 9' },
+					{ id: 'gen8', name: 'Gen 8' },
+					{ id: 'gen8bdsp', name: 'BDSP' },
+					{ id: 'gen7', name: 'Gen 7' },
+					{ id: 'gen7letsgo', name: "Let's Go" },
+					{ id: 'gen6', name: 'Gen 6' },
+					{ id: 'gen5', name: 'Gen 5' },
+					{ id: 'gen4', name: 'Gen 4' },
+					{ id: 'gen3', name: 'Gen 3' },
+					{ id: 'gen2', name: 'Gen 2' },
+					{ id: 'gen1', name: 'Gen 1' }
+				];
+			} else if (baseFormat.indexOf('customgame') >= 0) {
+				kw = 'customgame'; kwLen = 10;
+				modes = [
+					{ id: 'gen9', name: 'Gen 9' },
+					{ id: 'gen8', name: 'Gen 8' },
+					{ id: 'gen7', name: 'Gen 7' },
+					{ id: 'gen6', name: 'Gen 6' },
+					{ id: 'gen5', name: 'Gen 5' },
+					{ id: 'gen4', name: 'Gen 4' },
+					{ id: 'gen3', name: 'Gen 3' },
+					{ id: 'gen2', name: 'Gen 2' },
+					{ id: 'gen1', name: 'Gen 1' }
+				];
+			} else {
+				modes = [];
+			}
+			var idx = kw ? baseFormat.indexOf(kw) : -1;
 			var prefix = idx >= 0 ? baseFormat.slice(0, idx) : '';
-			var suffix = idx >= 0 ? baseFormat.slice(idx + 15) : '';
-			var modes = [
-				{ id: 'gen9champions', name: 'Champions', gts: ['', 'doubles', 'triples', 'rotation', 'multi', 'freeforall'] },
-				{ id: 'gen9nonerfs', name: 'No Nerfs', gts: ['', 'doubles', 'triples', 'rotation', 'multi', 'freeforall'] },
-				{ id: 'gen9', name: 'Gen 9', gts: ['', 'doubles', 'triples', 'rotation', 'multi', 'freeforall'] },
-				{ id: 'gen8', name: 'Gen 8', gts: ['', 'doubles', 'triples', 'rotation', 'multi', 'freeforall'] },
-				{ id: 'gen8bdsp', name: 'BDSP', gts: ['', 'doubles', 'multi', 'freeforall'] },
-				{ id: 'gen7', name: 'Gen 7', gts: ['', 'doubles', 'triples', 'rotation', 'multi', 'freeforall'] },
-				{ id: 'gen7letsgo', name: "Let's Go", gts: [''] },
-				{ id: 'gen6', name: 'Gen 6', gts: ['', 'doubles', 'triples', 'rotation', 'multi', 'freeforall'] },
-				{ id: 'gen5', name: 'Gen 5', gts: ['', 'doubles', 'triples', 'rotation', 'multi', 'freeforall'] },
-				{ id: 'gen4', name: 'Gen 4', gts: ['', 'doubles', 'multi', 'freeforall'] },
-				{ id: 'gen3', name: 'Gen 3', gts: ['', 'doubles', 'multi', 'freeforall'] },
-				{ id: 'gen2', name: 'Gen 2', gts: ['', 'doubles', 'multi', 'freeforall'] },
-				{ id: 'gen1', name: 'Gen 1', gts: ['', 'doubles', 'multi', 'freeforall'] }
-			];
 			var buf = '<ul class="popupmenu">';
 			for (var i = 0; i < modes.length; i++) {
-				if (modes[i].gts.indexOf(suffix) < 0) continue;
 				buf += '<li><button name="selectCdMode" value="' + modes[i].id + '" class="option' + (modes[i].id === prefix ? ' sel' : '') + '">' + modes[i].name + '</button></li>';
 			}
 			buf += '</ul>';

@@ -157,15 +157,17 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 	gametype: {
 		effectType: 'Rule',
 		name: 'Gametype',
-		desc: "Overrides the battle's game type. Usage: Gametype = [Singles/Doubles/Triples], e.g. \"Gametype = Doubles\". Multi and Free-for-All require their dedicated formats.",
+		desc: "Overrides the battle's game type. Usage: Gametype = [Singles/Doubles/Triples/Rotation/Multi/Free-for-All], e.g. \"Gametype = Rotation\".",
 		hasValue: true,
 		onValidateRule(value) {
-			const gameType = value.toLowerCase().trim();
-			if (gameType !== 'singles' && gameType !== 'doubles' && gameType !== 'triples') {
-				throw new Error(`Invalid Gametype "${value}"; use Singles, Doubles, or Triples (Multi and Free-for-All have dedicated formats).`);
+			let gameType = value.toLowerCase().replace(/[^a-z]/g, '');
+			if (gameType === 'rotations') gameType = 'rotation';
+			if (gameType === 'ffa') gameType = 'freeforall';
+			if (!['singles', 'doubles', 'triples', 'rotation', 'multi', 'freeforall'].includes(gameType)) {
+				throw new Error(`Invalid Gametype "${value}"; use Singles, Doubles, Triples, Rotation, Multi, or Free-for-All.`);
 			}
-			if (gameType === 'triples' && this.dex.gen < 5) {
-				throw new Error(`Triples battles are not supported before Generation 5.`);
+			if ((gameType === 'triples' || gameType === 'rotation') && this.dex.gen < 5) {
+				throw new Error(`${gameType === 'triples' ? 'Triples' : 'Rotation'} battles are not supported before Generation 5.`);
 			}
 			return gameType;
 		},

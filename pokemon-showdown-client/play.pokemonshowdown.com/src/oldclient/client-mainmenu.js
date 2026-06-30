@@ -915,32 +915,91 @@
 				{ id: 'gen1', name: 'Gen 1', gts: ['', 'doubles', 'multi', 'freeforall'] }
 			];
 		},
+		cdModeListGame: function () {
+			return [
+				{ id: 'gen9', name: 'Gen 9' },
+				{ id: 'gen8', name: 'Gen 8' },
+				{ id: 'gen7', name: 'Gen 7' },
+				{ id: 'gen6', name: 'Gen 6' },
+				{ id: 'gen5', name: 'Gen 5' },
+				{ id: 'gen4', name: 'Gen 4' },
+				{ id: 'gen3', name: 'Gen 3' },
+				{ id: 'gen2', name: 'Gen 2' },
+				{ id: 'gen1', name: 'Gen 1' }
+			];
+		},
 		renderCdModeChallenge: function (format) {
 			format = '' + (format || '');
 			var atIdx = format.indexOf('@@@');
 			var baseFormat = atIdx >= 0 ? format.slice(0, atIdx) : format;
-			var idx = baseFormat.indexOf('customdisguises');
-			if (idx < 0) return '<span class="cdmodewrap"></span>';
-			var prefix = baseFormat.slice(0, idx);
-			var modes = this.cdModeListMain();
-			var name = prefix;
-			for (var i = 0; i < modes.length; i++) {
-				if (modes[i].id === prefix) { name = modes[i].name; break; }
+			var rulesStr = atIdx >= 0 ? format.slice(atIdx + 3) : '';
+			var rulesLc = rulesStr.toLowerCase();
+
+			var cdKw = '', cdPrefix = '', cdModes = null;
+			var diIdx = baseFormat.indexOf('customdisguises');
+			var cgIdx = baseFormat.indexOf('customgame');
+			if (diIdx >= 0) { cdKw = 'customdisguises'; cdPrefix = baseFormat.slice(0, diIdx); cdModes = this.cdModeListMain(); }
+			else if (cgIdx >= 0) { cdKw = 'customgame'; cdPrefix = baseFormat.slice(0, cgIdx); cdModes = this.cdModeListGame(); }
+			var genHtml = '';
+			if (cdKw) {
+				var name = cdPrefix;
+				for (var i = 0; i < cdModes.length; i++) {
+					if (cdModes[i].id === cdPrefix) { name = cdModes[i].name; break; }
+				}
+				genHtml = '<p><label class="label">Generation:</label> <button class="select cdmodeselect" name="cdMode">' + name + '</button></p>';
 			}
-			var infiniteChecked = (format.indexOf('Infinite Mod') >= 0 || format.indexOf('infinitemod') >= 0) ? ' checked' : '';
-			return '<span class="cdmodewrap"><p><label class="label">Generation:</label> <button class="select cdmodeselect" name="cdMode">' + name + '</button></p><p><label class="checkbox"><input type="checkbox" name="infiniteMode"' + infiniteChecked + ' /> <abbr title="When a player runs out of Pokémon they can submit a new one instead of losing">Infinite Mod</abbr></label></p></span>';
+
+			var infiniteChecked = (rulesLc.indexOf('infinitemod') >= 0 || rulesLc.indexOf('infinite mod') >= 0) ? ' checked' : '';
+
+			var genMatch = baseFormat.match(/^gen(\d+)/);
+			var genNum = genMatch ? +genMatch[1] : 9;
+			var gametypeOpts = [
+				{ value: '', label: 'Singles' },
+				{ value: 'Doubles', label: 'Doubles' }
+			];
+			if (genNum >= 5) {
+				gametypeOpts.push({ value: 'Triples', label: 'Triples' });
+				gametypeOpts.push({ value: 'Rotation', label: 'Rotation' });
+			}
+			gametypeOpts.push({ value: 'Multi', label: 'Multi' });
+			gametypeOpts.push({ value: 'Freeforall', label: 'Free-for-All' });
+			var selectedGt = '';
+			var gtMatch = rulesStr.match(/(?:^|,)\s*gametype\s*=\s*([A-Za-z-]+)/i);
+			if (gtMatch) {
+				var v = gtMatch[1].toLowerCase().replace(/-/g, '');
+				if (v === 'rotations') v = 'rotation';
+				if (v === 'freeforall') selectedGt = 'Freeforall';
+				else if (v && v !== 'singles') selectedGt = v.charAt(0).toUpperCase() + v.slice(1);
+			} else if (/multibattle$/i.test(baseFormat) || /multi$/i.test(baseFormat)) {
+				selectedGt = 'Multi';
+			} else if (/freeforall$/i.test(baseFormat)) {
+				selectedGt = 'Freeforall';
+			}
+			var gtOptsHtml = '';
+			for (var j = 0; j < gametypeOpts.length; j++) {
+				var o = gametypeOpts[j];
+				var sel = (selectedGt === o.value || (!selectedGt && !o.value)) ? ' selected' : '';
+				gtOptsHtml += '<option value="' + o.value + '"' + sel + '>' + BattleLog.escapeHTML(o.label) + '</option>';
+			}
+			var gametypeHtml = '<p><label class="label">Gametype:</label> <select name="gameTypeSelect" class="textbox" style="width: 230px; box-sizing: border-box;">' + gtOptsHtml + '</select></p>';
+
+			return '<span class="cdmodewrap">' + genHtml + gametypeHtml + '<p><label class="checkbox"><input type="checkbox" name="infiniteMode"' + infiniteChecked + ' /> <abbr title="When a player runs out of Pokémon they can submit a new one instead of losing">Infinite Mod</abbr></label></p></span>';
 		},
 		cdMode: function (i, button) {
 			var self = this;
 			var $form = $(button).closest('form');
 			var $fmtBtn = $form.find('button[name=format]');
 			var format = '' + $fmtBtn.val();
-			var idx = format.indexOf('customdisguises');
-			if (idx < 0) return;
-			var suffix = format.slice(idx + 15);
+			var kw = '', kwLen = 0;
+			if (format.indexOf('customdisguises') >= 0) { kw = 'customdisguises'; kwLen = 15; }
+			else if (format.indexOf('customgame') >= 0) { kw = 'customgame'; kwLen = 10; }
+			else return;
+			var idx = format.indexOf(kw);
+			var suffix = format.slice(idx + kwLen);
 			app.addPopup(window.CdModePopup, { format: format, sourceEl: button, onselect: function (modeId) {
 				var infiniteChecked = $form.find('input[name=infiniteMode]').is(':checked');
-				var newFormat = modeId + 'customdisguises' + suffix;
+				var prevGametype = $form.find('select[name=gameTypeSelect]').val();
+				var newFormat = modeId + kw + suffix;
 				$fmtBtn.val(newFormat).html(BattleLog.escapeFormat(newFormat));
 				self.curFormat = newFormat;
 				var $teamButton = $form.find('button[name=team]');
@@ -948,6 +1007,7 @@
 				var $cdwrap = $form.find('.cdmodewrap');
 				if ($cdwrap.length) $cdwrap.replaceWith(self.renderCdModeChallenge(newFormat));
 				if (infiniteChecked) $form.find('input[name=infiniteMode]').prop('checked', true);
+				if (prevGametype) $form.find('select[name=gameTypeSelect]').val(prevGametype);
 			} });
 		},
 
@@ -971,7 +1031,7 @@
 			buf += '<p><label class="label">Format:</label>' + this.renderFormats(format) + '</p>';
 			buf += '<p><label class="label">Team:</label>' + this.renderTeams(format) + '</p>';
 			buf += this.renderCdModeChallenge(format);
-			buf += '<p><label class="label">Custom rules:</label> <input type="text" name="customRules" class="textbox" placeholder="e.g. Gametype = Doubles …" style="width: 230px; box-sizing: border-box;" maxlength="9000" autocomplete="off" /></p>';
+			buf += '<p><label class="label">Custom rules:</label> <input type="text" name="customRules" class="textbox" placeholder="e.g. Max Team Size = 24, -Endless Battle Clause" style="width: 230px; box-sizing: border-box;" maxlength="9000" autocomplete="off" /></p>';
 
 			var bestOfDefault = format && BattleFormats[format] ? BattleFormats[format].bestOfDefault : false;
 			buf += '<p' + (!bestOfDefault ? ' class="hidden">' : '>');
@@ -1033,12 +1093,21 @@
 
 			var atIdx = format.indexOf('@@@');
 			if (atIdx >= 0) {
-				var cleanRules = format.slice(atIdx + 3).split(',').map(function (r) { return r.trim(); }).filter(function (r) { return r.toLowerCase().replace(/\s/g, '') !== 'infinitemod'; }).join(', ');
+				var cleanRules = format.slice(atIdx + 3).split(',').map(function (r) { return r.trim(); }).filter(function (r) {
+					var lc = r.toLowerCase().replace(/\s/g, '');
+					if (lc === 'infinitemod') return false;
+					if (lc.indexOf('gametype=') === 0) return false;
+					return true;
+				}).join(', ');
 				format = cleanRules ? format.slice(0, atIdx + 3) + cleanRules : format.slice(0, atIdx);
 			}
 			var infiniteMode = $pmWindow.find('input[name=infiniteMode]').is(':checked');
 			if (infiniteMode) {
 				format += (format.includes('@@@') ? ', ' : '@@@') + 'Infinite Mod';
+			}
+			var gameTypeChoice = ('' + ($pmWindow.find('select[name=gameTypeSelect]').val() || '')).trim();
+			if (gameTypeChoice && gameTypeChoice !== 'Singles') {
+				format += (format.includes('@@@') ? ', ' : '@@@') + 'Gametype = ' + gameTypeChoice;
 			}
 
 			var bestOf = $pmWindow.find('input[name=bestof]').is(':checked');
@@ -1475,7 +1544,8 @@
 			this.update();
 		},
 		shouldDisplayFormat: function (format) {
-			if (/customdisguises/.test(format.id) && !/^gen9customdisguises(doubles|triples|rotation|multi|freeforall)?$/.test(format.id)) return false;
+			if (/customdisguises/.test(format.id) && format.id !== 'gen9nonerfscustomdisguises') return false;
+			if (/customgame/.test(format.id) && format.id !== 'gen9customgame') return false;
 			if (this.selectType === 'teambuilder') {
 				if (!format.isTeambuilderFormat) return false;
 			} else {
@@ -1495,9 +1565,11 @@
 				var $teamButton = $form.find('button[name=team]');
 				if ($teamButton.length) $teamButton.replaceWith(app.rooms[''].renderTeams(format));
 				var infiniteWasChecked = $form.find('input[name=infiniteMode]').is(':checked');
+				var prevGametypeFmt = $form.find('select[name=gameTypeSelect]').val();
 				var $cdwrap = $form.find('.cdmodewrap');
 				if ($cdwrap.length) $cdwrap.replaceWith(app.rooms[''].renderCdModeChallenge(format));
 				if (infiniteWasChecked) $form.find('input[name=infiniteMode]').prop('checked', true);
+				if (prevGametypeFmt) $form.find('select[name=gameTypeSelect]').val(prevGametypeFmt);
 
 				var $bestOfCheckbox = $form.find('input[name=bestof]');
 				var $bestOfValueInput = $form.find('input[name=bestofvalue]');
