@@ -543,6 +543,21 @@ export class Format extends BasicEffect implements Readonly<BasicEffect> {
 		this.debug = !!data.debug;
 		this.rated = (typeof data.rated === 'string' ? data.rated : data.rated !== false);
 		this.gameType = data.gameType || 'singles';
+		// A "Gametype = X" custom rule overrides the base game type. This is parsed
+		// here (rather than only in the rule table) so that playerCount, and the
+		// player allocation it drives, reflect Multi/Free-for-All as 4-player.
+		if (data.customRules) {
+			for (const rule of data.customRules) {
+				const gtMatch = /^\s*gametype\s*=\s*(.+)$/i.exec(rule);
+				if (!gtMatch) continue;
+				let gt = gtMatch[1].toLowerCase().replace(/[^a-z]/g, '');
+				if (gt === 'rotations') gt = 'rotation';
+				if (gt === 'ffa') gt = 'freeforall';
+				if (['singles', 'doubles', 'triples', 'rotation', 'multi', 'freeforall'].includes(gt)) {
+					this.gameType = gt as GameType;
+				}
+			}
+		}
 		this.ruleset = data.ruleset || [];
 		this.baseRuleset = data.baseRuleset || [];
 		this.banlist = data.banlist || [];
