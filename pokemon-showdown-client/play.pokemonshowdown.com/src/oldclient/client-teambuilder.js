@@ -1403,8 +1403,6 @@
 			buf += '</div></div>';
 
 			// moves
-			// PHNN custom PP: the "(pp/ppups)" suffix is kept inside the move box itself
-			// (chartChange peels it off for move lookup and re-attaches it on commit).
 			if (!set.moves) set.moves = [];
 			buf += '<div class="setcol setcol-moves"><div class="setcell"><label>Moves</label>';
 			buf += '<input type="text" name="move1" class="textbox chartinput" value="' + BattleLog.escapeHTML(set.moves[0] || '') + '" autocomplete="off" /></div>';
@@ -2245,7 +2243,6 @@
 
 			if (pokemonChanged || this.search.qName !== this.curChartName) {
 				var cur = {};
-				// PHNN custom PP: key on the base move name, ignoring any "(pp/ppups)" suffix
 				var stripPP = function (v) { return toID((v || '').replace(/\s*\(\d+(?:\/\d+)?\)\s*$/, '')); };
 				cur[stripPP(q)] = 1; // make sure selected one is first
 				if (type === 'move') {
@@ -3060,7 +3057,6 @@
 				buf += '</select></div></div>';
 			}
 
-			// PHNN: custom type / disguise / status / HP / PP
 			var isDisguise = this.curTeam.format.includes('disguise');
 			var isCustomDisguise = this.curTeam.format.includes('customdisguise');
 			var isModded = isDisguise || this.curTeam.format.includes('status') || this.curTeam.format.includes('nonerfs');
@@ -3208,7 +3204,6 @@
 				delete set.teraType;
 			}
 
-			// PHNN: custom type / disguise / status / HP / PP
 			var isModded = this.curTeam.format.includes('disguise') || this.curTeam.format.includes('status') || this.curTeam.format.includes('nonerfs');
 			if (isModded) {
 				if (this.curTeam.format.includes('disguise')) {
@@ -3256,9 +3251,6 @@
 				}
 			}
 
-			// Re-render the whole set card via renderSet so the summary stays consistent
-			// with the details form — including Start HP and the custom move PP notes.
-			// (The details form lives in .teambuilder-results, which updateSetTop doesn't touch.)
 			this.updateSetTop();
 
 			this.save();
@@ -3421,8 +3413,6 @@
 			var name = e.currentTarget.name;
 			if (this.curChartName !== name) return;
 			var rawValue = e.currentTarget.value;
-			// PHNN custom PP: peel a trailing "(pp/ppups)" off move boxes so the move still
-			// resolves; it is re-attached to the resolved name before we commit it below.
 			var ppSuffix = '';
 			if (name === 'move1' || name === 'move2' || name === 'move3' || name === 'move4') {
 				var ppMatch = rawValue.match(/\s*(\((\d+)(?:\/(\d+))?\))\s*$/);
@@ -3475,7 +3465,6 @@
 					return;
 				}
 			}
-			// PHNN custom PP: re-attach the "(pp/ppups)" suffix to the resolved move name
 			if (val && ppSuffix) val = val + ppSuffix;
 			this.chartSet(val, selectNext);
 		},

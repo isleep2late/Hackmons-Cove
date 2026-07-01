@@ -17,8 +17,6 @@ compiledFiles += compiler.compileToDir(`play.pokemonshowdown.com/src`, `play.pok
 compiledFiles += compiler.compileToDir(`replay.pokemonshowdown.com/src`, `replay.pokemonshowdown.com/js`, compileOpts);
 compiledFiles += compiler.compileToDir(`teams.pokemonshowdown.com/src`, `teams.pokemonshowdown.com/js`, compileOpts);
 
-// The compiler only transpiles .ts/.tsx. Plain .js files (the old client) must be
-// copied verbatim, mirroring `build-tools/update`'s cpSync of src/oldclient -> js/oldclient.
 fs.cpSync('play.pokemonshowdown.com/src/oldclient', 'play.pokemonshowdown.com/js/oldclient', {
 	recursive: true,
 	force: true,

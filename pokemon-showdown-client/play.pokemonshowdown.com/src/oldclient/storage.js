@@ -803,7 +803,6 @@ Storage.packTeam = function (team) {
 		buf += '|';
 		if (set.moves) for (var j = 0; j < set.moves.length; j++) {
 			var moveEntry = set.moves[j] || '';
-			// PHNN custom PP: keep the "(pp/ppups)" suffix out of toID so it survives packing
 			var ppMatch = moveEntry.match(/(.*)\s*(\(\d+(?:\/\d+)?\))$/);
 			var moveid = toID(ppMatch ? ppMatch[1] : moveEntry);
 			var ppSuffix = ppMatch ? ppMatch[2] : '';
@@ -1049,7 +1048,6 @@ Storage.unpackTeam = function (buf) {
 		// moves
 		j = buf.indexOf('|', i);
 		set.moves = buf.substring(i, j).split(',').map(function (moveEntry) {
-			// PHNN custom PP: re-attach the "(pp/ppups)" suffix after resolving the move name
 			var ppMatch = moveEntry.match(/(.*)(\(\d+(?:\/\d+)?\))$/);
 			if (ppMatch) return Dex.moves.get(ppMatch[1]).name + ' ' + ppMatch[2];
 			return Dex.moves.get(moveEntry).name;
