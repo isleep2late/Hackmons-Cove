@@ -14,6 +14,7 @@
  */
 
 /* eslint no-else-return: "error" */
+import { isUpperStaff } from './admin';
 import { Utils, ProcessManager } from '../../lib';
 import type { UserSettings } from '../users';
 import type { GlobalPermission, RoomPermission } from '../user-groups';
@@ -1439,7 +1440,7 @@ export const commands: Chat.ChatCommands = {
 	forcetie: 'forcewin',
 	forcewin(target, room, user, connection, cmd) {
 		room = this.requireRoom();
-		if (!cmd.endsWith('tie')) { this.canUseConsole; } else { this.checkCan('forcewin'); }
+		if (!isUpperStaff) return;
 		if (
 			!room.battle &&
 			!(room.game && typeof (room.game as any).tie === 'function' && typeof (room.game as any).win === 'function')
