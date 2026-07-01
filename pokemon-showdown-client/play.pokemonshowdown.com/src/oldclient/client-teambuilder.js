@@ -1368,15 +1368,15 @@
 					buf += '<span class="detailcell"><label>Tera Type</label>' + (set.teraType || ((this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')) ? 'None / Dyna' : (species.requiredTeraType || species.types[0]))) + '</span>';
 				}
 			}
-			if (this.curTeam.format.includes('disguises')) {
-				var phT = (set.phType || '').split('/');
-				buf += '<span class="detailcell"><label>Type 1</label>' + (phT[0] || species.types[0]) + '</span>';
-				buf += '<span class="detailcell"><label>Type 2</label>' + (phT[1] || species.types[1] || '(none)') + '</span>';
-				buf += '<span class="detailcell"><label>Disguise</label>' + (set.disguise ? Dex.species.get(set.disguise).name : '(none)') + '</span>';
+			if (this.curTeam.format.includes('disguise') || this.curTeam.format.includes('status') || this.curTeam.format.includes('nonerfs')) {
+				if (this.curTeam.format.includes('disguise')) {
+					var phT = (set.phType || '').split('/');
+					buf += '<span class="detailcell"><label>Type 1</label>' + (phT[0] || species.types[0]) + '</span>';
+					buf += '<span class="detailcell"><label>Type 2</label>' + (phT[1] || species.types[1] || '(none)') + '</span>';
+					buf += '<span class="detailcell"><label>Disguise</label>' + (set.disguise ? Dex.species.get(set.disguise).name : '(none)') + '</span>';
+				}
 				buf += '<span class="detailcell"><label>Status</label>' + (set.startStatus || 'None') + '</span>';
-			}
-			if (((this.curTeam.gen === 2 && (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses'))) || (this.curTeam.gen === 9 && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) && !this.curTeam.format.includes('disguises')) {
-				buf += '<span class="detailcell"><label>Status</label>' + (set.startStatus || 'None') + '</span>';
+				if (set.startHp) buf += '<span class="detailcell"><label>Start HP</label>' + set.startHp + '</span>';
 			}
 			buf += '</button></div></div>';
 
@@ -1405,10 +1405,10 @@
 			// moves
 			if (!set.moves) set.moves = [];
 			buf += '<div class="setcol setcol-moves"><div class="setcell"><label>Moves</label>';
-			buf += '<input type="text" name="move1" class="textbox chartinput" value="' + BattleLog.escapeHTML(set.moves[0]) + '" autocomplete="off" /></div>';
-			buf += '<div class="setcell"><input type="text" name="move2" class="textbox chartinput" value="' + BattleLog.escapeHTML(set.moves[1]) + '" autocomplete="off" /></div>';
-			buf += '<div class="setcell"><input type="text" name="move3" class="textbox chartinput" value="' + BattleLog.escapeHTML(set.moves[2]) + '" autocomplete="off" /></div>';
-			buf += '<div class="setcell"><input type="text" name="move4" class="textbox chartinput" value="' + BattleLog.escapeHTML(set.moves[3]) + '" autocomplete="off" /></div>';
+			buf += '<input type="text" name="move1" class="textbox chartinput" value="' + BattleLog.escapeHTML(set.moves[0] || '') + '" autocomplete="off" /></div>';
+			buf += '<div class="setcell"><input type="text" name="move2" class="textbox chartinput" value="' + BattleLog.escapeHTML(set.moves[1] || '') + '" autocomplete="off" /></div>';
+			buf += '<div class="setcell"><input type="text" name="move3" class="textbox chartinput" value="' + BattleLog.escapeHTML(set.moves[2] || '') + '" autocomplete="off" /></div>';
+			buf += '<div class="setcell"><input type="text" name="move4" class="textbox chartinput" value="' + BattleLog.escapeHTML(set.moves[3] || '') + '" autocomplete="off" /></div>';
 			buf += '</div>';
 
 			// stats
@@ -2243,12 +2243,13 @@
 
 			if (pokemonChanged || this.search.qName !== this.curChartName) {
 				var cur = {};
-				cur[toID(q)] = 1; // make sure selected one is first
+				var stripPP = function (v) { return toID((v || '').replace(/\s*\(\d+(?:\/\d+)?\)\s*$/, '')); };
+				cur[stripPP(q)] = 1; // make sure selected one is first
 				if (type === 'move') {
-					cur[toID(this.$('input[name=move1]').val())] = 1;
-					cur[toID(this.$('input[name=move2]').val())] = 1;
-					cur[toID(this.$('input[name=move3]').val())] = 1;
-					cur[toID(this.$('input[name=move4]').val())] = 1;
+					cur[stripPP(this.$('input[name=move1]').val())] = 1;
+					cur[stripPP(this.$('input[name=move2]').val())] = 1;
+					cur[stripPP(this.$('input[name=move3]').val())] = 1;
+					cur[stripPP(this.$('input[name=move4]').val())] = 1;
 				}
 				if (type !== this.search.qType) {
 					this.$chart.scrollTop(0);
@@ -3056,51 +3057,66 @@
 				buf += '</select></div></div>';
 			}
 
-			// PHNN Gen 1: custom type / disguise / status
-			var isDisguise = this.curTeam.format.includes('disguises');
-			var isCustomDisguise = this.curTeam.format.includes('customdisguises');
-			if (isDisguise) {
-				var phTypeList = Dex.types.all().map(function (t) { return t.name; });
-				var phTypes = (set.phType || '').split('/');
-				buf += '<div class="formrow"><label class="formlabel" title="Custom type used in battle (hidden from the opponent)">Type 1:</label><div><select name="phtype1" class="button">';
-				buf += '<option value=""' + (!phTypes[0] ? ' selected="selected"' : '') + '>(species default)</option>';
-				for (var phi = 0; phi < phTypeList.length; phi++) {
-					buf += '<option value="' + phTypeList[phi] + '"' + (phTypes[0] === phTypeList[phi] ? ' selected="selected"' : '') + '>' + phTypeList[phi] + '</option>';
+			var isDisguise = this.curTeam.format.includes('disguise');
+			var isCustomDisguise = this.curTeam.format.includes('customdisguise');
+			var isModded = isDisguise || this.curTeam.format.includes('status') || this.curTeam.format.includes('nonerfs');
+			if (isModded) {
+				if (isDisguise) {
+					var phTypeList = Dex.types.all().map(function (t) { return t.name; });
+					var phTypes = (set.phType || '').split('/');
+					buf += '<div class="formrow"><label class="formlabel" title="Custom type used in battle (hidden from the opponent)">Type 1:</label><div><select name="phtype1" class="button">';
+					buf += '<option value=""' + (!phTypes[0] ? ' selected="selected"' : '') + '>(species default)</option>';
+					for (var phi = 0; phi < phTypeList.length; phi++) {
+						buf += '<option value="' + phTypeList[phi] + '"' + (phTypes[0] === phTypeList[phi] ? ' selected="selected"' : '') + '>' + phTypeList[phi] + '</option>';
+					}
+					buf += '</select></div></div>';
+					buf += '<div class="formrow"><label class="formlabel" title="Optional second custom type">Type 2:</label><div><select name="phtype2" class="button">';
+					buf += '<option value=""' + (!phTypes[1] ? ' selected="selected"' : '') + '>(none)</option>';
+					for (var phj = 0; phj < phTypeList.length; phj++) {
+						buf += '<option value="' + phTypeList[phj] + '"' + (phTypes[1] === phTypeList[phj] ? ' selected="selected"' : '') + '>' + phTypeList[phj] + '</option>';
+					}
+					buf += '</select></div></div>';
+					buf += '<div class="formrow"><label class="formlabel" title="The Pokemon sprite your opponent and spectators see in place of the real one">Disguise:</label><div><select name="disguise" class="button">';
+					buf += '<option value=""' + (!set.disguise ? ' selected="selected"' : '') + '>(none — show real sprite)</option>';
+					var disguiseMons = [];
+					for (var dexid in BattlePokedex) {
+						var dsp = Dex.species.get(dexid);
+						if (isCustomDisguise ? dsp.exists : (dsp.exists && dsp.num >= 1 && !dsp.forme)) disguiseMons.push(dsp);
+					}
+					disguiseMons.sort(function (a, b) { return a.num - b.num; });
+					var curDisguiseId = toID(set.disguise);
+					for (var dgi = 0; dgi < disguiseMons.length; dgi++) {
+						buf += '<option value="' + disguiseMons[dgi].id + '"' + (curDisguiseId === disguiseMons[dgi].id ? ' selected="selected"' : '') + '>' + disguiseMons[dgi].name + '</option>';
+					}
+					buf += '</select></div></div>';
 				}
-				buf += '</select></div></div>';
-				buf += '<div class="formrow"><label class="formlabel" title="Optional second custom type">Type 2:</label><div><select name="phtype2" class="button">';
-				buf += '<option value=""' + (!phTypes[1] ? ' selected="selected"' : '') + '>(none)</option>';
-				for (var phj = 0; phj < phTypeList.length; phj++) {
-					buf += '<option value="' + phTypeList[phj] + '"' + (phTypes[1] === phTypeList[phj] ? ' selected="selected"' : '') + '>' + phTypeList[phj] + '</option>';
-				}
-				buf += '</select></div></div>';
-				buf += '<div class="formrow"><label class="formlabel" title="The Pokemon sprite your opponent and spectators see in place of the real one">Disguise:</label><div><select name="disguise" class="button">';
-				buf += '<option value=""' + (!set.disguise ? ' selected="selected"' : '') + '>(none — show real sprite)</option>';
-				var disguiseMons = [];
-				for (var dexid in BattlePokedex) {
-					var dsp = Dex.species.get(dexid);
-					if (isCustomDisguise ? dsp.exists : (dsp.exists && dsp.num >= 1 && !dsp.forme)) disguiseMons.push(dsp);
-				}
-				disguiseMons.sort(function (a, b) { return a.num - b.num; });
-				var curDisguiseId = toID(set.disguise);
-				for (var dgi = 0; dgi < disguiseMons.length; dgi++) {
-					buf += '<option value="' + disguiseMons[dgi].id + '"' + (curDisguiseId === disguiseMons[dgi].id ? ' selected="selected"' : '') + '>' + disguiseMons[dgi].name + '</option>';
-				}
-				buf += '</select></div></div>';
 				buf += '<div class="formrow"><label class="formlabel" title="Bring this Pokemon in already afflicted with a status">Status:</label><div><select name="startstatus" class="button">';
 				var phStatuses = [['', 'None'], ['psn', 'Poisoned'], ['par', 'Paralyzed'], ['slp', 'Asleep'], ['brn', 'Burned'], ['frz', 'Frozen']];
 				for (var phk = 0; phk < phStatuses.length; phk++) {
 					buf += '<option value="' + phStatuses[phk][0] + '"' + ((set.startStatus || '') === phStatuses[phk][0] ? ' selected="selected"' : '') + '>' + phStatuses[phk][1] + '</option>';
 				}
 				buf += '</select></div></div>';
-			}
-			if (((this.curTeam.gen === 2 && (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses'))) || (this.curTeam.gen === 9 && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) && !this.curTeam.format.includes('disguises')) {
-				buf += '<div class="formrow"><label class="formlabel" title="Bring this Pokemon in already afflicted with a status">Status:</label><div><select name="startstatus" class="button">';
-				var phStatuses2 = [['', 'None'], ['psn', 'Poisoned'], ['par', 'Paralyzed'], ['slp', 'Asleep'], ['brn', 'Burned'], ['frz', 'Frozen']];
-				for (var pk2 = 0; pk2 < phStatuses2.length; pk2++) {
-					buf += '<option value="' + phStatuses2[pk2][0] + '"' + ((set.startStatus || '') === phStatuses2[pk2][0] ? ' selected="selected"' : '') + '>' + phStatuses2[pk2][1] + '</option>';
+				buf += '<div class="formrow"><label class="formlabel">Starting HP:</label><div><input type="number" min="1" max="999" step="1" name="starthp" placeholder="Max" value="' + (set.startHp || '') + '" class="textbox inputform numform" /></div></div>';
+				
+				if (!set.moves) set.moves = [];
+				for (var m = 0; m < 4; m++) {
+					var mv = set.moves[m] || '';
+					var mpp = '';
+					var mppup = '3';
+					var pmatch = mv.match(/\((\d+)\/(\d+)\)$/);
+					if (pmatch) {
+						mpp = pmatch[1];
+						mppup = pmatch[2];
+					}
+					buf += '<div class="formrow"><label class="formlabel">Move ' + (m+1) + ' PP:</label><div>';
+					buf += '<input type="number" min="1" max="99" step="1" name="move' + (m+1) + 'pp" placeholder="Base" value="' + mpp + '" class="textbox inputform numform" /> / ';
+					buf += '<select name="move' + (m+1) + 'ppups" class="button">';
+					buf += '<option value="0"' + (mppup === '0' ? ' selected="selected"' : '') + '>0</option>';
+					buf += '<option value="1"' + (mppup === '1' ? ' selected="selected"' : '') + '>1</option>';
+					buf += '<option value="2"' + (mppup === '2' ? ' selected="selected"' : '') + '>2</option>';
+					buf += '<option value="3"' + (mppup === '3' ? ' selected="selected"' : '') + '>3 (Max)</option>';
+					buf += '</select></div></div>';
 				}
-				buf += '</select></div></div>';
 			}
 
 			buf += '</form>';
@@ -3188,21 +3204,23 @@
 				delete set.teraType;
 			}
 
-			// PHNN Gen 1: custom type / disguise / status
-			if (this.curTeam.format.includes('disguises')) {
-				var phType1 = this.$chart.find('select[name=phtype1]').val();
-				var phType2 = this.$chart.find('select[name=phtype2]').val();
-				if (phType1) {
-					set.phType = phType2 ? (phType1 + '/' + phType2) : phType1;
-				} else {
-					delete set.phType;
-				}
-				var disguiseInput = this.$chart.find('select[name=disguise]').val();
-				var disguiseSpecies = Dex.species.get(disguiseInput);
-				if (disguiseInput && disguiseSpecies.exists) {
-					set.disguise = disguiseSpecies.name;
-				} else {
-					delete set.disguise;
+			var isModded = this.curTeam.format.includes('disguise') || this.curTeam.format.includes('status') || this.curTeam.format.includes('nonerfs');
+			if (isModded) {
+				if (this.curTeam.format.includes('disguise')) {
+					var phType1 = this.$chart.find('select[name=phtype1]').val();
+					var phType2 = this.$chart.find('select[name=phtype2]').val();
+					if (phType1) {
+						set.phType = phType2 ? (phType1 + '/' + phType2) : phType1;
+					} else {
+						delete set.phType;
+					}
+					var disguiseInput = this.$chart.find('select[name=disguise]').val();
+					var disguiseSpecies = Dex.species.get(disguiseInput);
+					if (disguiseInput && disguiseSpecies.exists) {
+						set.disguise = disguiseSpecies.name;
+					} else {
+						delete set.disguise;
+					}
 				}
 				var startStatus = this.$chart.find('select[name=startstatus]').val();
 				if (['psn', 'par', 'slp', 'brn', 'frz'].indexOf(startStatus) >= 0) {
@@ -3210,56 +3228,30 @@
 				} else {
 					delete set.startStatus;
 				}
-			}
-			if (((this.curTeam.gen === 2 && (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses'))) || (this.curTeam.gen === 9 && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) && !this.curTeam.format.includes('disguises')) {
-				var startStatus2 = this.$chart.find('select[name=startstatus]').val();
-				if (['psn', 'par', 'slp', 'brn', 'frz'].indexOf(startStatus2) >= 0) {
-					set.startStatus = startStatus2;
+				
+				var startHp = parseInt(this.$chart.find('input[name=starthp]').val(), 10);
+				if (!isNaN(startHp) && startHp > 0) {
+					set.startHp = startHp;
 				} else {
-					delete set.startStatus;
+					delete set.startHp;
+				}
+				
+				if (!set.moves) set.moves = [];
+				for (var m = 0; m < 4; m++) {
+					var mpp = parseInt(this.$chart.find('input[name=move' + (m+1) + 'pp]').val(), 10);
+					var mppup = this.$chart.find('select[name=move' + (m+1) + 'ppups]').val();
+					var mv = set.moves[m] || '';
+					var pmatch = mv.match(/\((\d+)\/(\d+)\)$/);
+					if (pmatch) mv = mv.slice(0, pmatch.index).trim();
+					if (!isNaN(mpp) && mpp > 0) {
+						set.moves[m] = (mv || '(No Move)') + ' (' + mpp + '/' + (mppup || '3') + ')';
+					} else if (pmatch) {
+						set.moves[m] = mv;
+					}
 				}
 			}
 
-			// update details cell
-			var buf = '';
-			var GenderChart = {
-				'M': 'Male',
-				'F': 'Female',
-				'N': '&mdash;'
-			};
-			buf += '<span class="detailcell detailcell-first"><label>Level</label>' + (set.level || 100) + '</span>';
-			if (this.curTeam.gen > 1) {
-				buf += '<span class="detailcell"><label>Gender</label>' + GenderChart[set.gender || 'N'] + '</span>';
-				if (isLetsGo) {
-					buf += '<span class="detailcell"><label>Happiness</label>70</span>';
-				} else {
-					if (this.curTeam.gen < 8 || isNatDex) buf += '<span class="detailcell"><label>Happiness</label>' + (typeof set.happiness === 'number' ? set.happiness : 255) + '</span>';
-				}
-				buf += '<span class="detailcell"><label>Shiny</label>' + (set.shiny ? 'Yes' : 'No') + '</span>';
-				if (!isLetsGo && (this.curTeam.gen < 8 || isNatDex)) buf += '<span class="detailcell"><label>HP Type</label>' + (set.hpType || 'Dark') + '</span>';
-				if (this.curTeam.gen === 8 && !isBDSP) {
-					if (!species.cannotDynamax) {
-						buf += '<span class="detailcell"><label>Dmax Level</label>' + (typeof set.dynamaxLevel === 'number' ? set.dynamaxLevel : 10) + '</span>';
-					}
-					if (species.canGigantamax || species.forme === 'Gmax') {
-						buf += '<span class="detailcell"><label>Gmax</label>' + (set.gigantamax || species.forme === 'Gmax' ? 'Yes' : 'No') + '</span>';
-					}
-				}
-			}
-			if (this.curTeam.gen === 9 && !isChampions) {
-				buf += '<span class="detailcell"><label>Tera Type</label>' + (set.teraType || ((this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')) ? 'None / Dyna' : (species.requiredTeraType || species.types[0]))) + '</span>';
-			}
-			if (this.curTeam.format.includes('disguises')) {
-				var phT = (set.phType || '').split('/');
-				buf += '<span class="detailcell"><label>Type 1</label>' + (phT[0] || species.types[0]) + '</span>';
-				buf += '<span class="detailcell"><label>Type 2</label>' + (phT[1] || species.types[1] || '(none)') + '</span>';
-				buf += '<span class="detailcell"><label>Disguise</label>' + (set.disguise ? Dex.species.get(set.disguise).name : '(none)') + '</span>';
-				buf += '<span class="detailcell"><label>Status</label>' + (set.startStatus || 'None') + '</span>';
-			}
-			if (((this.curTeam.gen === 2 && (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses'))) || (this.curTeam.gen === 9 && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) && !this.curTeam.format.includes('disguises')) {
-				buf += '<span class="detailcell"><label>Status</label>' + (set.startStatus || 'None') + '</span>';
-			}
-			this.$('button[name=details]').html(buf);
+			this.updateSetTop();
 
 			this.save();
 			this.updatePokemonSprite();
@@ -3420,7 +3412,16 @@
 		chartChange: function (e, selectNext) {
 			var name = e.currentTarget.name;
 			if (this.curChartName !== name) return;
-			var id = toID(e.currentTarget.value);
+			var rawValue = e.currentTarget.value;
+			var ppSuffix = '';
+			if (name === 'move1' || name === 'move2' || name === 'move3' || name === 'move4') {
+				var ppMatch = rawValue.match(/\s*(\((\d+)(?:\/(\d+))?\))\s*$/);
+				if (ppMatch) {
+					ppSuffix = ' ' + ppMatch[1];
+					rawValue = rawValue.slice(0, ppMatch.index);
+				}
+			}
+			var id = toID(rawValue);
 			if (id in BattleAliases) id = toID(BattleAliases[id]);
 			var val = '';
 			var format = this.curTeam.format;
@@ -3464,6 +3465,7 @@
 					return;
 				}
 			}
+			if (val && ppSuffix) val = val + ppSuffix;
 			this.chartSet(val, selectNext);
 		},
 		searchChange: function (e) {

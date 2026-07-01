@@ -351,20 +351,32 @@ export class Pokemon {
 		if (!this.set.moves?.length) {
 			throw new Error(`Set ${this.name} has no moves`);
 		}
-		for (const moveid of this.set.moves) {
+		for (const moveStr of this.set.moves) {
+			let moveid = moveStr;
+			let customPP: number | undefined = undefined;
+			let customPpUps: number | undefined = undefined;
+
+			const match = /(.*)\s+\((\d+)(?:\/(\d+))?\)$/.exec(moveStr);
+			if (match) {
+				moveid = match[1].trim();
+				customPP = parseInt(match[2]);
+				if (match[3] !== undefined) customPpUps = parseInt(match[3]);
+			}
+
 			let move = this.battle.dex.moves.get(moveid);
 			if (!move.id) continue;
 			if (move.id === 'hiddenpower' && move.type !== 'Normal') {
 				if (!set.hpType) set.hpType = move.type;
 				move = this.battle.dex.moves.get('hiddenpower');
 			}
-			const ppUps = move.noPPBoosts || move.id === 'trumpcard' ? 0 : 3;
-			const basePP = this.battle.calculatePP(move, ppUps);
+			const ppUps = customPpUps !== undefined ? customPpUps : (move.noPPBoosts || move.id === 'trumpcard' ? 0 : 3);
+			const maxPP = this.battle.calculatePP(move, ppUps);
+			const basePP = customPP !== undefined ? customPP : maxPP;
 			this.baseMoveSlots.push({
 				move: move.name,
 				id: move.id,
 				pp: basePP,
-				maxpp: basePP,
+				maxpp: maxPP,
 				target: move.target,
 				disabled: false,
 				disabledSource: '',
@@ -503,6 +515,9 @@ export class Pokemon {
 		this.hp = 0;
 		this.clearVolatile();
 		this.hp = this.maxhp;
+		if (this.set.startHp !== undefined) {
+			this.hp = Math.max(1, Math.min(this.set.startHp, this.maxhp));
+		}
 	}
 
 	toJSON(): AnyObject {

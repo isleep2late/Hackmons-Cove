@@ -117,6 +117,7 @@ export interface PokemonSet {
 	phType?: string;
 	disguise?: string;
 	startStatus?: string;
+	startHp?: number;
 }
 
 export const Teams = new class Teams {
@@ -204,16 +205,17 @@ export const Teams = new class Teams {
 
 			if (set.pokeball || set.hpType || set.gigantamax ||
 				(set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10) || set.teraType ||
-				set.phType || set.disguise || set.startStatus) {
+				set.phType || set.disguise || set.startStatus || set.startHp !== undefined) {
 				buf += `,${set.hpType || ''}`;
 				buf += `,${this.packName(set.pokeball || '')}`;
 				buf += `,${set.gigantamax ? 'G' : ''}`;
 				buf += `,${set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10 ? set.dynamaxLevel : ''}`;
 				buf += `,${set.teraType || ''}`;
-				if (set.phType || set.disguise || set.startStatus) {
+				if (set.phType || set.disguise || set.startStatus || set.startHp !== undefined) {
 					buf += `,${(set.phType || '').replace(/\//g, '-')}`;
 					buf += `,${this.packName(set.disguise || '')}`;
 					buf += `,${set.startStatus || ''}`;
+					if (set.startHp !== undefined) buf += `,${set.startHp}`;
 				}
 			}
 		}
@@ -272,7 +274,11 @@ export const Teams = new class Teams {
 			// moves
 			j = buf.indexOf('|', i);
 			if (j < 0) return null;
-			set.moves = buf.substring(i, j).split(',', 24).map(name => this.unpackName(name, Dex.moves));
+			set.moves = buf.substring(i, j).split(',', 24).map(name => {
+				const match = /(.*)(\(\d+(?:\/\d+)?\))$/.exec(name);
+				if (match) return this.unpackName(match[1], Dex.moves) + ' ' + match[2];
+				return this.unpackName(name, Dex.moves);
+			});
 			i = j + 1;
 
 			// nature
@@ -335,9 +341,9 @@ export const Teams = new class Teams {
 			j = buf.indexOf(']', i);
 			let misc;
 			if (j < 0) {
-				if (i < buf.length) misc = buf.substring(i).split(',', 9);
+				if (i < buf.length) misc = buf.substring(i).split(',', 10);
 			} else {
-				if (i !== j) misc = buf.substring(i, j).split(',', 9);
+				if (i !== j) misc = buf.substring(i, j).split(',', 10);
 			}
 			if (misc) {
 				set.happiness = (misc[0] ? Number(misc[0]) : 255);
@@ -349,6 +355,7 @@ export const Teams = new class Teams {
 				if (misc[6]) set.phType = misc[6].replace(/-/g, '/');
 				if (misc[7]) set.disguise = this.unpackName(misc[7], Dex.species);
 				if (misc[8]) set.startStatus = misc[8];
+				if (misc[9]) set.startHp = Number(misc[9]);
 			}
 			if (j < 0) break;
 			i = j + 1;
@@ -360,6 +367,10 @@ export const Teams = new class Teams {
 	/** Very similar to toID but without the lowercase conversion */
 	packName(this: void, name: string | undefined | null) {
 		if (!name) return '';
+		const match = /(.*)\s+(\(\d+(?:\/\d+)?\))$/.exec(name);
+		if (match) {
+			return match[1].replace(/[^A-Za-z0-9]+/g, '') + match[2];
+		}
 		return name.replace(/[^A-Za-z0-9]+/g, '');
 	}
 
@@ -408,6 +419,9 @@ export const Teams = new class Teams {
 		// details
 		if (set.level && set.level !== 100) {
 			out += `Level: ${set.level}  \n`;
+		}
+		if (set.startHp !== undefined) {
+			out += `HP: ${set.startHp}  \n`;
 		}
 		if (set.shiny) {
 			out += `Shiny: Yes  \n`;
@@ -502,6 +516,9 @@ export const Teams = new class Teams {
 		} else if (line.startsWith('Level: ')) {
 			line = line.slice(7);
 			set.level = +line;
+		} else if (line.startsWith('HP: ')) {
+			line = line.slice(4);
+			set.startHp = +line;
 		} else if (line.startsWith('Happiness: ')) {
 			line = line.slice(11);
 			set.happiness = +line;
