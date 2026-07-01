@@ -802,9 +802,13 @@ Storage.packTeam = function (team) {
 		// moves
 		buf += '|';
 		if (set.moves) for (var j = 0; j < set.moves.length; j++) {
-			var moveid = toID(set.moves[j]);
+			var moveEntry = set.moves[j] || '';
+			// PHNN custom PP: keep the "(pp/ppups)" suffix out of toID so it survives packing
+			var ppMatch = moveEntry.match(/(.*)\s*(\(\d+(?:\/\d+)?\))$/);
+			var moveid = toID(ppMatch ? ppMatch[1] : moveEntry);
+			var ppSuffix = ppMatch ? ppMatch[2] : '';
 			if (j && !moveid) continue;
-			buf += (j ? ',' : '') + moveid;
+			buf += (j ? ',' : '') + moveid + ppSuffix;
 			if (moveid.substr(0, 11) === 'hiddenpower' && moveid.length > 11) hasHP = true;
 		}
 
@@ -864,17 +868,18 @@ Storage.packTeam = function (team) {
 		}
 
 		if (set.pokeball || (set.hpType && !hasHP) || set.gigantamax || (set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10) || set.teraType ||
-			set.phType || set.disguise || set.startStatus) {
+			set.phType || set.disguise || set.startStatus || set.startHp !== undefined) {
 			buf += ',' + (set.hpType || '');
 			buf += ',' + toID(set.pokeball);
 			buf += ',' + (set.gigantamax ? 'G' : '');
 			buf += ',' + (set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10 ? set.dynamaxLevel : '');
 			buf += ',' + (set.teraType || '');
 			// PHNN Gen 1 fields
-			if (set.phType || set.disguise || set.startStatus) {
+			if (set.phType || set.disguise || set.startStatus || set.startHp !== undefined) {
 				buf += ',' + ((set.phType || '').replace(/\//g, '-'));
 				buf += ',' + toID(set.disguise);
 				buf += ',' + (set.startStatus || '');
+				if (set.startHp !== undefined) buf += ',' + set.startHp;
 			}
 		}
 	}
@@ -985,9 +990,9 @@ Storage.fastUnpackTeam = function (buf) {
 		j = buf.indexOf(']', i);
 		var misc = undefined;
 		if (j < 0) {
-			if (i < buf.length) misc = buf.substring(i).split(',', 9);
+			if (i < buf.length) misc = buf.substring(i).split(',', 10);
 		} else {
-			if (i !== j) misc = buf.substring(i, j).split(',', 9);
+			if (i !== j) misc = buf.substring(i, j).split(',', 10);
 		}
 		if (misc) {
 			set.happiness = (misc[0] ? Number(misc[0]) : 255);
@@ -1000,6 +1005,7 @@ Storage.fastUnpackTeam = function (buf) {
 			if (misc[6]) set.phType = misc[6].replace(/-/g, '/');
 			if (misc[7]) set.disguise = misc[7];
 			if (misc[8]) set.startStatus = misc[8];
+			if (misc[9]) set.startHp = Number(misc[9]);
 		}
 		if (j < 0) break;
 		i = j + 1;
@@ -1042,8 +1048,11 @@ Storage.unpackTeam = function (buf) {
 
 		// moves
 		j = buf.indexOf('|', i);
-		set.moves = buf.substring(i, j).split(',').map(function (moveid) {
-			return Dex.moves.get(moveid).name;
+		set.moves = buf.substring(i, j).split(',').map(function (moveEntry) {
+			// PHNN custom PP: re-attach the "(pp/ppups)" suffix after resolving the move name
+			var ppMatch = moveEntry.match(/(.*)(\(\d+(?:\/\d+)?\))$/);
+			if (ppMatch) return Dex.moves.get(ppMatch[1]).name + ' ' + ppMatch[2];
+			return Dex.moves.get(moveEntry).name;
 		});
 		i = j + 1;
 
@@ -1112,9 +1121,9 @@ Storage.unpackTeam = function (buf) {
 		j = buf.indexOf(']', i);
 		var misc = undefined;
 		if (j < 0) {
-			if (i < buf.length) misc = buf.substring(i).split(',', 9);
+			if (i < buf.length) misc = buf.substring(i).split(',', 10);
 		} else {
-			if (i !== j) misc = buf.substring(i, j).split(',', 9);
+			if (i !== j) misc = buf.substring(i, j).split(',', 10);
 		}
 		if (misc) {
 			set.happiness = (misc[0] ? Number(misc[0]) : 255);
@@ -1127,6 +1136,7 @@ Storage.unpackTeam = function (buf) {
 			if (misc[6]) set.phType = misc[6].replace(/-/g, '/');
 			if (misc[7]) set.disguise = misc[7];
 			if (misc[8]) set.startStatus = misc[8];
+			if (misc[9]) set.startHp = Number(misc[9]);
 		}
 		if (j < 0 || buf.indexOf('|', j) < 0) break;
 		i = j + 1;
@@ -1297,6 +1307,9 @@ Storage.importTeam = function (buffer, teams) {
 		} else if (line.substr(0, 7) === 'Level: ') {
 			line = line.substr(7);
 			curSet.level = +line;
+		} else if (line.substr(0, 4) === 'HP: ') {
+			line = line.substr(4);
+			curSet.startHp = +line;
 		} else if (line.substr(0, 11) === 'Happiness: ') {
 			line = line.substr(11);
 			curSet.happiness = +line;
@@ -1438,6 +1451,9 @@ Storage.exportTeam = function (team, hidestats) {
 		}
 		if (curSet.level && curSet.level !== 100) {
 			text += 'Level: ' + curSet.level + "  \n";
+		}
+		if (curSet.startHp) {
+			text += 'HP: ' + curSet.startHp + "  \n";
 		}
 		if (curSet.shiny) {
 			text += 'Shiny: Yes  \n';

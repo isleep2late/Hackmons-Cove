@@ -405,6 +405,9 @@ export const Teams = new class {
 		if (set.teraType) {
 			text += `Tera Type: ${set.teraType}\n`;
 		}
+		if (set.startHp) {
+			text += `HP: ${set.startHp}\n`;
+		}
 
 		if (!newFormat) {
 			for (let move of set.moves || []) {
@@ -481,6 +484,8 @@ export const Teams = new class {
 			set.name = line.slice(10);
 		} else if (line.startsWith('Species: ')) {
 			set.species = line.slice(9);
+		} else if (line.startsWith('HP: ')) {
+			set.startHp = parseInt(line.slice(4), 10);
 		} else if (line === 'Shiny: Yes' || line === 'Shiny') {
 			set.shiny = true;
 		} else if (line.startsWith('Level: ')) {

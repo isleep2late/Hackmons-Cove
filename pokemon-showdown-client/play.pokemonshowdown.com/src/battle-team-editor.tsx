@@ -1814,10 +1814,16 @@ class TeamTextbox extends preact.Component<{
 						) : this.innerFocus.type === 'details' ? (
 							<DetailsForm editor={editor} set={this.editor.sets[this.innerFocus.setIndex]} onChange={this.handleSetChange} />
 						) : (
-							<PSSearchResults
-								search={editor.search} resultIndex={editor.searchIndex}
-								windowing={this.windowResults()} onSelect={this.selectResult}
-							/>
+							<div class="searchresults-container" style="display: flex; flex-direction: column; height: 100%;">
+								{(this.innerFocus.type === 'move' && (editor.format.includes('nonerfs') || editor.format.includes('disguise') || editor.format.includes('status'))) && (
+									<MoveDetailsForm
+										editor={editor} set={this.editor.sets[this.innerFocus.setIndex]} onChange={this.handleSetChange} />
+								)}
+								<PSSearchResults
+									search={editor.search} resultIndex={editor.searchIndex}
+									windowing={this.windowResults()} onSelect={this.selectResult}
+								/>
+							</div>
 						)}
 					</div>
 				)}
@@ -3004,6 +3010,16 @@ class DetailsForm extends preact.Component<{
 		}
 		this.props.onChange();
 	};
+	changeStartHp = (ev: Event) => {
+		const target = ev.currentTarget as HTMLInputElement;
+		const { set } = this.props;
+		if (target.value) {
+			set.startHp = parseInt(target.value.trim());
+		} else {
+			delete set.startHp;
+		}
+		this.props.onChange();
+	};
 	changeGender = (ev: Event) => {
 		const target = ev.currentTarget as HTMLInputElement;
 		const { set } = this.props;
@@ -3088,6 +3104,14 @@ class DetailsForm extends preact.Component<{
 					class="textbox inputform numform default-placeholder" style="width: 50px"
 					onInput={this.changeLevel} onChange={this.changeLevel} disabled={editor.isChampions}
 				/></label><small>(You probably want to change the team's levels by changing the format, not here)</small></p>
+				{ (editor.format.includes('nonerfs') || editor.format.includes('disguise') || editor.format.includes('status')) && (
+					<p><label class="label">Starting HP: <input
+						name="starthp" value={set.startHp ?? ''} placeholder="Max"
+						type="number" inputMode="numeric" min="1" max="999" step="1"
+						class="textbox inputform numform default-placeholder" style="width: 50px"
+						onInput={this.changeStartHp} onChange={this.changeStartHp}
+					/></label><small>(Custom starting HP is active for this format)</small></p>
+				)}
 				{editor.gen > 1 && (<>
 					<p><div class="label">Shiny: <div class="labeled">
 						<label class="checkbox inline"><input
@@ -3215,4 +3239,108 @@ class DetailsForm extends preact.Component<{
 		this.props.onChange();
 		this.forceUpdate();
 	};
+}
+
+class MoveDetailsForm extends preact.Component<{
+	editor: TeamEditorState,
+	set: Dex.PokemonSet,
+	onChange: () => void,
+}> {
+	changePP = (ev: Event) => {
+		const target = ev.currentTarget as HTMLInputElement;
+		const moveIndex = parseInt(target.getAttribute('data-index')!);
+		const { set } = this.props;
+		let moveName = set.moves[moveIndex];
+		if (!moveName) return;
+
+		let baseMove = moveName;
+		let ppups = 3;
+		const match = /(.*)\s+\((\d+)(?:\/(\d+))?\)$/.exec(moveName);
+		if (match) {
+			baseMove = match[1];
+			if (match[3]) ppups = parseInt(match[3]);
+		}
+
+		const newPP = target.value.trim();
+		if (newPP) {
+			set.moves[moveIndex] = `${baseMove} (${newPP}/${ppups})`;
+		} else {
+			set.moves[moveIndex] = baseMove;
+		}
+		this.props.onChange();
+	};
+
+	changePPUps = (ev: Event) => {
+		const target = ev.currentTarget as HTMLSelectElement;
+		const moveIndex = parseInt(target.getAttribute('data-index')!);
+		const { set } = this.props;
+		let moveName = set.moves[moveIndex];
+		if (!moveName) return;
+
+		let baseMove = moveName;
+		let pp = '';
+		const match = /(.*)\s+\((\d+)(?:\/(\d+))?\)$/.exec(moveName);
+		if (match) {
+			baseMove = match[1];
+			pp = match[2];
+		}
+
+		if (pp) {
+			set.moves[moveIndex] = `${baseMove} (${pp}/${target.value})`;
+		}
+		this.props.onChange();
+	};
+
+	render() {
+		const { set } = this.props;
+		if (!set.moves || !set.moves.length || !set.moves.some(Boolean)) return null;
+
+		return <div style="font-size:10pt; padding: 10px; background: rgba(0, 0, 0, 0.05); border-bottom: 1px solid #ccc; margin-bottom: 5px; flex-shrink: 0;">
+			<div class="resultheader"><h3>Custom PP Configuration</h3></div>
+			<table style="width: 100%; border-spacing: 0 5px;">
+				<thead>
+					<tr>
+						<th style="text-align: left; padding-right: 10px;">Move</th>
+						<th style="text-align: left; padding-right: 10px;">Starting PP</th>
+						<th style="text-align: left;">PP Ups</th>
+					</tr>
+				</thead>
+				<tbody>
+					{set.moves.map((move, i) => {
+						if (!move) return null;
+						let baseMove = move;
+						let pp = '';
+						let ppups = '3';
+						const match = /(.*)\s+\((\d+)(?:\/(\d+))?\)$/.exec(move);
+						if (match) {
+							baseMove = match[1];
+							pp = match[2];
+							if (match[3]) ppups = match[3];
+						}
+
+						return <tr>
+							<td style="padding-right: 10px;"><strong>{baseMove}</strong></td>
+							<td style="padding-right: 10px;">
+								<input
+									type="number" inputMode="numeric" min="1" max="99" step="1"
+									class="textbox numform" style="width: 60px"
+									placeholder="Max" value={pp} data-index={i}
+									onInput={this.changePP} onChange={this.changePP}
+								/>
+							</td>
+							<td>
+								<select class="button" data-index={i} value={ppups} onChange={this.changePPUps} disabled={!pp}>
+									<option value="0">0</option>
+									<option value="1">1</option>
+									<option value="2">2</option>
+									<option value="3">3</option>
+								</select>
+							</td>
+						</tr>;
+					})}
+				</tbody>
+			</table>
+			<small style="display: block; margin-top: 5px;">Clear the PP input to reset to standard Max PP.</small>
+		</div>;
+	}
 }
