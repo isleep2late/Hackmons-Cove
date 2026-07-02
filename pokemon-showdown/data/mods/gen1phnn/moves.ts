@@ -1,15 +1,3 @@
-/**
- * Japanese Gen 1 move mechanics, merged into the gen1phnn mod so [Gen 1] Disguises
- * uses the pre-international-release RBY rules:
- *  - Blizzard: 30% freeze (vs. the international 10%)
- *  - Swift: rolls accuracy normally (except vs. Substitute, per the invulnerability
- *    + substitute onAccuracy override below); no auto-hit
- *  - Substitute: draining moves fail against a Substitute; stricter status-move
- *    blocking than international Gen 1
- *
- * Everything else falls through to stock gen1 via `inherit: true`.
- */
-
 export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	blizzard: {
 		inherit: true,
@@ -31,8 +19,6 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 					return null;
 				}
 				if (move.category === 'Status') {
-					// In gen 1 it only blocks:
-					// poison, confusion, secondary effect confusion, stat reducing moves and Leech Seed.
 					const subBlocked = ['lockon', 'meanlook', 'mindreader', 'nightmare'];
 					if ((move.status && ['psn', 'tox'].includes(move.status)) || (move.boosts && target !== source) ||
 						move.volatileStatus === 'confusion' || subBlocked.includes(move.id)) {
@@ -41,9 +27,6 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 					return;
 				}
 				if (move.volatileStatus && target === source) return;
-				// NOTE: In future generations the damage is capped to the remaining HP of the
-				// Substitute, here we deliberately use the uncapped damage when tracking lastDamage etc.
-				// Also, multi-hit moves must always deal the same damage as the first hit for any subsequent hits
 				const uncappedDamage = move.hit > 1 ? this.lastDamage : this.actions.getDamage(source, target, move);
 				if (!uncappedDamage && uncappedDamage !== 0) return null;
 				this.lastDamage = uncappedDamage;
@@ -55,7 +38,6 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 				} else {
 					this.add('-activate', target, 'Substitute', '[damage]');
 				}
-				// Drain/recoil does not happen if the substitute breaks
 				if (target.volatiles['substitute']) {
 					if (move.recoil) {
 						this.damage(Math.round(uncappedDamage * move.recoil[0] / move.recoil[1]), source, target, 'recoil');
@@ -65,7 +47,6 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 					}
 				}
 				this.runEvent('AfterSubDamage', target, source, move, uncappedDamage);
-				// Add here counter damage
 				const lastAttackedBy = target.getLastAttackedBy();
 				if (!lastAttackedBy) {
 					target.attackedBy.push({ source, move: move.id, damage: uncappedDamage, thisTurn: true, slot: source.getSlot() });
