@@ -11,7 +11,7 @@
 const fs = require('node:fs');
 const crypto = require('node:crypto');
 const child_process = require('node:child_process');
-const compiler = require('./compiler.mjs');
+const compiler = require('build-tools/compiler.mjs');
 
 process.chdir(__dirname + '/..');
 
