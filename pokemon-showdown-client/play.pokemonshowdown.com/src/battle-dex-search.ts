@@ -1891,9 +1891,9 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 			learnsetid = this.nextLearnsetid(learnsetid, species.id, true);
 		}
 		const glitchList = ['mew', 'ditto', 'jigglypuff', 'wigglytuff', 'mrmime', 'sudowoodo', 'bonsly', 'mimejr', 'chatot', 'caterpie', 'metapod', 'butterfree', 'weedle', 'kakuna', 'beedrill', 'magikarp', 'gyarados', 'unown', 'wobbuffet', 'smeargle', 'wurmple', 'silcoon', 'cascoon', 'wynaut', 'beldum', 'metagross', 'dustox', 'beautifly', 'metang', 'cleffa', 'clefairy', 'clefable', 'igglybuff', 'smoochum', 'jynx', 'skitty', 'delcatty', 'plusle', 'minun', 'spinda', 'riolu', 'lucario', 'happiny', 'chansey', 'blissey', 'mesprit', 'glameow', 'purugly', 'meowth', 'persian', 'drowzee', 'hypno', 'sentret', 'furret', 'sneasel', 'weavile', 'chimchar', 'monferno', 'infernape', 'togepi', 'togetic', 'togekiss', 'munchlax', 'snorlax', 'mankey', 'primeape', 'poliwhirl', 'poliwrath', 'abra', 'kadabra', 'alakazam', 'machop', 'machoke', 'machamp', 'geodude', 'graveler', 'golem', 'gengar', 'hitmonlee', 'hitmonchan', 'mewtwo', 'politoed', 'aipom', 'ambipom', 'snubbull', 'granbull', 'teddiursa', 'ursaring', 'miltank', 'celebi', 'ludicolo', 'makuhita', 'hariyama', 'sableye', 'meditite', 'medicham', 'volbeat', 'illumise', 'kecleon', 'banette', 'dusclops', 'dusknoir', 'jirachi'];
-		const isGlitchedMon = format.includes('glitch') && (glitchList.includes(species.id) || glitchList.includes(toID(species.baseSpecies)));
+		const isGlitchedMon = (format.includes('glitch') || (this.dex.gen === 4 && format === 'rage')) && (glitchList.includes(species.id) || glitchList.includes(toID(species.baseSpecies)));
 		if (sketch || isHackmons || isGlitchedMon) {
-			if (isHackmons) moves = [];
+			if (isHackmons || isGlitchedMon) moves = [];
 			for (let id in BattleMovedex) {
 				if (!format.startsWith('cap') && (id === 'paleowave' || id === 'shadowstrike')) continue;
 				if (isGlitchedMon && (id === 'chatter' || id === 'struggle')) continue;
