@@ -659,6 +659,9 @@ abstract class BattleTypedSearch<T extends SearchType> {
 		if ((format.includes('nonerfs') || format.includes('phnn')) && this.dex.gen === 9) {
 			this.dex = Dex.mod('gen9phnn' as ID);
 		}
+		if (format === 'disguises' && this.dex.gen === 1) {
+			this.dex = Dex.mod('gen1phnn' as ID);
+		}
 		if (format.startsWith('vgc')) {
 			this.formatType = 'doubles';
 			this.isDoubles = true;
