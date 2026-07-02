@@ -512,7 +512,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		name: "[Gen 5] Pure Hackmons No Nerfs",
 		desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
 		mod: 'gen5phnn',
-		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Overflow Stat Mod', 'Prestatus'],
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Overflow Stat Mod', 'Prestatus', 'Max Level = 255', 'Default Level = 100'],
 	},
 	//////////////////////////////////
 	/////// Wondrous Hackmons ////////
