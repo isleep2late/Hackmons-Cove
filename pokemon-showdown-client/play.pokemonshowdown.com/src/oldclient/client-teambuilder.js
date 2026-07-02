@@ -3079,9 +3079,16 @@
 					buf += '<div class="formrow"><label class="formlabel" title="The Pokemon sprite your opponent and spectators see in place of the real one">Disguise:</label><div><select name="disguise" class="button">';
 					buf += '<option value=""' + (!set.disguise ? ' selected="selected"' : '') + '>(none — show real sprite)</option>';
 					var disguiseMons = [];
+					var isGen1Disguises = this.curTeam.gen === 1 && !isCustomDisguise;
 					for (var dexid in BattlePokedex) {
 						var dsp = Dex.species.get(dexid);
-						if (isCustomDisguise ? dsp.exists : (dsp.exists && dsp.num >= 1 && !dsp.forme)) disguiseMons.push(dsp);
+						if (isCustomDisguise) {
+							if (dsp.exists) disguiseMons.push(dsp);
+						} else if (isGen1Disguises) {
+							if (dsp.exists && dsp.num >= 0 && dsp.num <= 151 && !dsp.forme) disguiseMons.push(dsp);
+						} else if (dsp.exists && dsp.num >= 1 && !dsp.forme) {
+							disguiseMons.push(dsp);
+						}
 					}
 					disguiseMons.sort(function (a, b) { return a.num - b.num; });
 					var curDisguiseId = toID(set.disguise);
