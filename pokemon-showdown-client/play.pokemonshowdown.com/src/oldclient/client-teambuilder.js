@@ -2980,7 +2980,7 @@
 			buf += '<form class="detailsform">';
 
 			buf += '<div class="formrow"><label class="formlabel">Level:</label><div>' +
-				'<input type="number" min="1" max="' + ((this.curTeam.format.includes('customdisguises') || this.curTeam.format.includes('customgame')) ? 9999 : (((this.curTeam.gen === 1 && this.curTeam.format.includes('disguises')) || (this.curTeam.gen === 2 && (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses'))) || (this.curTeam.gen === 9 && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) ? 255 : 100)) + '" step="1" name="level" value="' +
+				'<input type="number" min="1" max="' + ((this.curTeam.format.includes('customdisguises') || this.curTeam.format.includes('customgame')) ? 9999 : (((this.curTeam.gen === 1 && this.curTeam.format.includes('disguises')) || (this.curTeam.gen === 2 && (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses'))) || ((this.curTeam.gen === 9 || this.curTeam.gen === 5) && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) ? 255 : 100)) + '" step="1" name="level" value="' +
 				(typeof set.level === 'number' ? set.level : 100) +
 				'" class="textbox inputform numform"' +
 				(isChampions ? ' disabled' : '') +
@@ -3156,7 +3156,7 @@
 
 			// level
 			var level = parseInt(this.$chart.find('input[name=level]').val(), 10);
-			var maxLevel = (this.curTeam.format.includes('customdisguises') || this.curTeam.format.includes('customgame')) ? 9999 : (((this.curTeam.gen === 1 && this.curTeam.format.includes('disguises')) || (this.curTeam.gen === 2 && (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses'))) || (this.curTeam.gen === 9 && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) ? 255 : 100);
+			var maxLevel = (this.curTeam.format.includes('customdisguises') || this.curTeam.format.includes('customgame')) ? 9999 : (((this.curTeam.gen === 1 && this.curTeam.format.includes('disguises')) || (this.curTeam.gen === 2 && (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses'))) || ((this.curTeam.gen === 9 || this.curTeam.gen === 5) && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) ? 255 : 100);
 			if (!level || level < 1) level = 100;
 			if (level > maxLevel) level = maxLevel;
 			if (level !== 100 || set.level) set.level = level;
@@ -3526,7 +3526,7 @@
 						set.level = 50;
 					}
 					if (baseFormat.startsWith('lc') || baseFormat.endsWith('lc')) set.level = 5;
-					if (this.curTeam.format.includes('disguises') || (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses')) || (this.curTeam.gen === 9 && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) set.level = this.curTeam.format.includes('customdisguises') ? 9999 : 255;
+					if (this.curTeam.format.includes('disguises') || (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses')) || ((this.curTeam.gen === 9 || this.curTeam.gen === 5) && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) set.level = this.curTeam.format.includes('customdisguises') ? 9999 : 255;
 				}
 				set.gender = 'F';
 				if (set.happiness) delete set.happiness;
@@ -3562,7 +3562,7 @@
 						set.level = 50;
 					}
 					if (baseFormat.startsWith('lc') || baseFormat.endsWith('lc')) set.level = 5;
-					if (this.curTeam.format.includes('disguises') || (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses')) || (this.curTeam.gen === 9 && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) set.level = this.curTeam.format.includes('customdisguises') ? 9999 : 255;
+					if (this.curTeam.format.includes('disguises') || (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses')) || ((this.curTeam.gen === 9 || this.curTeam.gen === 5) && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) set.level = this.curTeam.format.includes('customdisguises') ? 9999 : 255;
 				}
 				if (set.happiness) delete set.happiness;
 				if (set.shiny) delete set.shiny;
@@ -3779,7 +3779,7 @@
 
 			set.name = "";
 			set.species = val;
-			var phnnLevelFormat = this.curTeam.format.includes('disguises') || this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses') || (this.curTeam.gen === 9 && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')));
+			var phnnLevelFormat = this.curTeam.format.includes('disguises') || this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses') || ((this.curTeam.gen === 9 || this.curTeam.gen === 5) && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')));
 			if (set.level && !phnnLevelFormat) delete set.level;
 			if (this.curTeam && this.curTeam.format) {
 				var baseFormat = this.curTeam.format;
