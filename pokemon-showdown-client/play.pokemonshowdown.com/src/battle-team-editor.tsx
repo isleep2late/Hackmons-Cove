@@ -2618,8 +2618,13 @@ class StatForm extends preact.Component<{
 		const { editor, set } = this.props;
 		const team = editor.team;
 
-		const guess = new BattleStatGuesser(team.format).guess(set);
-		set.evs = guess.evs;
+		const guesser = new BattleStatGuesser(team.format);
+		const guess = guesser.guess(set);
+		set.evs = guess.evs as Dex.StatsTable;
+		if (guesser.ignoreEVLimits && guess.evs.atk === 0) {
+			if (!set.ivs) set.ivs = { hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31 };
+			set.ivs.atk = 0;
+		}
 		this.plus = guess.plusStat || null;
 		this.minus = guess.minusStat || null;
 		this.updateNatureFromPlusMinus();
