@@ -429,8 +429,8 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		desc: "Gen 8 Pure Hackmons with every BDSP Pokemon.",
 		mod: 'gen8unified',
 		searchShow: false,
-		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Overflow Stat Mod'],
-		unbanlist: ['Past', 'Future', 'Unobtainable'],
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Overflow Stat Mod', 'SwSh Plus BDSP Pokedex'],
+		unbanlist: ['Past', 'Unobtainable'],
 	},
 	{
 		name: "[Gen 6] No Limit",
