@@ -2892,7 +2892,14 @@ export class BattleStatGuesser {
 			this.dex.gen < 3 ||
 			((this.formatid.endsWith('hackmons') || this.formatid.endsWith('bh')) && this.dex.gen !== 6) ||
 			this.formatid.includes('metronomebattle') ||
-			this.formatid.endsWith('norestrictions')
+			this.formatid.endsWith('norestrictions') ||
+			this.formatid.includes('disguise') ||
+			this.formatid.includes('statuses') ||
+			this.formatid.includes('anyability') ||
+			this.formatid.includes('nolimit') ||
+			this.formatid.includes('unified') ||
+			this.formatid.includes('nonerfs') ||
+			this.formatid.includes('customgame')
 		);
 		this.useStatPoints = this.formatid.includes('champions');
 		this.supportsEVs = !this.formatid.includes('letsgo') && !this.useStatPoints;

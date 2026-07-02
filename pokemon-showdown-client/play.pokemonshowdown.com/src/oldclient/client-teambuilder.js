@@ -2386,7 +2386,15 @@
 			var guessedEVs = guess.evs;
 			var guessedPlus = guess.plusStat;
 			var guessedMinus = guess.minusStat;
-			if (((this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')) || this.curTeam.format.includes('510') || this.curTeam.format.includes('nolimit')) && role !== '?') {
+			// Formats where hackable EVs let every stat be maxed (mirrors ignoreEVLimits
+			// in battle-tooltips.ts, minus the auto-Gen-1/2 case which needs no override).
+			var fmt = this.curTeam.format;
+			var is252Format = (
+				(fmt.endsWith('hackmons') || fmt.endsWith('bh')) && this.curTeam.gen !== 6
+			) || fmt.includes('nonerfs') || fmt.includes('phnn') || fmt.includes('510') ||
+				fmt.includes('nolimit') || fmt.includes('disguise') || fmt.includes('statuses') ||
+				fmt.includes('anyability') || fmt.includes('unified') || fmt.includes('customgame');
+			if (is252Format && role !== '?') {
 				guessedEVs = { hp: 252, atk: 252, def: 252, spa: 252, spd: 252, spe: 252 };
 				var self = this;
 				var usesPhysical = (set.moves || []).some(function (m) {
@@ -2414,6 +2422,13 @@
 
 			if (setGuessed) {
 				set.evs = guessedEVs;
+				// Pure special attacker (atk EVs guessed to 0) → also drop atk IV to 0
+				// to minimize Confusion / Foul Play self-damage. Only applies in the
+				// hackable-EV formats where atk EVs going to 0 is meaningful.
+				if (is252Format && guessedEVs.atk === 0) {
+					if (!set.ivs) set.ivs = { hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31 };
+					set.ivs.atk = 0;
+				}
 				this.plus = guessedPlus;
 				this.minus = guessedMinus;
 				this.updateNature();
