@@ -1914,6 +1914,20 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 		desc: "Caps stats at 654 after a positive nature, or 655 after a negative nature",
 		// Implemented in sim/battle.ts
 	},
+	swshplusbdsppokedex: {
+		effectType: 'ValidatorRule',
+		name: 'SwSh Plus BDSP Pokedex',
+		desc: "Restricts the format to Pok&eacute;mon obtainable in Sword/Shield or Brilliant Diamond/Shining Pearl",
+		onValidateSet(set) {
+			const species = this.dex.species.get(set.species || set.name);
+			const inSwsh = species.exists && !species.isNonstandard;
+			const bdspSpecies = this.dex.mod('gen8bdsp').species.get(species.id);
+			const inBdsp = bdspSpecies.exists && !bdspSpecies.isNonstandard;
+			if (!inSwsh && !inBdsp && !this.ruleTable.has(`+${species.id}`)) {
+				return [`${species.name} is not obtainable in Sword/Shield or BDSP.`];
+			}
+		},
+	},
 	formeclause: {
 		effectType: 'ValidatorRule',
 		name: 'Forme Clause',

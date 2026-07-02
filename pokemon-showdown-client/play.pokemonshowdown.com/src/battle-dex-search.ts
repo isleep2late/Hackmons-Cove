@@ -1063,6 +1063,8 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 			table = table[`gen${dex.gen}vgc`];
 		} else if (dex.gen === 9 && isHackmons && !this.formatType) {
 			table = table['bh'];
+		} else if (dex.gen === 8 && format === 'unified') {
+			table = table['gen8unified'];
 		} else if (
 			table[`gen${dex.gen}doubles`] && dex.gen > 4 &&
 			this.formatType !== 'letsgo' && this.formatType !== 'bdspdoubles' &&

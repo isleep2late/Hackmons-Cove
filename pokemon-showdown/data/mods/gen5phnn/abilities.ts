@@ -7,9 +7,6 @@ export const Abilities: import('../../../sim/dex-abilities').ModdedAbilityDataTa
 				return false;
 			}
 		},
-		onSetStatus(status, target, source, effect) {
-			if (status.id === 'par') return false;
-		},
 		onTryAddVolatile(status, target) {
 			if (status.id === 'toxicspikes') return null;
 		},

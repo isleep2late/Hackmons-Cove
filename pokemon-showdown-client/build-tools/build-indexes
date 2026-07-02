@@ -264,7 +264,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 	const CHAMPIONS = [9.67, 9.68];
 	const OTHER = [
 		9.9, 9.6, 9.411, 9.41, 9.401, 9.4, 9.33, 9.2, -9.4, -9.401,
-		8.6, 8.4, 8.2, -8.4, -8.6,
+		8.8, 8.6, 8.4, 8.2, -8.4, -8.6,
 		7.1,
 		5.1,
 		3.1, 3.11,
@@ -274,6 +274,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 	for (const genIdent of [...GENS, ...DOUBLES, ...VGC, ...NFE, ...STADIUM, ...OTHER, ...NATDEX, ...CHAMPIONS, ...LC]) {
 		const isLetsGo = (genIdent === 7.1);
 		const isBDSP = (genIdent === 8.6 || genIdent === -8.6);
+		const isUnified = (genIdent === 8.8);
 		const isMetBattle = ('' + genIdent).endsWith('.2');
 		const isNFE = ('' + genIdent).endsWith('.3');
 		const isLC = ('' + genIdent).endsWith('.7');
@@ -297,6 +298,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 			if (isSSDLC1) genStr += 'dlc1';
 			if (isLetsGo) genStr += 'letsgo';
 			if (isBDSP) genStr += 'bdsp';
+			if (isUnified) genStr += 'unified';
 			if (isPreDLC) genStr += 'predlc';
 			if (isSVDLC1) genStr += 'dlc1';
 			if (isStadium) genStr += 'stadium' + (genNum > 1 ? genNum : '');
@@ -405,6 +407,13 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 					return species.tags.includes('Mythical') ? 'Mythical' :
 						species.tags.includes('Restricted Legendary') ? 'Restricted' :
 						species.nfe ? (species.prevo ? 'NFE' : 'LC') : 'Regular';
+				}
+				if (isUnified) {
+					// [Gen 8] Unified: only Pokémon obtainable in Sword/Shield or BDSP.
+					const inSwsh = !species.isNonstandard;
+					const bdspSpecies = Dex.mod('gen8bdsp').species.get(species.id);
+					const inBdsp = bdspSpecies.exists && !bdspSpecies.isNonstandard;
+					return (inSwsh || inBdsp) ? 'AG' : 'Illegal';
 				}
 				if (species.tier === 'CAP' || species.tier === 'CAP NFE' || species.tier === 'CAP LC') {
 					return species.tier;
