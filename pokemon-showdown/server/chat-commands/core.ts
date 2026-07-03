@@ -74,6 +74,14 @@ export const crqHandlers: { [k: string]: Chat.CRQHandler } = {
 			friended: user.friends?.has(targetUser.id) || undefined,
 		};
 	},
+	roomauth(target, user) {
+		const rooms: string[] = [];
+		for (const curRoom of Rooms.global.chatRooms) {
+			if (!curRoom) continue;
+			if (curRoom.auth.has(user.id)) rooms.push(curRoom.roomid);
+		}
+		return { rooms };
+	},
 	roomlist(target, user, trustable) {
 		if (!trustable) return false;
 		return { rooms: Rooms.global.getBattles(target) };
