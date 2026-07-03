@@ -256,10 +256,16 @@ export const getPhnnArceusTypes = (
   return plateType ? [plateType] : null;
 };
 
+const PHNN_SHADOW_MOVE_IDS = [
+  'shadowrush', 'shadowblast', 'shadowblitz', 'shadowbreak', 'shadowend', 'shadowbolt',
+  'shadowchill', 'shadowfire', 'shadowstorm', 'shadowwave', 'shadowrave', 'shadowdown',
+  'shadowmist', 'shadowpanic', 'shadowhold', 'shadowhalf', 'shadowshed', 'shadowsky',
+];
+
 export const setPhnnCalcContext = (format: string): void => {
   const key = detectPhnnKey(format);
 
   (globalThis as Record<string, unknown>).__phnnCalc = key
-    ? { typeChart: getPhnnTypeChart(format) || {}, parentalBond: true }
+    ? { typeChart: getPhnnTypeChart(format) || {}, parentalBond: true, shadowMoves: PHNN_SHADOW_MOVE_IDS }
     : null;
 };

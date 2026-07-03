@@ -209,6 +209,7 @@ export interface TeambuilderSpriteData {
 	spriteid: string;
 	shiny?: boolean;
 	pixelated?: boolean;
+	customPrefix?: string;
 }
 
 export const Dex = new class implements ModdedDex {
@@ -597,6 +598,39 @@ export const Dex = new class implements ModdedDex {
 			pokemon = pokemon.getSpeciesForme() + (isGigantamax ? '-Gmax' : '');
 		}
 		const species = Dex.species.get(pokemon);
+		const phnnLocalSpriteIds: {[id: string]: number} = {
+			mewtwoshadow: 1, mewtwoshadowmegax: 1, lugiashadow: 1, hakamoototem: 1, wishiwashitotem: 1,
+		};
+		if (phnnLocalSpriteIds[species.id]) {
+			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
+			const host = window.Config ? Config.routes.client : 'beta.hackmons.com';
+			if (species.id === 'lugiashadow') {
+				const useBack = !isFront;
+				const file = useBack ? 'lugiashadow-back' : 'lugiashadow';
+				return {
+					gen: mechanicsGen,
+					w: 134,
+					h: useBack ? 123 : 119,
+					y: 0,
+					url: `${protocol}//${host}/sprites/phnn/${file}.png`,
+					pixelated: true,
+					isFrontSprite: isFront,
+					cryurl: '',
+					shiny: !!options.shiny,
+				};
+			}
+			return {
+				gen: mechanicsGen,
+				w: 120,
+				h: 120,
+				y: 0,
+				url: `${protocol}//${host}/sprites/phnn/${species.id}.png`,
+				pixelated: false,
+				isFrontSprite: isFront,
+				cryurl: '',
+				shiny: !!options.shiny,
+			};
+		}
 		// Gmax sprites are already extremely large, so we don't need to double.
 		if (species.name.endsWith('-Gmax')) isDynamax = false;
 		let spriteData = {
@@ -808,6 +842,11 @@ export const Dex = new class implements ModdedDex {
 			// @ts-expect-error safe, but too lazy to cast
 			id = toID(pokemon.volatiles.formechange[1]);
 		}
+		if (id === 'lugiashadow') {
+			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
+			const host = window.Config ? Config.routes.client : 'beta.hackmons.com';
+			return `background:transparent url(${protocol}//${host}/sprites/phnn/lugiashadow-icon.png) no-repeat scroll center;background-size:contain;image-rendering:pixelated`;
+		}
 		let num = this.getPokemonIconNum(id, pokemon?.gender === 'F', facingLeft);
 
 		let top = Math.floor(num / 12) * 30;
@@ -831,6 +870,23 @@ export const Dex = new class implements ModdedDex {
 			}
 		}
 		if (species.exists === false) return { spriteDir: 'sprites/gen5', spriteid: '0', x: 10, y: 5, pixelated: true };
+		const phnnLocalSpriteIds: {[id: string]: number} = {
+			mewtwoshadow: 1, mewtwoshadowmegax: 1, lugiashadow: 1, hakamoototem: 1, wishiwashitotem: 1,
+		};
+		if (phnnLocalSpriteIds[species.id]) {
+			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
+			const host = window.Config ? Config.routes.client : 'beta.hackmons.com';
+			const isPixel = species.id === 'lugiashadow';
+			return {
+				spriteid: species.id,
+				spriteDir: 'sprites/phnn',
+				x: isPixel ? 14 : 10,
+				y: isPixel ? 16 : 12,
+				h: isPixel ? 76 : 80,
+				pixelated: isPixel,
+				customPrefix: `${protocol}//${host}/`,
+			};
+		}
 		if (Dex.afdMode) {
 			return {
 				spriteid,
@@ -897,8 +953,10 @@ export const Dex = new class implements ModdedDex {
 		if (!pokemon) return '';
 		const data = this.getTeambuilderSpriteData(pokemon, dex);
 		const shiny = (data.shiny ? '-shiny' : '');
-		const resize = (data.h ? `background-size:${data.h}px` : '');
-		return `background-image:url(${Dex.resourcePrefix}${data.spriteDir}${shiny}/${data.spriteid}.png);background-position:${data.x + xOffset}px ${data.y + yOffset}px;background-repeat:no-repeat;${resize}`;
+		const resize = (data.h ? `background-size:${data.h}px;` : '');
+		const pixelated = (data.pixelated ? `image-rendering:pixelated;` : '');
+		const prefix = data.customPrefix || Dex.resourcePrefix;
+		return `background-image:url(${prefix}${data.spriteDir}${shiny}/${data.spriteid}.png);background-position:${data.x + xOffset}px ${data.y + yOffset}px;background-repeat:no-repeat;${resize}${pixelated}`;
 	}
 
 	getItemIcon(item: any) {
@@ -915,7 +973,13 @@ export const Dex = new class implements ModdedDex {
 		type = this.types.get(type).name;
 		if (!type) type = '???';
 		let sanitizedType = type.replace(/\?/g, '%3f');
-		return `<img src="${Dex.resourcePrefix}sprites/types/${sanitizedType}.png" alt="${type}" height="14" width="32" class="pixelated${b ? ' b' : ''}" />`;
+		let prefix = Dex.resourcePrefix;
+		if (type === 'Shadow') {
+			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
+			const host = window.Config ? Config.routes.client : 'beta.hackmons.com';
+			prefix = `${protocol}//${host}/`;
+		}
+		return `<img src="${prefix}sprites/types/${sanitizedType}.png" alt="${type}" height="14" width="32" class="pixelated${b ? ' b' : ''}" />`;
 	}
 
 	getCategoryIcon(category: string | null) {

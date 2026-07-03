@@ -40,6 +40,13 @@ export const Scripts: ModdedBattleScriptsData = {
 
 	pokemon: {
 
+		transformInto(pokemon: Pokemon, effect: Effect | null) {
+			const shadowMoveIds = ['shadowrush', 'shadowblast', 'shadowblitz', 'shadowbreak', 'shadowend', 'shadowbolt', 'shadowchill', 'shadowfire', 'shadowstorm', 'shadowwave', 'shadowrave', 'shadowdown', 'shadowmist', 'shadowpanic', 'shadowhold', 'shadowhalf', 'shadowshed', 'shadowsky'];
+			const isShadow = pokemon.hasType('Shadow') || pokemon.moveSlots.some((s: any) => shadowMoveIds.includes(s.id));
+			if (isShadow) return false;
+			return Object.getPrototypeOf(this).transformInto.call(this, pokemon, effect);
+		},
+
 		// Gimmick priority: Mega/Ultra Burst/Z > Tera (any assigned Tera type) > Dynamax (no Tera assigned).
 		getDynamaxRequest(skipChecks?: boolean) {
 			if (!skipChecks) {

@@ -3062,6 +3062,7 @@
 					buf += '<option value=""' + (!teraType ? ' selected="selected"' : '') + '>None / Dyna</option>';
 				}
 				for (var i = 0; i < types.length; i++) {
+					if (types[i].id === 'shadow' && !isPHNN9) continue;
 					buf += '<option value="' + types[i].name + '"' + (teraType === types[i].name ? ' selected="selected"' : '') + '>' + types[i].name + '</option>';
 				}
 				buf += '</select></div></div>';

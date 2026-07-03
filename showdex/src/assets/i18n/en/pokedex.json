@@ -327,6 +327,10 @@
     "sun": {
       "label": "Sun",
       "shortDesc": "For 5 turns (8 w/ Heat Rock), $t(pokedex:types.fire.0) 1.5{{times}}, $t(pokedex:types.water.0) 0.5{{times}}."
+    },
+    "shadowsky": {
+      "label": "Shadow Sky",
+      "shortDesc": "For 5 turns, Shadow moves 1.5{{times}}; -6% HP each turn to non-Shadow Pokemon."
     }
   },
 

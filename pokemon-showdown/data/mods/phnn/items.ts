@@ -38,4 +38,17 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 		shortDesc: "Holder's Normal-type moves have 1.1x power.",
 		desc: "The power of the holder's Normal-type moves is multiplied by 1.1.",
 	},
+	shadowsynergystone: {
+		name: "Shadow Synergy Stone",
+		spritenum: 345,
+		megaStone: {"Mewtwo": "Mewtwo-Shadow-Mega-X"},
+		itemUser: ["Mewtwo", "Mewtwo-Shadow"],
+		onTakeItem(item, source) {
+			return !item.megaStone?.[source.baseSpecies.baseSpecies];
+		},
+		num: 0,
+		gen: 9,
+		shortDesc: "Mega Evolves Mewtwo or Shadow Mewtwo into Shadow Mega Mewtwo X.",
+	},
+
 };

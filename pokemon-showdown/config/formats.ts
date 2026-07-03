@@ -455,6 +455,17 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 			}
 			return this.checkCanLearn(move, species, setSources, set);
 		},
+		onValidateSet(set) {
+			const species = this.dex.species.get(set.species);
+			const moves = set.moves || [];
+			if (!moves.length) return;
+			for (const moveName of moves) {
+				const move = this.dex.moves.get(moveName);
+				if (move.id === 'rage') return;
+				if (!this.checkCanLearn(move, species)) return;
+			}
+			return [`${set.name || species.name} needs at least one move that is Rage or a move it can legitimately learn (the Gen 4 Rage glitch requires one legal move slot).`];
+		},
 	},
 	{
 		name: "[Gen 3] Any Ability",
@@ -489,7 +500,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		desc: "Pure Hackmons, but Pokemon are at the highest power level across all their available generations.",
 		mod: 'phnn',
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Data Preview', 'Max Level = 255', 'Default Level = 100', 'Prestatus'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Data Preview', 'Max Level = 255', 'Default Level = 100', 'Prestatus', 'Totem Aura'],
 		unbanlist: ['Past', 'Future', 'Unobtainable'],
 	},
 	{
@@ -497,7 +508,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'phnn',
 		searchShow: false,
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Data Preview', 'Max Level = 5', 'Prestatus'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Data Preview', 'Max Level = 5', 'Prestatus', 'Totem Aura'],
 		unbanlist: ['Past', 'Future', 'Unobtainable'],
 	},
 	{
@@ -505,14 +516,14 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'phnn',
 		searchShow: false,
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Data Preview', 'Max Level = 50', 'Prestatus'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Data Preview', 'Max Level = 50', 'Prestatus', 'Totem Aura'],
 		unbanlist: ['Past', 'Future', 'Unobtainable'],
 	},
 	{
 		name: "[Gen 5] Pure Hackmons No Nerfs",
 		desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
 		mod: 'gen5phnn',
-		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Overflow Stat Mod', 'Prestatus', 'Max Level = 255', 'Default Level = 100'],
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Overflow Stat Mod', 'Prestatus', 'Totem Aura', 'Max Level = 255', 'Default Level = 100'],
 	},
 	//////////////////////////////////
 	/////// Wondrous Hackmons ////////

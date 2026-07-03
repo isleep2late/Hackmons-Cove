@@ -725,7 +725,7 @@ export class TeamValidator {
 				delete set.teraType;
 			} else {
 				const type = dex.types.get(set.teraType || species.requiredTeraType || species.types[0]);
-				if (!type.exists || type.isNonstandard) {
+				if (!type.exists || (type.isNonstandard && !(dex.currentMod === 'phnn' && type.id === 'shadow'))) {
 					problems.push(`${name}'s Terastal type (${set.teraType}) is invalid.`);
 				} else if (species.requiredTeraType && species.requiredTeraType !== type.name && ruleTable.has('obtainablemisc')) {
 					problems.push(`${species.name}'s Terastal type needs to be ${species.requiredTeraType}.`);

@@ -21,6 +21,16 @@ import { BattleNatures } from './battle-dex-data';
 import { BattleTooltips } from './battle-tooltips';
 import { BattleTextParser, type Args, type KWArgs } from './battle-text-parser';
 
+function phnnTypeIconSrc(type: string): string {
+	let prefix = Dex.resourcePrefix;
+	if (type === 'Shadow') {
+		const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
+		const host = window.Config ? Config.routes.client : 'beta.hackmons.com';
+		prefix = `${protocol}//${host}/`;
+	}
+	return `${prefix}sprites/types/${encodeURIComponent(type)}.png`;
+}
+
 /*
 
 Most of this file is: CC0 (public domain)
@@ -1422,7 +1432,7 @@ export class BattleScene implements BattleSceneStub {
 
 	typeAnim(pokemon: Pokemon, types: string) {
 		const result = BattleLog.escapeHTML(types).split('/').map(type =>
-			`<img src="${Dex.resourcePrefix}sprites/types/${encodeURIComponent(type)}.png" alt="${type}" class="pixelated" />`
+			`<img src="${phnnTypeIconSrc(type)}" alt="${type}" class="pixelated" />`
 		).join(' ');
 		this.resultAnim(pokemon, result, 'neutral');
 	}
@@ -2855,16 +2865,16 @@ export class PokemonSprite extends Sprite {
 			status += '<span class="frz">FRZ</span> ';
 		}
 		if (pokemon.terastallized) {
-			status += `<img src="${Dex.resourcePrefix}sprites/types/${encodeURIComponent(pokemon.terastallized)}.png" alt="${pokemon.terastallized}" class="pixelated" /> `;
+			status += `<img src="${phnnTypeIconSrc(pokemon.terastallized)}" alt="${pokemon.terastallized}" class="pixelated" /> `;
 		} else if (pokemon.volatiles.typechange?.[1]) {
 			const types = pokemon.volatiles.typechange[1].split('/');
 			for (const type of types) {
-				status += '<img src="' + Dex.resourcePrefix + 'sprites/types/' + encodeURIComponent(type) + '.png" alt="' + type + '" class="pixelated" /> ';
+				status += '<img src="' + phnnTypeIconSrc(type) + '" alt="' + type + '" class="pixelated" /> ';
 			}
 		}
 		if (pokemon.volatiles.typeadd) {
 			const type = pokemon.volatiles.typeadd[1];
-			status += '+<img src="' + Dex.resourcePrefix + 'sprites/types/' + type + '.png" alt="' + type + '" class="pixelated" /> ';
+			status += '+<img src="' + phnnTypeIconSrc(type) + '" alt="' + type + '" class="pixelated" /> ';
 		}
 		for (const stat in pokemon.boosts) {
 			if (pokemon.boosts[stat]) {
