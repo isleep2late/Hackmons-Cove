@@ -1,3 +1,10 @@
+const PHNN_SHADOW_MOVE_IDS = ['shadowrush', 'shadowblast', 'shadowblitz', 'shadowbreak', 'shadowend', 'shadowbolt', 'shadowchill', 'shadowfire', 'shadowstorm', 'shadowwave', 'shadowrave', 'shadowdown', 'shadowmist', 'shadowpanic', 'shadowhold', 'shadowhalf', 'shadowshed', 'shadowsky'];
+function phnnIsShadowMon(target: any): boolean {
+	if (!target) return false;
+	if (target.hasType('Shadow')) return true;
+	return target.moveSlots.some((s: any) => PHNN_SHADOW_MOVE_IDS.includes(s.id));
+}
+
 export const Conditions: import('../../../sim/dex-conditions').ModdedConditionDataTable = {
 
 // Status
@@ -132,6 +139,32 @@ export const Conditions: import('../../../sim/dex-conditions').ModdedConditionDa
 		onBeforeMove(pokemon) {
 			this.add('cant', pokemon, 'partiallytrapped');
 			return false;
+		},
+	},
+	shadowsky: {
+		name: 'Shadow Sky',
+		effectType: 'Weather',
+		duration: 5,
+		onFieldStart(field, source, effect) {
+			this.add('-weather', 'Shadow Sky');
+		},
+		onWeatherModifyDamage(damage, attacker, defender, move) {
+			if (move.type === 'Shadow') {
+				return this.chainModify(1.5);
+			}
+		},
+		onFieldResidualOrder: 1,
+		onFieldResidual() {
+			this.add('-weather', 'Shadow Sky', '[upkeep]');
+			if (this.field.isWeather('shadowsky')) this.eachEvent('Weather');
+		},
+		onWeather(target) {
+			if (!phnnIsShadowMon(target)) {
+				this.damage(target.baseMaxhp / 16);
+			}
+		},
+		onFieldEnd() {
+			this.add('-weather', 'none');
 		},
 	},
 };

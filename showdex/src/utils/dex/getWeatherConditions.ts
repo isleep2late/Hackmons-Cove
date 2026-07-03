@@ -63,5 +63,14 @@ export const getWeatherConditions = (
     }
   }
 
+  // phnn: Shadow Sky (No Nerfs custom weather) boosts Shadow-type moves by 50%
+  if (gen > 8 && typeof format === 'string') {
+    const f = format.toLowerCase();
+
+    if (f.includes('phnn') || f.includes('nonerfs')) {
+      weatherNames.push('Shadow Sky' as Weather);
+    }
+  }
+
   return weatherNames;
 };

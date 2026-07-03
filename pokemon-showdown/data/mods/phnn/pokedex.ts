@@ -131,6 +131,8 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	mewtwo: {
 		inherit: true,
 		baseStats: {hp: 106, atk: 110, def: 90, spa: 154, spd: 154, spe: 130},
+		otherFormes: ["Mewtwo-Mega-X", "Mewtwo-Mega-Y", "Mewtwo-Shadow", "Mewtwo-Shadow-Mega-X"],
+		formeOrder: ["Mewtwo", "Mewtwo-Mega-X", "Mewtwo-Mega-Y", "Mewtwo-Shadow", "Mewtwo-Shadow-Mega-X"],
 	},
 	moltres: {
 		inherit: true,
@@ -678,4 +680,219 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 		requiredItem: "Glimmoranite",
 		battleOnly: "Glimmora",
 	},
+	mewtwoshadow: {
+		num: 150,
+		name: "Mewtwo-Shadow",
+		baseSpecies: "Mewtwo",
+		forme: "Shadow",
+		types: ["Shadow"],
+		baseStats: {hp: 106, atk: 110, def: 90, spa: 154, spd: 90, spe: 130},
+		abilities: {0: "Pressure", H: "Unnerve"},
+		heightm: 2,
+		weightkg: 122,
+		color: "Purple",
+		gender: "N",
+		eggGroups: ["Undiscovered"],
+		otherFormes: ["Mewtwo-Shadow-Mega-X"],
+	},
+	mewtwoshadowmegax: {
+		num: 150,
+		name: "Mewtwo-Shadow-Mega-X",
+		baseSpecies: "Mewtwo",
+		forme: "Shadow-Mega-X",
+		types: ["Shadow", "Fighting"],
+		baseStats: {hp: 106, atk: 190, def: 100, spa: 154, spd: 100, spe: 130},
+		abilities: {0: "Steadfast"},
+		heightm: 2.3,
+		weightkg: 127,
+		color: "Purple",
+		gender: "N",
+		eggGroups: ["Undiscovered"],
+		isMega: true,
+		requiredItem: "Shadow Synergy Stone",
+	},
+	lugia: {
+		inherit: true,
+		otherFormes: ["Lugia-Shadow"],
+		formeOrder: ["Lugia", "Lugia-Shadow"],
+	},
+	lugiashadow: {
+		num: 249,
+		name: "Lugia-Shadow",
+		baseSpecies: "Lugia",
+		forme: "Shadow",
+		types: ["Shadow", "Flying"],
+		baseStats: {hp: 106, atk: 90, def: 130, spa: 90, spd: 154, spe: 110},
+		abilities: {0: "Pressure", H: "Multiscale"},
+		heightm: 5.2,
+		weightkg: 216,
+		color: "White",
+		gender: "N",
+		eggGroups: ["Undiscovered"],
+	},
+	venusaurgmax: {
+		inherit: true,
+		weightkg: 14400,
+	},
+	charizardgmax: {
+		inherit: true,
+		weightkg: 24550.9,
+	},
+	blastoisegmax: {
+		inherit: true,
+		weightkg: 20874,
+	},
+	butterfreegmax: {
+		inherit: true,
+		weightkg: 7643,
+	},
+	pikachugmax: {
+		inherit: true,
+		weightkg: 16537.5,
+	},
+	meowthgmax: {
+		inherit: true,
+		weightkg: 28586.2,
+	},
+	machampgmax: {
+		inherit: true,
+		weightkg: 31738.3,
+	},
+	gengargmax: {
+		inherit: true,
+		weightkg: 7200,
+	},
+	kinglergmax: {
+		inherit: true,
+		weightkg: 12816.6,
+	},
+	laprasgmax: {
+		inherit: true,
+		weightkg: 20275.2,
+	},
+	eeveegmax: {
+		inherit: true,
+		weightkg: 23400,
+	},
+	snorlaxgmax: {
+		inherit: true,
+		weightkg: 127777.8,
+	},
+	garbodorgmax: {
+		inherit: true,
+		weightkg: 13107.8,
+	},
+	melmetalgmax: {
+		inherit: true,
+		weightkg: 80000,
+	},
+	rillaboomgmax: {
+		inherit: true,
+		weightkg: 16000,
+	},
+	cinderacegmax: {
+		inherit: true,
+		weightkg: 12274,
+	},
+	inteleongmax: {
+		inherit: true,
+		weightkg: 20033.2,
+	},
+	corviknightgmax: {
+		inherit: true,
+		weightkg: 3037.2,
+	},
+	orbeetlegmax: {
+		inherit: true,
+		weightkg: 49980,
+	},
+	drednawgmax: {
+		inherit: true,
+		weightkg: 66528,
+	},
+	coalossalgmax: {
+		inherit: true,
+		weightkg: 69862.5,
+	},
+	flapplegmax: {
+		inherit: true,
+		weightkg: 6400,
+	},
+	appletungmax: {
+		inherit: true,
+		weightkg: 46800,
+	},
+	sandacondagmax: {
+		inherit: true,
+		weightkg: 2195.4,
+	},
+	toxtricitygmax: {
+		inherit: true,
+		weightkg: 9000,
+	},
+	centiskorchgmax: {
+		inherit: true,
+		weightkg: 75000,
+	},
+	hatterenegmax: {
+		inherit: true,
+		weightkg: 781.8,
+	},
+	grimmsnarlgmax: {
+		inherit: true,
+		weightkg: 27761.8,
+	},
+	alcremiegmax: {
+		inherit: true,
+		weightkg: 5000,
+	},
+	copperajahgmax: {
+		inherit: true,
+		weightkg: 38205.6,
+	},
+	duraludongmax: {
+		inherit: true,
+		weightkg: 22827.2,
+	},
+	urshifugmax: {
+		inherit: true,
+		weightkg: 24461.2,
+	},
+	hakamoo: {
+		inherit: true,
+		otherFormes: ["Hakamo-o-Totem"],
+		formeOrder: ["Hakamo-o", "Hakamo-o-Totem"],
+	},
+	hakamoototem: {
+		num: 783,
+		name: "Hakamo-o-Totem",
+		baseSpecies: "Hakamo-o",
+		forme: "Totem",
+		types: ["Dragon", "Fighting"],
+		baseStats: {hp: 55, atk: 75, def: 90, spa: 65, spd: 70, spe: 65},
+		abilities: {0: "Bulletproof", 1: "Soundproof", H: "Overcoat"},
+		heightm: 1.2,
+		weightkg: 47,
+		color: "Gray",
+		eggGroups: ["Dragon"],
+	},
+	wishiwashi: {
+		inherit: true,
+		otherFormes: ["Wishiwashi-School", "Wishiwashi-Totem"],
+		formeOrder: ["Wishiwashi", "Wishiwashi-School", "Wishiwashi-Totem"],
+	},
+	wishiwashitotem: {
+		num: 746,
+		name: "Wishiwashi-Totem",
+		baseSpecies: "Wishiwashi",
+		forme: "Totem",
+		types: ["Water"],
+		baseStats: {hp: 45, atk: 140, def: 130, spa: 140, spd: 135, spe: 30},
+		abilities: {0: "Swift Swim"},
+		heightm: 8.2,
+		weightkg: 78.6,
+		color: "Blue",
+		eggGroups: ["Water 2"],
+	},
+
 };

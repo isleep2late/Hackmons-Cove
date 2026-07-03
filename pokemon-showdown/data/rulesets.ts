@@ -205,6 +205,34 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 			}
 		},
 	},
+	totemaura: {
+		effectType: 'Rule',
+		name: 'Totem Aura',
+		desc: "Totem Pok&eacute;mon receive their signature stat boosts upon entering battle.",
+		onSwitchIn(pokemon) {
+			const auras: {[speciesid: string]: SparseBoostsTable} = {
+				araquanidtotem: {spe: 1},
+				marowakalolatotem: {spe: 2},
+				lurantistotem: {spe: 2},
+				togedemarutotem: {def: 2},
+				wishiwashitotem: {def: 1},
+				salazzletotem: {spd: 1},
+				mimikyutotem: {atk: 1, def: 1, spa: 1, spd: 1, spe: 1},
+				mimikyubustedtotem: {atk: 1, def: 1, spa: 1, spd: 1, spe: 1},
+				kommoototem: {atk: 1, def: 1, spa: 1, spd: 1, spe: 1},
+				vikavolttotem: {atk: 1, def: 1, spa: 1, spd: 1, spe: 1},
+				hakamoototem: {atk: 1, def: 1, spa: 1, spd: 1, spe: 1},
+				ribombeetotem: {atk: 2, def: 2, spa: 2, spd: 2, spe: 2},
+				gumshoostotem: {atk: 2, def: 2, spa: 2, spd: 2, spe: 2},
+				raticatealolatotem: {atk: 2, def: 2, spa: 2, spd: 2, spe: 2},
+			};
+			const aura = auras[pokemon.species.id];
+			if (aura && !pokemon.m.totemAuraApplied) {
+				pokemon.m.totemAuraApplied = true;
+				this.boost(aura, pokemon);
+			}
+		},
+	},
 	standarddraft: {
 		effectType: 'ValidatorRule',
 		name: 'Standard Draft',
