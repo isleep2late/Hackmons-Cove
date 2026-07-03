@@ -157,7 +157,19 @@ function toId() {
 					this.set('avatar', '' + data.avatar);
 				}
 			}, this);
+			app.on('response:roomauth', function (data) {
+				if (!data || !data.rooms) return;
+				for (var i = 0; i < data.rooms.length; i++) {
+					var roomauthId = toRoomid(data.rooms[i]);
+					if (!roomauthId || app.rooms[roomauthId]) continue;
+					app.addRoom(roomauthId, null, true);
+					app.send('/join ' + roomauthId);
+				}
+			});
 			var self = this;
+			this.on('change:named', function () {
+				if (self.get('named')) app.send('/crq roomauth');
+			});
 			this.on('change:name', function () {
 				if (!self.get('named')) {
 					self.nameRegExp = null;
