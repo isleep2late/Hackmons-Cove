@@ -23,7 +23,7 @@ interface ProcessData {
 
 export function isUpperStaff(user: User) {
 	const usRoom = Rooms.get('upperstaff');
-	return usRoom && Users.Auth.atLeast(usRoom.auth.getDirect(user.id), '+');
+	return usRoom && Users.Auth.atLeast(usRoom.auth.getDirect(user.id), '%');
 }
 
 function bash(command: string, context: Chat.CommandContext, cwd?: string): Promise<[number, string, string]> {

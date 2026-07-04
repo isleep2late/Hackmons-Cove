@@ -49,11 +49,12 @@ The server and client are both included as regular folders rather than submodule
 - **Doshidak** - Showdex Developer: https://github.com/doshidak/showdex
 - **rby2k20** - Gen 1/2 Doubles implementation: https://github.com/rby2k20/pokemon-showdown
 - **MathyFurret** - Rotations implementation: https://github.com/smogon/pokemon-showdown-client/pull/1944 and https://github.com/smogon/pokemon-showdown/pull/8677
+- **ShadowGate31** - Creation of Shadow Lugia sprites for fangames: https://www.deviantart.com/shadowgate31/art/Shadow-Lugia-sprites-for-fangames-410361664
 
 **Special Thanks:**
 - **Siphonaptera** for leading the [Gen 8] Unified project
 - **psim tseng** for artistic contribution and leadership
-- **PenUltimate Tast** for Hackmons.com database management as site admin
+- **Penultimate Toast** for Hackmons.com database management as site admin
 - **Wyrd & Viola Lunala** for promoting the server and leadership
 - **ProKameron** for contributing to the bot and leadership
 - **aidan amoongus** for Room Intros and leadership

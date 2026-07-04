@@ -2170,6 +2170,9 @@ export const commands: Chat.ChatCommands = {
 		if (showAll || ['lostpassword', 'password', 'lostpass'].includes(target)) {
 			buffer.push(`Until an email server for Pokemon Showdown is set up, <b>it is no longer possible to reset the password for your account</b>`);
 		}
+		if (showAll || ['autojoin', 'aj'].includes(target)) {
+			buffer.push(`The autojoin system on Hackmons Cove requires a room's staff member to add you to the room's autojoin, done with the <code>/addautojoin</code> command. After being added to the list, you will automatically join that room every time you log in.`);
+		}
 		if (!buffer.length && target) {
 			this.errorReply(`'${target}' is an invalid FAQ.`);
 			return this.parse(`/help faq`);
