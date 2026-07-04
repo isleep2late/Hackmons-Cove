@@ -52,10 +52,11 @@ The server and client are both included as regular folders rather than submodule
 - **ShadowGate31** - Creation of Shadow Lugia sprites for fangames: https://www.deviantart.com/shadowgate31/art/Shadow-Lugia-sprites-for-fangames-410361664
 
 **Special Thanks:**
+- **Sonja_Krystal** for creating the Shadow Mewtwo/Mega X & Arceus front battle sprites!
 - **Siphonaptera** for leading the [Gen 8] Unified project
 - **psim tseng** for artistic contribution and leadership
 - **Penultimate Toast** for Hackmons.com database management as site admin
-- **Wyrd & Viola Lunala** for promoting the server and leadership
+- **Wyrd & Viola Lunala** for promoting the server and leadership (And Wyrd for making the SHADOW type badge)
 - **ProKameron** for contributing to the bot and leadership
 - **aidan amoongus** for Room Intros and leadership
 - The Pure Hackmons community for additional feedback
