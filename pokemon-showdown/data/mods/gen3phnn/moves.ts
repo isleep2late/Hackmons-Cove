@@ -1,9 +1,7 @@
-// Shadow moves ported into Gen 3 for [Gen 3] Any Ability.
-// Physical/special split is preserved by data/mods/gen3phnn/scripts.ts init(),
-// which exempts Shadow-typed moves from Gen 3's type-based recategorization.
 const PHNN_SHADOW_MOVE_IDS = ['shadowrush', 'shadowblast', 'shadowblitz', 'shadowbreak', 'shadowend', 'shadowbolt', 'shadowchill', 'shadowfire', 'shadowstorm', 'shadowwave', 'shadowrave', 'shadowdown', 'shadowmist', 'shadowpanic', 'shadowhold', 'shadowhalf', 'shadowshed', 'shadowsky'];
 function phnnIsShadowMon(target: any): boolean {
 	if (!target) return false;
+	if (target.hasAbility('wonderguard')) return false;
 	if (target.hasType('Shadow')) return true;
 	return target.moveSlots.some((s: any) => PHNN_SHADOW_MOVE_IDS.includes(s.id));
 }

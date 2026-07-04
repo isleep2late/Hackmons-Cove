@@ -1934,6 +1934,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 				if (isGlitchedMon && (id === 'chatter' || id === 'struggle')) continue;
 				const move = dex.moves.get(id);
 				if (move.gen > dex.gen || !move.exists) continue;
+				if (move.type === 'Shadow' && !dex.modid.includes('phnn')) continue;
 				if (sketch) {
 					if (move.flags['nosketch'] || move.isMax || move.isZ) continue;
 					if (move.isNonstandard && move.isNonstandard !== 'Past') continue;

@@ -472,8 +472,6 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		desc: "Gen 3 Pure Hackmons, but any Pokemon can have any ability. Shadow moves are usable.",
 		mod: 'gen3phnn',
 		searchShow: false,
-		// The 3 Shadow Pokemon (Lugia-Shadow, Mewtwo-Shadow, Mewtwo-Shadow-Mega-X) are phnn-only
-		// formes absent from the Gen 3 dex, so '-Nonexistent' already keeps them illegal here.
 		ruleset: ['[Gen 3] Pure Hackmons', '!Obtainable Abilities'],
 	},
 	{

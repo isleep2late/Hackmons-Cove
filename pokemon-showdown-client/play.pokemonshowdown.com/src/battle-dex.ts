@@ -882,8 +882,6 @@ export const Dex = new class implements ModdedDex {
 			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
 			const host = window.Config ? Config.routes.client : 'beta.hackmons.com';
 			const isPixel = species.id === 'lugiashadow';
-			// phnn shiny fronts live in the same phnn/ folder as `<id>-shiny.png` (filename suffix,
-			// not a phnn-shiny/ directory), so bake `-shiny` into spriteid here and leave data.shiny unset.
 			const phnnShinyFrontIds: {[id: string]: number} = { arceusshadow: 1, arceusquestion: 1, mewtwoshadow: 1, mewtwoshadowmegax: 1 };
 			const useShiny = pokemon.shiny && phnnShinyFrontIds[species.id];
 			return {
@@ -1069,8 +1067,6 @@ export class ModdedDex {
 				}
 			}
 			if (this.gen <= 3 && data.category !== 'Status' && data.type !== 'Shadow') {
-				// Shadow moves keep their real physical/special split (see the gen3phnn mod);
-				// the vanilla type-based Gen 1-3 split doesn't know the Shadow type.
 				data.category = Dex.getGen3Category(data.type);
 			}
 
