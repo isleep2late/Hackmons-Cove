@@ -14,7 +14,7 @@ import {
 import { type ShowdexSettings } from '@showdex/interfaces/app';
 import { type CalcdexBattleState, type CalcdexPlayerKey, CalcdexPlayerKeys as AllPlayerKeys } from '@showdex/interfaces/calc';
 import { logger } from '@showdex/utils/debug';
-import { detectDisguiseFormat, setPhnnCalcContext } from '@showdex/phnn';
+import { detectDisguiseFormat, isPhnnShadowDamagingMove, setPhnnCalcContext } from '@showdex/phnn';
 import { getGenDexForFormat } from '@showdex/utils/dex';
 import { createSmogonField } from './createSmogonField';
 import { createSmogonMove } from './createSmogonMove';
@@ -187,6 +187,13 @@ export const calcSmogonMatchup = (
   };
 
   if (detectDisguiseFormat(format)) {
+    matchup.damageRange = '???';
+    return matchup;
+  }
+
+  // Shadow damaging moves: effectiveness depends on whether the target is a Shadow mon
+  // (which the player can't know), so their damage is always indeterminate.
+  if (isPhnnShadowDamagingMove(playerMove)) {
     matchup.damageRange = '???';
     return matchup;
   }
