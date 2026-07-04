@@ -39,8 +39,8 @@ The server and client are both included as regular folders rather than submodule
 
 **Main Contributors:**
 - **isleep2late** - Community Indentured Servant
-- **iforgetwhyimhere** - Coleader and Developer
-- **electra102** - Lead Developer of Wondrous Hackmons, Co-Creator of Pure Hackmons No Nerfs
+- **ifwih** - Coleader and Developer
+- **electra** - Lead Developer of Wondrous Hackmons, Co-Creator of Pure Hackmons No Nerfs
 - **Enigmatist** - Co-Creator of No Nerfs Generation, #1 Ranked Hackmons Player
 - **Alex BB** - Contributor
 
@@ -55,15 +55,15 @@ The server and client are both included as regular folders rather than submodule
 - **Siphonaptera** for leading the [Gen 8] Unified project
 - **psim tseng** for artistic contribution and leadership
 - **Penultimate Toast** for Hackmons.com database management as site admin
-- **Wyrdwind & Viola Lunala** for promoting the server and leadership
+- **Wyrd & Viola Lunala** for promoting the server and leadership
 - **ProKameron** for contributing to the bot and leadership
 - **aidan amoongus** for Room Intros and leadership
 - The Pure Hackmons community for additional feedback
 
-[Join the Discord](https://discord.gg/hackmons)
+[Join our Discord](https://discord.gg/hackmons)
 
 ---
 
 ## License
 
-This project is a modification of Pokémon Showdown and Showdex and is licensed under AGPL-3.0, MIT, and other licenses. Pokémon and all related properties are (c) The Pokemon Company / Nintendo / Creatures Inc. / GAME FREAK inc.
+This project is a modification of Pokémon Showdown and Showdex and is licensed under AGPL-3.0. Pokémon and all related properties are (c) The Pokemon Company / Nintendo / Creatures Inc. / GAME FREAK inc.
