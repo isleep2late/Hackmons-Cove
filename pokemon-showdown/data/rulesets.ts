@@ -233,6 +233,16 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 			}
 		},
 	},
+	shadowteraclause: {
+		effectType: 'ValidatorRule',
+		name: 'Shadow Tera Clause',
+		desc: "Prevents Pok&eacute;mon from Terastallizing into the Shadow type.",
+		onValidateSet(set) {
+			if (set.teraType && this.dex.toID(set.teraType) === 'shadow') {
+				return [`${set.species} cannot Terastallize into the Shadow type in this format.`];
+			}
+		},
+	},
 	standarddraft: {
 		effectType: 'ValidatorRule',
 		name: 'Standard Draft',

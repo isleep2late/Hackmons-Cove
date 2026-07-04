@@ -28,6 +28,7 @@ export const PokemonTypes: Showdown.TypeName[] = [
   'Steel',
   'Fairy',
   'Stellar',
+  'Shadow' as Showdown.TypeName,
   '???',
 ];
 
@@ -45,7 +46,7 @@ export const PokemonTypes: Showdown.TypeName[] = [
  *
  * @since 1.1.1
  */
-export const PokemonTypeLabels: Record<Exclude<Showdown.TypeName, '???'>, [full: string, sm: string, xs: string]> = {
+export const PokemonTypeLabels: Record<Exclude<Showdown.TypeName, '???'> | 'Shadow', [full: string, sm: string, xs: string]> = {
   Normal: ['NORMAL', 'NRML', 'NRM'],
   Grass: ['GRASS', 'GRSS', 'GRS'],
   Fire: ['FIRE', 'FIRE', 'FRE'],
@@ -65,4 +66,5 @@ export const PokemonTypeLabels: Record<Exclude<Showdown.TypeName, '???'>, [full:
   Steel: ['STEEL', 'STL', 'STL'],
   Fairy: ['FAIRY', 'FARY', 'FRY'],
   Stellar: ['STELLR', 'STLR', 'SLR'],
+  Shadow: ['SHADOW', 'SHDW', 'SHW'],
 };

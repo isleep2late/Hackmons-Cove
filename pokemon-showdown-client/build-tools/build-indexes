@@ -172,6 +172,8 @@ function requireNoCache(pathSpec) {
 		mewtwoshadow: 'Mewtwo-Shadow',
 		mewtwoshadowmegax: 'Mewtwo-Shadow-Mega-X',
 		lugiashadow: 'Lugia-Shadow',
+		arceusshadow: 'Arceus-Shadow',
+		arceusquestion: 'Arceus-Question',
 		hakamoototem: 'Hakamo-o-Totem',
 		wishiwashitotem: 'Wishiwashi-Totem',
 	};
@@ -193,6 +195,14 @@ function requireNoCache(pathSpec) {
 	if (phnnSI.items.get('shadowsynergystone').exists && !index.includes('shadowsynergystone item')) {
 		index.push('shadowsynergystone item');
 		pushPhnnAliases('shadowsynergystone', 'Shadow Synergy Stone', 'item');
+	}
+	if (phnnSI.items.get('shadowplate').exists && !index.includes('shadowplate item')) {
+		index.push('shadowplate item');
+		pushPhnnAliases('shadowplate', 'Shadow Plate', 'item');
+	}
+	if (phnnSI.items.get('questionmarkplate').exists && !index.includes('questionmarkplate item')) {
+		index.push('questionmarkplate item');
+		pushPhnnAliases('questionmarkplate', 'Question Mark Plate', 'item');
 	}
 
 	index.sort();
@@ -1476,7 +1486,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 	}
 
 	{
-		const phnnFormeIds = ['mewtwoshadow', 'mewtwoshadowmegax', 'lugiashadow', 'hakamoototem', 'wishiwashitotem'];
+		const phnnFormeIds = ['mewtwoshadow', 'mewtwoshadowmegax', 'lugiashadow', 'arceusshadow', 'arceusquestion', 'hakamoototem', 'wishiwashitotem'];
 		const phnnDexTB = Dex.mod('phnn');
 		for (const target of [BattleTeambuilderTable, BattleTeambuilderTable.bh]) {
 			if (!target || !target.tiers || target.tiers.includes('mewtwoshadow')) continue;
@@ -1516,8 +1526,8 @@ process.stdout.write("Building `data/pokedex.js`... ");
 		}
 	}
 	const phnnDexP = Dex.mod('phnn');
-	const phnnFormeMap = {mewtwo: 'Mewtwo-Shadow', lugia: 'Lugia-Shadow', hakamoo: 'Hakamo-o-Totem', wishiwashi: 'Wishiwashi-Totem'};
-	for (const id of ['mewtwoshadow', 'mewtwoshadowmegax', 'lugiashadow', 'hakamoototem', 'wishiwashitotem']) {
+	const phnnFormeMap = {mewtwo: ['Mewtwo-Shadow'], lugia: ['Lugia-Shadow'], arceus: ['Arceus-Shadow', 'Arceus-Question'], hakamoo: ['Hakamo-o-Totem'], wishiwashi: ['Wishiwashi-Totem']};
+	for (const id of ['mewtwoshadow', 'mewtwoshadowmegax', 'lugiashadow', 'arceusshadow', 'arceusquestion', 'hakamoototem', 'wishiwashitotem']) {
 		const s = phnnDexP.species.get(id);
 		if (s.exists && !Pokedex[id]) {
 			const e = {
@@ -1535,14 +1545,16 @@ process.stdout.write("Building `data/pokedex.js`... ");
 				tier: 'AG',
 			};
 			if (s.requiredItem) e.requiredItem = s.requiredItem;
+			if (s.requiredItems) e.requiredItems = s.requiredItems;
+			if (s.changesFrom) e.changesFrom = s.changesFrom;
 			if (s.gender) e.gender = s.gender;
 			Pokedex[id] = e;
 		}
 	}
 	for (const baseId in phnnFormeMap) {
 		if (Pokedex[baseId]) {
-			Pokedex[baseId].otherFormes = (Pokedex[baseId].otherFormes || []).concat([phnnFormeMap[baseId]]);
-			Pokedex[baseId].formeOrder = (Pokedex[baseId].formeOrder || [Pokedex[baseId].name]).concat([phnnFormeMap[baseId]]);
+			Pokedex[baseId].otherFormes = (Pokedex[baseId].otherFormes || []).concat(phnnFormeMap[baseId]);
+			Pokedex[baseId].formeOrder = (Pokedex[baseId].formeOrder || [Pokedex[baseId].name]).concat(phnnFormeMap[baseId]);
 		}
 	}
 	if (Pokedex.mewtwo) {
@@ -1606,19 +1618,22 @@ process.stdout.write("Building `data/moves,items,abilities,typechart,learnsets.j
 		if (item.desc) Items[id].desc = item.desc;
 		if (item.shortDesc) Items[id].shortDesc = item.shortDesc;
 	}
-	for (const id of ['shadowsynergystone']) {
+	for (const id of ['shadowsynergystone', 'shadowplate', 'questionmarkplate']) {
 		const it = Dex.mod('phnn').items.get(id);
 		if (it.exists && !Items[id]) {
-			Items[id] = {
+			const e = {
 				name: it.name,
 				spritenum: it.spritenum,
-				megaStone: it.megaStone,
-				itemUser: it.itemUser,
 				num: it.num,
 				gen: it.gen,
 				desc: it.desc || it.shortDesc || '',
 				shortDesc: it.shortDesc || it.desc || '',
 			};
+			if (it.megaStone) e.megaStone = it.megaStone;
+			if (it.itemUser) e.itemUser = it.itemUser;
+			if (it.onPlate) e.onPlate = it.onPlate;
+			if (it.forcedForme) e.forcedForme = it.forcedForme;
+			Items[id] = e;
 		}
 	}
 	const buf = 'exports.BattleItems = ' + es3stringify(Items) + ';';
