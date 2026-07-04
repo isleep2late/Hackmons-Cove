@@ -1,7 +1,4 @@
 export const TypeChart: import('../../../sim/dex-data').ModdedTypeDataTable = {
-	// Register the Shadow type for Gen 3. Defensively neutral to everything (all 0);
-	// the "super effective vs non-Shadow / resisted by Shadow mons" behavior comes
-	// from each Shadow move's onEffectiveness (see moves.ts), exactly as in the phnn mod.
 	shadow: {
 		isNonstandard: 'Custom',
 		damageTaken: {

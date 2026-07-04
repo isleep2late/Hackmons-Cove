@@ -191,8 +191,6 @@ export const calcSmogonMatchup = (
     return matchup;
   }
 
-  // Shadow damaging moves: effectiveness depends on whether the target is a Shadow mon
-  // (which the player can't know), so their damage is always indeterminate.
   if (isPhnnShadowDamagingMove(playerMove)) {
     matchup.damageRange = '???';
     return matchup;

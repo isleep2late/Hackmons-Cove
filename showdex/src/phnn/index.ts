@@ -262,9 +262,6 @@ const PHNN_SHADOW_MOVE_IDS = [
   'shadowmist', 'shadowpanic', 'shadowhold', 'shadowhalf', 'shadowshed', 'shadowsky',
 ];
 
-// The 11 damaging Shadow moves. Their effectiveness is conditional (super effective vs
-// non-Shadow mons, resisted by any mon holding a Shadow move) and depends on hidden
-// opponent info, so the calc intentionally reports their damage as '???'.
 const PHNN_SHADOW_DAMAGING_MOVE_IDS = [
   'shadowrush', 'shadowblast', 'shadowblitz', 'shadowbreak', 'shadowend', 'shadowbolt',
   'shadowchill', 'shadowfire', 'shadowstorm', 'shadowwave', 'shadowrave',

@@ -1934,8 +1934,6 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 				if (isGlitchedMon && (id === 'chatter' || id === 'struggle')) continue;
 				const move = dex.moves.get(id);
 				if (move.gen > dex.gen || !move.exists) continue;
-				// Shadow-type moves only exist in the phnn-family mods (No Nerfs, [Gen 3] Any Ability).
-				// Hide them from base Pure Hackmons/etc., matching server legality (base gens lack them).
 				if (move.type === 'Shadow' && !dex.modid.includes('phnn')) continue;
 				if (sketch) {
 					if (move.flags['nosketch'] || move.isMax || move.isZ) continue;
