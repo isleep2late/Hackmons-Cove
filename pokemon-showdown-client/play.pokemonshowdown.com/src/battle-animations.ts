@@ -23,12 +23,14 @@ import { BattleTextParser, type Args, type KWArgs } from './battle-text-parser';
 
 function phnnTypeIconSrc(type: string): string {
 	let prefix = Dex.resourcePrefix;
-	if (type === 'Shadow') {
+	let file = encodeURIComponent(type);
+	if (type === 'Shadow' || type === '???') {
 		const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
 		const host = window.Config ? Config.routes.client : 'beta.hackmons.com';
 		prefix = `${protocol}//${host}/`;
+		if (type === '???') file = 'Question';
 	}
-	return `${prefix}sprites/types/${encodeURIComponent(type)}.png`;
+	return `${prefix}sprites/types/${file}.png`;
 }
 
 /*

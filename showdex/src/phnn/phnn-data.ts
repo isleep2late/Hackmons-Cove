@@ -533,7 +533,105 @@ export default {
 	},
 	"gen3phnn": {
 		"gen": 3,
-		"moves": {},
+		"moves": {
+			"shadowrush": {
+				"basePower": 90,
+				"type": "Shadow",
+				"category": "Physical"
+			},
+			"shadowblast": {
+				"basePower": 80,
+				"type": "Shadow",
+				"category": "Physical"
+			},
+			"shadowblitz": {
+				"basePower": 40,
+				"type": "Shadow",
+				"category": "Physical"
+			},
+			"shadowbreak": {
+				"basePower": 75,
+				"type": "Shadow",
+				"category": "Physical"
+			},
+			"shadowend": {
+				"basePower": 120,
+				"type": "Shadow",
+				"category": "Physical"
+			},
+			"shadowbolt": {
+				"basePower": 75,
+				"type": "Shadow",
+				"category": "Special"
+			},
+			"shadowchill": {
+				"basePower": 75,
+				"type": "Shadow",
+				"category": "Special"
+			},
+			"shadowfire": {
+				"basePower": 75,
+				"type": "Shadow",
+				"category": "Special"
+			},
+			"shadowstorm": {
+				"basePower": 95,
+				"type": "Shadow",
+				"category": "Special"
+			},
+			"shadowwave": {
+				"basePower": 50,
+				"type": "Shadow",
+				"category": "Special"
+			},
+			"shadowrave": {
+				"basePower": 70,
+				"type": "Shadow",
+				"category": "Special"
+			},
+			"shadowdown": {
+				"basePower": 0,
+				"type": "Shadow",
+				"category": "Status",
+				"ignoreImmunity": true
+			},
+			"shadowmist": {
+				"basePower": 0,
+				"type": "Shadow",
+				"category": "Status",
+				"ignoreImmunity": true
+			},
+			"shadowpanic": {
+				"basePower": 0,
+				"type": "Shadow",
+				"category": "Status",
+				"ignoreImmunity": true
+			},
+			"shadowhold": {
+				"basePower": 0,
+				"type": "Shadow",
+				"category": "Status",
+				"ignoreImmunity": true
+			},
+			"shadowhalf": {
+				"basePower": 0,
+				"type": "Shadow",
+				"category": "Status",
+				"ignoreImmunity": true
+			},
+			"shadowshed": {
+				"basePower": 0,
+				"type": "Shadow",
+				"category": "Status",
+				"ignoreImmunity": true
+			},
+			"shadowsky": {
+				"basePower": 0,
+				"type": "Shadow",
+				"category": "Status",
+				"ignoreImmunity": true
+			}
+		},
 		"typeChart": {},
 		"baseStats": {}
 	},

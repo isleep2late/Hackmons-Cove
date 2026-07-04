@@ -50,5 +50,47 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 		gen: 9,
 		shortDesc: "Mega Evolves Mewtwo or Shadow Mewtwo into Shadow Mega Mewtwo X.",
 	},
+	shadowplate: {
+		name: "Shadow Plate",
+		spritenum: 8,
+		onPlate: 'Shadow',
+		onBasePowerPriority: 15,
+		onBasePower(basePower, user, target, move) {
+			if (move && move.type === 'Shadow') {
+				return this.chainModify([4915, 4096]);
+			}
+		},
+		onTakeItem(item, pokemon, source) {
+			if ((source && source.baseSpecies.num === 493) || pokemon.baseSpecies.num === 493) {
+				return false;
+			}
+			return true;
+		},
+		forcedForme: "Arceus-Shadow",
+		num: 0,
+		gen: 9,
+		shortDesc: "Holder's Shadow-type moves have 1.2x power; turns Arceus into its Shadow forme.",
+	},
+	questionmarkplate: {
+		name: "Question Mark Plate",
+		spritenum: 8,
+		onPlate: '???',
+		onBasePowerPriority: 15,
+		onBasePower(basePower, user, target, move) {
+			if (move && move.type === '???') {
+				return this.chainModify([4915, 4096]);
+			}
+		},
+		onTakeItem(item, pokemon, source) {
+			if ((source && source.baseSpecies.num === 493) || pokemon.baseSpecies.num === 493) {
+				return false;
+			}
+			return true;
+		},
+		forcedForme: "Arceus-Question",
+		num: 0,
+		gen: 9,
+		shortDesc: "Turns Arceus into its ??? (typeless) forme; Judgment becomes typeless.",
+	},
 
 };

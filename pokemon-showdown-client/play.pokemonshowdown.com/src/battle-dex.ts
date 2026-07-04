@@ -598,34 +598,36 @@ export const Dex = new class implements ModdedDex {
 			pokemon = pokemon.getSpeciesForme() + (isGigantamax ? '-Gmax' : '');
 		}
 		const species = Dex.species.get(pokemon);
-		const phnnLocalSpriteIds: {[id: string]: number} = {
-			mewtwoshadow: 1, mewtwoshadowmegax: 1, lugiashadow: 1, hakamoototem: 1, wishiwashitotem: 1,
+		const phnnSpriteMeta: {[id: string]: any} = {
+			arceusshadow: { fw: 120, fh: 120, fpx: false, back: 1, bw: 110, bh: 124, shinyFront: 1, sfw: 131, sfh: 170, shinyBack: 1, sbw: 110, sbh: 124, battle: 1, btw: 125, bth: 135 },
+			arceusquestion: { fw: 105, fh: 120, fpx: false, back: 1, bw: 124, bh: 112, shinyFront: 1, sfw: 105, sfh: 120, shinyBack: 1, sbw: 124, sbh: 112 },
+			lugiashadow: { fw: 134, fh: 119, fpx: true, back: 1, bw: 134, bh: 123 },
+			mewtwoshadow: { fw: 120, fh: 120, fpx: false, back: 1, bw: 124, bh: 117, shinyFront: 1, sfw: 130, sfh: 130, shinyBack: 1, battle: 1, btw: 135, bth: 130 },
+			mewtwoshadowmegax: { fw: 120, fh: 120, fpx: false, back: 1, bw: 93, bh: 132, shinyFront: 1, sfw: 140, sfh: 140, shinyBack: 1, battle: 1, btw: 100, bth: 142 },
+			hakamoototem: { fw: 120, fh: 120, fpx: false },
+			wishiwashitotem: { fw: 120, fh: 120, fpx: false },
 		};
-		if (phnnLocalSpriteIds[species.id]) {
+		const phnnMeta = phnnSpriteMeta[species.id];
+		if (phnnMeta) {
 			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
 			const host = window.Config ? Config.routes.client : 'beta.hackmons.com';
-			if (species.id === 'lugiashadow') {
-				const useBack = !isFront;
-				const file = useBack ? 'lugiashadow-back' : 'lugiashadow';
-				return {
-					gen: mechanicsGen,
-					w: 134,
-					h: useBack ? 123 : 119,
-					y: 0,
-					url: `${protocol}//${host}/sprites/phnn/${file}.png`,
-					pixelated: true,
-					isFrontSprite: isFront,
-					cryurl: '',
-					shiny: !!options.shiny,
-				};
+			const useBack = !isFront && !!phnnMeta.back;
+			let file: string, w: number, h: number, px: boolean;
+			if (useBack) {
+				file = (options.shiny && phnnMeta.shinyBack) ? `${species.id}-shiny-back` : `${species.id}-back`;
+				w = phnnMeta.bw; h = phnnMeta.bh; px = true;
+			} else if (options.shiny && phnnMeta.shinyFront) {
+				file = `${species.id}-shiny`; w = phnnMeta.sfw || phnnMeta.fw; h = phnnMeta.sfh || phnnMeta.fh; px = !!phnnMeta.fpx;
+			} else if (!options.shiny && phnnMeta.battle) {
+				file = `${species.id}-battle`; w = phnnMeta.btw || phnnMeta.fw; h = phnnMeta.bth || phnnMeta.fh; px = false;
+			} else {
+				file = species.id; w = phnnMeta.fw; h = phnnMeta.fh; px = !!phnnMeta.fpx;
 			}
 			return {
 				gen: mechanicsGen,
-				w: 120,
-				h: 120,
-				y: 0,
-				url: `${protocol}//${host}/sprites/phnn/${species.id}.png`,
-				pixelated: false,
+				w, h, y: 0,
+				url: `${protocol}//${host}/sprites/phnn/${file}.png`,
+				pixelated: px,
 				isFrontSprite: isFront,
 				cryurl: '',
 				shiny: !!options.shiny,
@@ -842,10 +844,13 @@ export const Dex = new class implements ModdedDex {
 			// @ts-expect-error safe, but too lazy to cast
 			id = toID(pokemon.volatiles.formechange[1]);
 		}
-		if (id === 'lugiashadow') {
+		const phnnIconIds: {[id: string]: number} = {
+			arceusshadow: 1, arceusquestion: 1, lugiashadow: 1, mewtwoshadow: 1, mewtwoshadowmegax: 1,
+		};
+		if (phnnIconIds[id]) {
 			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
 			const host = window.Config ? Config.routes.client : 'beta.hackmons.com';
-			return `background:transparent url(${protocol}//${host}/sprites/phnn/lugiashadow-icon.png) no-repeat scroll center;background-size:contain;image-rendering:pixelated`;
+			return `background:transparent url(${protocol}//${host}/sprites/phnn/${id}-icon.png) no-repeat scroll center;background-size:contain;image-rendering:pixelated`;
 		}
 		let num = this.getPokemonIconNum(id, pokemon?.gender === 'F', facingLeft);
 
@@ -871,14 +876,18 @@ export const Dex = new class implements ModdedDex {
 		}
 		if (species.exists === false) return { spriteDir: 'sprites/gen5', spriteid: '0', x: 10, y: 5, pixelated: true };
 		const phnnLocalSpriteIds: {[id: string]: number} = {
-			mewtwoshadow: 1, mewtwoshadowmegax: 1, lugiashadow: 1, hakamoototem: 1, wishiwashitotem: 1,
+			arceusshadow: 1, arceusquestion: 1, mewtwoshadow: 1, mewtwoshadowmegax: 1, lugiashadow: 1, hakamoototem: 1, wishiwashitotem: 1,
 		};
 		if (phnnLocalSpriteIds[species.id]) {
 			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
 			const host = window.Config ? Config.routes.client : 'beta.hackmons.com';
 			const isPixel = species.id === 'lugiashadow';
+			// phnn shiny fronts live in the same phnn/ folder as `<id>-shiny.png` (filename suffix,
+			// not a phnn-shiny/ directory), so bake `-shiny` into spriteid here and leave data.shiny unset.
+			const phnnShinyFrontIds: {[id: string]: number} = { arceusshadow: 1, arceusquestion: 1, mewtwoshadow: 1, mewtwoshadowmegax: 1 };
+			const useShiny = pokemon.shiny && phnnShinyFrontIds[species.id];
 			return {
-				spriteid: species.id,
+				spriteid: useShiny ? `${species.id}-shiny` : species.id,
 				spriteDir: 'sprites/phnn',
 				x: isPixel ? 14 : 10,
 				y: isPixel ? 16 : 12,
@@ -962,6 +971,13 @@ export const Dex = new class implements ModdedDex {
 	getItemIcon(item: any) {
 		let num = 0;
 		if (typeof item === 'string' && window.BattleItems) item = window.BattleItems[toID(item)];
+		const phnnPlateIcons: {[id: string]: string} = { shadowplate: 'shadowplate', questionmarkplate: 'questionmarkplate' };
+		const phnnPlateId = phnnPlateIcons[toID(item?.name)];
+		if (phnnPlateId) {
+			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
+			const host = window.Config ? Config.routes.client : 'beta.hackmons.com';
+			return `background:transparent url(${protocol}//${host}/sprites/phnn/${phnnPlateId}.png) no-repeat scroll center;background-size:contain;image-rendering:pixelated`;
+		}
 		if (item?.spritenum) num = item.spritenum;
 
 		let top = Math.floor(num / 16) * 24;
@@ -974,10 +990,11 @@ export const Dex = new class implements ModdedDex {
 		if (!type) type = '???';
 		let sanitizedType = type.replace(/\?/g, '%3f');
 		let prefix = Dex.resourcePrefix;
-		if (type === 'Shadow') {
+		if (type === 'Shadow' || type === '???') {
 			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
 			const host = window.Config ? Config.routes.client : 'beta.hackmons.com';
 			prefix = `${protocol}//${host}/`;
+			if (type === '???') sanitizedType = 'Question';
 		}
 		return `<img src="${prefix}sprites/types/${sanitizedType}.png" alt="${type}" height="14" width="32" class="pixelated${b ? ' b' : ''}" />`;
 	}
@@ -1051,7 +1068,9 @@ export class ModdedDex {
 					Object.assign(data, table.overrideMoveData[id]);
 				}
 			}
-			if (this.gen <= 3 && data.category !== 'Status') {
+			if (this.gen <= 3 && data.category !== 'Status' && data.type !== 'Shadow') {
+				// Shadow moves keep their real physical/special split (see the gen3phnn mod);
+				// the vanilla type-based Gen 1-3 split doesn't know the Shadow type.
 				data.category = Dex.getGen3Category(data.type);
 			}
 
@@ -1124,13 +1143,16 @@ export class ModdedDex {
 	species = {
 		get: (name: string): Species => {
 			let id = toID(name);
+			const originalId = id;
 			if (window.BattleAliases && id in BattleAliases) {
 				name = BattleAliases[id];
 				id = toID(name);
 			}
+			const baseSpecies = Dex.species.get(originalId || name);
+			id = baseSpecies.id;
 			if (this.cache.Species.hasOwnProperty(id)) return this.cache.Species[id];
 
-			let data = { ...Dex.species.get(name) };
+			let data = { ...baseSpecies };
 
 			for (let i = Dex.gen - 1; i >= this.gen; i--) {
 				const table = window.BattleTeambuilderTable[`gen${i}`];
