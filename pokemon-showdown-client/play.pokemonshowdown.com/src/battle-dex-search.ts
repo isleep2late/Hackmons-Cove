@@ -692,6 +692,9 @@ abstract class BattleTypedSearch<T extends SearchType> {
 		if (format === 'disguises' && this.dex.gen === 1) {
 			this.dex = Dex.mod('gen1phnn' as ID);
 		}
+		if (format === 'anyability' && this.dex.gen === 3) {
+			this.dex = Dex.mod('gen3phnn' as ID);
+		}
 		if (format.startsWith('vgc')) {
 			this.formatType = 'doubles';
 			this.isDoubles = true;

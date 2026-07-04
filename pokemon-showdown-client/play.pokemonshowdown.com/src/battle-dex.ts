@@ -602,8 +602,8 @@ export const Dex = new class implements ModdedDex {
 			arceusshadow: { fw: 120, fh: 120, fpx: false, back: 1, bw: 110, bh: 124, shinyFront: 1, sfw: 131, sfh: 170, shinyBack: 1, sbw: 110, sbh: 124, battle: 1, btw: 125, bth: 135 },
 			arceusquestion: { fw: 105, fh: 120, fpx: false, back: 1, bw: 124, bh: 112, shinyFront: 1, sfw: 105, sfh: 120, shinyBack: 1, sbw: 124, sbh: 112 },
 			lugiashadow: { fw: 134, fh: 119, fpx: true, back: 1, bw: 134, bh: 123 },
-			mewtwoshadow: { fw: 120, fh: 120, fpx: false, back: 1, bw: 124, bh: 117, shinyBack: 1, battle: 1, btw: 135, bth: 130 },
-			mewtwoshadowmegax: { fw: 120, fh: 120, fpx: false, back: 1, bw: 93, bh: 132, shinyBack: 1, battle: 1, btw: 100, bth: 142 },
+			mewtwoshadow: { fw: 120, fh: 120, fpx: false, back: 1, bw: 124, bh: 117, shinyFront: 1, sfw: 130, sfh: 130, shinyBack: 1, battle: 1, btw: 135, bth: 130 },
+			mewtwoshadowmegax: { fw: 120, fh: 120, fpx: false, back: 1, bw: 93, bh: 132, shinyFront: 1, sfw: 140, sfh: 140, shinyBack: 1, battle: 1, btw: 100, bth: 142 },
 			hakamoototem: { fw: 120, fh: 120, fpx: false },
 			wishiwashitotem: { fw: 120, fh: 120, fpx: false },
 		};
@@ -882,8 +882,12 @@ export const Dex = new class implements ModdedDex {
 			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
 			const host = window.Config ? Config.routes.client : 'beta.hackmons.com';
 			const isPixel = species.id === 'lugiashadow';
+			// phnn shiny fronts live in the same phnn/ folder as `<id>-shiny.png` (filename suffix,
+			// not a phnn-shiny/ directory), so bake `-shiny` into spriteid here and leave data.shiny unset.
+			const phnnShinyFrontIds: {[id: string]: number} = { arceusshadow: 1, arceusquestion: 1, mewtwoshadow: 1, mewtwoshadowmegax: 1 };
+			const useShiny = pokemon.shiny && phnnShinyFrontIds[species.id];
 			return {
-				spriteid: species.id,
+				spriteid: useShiny ? `${species.id}-shiny` : species.id,
 				spriteDir: 'sprites/phnn',
 				x: isPixel ? 14 : 10,
 				y: isPixel ? 16 : 12,
@@ -967,10 +971,12 @@ export const Dex = new class implements ModdedDex {
 	getItemIcon(item: any) {
 		let num = 0;
 		if (typeof item === 'string' && window.BattleItems) item = window.BattleItems[toID(item)];
-		if (toID(item?.name) === 'shadowplate') {
+		const phnnPlateIcons: {[id: string]: string} = { shadowplate: 'shadowplate', questionmarkplate: 'questionmarkplate' };
+		const phnnPlateId = phnnPlateIcons[toID(item?.name)];
+		if (phnnPlateId) {
 			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
 			const host = window.Config ? Config.routes.client : 'beta.hackmons.com';
-			return `background:transparent url(${protocol}//${host}/sprites/phnn/shadowplate.png) no-repeat scroll center;background-size:contain;image-rendering:pixelated`;
+			return `background:transparent url(${protocol}//${host}/sprites/phnn/${phnnPlateId}.png) no-repeat scroll center;background-size:contain;image-rendering:pixelated`;
 		}
 		if (item?.spritenum) num = item.spritenum;
 
@@ -1062,7 +1068,9 @@ export class ModdedDex {
 					Object.assign(data, table.overrideMoveData[id]);
 				}
 			}
-			if (this.gen <= 3 && data.category !== 'Status') {
+			if (this.gen <= 3 && data.category !== 'Status' && data.type !== 'Shadow') {
+				// Shadow moves keep their real physical/special split (see the gen3phnn mod);
+				// the vanilla type-based Gen 1-3 split doesn't know the Shadow type.
 				data.category = Dex.getGen3Category(data.type);
 			}
 

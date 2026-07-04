@@ -1418,6 +1418,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 	for (const [clientId, serverMod] of [
 		['gen9phnn', 'phnn'],
 		['gen1phnn', 'gen1phnn'],
+		['gen3phnn', 'gen3phnn'],
 	]) {
 		const modDex = Dex.mod(serverMod);
 		const modData = modDex.data;
