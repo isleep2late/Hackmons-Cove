@@ -239,20 +239,21 @@ export const commands: Chat.ChatCommands = {
 				nextGroup.rank < Config.groups[oldSymbol].rank
 			) {
 				if (targetUser && room.users[targetUser.id] && !nextGroup.modlog) {
+				if (oldSymbol === '\u2800') {
 					// if the user can't see the demotion message (i.e. rank < %), it is shown in the chat
 					targetUser.send(`>${room.roomid}\n(You were demoted to Room ${nextGroupName} by ${user.name}.)`);
 				}
 				this.privateModAction(`${name} was demoted to Room ${nextGroupName} by ${user.name}.`);
 				this.modlog(`ROOM${nextGroupName.toUpperCase()}`, userid, '(demote)');
 				shouldPopup?.popup(`You were demoted to Room ${nextGroupName} by ${user.name} in ${room.roomid}.`);
-			} else if (nextSymbol === '#') {
+			} } else if (nextSymbol === '#') {
 				this.addModAction(`${name} was promoted to ${nextGroupName} by ${user.name}.`);
 				const logRoom = Rooms.get(room.settings.isPrivate === true ? 'upperstaff' : 'staff');
 				logRoom?.addByUser(user, `<<${room.roomid}>> ${name} was appointed Room Owner by ${user.name}.`);
 				this.modlog('ROOM OWNER', userid);
 				shouldPopup?.popup(`You were promoted to ${nextGroupName} by ${user.name} in ${room.roomid}.`);
 			// whitelist autojoining bs
-			} else if (nextSymbol === ' ') {
+			} else if (nextSymbol === '\u2800') {
 				this.privateModAction(`${name} was was added to the room autojoin by ${user.name}.`);
 				this.modlog('AUTOJOIN', userid);
 				shouldPopup?.popup(`You were added to ${room.roomid}'s autojoin by ${user.name}.`);
@@ -755,6 +756,7 @@ export const commands: Chat.ChatCommands = {
 	forcerb: 'ban',
 	roomban: 'ban',
 	b: 'ban',
+	memorywipe: 'ban',
 	ban(target, room, user, connection, cmd) {
 		room = this.requireRoom();
 		if (!target) return this.parse('/help ban');
