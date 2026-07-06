@@ -171,6 +171,7 @@ function requireNoCache(pathSpec) {
 	const phnnFormeNames = {
 		mewtwoshadow: 'Mewtwo-Shadow',
 		mewtwoshadowmegax: 'Mewtwo-Shadow-Mega-X',
+		mewtwoarmored: 'Mewtwo-Armored',
 		lugiashadow: 'Lugia-Shadow',
 		arceusshadow: 'Arceus-Shadow',
 		arceusquestion: 'Arceus-Question',
@@ -1487,7 +1488,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 	}
 
 	{
-		const phnnFormeIds = ['mewtwoshadow', 'mewtwoshadowmegax', 'lugiashadow', 'arceusshadow', 'arceusquestion', 'hakamoototem', 'wishiwashitotem'];
+		const phnnFormeIds = ['mewtwoshadow', 'mewtwoshadowmegax', 'mewtwoarmored', 'lugiashadow', 'arceusshadow', 'arceusquestion', 'hakamoototem', 'wishiwashitotem'];
 		const phnnDexTB = Dex.mod('phnn');
 		for (const target of [BattleTeambuilderTable, BattleTeambuilderTable.bh]) {
 			if (!target || !target.tiers || target.tiers.includes('mewtwoshadow')) continue;
@@ -1527,8 +1528,8 @@ process.stdout.write("Building `data/pokedex.js`... ");
 		}
 	}
 	const phnnDexP = Dex.mod('phnn');
-	const phnnFormeMap = {mewtwo: ['Mewtwo-Shadow'], lugia: ['Lugia-Shadow'], arceus: ['Arceus-Shadow', 'Arceus-Question'], hakamoo: ['Hakamo-o-Totem'], wishiwashi: ['Wishiwashi-Totem']};
-	for (const id of ['mewtwoshadow', 'mewtwoshadowmegax', 'lugiashadow', 'arceusshadow', 'arceusquestion', 'hakamoototem', 'wishiwashitotem']) {
+	const phnnFormeMap = {mewtwo: ['Mewtwo-Shadow', 'Mewtwo-Armored'], lugia: ['Lugia-Shadow'], arceus: ['Arceus-Shadow', 'Arceus-Question'], hakamoo: ['Hakamo-o-Totem'], wishiwashi: ['Wishiwashi-Totem']};
+	for (const id of ['mewtwoshadow', 'mewtwoshadowmegax', 'mewtwoarmored', 'lugiashadow', 'arceusshadow', 'arceusquestion', 'hakamoototem', 'wishiwashitotem']) {
 		const s = phnnDexP.species.get(id);
 		if (s.exists && !Pokedex[id]) {
 			const e = {
