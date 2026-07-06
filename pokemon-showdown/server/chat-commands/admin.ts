@@ -1345,6 +1345,7 @@ export const commands: Chat.ChatCommands = {
 
 	async kill(target, room, user) {
 		this.canUseConsole;
+		// @ts-expect-error
 		await killServer(this, target, room, user);
 	},
 	killhelp: [
