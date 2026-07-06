@@ -1367,9 +1367,16 @@ export class Side {
 		} else if (this.requestState === 'switch') {
 			let i = 0;
 			while (!this.isChoiceDone()) {
-				if (!this.chooseSwitch()) throw new Error(`autoChoose switch crashed: ${this.choice.error}`);
+				if (!this.chooseSwitch()) {
+					// No legal switch-in for a slot that must be filled (e.g. rotation battles with
+					// fewer live Pokemon than active slots): pass the empty slot instead of crashing.
+					this.choice.error = ``;
+					this.choice.forcedSwitchesLeft = 0;
+					this.choice.forcedPassesLeft = this.active.length;
+					if (!this.choosePass()) break;
+				}
 				i++;
-				if (i > 10) throw new Error(`autoChoose failed: infinite looping`);
+				if (i > 10) break;
 			}
 		} else if (this.requestState === 'move') {
 			let i = 0;
