@@ -604,6 +604,7 @@ export const Dex = new class implements ModdedDex {
 			lugiashadow: { fw: 134, fh: 119, fpx: true, back: 1, bw: 134, bh: 123 },
 			mewtwoshadow: { fw: 120, fh: 120, fpx: false, back: 1, bw: 124, bh: 117, shinyFront: 1, sfw: 130, sfh: 130, shinyBack: 1, battle: 1, btw: 135, bth: 130 },
 			mewtwoshadowmegax: { fw: 120, fh: 120, fpx: false, back: 1, bw: 93, bh: 132, shinyFront: 1, sfw: 140, sfh: 140, shinyBack: 1, battle: 1, btw: 100, bth: 142 },
+			mewtwoarmored: { fw: 120, fh: 120, fpx: false, back: 1, bw: 95, bh: 155, shinyFront: 1, sfw: 120, sfh: 135, shinyBack: 1, battle: 1, btw: 120, bth: 135 },
 			hakamoototem: { fw: 120, fh: 120, fpx: false },
 			wishiwashitotem: { fw: 120, fh: 120, fpx: false },
 		};
@@ -845,7 +846,7 @@ export const Dex = new class implements ModdedDex {
 			id = toID(pokemon.volatiles.formechange[1]);
 		}
 		const phnnIconIds: {[id: string]: number} = {
-			arceusshadow: 1, arceusquestion: 1, lugiashadow: 1, mewtwoshadow: 1, mewtwoshadowmegax: 1,
+			arceusshadow: 1, arceusquestion: 1, lugiashadow: 1, mewtwoshadow: 1, mewtwoshadowmegax: 1, mewtwoarmored: 1,
 		};
 		if (phnnIconIds[id]) {
 			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
@@ -876,13 +877,13 @@ export const Dex = new class implements ModdedDex {
 		}
 		if (species.exists === false) return { spriteDir: 'sprites/gen5', spriteid: '0', x: 10, y: 5, pixelated: true };
 		const phnnLocalSpriteIds: {[id: string]: number} = {
-			arceusshadow: 1, arceusquestion: 1, mewtwoshadow: 1, mewtwoshadowmegax: 1, lugiashadow: 1, hakamoototem: 1, wishiwashitotem: 1,
+			arceusshadow: 1, arceusquestion: 1, mewtwoshadow: 1, mewtwoshadowmegax: 1, mewtwoarmored: 1, lugiashadow: 1, hakamoototem: 1, wishiwashitotem: 1,
 		};
 		if (phnnLocalSpriteIds[species.id]) {
 			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
 			const host = window.Config ? Config.routes.client : 'beta.hackmons.com';
 			const isPixel = species.id === 'lugiashadow';
-			const phnnShinyFrontIds: {[id: string]: number} = { arceusshadow: 1, arceusquestion: 1, mewtwoshadow: 1, mewtwoshadowmegax: 1 };
+			const phnnShinyFrontIds: {[id: string]: number} = { arceusshadow: 1, arceusquestion: 1, mewtwoshadow: 1, mewtwoshadowmegax: 1, mewtwoarmored: 1 };
 			const useShiny = pokemon.shiny && phnnShinyFrontIds[species.id];
 			return {
 				spriteid: useShiny ? `${species.id}-shiny` : species.id,
