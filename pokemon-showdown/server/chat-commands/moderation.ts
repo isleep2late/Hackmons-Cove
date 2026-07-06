@@ -252,11 +252,6 @@ export const commands: Chat.ChatCommands = {
 				logRoom?.addByUser(user, `<<${room.roomid}>> ${name} was appointed Room Owner by ${user.name}.`);
 				this.modlog('ROOM OWNER', userid);
 				shouldPopup?.popup(`You were promoted to ${nextGroupName} by ${user.name} in ${room.roomid}.`);
-			// whitelist autojoining bs
-			} else if (nextSymbol === '\u2800') {
-				this.privateModAction(`${name} was was added to the room autojoin by ${user.name}.`);
-				this.modlog('AUTOJOIN', userid);
-				shouldPopup?.popup(`You were added to ${room.roomid}'s autojoin by ${user.name}.`);
 			} else {
 				this.addModAction(`${name} was promoted to Room ${nextGroupName} by ${user.name}.`);
 				this.modlog(`ROOM${nextGroupName.toUpperCase()}`, userid);
