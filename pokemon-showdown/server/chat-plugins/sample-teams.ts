@@ -54,7 +54,7 @@ export const SampleTeams = new class SampleTeams {
 	}
 
 	isDevMod(user: User) {
-		return !!Rooms.get('development')?.auth.atLeast(user, '@');
+		return !!Rooms.get('adminlog')?.auth.atLeast(user, '@');
 	}
 
 	checkPermissions(user: User, roomids: RoomID[]) {

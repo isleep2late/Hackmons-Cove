@@ -905,13 +905,13 @@ export const commands: Chat.ChatCommands = {
 			}
 		} catch (e: any) {
 			Rooms.global.notifyRooms(
-				['development', 'staff', 'upperstaff'] as RoomID[],
+				['adminlog', 'staff', 'upperstaff'] as RoomID[],
 				`|c|${user.getIdentity()}|/log ${user.name} used /hotpatch ${target} - but something failed while trying to hot-patch.`
 			);
 			throw new Chat.ErrorMessage([`Something failed while trying to hot-patch ${target}:`, e.stack]);
 		}
 		Rooms.global.notifyRooms(
-			['development', 'staff', 'upperstaff'] as RoomID[],
+			['adminlog', 'staff', 'upperstaff'] as RoomID[],
 			`|c|${user.getIdentity()}|/log ${user.name} used /hotpatch ${target}`
 		);
 	},
@@ -971,7 +971,7 @@ export const commands: Chat.ChatCommands = {
 			this.sendReply(`You have disabled hot-patching ${hotpatch}.`);
 		}
 		Rooms.global.notifyRooms(
-			['development', 'staff', 'upperstaff'] as RoomID[],
+			['adminlog', 'staff', 'upperstaff'] as RoomID[],
 			`|c|${user.getIdentity()}|/log ${user.name} has ${enable ? 'enabled' : 'disabled'} hot-patching ${hotpatch}. Reason: ${reason}`
 		);
 	},
@@ -1420,7 +1420,7 @@ export const commands: Chat.ChatCommands = {
 		const [result, err] = await LoginServer.request('restart');
 		if (err) {
 			Rooms.global.notifyRooms(
-				['staff', 'development'],
+				['staff', 'adminlog'],
 				`|c|${user.getIdentity()}|/log ${user.name} used /updateloginserver - but something failed while updating.`
 			);
 			throw new Chat.ErrorMessage([err.message, err.stack || '']);
@@ -1438,7 +1438,7 @@ export const commands: Chat.ChatCommands = {
 			this.errorReply(`FAILED. Conflicts were found while updating - the restart was aborted.`);
 		}
 		Rooms.global.notifyRooms(
-			['staff', 'development'], `|c|${user.getIdentity()}|/log ${message}`
+			['staff', 'adminlog'], `|c|${user.getIdentity()}|/log ${message}`
 		);
 	},
 	updateloginserverhelp: [
@@ -1453,7 +1453,7 @@ export const commands: Chat.ChatCommands = {
 		});
 		if (err) {
 			Rooms.global.notifyRooms(
-				['staff', 'development'],
+				['staff', 'adminlog'],
 				`|c|${user.getIdentity()}|/log ${user.name} used /updateclient - but something failed while updating.`
 			);
 			throw new Chat.ErrorMessage([err.message, err.stack || '']);
@@ -1471,7 +1471,7 @@ export const commands: Chat.ChatCommands = {
 			this.errorReply(`FAILED. Conflicts were found while updating.`);
 		}
 		Rooms.global.notifyRooms(
-			['staff', 'development'], `|c|${user.getIdentity()}|/log ${message}`
+			['staff', 'adminlog'], `|c|${user.getIdentity()}|/log ${message}`
 		);
 	},
 	updateclienthelp: [

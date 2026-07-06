@@ -472,7 +472,7 @@ describe('Modlog conversion script', () => {
 			assert.deepEqual(
 				converter.parseModlog(`[2020-08-23T19:50:49.944Z] (development) ROOMMODERATOR: [annika] by heartofetheria`),
 				{
-					action: 'ROOMMODERATOR', roomID: 'development', userid: 'annika',
+					action: 'ROOMMODERATOR', roomID: 'adminlog', userid: 'annika',
 					isGlobal: false, loggedBy: 'heartofetheria', time: 1598212249944,
 					alts: [], autoconfirmedID: null, ip: null, note: '', visualRoomID: '',
 				}
@@ -481,7 +481,7 @@ describe('Modlog conversion script', () => {
 			assert.deepEqual(
 				converter.parseModlog(`[2020-08-23T19:50:49.944Z] (development) ROOMVOICE: [annika] by heartofetheria: (demote)`),
 				{
-					action: 'ROOMVOICE', roomID: 'development', userid: 'annika',
+					action: 'ROOMVOICE', roomID: 'adminlog', userid: 'annika',
 					isGlobal: false, loggedBy: 'heartofetheria', note: '(demote)', time: 1598212249944,
 					alts: [], autoconfirmedID: null, ip: null, visualRoomID: '',
 				}
@@ -493,7 +493,7 @@ describe('Modlog conversion script', () => {
 			assert.deepEqual(
 				converter.parseModlog(`[2020-08-23T19:50:49.944Z] (development) HIDEALTSTEXT: [auser] alts:[alt1] by annika: hnr`),
 				{
-					action: 'HIDEALTSTEXT', roomID: 'development', userid: 'auser', alts: ['alt1'],
+					action: 'HIDEALTSTEXT', roomID: 'adminlog', userid: 'auser', alts: ['alt1'],
 					note: 'hnr', isGlobal: false, loggedBy: 'annika', time: 1598212249944,
 					autoconfirmedID: null, ip: null, visualRoomID: '',
 				}
@@ -504,14 +504,14 @@ describe('Modlog conversion script', () => {
 			assert.deepEqual(
 				converter.parseModlog(`[2020-08-23T19:50:49.944Z] (development) WEEKLOCK: [gejg] ac: [annika] alts: [annalytically], [heartofetheria] [127.0.0.1] by somemod: terrible user`),
 				{
-					action: 'WEEKLOCK', roomID: 'development', userid: 'gejg', autoconfirmedID: 'annika', alts: ['annalytically', 'heartofetheria'],
+					action: 'WEEKLOCK', roomID: 'adminlog', userid: 'gejg', autoconfirmedID: 'annika', alts: ['annalytically', 'heartofetheria'],
 					ip: '127.0.0.1', isGlobal: false, loggedBy: 'somemod', note: 'terrible user', time: 1598212249944, visualRoomID: '',
 				}
 			);
 			assert.deepEqual(
 				converter.parseModlog(`[2020-08-23T19:50:49.944Z] (development) WEEKLOCK: [gejg] ac:[annika] alts:[annalytically], [heartofetheria] [127.0.0.1] by somemod: terrible user`),
 				{
-					action: 'WEEKLOCK', roomID: 'development', userid: 'gejg', autoconfirmedID: 'annika', alts: ['annalytically', 'heartofetheria'],
+					action: 'WEEKLOCK', roomID: 'adminlog', userid: 'gejg', autoconfirmedID: 'annika', alts: ['annalytically', 'heartofetheria'],
 					ip: '127.0.0.1', isGlobal: false, loggedBy: 'somemod', note: 'terrible user', time: 1598212249944, visualRoomID: '',
 				}
 			);
@@ -519,7 +519,7 @@ describe('Modlog conversion script', () => {
 			assert.deepEqual(
 				converter.parseModlog(`[2020-08-23T19:50:49.944Z] (development) WEEKLOCK: [gejg] alts:[annalytically] [127.0.0.1] by somemod: terrible user`),
 				{
-					action: 'WEEKLOCK', roomID: 'development', userid: 'gejg', alts: ['annalytically'],
+					action: 'WEEKLOCK', roomID: 'adminlog', userid: 'gejg', alts: ['annalytically'],
 					ip: '127.0.0.1', isGlobal: false, loggedBy: 'somemod', note: 'terrible user', time: 1598212249944,
 					autoconfirmedID: null, visualRoomID: '',
 				}
@@ -528,7 +528,7 @@ describe('Modlog conversion script', () => {
 			assert.deepEqual(
 				converter.parseModlog(`[2020-08-23T19:50:49.944Z] (development) WEEKLOCK: [gejg] [127.0.0.1] by somemod: terrible user`),
 				{
-					action: 'WEEKLOCK', roomID: 'development', userid: 'gejg',
+					action: 'WEEKLOCK', roomID: 'adminlog', userid: 'gejg',
 					ip: '127.0.0.1', isGlobal: false, loggedBy: 'somemod', note: 'terrible user', time: 1598212249944,
 					alts: [], autoconfirmedID: null, visualRoomID: '',
 				}
@@ -539,7 +539,7 @@ describe('Modlog conversion script', () => {
 			assert.deepEqual(
 				converter.parseModlog(`[2020-08-23T19:50:49.944Z] (development) NOTE: by annika: HELP! I'm trapped in a unit test factory...`),
 				{
-					action: 'NOTE', roomID: 'development', isGlobal: false, loggedBy: 'annika',
+					action: 'NOTE', roomID: 'adminlog', isGlobal: false, loggedBy: 'annika',
 					note: `HELP! I'm trapped in a unit test factory...`, time: 1598212249944,
 					alts: [], autoconfirmedID: null, ip: null, userid: null, visualRoomID: '',
 				}
@@ -625,7 +625,7 @@ describe('Modlog conversion script', () => {
 		it('should handle all fields of the ModlogEntry object', () => {
 			const entry = {
 				action: 'UNITTEST',
-				roomID: 'development',
+				roomID: 'adminlog',
 				userid: 'annika',
 				autoconfirmedID: 'heartofetheria',
 				alts: ['googlegoddess', 'princessentrapta'],
@@ -644,7 +644,7 @@ describe('Modlog conversion script', () => {
 		it('should handle OLD MODLOG', () => {
 			assert.deepEqual(
 				converter.rawifyLog({
-					action: 'OLD MODLOG', roomID: 'development', isGlobal: false, loggedBy: 'unknown',
+					action: 'OLD MODLOG', roomID: 'adminlog', isGlobal: false, loggedBy: 'unknown',
 					note: `hello hi test`, time: 1598212249944, alts: [],
 				}),
 				`[2020-08-23T19:50:49.944Z] (development) OLD MODLOG: by unknown: hello hi test\n`
@@ -697,7 +697,7 @@ describe('Modlog conversion script', () => {
 
 			const entry = {
 				action: 'UNITTEST',
-				roomID: 'development',
+				roomID: 'adminlog',
 				userid: 'annika',
 				autoconfirmedID: 'heartofetheria',
 				alts: ['googlegoddess', 'princessentrapta'],
@@ -707,16 +707,16 @@ describe('Modlog conversion script', () => {
 				note: 'Write 1',
 				time: 1598212249944,
 			};
-			modlog.write('development', entry);
+			modlog.write('adminlog', entry);
 			entry.time++;
 			entry.note = 'Write 2';
-			modlog.write('development', entry);
+			modlog.write('adminlog', entry);
 			entry.time++;
 			entry.note = 'Write 3';
-			modlog.write('development', entry);
-			modlog.write('development', {
+			modlog.write('adminlog', entry);
+			modlog.write('adminlog', {
 				action: 'GLOBAL UNITTEST',
-				roomID: 'development',
+				roomID: 'adminlog',
 				userid: 'annika',
 				autoconfirmedID: 'heartofetheria',
 				alts: ['googlegoddess', 'princessentrapta'],
@@ -762,7 +762,7 @@ describe('Modlog conversion script', () => {
 				.all();
 			const entries = database
 				.prepare(`SELECT *, (SELECT group_concat(userid, ',') FROM alts WHERE alts.modlog_id = modlog.modlog_id) as alts FROM modlog WHERE roomid IN (?, ?) ORDER BY timestamp ASC`)
-				.all('development', 'trivia');
+				.all('adminlog', 'trivia');
 
 			assert.equal(globalEntries.length, globalLines.length);
 			assert.equal(entries.length, lines.length);
@@ -774,7 +774,7 @@ describe('Modlog conversion script', () => {
 			assert(!globalEntries[0].visual_roomid);
 
 			assert.equal(globalEntries[0].timestamp, 1598212249945);
-			assert.equal(globalEntries[0].roomid, 'development');
+			assert.equal(globalEntries[0].roomid, 'adminlog');
 			assert.equal(globalEntries[0].action, 'GLOBAL UNITTEST');
 			assert.equal(globalEntries[0].action_taker_userid, 'yourmom');
 			assert.equal(globalEntries[0].userid, 'annika');

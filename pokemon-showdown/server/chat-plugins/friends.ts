@@ -421,7 +421,7 @@ export const commands: Chat.ChatCommands = {
 				void Chat.Friends.updateUserCache(curUser);
 			}
 			Rooms.global.notifyRooms(
-				['staff', 'development'],
+				['staff', 'adminlog'],
 				`|c|${user.getIdentity()}|/log ${user.name} used /friends invalidatecache`,
 			);
 			this.sendReply(`You invalidated each entry in the friends database cache.`);

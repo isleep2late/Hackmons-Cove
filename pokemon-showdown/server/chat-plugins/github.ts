@@ -126,7 +126,7 @@ export const GitHub = new class {
 		const title = result.pull_request.title;
 		let buf = Utils.html`[<span style="color:#FF00FF">${repoName}</span>] <span style="color:#909090">${userName}</span> `;
 		buf += Utils.html`${action} <a href="${url}">PR#${result.number}</a>: ${title}`;
-		this.report('development', repo, buf);
+		this.report('adminlog', repo, buf);
 	}
 	report(roomid: RoomID, repo: string, messages: string[] | string) {
 		if (!STAFF_REPOS.includes(repo) && roomid === 'staff') return;
@@ -173,7 +173,7 @@ export const commands: Chat.ChatCommands = {
 			return this.parse('/help github');
 		},
 		ban(target, room, user) {
-			room = this.requireRoom('development');
+			room = this.requireRoom('adminlog');
 			this.checkCan('mute', null, room);
 			const [username, reason] = Utils.splitFirst(target, ',').map(u => u.trim());
 			if (!toID(target)) return this.parse(`/help github`);
@@ -191,7 +191,7 @@ export const commands: Chat.ChatCommands = {
 			this.modlog('GITHUB BAN', username, reason);
 		},
 		unban(target, room, user) {
-			room = this.requireRoom('development');
+			room = this.requireRoom('adminlog');
 			this.checkCan('mute', null, room);
 			target = toID(target);
 			if (!target) return this.parse('/help github');
@@ -203,13 +203,13 @@ export const commands: Chat.ChatCommands = {
 			this.modlog('GITHUB UNBAN', target);
 		},
 		bans() {
-			const room = this.requireRoom('development');
+			const room = this.requireRoom('adminlog');
 			this.checkCan('mute', null, room);
 			return this.parse('/j view-github-bans');
 		},
 		setname: 'addusername',
 		addusername(target, room, user) {
-			room = this.requireRoom('development');
+			room = this.requireRoom('adminlog');
 			this.checkCan('mute', null, room);
 			const [gitName, username] = Utils.splitFirst(target, ',').map(u => u.trim());
 			if (!toID(gitName) || !toID(username)) return this.parse(`/help github`);
@@ -221,7 +221,7 @@ export const commands: Chat.ChatCommands = {
 		},
 		clearname: 'removeusername',
 		removeusername(target, room, user) {
-			room = this.requireRoom('development');
+			room = this.requireRoom('adminlog');
 			this.checkCan('mute', null, room);
 			target = toID(target);
 			if (!target) return this.parse(`/help github`);
@@ -250,7 +250,7 @@ export const commands: Chat.ChatCommands = {
 export const pages: Chat.PageTable = {
 	github: {
 		bans(query, user) {
-			const room = Rooms.get('development');
+			const room = Rooms.get('adminlog');
 			if (!room) throw new Chat.ErrorMessage("No Development room found.");
 			this.checkCan('mute', null, room);
 			if (!gitData.bans) throw new Chat.ErrorMessage("There are no gitbans at this time.");

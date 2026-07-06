@@ -66,17 +66,17 @@ async function lastLine(database, roomid) {
 			assert(Rooms.Modlog.getSharedID('help-mePleaseIAmTrappedInAUnitTestFactory'));
 
 			assert(!Rooms.Modlog.getSharedID('1v1'));
-			assert(!Rooms.Modlog.getSharedID('development'));
+			assert(!Rooms.Modlog.getSharedID('adminlog'));
 		});
 	});
 
 	describe('Modlog#write', () => {
 		it('should write messages serially to the modlog', async () => {
-			await Rooms.Modlog.write('development', { note: 'This message is logged first', action: 'UNITTEST' });
-			await Rooms.Modlog.write('development', { note: 'This message is logged second', action: 'UNITTEST' });
+			await Rooms.Modlog.write('adminlog', { note: 'This message is logged first', action: 'UNITTEST' });
+			await Rooms.Modlog.write('adminlog', { note: 'This message is logged second', action: 'UNITTEST' });
 			const lines = await Rooms.Modlog.database.all(await Rooms.Modlog.database.prepare(
 				// Order by modlog_id since the writes most likely happen at the same second
-				`SELECT * FROM modlog WHERE roomid = 'development' ORDER BY modlog_id DESC LIMIT 2`
+				`SELECT * FROM modlog WHERE roomid = 'adminlog' ORDER BY modlog_id DESC LIMIT 2`
 			));
 
 			assert.equal(lines.pop().note, 'This message is logged first');
