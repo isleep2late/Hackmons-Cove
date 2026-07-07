@@ -92,9 +92,8 @@ export const Avatars = new class {
 		saveCustomAvatars(instant);
 	}
 	src(avatar: AvatarID) {
-		if (avatar.includes('.')) return '';
 		const avatarUrl = OFFICIAL_AVATARS.has(avatar) ? 
-		`https://play.pokemonshowdown.com/sprites/trainers/${avatar}.png` : `https://play.hackmons.com/avatars/${avatar}.png`;
+		`https://play.pokemonshowdown.com/sprites/trainers/${avatar}.png` : `https://play.hackmons.com/avatars/${avatar}`;
 		return `${avatarUrl}`;
 	}
 	exists(avatar: string) {
