@@ -167,4 +167,31 @@ export const Conditions: import('../../../sim/dex-conditions').ModdedConditionDa
 			this.add('-weather', 'none');
 		},
 	},
+	wildmight: {
+		name: 'Wild Might',
+		noCopy: true,
+		onStart(pokemon) {
+			this.add('-start', pokemon, 'Wild Might');
+			this.add('-message', `${pokemon.name} is filled with Wild Might!`);
+		},
+		onModifyAtkPriority: 5,
+		onModifyAtk() {
+			return this.chainModify(2);
+		},
+		onModifyDefPriority: 5,
+		onModifyDef() {
+			return this.chainModify(2);
+		},
+		onModifySpAPriority: 5,
+		onModifySpA() {
+			return this.chainModify(2);
+		},
+		onModifySpDPriority: 5,
+		onModifySpD() {
+			return this.chainModify(2);
+		},
+		onEnd(pokemon) {
+			this.add('-end', pokemon, 'Wild Might');
+		},
+	},
 };

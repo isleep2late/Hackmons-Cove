@@ -173,6 +173,19 @@ export class BattleActions {
 				]);
 			}
 		}
+		if (pokemon.set.phAbilities) {
+			for (const abilityName of pokemon.set.phAbilities.split('/')) {
+				const extraAbility = this.battle.dex.abilities.get(abilityName);
+				if (!extraAbility.exists || extraAbility.id === pokemon.ability) continue;
+				const effect = 'ability:' + extraAbility.id;
+				pokemon.volatiles[effect] = this.battle.initEffectState({ id: effect as ID, target: pokemon });
+				if (!pokemon.m.abils) pokemon.m.abils = [];
+				if (!pokemon.m.abils.includes(effect)) pokemon.m.abils.push(effect);
+			}
+		}
+		if (pokemon.species.forme?.endsWith('Alpha') && this.battle.dex.conditions.getByID('wildmight' as ID).exists) {
+			pokemon.addVolatile('wildmight');
+		}
 		if (pokemon.set.startStatus && !pokemon.m.phnnStartStatusApplied) {
 			pokemon.m.phnnStartStatusApplied = true;
 			pokemon.setStatus(pokemon.set.startStatus, pokemon, null, true);
@@ -1836,7 +1849,7 @@ export class BattleActions {
 					}
 				}
 			} else {
-				if (pokemon.terastallized === type && pokemon.getTypes(false, true).includes(type)) {
+				if (pokemon.terastallized?.split('/').includes(type) && pokemon.getTypes(false, true).includes(type)) {
 					stab = 2;
 				}
 				stab = this.battle.runEvent('ModifySTAB', pokemon, target, move, stab);

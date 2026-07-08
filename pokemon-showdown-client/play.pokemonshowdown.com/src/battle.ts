@@ -508,7 +508,7 @@ export class Pokemon implements PokemonDetails, PokemonHealth {
 	getTypes(serverPokemon?: ServerPokemon, preterastallized = false): [readonly Dex.TypeName[], Dex.TypeName | ''] {
 		let types: readonly Dex.TypeName[];
 		if (!preterastallized && this.terastallized && this.terastallized !== 'Stellar') {
-			types = [this.terastallized as Dex.TypeName];
+			types = this.terastallized.split('/') as Dex.TypeName[];
 		} else if (this.volatiles.typechange) {
 			types = this.volatiles.typechange[1].split('/');
 		} else if (this.moddedType.length) {
@@ -2629,7 +2629,9 @@ export class Battle {
 		}
 		case '-terastallize': {
 			let poke = this.getPokemon(args[1])!;
-			let type = Dex.types.get(args[2]).name;
+			let type = args[2].split('/').map(
+				part => part.trim() === '???' ? '???' : Dex.types.get(part).name || part.trim()
+			).join('/');
 			let lockForme = false;
 			poke.removeVolatile('typeadd' as ID);
 			poke.teraType = type;

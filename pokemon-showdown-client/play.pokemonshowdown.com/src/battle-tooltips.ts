@@ -873,7 +873,7 @@ export class BattleTooltips {
 				}
 			}
 
-			let types = serverPokemon?.terastallized ? [serverPokemon.teraType] : this.getPokemonTypes(pokemon);
+			let types = serverPokemon?.terastallized ? serverPokemon.teraType.split('/') : this.getPokemonTypes(pokemon);
 			let knownPokemon = serverPokemon || clientPokemon!;
 
 			if (pokemon.terastallized) {
@@ -885,7 +885,7 @@ export class BattleTooltips {
 			if (pokemon.terastallized) {
 				text += `&nbsp; &nbsp; <small>(base: <span class="textaligned-typeicons">${this.getPokemonTypes(pokemon, true).map(type => Dex.getTypeIcon(type)).join(' ')}</span>)</small>`;
 			} else if (knownPokemon.teraType) {
-				text += `&nbsp; &nbsp; <small>(Tera Type: <span class="textaligned-typeicons">${Dex.getTypeIcon(knownPokemon.teraType)}</span>)</small>`;
+				text += `&nbsp; &nbsp; <small>(Tera Type: <span class="textaligned-typeicons">${knownPokemon.teraType.split('/').map(type => Dex.getTypeIcon(type)).join(' ')}</span>)</small>`;
 			}
 			text += `</h2>`;
 		}
@@ -2577,7 +2577,7 @@ export class BattleTooltips {
 
 		// Terastal base power floor
 		if (
-			pokemon.terastallized && (pokemon.terastallized === move.type || pokemon.terastallized === 'Stellar') &&
+			pokemon.terastallized && (pokemon.terastallized.split('/').includes(move.type) || pokemon.terastallized === 'Stellar') &&
 			value.value < 60 && move.priority <= 0 && !move.multihit && !(
 				(move.basePower === 0 || move.basePower === 150) && move.basePowerCallback
 			)

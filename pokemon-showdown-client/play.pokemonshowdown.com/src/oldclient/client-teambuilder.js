@@ -58,6 +58,8 @@
 			'change .detailsform input': 'detailsChange',
 			'change .detailsform select': 'detailsChange',
 			'submit .detailsform': 'detailsChange',
+			'input .phnn-ms-filter': 'phnnMultiselectFilter',
+			'keyup .phnn-ms-filter': 'phnnMultiselectFilter',
 			'click .changeform': 'altForm',
 			'click .altform': 'altForm',
 
@@ -1365,11 +1367,25 @@
 					}
 				}
 				if (this.curTeam.gen === 9 && !isChampions) {
-					buf += '<span class="detailcell"><label>Tera Type</label>' + (set.teraType || ((this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')) ? 'None / Dyna' : (species.requiredTeraType || species.types[0]))) + '</span>';
+					var teraCellText;
+					if (this.curTeam.format.includes('customdisguise')) {
+						var teraCellList = (set.teraType || '').split('/').filter(function (t) { return !!t; });
+						teraCellText = !teraCellList.length ? 'None / Dyna' : (teraCellList.length > 1 ? 'Multi' : teraCellList[0]);
+					} else {
+						teraCellText = set.teraType || ((this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')) ? 'None / Dyna' : (species.requiredTeraType || species.types[0]));
+					}
+					buf += '<span class="detailcell"><label>Tera Type</label>' + teraCellText + '</span>';
 				}
 			}
 			if (this.curTeam.format.includes('disguise') || this.curTeam.format.includes('status') || this.curTeam.format.includes('nonerfs')) {
-				if (this.curTeam.format.includes('disguise')) {
+				if (this.curTeam.format.includes('customdisguise')) {
+					var cdCellTypes = (set.phType || '').split('/').filter(function (t) { return !!t; });
+					if (!cdCellTypes.length) cdCellTypes = species.types.slice();
+					buf += '<span class="detailcell"><label>Type(s)</label>' + (cdCellTypes.length > 2 ? 'Multi' : cdCellTypes.join('/')) + '</span>';
+					var cdAbilityCount = (set.ability ? 1 : 0) + (set.phAbilities ? set.phAbilities.split('/').length : 0);
+					buf += '<span class="detailcell"><label>Abilities</label>' + (cdAbilityCount > 1 ? 'Multi' : (set.ability || '(none)')) + '</span>';
+					buf += '<span class="detailcell"><label>Disguise</label>' + (set.disguise ? Dex.species.get(set.disguise).name : '(none)') + '</span>';
+				} else if (this.curTeam.format.includes('disguise')) {
 					var phT = (set.phType || '').split('/');
 					buf += '<span class="detailcell"><label>Type 1</label>' + (phT[0] || species.types[0]) + '</span>';
 					buf += '<span class="detailcell"><label>Type 2</label>' + (phT[1] || species.types[1] || '(none)') + '</span>';
@@ -3052,7 +3068,13 @@
 				buf += '</select></div></div>';
 			}
 
-			if (this.curTeam.gen === 9 && !isChampions) {
+			var isCustomDisguiseEarly = this.curTeam.format.includes('customdisguise');
+			if (this.curTeam.gen === 9 && !isChampions && isCustomDisguiseEarly) {
+				var curTeras = (set.teraType || '').split('/').filter(function (t) { return !!t; });
+				buf += '<div class="formrow"><label class="formlabel" title="Tera Types (select any number; none = Dynamax)">Tera Type(s):</label><div>';
+				buf += this.renderPhnnMultiselect('teratypes', this.phnnCDTypeList(), curTeras, 'None / Dyna');
+				buf += '</div></div>';
+			} else if (this.curTeam.gen === 9 && !isChampions) {
 				buf += '<div class="formrow"><label class="formlabel" title="Tera Type">Tera Type:</label><div>';
 				buf += '<select name="teratype" class="button">';
 				var types = Dex.types.all();
@@ -3072,7 +3094,24 @@
 			var isCustomDisguise = this.curTeam.format.includes('customdisguise');
 			var isModded = isDisguise || this.curTeam.format.includes('status') || this.curTeam.format.includes('nonerfs');
 			if (isModded) {
-				if (isDisguise) {
+				if (isDisguise && isCustomDisguise) {
+					var curPhTypes = (set.phType || '').split('/').filter(function (t) { return !!t; });
+					buf += '<div class="formrow"><label class="formlabel" title="Custom types used in battle (select any number; hidden from the opponent)">Type(s):</label><div>';
+					buf += this.renderPhnnMultiselect('phtypes', this.phnnCDTypeList(), curPhTypes, '(species default)');
+					buf += '</div></div>';
+					var curAbilities = [];
+					if (set.ability) curAbilities.push(set.ability);
+					if (set.phAbilities) curAbilities = curAbilities.concat(set.phAbilities.split('/'));
+					var abilityNames = [];
+					for (var abid in BattleAbilities) {
+						if (abid === 'noability') continue;
+						abilityNames.push(BattleAbilities[abid].name || abid);
+					}
+					abilityNames.sort();
+					buf += '<div class="formrow"><label class="formlabel" title="Abilities (select any number; the first is the main ability, the rest are innate)">Abilities:</label><div>';
+					buf += this.renderPhnnMultiselect('phabilities', abilityNames, curAbilities, '(none)', true);
+					buf += '</div></div>';
+				} else if (isDisguise) {
 					var phTypeList = Dex.types.all().map(function (t) { return t.name; });
 					var phTypes = (set.phType || '').split('/');
 					buf += '<div class="formrow"><label class="formlabel" title="Custom type used in battle (hidden from the opponent)">Type 1:</label><div><select name="phtype1" class="button">';
@@ -3087,6 +3126,8 @@
 						buf += '<option value="' + phTypeList[phj] + '"' + (phTypes[1] === phTypeList[phj] ? ' selected="selected"' : '') + '>' + phTypeList[phj] + '</option>';
 					}
 					buf += '</select></div></div>';
+				}
+				if (isDisguise) {
 					buf += '<div class="formrow"><label class="formlabel" title="The Pokemon sprite your opponent and spectators see in place of the real one">Disguise:</label><div><select name="disguise" class="button">';
 					buf += '<option value=""' + (!set.disguise ? ' selected="selected"' : '') + '>(none — show real sprite)</option>';
 					var disguiseMons = [];
@@ -3143,6 +3184,56 @@
 			}
 
 			this.$chart.html(buf);
+		},
+		phnnCDTypeList: function () {
+			var names = Dex.types.all().map(function (t) { return t.name; });
+			var extras = ['Stellar', 'Shadow', 'Bird', '???'];
+			var list = [];
+			for (var i = 0; i < names.length; i++) {
+				if (extras.indexOf(names[i]) < 0) list.push(names[i]);
+			}
+			list.sort();
+			return list.concat(extras);
+		},
+		phnnMultiselectLabel: function (selected, emptyLabel) {
+			if (!selected.length) return emptyLabel;
+			if (selected.length <= 2) return selected.join(' / ');
+			return 'Multi (' + selected.length + ')';
+		},
+		renderPhnnMultiselect: function (name, options, selected, emptyLabel, withFilter) {
+			var buf = '<details class="phnn-multiselect" data-name="' + name + '" data-empty="' + BattleLog.escapeHTML(emptyLabel) + '" style="display:inline-block;position:relative;">';
+			buf += '<summary class="button" style="list-style:none;cursor:pointer;min-width:130px;display:inline-block;">' + BattleLog.escapeHTML(this.phnnMultiselectLabel(selected, emptyLabel)) + ' &#9662;</summary>';
+			buf += '<div style="position:absolute;left:0;top:100%;z-index:200;background:#fff;color:#000;border:1px solid #999;border-radius:3px;box-shadow:2px 2px 4px rgba(0,0,0,0.3);max-height:250px;overflow-y:auto;min-width:190px;padding:3px 6px;">';
+			if (withFilter) {
+				buf += '<input type="text" class="textbox phnn-ms-filter" placeholder="Filter..." style="width:95%;margin:2px 0;" />';
+			}
+			for (var i = 0; i < options.length; i++) {
+				var checked = selected.indexOf(options[i]) >= 0 ? ' checked="checked"' : '';
+				buf += '<label class="checkbox phnn-ms-option" style="display:block;white-space:nowrap;"><input type="checkbox" name="' + name + '" value="' + BattleLog.escapeHTML(options[i]) + '"' + checked + ' /> ' + BattleLog.escapeHTML(options[i]) + '</label>';
+			}
+			buf += '</div></details>';
+			return buf;
+		},
+		phnnMultiselectFilter: function (e) {
+			var $input = $(e.currentTarget);
+			var query = toID($input.val());
+			$input.closest('details').find('label.phnn-ms-option').each(function () {
+				var matches = !query || toID($(this).text()).indexOf(query) >= 0;
+				$(this).toggle(matches);
+			});
+		},
+		phnnMultiselectValues: function (name) {
+			var values = [];
+			this.$chart.find('input[name=' + name + ']:checked').each(function () {
+				values.push($(this).val());
+			});
+			return values;
+		},
+		phnnUpdateMultiselectLabel: function (name) {
+			var $details = this.$chart.find('details.phnn-multiselect[data-name=' + name + ']');
+			if (!$details.length) return;
+			var selected = this.phnnMultiselectValues(name);
+			$details.find('summary').html(BattleLog.escapeHTML(this.phnnMultiselectLabel(selected, $details.attr('data-empty'))) + ' &#9662;');
 		},
 		detailsChange: function (e) {
 			e.preventDefault();
@@ -3215,22 +3306,69 @@
 			}
 
 			// Tera type
-			var teraType = this.$chart.find('select[name=teratype]').val();
-			if (!isChampions && Dex.types.isName(teraType)) {
-				set.teraType = teraType || species.requiredTeraType || species.types[0];
+			var hasCDTera = this.$chart.find('details.phnn-multiselect[data-name=teratypes]').length > 0;
+			if (hasCDTera) {
+				var cdTeras = this.phnnMultiselectValues('teratypes');
+				if (cdTeras.length) {
+					set.teraType = cdTeras.join('/');
+				} else {
+					delete set.teraType;
+				}
+				this.phnnUpdateMultiselectLabel('teratypes');
 			} else {
-				delete set.teraType;
+				var teraType = this.$chart.find('select[name=teratype]').val();
+				if (!isChampions && Dex.types.isName(teraType)) {
+					set.teraType = teraType || species.requiredTeraType || species.types[0];
+				} else {
+					delete set.teraType;
+				}
 			}
 
 			var isModded = this.curTeam.format.includes('disguise') || this.curTeam.format.includes('status') || this.curTeam.format.includes('nonerfs');
 			if (isModded) {
 				if (this.curTeam.format.includes('disguise')) {
-					var phType1 = this.$chart.find('select[name=phtype1]').val();
-					var phType2 = this.$chart.find('select[name=phtype2]').val();
-					if (phType1) {
-						set.phType = phType2 ? (phType1 + '/' + phType2) : phType1;
+					var hasCDTypes = this.$chart.find('details.phnn-multiselect[data-name=phtypes]').length > 0;
+					if (hasCDTypes) {
+						var cdTypes = this.phnnMultiselectValues('phtypes');
+						if (cdTypes.length) {
+							set.phType = cdTypes.join('/');
+						} else {
+							delete set.phType;
+						}
+						this.phnnUpdateMultiselectLabel('phtypes');
 					} else {
-						delete set.phType;
+						var phType1 = this.$chart.find('select[name=phtype1]').val();
+						var phType2 = this.$chart.find('select[name=phtype2]').val();
+						if (phType1) {
+							set.phType = phType2 ? (phType1 + '/' + phType2) : phType1;
+						} else {
+							delete set.phType;
+						}
+					}
+					var hasCDAbilities = this.$chart.find('details.phnn-multiselect[data-name=phabilities]').length > 0;
+					if (hasCDAbilities) {
+						var checkedAbilities = this.phnnMultiselectValues('phabilities');
+						var prevAbilities = [];
+						if (set.ability) prevAbilities.push(set.ability);
+						if (set.phAbilities) prevAbilities = prevAbilities.concat(set.phAbilities.split('/'));
+						var orderedAbilities = [];
+						for (var pai = 0; pai < prevAbilities.length; pai++) {
+							if (checkedAbilities.indexOf(prevAbilities[pai]) >= 0 && orderedAbilities.indexOf(prevAbilities[pai]) < 0) {
+								orderedAbilities.push(prevAbilities[pai]);
+							}
+						}
+						for (var cai = 0; cai < checkedAbilities.length; cai++) {
+							if (orderedAbilities.indexOf(checkedAbilities[cai]) < 0) {
+								orderedAbilities.push(checkedAbilities[cai]);
+							}
+						}
+						set.ability = orderedAbilities[0] || '';
+						if (orderedAbilities.length > 1) {
+							set.phAbilities = orderedAbilities.slice(1).join('/');
+						} else {
+							delete set.phAbilities;
+						}
+						this.phnnUpdateMultiselectLabel('phabilities');
 					}
 					var disguiseInput = this.$chart.find('select[name=disguise]').val();
 					var disguiseSpecies = Dex.species.get(disguiseInput);

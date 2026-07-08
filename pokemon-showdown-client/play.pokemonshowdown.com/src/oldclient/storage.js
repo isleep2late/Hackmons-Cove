@@ -869,18 +869,21 @@ Storage.packTeam = function (team) {
 		}
 
 		if (set.pokeball || (set.hpType && !hasHP) || set.gigantamax || (set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10) || set.teraType ||
-			set.phType || set.disguise || set.startStatus || set.startHp !== undefined) {
+			set.phType || set.disguise || set.startStatus || set.startHp !== undefined || set.phAbilities) {
 			buf += ',' + (set.hpType || '');
 			buf += ',' + toID(set.pokeball);
 			buf += ',' + (set.gigantamax ? 'G' : '');
 			buf += ',' + (set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10 ? set.dynamaxLevel : '');
-			buf += ',' + (set.teraType || '');
+			buf += ',' + ((set.teraType || '').replace(/\//g, '-'));
 			// PHNN Gen 1 fields
-			if (set.phType || set.disguise || set.startStatus || set.startHp !== undefined) {
+			if (set.phType || set.disguise || set.startStatus || set.startHp !== undefined || set.phAbilities) {
 				buf += ',' + ((set.phType || '').replace(/\//g, '-'));
 				buf += ',' + toID(set.disguise);
 				buf += ',' + (set.startStatus || '');
-				if (set.startHp !== undefined) buf += ',' + set.startHp;
+				if (set.startHp !== undefined || set.phAbilities) buf += ',' + (set.startHp !== undefined ? set.startHp : '');
+				if (set.phAbilities) {
+					buf += ',' + set.phAbilities.split('/').map(function (a) { return toID(a); }).join('-');
+				}
 			}
 		}
 	}
@@ -991,9 +994,9 @@ Storage.fastUnpackTeam = function (buf) {
 		j = buf.indexOf(']', i);
 		var misc = undefined;
 		if (j < 0) {
-			if (i < buf.length) misc = buf.substring(i).split(',', 10);
+			if (i < buf.length) misc = buf.substring(i).split(',', 11);
 		} else {
-			if (i !== j) misc = buf.substring(i, j).split(',', 10);
+			if (i !== j) misc = buf.substring(i, j).split(',', 11);
 		}
 		if (misc) {
 			set.happiness = (misc[0] ? Number(misc[0]) : 255);
@@ -1001,12 +1004,18 @@ Storage.fastUnpackTeam = function (buf) {
 			set.pokeball = misc[2];
 			set.gigantamax = !!misc[3];
 			set.dynamaxLevel = (misc[4] ? Number(misc[4]) : 10);
-			set.teraType = misc[5];
+			set.teraType = misc[5] ? misc[5].replace(/-/g, '/') : misc[5];
 			// PHNN Gen 1 fields
 			if (misc[6]) set.phType = misc[6].replace(/-/g, '/');
 			if (misc[7]) set.disguise = misc[7];
 			if (misc[8]) set.startStatus = misc[8];
 			if (misc[9]) set.startHp = Number(misc[9]);
+			if (misc[10]) {
+				set.phAbilities = misc[10].split('-').map(function (abid) {
+					var key = toID(abid);
+					return (window.BattleAbilities && window.BattleAbilities[key] && window.BattleAbilities[key].name) || abid;
+				}).join('/');
+			}
 		}
 		if (j < 0) break;
 		i = j + 1;
@@ -1121,9 +1130,9 @@ Storage.unpackTeam = function (buf) {
 		j = buf.indexOf(']', i);
 		var misc = undefined;
 		if (j < 0) {
-			if (i < buf.length) misc = buf.substring(i).split(',', 10);
+			if (i < buf.length) misc = buf.substring(i).split(',', 11);
 		} else {
-			if (i !== j) misc = buf.substring(i, j).split(',', 10);
+			if (i !== j) misc = buf.substring(i, j).split(',', 11);
 		}
 		if (misc) {
 			set.happiness = (misc[0] ? Number(misc[0]) : 255);
@@ -1131,12 +1140,18 @@ Storage.unpackTeam = function (buf) {
 			set.pokeball = misc[2];
 			set.gigantamax = !!misc[3];
 			set.dynamaxLevel = (misc[4] ? Number(misc[4]) : 10);
-			set.teraType = misc[5];
+			set.teraType = misc[5] ? misc[5].replace(/-/g, '/') : misc[5];
 			// PHNN Gen 1 fields
 			if (misc[6]) set.phType = misc[6].replace(/-/g, '/');
 			if (misc[7]) set.disguise = misc[7];
 			if (misc[8]) set.startStatus = misc[8];
 			if (misc[9]) set.startHp = Number(misc[9]);
+			if (misc[10]) {
+				set.phAbilities = misc[10].split('-').map(function (abid) {
+					var key = toID(abid);
+					return (window.BattleAbilities && window.BattleAbilities[key] && window.BattleAbilities[key].name) || abid;
+				}).join('/');
+			}
 		}
 		if (j < 0 || buf.indexOf('|', j) < 0) break;
 		i = j + 1;
@@ -1302,6 +1317,10 @@ Storage.importTeam = function (buffer, teams) {
 		} else if (line.substr(0, 9) === 'Ability: ') {
 			line = line.substr(9);
 			curSet.ability = line;
+		} else if (line.substr(0, 11) === 'Abilities: ') {
+			var abilityParts = line.substr(11).split('/').map(function (part) { return $.trim(part); }).filter(function (part) { return !!part; });
+			curSet.ability = abilityParts[0] || '';
+			if (abilityParts.length > 1) curSet.phAbilities = abilityParts.slice(1).join('/');
 		} else if (line === 'Shiny: Yes') {
 			curSet.shiny = true;
 		} else if (line.substr(0, 7) === 'Level: ') {
@@ -1435,7 +1454,9 @@ Storage.exportTeam = function (team, hidestats) {
 			text += ' @ ' + curSet.item;
 		}
 		text += "  \n";
-		if (curSet.ability) {
+		if (curSet.phAbilities) {
+			text += 'Abilities: ' + [curSet.ability || 'No Ability'].concat(curSet.phAbilities.split('/')).join(' / ') + "  \n";
+		} else if (curSet.ability) {
 			text += 'Ability: ' + curSet.ability + "  \n";
 		}
 		// PHNN Gen 1 desync fields: Sprite, Types, Status

@@ -118,6 +118,7 @@ export interface PokemonSet {
 	disguise?: string;
 	startStatus?: string;
 	startHp?: number;
+	phAbilities?: string;
 }
 
 export const Teams = new class Teams {
@@ -205,17 +206,20 @@ export const Teams = new class Teams {
 
 			if (set.pokeball || set.hpType || set.gigantamax ||
 				(set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10) || set.teraType ||
-				set.phType || set.disguise || set.startStatus || set.startHp !== undefined) {
+				set.phType || set.disguise || set.startStatus || set.startHp !== undefined || set.phAbilities) {
 				buf += `,${set.hpType || ''}`;
 				buf += `,${this.packName(set.pokeball || '')}`;
 				buf += `,${set.gigantamax ? 'G' : ''}`;
 				buf += `,${set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10 ? set.dynamaxLevel : ''}`;
-				buf += `,${set.teraType || ''}`;
-				if (set.phType || set.disguise || set.startStatus || set.startHp !== undefined) {
+				buf += `,${set.teraType ? set.teraType.replace(/\//g, '-') : ''}`;
+				if (set.phType || set.disguise || set.startStatus || set.startHp !== undefined || set.phAbilities) {
 					buf += `,${(set.phType || '').replace(/\//g, '-')}`;
 					buf += `,${this.packName(set.disguise || '')}`;
 					buf += `,${set.startStatus || ''}`;
-					if (set.startHp !== undefined) buf += `,${set.startHp}`;
+					if (set.startHp !== undefined || set.phAbilities) buf += `,${set.startHp !== undefined ? set.startHp : ''}`;
+					if (set.phAbilities) {
+						buf += `,${set.phAbilities.split('/').map(a => this.packName(a)).join('-')}`;
+					}
 				}
 			}
 		}
@@ -341,9 +345,9 @@ export const Teams = new class Teams {
 			j = buf.indexOf(']', i);
 			let misc;
 			if (j < 0) {
-				if (i < buf.length) misc = buf.substring(i).split(',', 10);
+				if (i < buf.length) misc = buf.substring(i).split(',', 11);
 			} else {
-				if (i !== j) misc = buf.substring(i, j).split(',', 10);
+				if (i !== j) misc = buf.substring(i, j).split(',', 11);
 			}
 			if (misc) {
 				set.happiness = (misc[0] ? Number(misc[0]) : 255);
@@ -351,11 +355,14 @@ export const Teams = new class Teams {
 				set.pokeball = this.unpackName(misc[2] || '', Dex.items);
 				set.gigantamax = !!misc[3];
 				set.dynamaxLevel = (misc[4] ? Number(misc[4]) : 10);
-				set.teraType = misc[5];
+				set.teraType = misc[5] ? misc[5].replace(/-/g, '/') : misc[5];
 				if (misc[6]) set.phType = misc[6].replace(/-/g, '/');
 				if (misc[7]) set.disguise = this.unpackName(misc[7], Dex.species);
 				if (misc[8]) set.startStatus = misc[8];
 				if (misc[9]) set.startHp = Number(misc[9]);
+				if (misc[10]) {
+					set.phAbilities = misc[10].split('-').map(id => this.unpackName(id, Dex.abilities)).join('/');
+				}
 			}
 			if (j < 0) break;
 			i = j + 1;
@@ -412,8 +419,20 @@ export const Teams = new class Teams {
 		if (set.item) out += ` @ ${set.item}`;
 		out += `  \n`;
 
-		if (set.ability) {
+		if (set.phAbilities) {
+			out += `Abilities: ${[set.ability || 'No Ability', ...set.phAbilities.split('/')].join(' / ')}  \n`;
+		} else if (set.ability) {
 			out += `Ability: ${set.ability}  \n`;
+		}
+		if (set.disguise) {
+			out += `Sprite: ${set.disguise}  \n`;
+		}
+		if (set.phType) {
+			out += `Types: ${set.phType.split('/').join(' / ')}  \n`;
+		}
+		if (set.startStatus) {
+			const statusNames: { [k: string]: string } = { brn: 'Burn', par: 'Paralysis', slp: 'Sleep', psn: 'Poison', tox: 'Toxic', frz: 'Freeze' };
+			out += `Status: ${statusNames[set.startStatus] || set.startStatus}  \n`;
 		}
 
 		// details
@@ -511,6 +530,16 @@ export const Teams = new class Teams {
 		} else if (line.startsWith('Ability: ')) {
 			line = line.slice(9);
 			set.ability = aggressive ? toID(line) : line;
+		} else if (line.startsWith('Abilities: ')) {
+			const names = line.slice(11).split('/').map(part => part.trim()).filter(Boolean);
+			set.ability = names[0] ? (aggressive ? toID(names[0]) : names[0]) : '';
+			if (names.length > 1) {
+				set.phAbilities = names.slice(1).map(part => aggressive ? toID(part) : part).join('/');
+			}
+		} else if (line.startsWith('Sprite: ')) {
+			set.disguise = line.slice(8).trim();
+		} else if (line.startsWith('Types: ')) {
+			set.phType = line.slice(7).split('/').map(part => part.trim()).filter(Boolean).join('/');
 		} else if (line === 'Shiny: Yes') {
 			set.shiny = true;
 		} else if (line.startsWith('Level: ')) {
@@ -529,8 +558,8 @@ export const Teams = new class Teams {
 			line = line.slice(14);
 			set.hpType = aggressive ? toID(line) : line;
 		} else if (line.startsWith('Tera Type: ')) {
-			line = line.slice(11);
-			set.teraType = aggressive ? line.replace(/[^a-zA-Z0-9]/g, '') : line;
+			line = line.slice(11).split('/').map(part => part.trim()).filter(Boolean).join('/');
+			set.teraType = aggressive && !line.includes('/') ? line.replace(/[^a-zA-Z0-9]/g, '') : line;
 		} else if (line === 'Gigantamax: Yes') {
 			set.gigantamax = true;
 		} else if (line.startsWith('Status: ')) {

@@ -599,6 +599,7 @@ export class TeamValidator {
 		if (!Array.isArray(set.moves)) set.moves = [];
 
 		const isCustomPPAllowed = ruleTable.has('disguisemod') || dex.currentMod.includes('phnn');
+		const isCustomDisguises = ruleTable.has('disguisemod') && format.id.includes('customdisguise');
 		if (!isCustomPPAllowed) {
 			if (set.startHp !== undefined) {
 				problems.push(`${set.name || set.species} has a custom starting HP, which is only allowed in Pure Hackmons No Nerfs or Custom Disguises formats.`);
@@ -608,6 +609,44 @@ export class TeamValidator {
 					problems.push(`${set.name || set.species} has a custom move PP for ${move}, which is only allowed in Pure Hackmons No Nerfs or Custom Disguises formats.`);
 				}
 			}
+		}
+		if (!ruleTable.has('disguisemod')) {
+			if (set.phType) {
+				problems.push(`${set.name || set.species} has a custom typing, which is only allowed in Disguises formats.`);
+			}
+			if (set.disguise) {
+				problems.push(`${set.name || set.species} has a disguise, which is only allowed in Disguises formats.`);
+			}
+			if (set.startStatus && !ruleTable.has('prestatus')) {
+				problems.push(`${set.name || set.species} has a starting status, which is not allowed in this format.`);
+			}
+		}
+		if (set.phAbilities && !isCustomDisguises) {
+			problems.push(`${set.name || set.species} has multiple abilities, which is only allowed in Custom Disguises formats.`);
+		}
+		const findTypeName = (typeText: string): string | null => {
+			const wanted = typeText.trim().toLowerCase();
+			if (!wanted) return null;
+			for (const type of dex.types.all()) {
+				if (type.name.toLowerCase() === wanted) return type.name;
+			}
+			return null;
+		};
+		if (set.phType && ruleTable.has('disguisemod')) {
+			const typeNames: string[] = [];
+			for (const part of set.phType.split('/')) {
+				const typeName = findTypeName(part);
+				if (!typeName) {
+					problems.push(`${set.name || set.species}'s custom type "${part.trim()}" is invalid.`);
+				} else if (!typeNames.includes(typeName)) {
+					typeNames.push(typeName);
+				}
+			}
+			if (typeNames.length > 2 && !isCustomDisguises) {
+				problems.push(`${set.name || set.species} has more than 2 types, which is only allowed in Custom Disguises formats.`);
+			}
+			set.phType = typeNames.join('/');
+			if (!set.phType) delete set.phType;
 		}
 
 		set.name = set.name || species.baseSpecies;
@@ -698,6 +737,19 @@ export class TeamValidator {
 				return [`"${set.ability}" is an invalid ability.`];
 			}
 		}
+		if (set.phAbilities && isCustomDisguises) {
+			const extraNames: string[] = [];
+			for (const part of set.phAbilities.split('/')) {
+				const extraAbility = dex.abilities.get(part.trim());
+				if (!extraAbility.exists || extraAbility.id === 'noability') {
+					problems.push(`${name} has an invalid extra ability "${part.trim()}".`);
+				} else if (extraAbility.name !== ability.name && !extraNames.includes(extraAbility.name)) {
+					extraNames.push(extraAbility.name);
+				}
+			}
+			set.phAbilities = extraNames.join('/');
+			if (!set.phAbilities) delete set.phAbilities;
+		}
 		if (nature.id && !nature.exists) {
 			if (dex.gen < 3) {
 				// gen 1-2 don't have natures, just remove them
@@ -712,7 +764,8 @@ export class TeamValidator {
 		}
 		if (set.hpType) {
 			const type = dex.types.get(set.hpType);
-			if (!type.exists || ['normal', 'fairy', 'stellar'].includes(type.id)) {
+			if (!type.exists || ['normal', 'fairy', 'stellar'].includes(type.id) ||
+				(type.isNonstandard && ruleTable.has('obtainablemisc'))) {
 				problems.push(`${name}'s Hidden Power type (${set.hpType}) is invalid.`);
 			} else {
 				set.hpType = type.name;
@@ -721,9 +774,24 @@ export class TeamValidator {
 		if ((this.gen === 9 && !dex.currentMod.startsWith('champions') && !ruleTable.has('terastalclause')) ||
 			ruleTable.has('bonustypemod')) {
 			// PHNN: an empty Tera type stays empty as the Dynamax signal (see data/mods/phnn/scripts.ts).
-			if (dex.currentMod === 'phnn' && !set.teraType) {
+			if ((dex.currentMod === 'phnn' || isCustomDisguises) && !set.teraType) {
 				delete set.teraType;
+			} else if (isCustomDisguises) {
+				const teraNames: string[] = [];
+				for (const part of set.teraType!.split('/')) {
+					const typeName = findTypeName(part);
+					if (!typeName) {
+						problems.push(`${name}'s Terastal type "${part.trim()}" is invalid.`);
+					} else if (!teraNames.includes(typeName)) {
+						teraNames.push(typeName);
+					}
+				}
+				set.teraType = teraNames.join('/');
+				if (!set.teraType) delete set.teraType;
 			} else {
+				if (set.teraType?.includes('/')) {
+					problems.push(`${name} has multiple Terastal types, which is only allowed in Custom Disguises formats.`);
+				}
 				const type = dex.types.get(set.teraType || species.requiredTeraType || species.types[0]);
 				if (!type.exists || (type.isNonstandard && !(dex.currentMod === 'phnn' && type.id === 'shadow'))) {
 					problems.push(`${name}'s Terastal type (${set.teraType}) is invalid.`);
@@ -753,6 +821,7 @@ export class TeamValidator {
 			}
 		}
 
+		let rockHeadBasculin = false;
 		if (!set.ability) set.ability = 'No Ability';
 		if (ruleTable.has('obtainableabilities')) {
 			if (dex.gen <= 2 || dex.currentMod === 'gen7letsgo') {
@@ -792,6 +861,16 @@ export class TeamValidator {
 					}
 				} else {
 					setSources.isHidden = false;
+				}
+				if (dex.currentMod === 'gen5bw1' && species.id === 'basculinbluestriped' && set.ability === 'Rock Head') {
+					const eventData: EventInfo = {
+						generation: 5, level: 25, gender: "M", ivs: { hp: 20, atk: 31, def: 20, spa: 20, spd: 20, spe: 20 }, nature: "Adamant",
+					};
+					const eventProblems = this.validateEvent(
+						set, setSources, eventData, species, ` to have Rock Head`, `from an in-game trade`
+					);
+					if (eventProblems) problems.push(...eventProblems);
+					rockHeadBasculin = true;
 				}
 			}
 		}
@@ -1073,7 +1152,7 @@ export class TeamValidator {
 				problems.push(`${name} has a Hidden Ability - it can't use moves from before Gen 5.`);
 			}
 			if (
-				species.maleOnlyHidden && setSources.isHidden && setSources.sourcesBefore < 5 &&
+				((species.maleOnlyHidden && setSources.isHidden) || rockHeadBasculin) && setSources.sourcesBefore < 5 &&
 				setSources.sources.every(source => source.charAt(1) === 'E')
 			) {
 				problems.push(`${name} has an unbreedable Hidden Ability - it can't use egg moves.`);
