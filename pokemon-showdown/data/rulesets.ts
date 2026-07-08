@@ -244,6 +244,32 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 			}
 		},
 	},
+	standardcustom: {
+		effectType: 'ValidatorRule',
+		name: 'Standard Custom',
+		desc: "Limits each Pok&eacute;mon to 1 ability, up to 2 types, and up to 1 Tera type. Combine with 2 Abilities, 3 Abilities, or 2 Tera Types to raise those caps.",
+		onValidateSet(set) {
+			const problems = [];
+			let abilityCap = 1;
+			if (this.ruleTable.has('2abilities')) abilityCap = 2;
+			if (this.ruleTable.has('3abilities')) abilityCap = 3;
+			let teraCap = 1;
+			if (this.ruleTable.has('2teratypes')) teraCap = 2;
+			const abilityCount = 1 + (set.phAbilities ? set.phAbilities.split('/').length : 0);
+			if (abilityCount > abilityCap) {
+				problems.push(`${set.name || set.species} has ${abilityCount} abilities, but Standard Custom allows at most ${abilityCap} ${abilityCap === 1 ? 'ability' : 'abilities'} per Pokémon in this battle.`);
+			}
+			const typeCount = set.phType ? set.phType.split('/').length : 0;
+			if (typeCount > 2) {
+				problems.push(`${set.name || set.species} has ${typeCount} types, but Standard Custom allows at most 2 types per Pokémon.`);
+			}
+			const teraCount = set.teraType ? set.teraType.split('/').length : 0;
+			if (teraCount > teraCap) {
+				problems.push(`${set.name || set.species} has ${teraCount} Tera types, but Standard Custom allows at most ${teraCap} Tera ${teraCap === 1 ? 'type' : 'types'} per Pokémon in this battle.`);
+			}
+			return problems;
+		},
+	},
 	'2abilities': {
 		effectType: 'ValidatorRule',
 		name: '2 Abilities',
