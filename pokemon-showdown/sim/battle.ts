@@ -2775,6 +2775,9 @@ export class Battle {
 							pokemon.addVolatile('ability:' + extraAbility.id);
 						}
 					}
+					if (pokemon.species.forme?.endsWith('Alpha') && this.dex.conditions.getByID('wildmight' as ID).exists) {
+						pokemon.addVolatile('wildmight');
+					}
 					if (pokemon.set.startStatus && !pokemon.m.phnnStartStatusApplied) {
 						pokemon.m.phnnStartStatusApplied = true;
 						pokemon.setStatus(pokemon.set.startStatus, pokemon, null, true);
@@ -2897,6 +2900,9 @@ export class Battle {
 							if (!extraAbility.exists || extraAbility.id === pokemon.ability) continue;
 							pokemon.addVolatile('ability:' + extraAbility.id);
 						}
+					}
+					if (pokemon.species.forme?.endsWith('Alpha') && this.dex.conditions.getByID('wildmight' as ID).exists) {
+						pokemon.addVolatile('wildmight');
 					}
 					if (pokemon.set.startStatus && !pokemon.m.phnnStartStatusApplied) {
 						pokemon.m.phnnStartStatusApplied = true;

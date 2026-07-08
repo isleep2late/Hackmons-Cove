@@ -501,7 +501,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		desc: "Pure Hackmons, but Pokemon are at the highest power level across all their available generations.",
 		mod: 'phnn',
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Data Preview', 'Max Level = 255', 'Default Level = 100', 'Prestatus', 'Totem Aura', 'Shadow Tera Clause'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Data Preview', 'Max Level = 255', 'Default Level = 100', 'Prestatus', 'Totem Aura', 'Shadow Tera Clause', 'No Alphas'],
 		banlist: [
 			'Mewtwo-Shadow', 'Mewtwo-Shadow-Mega-X', 'Lugia-Shadow', 'Arceus-Shadow', 'Mewtwo-Armored',
 			'Shadow Plate',

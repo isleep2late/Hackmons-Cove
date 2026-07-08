@@ -168,16 +168,11 @@ function requireNoCache(pathSpec) {
 			index.push(fullSplit.slice(i).join('') + ' ' + type + ' ' + id + ' ' + fullSplit.slice(0, i).join('').length);
 		}
 	};
-	const phnnFormeNames = {
-		mewtwoshadow: 'Mewtwo-Shadow',
-		mewtwoshadowmegax: 'Mewtwo-Shadow-Mega-X',
-		mewtwoarmored: 'Mewtwo-Armored',
-		lugiashadow: 'Lugia-Shadow',
-		arceusshadow: 'Arceus-Shadow',
-		arceusquestion: 'Arceus-Question',
-		hakamoototem: 'Hakamo-o-Totem',
-		wishiwashitotem: 'Wishiwashi-Totem',
-	};
+	const phnnFormeNames = {};
+	for (const phnnSpecies of phnnSI.species.all()) {
+		if (!phnnSpecies.exists || Dex.data.Pokedex[phnnSpecies.id]) continue;
+		phnnFormeNames[phnnSpecies.id] = phnnSpecies.name;
+	}
 	for (const id in phnnFormeNames) {
 		if (index.includes(id + ' pokemon')) continue;
 		index.push(id + ' pokemon');
@@ -1488,13 +1483,26 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 	}
 
 	{
-		const phnnFormeIds = ['mewtwoshadow', 'mewtwoshadowmegax', 'mewtwoarmored', 'lugiashadow', 'arceusshadow', 'arceusquestion', 'hakamoototem', 'wishiwashitotem'];
 		const phnnDexTB = Dex.mod('phnn');
+		const phnnClassicIds = [];
+		const phnnTitanIds = [];
+		const phnnAlphaIds = [];
+		for (const phnnSpecies of phnnDexTB.species.all()) {
+			if (!phnnSpecies.exists || Dex.data.Pokedex[phnnSpecies.id]) continue;
+			if (phnnSpecies.forme && phnnSpecies.forme.endsWith('Alpha')) phnnAlphaIds.push(phnnSpecies.id);
+			else if (phnnSpecies.forme === 'Titan') phnnTitanIds.push(phnnSpecies.id);
+			else phnnClassicIds.push(phnnSpecies.id);
+		}
+		phnnAlphaIds.sort((a, b) => phnnDexTB.species.get(a).num - phnnDexTB.species.get(b).num);
 		for (const target of [BattleTeambuilderTable, BattleTeambuilderTable.bh]) {
 			if (!target || !target.tiers || target.tiers.includes('mewtwoshadow')) continue;
 			target.tiers.push(['header', 'Shadow & Totem']);
-			for (const id of phnnFormeIds) target.tiers.push(id);
-			for (const id of phnnFormeIds) {
+			for (const id of phnnClassicIds) target.tiers.push(id);
+			target.tiers.push(['header', 'Titans']);
+			for (const id of phnnTitanIds) target.tiers.push(id);
+			target.tiers.push(['header', 'Alphas']);
+			for (const id of phnnAlphaIds) target.tiers.push(id);
+			for (const id of phnnClassicIds.concat(phnnTitanIds, phnnAlphaIds)) {
 				const baseId = toID(phnnDexTB.species.get(id).baseSpecies);
 				const baseTier = target.overrideTier[baseId];
 				if (baseTier) target.overrideTier[id] = baseTier;
@@ -1528,40 +1536,37 @@ process.stdout.write("Building `data/pokedex.js`... ");
 		}
 	}
 	const phnnDexP = Dex.mod('phnn');
-	const phnnFormeMap = {mewtwo: ['Mewtwo-Shadow', 'Mewtwo-Armored'], lugia: ['Lugia-Shadow'], arceus: ['Arceus-Shadow', 'Arceus-Question'], hakamoo: ['Hakamo-o-Totem'], wishiwashi: ['Wishiwashi-Totem']};
-	for (const id of ['mewtwoshadow', 'mewtwoshadowmegax', 'mewtwoarmored', 'lugiashadow', 'arceusshadow', 'arceusquestion', 'hakamoototem', 'wishiwashitotem']) {
-		const s = phnnDexP.species.get(id);
-		if (s.exists && !Pokedex[id]) {
-			const e = {
-				num: s.num,
-				name: s.name,
-				baseSpecies: s.baseSpecies,
-				forme: s.forme,
-				types: s.types,
-				baseStats: s.baseStats,
-				abilities: s.abilities,
-				heightm: s.heightm,
-				weightkg: s.weightkg,
-				color: s.color,
-				eggGroups: s.eggGroups,
-				tier: 'AG',
-			};
-			if (s.requiredItem) e.requiredItem = s.requiredItem;
-			if (s.requiredItems) e.requiredItems = s.requiredItems;
-			if (s.changesFrom) e.changesFrom = s.changesFrom;
-			if (s.gender) e.gender = s.gender;
-			Pokedex[id] = e;
-		}
+	const phnnFormeMap = {};
+	for (const s of phnnDexP.species.all()) {
+		if (!s.exists || Pokedex[s.id]) continue;
+		const e = {
+			num: s.num,
+			name: s.name,
+			baseSpecies: s.baseSpecies,
+			forme: s.forme,
+			types: s.types,
+			baseStats: s.baseStats,
+			abilities: s.abilities,
+			heightm: s.heightm,
+			weightkg: s.weightkg,
+			color: s.color,
+			eggGroups: s.eggGroups,
+			tier: 'AG',
+		};
+		if (s.requiredItem) e.requiredItem = s.requiredItem;
+		if (s.requiredItems) e.requiredItems = s.requiredItems;
+		if (s.changesFrom) e.changesFrom = s.changesFrom;
+		if (s.gender) e.gender = s.gender;
+		Pokedex[s.id] = e;
+		const baseId = toID(s.baseSpecies);
+		if (!phnnFormeMap[baseId]) phnnFormeMap[baseId] = [];
+		phnnFormeMap[baseId].push(s.name);
 	}
 	for (const baseId in phnnFormeMap) {
 		if (Pokedex[baseId]) {
 			Pokedex[baseId].otherFormes = (Pokedex[baseId].otherFormes || []).concat(phnnFormeMap[baseId]);
 			Pokedex[baseId].formeOrder = (Pokedex[baseId].formeOrder || [Pokedex[baseId].name]).concat(phnnFormeMap[baseId]);
 		}
-	}
-	if (Pokedex.mewtwo) {
-		Pokedex.mewtwo.otherFormes = Pokedex.mewtwo.otherFormes.concat(['Mewtwo-Shadow-Mega-X']);
-		Pokedex.mewtwo.formeOrder = Pokedex.mewtwo.formeOrder.concat(['Mewtwo-Shadow-Mega-X']);
 	}
 	const buf = 'exports.BattlePokedex = ' + es3stringify(Pokedex) + ';';
 	fs.writeFileSync('play.pokemonshowdown.com/data/pokedex.js', buf);

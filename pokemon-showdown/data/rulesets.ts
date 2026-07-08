@@ -219,7 +219,25 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 	totemaura: {
 		effectType: 'Rule',
 		name: 'Totem Aura',
-		desc: "Totem Pok&eacute;mon receive their signature stat boosts upon entering battle.",
+		desc: "Totem and Titan Pok&eacute;mon receive their signature stat boosts upon entering battle; Titans rally their team the first time they end a turn below half health.",
+		onResidualOrder: 29,
+		onResidual(pokemon) {
+			const titanRallies: {[speciesid: string]: BoostID} = {
+				okidogititan: 'atk',
+				munkidorititan: 'spa',
+				fezandipitititan: 'spe',
+			};
+			const stat = titanRallies[pokemon.species.id];
+			if (!stat || pokemon.m.titanRallied) return;
+			if (!pokemon.hp || pokemon.hp >= pokemon.maxhp / 2) return;
+			pokemon.m.titanRallied = true;
+			this.add('-message', `${pokemon.name}'s Titan spirit rallies its team!`);
+			const allies = pokemon.side.activeAndSubActives ? pokemon.side.activeAndSubActives() : pokemon.side.active;
+			for (const ally of allies) {
+				if (!ally || ally.fainted || !ally.hp) continue;
+				this.boost({[stat]: 1}, ally, pokemon);
+			}
+		},
 		onSwitchIn(pokemon) {
 			const auras: {[speciesid: string]: SparseBoostsTable} = {
 				araquanidtotem: {spe: 1},
@@ -236,11 +254,25 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 				ribombeetotem: {atk: 2, def: 2, spa: 2, spd: 2, spe: 2},
 				gumshoostotem: {atk: 2, def: 2, spa: 2, spd: 2, spe: 2},
 				raticatealolatotem: {atk: 2, def: 2, spa: 2, spd: 2, spe: 2},
+				okidogititan: {def: 2},
+				munkidorititan: {spd: 2},
+				fezandipitititan: {spe: 2},
 			};
 			const aura = auras[pokemon.species.id];
 			if (aura && !pokemon.m.totemAuraApplied) {
 				pokemon.m.totemAuraApplied = true;
 				this.boost(aura, pokemon);
+			}
+		},
+	},
+	noalphas: {
+		effectType: 'ValidatorRule',
+		name: 'No Alphas',
+		desc: "Bans Alpha formes (Wild Might Pok&eacute;mon).",
+		onValidateSet(set) {
+			const species = this.dex.species.get(set.species);
+			if (species.forme?.endsWith('Alpha')) {
+				return [`${species.name} is banned in this format.`];
 			}
 		},
 	},
