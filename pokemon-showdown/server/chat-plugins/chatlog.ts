@@ -560,9 +560,6 @@ export abstract class Searcher {
 		context: Chat.PageContext, search: string, roomid: RoomID, date: string, limit: number | null
 	) {
 		context.title = `[Search] [${roomid}] ${search}`;
-		if (!Rooms.Roomlogs.table) {
-			throw new Error(`Database logging must be enabled to use this feature.`);
-		}
 		context.setHTML(
 			`<div class="pad"><h2>Running a chatlog search for "${search}" on room ${roomid}` +
 			(date ? date !== 'all' ? `, on the date "${date}"` : ', on all dates' : '') +
@@ -632,8 +629,86 @@ export class FSLogSearcher extends Searcher {
 		super();
 		this.results = 0;
 	}
-	searchLogs(): Promise<string> {
-		throw new Chat.ErrorMessage(`Searching logs is not supported right now. Use database text logging to enable it.`);
+	async searchLogs(roomid: RoomID, rawSearch: string, limit: number | null, month: string) {
+		if (!limit) limit = 500;
+		if (limit > 5000) limit = 5000;
+		const textTerms: string[] = [];
+		let userSearch: [ID, boolean] | null = null;
+		for (let part of rawSearch.split(',').map(x => x.trim())) {
+			let negated = false;
+			if (part.includes('!=')) {
+				negated = true;
+				part = part.replace('!=', '=');
+			}
+			if (['user=', 'user:', 'user-'].some(x => part.toLowerCase().startsWith(x))) {
+				userSearch = [toID(part.slice(5)), negated];
+			} else {
+				part = part.replace(/[/\\:=!|&?*<->]+/g, ' ').trim();
+				if (toID(part).length) textTerms.push(part.toLowerCase());
+			}
+		}
+
+		const directory = Monitor.logPath(`chat/${roomid}/${month}`);
+		if (!directory.existsSync()) {
+			return LogViewer.error(`No logs for the room "${roomid}" during the month "${month}".`);
+		}
+		const files = Utils.sortBy(
+			(await directory.readdir()).filter(file => file.endsWith('.txt')),
+			file => -Number(file.slice(0, -4).replace(/-/g, ''))
+		);
+		const matchesByDay: { day: string, lines: string[] }[] = [];
+		let total = 0;
+		for (const file of files) {
+			if (total >= limit) break;
+			const day = file.slice(0, -4);
+			const dayLines: string[] = [];
+			const stream = Monitor.logPath(`chat/${roomid}/${month}/${file}`).createReadStream();
+			for await (const line of stream.byLine()) {
+				const parts = line.split('|');
+				if (parts[1] !== 'c') continue;
+				if (userSearch) {
+					const matchesUser = toID(parts[2]) === userSearch[0];
+					if (userSearch[1] ? matchesUser : !matchesUser) continue;
+				}
+				const message = parts.slice(3).join('|').toLowerCase();
+				if (!textTerms.every(term => message.includes(term))) continue;
+				dayLines.push(line);
+				total++;
+				if (total >= limit) break;
+			}
+			void stream.destroy();
+			if (dayLines.length) matchesByDay.push({ day, lines: dayLines.reverse() });
+		}
+
+		let buf = `<div class="pad"><strong>Results on ${roomid} for ${Utils.escapeHTML(`"${textTerms.join(', ')}"`)}`;
+		if (userSearch) buf += ` <small>(arguments: user${userSearch[1] ? '!=' : '='}${userSearch[0]})</small>`;
+		buf += ` during the month ${month}:</strong> ${total} (capped at ${limit})<hr />`;
+		const searchStr = `search-${Dashycode.encode(rawSearch)}--limit-${limit}`;
+		const pref = `/join view-chatlog-${roomid}--`;
+		buf += `<button class="button" name="send" value="${pref}${LogReader.prevMonth(month)}--${searchStr}">Previous month</button> `;
+		buf += `<button class="button" name="send" value="${pref}${LogReader.nextMonth(month)}--${searchStr}">Next month</button>`;
+		buf += `<br />`;
+		buf += `<div class="pad"><blockquote>`;
+		buf += matchesByDay.map(({ day, lines }) => {
+			let chunk = `<details open><summary>[<a href="view-chatlog-${roomid}--${day}">${day}</a>]</summary>`;
+			chunk += lines.map(line => {
+				const rendered = LogViewer.renderLine(line, '', { roomid, date: day });
+				return rendered ? `<div class="chat chatmessage highlighted">${rendered}</div>` : null;
+			}).filter(Boolean).join('<hr />');
+			chunk += `</details>`;
+			return chunk;
+		}).join('<hr />');
+		buf += `</blockquote>`;
+		if (total >= limit && limit < 5000) {
+			const escapedSearch = Utils.escapeHTML(rawSearch);
+			buf += `<hr /><strong>Capped at ${limit}.</strong><br />`;
+			buf += `<button class="button" name="send" value="/sl ${escapedSearch},room=${roomid},limit=${limit + 200}">`;
+			buf += `View 200 more<br />&#x25bc;</button>`;
+			buf += `<button class="button" name="send" value="/sl ${escapedSearch},room=${roomid},limit=3000">`;
+			buf += `View all<br />&#x25bc;</button>`;
+		}
+		buf += `</div>`;
+		return buf;
 	}
 	async searchLinecounts(roomid: RoomID, month: string, user?: ID) {
 		const directory = Monitor.logPath(`chat/${roomid}/${month}`);
