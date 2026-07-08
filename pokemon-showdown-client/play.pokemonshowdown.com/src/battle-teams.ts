@@ -43,6 +43,8 @@ export declare namespace Teams {
 		phType?: string;
 		disguise?: string;
 		startStatus?: string;
+		startHp?: number;
+		phAbilities?: string;
 	}
 	export interface PokemonSet extends Partial<FullPokemonSet> {
 		/** Defaults to species name (not including forme), like in games */
@@ -120,16 +122,20 @@ export const Teams = new class {
 
 			if (set.pokeball || set.hpType || set.gigantamax ||
 				(set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10) || set.teraType ||
-				set.phType || set.disguise || set.startStatus) {
+				set.phType || set.disguise || set.startStatus || set.startHp !== undefined || set.phAbilities) {
 				buf += `,${set.hpType || ''}`;
 				buf += `,${this.packName(set.pokeball || '')}`;
 				buf += `,${set.gigantamax ? 'G' : ''}`;
 				buf += `,${set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10 ? set.dynamaxLevel : ''}`;
-				buf += `,${set.teraType || ''}`;
-				if (set.phType || set.disguise || set.startStatus) {
+				buf += `,${set.teraType ? set.teraType.replace(/\//g, '-') : ''}`;
+				if (set.phType || set.disguise || set.startStatus || set.startHp !== undefined || set.phAbilities) {
 					buf += `,${(set.phType || '').replace(/\//g, '-')}`;
 					buf += `,${this.packName(set.disguise || '')}`;
 					buf += `,${set.startStatus || ''}`;
+					if (set.startHp !== undefined || set.phAbilities) buf += `,${set.startHp !== undefined ? set.startHp : ''}`;
+					if (set.phAbilities) {
+						buf += `,${set.phAbilities.split('/').map(a => this.packName(a)).join('-')}`;
+					}
 				}
 			}
 		}
@@ -258,9 +264,9 @@ export const Teams = new class {
 			j = buf.indexOf(']', i);
 			let misc;
 			if (j < 0) {
-				if (i < buf.length) misc = buf.substring(i).split(',', 9);
+				if (i < buf.length) misc = buf.substring(i).split(',', 11);
 			} else {
-				if (i !== j) misc = buf.substring(i, j).split(',', 9);
+				if (i !== j) misc = buf.substring(i, j).split(',', 11);
 			}
 			if (misc) {
 				set.happiness = (misc[0] ? Number(misc[0]) : undefined);
@@ -268,11 +274,17 @@ export const Teams = new class {
 				set.pokeball = misc[2] || undefined;
 				set.gigantamax = !!misc[3] || undefined;
 				set.dynamaxLevel = (misc[4] ? Number(misc[4]) : undefined);
-				set.teraType = misc[5] || undefined;
+				set.teraType = misc[5] ? misc[5].replace(/-/g, '/') : undefined;
 				// PHNN Gen 1 fields
 				if (misc[6]) set.phType = misc[6].replace(/-/g, '/');
 				if (misc[7]) set.disguise = misc[7];
 				if (misc[8]) set.startStatus = misc[8];
+				if (misc[9]) set.startHp = Number(misc[9]);
+				if (misc[10]) {
+					set.phAbilities = misc[10].split('-').map(
+						abid => window.BattleAbilities?.[toID(abid)]?.name || abid
+					).join('/');
+				}
 			}
 			i = j + 1;
 			if (j < 0 || i <= lastI) break;
@@ -329,6 +341,8 @@ export const Teams = new class {
 			if (set.ability || dex.gen >= 3) text += `[${set.ability || '(select ability)'}]`;
 			if (set.item || dex.gen >= 2) text += ` @ ${set.item || "(no item)"}`;
 			text += `\n`;
+		} else if (set.phAbilities) {
+			text += `Abilities: ${[set.ability || 'No Ability', ...set.phAbilities.split('/')].join(' / ')}\n`;
 		} else if (set.ability && set.ability !== 'No Ability') {
 			text += `Ability: ${set.ability}\n`;
 		}
@@ -480,6 +494,10 @@ export const Teams = new class {
 			set.ability = line.slice(7);
 		} else if (line.startsWith('Ability: ')) {
 			set.ability = line.slice(9);
+		} else if (line.startsWith('Abilities: ')) {
+			const abilityParts = line.slice(11).split('/').map(part => part.trim()).filter(Boolean);
+			set.ability = abilityParts[0] || '';
+			if (abilityParts.length > 1) set.phAbilities = abilityParts.slice(1).join('/');
 		} else if (line.startsWith('Item: ')) {
 			set.item = line.slice(6);
 		} else if (line.startsWith('Nickname: ')) {

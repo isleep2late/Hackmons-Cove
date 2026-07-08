@@ -2768,6 +2768,13 @@ export class Battle {
 							this.addSplit(pokemon.side.id, ['-start', pokemon, 'typechange', types.join('/'), '[from] rule: Disguise Mod']);
 						}
 					}
+					if (pokemon.set.phAbilities) {
+						for (const abilityName of pokemon.set.phAbilities.split('/')) {
+							const extraAbility = this.dex.abilities.get(abilityName);
+							if (!extraAbility.exists || extraAbility.id === pokemon.ability) continue;
+							pokemon.addVolatile('ability:' + extraAbility.id);
+						}
+					}
 					if (pokemon.set.startStatus && !pokemon.m.phnnStartStatusApplied) {
 						pokemon.m.phnnStartStatusApplied = true;
 						pokemon.setStatus(pokemon.set.startStatus, pokemon, null, true);
@@ -2882,6 +2889,13 @@ export class Battle {
 							this.addSplit(pokemon.side.id, [
 								'-start', pokemon, 'typechange', types.join('/'), '[from] rule: Disguise Mod',
 							]);
+						}
+					}
+					if (pokemon.set.phAbilities) {
+						for (const abilityName of pokemon.set.phAbilities.split('/')) {
+							const extraAbility = this.dex.abilities.get(abilityName);
+							if (!extraAbility.exists || extraAbility.id === pokemon.ability) continue;
+							pokemon.addVolatile('ability:' + extraAbility.id);
 						}
 					}
 					if (pokemon.set.startStatus && !pokemon.m.phnnStartStatusApplied) {

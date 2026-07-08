@@ -1664,7 +1664,9 @@ process.stdout.write("Building `data/moves,items,abilities,typechart,learnsets.j
 {
 	const TypeChart = requireNoCache('../caches/pokemon-showdown/dist/data/typechart.js').TypeChart;
 	const phnnTypeChart = requireNoCache('../caches/pokemon-showdown/dist/data/mods/phnn/typechart.js').TypeChart;
-	if (phnnTypeChart.shadow && !TypeChart.shadow) {
+	delete TypeChart['???'];
+	delete TypeChart.bird;
+	if (phnnTypeChart.shadow) {
 		TypeChart.shadow = { damageTaken: phnnTypeChart.shadow.damageTaken, HPivs: {}, HPdvs: {} };
 	}
 	const buf = 'exports.BattleTypeChart = ' + es3stringify(TypeChart) + ';';

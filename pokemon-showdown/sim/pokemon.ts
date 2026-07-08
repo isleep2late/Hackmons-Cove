@@ -1981,10 +1981,11 @@ export class Pokemon {
 
 	hasAbility(ability: string | string[]) {
 		if (Array.isArray(ability)) {
-			if (!ability.map(toID).includes(this.ability)) return false;
-		} else {
-			if (toID(ability) !== this.ability) return false;
+			if (!ability.some(oneAbility => this.hasAbility(oneAbility))) return false;
+			return true;
 		}
+		const abilityid = toID(ability);
+		if (this.ability !== abilityid && !this.volatiles['ability:' + abilityid]) return false;
 		return !this.ignoringAbility();
 	}
 
@@ -2167,7 +2168,7 @@ export class Pokemon {
 
 	getTypes(excludeAdded?: boolean, preterastallized?: boolean): string[] {
 		if (!preterastallized && this.terastallized && this.terastallized !== 'Stellar') {
-			return [this.terastallized];
+			return this.terastallized.split('/');
 		}
 		const types = this.battle.runEvent('Type', this, null, null, this.types);
 		if (!types.length) types.push(this.battle.gen >= 5 ? 'Normal' : '???');

@@ -821,7 +821,8 @@
 					checkboxes.push('<label class="megaevo"><input type="checkbox" name="dynamax" />&nbsp;Dynamax</label>');
 				}
 				if (canTerastallize) {
-					checkboxes.push('<label class="megaevo"><input type="checkbox" name="terastallize" />&nbsp;Terastallize<br />' + Dex.getTypeIcon(canTerastallize) + '</label>');
+					var teraIcons = String(canTerastallize).split('/').map(function (t) { return Dex.getTypeIcon(t); }).join(' ');
+					checkboxes.push('<label class="megaevo"><input type="checkbox" name="terastallize" />&nbsp;Terastallize<br />' + teraIcons + '</label>');
 				}
 				if (checkboxes.length) {
 					moveMenu += '<div class="megaevo-box">' + checkboxes.join('') + '</div>';

@@ -175,7 +175,7 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 	disguisemod: {
 		effectType: 'Rule',
 		name: 'Disguise Mod',
-		desc: "Pok&eacute;mon may disguise as another species' sprite, take on any typing, and start the battle pre-statused; opponents only ever see the disguise sprite and status.",
+		desc: "Pok&eacute;mon may disguise as another species' sprite, take on any typing (in Custom Disguises: any number of types, Tera types, and abilities), and start the battle pre-statused; opponents only ever see the disguise sprite and status.",
 		onBegin() {
 			for (const side of this.sides) {
 				for (const pokemon of side.pokemon) {
@@ -186,6 +186,17 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 						(pokemon as any).fullname = `${pokemon.side.id}: ${disguise.name}`;
 					}
 				}
+			}
+		},
+		onSwitchInPriority: 2,
+		onSwitchIn(pokemon) {
+			if (!pokemon.set.phAbilities) return;
+			for (const abilityName of pokemon.set.phAbilities.split('/')) {
+				const extraAbility = this.dex.abilities.get(abilityName);
+				if (!extraAbility.exists || extraAbility.id === pokemon.ability) continue;
+				const effect = 'ability:' + extraAbility.id;
+				delete pokemon.volatiles[effect];
+				pokemon.addVolatile(effect);
 			}
 		},
 	},
@@ -230,6 +241,39 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 			if (aura && !pokemon.m.totemAuraApplied) {
 				pokemon.m.totemAuraApplied = true;
 				this.boost(aura, pokemon);
+			}
+		},
+	},
+	'2abilities': {
+		effectType: 'ValidatorRule',
+		name: '2 Abilities',
+		desc: "Limits each Pok&eacute;mon to at most 2 abilities.",
+		onValidateSet(set) {
+			const count = 1 + (set.phAbilities ? set.phAbilities.split('/').length : 0);
+			if (count > 2) {
+				return [`${set.name || set.species} has ${count} abilities, but this battle allows at most 2 abilities per Pokémon.`];
+			}
+		},
+	},
+	'3abilities': {
+		effectType: 'ValidatorRule',
+		name: '3 Abilities',
+		desc: "Limits each Pok&eacute;mon to at most 3 abilities.",
+		onValidateSet(set) {
+			const count = 1 + (set.phAbilities ? set.phAbilities.split('/').length : 0);
+			if (count > 3) {
+				return [`${set.name || set.species} has ${count} abilities, but this battle allows at most 3 abilities per Pokémon.`];
+			}
+		},
+	},
+	'2teratypes': {
+		effectType: 'ValidatorRule',
+		name: '2 Tera Types',
+		desc: "Limits each Pok&eacute;mon to at most 2 Tera types.",
+		onValidateSet(set) {
+			const count = set.teraType ? set.teraType.split('/').length : 0;
+			if (count > 2) {
+				return [`${set.name || set.species} has ${count} Tera types, but this battle allows at most 2 Tera types per Pokémon.`];
 			}
 		},
 	},
