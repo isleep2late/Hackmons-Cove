@@ -1924,10 +1924,11 @@ export class Pokemon {
 
 	hasItem(item: string | string[]) {
 		if (Array.isArray(item)) {
-			if (!item.map(toID).includes(this.item)) return false;
-		} else {
-			if (toID(item) !== this.item) return false;
+			if (!item.some(oneItem => this.hasItem(oneItem))) return false;
+			return true;
 		}
+		const itemid = toID(item);
+		if (this.item !== itemid && !this.volatiles['item:' + itemid]) return false;
 		return !this.ignoringItem();
 	}
 

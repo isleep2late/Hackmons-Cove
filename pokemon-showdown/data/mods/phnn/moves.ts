@@ -110,6 +110,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 			},
 			onTryHitPriority: 4,
 			onTryHit(target, source, effect) {
+				if (effect && effect.id === 'kamehameha') return;
 				if (effect && (effect.priority <= 0.1 || effect.target === 'self')) {
 					return;
 				}
@@ -1308,6 +1309,77 @@ clangoroussoulblaze: {
 		secondary: null,
 		target: "all",
 		type: "Shadow",
+	},
+	kamehameha: {
+		accuracy: true,
+		basePower: 0,
+		category: "Physical",
+		name: "Kamehameha",
+		shortDesc: "Ignores abilities and items. Cannot be stopped by anything.",
+		desc: "Ignores abilities and items. Bypasses Protect, Substitute, terrains, semi-invulnerability, and every condition that would prevent the user from moving or the move from hitting. All opposing Pokemon faint.",
+		pp: 100,
+		noPPBoosts: true,
+		priority: 10,
+		flags: {mirror: 1, bypasssub: 1, defrost: 1},
+		sleepUsable: true,
+		breaksProtect: true,
+		ignoreAbility: true,
+		ignoreImmunity: true,
+		onHit(target, source, move) {
+			target.faint(source, move);
+		},
+		onAfterMove(source, target, move) {
+			for (const pokemon of this.getAllActive()) {
+				if (pokemon.hp && !pokemon.fainted && !pokemon.isAlly(source)) {
+					pokemon.faint(source, move);
+				}
+			}
+		},
+		secondary: null,
+		target: "allAdjacentFoes",
+		type: "Fighting",
+	},
+	attract: {
+		inherit: true,
+		condition: {
+			noCopy: true, // doesn't get copied by Baton Pass
+			onStart(pokemon, source, effect) {
+				if (!(pokemon.gender === 'M' && source.gender === 'F') && !(pokemon.gender === 'F' && source.gender === 'M')) {
+					this.debug('incompatible gender');
+					return false;
+				}
+				if (!this.runEvent('Attract', pokemon, source)) {
+					this.debug('Attract event failed');
+					return false;
+				}
+
+				if (effect.name === 'Cute Charm') {
+					this.add('-start', pokemon, 'Attract', '[from] ability: Cute Charm', `[of] ${source}`);
+				} else if (effect.name === 'Destiny Knot') {
+					this.add('-start', pokemon, 'Attract', '[from] item: Destiny Knot', `[of] ${source}`);
+				} else {
+					this.add('-start', pokemon, 'Attract');
+				}
+			},
+			onUpdate(pokemon) {
+				if (this.effectState.source && !this.effectState.source.isActive && pokemon.volatiles['attract']) {
+					this.debug(`Removing Attract volatile on ${pokemon}`);
+					pokemon.removeVolatile('attract');
+				}
+			},
+			onBeforeMovePriority: 2,
+			onBeforeMove(pokemon, target, move) {
+				if (move.id === 'kamehameha') return;
+				this.add('-activate', pokemon, 'move: Attract', '[of] ' + this.effectState.source);
+				if (this.randomChance(1, 2)) {
+					this.add('cant', pokemon, 'Attract');
+					return false;
+				}
+			},
+			onEnd(pokemon) {
+				this.add('-end', pokemon, 'Attract', '[silent]');
+			},
+		},
 	},
 
 };

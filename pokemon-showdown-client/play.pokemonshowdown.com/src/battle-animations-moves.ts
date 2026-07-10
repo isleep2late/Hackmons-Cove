@@ -13,6 +13,20 @@ import { type AnimTable, BattleOtherAnims } from './battle-animations';
 import { Config } from './client-main';
 
 export const BattleMoveAnims: AnimTable = {
+	kamehameha: {
+		anim(scene) {
+			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
+			const host = window.Config ? Config.routes.client : 'beta.hackmons.com';
+			const KAME_MS = 3900;
+			const $overlay = $(
+				`<img src="${protocol}//${host}/sprites/phnn/kamehameha.gif?t=${Date.now()}" ` +
+				`style="position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;z-index:100;pointer-events:none" />`
+			);
+			scene.$fx.append($overlay);
+			setTimeout(() => $overlay.remove(), KAME_MS);
+			scene.wait(KAME_MS);
+		},
+	},
 	taunt: {
 		anim(scene, [attacker, defender]) {
 			BattleOtherAnims.dance.anim(scene, [attacker, defender]);

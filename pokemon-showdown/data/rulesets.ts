@@ -190,13 +190,23 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 		},
 		onSwitchInPriority: 2,
 		onSwitchIn(pokemon) {
-			if (!pokemon.set.phAbilities) return;
-			for (const abilityName of pokemon.set.phAbilities.split('/')) {
-				const extraAbility = this.dex.abilities.get(abilityName);
-				if (!extraAbility.exists || extraAbility.id === pokemon.ability) continue;
-				const effect = 'ability:' + extraAbility.id;
-				delete pokemon.volatiles[effect];
-				pokemon.addVolatile(effect);
+			if (pokemon.set.phAbilities) {
+				for (const abilityName of pokemon.set.phAbilities.split('/')) {
+					const extraAbility = this.dex.abilities.get(abilityName);
+					if (!extraAbility.exists || extraAbility.id === pokemon.ability) continue;
+					const effect = 'ability:' + extraAbility.id;
+					delete pokemon.volatiles[effect];
+					pokemon.addVolatile(effect);
+				}
+			}
+			if (pokemon.set.phItems) {
+				for (const itemName of pokemon.set.phItems.split('/')) {
+					const extraItem = this.dex.items.get(itemName);
+					if (!extraItem.exists || extraItem.id === pokemon.item) continue;
+					const effect = 'item:' + extraItem.id;
+					delete pokemon.volatiles[effect];
+					pokemon.addVolatile(effect);
+				}
 			}
 		},
 	},
@@ -298,6 +308,10 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 			const teraCount = set.teraType ? set.teraType.split('/').length : 0;
 			if (teraCount > teraCap) {
 				problems.push(`${set.name || set.species} has ${teraCount} Tera types, but Standard Custom allows at most ${teraCap} Tera ${teraCap === 1 ? 'type' : 'types'} per Pokémon in this battle.`);
+			}
+			const itemCount = (set.item ? 1 : 0) + (set.phItems ? set.phItems.split('/').length : 0);
+			if (itemCount > 1) {
+				problems.push(`${set.name || set.species} has ${itemCount} items, but Standard Custom allows at most 1 item per Pokémon.`);
 			}
 			return problems;
 		},

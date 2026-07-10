@@ -155,29 +155,59 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 			// - if Counter is used by the opponent, it will succeed if the player's last selected move is Counterable
 			// - (Counter will thus desync if the target's last used move is not as counterable as the target's last selected move)
 			// - if Counter succeeds it will deal twice the last move damage dealt in battle (even if it's from a different pokemon because of a switch)
-			const isCounterable = (move: Move | null) => move && move.basePower > 0 &&
-				['Normal', 'Fighting'].includes(move.type) && move.id !== 'counter';
 
-			const lastMove = target.side.lastMove && this.dex.moves.get(target.side.lastMove.id);
-			const lastMoveIsCounterable = isCounterable(lastMove);
 
-			const lastSelectedMove = target.side.lastSelectedMove && this.dex.moves.get(target.side.lastSelectedMove);
-			const lastSelectedMoveIsCounterable = isCounterable(lastSelectedMove || null);
+			const isCounterable = (move: { basePower: number, type: string } | null) => {
+				if (!move) {
+					throw new Error(`Gen 1 Counter: move is null. It should have been initialized to {basePower: 0, type: 'Normal'}.`);
+				}
+				return ['Normal', 'Fighting'].includes(move.type) && move.basePower > 0;
+			};
 
-			if (!lastMoveIsCounterable && !lastSelectedMoveIsCounterable) {
-				this.debug("Gen 1 Counter: last move was not Counterable");
+			const isLastEnemySelectedMoveCounterable = target.side.lastEnemySelectedMove !== 'counter';
+			const isLastEnemyMoveCounterable = isCounterable(target.side.lastEnemyMove);
+
+			const isLastSelectedMoveCounterable = target.side.lastSelectedMove !== 'counter';
+			const isLastMoveCounterable = isCounterable(target.side.lastMove);
+
+			const isLastDamageNonZero = this.lastDamage > 0;
+
+			const willCounterSucceed = isLastEnemySelectedMoveCounterable && isLastEnemyMoveCounterable && isLastDamageNonZero;
+
+
+			if (!willCounterSucceed) {
+				if (isLastDamageNonZero) {
+					if (!isLastEnemySelectedMoveCounterable && isLastSelectedMoveCounterable) {
+						if (isLastEnemyMoveCounterable) {
+							this.hint("Desync Clause Mod activated!");
+							this.hint(
+								"In Gen 1, if Counter is used against a target that switched in and spent the turn sleeping, " +
+								"from the Counter user's perspective, " +
+								"it will fail if the move in the target's first slot is also Counter.",
+							);
+						}
+					} else if (!isLastEnemyMoveCounterable && isLastMoveCounterable) {
+						this.hint("Desync Clause Mod activated!", false, target.side);
+						this.hint(
+							"In Gen 1, from the Counter user's perspective, " +
+							"Counter uses the last announced move by the target's team to determine if it will succeed.",
+							false, target.side,
+						);
+					}
+				}
+
 				this.add('-fail', pokemon);
 				return false;
 			}
-			if (this.lastDamage <= 0) {
-				this.debug("Gen 1 Counter: no previous damage exists");
-				this.add('-fail', pokemon);
-				return false;
-			}
-			if (!lastMoveIsCounterable || !lastSelectedMoveIsCounterable) {
-				this.hint("Desync Clause Mod activated!");
-				this.add('-fail', pokemon);
-				return false;
+
+			if (!isLastSelectedMoveCounterable) {
+			} else if (!isLastMoveCounterable) {
+				this.hint("Desync Clause Mod activated!", false, target.side);
+				this.hint(
+					"In Gen 1, from the Counter user's perspective, " +
+					"Counter uses the last announced move by the target's team to determine if it will succeed.",
+					false, target.side,
+				);
 			}
 
 			return 2 * this.lastDamage;
@@ -329,6 +359,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 				if (pokemon !== source) {
 					if (['frz', 'slp'].includes(pokemon.status)) {
 						pokemon.side.lastSelectedMove = 'cannotmove' as ID;
+						pokemon.side.lastEnemySelectedMove = 'cannotmove' as ID;
 						if (this.queue.willMove(pokemon)) {
 							this.queue.changeAction(pokemon, { choice: 'move', pokemon, moveid: 'cannotmove' });
 						}
@@ -446,6 +477,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 			}
 			if (!randomMove) return false;
 			pokemon.side.lastSelectedMove = this.toID(randomMove);
+			pokemon.side.lastEnemySelectedMove = pokemon.side.lastSelectedMove;
 			this.actions.useMove(randomMove, pokemon);
 		},
 	},
@@ -486,6 +518,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 				return false;
 			}
 			pokemon.side.lastSelectedMove = foe.lastMove.id;
+			pokemon.side.lastEnemySelectedMove = pokemon.side.lastSelectedMove;
 			this.actions.useMove(foe.lastMove.id, pokemon);
 		},
 	},
@@ -541,17 +574,11 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		inherit: true,
 		basePower: 1,
 		damageCallback(pokemon) {
-			if ([0, 1, 171].includes(pokemon.level)) {
-				this.hint("Desync Clause Mod activated!");
+			if (((pokemon.level + (pokemon.level >> 1)) & 0xff) < 2) {
 				this.hint("In Gen 1, if a Pokémon at level 0, 1 or 171 uses Psywave, the game softlocks.");
 				return false;
 			}
-			const psywaveDamage = (this.random(0, this.trunc(1.5 * pokemon.level)));
-			if (psywaveDamage <= 0) {
-				this.hint("Desync Clause Mod activated!");
-				this.hint("In Gen 1, Psywave can roll 0 damage.");
-				return false;
-			}
+			const psywaveDamage = this.random(1, this.trunc(1.5 * pokemon.level));
 			return psywaveDamage;
 		},
 	},
