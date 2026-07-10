@@ -1559,13 +1559,16 @@ process.stdout.write("Building `data/pokedex.js`... ");
 		if (s.gender) e.gender = s.gender;
 		Pokedex[s.id] = e;
 		const baseId = toID(s.baseSpecies);
+		if (baseId === s.id) continue;
 		if (!phnnFormeMap[baseId]) phnnFormeMap[baseId] = [];
 		phnnFormeMap[baseId].push(s.name);
 	}
 	for (const baseId in phnnFormeMap) {
 		if (Pokedex[baseId]) {
-			Pokedex[baseId].otherFormes = (Pokedex[baseId].otherFormes || []).concat(phnnFormeMap[baseId]);
-			Pokedex[baseId].formeOrder = (Pokedex[baseId].formeOrder || [Pokedex[baseId].name]).concat(phnnFormeMap[baseId]);
+			const existingFormes = Pokedex[baseId].otherFormes || [];
+			const newFormes = phnnFormeMap[baseId].filter(name => !existingFormes.includes(name));
+			Pokedex[baseId].otherFormes = existingFormes.concat(newFormes);
+			Pokedex[baseId].formeOrder = (Pokedex[baseId].formeOrder || [Pokedex[baseId].name]).concat(newFormes);
 		}
 	}
 	const buf = 'exports.BattlePokedex = ' + es3stringify(Pokedex) + ';';
@@ -1590,7 +1593,7 @@ process.stdout.write("Building `data/moves,items,abilities,typechart,learnsets.j
 		if (move.basePowerCallback) Moves[id].basePowerCallback = true;
 	}
 	const phnnDex = Dex.mod('phnn');
-	for (const id of ['shadowrush', 'shadowblast', 'shadowblitz', 'shadowbreak', 'shadowend', 'shadowbolt', 'shadowchill', 'shadowfire', 'shadowstorm', 'shadowwave', 'shadowrave', 'shadowdown', 'shadowmist', 'shadowpanic', 'shadowhold', 'shadowhalf', 'shadowshed', 'shadowsky']) {
+	for (const id of Object.keys(phnnDex.data.Moves)) {
 		const m = phnnDex.moves.get(id);
 		if (m.exists && !Moves[id]) {
 			Moves[id] = {

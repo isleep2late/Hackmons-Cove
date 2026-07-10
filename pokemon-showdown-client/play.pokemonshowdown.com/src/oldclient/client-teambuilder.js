@@ -60,6 +60,8 @@
 			'submit .detailsform': 'detailsChange',
 			'input .phnn-ms-filter': 'phnnMultiselectFilter',
 			'keyup .phnn-ms-filter': 'phnnMultiselectFilter',
+			'click .phnn-ms-showsel': 'phnnMultiselectShowSelected',
+			'click .phnn-ms-selectall': 'phnnMultiselectSelectAll',
 			'click .changeform': 'altForm',
 			'click .altform': 'altForm',
 
@@ -1414,7 +1416,10 @@
 			buf += '</div></div>';
 
 			buf += '<div class="setrow">';
-			if (this.curTeam.gen > 1 && !isLetsGo) buf += '<div class="setcell setcell-item"><label>Item</label><input type="text" name="item" class="textbox chartinput" value="' + BattleLog.escapeHTML(set.item) + '" autocomplete="off" /></div>';
+			if (this.curTeam.gen > 1 && !isLetsGo) {
+				var itemCellVal = (this.curTeam.format.includes('customdisguise') && set.phItems) ? 'Multi' : set.item;
+				buf += '<div class="setcell setcell-item"><label>Item' + (set.phItems ? '(s)' : '') + '</label><input type="text" name="item" class="textbox chartinput" value="' + BattleLog.escapeHTML(itemCellVal) + '" autocomplete="off" /></div>';
+			}
 			if (this.curTeam.gen > 2 && !isLetsGo) buf += '<div class="setcell setcell-ability"><label>Ability</label><input type="text" name="ability" class="textbox chartinput" value="' + BattleLog.escapeHTML(set.ability) + '" autocomplete="off" /></div>';
 			buf += '</div></div>';
 
@@ -3104,13 +3109,31 @@
 					if (set.phAbilities) curAbilities = curAbilities.concat(set.phAbilities.split('/'));
 					var abilityNames = [];
 					for (var abid in BattleAbilities) {
-						if (abid === 'noability') continue;
-						abilityNames.push(BattleAbilities[abid].name || abid);
+						if (!abid || abid === 'noability') continue;
+						if (BattleAbilities[abid].exists === false) continue;
+						var abilOptName = BattleAbilities[abid].name || abid;
+						if (abilOptName) abilityNames.push(abilOptName);
 					}
 					abilityNames.sort();
 					buf += '<div class="formrow"><label class="formlabel" title="Abilities (select any number; the first is the main ability, the rest are innate)">Abilities:</label><div>';
 					buf += this.renderPhnnMultiselect('phabilities', abilityNames, curAbilities, '(none)', true);
 					buf += '</div></div>';
+					if (this.curTeam.gen > 1) {
+						var curItems = [];
+						if (set.item) curItems.push(set.item);
+						if (set.phItems) curItems = curItems.concat(set.phItems.split('/'));
+						var itemNames = [];
+						for (var itid in BattleItems) {
+							if (!itid || BattleItems[itid].isPokeball) continue;
+							if (BattleItems[itid].exists === false) continue;
+							var itemOptName = BattleItems[itid].name || itid;
+							if (itemOptName) itemNames.push(itemOptName);
+						}
+						itemNames.sort();
+						buf += '<div class="formrow"><label class="formlabel" title="Items (select any number; the first is the held item, the rest also apply in battle)">Item(s):</label><div>';
+						buf += this.renderPhnnMultiselect('phitems', itemNames, curItems, '(none)', true);
+						buf += '</div></div>';
+					}
 				} else if (isDisguise) {
 					var phTypeList = Dex.types.all().map(function (t) { return t.name; });
 					var phTypes = (set.phType || '').split('/');
@@ -3205,7 +3228,11 @@
 			buf += '<summary class="button" style="list-style:none;cursor:pointer;min-width:130px;display:inline-block;">' + BattleLog.escapeHTML(this.phnnMultiselectLabel(selected, emptyLabel)) + ' &#9662;</summary>';
 			buf += '<div style="position:absolute;left:0;top:100%;z-index:200;background:#fff;color:#000;border:1px solid #999;border-radius:3px;box-shadow:2px 2px 4px rgba(0,0,0,0.3);max-height:250px;overflow-y:auto;min-width:190px;padding:3px 6px;">';
 			if (withFilter) {
-				buf += '<input type="text" class="textbox phnn-ms-filter" placeholder="Filter..." style="width:95%;margin:2px 0;" />';
+				buf += '<div style="white-space:nowrap;">';
+				buf += '<input type="text" class="textbox phnn-ms-filter" placeholder="Filter..." style="width:52%;margin:2px 0;" />';
+				buf += ' <button type="button" class="button phnn-ms-showsel" title="Show only the options you have selected (click again to show all)" style="padding:1px 6px;">Sel</button>';
+				buf += ' <button type="button" class="button phnn-ms-selectall" title="Select every option currently shown" style="padding:1px 6px;">All</button>';
+				buf += '</div>';
 			}
 			for (var i = 0; i < options.length; i++) {
 				var checked = selected.indexOf(options[i]) >= 0 ? ' checked="checked"' : '';
@@ -3216,11 +3243,39 @@
 		},
 		phnnMultiselectFilter: function (e) {
 			var $input = $(e.currentTarget);
+			$input.closest('details').find('.phnn-ms-showsel').attr('data-active', '0').removeClass('cur');
 			var query = toID($input.val());
 			$input.closest('details').find('label.phnn-ms-option').each(function () {
 				var matches = !query || toID($(this).text()).indexOf(query) >= 0;
 				$(this).toggle(matches);
 			});
+		},
+		phnnMultiselectShowSelected: function (e) {
+			e.preventDefault();
+			e.stopPropagation();
+			var $btn = $(e.currentTarget);
+			var showSel = $btn.attr('data-active') !== '1';
+			$btn.attr('data-active', showSel ? '1' : '0');
+			$btn.toggleClass('cur', showSel);
+			var $details = $btn.closest('details');
+			if (showSel) {
+				$details.find('label.phnn-ms-option').each(function () {
+					$(this).toggle($(this).find('input').prop('checked'));
+				});
+			} else {
+				var query = toID($details.find('.phnn-ms-filter').val());
+				$details.find('label.phnn-ms-option').each(function () {
+					var matches = !query || toID($(this).text()).indexOf(query) >= 0;
+					$(this).toggle(matches);
+				});
+			}
+		},
+		phnnMultiselectSelectAll: function (e) {
+			e.preventDefault();
+			e.stopPropagation();
+			var $details = $(e.currentTarget).closest('details');
+			$details.find('label.phnn-ms-option:visible input[type=checkbox]').prop('checked', true);
+			this.detailsChange(e);
 		},
 		phnnMultiselectValues: function (name) {
 			var values = [];
@@ -3347,7 +3402,7 @@
 					}
 					var hasCDAbilities = this.$chart.find('details.phnn-multiselect[data-name=phabilities]').length > 0;
 					if (hasCDAbilities) {
-						var checkedAbilities = this.phnnMultiselectValues('phabilities');
+						var checkedAbilities = this.phnnMultiselectValues('phabilities').filter(function (v) { return !!v; });
 						var prevAbilities = [];
 						if (set.ability) prevAbilities.push(set.ability);
 						if (set.phAbilities) prevAbilities = prevAbilities.concat(set.phAbilities.split('/'));
@@ -3369,6 +3424,31 @@
 							delete set.phAbilities;
 						}
 						this.phnnUpdateMultiselectLabel('phabilities');
+					}
+					var hasCDItems = this.$chart.find('details.phnn-multiselect[data-name=phitems]').length > 0;
+					if (hasCDItems) {
+						var checkedItems = this.phnnMultiselectValues('phitems').filter(function (v) { return !!v; });
+						var prevItems = [];
+						if (set.item) prevItems.push(set.item);
+						if (set.phItems) prevItems = prevItems.concat(set.phItems.split('/'));
+						var orderedItems = [];
+						for (var pii = 0; pii < prevItems.length; pii++) {
+							if (checkedItems.indexOf(prevItems[pii]) >= 0 && orderedItems.indexOf(prevItems[pii]) < 0) {
+								orderedItems.push(prevItems[pii]);
+							}
+						}
+						for (var cii = 0; cii < checkedItems.length; cii++) {
+							if (orderedItems.indexOf(checkedItems[cii]) < 0) {
+								orderedItems.push(checkedItems[cii]);
+							}
+						}
+						set.item = orderedItems[0] || '';
+						if (orderedItems.length > 1) {
+							set.phItems = orderedItems.slice(1).join('/');
+						} else {
+							delete set.phItems;
+						}
+						this.phnnUpdateMultiselectLabel('phitems');
 					}
 					var disguiseInput = this.$chart.find('select[name=disguise]').val();
 					var disguiseSpecies = Dex.species.get(disguiseInput);

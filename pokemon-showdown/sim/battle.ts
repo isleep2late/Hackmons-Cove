@@ -2775,6 +2775,13 @@ export class Battle {
 							pokemon.addVolatile('ability:' + extraAbility.id);
 						}
 					}
+					if (pokemon.set.phItems) {
+						for (const itemName of pokemon.set.phItems.split('/')) {
+							const extraItem = this.dex.items.get(itemName);
+							if (!extraItem.exists || extraItem.id === pokemon.item) continue;
+							pokemon.addVolatile('item:' + extraItem.id);
+						}
+					}
 					if (pokemon.species.forme?.endsWith('Alpha') && this.dex.conditions.getByID('wildmight' as ID).exists) {
 						pokemon.addVolatile('wildmight');
 					}
@@ -2899,6 +2906,13 @@ export class Battle {
 							const extraAbility = this.dex.abilities.get(abilityName);
 							if (!extraAbility.exists || extraAbility.id === pokemon.ability) continue;
 							pokemon.addVolatile('ability:' + extraAbility.id);
+						}
+					}
+					if (pokemon.set.phItems) {
+						for (const itemName of pokemon.set.phItems.split('/')) {
+							const extraItem = this.dex.items.get(itemName);
+							if (!extraItem.exists || extraItem.id === pokemon.item) continue;
+							pokemon.addVolatile('item:' + extraItem.id);
 						}
 					}
 					if (pokemon.species.forme?.endsWith('Alpha') && this.dex.conditions.getByID('wildmight' as ID).exists) {

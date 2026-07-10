@@ -624,6 +624,9 @@ export class TeamValidator {
 		if (set.phAbilities && !isCustomDisguises) {
 			problems.push(`${set.name || set.species} has multiple abilities, which is only allowed in Custom Disguises formats.`);
 		}
+		if (set.phItems && !isCustomDisguises) {
+			problems.push(`${set.name || set.species} has multiple items, which is only allowed in Custom Disguises formats.`);
+		}
 		const findTypeName = (typeText: string): string | null => {
 			const wanted = typeText.trim().toLowerCase();
 			if (!wanted) return null;
@@ -740,6 +743,7 @@ export class TeamValidator {
 		if (set.phAbilities && isCustomDisguises) {
 			const extraNames: string[] = [];
 			for (const part of set.phAbilities.split('/')) {
+				if (!part.trim()) continue;
 				const extraAbility = dex.abilities.get(part.trim());
 				if (!extraAbility.exists || extraAbility.id === 'noability') {
 					problems.push(`${name} has an invalid extra ability "${part.trim()}".`);
@@ -749,6 +753,20 @@ export class TeamValidator {
 			}
 			set.phAbilities = extraNames.join('/');
 			if (!set.phAbilities) delete set.phAbilities;
+		}
+		if (set.phItems && isCustomDisguises) {
+			const extraItemNames: string[] = [];
+			for (const part of set.phItems.split('/')) {
+				if (!part.trim()) continue;
+				const extraItem = dex.items.get(part.trim());
+				if (!extraItem.exists) {
+					problems.push(`${name} has an invalid extra item "${part.trim()}".`);
+				} else if (extraItem.name !== item.name && !extraItemNames.includes(extraItem.name)) {
+					extraItemNames.push(extraItem.name);
+				}
+			}
+			set.phItems = extraItemNames.join('/');
+			if (!set.phItems) delete set.phItems;
 		}
 		if (nature.id && !nature.exists) {
 			if (dex.gen < 3) {
@@ -773,7 +791,6 @@ export class TeamValidator {
 		}
 		if ((this.gen === 9 && !dex.currentMod.startsWith('champions') && !ruleTable.has('terastalclause')) ||
 			ruleTable.has('bonustypemod')) {
-			// PHNN: an empty Tera type stays empty as the Dynamax signal (see data/mods/phnn/scripts.ts).
 			if ((dex.currentMod === 'phnn' || isCustomDisguises) && !set.teraType) {
 				delete set.teraType;
 			} else if (isCustomDisguises) {

@@ -183,6 +183,14 @@ export class BattleActions {
 				if (!pokemon.m.abils.includes(effect)) pokemon.m.abils.push(effect);
 			}
 		}
+		if (pokemon.set.phItems) {
+			for (const itemName of pokemon.set.phItems.split('/')) {
+				const extraItem = this.battle.dex.items.get(itemName);
+				if (!extraItem.exists || extraItem.id === pokemon.item) continue;
+				const effect = 'item:' + extraItem.id;
+				pokemon.volatiles[effect] = this.battle.initEffectState({ id: effect as ID, target: pokemon });
+			}
+		}
 		if (pokemon.species.forme?.endsWith('Alpha') && this.battle.dex.conditions.getByID('wildmight' as ID).exists) {
 			pokemon.addVolatile('wildmight');
 		}

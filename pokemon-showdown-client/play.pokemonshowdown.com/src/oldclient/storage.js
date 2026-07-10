@@ -869,20 +869,22 @@ Storage.packTeam = function (team) {
 		}
 
 		if (set.pokeball || (set.hpType && !hasHP) || set.gigantamax || (set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10) || set.teraType ||
-			set.phType || set.disguise || set.startStatus || set.startHp !== undefined || set.phAbilities) {
+			set.phType || set.disguise || set.startStatus || set.startHp !== undefined || set.phAbilities || set.phItems) {
 			buf += ',' + (set.hpType || '');
 			buf += ',' + toID(set.pokeball);
 			buf += ',' + (set.gigantamax ? 'G' : '');
 			buf += ',' + (set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10 ? set.dynamaxLevel : '');
 			buf += ',' + ((set.teraType || '').replace(/\//g, '-'));
-			// PHNN Gen 1 fields
-			if (set.phType || set.disguise || set.startStatus || set.startHp !== undefined || set.phAbilities) {
+			if (set.phType || set.disguise || set.startStatus || set.startHp !== undefined || set.phAbilities || set.phItems) {
 				buf += ',' + ((set.phType || '').replace(/\//g, '-'));
 				buf += ',' + toID(set.disguise);
 				buf += ',' + (set.startStatus || '');
-				if (set.startHp !== undefined || set.phAbilities) buf += ',' + (set.startHp !== undefined ? set.startHp : '');
-				if (set.phAbilities) {
-					buf += ',' + set.phAbilities.split('/').map(function (a) { return toID(a); }).join('-');
+				if (set.startHp !== undefined || set.phAbilities || set.phItems) buf += ',' + (set.startHp !== undefined ? set.startHp : '');
+				if (set.phAbilities || set.phItems) {
+					buf += ',' + (set.phAbilities || '').split('/').filter(function (a) { return a; }).map(function (a) { return toID(a); }).join('-');
+				}
+				if (set.phItems) {
+					buf += ',' + set.phItems.split('/').map(function (a) { return toID(a); }).filter(function (a) { return a; }).join('-');
 				}
 			}
 		}
@@ -994,9 +996,9 @@ Storage.fastUnpackTeam = function (buf) {
 		j = buf.indexOf(']', i);
 		var misc = undefined;
 		if (j < 0) {
-			if (i < buf.length) misc = buf.substring(i).split(',', 11);
+			if (i < buf.length) misc = buf.substring(i).split(',', 12);
 		} else {
-			if (i !== j) misc = buf.substring(i, j).split(',', 11);
+			if (i !== j) misc = buf.substring(i, j).split(',', 12);
 		}
 		if (misc) {
 			set.happiness = (misc[0] ? Number(misc[0]) : 255);
@@ -1005,7 +1007,6 @@ Storage.fastUnpackTeam = function (buf) {
 			set.gigantamax = !!misc[3];
 			set.dynamaxLevel = (misc[4] ? Number(misc[4]) : 10);
 			set.teraType = misc[5] ? misc[5].replace(/-/g, '/') : misc[5];
-			// PHNN Gen 1 fields
 			if (misc[6]) set.phType = misc[6].replace(/-/g, '/');
 			if (misc[7]) set.disguise = misc[7];
 			if (misc[8]) set.startStatus = misc[8];
@@ -1014,6 +1015,12 @@ Storage.fastUnpackTeam = function (buf) {
 				set.phAbilities = misc[10].split('-').map(function (abid) {
 					var key = toID(abid);
 					return (window.BattleAbilities && window.BattleAbilities[key] && window.BattleAbilities[key].name) || abid;
+				}).join('/');
+			}
+			if (misc[11]) {
+				set.phItems = misc[11].split('-').map(function (itemid) {
+					var key = toID(itemid);
+					return (window.BattleItems && window.BattleItems[key] && window.BattleItems[key].name) || itemid;
 				}).join('/');
 			}
 		}
@@ -1130,9 +1137,9 @@ Storage.unpackTeam = function (buf) {
 		j = buf.indexOf(']', i);
 		var misc = undefined;
 		if (j < 0) {
-			if (i < buf.length) misc = buf.substring(i).split(',', 11);
+			if (i < buf.length) misc = buf.substring(i).split(',', 12);
 		} else {
-			if (i !== j) misc = buf.substring(i, j).split(',', 11);
+			if (i !== j) misc = buf.substring(i, j).split(',', 12);
 		}
 		if (misc) {
 			set.happiness = (misc[0] ? Number(misc[0]) : 255);
@@ -1141,7 +1148,6 @@ Storage.unpackTeam = function (buf) {
 			set.gigantamax = !!misc[3];
 			set.dynamaxLevel = (misc[4] ? Number(misc[4]) : 10);
 			set.teraType = misc[5] ? misc[5].replace(/-/g, '/') : misc[5];
-			// PHNN Gen 1 fields
 			if (misc[6]) set.phType = misc[6].replace(/-/g, '/');
 			if (misc[7]) set.disguise = misc[7];
 			if (misc[8]) set.startStatus = misc[8];
@@ -1150,6 +1156,12 @@ Storage.unpackTeam = function (buf) {
 				set.phAbilities = misc[10].split('-').map(function (abid) {
 					var key = toID(abid);
 					return (window.BattleAbilities && window.BattleAbilities[key] && window.BattleAbilities[key].name) || abid;
+				}).join('/');
+			}
+			if (misc[11]) {
+				set.phItems = misc[11].split('-').map(function (itemid) {
+					var key = toID(itemid);
+					return (window.BattleItems && window.BattleItems[key] && window.BattleItems[key].name) || itemid;
 				}).join('/');
 			}
 		}
@@ -1321,6 +1333,10 @@ Storage.importTeam = function (buffer, teams) {
 			var abilityParts = line.substr(11).split('/').map(function (part) { return $.trim(part); }).filter(function (part) { return !!part; });
 			curSet.ability = abilityParts[0] || '';
 			if (abilityParts.length > 1) curSet.phAbilities = abilityParts.slice(1).join('/');
+		} else if (line.substr(0, 7) === 'Items: ') {
+			var itemParts = line.substr(7).split('/').map(function (part) { return $.trim(part); }).filter(function (part) { return !!part && part !== '(none)'; });
+			if (itemParts[0]) curSet.item = itemParts[0];
+			if (itemParts.length > 1) curSet.phItems = itemParts.slice(1).join('/');
 		} else if (line === 'Shiny: Yes') {
 			curSet.shiny = true;
 		} else if (line.substr(0, 7) === 'Level: ') {
@@ -1459,7 +1475,9 @@ Storage.exportTeam = function (team, hidestats) {
 		} else if (curSet.ability) {
 			text += 'Ability: ' + curSet.ability + "  \n";
 		}
-		// PHNN Gen 1 desync fields: Sprite, Types, Status
+		if (curSet.phItems) {
+			text += 'Items: ' + [curSet.item || '(none)'].concat(curSet.phItems.split('/')).join(' / ') + "  \n";
+		}
 		if (curSet.disguise) {
 			text += 'Sprite: ' + curSet.disguise + "  \n";
 		}

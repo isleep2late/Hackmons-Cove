@@ -119,6 +119,7 @@ export interface PokemonSet {
 	startStatus?: string;
 	startHp?: number;
 	phAbilities?: string;
+	phItems?: string;
 }
 
 export const Teams = new class Teams {
@@ -206,19 +207,22 @@ export const Teams = new class Teams {
 
 			if (set.pokeball || set.hpType || set.gigantamax ||
 				(set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10) || set.teraType ||
-				set.phType || set.disguise || set.startStatus || set.startHp !== undefined || set.phAbilities) {
+				set.phType || set.disguise || set.startStatus || set.startHp !== undefined || set.phAbilities || set.phItems) {
 				buf += `,${set.hpType || ''}`;
 				buf += `,${this.packName(set.pokeball || '')}`;
 				buf += `,${set.gigantamax ? 'G' : ''}`;
 				buf += `,${set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10 ? set.dynamaxLevel : ''}`;
 				buf += `,${set.teraType ? set.teraType.replace(/\//g, '-') : ''}`;
-				if (set.phType || set.disguise || set.startStatus || set.startHp !== undefined || set.phAbilities) {
+				if (set.phType || set.disguise || set.startStatus || set.startHp !== undefined || set.phAbilities || set.phItems) {
 					buf += `,${(set.phType || '').replace(/\//g, '-')}`;
 					buf += `,${this.packName(set.disguise || '')}`;
 					buf += `,${set.startStatus || ''}`;
-					if (set.startHp !== undefined || set.phAbilities) buf += `,${set.startHp !== undefined ? set.startHp : ''}`;
-					if (set.phAbilities) {
-						buf += `,${set.phAbilities.split('/').map(a => this.packName(a)).join('-')}`;
+					if (set.startHp !== undefined || set.phAbilities || set.phItems) buf += `,${set.startHp !== undefined ? set.startHp : ''}`;
+					if (set.phAbilities || set.phItems) {
+						buf += `,${(set.phAbilities || '').split('/').filter(Boolean).map(a => this.packName(a)).join('-')}`;
+					}
+					if (set.phItems) {
+						buf += `,${set.phItems.split('/').map(a => this.packName(a)).filter(Boolean).join('-')}`;
 					}
 				}
 			}
@@ -345,9 +349,9 @@ export const Teams = new class Teams {
 			j = buf.indexOf(']', i);
 			let misc;
 			if (j < 0) {
-				if (i < buf.length) misc = buf.substring(i).split(',', 11);
+				if (i < buf.length) misc = buf.substring(i).split(',', 12);
 			} else {
-				if (i !== j) misc = buf.substring(i, j).split(',', 11);
+				if (i !== j) misc = buf.substring(i, j).split(',', 12);
 			}
 			if (misc) {
 				set.happiness = (misc[0] ? Number(misc[0]) : 255);
@@ -362,6 +366,9 @@ export const Teams = new class Teams {
 				if (misc[9]) set.startHp = Number(misc[9]);
 				if (misc[10]) {
 					set.phAbilities = misc[10].split('-').map(id => this.unpackName(id, Dex.abilities)).join('/');
+				}
+				if (misc[11]) {
+					set.phItems = misc[11].split('-').map(id => this.unpackName(id, Dex.items)).join('/');
 				}
 			}
 			if (j < 0) break;
@@ -423,6 +430,9 @@ export const Teams = new class Teams {
 			out += `Abilities: ${[set.ability || 'No Ability', ...set.phAbilities.split('/')].join(' / ')}  \n`;
 		} else if (set.ability) {
 			out += `Ability: ${set.ability}  \n`;
+		}
+		if (set.phItems) {
+			out += `Items: ${[set.item || '(none)', ...set.phItems.split('/')].join(' / ')}  \n`;
 		}
 		if (set.disguise) {
 			out += `Sprite: ${set.disguise}  \n`;
@@ -535,6 +545,12 @@ export const Teams = new class Teams {
 			set.ability = names[0] ? (aggressive ? toID(names[0]) : names[0]) : '';
 			if (names.length > 1) {
 				set.phAbilities = names.slice(1).map(part => aggressive ? toID(part) : part).join('/');
+			}
+		} else if (line.startsWith('Items: ')) {
+			const itemParts = line.slice(7).split('/').map(part => part.trim()).filter(part => part && part !== '(none)');
+			if (itemParts[0]) set.item = aggressive ? toID(itemParts[0]) : itemParts[0];
+			if (itemParts.length > 1) {
+				set.phItems = itemParts.slice(1).map(part => aggressive ? toID(part) : part).join('/');
 			}
 		} else if (line.startsWith('Sprite: ')) {
 			set.disguise = line.slice(8).trim();

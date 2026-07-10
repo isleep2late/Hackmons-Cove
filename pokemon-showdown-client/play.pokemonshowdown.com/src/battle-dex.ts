@@ -210,6 +210,7 @@ export interface TeambuilderSpriteData {
 	shiny?: boolean;
 	pixelated?: boolean;
 	customPrefix?: string;
+	ext?: string;
 }
 
 export const Dex = new class implements ModdedDex {
@@ -607,6 +608,8 @@ export const Dex = new class implements ModdedDex {
 			mewtwoarmored: { fw: 120, fh: 120, fpx: false, back: 1, bw: 95, bh: 155, shinyFront: 1, sfw: 120, sfh: 135, shinyBack: 1, battle: 1, btw: 120, bth: 135 },
 			hakamoototem: { fw: 120, fh: 120, fpx: false },
 			wishiwashitotem: { fw: 120, fh: 120, fpx: false },
+			goku: { fw: 114, fh: 160, fpx: false, back: 1, bw: 114, bh: 160, ext: 'gif' },
+			gokusupersaiyan: { fw: 179, fh: 160, fpx: false, back: 1, bw: 179, bh: 160, ext: 'gif' },
 		};
 		const phnnMeta = phnnSpriteMeta[species.id];
 		if (phnnMeta) {
@@ -627,7 +630,7 @@ export const Dex = new class implements ModdedDex {
 			return {
 				gen: mechanicsGen,
 				w, h, y: 0,
-				url: `${protocol}//${host}/sprites/phnn/${file}.png`,
+				url: `${protocol}//${host}/sprites/phnn/${file}.${phnnMeta.ext || 'png'}`,
 				pixelated: px,
 				isFrontSprite: isFront,
 				cryurl: '',
@@ -847,11 +850,13 @@ export const Dex = new class implements ModdedDex {
 		}
 		const phnnIconIds: {[id: string]: number} = {
 			arceusshadow: 1, arceusquestion: 1, lugiashadow: 1, mewtwoshadow: 1, mewtwoshadowmegax: 1, mewtwoarmored: 1,
+			goku: 1, gokusupersaiyan: 1,
 		};
 		if (phnnIconIds[id]) {
 			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
 			const host = window.Config ? Config.routes.client : 'beta.hackmons.com';
-			return `background:transparent url(${protocol}//${host}/sprites/phnn/${id}-icon.png) no-repeat scroll center;background-size:contain;image-rendering:pixelated`;
+			const iconFile = id === 'gokusupersaiyan' ? 'goku' : id;
+			return `background:transparent url(${protocol}//${host}/sprites/phnn/${iconFile}-icon.png) no-repeat scroll center/contain;image-rendering:pixelated`;
 		}
 		let num = this.getPokemonIconNum(id, pokemon?.gender === 'F', facingLeft);
 
@@ -878,10 +883,22 @@ export const Dex = new class implements ModdedDex {
 		if (species.exists === false) return { spriteDir: 'sprites/gen5', spriteid: '0', x: 10, y: 5, pixelated: true };
 		const phnnLocalSpriteIds: {[id: string]: number} = {
 			arceusshadow: 1, arceusquestion: 1, mewtwoshadow: 1, mewtwoshadowmegax: 1, mewtwoarmored: 1, lugiashadow: 1, hakamoototem: 1, wishiwashitotem: 1,
+			goku: 1, gokusupersaiyan: 1,
 		};
 		if (phnnLocalSpriteIds[species.id]) {
 			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
 			const host = window.Config ? Config.routes.client : 'beta.hackmons.com';
+			if (species.id === 'goku' || species.id === 'gokusupersaiyan') {
+				return {
+					spriteid: 'goku-teambuilder',
+					spriteDir: 'sprites/phnn',
+					x: 1,
+					y: 14,
+					h: 94,
+					ext: 'gif',
+					customPrefix: `${protocol}//${host}/`,
+				};
+			}
 			const isPixel = species.id === 'lugiashadow';
 			const phnnShinyFrontIds: {[id: string]: number} = { arceusshadow: 1, arceusquestion: 1, mewtwoshadow: 1, mewtwoshadowmegax: 1, mewtwoarmored: 1 };
 			const useShiny = pokemon.shiny && phnnShinyFrontIds[species.id];
@@ -964,7 +981,7 @@ export const Dex = new class implements ModdedDex {
 		const resize = (data.h ? `background-size:${data.h}px;` : '');
 		const pixelated = (data.pixelated ? `image-rendering:pixelated;` : '');
 		const prefix = data.customPrefix || Dex.resourcePrefix;
-		return `background-image:url(${prefix}${data.spriteDir}${shiny}/${data.spriteid}.png);background-position:${data.x + xOffset}px ${data.y + yOffset}px;background-repeat:no-repeat;${resize}${pixelated}`;
+		return `background-image:url(${prefix}${data.spriteDir}${shiny}/${data.spriteid}.${(data as any).ext || 'png'});background-position:${data.x + xOffset}px ${data.y + yOffset}px;background-repeat:no-repeat;${resize}${pixelated}`;
 	}
 
 	getItemIcon(item: any) {

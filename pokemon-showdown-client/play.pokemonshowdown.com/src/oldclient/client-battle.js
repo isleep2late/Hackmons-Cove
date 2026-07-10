@@ -803,7 +803,8 @@
 				}
 				var checkboxes = [];
 				if (canMegaEvo) {
-					checkboxes.push('<label class="megaevo"><input type="checkbox" name="megaevo" />&nbsp;Mega&nbsp;Evolution</label>');
+					var isGoku = switchables[pos] && toID(switchables[pos].speciesForme || '').indexOf('goku') === 0;
+					checkboxes.push('<label class="megaevo"><input type="checkbox" name="megaevo" />&nbsp;' + (isGoku ? 'Super&nbsp;Saiyan' : 'Mega&nbsp;Evolution') + '</label>');
 				}
 				if (canMegaEvoX) {
 					checkboxes.push('<label class="megaevo"><input type="checkbox" name="megaevox" />&nbsp;Mega&nbsp;Evolution&nbsp;X</label>');

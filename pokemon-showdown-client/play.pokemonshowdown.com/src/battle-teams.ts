@@ -45,6 +45,7 @@ export declare namespace Teams {
 		startStatus?: string;
 		startHp?: number;
 		phAbilities?: string;
+	phItems?: string;
 	}
 	export interface PokemonSet extends Partial<FullPokemonSet> {
 		/** Defaults to species name (not including forme), like in games */
@@ -122,19 +123,22 @@ export const Teams = new class {
 
 			if (set.pokeball || set.hpType || set.gigantamax ||
 				(set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10) || set.teraType ||
-				set.phType || set.disguise || set.startStatus || set.startHp !== undefined || set.phAbilities) {
+				set.phType || set.disguise || set.startStatus || set.startHp !== undefined || set.phAbilities || set.phItems) {
 				buf += `,${set.hpType || ''}`;
 				buf += `,${this.packName(set.pokeball || '')}`;
 				buf += `,${set.gigantamax ? 'G' : ''}`;
 				buf += `,${set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10 ? set.dynamaxLevel : ''}`;
 				buf += `,${set.teraType ? set.teraType.replace(/\//g, '-') : ''}`;
-				if (set.phType || set.disguise || set.startStatus || set.startHp !== undefined || set.phAbilities) {
+				if (set.phType || set.disguise || set.startStatus || set.startHp !== undefined || set.phAbilities || set.phItems) {
 					buf += `,${(set.phType || '').replace(/\//g, '-')}`;
 					buf += `,${this.packName(set.disguise || '')}`;
 					buf += `,${set.startStatus || ''}`;
-					if (set.startHp !== undefined || set.phAbilities) buf += `,${set.startHp !== undefined ? set.startHp : ''}`;
-					if (set.phAbilities) {
-						buf += `,${set.phAbilities.split('/').map(a => this.packName(a)).join('-')}`;
+					if (set.startHp !== undefined || set.phAbilities || set.phItems) buf += `,${set.startHp !== undefined ? set.startHp : ''}`;
+					if (set.phAbilities || set.phItems) {
+						buf += `,${(set.phAbilities || '').split('/').filter(Boolean).map(a => this.packName(a)).join('-')}`;
+					}
+					if (set.phItems) {
+						buf += `,${set.phItems.split('/').map(a => this.packName(a)).filter(Boolean).join('-')}`;
 					}
 				}
 			}
@@ -264,9 +268,9 @@ export const Teams = new class {
 			j = buf.indexOf(']', i);
 			let misc;
 			if (j < 0) {
-				if (i < buf.length) misc = buf.substring(i).split(',', 11);
+				if (i < buf.length) misc = buf.substring(i).split(',', 12);
 			} else {
-				if (i !== j) misc = buf.substring(i, j).split(',', 11);
+				if (i !== j) misc = buf.substring(i, j).split(',', 12);
 			}
 			if (misc) {
 				set.happiness = (misc[0] ? Number(misc[0]) : undefined);
@@ -275,7 +279,6 @@ export const Teams = new class {
 				set.gigantamax = !!misc[3] || undefined;
 				set.dynamaxLevel = (misc[4] ? Number(misc[4]) : undefined);
 				set.teraType = misc[5] ? misc[5].replace(/-/g, '/') : undefined;
-				// PHNN Gen 1 fields
 				if (misc[6]) set.phType = misc[6].replace(/-/g, '/');
 				if (misc[7]) set.disguise = misc[7];
 				if (misc[8]) set.startStatus = misc[8];
@@ -283,6 +286,11 @@ export const Teams = new class {
 				if (misc[10]) {
 					set.phAbilities = misc[10].split('-').map(
 						abid => window.BattleAbilities?.[toID(abid)]?.name || abid
+					).join('/');
+				}
+				if (misc[11]) {
+					set.phItems = misc[11].split('-').map(
+						itemid => window.BattleItems?.[toID(itemid)]?.name || itemid
 					).join('/');
 				}
 			}
@@ -345,6 +353,9 @@ export const Teams = new class {
 			text += `Abilities: ${[set.ability || 'No Ability', ...set.phAbilities.split('/')].join(' / ')}\n`;
 		} else if (set.ability && set.ability !== 'No Ability') {
 			text += `Ability: ${set.ability}\n`;
+		}
+		if (!newFormat && set.phItems) {
+			text += `Items: ${[set.item || '(none)', ...set.phItems.split('/')].join(' / ')}\n`;
 		}
 
 		if (newFormat) {
@@ -500,6 +511,10 @@ export const Teams = new class {
 			if (abilityParts.length > 1) set.phAbilities = abilityParts.slice(1).join('/');
 		} else if (line.startsWith('Item: ')) {
 			set.item = line.slice(6);
+		} else if (line.startsWith('Items: ')) {
+			const itemParts = line.slice(7).split('/').map(part => part.trim()).filter(part => part && part !== '(none)');
+			if (itemParts[0]) set.item = itemParts[0];
+			if (itemParts.length > 1) set.phItems = itemParts.slice(1).join('/');
 		} else if (line.startsWith('Nickname: ')) {
 			set.name = line.slice(10);
 		} else if (line.startsWith('Species: ')) {

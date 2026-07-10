@@ -2609,6 +2609,26 @@ export class PokemonSprite extends Sprite {
 				// standard animation
 			} else if (speciesid === 'palafinhero') {
 				skipAnim = true;
+			} else if (speciesid === 'gokusupersaiyan') {
+				const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
+				const host = window.Config ? Config.routes.client : 'beta.hackmons.com';
+				const EVOLVE_MS = 2150;
+				const $evolve = $(
+					`<img src="${protocol}//${host}/sprites/phnn/goku-evolve.gif?t=${Date.now()}" style="display:block;position:absolute" />`
+				);
+				$evolve.css(this.scene.pos({ x: this.x, y: this.y, z: this.z, opacity: 1 }, { w: 170, h: 170 }));
+				this.$el.css('opacity', 0);
+				this.$el.parent().append($evolve);
+				const $newElGoku = $(`<img src="${sp.url}" style="display:block;opacity:0;position:absolute" />`);
+				$newElGoku.css(this.scene.pos({ x: this.x, y: this.y, z: this.z, opacity: 0 }, sp));
+				setTimeout(() => {
+					$evolve.remove();
+					this.$el.replaceWith($newElGoku);
+					this.$el = $newElGoku;
+					this.animReset();
+				}, EVOLVE_MS);
+				scene.wait(EVOLVE_MS);
+				return;
 			} else {
 				BattleOtherAnims.megaevo.anim(scene, [this]);
 				doCry = true;
