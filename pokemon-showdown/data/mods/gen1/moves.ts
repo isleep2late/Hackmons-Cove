@@ -933,7 +933,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		category: "Special",
 		isNonstandard: "Custom",
 		name: "No Move",
-		shortDesc: "The corrupted thaw-desync move. Not blocked by Protect.",
+		shortDesc: "The corrupted thaw-desync move. Occupies the entire move list.",
 		desc: "A replica of the corrupted move a Pokemon uses when it thaws before its team has selected a move: Fissure's animation, 102 base power, ??? type, Special category, and 81/256 (~31.6%) accuracy.",
 		pp: 10,
 		priority: 0,
