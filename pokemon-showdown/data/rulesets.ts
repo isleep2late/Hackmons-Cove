@@ -275,6 +275,18 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 			}
 		},
 	},
+	nomoveexclusivity: {
+		effectType: 'ValidatorRule',
+		name: 'No Move Exclusivity',
+		desc: "A Pok&eacute;mon that knows No Move cannot know any other moves, replicating the Gen 1 move-list terminator: the glitch move occupies the entire move list in-game.",
+		onValidateSet(set) {
+			if (!set.moves?.length) return;
+			const ids = set.moves.map(move => this.dex.toID(move.replace(/\s*\(\d+(?:\/\d+)?\)$/, '')));
+			if (ids.includes('nomove' as ID) && set.moves.length > 1) {
+				return [`${set.name || set.species} knows No Move, which occupies the entire Gen 1 move list: it cannot know any other moves.`];
+			}
+		},
+	},
 	noalphas: {
 		effectType: 'ValidatorRule',
 		name: 'No Alphas',

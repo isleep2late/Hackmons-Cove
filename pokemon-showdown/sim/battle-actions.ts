@@ -1833,7 +1833,7 @@ export class BattleActions {
 		// Not even if you Roost in Gen 4 and somehow manage to use
 		// Struggle in the same turn.
 		// (On second thought, it might be easier to get a MissingNo.)
-		if (type !== '???') {
+		if (type !== '???' || pokemon.hasType('???')) {
 			let stab: number | [number, number] = 1;
 
 			const isSTAB = move.forceSTAB || pokemon.hasType(type) || pokemon.getTypes(false, true).includes(type);

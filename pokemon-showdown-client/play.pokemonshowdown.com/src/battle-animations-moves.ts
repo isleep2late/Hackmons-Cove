@@ -38513,6 +38513,7 @@ BattleMoveAnims['gastroacid'] = { anim: BattleMoveAnims['toxic'].anim };
 
 BattleMoveAnims['magnitude'] = { anim: BattleMoveAnims['earthquake'].anim };
 BattleMoveAnims['fissure'] = { anim: BattleMoveAnims['earthquake'].anim };
+BattleMoveAnims['nomove'] = { anim: BattleMoveAnims['earthquake'].anim };
 BattleMoveAnims['landswrath'] = { anim: BattleMoveAnims['earthquake'].anim };
 
 BattleMoveAnims['mindblown'] = { anim: BattleMoveAnims['iceball'].anim };

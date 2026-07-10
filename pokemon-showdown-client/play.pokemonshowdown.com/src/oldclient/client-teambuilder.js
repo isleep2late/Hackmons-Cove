@@ -3479,8 +3479,8 @@
 					var mv = set.moves[m] || '';
 					var pmatch = mv.match(/\((\d+)\/(\d+)\)$/);
 					if (pmatch) mv = mv.slice(0, pmatch.index).trim();
-					if (!isNaN(mpp) && mpp > 0) {
-						set.moves[m] = (mv || '(No Move)') + ' (' + mpp + '/' + (mppup || '3') + ')';
+					if (!isNaN(mpp) && mpp > 0 && mv) {
+						set.moves[m] = mv + ' (' + mpp + '/' + (mppup || '3') + ')';
 					} else if (pmatch) {
 						set.moves[m] = mv;
 					}
