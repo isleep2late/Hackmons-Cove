@@ -438,7 +438,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		desc: "Gen 6 Pure Hackmons without the 510 EV limit.",
 		mod: 'gen6',
 		searchShow: false,
-		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Overflow Stat Mod'],
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Overflow Stat Mod', 'Max Level = 255', 'Default Level = 255'],
 		onBegin() {
 			this.add('-rule', 'No Limits: Pokemon can max all EVs');
 		},
@@ -448,7 +448,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		desc: "Gen 4 Anything Goes, but any Pokemon that connects to Smeargle via breeding can learn any move except Chatter and Struggle.",
 		mod: 'gen4',
 		searchShow: false,
-		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 255'],
 		checkCanLearn(move, species, setSources, set) {
 			const glitchEligible = ['mew','ditto','jigglypuff','wigglytuff','mrmime','sudowoodo','bonsly','mimejr','chatot','caterpie','metapod','butterfree','weedle','kakuna','beedrill','magikarp','gyarados','unown','wobbuffet','smeargle','wurmple','silcoon','cascoon','wynaut','beldum','metagross','dustox','beautifly','metang','cleffa','clefairy','clefable','igglybuff','smoochum','jynx','skitty','delcatty','plusle','minun','spinda','riolu','lucario','happiny','chansey','blissey','mesprit','glameow','purugly','meowth','persian','drowzee','hypno','sentret','furret','sneasel','weavile','chimchar','monferno','infernape','togepi','togetic','togekiss','munchlax','snorlax','mankey','primeape','poliwhirl','poliwrath','abra','kadabra','alakazam','machop','machoke','machamp','geodude','graveler','golem','gengar','hitmonlee','hitmonchan','mewtwo','politoed','aipom','ambipom','snubbull','granbull','teddiursa','ursaring','miltank','celebi','ludicolo','makuhita','hariyama','sableye','meditite','medicham','volbeat','illumise','kecleon','banette','dusclops','dusknoir','jirachi'];
 			if (glitchEligible.includes(this.toID(species.baseSpecies)) && move.id !== 'chatter' && move.id !== 'struggle') {
@@ -473,14 +473,14 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		desc: "Gen 3 Pure Hackmons, but any Pokemon can have any ability. Shadow moves are usable.",
 		mod: 'gen3phnn',
 		searchShow: false,
-		ruleset: ['[Gen 3] Pure Hackmons', '!Obtainable Abilities'],
+		ruleset: ['[Gen 3] Pure Hackmons', '!Obtainable Abilities', 'Max Level = 255', 'Default Level = 255'],
 	},
 	{
 		name: "[Gen 2] Statuses",
 		desc: "Gen 2 Pure Hackmons, but Pokemon can start the battle pre-statused. Uses Crystal mechanics (No Move-2 has 9 base power).",
 		mod: 'gen2',
 		searchShow: false,
-		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100'],
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 255'],
 		unbanlist: ['No Move-2'],
 	},
 	{
@@ -489,7 +489,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'gen2gs',
 		searchShow: false,
 		challengeShow: false,
-		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100'],
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 255'],
 		unbanlist: ['No Move-2'],
 	},
 	{
@@ -498,7 +498,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'spaceworld',
 		searchShow: false,
 		challengeShow: false,
-		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100'],
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 255'],
 		unbanlist: ['No Move-2'],
 	},
 	{
@@ -506,7 +506,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		desc: "Gen 1 Pure Hackmons, but Pokemon can have any type, disguise as any species, and even start the game pre-statused.",
 		mod: 'gen1phnn',
 		//searchShow: false,
-		ruleset: ['-Nonexistent', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100', 'Disguise Mod', 'No Move Exclusivity', 'Crit Level Overflow'],
+		ruleset: ['-Nonexistent', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 255', 'Disguise Mod', 'No Move Exclusivity', 'Crit Level Overflow'],
 		unbanlist: ['No Move'],
 	},
 	{
@@ -515,7 +515,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'gen1phnneng',
 		searchShow: false,
 		challengeShow: false,
-		ruleset: ['-Nonexistent', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100', 'Disguise Mod', 'No Move Exclusivity', 'Crit Level Overflow'],
+		ruleset: ['-Nonexistent', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 255', 'Disguise Mod', 'No Move Exclusivity', 'Crit Level Overflow'],
 		unbanlist: ['No Move'],
 	},
 	//////////////////////////////////
@@ -561,7 +561,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		name: "[Gen 5] Pure Hackmons No Nerfs",
 		desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
 		mod: 'gen5phnn',
-		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Overflow Stat Mod', 'Prestatus', 'Totem Aura', 'Max Level = 255', 'Default Level = 100'],
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Overflow Stat Mod', 'Prestatus', 'Totem Aura', 'Max Level = 255', 'Default Level = 255'],
 	},
 	//////////////////////////////////
 	/////// Wondrous Hackmons ////////
