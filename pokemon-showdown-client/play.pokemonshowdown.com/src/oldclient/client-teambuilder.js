@@ -3242,7 +3242,7 @@
 			if (format.includes('customdisguises') || format.includes('customgame')) return 9999;
 			if ((gen === 1 && format.includes('disguises')) ||
 				(gen === 2 && (format.includes('noclerics') || format.includes('statuses'))) ||
-				((gen === 9 || gen === 5) && (format.includes('nonerfs') || format.includes('phnn'))) ||
+				((gen === 9 || gen === 5) && (format.includes('nonerfs') || format.includes('phnn')) && !format.includes('cup')) ||
 				(gen === 3 && format.includes('anyability')) ||
 				(gen === 4 && format.includes('rage')) ||
 				(gen === 6 && format.includes('nolimit')) ||
