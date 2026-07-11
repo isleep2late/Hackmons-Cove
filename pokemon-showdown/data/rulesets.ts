@@ -226,6 +226,128 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 			}
 		},
 	},
+	multistatus: {
+		effectType: 'Rule',
+		name: 'Multistatus',
+		desc: "Allows each Pok&eacute;mon to have multiple major status conditions at the same time, up to the chosen limit. Poison and Toxic still can't stack with each other, and full-cure effects heal every status at once. Usage: Multistatus = 2 to 5, e.g. \"Multistatus = 3\"",
+		hasValue: 'positive-integer',
+		onValidateRule(value) {
+			const num = parseInt(value);
+			if (isNaN(num) || num < 2 || num > 5) {
+				throw new Error(`Multistatus must be an integer between 2 and 5 (there are only 5 status families: sleep, poison, burn, freeze, and paralysis).`);
+			}
+			return `${num}`;
+		},
+		onBegin() {
+			const battle = this;
+			const limit = parseInt(this.ruleTable.valueRules.get('multistatus')!);
+			const family = (id: string) => (id === 'tox' ? 'psn' : id);
+			const wrap = (id: string): string => {
+				const conditions: any = battle.dex.conditions;
+				const vid = 'multistatus' + id;
+				if (!conditions.conditionCache.get(vid)) {
+					const base: any = conditions.get(id);
+					const data: any = { ...base, name: vid, effectType: 'Condition' };
+					delete data.id;
+					conditions.conditionCache.set(vid, new base.constructor(data));
+				}
+				return vid;
+			};
+			for (const pokemon of this.getAllPokemon()) {
+				pokemon.m.extraStatuses = [];
+				const baseTrySetStatus = pokemon.trySetStatus.bind(pokemon);
+				const baseCureStatus = pokemon.cureStatus.bind(pokemon);
+				const baseClearStatus = pokemon.clearStatus.bind(pokemon);
+				const extras = (): string[] => pokemon.m.extraStatuses;
+				const dropExtra = (id: string) => {
+					pokemon.m.extraStatuses = extras().filter(x => x !== id);
+					pokemon.removeVolatile(wrap(id));
+				};
+				(pokemon as any).trySetStatus = (
+					status: string | Condition, source: Pokemon | null = null, sourceEffect: Effect | null = null
+				) => {
+					status = battle.dex.conditions.get(status);
+					if (battle.event) {
+						if (!source) source = battle.event.source;
+						if (!sourceEffect) sourceEffect = battle.effect;
+					}
+					if (!source) source = pokemon;
+					const count = (pokemon.status ? 1 : 0) + extras().length;
+					const familyTaken = family(pokemon.status) === family(status.id) ||
+						extras().some(x => family(x) === family(status.id));
+					if (familyTaken || count >= limit) {
+						if (pokemon.status) return baseTrySetStatus(status, source, sourceEffect);
+						if ((sourceEffect as Move)?.status) {
+							battle.add('-fail', pokemon);
+							battle.attrLastMove('[still]');
+						}
+						return false;
+					}
+					if (!pokemon.status) return baseTrySetStatus(status, source, sourceEffect);
+					if (!(source?.hasAbility('corrosion') && ['tox', 'psn'].includes(status.id))) {
+						if (!pokemon.runStatusImmunity(status.id === 'tox' ? 'psn' : status.id)) {
+							if ((sourceEffect as Move)?.status) battle.add('-immune', pokemon);
+							return false;
+						}
+					}
+					if (status.id === 'slp') {
+						const prevId = pokemon.status;
+						if (!pokemon.addVolatile(wrap(prevId), source, sourceEffect)) return false;
+						extras().push(prevId);
+						if (!pokemon.setStatus('slp', source, sourceEffect)) {
+							dropExtra(prevId);
+							return false;
+						}
+						return true;
+					}
+					if (!battle.runEvent('SetStatus', pokemon, source, sourceEffect, status)) return false;
+					if (!pokemon.addVolatile(wrap(status.id), source, sourceEffect)) return false;
+					extras().push(status.id);
+					return true;
+				};
+				(pokemon as any).cureStatus = (silent = false) => {
+					const effId = battle.effect?.id || '';
+					const selfId = effId.startsWith('multistatus') ? effId.slice(11) : effId;
+					if (selfId !== effId && extras().includes(selfId)) {
+						dropExtra(selfId);
+						battle.add('-curestatus', pokemon, selfId, silent ? '[silent]' : '[msg]');
+						return true;
+					}
+					if (effId && effId === pokemon.status) return baseCureStatus(silent);
+					const cured = baseCureStatus(silent);
+					if (!extras().length) return cured;
+					for (const id of extras().slice()) {
+						dropExtra(id);
+						battle.add('-curestatus', pokemon, id, silent ? '[silent]' : '[msg]');
+					}
+					return true;
+				};
+				(pokemon as any).clearStatus = () => {
+					const effId = battle.effect?.id || '';
+					const selfId = effId.startsWith('multistatus') ? effId.slice(11) : effId;
+					if (selfId !== effId && extras().includes(selfId)) {
+						dropExtra(selfId);
+						return true;
+					}
+					if (effId && effId === pokemon.status) return baseClearStatus();
+					const cleared = baseClearStatus();
+					if (!extras().length) return cleared;
+					for (const id of extras().slice()) dropExtra(id);
+					return true;
+				};
+			}
+		},
+		onSwitchIn(pokemon) {
+			const stored: string[] = pokemon.m.extraStatuses || [];
+			for (const id of stored) {
+				if (!pokemon.volatiles['multistatus' + id]) pokemon.addVolatile('multistatus' + id);
+			}
+			pokemon.m.extraStatuses = stored.filter(id => pokemon.volatiles['multistatus' + id]);
+		},
+		onFaint(pokemon) {
+			pokemon.m.extraStatuses = [];
+		},
+	},
 	totemaura: {
 		effectType: 'Rule',
 		name: 'Totem Aura',
