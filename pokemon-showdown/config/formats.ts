@@ -492,6 +492,14 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		unbanlist: ['No Move-2'],
 	},
 	{
+		name: "[Gen 2] Statuses (SpaceWorld)",
+		desc: "Gen 2 Statuses using the 1997 Spaceworld demo's battle mechanics: status moves fail if the move's type is resisted or the target is immune (the Gen 1-style rule the final games dropped), plus the demo's move stats and type chart. Based on rby2k20's Spaceworld mod.",
+		mod: 'spaceworld',
+		searchShow: false,
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100'],
+		unbanlist: ['No Move-2'],
+	},
+	{
 		name: "[Gen 1] Disguises",
 		desc: "Gen 1 Pure Hackmons, but Pokemon can have any type, disguise as any species, and even start the game pre-statused.",
 		mod: 'gen1phnn',

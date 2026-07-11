@@ -47,7 +47,7 @@ The server and client are both included as regular folders rather than submodule
 **External recognition of those who made this possible:**
 - **Zarel** - Showdown Owner and Developer, along with staff: https://pokemonshowdown.com/credits
 - **Doshidak** - Showdex Developer: https://github.com/doshidak/showdex
-- **rby2k20** - Gen 1/2 Doubles implementation: https://github.com/rby2k20/pokemon-showdown
+- **rby2k20** - Gen 1/2 Doubles implementation and the Spaceworld '97 + Stadium mods that our SpaceWorld mechanics build on: https://github.com/rby2k20/pokemon-showdown
 - **MathyFurret** - Rotations implementation: https://github.com/smogon/pokemon-showdown-client/pull/1944 and https://github.com/smogon/pokemon-showdown/pull/8677
 - **ShadowGate31** - Creation of Shadow Lugia sprites for fangames: https://www.deviantart.com/shadowgate31/art/Shadow-Lugia-sprites-for-fangames-410361664
 - **Othienka** - Creation of Armored Mewtwo sprites for fangames: https://www.deviantart.com/othienka/art/Armored-Mewtwo-Battle-Sprite-and-Back-Sprite-v2-460897939 & https://www.deviantart.com/othienka/art/Armored-Mewtwo-V3-594576816
