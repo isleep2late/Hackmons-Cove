@@ -120,6 +120,7 @@ export interface PokemonSet {
 	startHp?: number;
 	phAbilities?: string;
 	phItems?: string;
+	phStats?: Partial<StatsTable>;
 }
 
 export const Teams = new class Teams {
@@ -207,22 +208,26 @@ export const Teams = new class Teams {
 
 			if (set.pokeball || set.hpType || set.gigantamax ||
 				(set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10) || set.teraType ||
-				set.phType || set.disguise || set.startStatus || set.startHp !== undefined || set.phAbilities || set.phItems) {
+				set.phType || set.disguise || set.startStatus || set.startHp !== undefined || set.phAbilities || set.phItems || set.phStats) {
 				buf += `,${set.hpType || ''}`;
 				buf += `,${this.packName(set.pokeball || '')}`;
 				buf += `,${set.gigantamax ? 'G' : ''}`;
 				buf += `,${set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10 ? set.dynamaxLevel : ''}`;
 				buf += `,${set.teraType ? set.teraType.replace(/\//g, '-') : ''}`;
-				if (set.phType || set.disguise || set.startStatus || set.startHp !== undefined || set.phAbilities || set.phItems) {
+				if (set.phType || set.disguise || set.startStatus || set.startHp !== undefined || set.phAbilities || set.phItems || set.phStats) {
 					buf += `,${(set.phType || '').replace(/\//g, '-')}`;
 					buf += `,${this.packName(set.disguise || '')}`;
 					buf += `,${set.startStatus || ''}`;
-					if (set.startHp !== undefined || set.phAbilities || set.phItems) buf += `,${set.startHp !== undefined ? set.startHp : ''}`;
-					if (set.phAbilities || set.phItems) {
+					if (set.startHp !== undefined || set.phAbilities || set.phItems || set.phStats) buf += `,${set.startHp !== undefined ? set.startHp : ''}`;
+					if (set.phAbilities || set.phItems || set.phStats) {
 						buf += `,${(set.phAbilities || '').split('/').filter(Boolean).map(a => this.packName(a)).join('-')}`;
 					}
-					if (set.phItems) {
-						buf += `,${set.phItems.split('/').map(a => this.packName(a)).filter(Boolean).join('-')}`;
+					if (set.phItems || set.phStats) {
+						buf += `,${(set.phItems || '').split('/').filter(Boolean).map(a => this.packName(a)).join('-')}`;
+					}
+					if (set.phStats) {
+						const order = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'] as const;
+						buf += `,${order.map(statName => set.phStats![statName] ?? '').join('.')}`;
 					}
 				}
 			}
@@ -349,9 +354,9 @@ export const Teams = new class Teams {
 			j = buf.indexOf(']', i);
 			let misc;
 			if (j < 0) {
-				if (i < buf.length) misc = buf.substring(i).split(',', 12);
+				if (i < buf.length) misc = buf.substring(i).split(',', 13);
 			} else {
-				if (i !== j) misc = buf.substring(i, j).split(',', 12);
+				if (i !== j) misc = buf.substring(i, j).split(',', 13);
 			}
 			if (misc) {
 				set.happiness = (misc[0] ? Number(misc[0]) : 255);
@@ -369,6 +374,20 @@ export const Teams = new class Teams {
 				}
 				if (misc[11]) {
 					set.phItems = misc[11].split('-').map(id => this.unpackName(id, Dex.items)).join('/');
+				}
+				if (misc[12]) {
+					const parts = misc[12].split('.');
+					const order = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'] as const;
+					const phStats: Partial<StatsTable> = {};
+					let any = false;
+					for (const [statIndex, statName] of order.entries()) {
+						const num = parseInt(parts[statIndex]);
+						if (!isNaN(num) && num >= 1) {
+							phStats[statName] = num;
+							any = true;
+						}
+					}
+					if (any) set.phStats = phStats;
 				}
 			}
 			if (j < 0) break;
@@ -433,6 +452,11 @@ export const Teams = new class Teams {
 		}
 		if (set.phItems) {
 			out += `Items: ${[set.item || '(none)', ...set.phItems.split('/')].join(' / ')}  \n`;
+		}
+		if (set.phStats) {
+			const statNames = { hp: 'HP', atk: 'Atk', def: 'Def', spa: 'SpA', spd: 'SpD', spe: 'Spe' };
+			const parts = Object.entries(set.phStats).map(([statName, value]) => `${value} ${statNames[statName as StatID]}`);
+			if (parts.length) out += `Overrides: ${parts.join(' / ')}  \n`;
 		}
 		if (set.disguise) {
 			out += `Sprite: ${set.disguise}  \n`;
@@ -546,6 +570,21 @@ export const Teams = new class Teams {
 			if (names.length > 1) {
 				set.phAbilities = names.slice(1).map(part => aggressive ? toID(part) : part).join('/');
 			}
+		} else if (line.startsWith('Overrides: ')) {
+			const statIds: { [k: string]: StatID } = { hp: 'hp', atk: 'atk', def: 'def', spa: 'spa', spd: 'spd', spe: 'spe' };
+			const phStats: Partial<StatsTable> = {};
+			let any = false;
+			for (const part of line.slice(11).split('/')) {
+				const m = /^\s*(\d+)\s+([A-Za-z]+)\s*$/.exec(part);
+				if (!m) continue;
+				const statId = statIds[m[2].toLowerCase()];
+				const num = parseInt(m[1]);
+				if (statId && num >= 1) {
+					phStats[statId] = Math.min(num, 65535);
+					any = true;
+				}
+			}
+			if (any) set.phStats = phStats;
 		} else if (line.startsWith('Items: ')) {
 			const itemParts = line.slice(7).split('/').map(part => part.trim()).filter(part => part && part !== '(none)');
 			if (itemParts[0]) set.item = aggressive ? toID(itemParts[0]) : itemParts[0];

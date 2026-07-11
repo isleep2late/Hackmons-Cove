@@ -2673,6 +2673,15 @@
 				}
 			}
 
+			if (this.curTeam.format.includes('customdisguise')) {
+				buf += '<div class="col ivcol"><div><strong>Override</strong></div>';
+				for (var i in stats) {
+					var oval = set.phStats && set.phStats[i] !== undefined ? '' + set.phStats[i] : '';
+					buf += '<div><input type="number" name="override-' + i + '" value="' + BattleLog.escapeHTML(oval) + '" class="textbox inputform numform" min="1" max="65535" step="1" /></div>';
+				}
+				buf += '</div>';
+			}
+
 			buf += '<div class="col statscol"><div></div>';
 			for (var i in stats) {
 				buf += '<div><b>' + stats[i] + '</b></div>';
@@ -2815,6 +2824,25 @@
 					this.setSlider(stat, val);
 					this.updateStatGraph();
 				}
+			} else if (inputName.substr(0, 9) === 'override-') {
+				var stat = inputName.substr(9);
+				var raw = ('' + e.currentTarget.value).trim();
+				if (raw === '' || isNaN(val) || val < 1) {
+					if (set.phStats) {
+						delete set.phStats[stat];
+						if (stat === 'spa' && this.curTeam.gen === 1) delete set.phStats.spd;
+						var remaining = false;
+						for (var k in set.phStats) { remaining = true; break; }
+						if (!remaining) delete set.phStats;
+					}
+				} else {
+					if (val > 65535) val = 65535;
+					val = Math.floor(val);
+					if (!set.phStats) set.phStats = {};
+					set.phStats[stat] = val;
+					if (stat === 'spa' && this.curTeam.gen === 1) set.phStats.spd = val;
+				}
+				this.updateStatGraph();
 			} else {
 				// IV
 				var stat = inputName.substr(3);
@@ -4084,6 +4112,9 @@
 			var supportsAVs = !supportsEVs;
 			if (!set) set = this.curSet;
 			if (!set) return 0;
+			if (set.phStats && set.phStats[stat] !== undefined && this.curTeam.format.includes('customdisguise')) {
+				return set.phStats[stat];
+			}
 
 			if (!set.ivs) set.ivs = {
 				hp: 31,

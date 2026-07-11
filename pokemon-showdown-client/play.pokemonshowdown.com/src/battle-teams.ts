@@ -46,6 +46,7 @@ export declare namespace Teams {
 		startHp?: number;
 		phAbilities?: string;
 	phItems?: string;
+		phStats?: Partial<Dex.StatsTable>;
 	}
 	export interface PokemonSet extends Partial<FullPokemonSet> {
 		/** Defaults to species name (not including forme), like in games */
@@ -123,22 +124,31 @@ export const Teams = new class {
 
 			if (set.pokeball || set.hpType || set.gigantamax ||
 				(set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10) || set.teraType ||
-				set.phType || set.disguise || set.startStatus || set.startHp !== undefined || set.phAbilities || set.phItems) {
+				set.phType || set.disguise || set.startStatus || set.startHp !== undefined || set.phAbilities || set.phItems || set.phStats) {
 				buf += `,${set.hpType || ''}`;
 				buf += `,${this.packName(set.pokeball || '')}`;
 				buf += `,${set.gigantamax ? 'G' : ''}`;
 				buf += `,${set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10 ? set.dynamaxLevel : ''}`;
 				buf += `,${set.teraType ? set.teraType.replace(/\//g, '-') : ''}`;
-				if (set.phType || set.disguise || set.startStatus || set.startHp !== undefined || set.phAbilities || set.phItems) {
+				if (set.phType || set.disguise || set.startStatus || set.startHp !== undefined || set.phAbilities || set.phItems || set.phStats) {
 					buf += `,${(set.phType || '').replace(/\//g, '-')}`;
 					buf += `,${this.packName(set.disguise || '')}`;
 					buf += `,${set.startStatus || ''}`;
-					if (set.startHp !== undefined || set.phAbilities || set.phItems) buf += `,${set.startHp !== undefined ? set.startHp : ''}`;
-					if (set.phAbilities || set.phItems) {
+					if (set.startHp !== undefined || set.phAbilities || set.phItems || set.phStats) buf += `,${set.startHp !== undefined ? set.startHp : ''}`;
+					if (set.phAbilities || set.phItems || set.phStats) {
 						buf += `,${(set.phAbilities || '').split('/').filter(Boolean).map(a => this.packName(a)).join('-')}`;
 					}
-					if (set.phItems) {
-						buf += `,${set.phItems.split('/').map(a => this.packName(a)).filter(Boolean).join('-')}`;
+					if (set.phItems || set.phStats) {
+						buf += `,${(set.phItems || '').split('/').filter(Boolean).map(a => this.packName(a)).join('-')}`;
+					}
+					if (set.phStats) {
+						const overrideOrder = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'] as const;
+						let overrideBuf = '';
+						for (const statName of overrideOrder) {
+							if (overrideBuf) overrideBuf += '.';
+							overrideBuf += set.phStats[statName] ?? '';
+						}
+						buf += `,${overrideBuf}`;
 					}
 				}
 			}
@@ -268,9 +278,9 @@ export const Teams = new class {
 			j = buf.indexOf(']', i);
 			let misc;
 			if (j < 0) {
-				if (i < buf.length) misc = buf.substring(i).split(',', 12);
+				if (i < buf.length) misc = buf.substring(i).split(',', 13);
 			} else {
-				if (i !== j) misc = buf.substring(i, j).split(',', 12);
+				if (i !== j) misc = buf.substring(i, j).split(',', 13);
 			}
 			if (misc) {
 				set.happiness = (misc[0] ? Number(misc[0]) : undefined);
@@ -292,6 +302,20 @@ export const Teams = new class {
 					set.phItems = misc[11].split('-').map(
 						itemid => window.BattleItems?.[toID(itemid)]?.name || itemid
 					).join('/');
+				}
+				if (misc[12]) {
+					const overrideParts = misc[12].split('.');
+					const overrideOrder = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'] as const;
+					const phStats: Partial<Dex.StatsTable> = {};
+					let anyOverride = false;
+					for (const [oi, statName] of overrideOrder.entries()) {
+						const num = parseInt(overrideParts[oi]);
+						if (!isNaN(num) && num >= 1) {
+							phStats[statName] = num;
+							anyOverride = true;
+						}
+					}
+					if (anyOverride) set.phStats = phStats;
 				}
 			}
 			i = j + 1;
@@ -356,6 +380,11 @@ export const Teams = new class {
 		}
 		if (!newFormat && set.phItems) {
 			text += `Items: ${[set.item || '(none)', ...set.phItems.split('/')].join(' / ')}\n`;
+		}
+		if (!newFormat && set.phStats) {
+			const overrideNames = { hp: 'HP', atk: 'Atk', def: 'Def', spa: 'SpA', spd: 'SpD', spe: 'Spe' };
+			const overrideParts = Object.entries(set.phStats).map(([statName, value]) => `${value} ${overrideNames[statName as Dex.StatName]}`);
+			if (overrideParts.length) text += `Overrides: ${overrideParts.join(' / ')}\n`;
 		}
 
 		if (newFormat) {
@@ -511,6 +540,21 @@ export const Teams = new class {
 			if (abilityParts.length > 1) set.phAbilities = abilityParts.slice(1).join('/');
 		} else if (line.startsWith('Item: ')) {
 			set.item = line.slice(6);
+		} else if (line.startsWith('Overrides: ')) {
+			const overrideIds: { [k: string]: Dex.StatName } = { hp: 'hp', atk: 'atk', def: 'def', spa: 'spa', spd: 'spd', spe: 'spe' };
+			const phStats: Partial<Dex.StatsTable> = {};
+			let anyOverride = false;
+			for (const part of line.slice(11).split('/')) {
+				const om = /^\s*(\d+)\s+([A-Za-z]+)\s*$/.exec(part);
+				if (!om) continue;
+				const oid = overrideIds[om[2].toLowerCase()];
+				const onum = parseInt(om[1]);
+				if (oid && onum >= 1) {
+					phStats[oid] = Math.min(onum, 65535);
+					anyOverride = true;
+				}
+			}
+			if (anyOverride) set.phStats = phStats;
 		} else if (line.startsWith('Items: ')) {
 			const itemParts = line.slice(7).split('/').map(part => part.trim()).filter(part => part && part !== '(none)');
 			if (itemParts[0]) set.item = itemParts[0];

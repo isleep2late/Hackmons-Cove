@@ -1428,6 +1428,15 @@ export class Pokemon {
 
 		const stats = this.battle.spreadModify(this.species.baseStats, this.set);
 		if (this.species.maxHP) stats.hp = this.species.maxHP;
+		if (this.set.phStats) {
+			let overrideName: StatID;
+			for (overrideName in this.set.phStats) {
+				const value = this.set.phStats[overrideName];
+				if (typeof value === 'number' && value >= 1) {
+					stats[overrideName] = this.battle.clampIntRange(value, 1, 65535);
+				}
+			}
+		}
 
 		if (!this.maxhp) {
 			this.baseMaxhp = stats.hp;
