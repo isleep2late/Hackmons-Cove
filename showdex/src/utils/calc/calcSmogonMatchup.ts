@@ -186,8 +186,6 @@ export const calcSmogonMatchup = (
       || (operatingMode === 'standalone' && !settings?.honkdex?.includeEotDamage),
   };
 
-  // Kamehameha is a guaranteed OHKO in PHNN — always show 100% OHKO, even in
-  // Custom Disguises (this check must precede the disguise-format short-circuit).
   if (isPhnnKamehamehaMove(playerMove)) {
     matchup.damageRange = '100%';
     matchup.koChance = 'guaranteed OHKO';

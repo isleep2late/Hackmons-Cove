@@ -38515,8 +38515,6 @@ BattleMoveAnims['magnitude'] = { anim: BattleMoveAnims['earthquake'].anim };
 BattleMoveAnims['fissure'] = { anim: BattleMoveAnims['earthquake'].anim };
 BattleMoveAnims['nomove'] = { anim: BattleMoveAnims['earthquake'].anim };
 BattleMoveAnims['nomove2'] = { anim: BattleMoveAnims['rapidspin'].anim };
-// SpaceWorld move 0's anim byte ($21=33) points to MOVE_TACKLE; Tackle has no
-// dedicated client anim (it uses the generic physical hit), so Pound stands in.
 BattleMoveAnims['nomovesw'] = { anim: BattleMoveAnims['pound'].anim };
 BattleMoveAnims['landswrath'] = { anim: BattleMoveAnims['earthquake'].anim };
 

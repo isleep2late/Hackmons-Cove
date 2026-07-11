@@ -729,9 +729,6 @@ abstract class BattleTypedSearch<T extends SearchType> {
 		if (format === 'disguises' && this.dex.gen === 1) {
 			this.dex = Dex.mod('gen1phnn' as ID);
 		}
-		// PHNN version variants: load the matching mod dex so move search shows
-		// version-accurate stats (English Blizzard 10%, No Move-2 BP 5 in Gold/Silver,
-		// SpaceWorld move/type changes). Base gen2 = Crystal (No Move-2 BP 9).
 		if (format.includes('disguisesenglish') && this.dex.gen === 1) {
 			this.dex = Dex.mod('gen1phnneng' as ID);
 		}

@@ -65,12 +65,6 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		inherit: true,
 		accuracy: 100,
 		onModifyMove(move, pokemon, target) {
-			// Japanese Gen 1: Swift is guaranteed to hit, EXCEPT against a Substitute,
-			// where it is subject to the normal accuracy roll (evasion applies). The
-			// international "Swift never misses" fix is exactly what broke the
-			// drain-vs-Substitute check, so the Japanese games have NEITHER fix:
-			// draining moves miss subs AND Swift can whiff a sub. Bit-exact to JP;
-			// only in gen1phnn (base gen1 is untouched).
 			if (!target || !target.volatiles['substitute']) {
 				move.accuracy = true;
 			}

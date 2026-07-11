@@ -1734,10 +1734,6 @@
 				self.changeFormat(modeId + parsed.kw + parsed.suffix);
 			} });
 		},
-		// Version/variant dropdown (mirrors the CD Generation dropdown): lets a single
-		// visible format (e.g. [Gen 1] Disguises) switch between hidden variant ids
-		// (JP/English, Crystal/Gold-Silver/SpaceWorld, Unified/SwSh/BDSP) right in the
-		// teambuilder so the correct mod's data is loaded.
 		versionFamily: function (format) {
 			var f = '' + (format || '');
 			var atIdx = f.indexOf('@@@');
@@ -1765,9 +1761,6 @@
 			}
 			return null;
 		},
-		// Maps a version/variant format id to the client mod dex that carries its
-		// version-accurate move data (Blizzard freeze %, No Move-2 BP, SpaceWorld
-		// move/type changes). Returns null for non-version formats.
 		phnnVersionModId: function (format) {
 			return {
 				gen1disguises: 'gen1phnn',
