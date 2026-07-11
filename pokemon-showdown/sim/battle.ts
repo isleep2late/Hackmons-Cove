@@ -1359,6 +1359,20 @@ export class Battle {
 		return pokemonList;
 	}
 
+	applyStartStatus(pokemon: Pokemon) {
+		if (!pokemon.set.startStatus || pokemon.m.phnnStartStatusApplied) return;
+		pokemon.m.phnnStartStatusApplied = true;
+		const statuses = pokemon.set.startStatus.split('/').filter(Boolean);
+		if (!statuses.length) return;
+		pokemon.setStatus(statuses[0], pokemon, null, true);
+		if (statuses.length > 1 && this.ruleTable.has('multistatus')) {
+			const limit = parseInt(this.ruleTable.valueRules.get('multistatus') || '1') || 1;
+			for (const extra of statuses.slice(1, limit)) {
+				pokemon.trySetStatus(extra, pokemon);
+			}
+		}
+	}
+
 	getAllActive(includeFainted?: boolean) {
 		const pokemonList: Pokemon[] = [];
 		for (const side of this.sides) {
@@ -2785,10 +2799,7 @@ export class Battle {
 					if (pokemon.species.forme?.endsWith('Alpha') && this.dex.conditions.getByID('wildmight' as ID).exists) {
 						pokemon.addVolatile('wildmight');
 					}
-					if (pokemon.set.startStatus && !pokemon.m.phnnStartStatusApplied) {
-						pokemon.m.phnnStartStatusApplied = true;
-						pokemon.setStatus(pokemon.set.startStatus, pokemon, null, true);
-					}
+					this.applyStartStatus(pokemon);
 				}
 			}
 			(side as any).infiniteQueue = [];
@@ -2918,10 +2929,7 @@ export class Battle {
 					if (pokemon.species.forme?.endsWith('Alpha') && this.dex.conditions.getByID('wildmight' as ID).exists) {
 						pokemon.addVolatile('wildmight');
 					}
-					if (pokemon.set.startStatus && !pokemon.m.phnnStartStatusApplied) {
-						pokemon.m.phnnStartStatusApplied = true;
-						pokemon.setStatus(pokemon.set.startStatus, pokemon, null, true);
-					}
+					this.applyStartStatus(pokemon);
 					pokemon.isActive = false;
 				}
 			}

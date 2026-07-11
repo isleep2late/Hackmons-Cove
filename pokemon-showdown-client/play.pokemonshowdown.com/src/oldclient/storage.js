@@ -1410,8 +1410,9 @@ Storage.importTeam = function (buffer, teams) {
 		} else if (line.substr(0, 7) === 'Types: ') {
 			curSet.phType = line.substr(7).split('/').map(function (s) { return $.trim(s); }).join('/');
 		} else if (line.substr(0, 8) === 'Status: ') {
-			var phStatusCodes = { burn: 'brn', paralysis: 'par', sleep: 'slp', poison: 'psn', freeze: 'frz', brn: 'brn', par: 'par', slp: 'slp', psn: 'psn', frz: 'frz' };
-			curSet.startStatus = phStatusCodes[toID(line.substr(8))] || '';
+			var phStatusCodes = { burn: 'brn', paralysis: 'par', sleep: 'slp', poison: 'psn', toxic: 'tox', freeze: 'frz', brn: 'brn', par: 'par', slp: 'slp', psn: 'psn', tox: 'tox', frz: 'frz' };
+			var phStatusParts = line.substr(8).split('/').map(function (part) { return phStatusCodes[toID(part)] || ''; }).filter(function (part) { return !!part; });
+			curSet.startStatus = phStatusParts.join('/');
 		} else if (line.substr(0, 15) === 'Dynamax Level: ') {
 			line = line.substr(15);
 			curSet.dynamaxLevel = +line;
@@ -1541,8 +1542,8 @@ Storage.exportTeam = function (team, hidestats) {
 			text += 'Types: ' + curSet.phType.split('/').join(' / ') + "  \n";
 		}
 		if (curSet.startStatus) {
-			var phStatusNames = { brn: 'Burn', par: 'Paralysis', slp: 'Sleep', psn: 'Poison', frz: 'Freeze' };
-			text += 'Status: ' + (phStatusNames[curSet.startStatus] || curSet.startStatus) + "  \n";
+			var phStatusNames = { brn: 'Burn', par: 'Paralysis', slp: 'Sleep', psn: 'Poison', tox: 'Toxic', frz: 'Freeze' };
+			text += 'Status: ' + curSet.startStatus.split('/').map(function (part) { return phStatusNames[part] || part; }).join(' / ') + "  \n";
 		}
 		if (curSet.level && curSet.level !== 100) {
 			text += 'Level: ' + curSet.level + "  \n";

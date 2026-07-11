@@ -621,6 +621,21 @@ export class TeamValidator {
 				problems.push(`${set.name || set.species} has a starting status, which is not allowed in this format.`);
 			}
 		}
+		if (set.startStatus) {
+			const legalStatuses = ['brn', 'par', 'slp', 'psn', 'tox', 'frz'];
+			const seenFamilies = new Set<string>();
+			for (const part of set.startStatus.split('/').filter(Boolean)) {
+				if (!legalStatuses.includes(part)) {
+					problems.push(`${set.name || set.species}'s starting status "${part}" is invalid.`);
+					continue;
+				}
+				const fam = part === 'tox' ? 'psn' : part;
+				if (seenFamilies.has(fam)) {
+					problems.push(`${set.name || set.species} has duplicate starting statuses (Poison and Toxic can't be combined).`);
+				}
+				seenFamilies.add(fam);
+			}
+		}
 		if (set.phAbilities && !isCustomDisguises) {
 			problems.push(`${set.name || set.species} has multiple abilities, which is only allowed in Custom Disguises formats.`);
 		}

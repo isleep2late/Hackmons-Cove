@@ -194,10 +194,7 @@ export class BattleActions {
 		if (pokemon.species.forme?.endsWith('Alpha') && this.battle.dex.conditions.getByID('wildmight' as ID).exists) {
 			pokemon.addVolatile('wildmight');
 		}
-		if (pokemon.set.startStatus && !pokemon.m.phnnStartStatusApplied) {
-			pokemon.m.phnnStartStatusApplied = true;
-			pokemon.setStatus(pokemon.set.startStatus, pokemon, null, true);
-		}
+		this.battle.applyStartStatus(pokemon);
 		if (isDrag && this.battle.gen === 2) pokemon.draggedIn = this.battle.turn;
 		pokemon.previouslySwitchedIn++;
 
