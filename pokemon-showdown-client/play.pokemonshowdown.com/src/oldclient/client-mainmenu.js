@@ -957,7 +957,7 @@
 			var atIdx = format.indexOf('@@@');
 			var baseFormat = atIdx >= 0 ? format.slice(0, atIdx) : format;
 			var fam = this.versionFamily(baseFormat);
-			if (!fam) return '';
+			if (!fam) return '<span class="versionwrap"></span>';
 			var optsHtml = '';
 			for (var i = 0; i < fam.members.length; i++) {
 				var sel = fam.members[i].id === baseFormat ? ' selected' : '';
@@ -1043,6 +1043,8 @@
 				if ($teamButton.length) $teamButton.replaceWith(self.renderTeams(newFormat));
 				var $cdwrap = $form.find('.cdmodewrap');
 				if ($cdwrap.length) $cdwrap.replaceWith(self.renderCdModeChallenge(newFormat));
+				var $vwrap = $form.find('.versionwrap');
+				if ($vwrap.length) $vwrap.replaceWith(self.renderVersionChallenge(newFormat));
 				if (infiniteChecked) $form.find('input[name=infiniteMode]').prop('checked', true);
 				if (prevGametype) $form.find('select[name=gameTypeSelect]').val(prevGametype);
 			} });
@@ -1614,6 +1616,8 @@
 				var prevGametypeFmt = $form.find('select[name=gameTypeSelect]').val();
 				var $cdwrap = $form.find('.cdmodewrap');
 				if ($cdwrap.length) $cdwrap.replaceWith(app.rooms[''].renderCdModeChallenge(format));
+				var $vwrap = $form.find('.versionwrap');
+				if ($vwrap.length) $vwrap.replaceWith(app.rooms[''].renderVersionChallenge(format));
 				if (infiniteWasChecked) $form.find('input[name=infiniteMode]').prop('checked', true);
 				if (prevGametypeFmt) $form.find('select[name=gameTypeSelect]').val(prevGametypeFmt);
 

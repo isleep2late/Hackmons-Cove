@@ -1240,6 +1240,7 @@
 					buf += '<li class="format-select">';
 					buf += '<label class="label">Format:</label><button class="select formatselect teambuilderformatselect" name="format" value="' + this.curTeam.format + '">' + (isGenericFormat(this.curTeam.format) ? '<em>Select a format</em>' : BattleLog.escapeFormat(this.curTeam.format)) + '</button>';
 					buf += this.renderCdModeSelect();
+					buf += this.renderVersionSelect();
 					var btnClass = 'button' + (!this.curSetList.length || app.isDisconnected ? ' disabled' : '');
 					buf += ' <button name="validate" class="' + btnClass + '"><i class="fa fa-check"></i> Validate</button></li>';
 				}
@@ -1725,6 +1726,60 @@
 			if (!parsed) return;
 			app.addPopup(CdModePopup, { format: this.curTeam.format, sourceEl: button, onselect: function (modeId) {
 				self.changeFormat(modeId + parsed.kw + parsed.suffix);
+			} });
+		},
+		// Version/variant dropdown (mirrors the CD Generation dropdown): lets a single
+		// visible format (e.g. [Gen 1] Disguises) switch between hidden variant ids
+		// (JP/English, Crystal/Gold-Silver/SpaceWorld, Unified/SwSh/BDSP) right in the
+		// teambuilder so the correct mod's data is loaded.
+		versionFamily: function (format) {
+			var f = '' + (format || '');
+			var atIdx = f.indexOf('@@@');
+			var baseFormat = atIdx >= 0 ? f.slice(0, atIdx) : f;
+			var families = [
+				{ label: 'Version', members: [
+					{ id: 'gen1disguises', name: 'JP' },
+					{ id: 'gen1disguisesenglish', name: 'English' },
+				] },
+				{ label: 'Version', members: [
+					{ id: 'gen2statuses', name: 'Crystal' },
+					{ id: 'gen2statusesgoldsilver', name: 'Gold/Silver' },
+					{ id: 'gen2statusesspaceworld', name: 'SpaceWorld' },
+				] },
+				{ label: 'Version', members: [
+					{ id: 'gen8255', name: 'Unified' },
+					{ id: 'gen8255swsh', name: 'SwSh' },
+					{ id: 'gen8255bdsp', name: 'BDSP' },
+				] },
+			];
+			for (var i = 0; i < families.length; i++) {
+				for (var j = 0; j < families[i].members.length; j++) {
+					if (families[i].members[j].id === baseFormat) return families[i];
+				}
+			}
+			return null;
+		},
+		renderVersionSelect: function () {
+			var fam = this.versionFamily(this.curTeam.format);
+			if (!fam) return '';
+			var f = '' + this.curTeam.format;
+			var atIdx = f.indexOf('@@@');
+			var baseFormat = atIdx >= 0 ? f.slice(0, atIdx) : f;
+			var name = fam.members[0].name;
+			for (var i = 0; i < fam.members.length; i++) {
+				if (fam.members[i].id === baseFormat) { name = fam.members[i].name; break; }
+			}
+			return ' <label class="label">' + fam.label + ':</label> <button class="select versionmodeselect" name="versionMode">' + name + '</button>';
+		},
+		versionMode: function (i, button) {
+			var self = this;
+			var fam = this.versionFamily(this.curTeam.format);
+			if (!fam) return;
+			var f = '' + this.curTeam.format;
+			var atIdx = f.indexOf('@@@');
+			var suffix = atIdx >= 0 ? f.slice(atIdx) : '';
+			app.addPopup(VersionModePopup, { members: fam.members, format: this.curTeam.format, sourceEl: button, onselect: function (versionId) {
+				self.changeFormat(versionId + suffix);
 			} });
 		},
 		nicknameChange: function (e) {
@@ -4240,6 +4295,27 @@
 			this.$el.html(buf);
 		},
 		selectCdMode: function (value) {
+			var cb = this.onselect;
+			this.close();
+			if (cb) cb(value);
+		}
+	});
+
+	var VersionModePopup = exports.VersionModePopup = Popup.extend({
+		initialize: function (data) {
+			this.onselect = data.onselect;
+			var members = data.members || [];
+			var format = '' + (data.format || '');
+			var atIdx = format.indexOf('@@@');
+			var baseFormat = atIdx >= 0 ? format.slice(0, atIdx) : format;
+			var buf = '<ul class="popupmenu">';
+			for (var i = 0; i < members.length; i++) {
+				buf += '<li><button name="selectVersionMode" value="' + members[i].id + '" class="option' + (members[i].id === baseFormat ? ' sel' : '') + '">' + BattleLog.escapeHTML(members[i].name) + '</button></li>';
+			}
+			buf += '</ul>';
+			this.$el.html(buf);
+		},
+		selectVersionMode: function (value) {
 			var cb = this.onselect;
 			this.close();
 			if (cb) cb(value);
