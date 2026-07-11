@@ -29,6 +29,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	doubleedge: {
 		inherit: true,
+		basePower: 100,
 		recoil: [25,100],
 	},
 	dynamicpunch: {
@@ -199,6 +200,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	triplekick: {
 		inherit: true,
+		accuracy: 100,
 		basePower: 60,
 		multihit: [1,3],
 	},
