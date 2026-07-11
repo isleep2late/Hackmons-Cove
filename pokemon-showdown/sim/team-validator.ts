@@ -627,6 +627,9 @@ export class TeamValidator {
 		if (set.phItems && !isCustomDisguises) {
 			problems.push(`${set.name || set.species} has multiple items, which is only allowed in Custom Disguises formats.`);
 		}
+		if (set.phStats && !isCustomDisguises) {
+			problems.push(`${set.name || set.species} has manual stat overrides, which are only allowed in Custom Disguises formats.`);
+		}
 		const findTypeName = (typeText: string): string | null => {
 			const wanted = typeText.trim().toLowerCase();
 			if (!wanted) return null;
@@ -767,6 +770,26 @@ export class TeamValidator {
 			}
 			set.phItems = extraItemNames.join('/');
 			if (!set.phItems) delete set.phItems;
+		}
+		if (set.phStats && isCustomDisguises) {
+			const statOrder = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'] as StatID[];
+			const cleaned: Partial<StatsTable> = {};
+			let any = false;
+			for (const statName of statOrder) {
+				const value = set.phStats[statName];
+				if (value === undefined) continue;
+				if (typeof value !== 'number' || isNaN(value) || value < 1 || value > 65535 || value % 1 !== 0) {
+					problems.push(`${name}'s ${statName.toUpperCase()} override must be a whole number from 1 to 65535.`);
+					continue;
+				}
+				cleaned[statName] = value;
+				any = true;
+			}
+			if (any) {
+				set.phStats = cleaned;
+			} else {
+				delete set.phStats;
+			}
 		}
 		if (nature.id && !nature.exists) {
 			if (dex.gen < 3) {

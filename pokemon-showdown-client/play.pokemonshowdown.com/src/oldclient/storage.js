@@ -869,22 +869,26 @@ Storage.packTeam = function (team) {
 		}
 
 		if (set.pokeball || (set.hpType && !hasHP) || set.gigantamax || (set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10) || set.teraType ||
-			set.phType || set.disguise || set.startStatus || set.startHp !== undefined || set.phAbilities || set.phItems) {
+			set.phType || set.disguise || set.startStatus || set.startHp !== undefined || set.phAbilities || set.phItems || set.phStats) {
 			buf += ',' + (set.hpType || '');
 			buf += ',' + toID(set.pokeball);
 			buf += ',' + (set.gigantamax ? 'G' : '');
 			buf += ',' + (set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10 ? set.dynamaxLevel : '');
 			buf += ',' + ((set.teraType || '').replace(/\//g, '-'));
-			if (set.phType || set.disguise || set.startStatus || set.startHp !== undefined || set.phAbilities || set.phItems) {
+			if (set.phType || set.disguise || set.startStatus || set.startHp !== undefined || set.phAbilities || set.phItems || set.phStats) {
 				buf += ',' + ((set.phType || '').replace(/\//g, '-'));
 				buf += ',' + toID(set.disguise);
 				buf += ',' + (set.startStatus || '');
-				if (set.startHp !== undefined || set.phAbilities || set.phItems) buf += ',' + (set.startHp !== undefined ? set.startHp : '');
-				if (set.phAbilities || set.phItems) {
+				if (set.startHp !== undefined || set.phAbilities || set.phItems || set.phStats) buf += ',' + (set.startHp !== undefined ? set.startHp : '');
+				if (set.phAbilities || set.phItems || set.phStats) {
 					buf += ',' + (set.phAbilities || '').split('/').filter(function (a) { return a; }).map(function (a) { return toID(a); }).join('-');
 				}
-				if (set.phItems) {
-					buf += ',' + set.phItems.split('/').map(function (a) { return toID(a); }).filter(function (a) { return a; }).join('-');
+				if (set.phItems || set.phStats) {
+					buf += ',' + (set.phItems || '').split('/').filter(function (a) { return a; }).map(function (a) { return toID(a); }).join('-');
+				}
+				if (set.phStats) {
+					var overrideOrder = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
+					buf += ',' + overrideOrder.map(function (statName) { return set.phStats[statName] !== undefined ? set.phStats[statName] : ''; }).join('.');
 				}
 			}
 		}
@@ -996,9 +1000,9 @@ Storage.fastUnpackTeam = function (buf) {
 		j = buf.indexOf(']', i);
 		var misc = undefined;
 		if (j < 0) {
-			if (i < buf.length) misc = buf.substring(i).split(',', 12);
+			if (i < buf.length) misc = buf.substring(i).split(',', 13);
 		} else {
-			if (i !== j) misc = buf.substring(i, j).split(',', 12);
+			if (i !== j) misc = buf.substring(i, j).split(',', 13);
 		}
 		if (misc) {
 			set.happiness = (misc[0] ? Number(misc[0]) : 255);
@@ -1022,6 +1026,20 @@ Storage.fastUnpackTeam = function (buf) {
 					var key = toID(itemid);
 					return (window.BattleItems && window.BattleItems[key] && window.BattleItems[key].name) || itemid;
 				}).join('/');
+			}
+			if (misc[12]) {
+				var overrideParts = misc[12].split('.');
+				var overrideOrder = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
+				var phStats = {};
+				var anyOverride = false;
+				for (var oi = 0; oi < overrideOrder.length; oi++) {
+					var num = parseInt(overrideParts[oi], 10);
+					if (!isNaN(num) && num >= 1) {
+						phStats[overrideOrder[oi]] = num;
+						anyOverride = true;
+					}
+				}
+				if (anyOverride) set.phStats = phStats;
 			}
 		}
 		if (j < 0) break;
@@ -1137,9 +1155,9 @@ Storage.unpackTeam = function (buf) {
 		j = buf.indexOf(']', i);
 		var misc = undefined;
 		if (j < 0) {
-			if (i < buf.length) misc = buf.substring(i).split(',', 12);
+			if (i < buf.length) misc = buf.substring(i).split(',', 13);
 		} else {
-			if (i !== j) misc = buf.substring(i, j).split(',', 12);
+			if (i !== j) misc = buf.substring(i, j).split(',', 13);
 		}
 		if (misc) {
 			set.happiness = (misc[0] ? Number(misc[0]) : 255);
@@ -1163,6 +1181,20 @@ Storage.unpackTeam = function (buf) {
 					var key = toID(itemid);
 					return (window.BattleItems && window.BattleItems[key] && window.BattleItems[key].name) || itemid;
 				}).join('/');
+			}
+			if (misc[12]) {
+				var overrideParts = misc[12].split('.');
+				var overrideOrder = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
+				var phStats = {};
+				var anyOverride = false;
+				for (var oi = 0; oi < overrideOrder.length; oi++) {
+					var num = parseInt(overrideParts[oi], 10);
+					if (!isNaN(num) && num >= 1) {
+						phStats[overrideOrder[oi]] = num;
+						anyOverride = true;
+					}
+				}
+				if (anyOverride) set.phStats = phStats;
 			}
 		}
 		if (j < 0 || buf.indexOf('|', j) < 0) break;
@@ -1333,6 +1365,22 @@ Storage.importTeam = function (buffer, teams) {
 			var abilityParts = line.substr(11).split('/').map(function (part) { return $.trim(part); }).filter(function (part) { return !!part; });
 			curSet.ability = abilityParts[0] || '';
 			if (abilityParts.length > 1) curSet.phAbilities = abilityParts.slice(1).join('/');
+		} else if (line.substr(0, 11) === 'Overrides: ') {
+			var overrideIds = { hp: 'hp', atk: 'atk', def: 'def', spa: 'spa', spd: 'spd', spe: 'spe' };
+			var phStats = {};
+			var anyOverride = false;
+			var overrideParts = line.substr(11).split('/');
+			for (var opi = 0; opi < overrideParts.length; opi++) {
+				var om = /^\s*(\d+)\s+([A-Za-z]+)\s*$/.exec(overrideParts[opi]);
+				if (!om) continue;
+				var oid = overrideIds[om[2].toLowerCase()];
+				var onum = parseInt(om[1], 10);
+				if (oid && onum >= 1) {
+					phStats[oid] = Math.min(onum, 65535);
+					anyOverride = true;
+				}
+			}
+			if (anyOverride) curSet.phStats = phStats;
 		} else if (line.substr(0, 7) === 'Items: ') {
 			var itemParts = line.substr(7).split('/').map(function (part) { return $.trim(part); }).filter(function (part) { return !!part && part !== '(none)'; });
 			if (itemParts[0]) curSet.item = itemParts[0];
@@ -1477,6 +1525,14 @@ Storage.exportTeam = function (team, hidestats) {
 		}
 		if (curSet.phItems) {
 			text += 'Items: ' + [curSet.item || '(none)'].concat(curSet.phItems.split('/')).join(' / ') + "  \n";
+		}
+		if (curSet.phStats) {
+			var overrideNames = { hp: 'HP', atk: 'Atk', def: 'Def', spa: 'SpA', spd: 'SpD', spe: 'Spe' };
+			var overrideParts = [];
+			for (var osn in overrideNames) {
+				if (curSet.phStats[osn] !== undefined) overrideParts.push(curSet.phStats[osn] + ' ' + overrideNames[osn]);
+			}
+			if (overrideParts.length) text += 'Overrides: ' + overrideParts.join(' / ') + "  \n";
 		}
 		if (curSet.disguise) {
 			text += 'Sprite: ' + curSet.disguise + "  \n";

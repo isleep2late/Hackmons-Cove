@@ -46,10 +46,10 @@ export class DexSearch {
 	prependResults: SearchRow[] | null = null;
 	resultsComponent: PSSearchResults | null = null;
 	/**
-	 * Not used by DexSearch itself, but useful as state for most DexSearch
-	 * consumers.
+	 * Not needed to use DexSearch, but useful as state for most UIs that
+	 * might want to use arrow keys to navigate results.
 	 */
-	resultIndex = 0;
+	selection = 0;
 	exactMatch = false;
 
 	static typeTable = {
@@ -122,7 +122,7 @@ export class DexSearch {
 		} else {
 			this.results = this.textSearch(query);
 		}
-		this.resultIndex = this.getFirstResultIndex();
+		this.selection = this.getFirstResultIndex();
 		return true;
 	}
 
@@ -134,17 +134,54 @@ export class DexSearch {
 		return 0;
 	}
 
-	moveResultIndex(offset: 1 | -1) {
+	moveSelection(offset: 1 | -1) {
 		if (!this.results?.length) return false;
-		let index = this.resultIndex;
+		let index = this.selection;
 		do {
 			index += offset;
 		} while (this.results[index] && DexSearch.unselectableResultTypes.includes(this.results[index][0]));
 		if (!this.results[index]) return false;
-		this.resultIndex = index;
+		this.selection = index;
 		this.resultsComponent?.scrollSelectedResult();
-		this.resultsComponent?.updateHover();
+		this.resultsComponent?.updateSelection();
 		return true;
+	}
+
+	selectResult(index = this.selection): SearchRow | null {
+		let result = this.results?.[index];
+		while (result && DexSearch.unselectableResultTypes.includes(result[0])) {
+			index++;
+			result = this.results?.[index];
+		}
+		if (!result) return null;
+		if (this.addFilter(result)) {
+			this.selection = 0;
+			return null;
+		}
+		return result;
+	}
+
+	/** Will have a `|slot` after move names if there are move slots in the result */
+	getResultName(result: SearchRow): string {
+		switch (result[0]) {
+		case 'pokemon':
+			return this.dex.species.get(result[1]).name;
+		case 'item':
+			return this.dex.items.get(result[1]).name;
+		case 'ability':
+			return this.dex.abilities.get(result[1]).name;
+		case 'move':
+			if (result[1].startsWith('_')) {
+				const [slot, moveid] = result[1].slice(1).split('_');
+				return this.dex.moves.get(moveid).name + '|' + slot;
+			}
+			return this.dex.moves.get(result[1]).name;
+		case 'html':
+		case 'header':
+			return '';
+		default:
+			return result[1];
+		}
 	}
 
 	setType(searchType: SearchType | '', format = '' as ID, speciesOrSet: ID | Dex.PokemonSet = '' as ID) {
@@ -691,6 +728,15 @@ abstract class BattleTypedSearch<T extends SearchType> {
 		}
 		if (format === 'disguises' && this.dex.gen === 1) {
 			this.dex = Dex.mod('gen1phnn' as ID);
+		}
+		if (format.includes('disguisesenglish') && this.dex.gen === 1) {
+			this.dex = Dex.mod('gen1phnneng' as ID);
+		}
+		if (format.includes('statusesgoldsilver') && this.dex.gen === 2) {
+			this.dex = Dex.mod('gen2gs' as ID);
+		}
+		if (format.includes('statusesspaceworld') && this.dex.gen === 2) {
+			this.dex = Dex.mod('gen2spaceworld' as ID);
 		}
 		if (format === 'anyability' && this.dex.gen === 3) {
 			this.dex = Dex.mod('gen3phnn' as ID);

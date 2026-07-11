@@ -271,6 +271,10 @@ export const isPhnnShadowDamagingMove = (moveName: string): boolean => (
   PHNN_SHADOW_DAMAGING_MOVE_IDS.includes(toPhnnId(moveName))
 );
 
+export const isPhnnKamehamehaMove = (moveName: string): boolean => (
+  toPhnnId(moveName) === 'kamehameha'
+);
+
 export const setPhnnCalcContext = (format: string): void => {
   const key = detectPhnnKey(format);
 

@@ -873,7 +873,7 @@ export const Scripts: ModdedBattleScriptsData = {
 			if (isCrit) {
 				move.ignoreOffensive = true;
 				move.ignoreDefensive = true;
-				level *= 2;
+				level = this.battle.ruleTable.has('critleveloverflow') ? (level * 2) % 256 : level * 2;
 				if (!suppressMessages) this.battle.add('-crit', target);
 			}
 

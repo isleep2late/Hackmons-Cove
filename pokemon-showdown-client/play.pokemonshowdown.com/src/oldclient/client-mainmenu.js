@@ -928,6 +928,43 @@
 				{ id: 'gen1', name: 'Gen 1' }
 			];
 		},
+		versionFamily: function (baseFormat) {
+			var families = [
+				{ label: 'Version', members: [
+					{ id: 'gen1disguises', name: 'JP' },
+					{ id: 'gen1disguisesenglish', name: 'English' },
+				] },
+				{ label: 'Generation', members: [
+					{ id: 'gen2statuses', name: 'Crystal' },
+					{ id: 'gen2statusesgoldsilver', name: 'Gold/Silver' },
+					{ id: 'gen2statusesspaceworld', name: 'SpaceWorld' },
+				] },
+				{ label: 'Generation', members: [
+					{ id: 'gen8255', name: 'Unified' },
+					{ id: 'gen8255swsh', name: 'SwSh' },
+					{ id: 'gen8255bdsp', name: 'BDSP' },
+				] },
+			];
+			for (var i = 0; i < families.length; i++) {
+				for (var j = 0; j < families[i].members.length; j++) {
+					if (families[i].members[j].id === baseFormat) return families[i];
+				}
+			}
+			return null;
+		},
+		renderVersionChallenge: function (format) {
+			format = '' + (format || '');
+			var atIdx = format.indexOf('@@@');
+			var baseFormat = atIdx >= 0 ? format.slice(0, atIdx) : format;
+			var fam = this.versionFamily(baseFormat);
+			if (!fam) return '<span class="versionwrap"></span>';
+			var optsHtml = '';
+			for (var i = 0; i < fam.members.length; i++) {
+				var sel = fam.members[i].id === baseFormat ? ' selected' : '';
+				optsHtml += '<option value="' + fam.members[i].id + '"' + sel + '>' + BattleLog.escapeHTML(fam.members[i].name) + '</option>';
+			}
+			return '<p class="versionwrap"><label class="label">' + fam.label + ':</label> <select name="versionSelect" class="textbox" style="width: 230px; box-sizing: border-box;">' + optsHtml + '</select></p>';
+		},
 		renderCdModeChallenge: function (format) {
 			format = '' + (format || '');
 			var atIdx = format.indexOf('@@@');
@@ -1006,6 +1043,8 @@
 				if ($teamButton.length) $teamButton.replaceWith(self.renderTeams(newFormat));
 				var $cdwrap = $form.find('.cdmodewrap');
 				if ($cdwrap.length) $cdwrap.replaceWith(self.renderCdModeChallenge(newFormat));
+				var $vwrap = $form.find('.versionwrap');
+				if ($vwrap.length) $vwrap.replaceWith(self.renderVersionChallenge(newFormat));
 				if (infiniteChecked) $form.find('input[name=infiniteMode]').prop('checked', true);
 				if (prevGametype) $form.find('select[name=gameTypeSelect]').val(prevGametype);
 			} });
@@ -1031,6 +1070,7 @@
 			buf += '<p><label class="label">Format:</label>' + this.renderFormats(format) + '</p>';
 			buf += '<p><label class="label">Team:</label>' + this.renderTeams(format) + '</p>';
 			buf += this.renderCdModeChallenge(format);
+			buf += this.renderVersionChallenge(format);
 			buf += '<p><label class="label">Custom rules:</label> <input type="text" name="customRules" class="textbox" placeholder="See /battlerules for your options!" style="width: 230px; box-sizing: border-box;" maxlength="9000" autocomplete="off" /></p>';
 
 			var bestOfDefault = format && BattleFormats[format] ? BattleFormats[format].bestOfDefault : false;
@@ -1083,6 +1123,14 @@
 			var name = $pmWindow.data('name');
 
 			var format = $pmWindow.find('button[name=format]').val();
+			var versionChoice = ('' + ($pmWindow.find('select[name=versionSelect]').val() || '')).trim();
+			if (versionChoice) {
+				var vAt = format.indexOf('@@@');
+				var vBase = vAt >= 0 ? format.slice(0, vAt) : format;
+				var vFam = this.versionFamily(vBase);
+				var vMatch = vFam && vFam.members.some(function (mem) { return mem.id === versionChoice; });
+				if (vMatch) format = vAt >= 0 ? versionChoice + format.slice(vAt) : versionChoice;
+			}
 			var teamIndex = $pmWindow.find('button[name=team]').val();
 			var privacy = this.adjustPrivacy($pmWindow.find('input[name=private]').is(':checked'));
 
@@ -1568,6 +1616,8 @@
 				var prevGametypeFmt = $form.find('select[name=gameTypeSelect]').val();
 				var $cdwrap = $form.find('.cdmodewrap');
 				if ($cdwrap.length) $cdwrap.replaceWith(app.rooms[''].renderCdModeChallenge(format));
+				var $vwrap = $form.find('.versionwrap');
+				if ($vwrap.length) $vwrap.replaceWith(app.rooms[''].renderVersionChallenge(format));
 				if (infiniteWasChecked) $form.find('input[name=infiniteMode]').prop('checked', true);
 				if (prevGametypeFmt) $form.find('select[name=gameTypeSelect]').val(prevGametypeFmt);
 

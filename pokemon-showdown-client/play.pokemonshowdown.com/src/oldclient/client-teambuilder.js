@@ -36,6 +36,8 @@
 				if ((this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')) && this.curTeam.gen === 9) {
 					this.curTeam.dex = Dex.mod('gen9phnn');
 				}
+				var focusVersionMod = this.phnnVersionModId(this.curTeam.format);
+				if (focusVersionMod) this.curTeam.dex = Dex.mod(focusVersionMod);
 				Storage.activeSetList = this.curSetList;
 			}
 		},
@@ -771,6 +773,8 @@
 			if ((this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')) && this.curTeam.gen === 9) {
 				this.curTeam.dex = Dex.mod('gen9phnn');
 			}
+			var selVersionMod = this.phnnVersionModId(this.curTeam.format);
+			if (selVersionMod) this.curTeam.dex = Dex.mod(selVersionMod);
 			Storage.activeSetList = this.curSetList = Storage.unpackTeam(this.curTeam.team);
 			this.curTeamIndex = i;
 			this.update();
@@ -1240,6 +1244,7 @@
 					buf += '<li class="format-select">';
 					buf += '<label class="label">Format:</label><button class="select formatselect teambuilderformatselect" name="format" value="' + this.curTeam.format + '">' + (isGenericFormat(this.curTeam.format) ? '<em>Select a format</em>' : BattleLog.escapeFormat(this.curTeam.format)) + '</button>';
 					buf += this.renderCdModeSelect();
+					buf += this.renderVersionSelect();
 					var btnClass = 'button' + (!this.curSetList.length || app.isDisconnected ? ' disabled' : '');
 					buf += ' <button name="validate" class="' + btnClass + '"><i class="fa fa-check"></i> Validate</button></li>';
 				}
@@ -1666,6 +1671,8 @@
 			if ((this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')) && this.curTeam.gen === 9) {
 				this.curTeam.dex = Dex.mod('gen9phnn');
 			}
+			var cfVersionMod = this.phnnVersionModId(this.curTeam.format);
+			if (cfVersionMod) this.curTeam.dex = Dex.mod(cfVersionMod);
 			this.save();
 			if (this.curTeam.gen === 5 && !Dex.loadedSpriteData['bw']) Dex.loadSpriteData('bw');
 			this.update();
@@ -1725,6 +1732,64 @@
 			if (!parsed) return;
 			app.addPopup(CdModePopup, { format: this.curTeam.format, sourceEl: button, onselect: function (modeId) {
 				self.changeFormat(modeId + parsed.kw + parsed.suffix);
+			} });
+		},
+		versionFamily: function (format) {
+			var f = '' + (format || '');
+			var atIdx = f.indexOf('@@@');
+			var baseFormat = atIdx >= 0 ? f.slice(0, atIdx) : f;
+			var families = [
+				{ label: 'Version', members: [
+					{ id: 'gen1disguises', name: 'JP' },
+					{ id: 'gen1disguisesenglish', name: 'English' },
+				] },
+				{ label: 'Version', members: [
+					{ id: 'gen2statuses', name: 'Crystal' },
+					{ id: 'gen2statusesgoldsilver', name: 'Gold/Silver' },
+					{ id: 'gen2statusesspaceworld', name: 'SpaceWorld' },
+				] },
+				{ label: 'Version', members: [
+					{ id: 'gen8255', name: 'Unified' },
+					{ id: 'gen8255swsh', name: 'SwSh' },
+					{ id: 'gen8255bdsp', name: 'BDSP' },
+				] },
+			];
+			for (var i = 0; i < families.length; i++) {
+				for (var j = 0; j < families[i].members.length; j++) {
+					if (families[i].members[j].id === baseFormat) return families[i];
+				}
+			}
+			return null;
+		},
+		phnnVersionModId: function (format) {
+			return {
+				gen1disguises: 'gen1phnn',
+				gen1disguisesenglish: 'gen1phnneng',
+				gen2statusesgoldsilver: 'gen2gs',
+				gen2statusesspaceworld: 'gen2spaceworld',
+			}[('' + (format || '')).split('@@@')[0]] || null;
+		},
+		renderVersionSelect: function () {
+			var fam = this.versionFamily(this.curTeam.format);
+			if (!fam) return '';
+			var f = '' + this.curTeam.format;
+			var atIdx = f.indexOf('@@@');
+			var baseFormat = atIdx >= 0 ? f.slice(0, atIdx) : f;
+			var name = fam.members[0].name;
+			for (var i = 0; i < fam.members.length; i++) {
+				if (fam.members[i].id === baseFormat) { name = fam.members[i].name; break; }
+			}
+			return ' <label class="label">' + fam.label + ':</label> <button class="select versionmodeselect" name="versionMode">' + name + '</button>';
+		},
+		versionMode: function (i, button) {
+			var self = this;
+			var fam = this.versionFamily(this.curTeam.format);
+			if (!fam) return;
+			var f = '' + this.curTeam.format;
+			var atIdx = f.indexOf('@@@');
+			var suffix = atIdx >= 0 ? f.slice(atIdx) : '';
+			app.addPopup(VersionModePopup, { members: fam.members, format: this.curTeam.format, sourceEl: button, onselect: function (versionId) {
+				self.changeFormat(versionId + suffix);
 			} });
 		},
 		nicknameChange: function (e) {
@@ -2673,6 +2738,15 @@
 				}
 			}
 
+			if (this.curTeam.format.includes('customdisguise')) {
+				buf += '<div class="col ivcol"><div><strong>Override</strong></div>';
+				for (var i in stats) {
+					var oval = set.phStats && set.phStats[i] !== undefined ? '' + set.phStats[i] : '';
+					buf += '<div><input type="number" name="override-' + i + '" value="' + BattleLog.escapeHTML(oval) + '" class="textbox inputform numform" min="1" max="65535" step="1" /></div>';
+				}
+				buf += '</div>';
+			}
+
 			buf += '<div class="col statscol"><div></div>';
 			for (var i in stats) {
 				buf += '<div><b>' + stats[i] + '</b></div>';
@@ -2815,6 +2889,25 @@
 					this.setSlider(stat, val);
 					this.updateStatGraph();
 				}
+			} else if (inputName.substr(0, 9) === 'override-') {
+				var stat = inputName.substr(9);
+				var raw = ('' + e.currentTarget.value).trim();
+				if (raw === '' || isNaN(val) || val < 1) {
+					if (set.phStats) {
+						delete set.phStats[stat];
+						if (stat === 'spa' && this.curTeam.gen === 1) delete set.phStats.spd;
+						var remaining = false;
+						for (var k in set.phStats) { remaining = true; break; }
+						if (!remaining) delete set.phStats;
+					}
+				} else {
+					if (val > 65535) val = 65535;
+					val = Math.floor(val);
+					if (!set.phStats) set.phStats = {};
+					set.phStats[stat] = val;
+					if (stat === 'spa' && this.curTeam.gen === 1) set.phStats.spd = val;
+				}
+				this.updateStatGraph();
 			} else {
 				// IV
 				var stat = inputName.substr(3);
@@ -3001,8 +3094,8 @@
 			buf += '<form class="detailsform">';
 
 			buf += '<div class="formrow"><label class="formlabel">Level:</label><div>' +
-				'<input type="number" min="1" max="' + ((this.curTeam.format.includes('customdisguises') || this.curTeam.format.includes('customgame')) ? 9999 : (((this.curTeam.gen === 1 && this.curTeam.format.includes('disguises')) || (this.curTeam.gen === 2 && (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses'))) || ((this.curTeam.gen === 9 || this.curTeam.gen === 5) && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) ? 255 : 100)) + '" step="1" name="level" value="' +
-				(typeof set.level === 'number' ? set.level : 100) +
+				'<input type="number" min="1" max="' + (this.phnnLevelCap()) + '" step="1" name="level" value="' +
+				(typeof set.level === 'number' ? set.level : this.phnnLevelCap()) +
 				'" class="textbox inputform numform"' +
 				(isChampions ? ' disabled' : '') +
 				' /></div></div>';
@@ -3208,6 +3301,19 @@
 
 			this.$chart.html(buf);
 		},
+		phnnLevelCap: function (format, gen) {
+			if (format === undefined) format = this.curTeam.format;
+			if (gen === undefined) gen = this.curTeam.gen;
+			if (format.includes('customdisguises') || format.includes('customgame')) return 9999;
+			if ((gen === 1 && format.includes('disguises')) ||
+				(gen === 2 && (format.includes('noclerics') || format.includes('statuses'))) ||
+				((gen === 9 || gen === 5) && (format.includes('nonerfs') || format.includes('phnn')) && !format.includes('cup')) ||
+				(gen === 3 && format.includes('anyability')) ||
+				(gen === 4 && format.includes('rage')) ||
+				(gen === 6 && format.includes('nolimit')) ||
+				(gen === 8 && (format.includes('unified') || format.includes('255')))) return 255;
+			return 100;
+		},
 		phnnCDTypeList: function () {
 			var names = Dex.types.all().map(function (t) { return t.name; });
 			var extras = ['Stellar', 'Shadow', 'Bird', '???'];
@@ -3303,7 +3409,7 @@
 
 			// level
 			var level = parseInt(this.$chart.find('input[name=level]').val(), 10);
-			var maxLevel = (this.curTeam.format.includes('customdisguises') || this.curTeam.format.includes('customgame')) ? 9999 : (((this.curTeam.gen === 1 && this.curTeam.format.includes('disguises')) || (this.curTeam.gen === 2 && (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses'))) || ((this.curTeam.gen === 9 || this.curTeam.gen === 5) && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) ? 255 : 100);
+			var maxLevel = this.phnnLevelCap();
 			if (!level || level < 1) level = 100;
 			if (level > maxLevel) level = maxLevel;
 			if (level !== 100 || set.level) set.level = level;
@@ -3745,7 +3851,7 @@
 						set.level = 50;
 					}
 					if (baseFormat.startsWith('lc') || baseFormat.endsWith('lc')) set.level = 5;
-					if (this.curTeam.format.includes('disguises') || (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses')) || ((this.curTeam.gen === 9 || this.curTeam.gen === 5) && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) set.level = this.curTeam.format.includes('customdisguises') ? 9999 : 255;
+					var phnnCap = this.phnnLevelCap(); if (phnnCap > 100) set.level = phnnCap;
 				}
 				set.gender = 'F';
 				if (set.happiness) delete set.happiness;
@@ -3781,7 +3887,7 @@
 						set.level = 50;
 					}
 					if (baseFormat.startsWith('lc') || baseFormat.endsWith('lc')) set.level = 5;
-					if (this.curTeam.format.includes('disguises') || (this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses')) || ((this.curTeam.gen === 9 || this.curTeam.gen === 5) && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')))) set.level = this.curTeam.format.includes('customdisguises') ? 9999 : 255;
+					var phnnCap = this.phnnLevelCap(); if (phnnCap > 100) set.level = phnnCap;
 				}
 				if (set.happiness) delete set.happiness;
 				if (set.shiny) delete set.shiny;
@@ -3998,7 +4104,7 @@
 
 			set.name = "";
 			set.species = val;
-			var phnnLevelFormat = this.curTeam.format.includes('disguises') || this.curTeam.format.includes('noclerics') || this.curTeam.format.includes('statuses') || ((this.curTeam.gen === 9 || this.curTeam.gen === 5) && (this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')));
+			var phnnLevelFormat = this.phnnLevelCap() > 100;
 			if (set.level && !phnnLevelFormat) delete set.level;
 			if (this.curTeam && this.curTeam.format) {
 				var baseFormat = this.curTeam.format;
@@ -4015,7 +4121,7 @@
 						baseFormat.substr(0, 3) === 'bss' || baseFormat.substr(0, 3) === 'vgc' ||
 						baseFormat.substr(0, 14) === 'battlefestival') set.level = 50;
 					if (baseFormat.startsWith('lc') || baseFormat.endsWith('lc')) set.level = 5;
-					if (phnnLevelFormat && !set.level) set.level = this.curTeam.format.includes('customdisguises') ? 9999 : 255;
+					if (phnnLevelFormat && !set.level) set.level = this.phnnLevelCap();
 					if (baseFormat.substr(0, 19) === 'battlespotspecial17') set.level = 1;
 					if (format && format.teambuilderLevel) {
 						set.level = format.teambuilderLevel;
@@ -4084,6 +4190,9 @@
 			var supportsAVs = !supportsEVs;
 			if (!set) set = this.curSet;
 			if (!set) return 0;
+			if (set.phStats && set.phStats[stat] !== undefined && this.curTeam.format.includes('customdisguise')) {
+				return set.phStats[stat];
+			}
 
 			if (!set.ivs) set.ivs = {
 				hp: 31,
@@ -4196,6 +4305,27 @@
 			this.$el.html(buf);
 		},
 		selectCdMode: function (value) {
+			var cb = this.onselect;
+			this.close();
+			if (cb) cb(value);
+		}
+	});
+
+	var VersionModePopup = exports.VersionModePopup = Popup.extend({
+		initialize: function (data) {
+			this.onselect = data.onselect;
+			var members = data.members || [];
+			var format = '' + (data.format || '');
+			var atIdx = format.indexOf('@@@');
+			var baseFormat = atIdx >= 0 ? format.slice(0, atIdx) : format;
+			var buf = '<ul class="popupmenu">';
+			for (var i = 0; i < members.length; i++) {
+				buf += '<li><button name="selectVersionMode" value="' + members[i].id + '" class="option' + (members[i].id === baseFormat ? ' sel' : '') + '">' + BattleLog.escapeHTML(members[i].name) + '</button></li>';
+			}
+			buf += '</ul>';
+			this.$el.html(buf);
+		},
+		selectVersionMode: function (value) {
 			var cb = this.onselect;
 			this.close();
 			if (cb) cb(value);

@@ -163,6 +163,10 @@ export class BattleTooltips {
 	static parentElem: HTMLElement | null = null;
 	static isLocked = false;
 	static isPressed = false;
+	static allowsTouchScroll(elem: EventTarget | null) {
+		if (!(elem instanceof HTMLElement)) return false;
+		return elem.dataset.tooltip?.startsWith('activepokemon|') || false;
+	}
 
 	static hideTooltip() {
 		BattleTooltips.cancelLongTap();
@@ -202,16 +206,16 @@ export class BattleTooltips {
 
 	listen(elem: HTMLElement | JQuery) {
 		const $elem = $(elem);
-		$elem.on('mouseover', '.has-tooltip', this.showTooltipEvent);
-		$elem.on('click', '.has-tooltip', this.clickTooltipEvent);
-		$elem.on('focus', '.has-tooltip', this.showTooltipEvent);
-		$elem.on('mouseout', '.has-tooltip', BattleTooltips.unshowTooltip);
-		$elem.on('mousedown', '.has-tooltip', this.holdLockTooltipEvent);
-		$elem.on('blur', '.has-tooltip', BattleTooltips.unshowTooltip);
-		$elem.on('mouseup', '.has-tooltip', BattleTooltips.unshowTooltip);
+		$elem.on('mouseover.battleTooltips', '.has-tooltip', this.mouseOverEvent);
+		$elem.on('click.battleTooltips', '.has-tooltip', this.clickTooltipEvent);
+		$elem.on('focus.battleTooltips', '.has-tooltip', this.showTooltipEvent);
+		$elem.on('mouseout.battleTooltips', '.has-tooltip', BattleTooltips.unshowTooltip);
+		$elem.on('mousedown.battleTooltips', '.has-tooltip', this.holdLockTooltipEvent);
+		$elem.on('blur.battleTooltips', '.has-tooltip', BattleTooltips.unshowTooltip);
+		$elem.on('mouseup.battleTooltips', '.has-tooltip', BattleTooltips.unshowTooltip);
 
-		$elem.on('touchstart', '.has-tooltip', e => {
-			e.preventDefault();
+		$elem.on('touchstart.battleTooltips', '.has-tooltip', e => {
+			if (!BattleTooltips.allowsTouchScroll(e.currentTarget)) e.preventDefault();
 			this.holdLockTooltipEvent(e);
 			if (!BattleTooltips.parentElem) {
 				// should never happen, but in case there's a bug in the tooltip handler
@@ -220,15 +224,20 @@ export class BattleTooltips {
 			$(BattleTooltips.parentElem!).addClass('pressed');
 			BattleTooltips.isPressed = true;
 		});
-		$elem.on('touchend', '.has-tooltip', e => {
-			e.preventDefault();
-			if (e.currentTarget === BattleTooltips.parentElem && BattleTooltips.isPressed) {
+		$elem.on('touchend.battleTooltips', '.has-tooltip', e => {
+			const allowScroll = BattleTooltips.allowsTouchScroll(e.currentTarget);
+			if (!allowScroll) e.preventDefault();
+			if (!allowScroll && e.currentTarget === BattleTooltips.parentElem && BattleTooltips.isPressed) {
 				BattleTooltips.parentElem!.click();
 			}
 			BattleTooltips.unshowTooltip();
 		});
-		$elem.on('touchleave', '.has-tooltip', BattleTooltips.unshowTooltip);
-		$elem.on('touchcancel', '.has-tooltip', BattleTooltips.unshowTooltip);
+		$elem.on('touchleave.battleTooltips', '.has-tooltip', BattleTooltips.unshowTooltip);
+		$elem.on('touchcancel.battleTooltips', '.has-tooltip', BattleTooltips.unshowTooltip);
+	}
+
+	unlisten(elem: HTMLElement | JQuery) {
+		$(elem).off('.battleTooltips');
 	}
 
 	clickTooltipEvent = (e: Event) => {
@@ -261,6 +270,12 @@ export class BattleTooltips {
 
 	showTooltipEvent = (e: Event) => {
 		if (BattleTooltips.isLocked) return;
+		this.showTooltip(e.currentTarget as HTMLElement);
+	};
+
+	mouseOverEvent = (e: Event) => {
+		// 2026-07-06 Firefox bug: can trigger mouseover after tapping a completely different button
+		if (BattleTooltips.isLocked || (e as any).originalEvent?.mozInputSource === 5) return;
 		this.showTooltip(e.currentTarget as HTMLElement);
 	};
 
@@ -1594,6 +1609,10 @@ export class BattleTooltips {
 
 		let minNatureMult = 0.9;
 		let maxNatureMult = 1.1;
+		if (tier.includes('Random Battle')) {
+			minNatureMult = 1;
+			maxNatureMult = 1;
+		}
 		if (pokemon.nature) {
 			let natureVals = BattleNatures[pokemon.nature];
 			if (natureVals.minus === 'spe') maxNatureMult = 0.9;
@@ -1980,7 +1999,13 @@ export class BattleTooltips {
 		}
 
 		// status immunities
-		if (target.status && inflictsStatus) return 0;
+		if (target.status && inflictsStatus) {
+			if (dex.gen === 1 && inflictsStatus === 'slp' && target.volatiles['mustrecharge']) {
+				// unfortunately gen 1 can actually override status here
+			} else {
+				return 0;
+			}
+		}
 		if (targetAbility === "Comatose" && inflictsStatus) return 0;
 		if (targetAbility === "Purifying Salt" && inflictsStatus) return 0;
 		if (targetAbility === "Shields Down" && target.speciesForme === 'Minior-Meteor' && inflictsStatus) return 0;
@@ -2002,7 +2027,10 @@ export class BattleTooltips {
 		].includes(move.id)) return 0;
 
 		if (category === 'Status') {
-			if (!move.flags['bypasssub'] && target.volatiles['substitute'] && sourceAbility !== 'Infiltrator') return 0;
+			if (target.volatiles['substitute'] && !move.flags['bypasssub'] && sourceAbility !== 'Infiltrator') {
+				if (dex.gen !== 1) return 0;
+				if (inflictsStatus !== 'par' && inflictsStatus !== 'slp' && inflictsEffect !== 'confusion') return 0;
+			}
 			if (move.id === 'thunderwave') return factor * otherFactor === 0 ? 0 : null;
 			return otherFactor === 0 ? 0 : null;
 		}

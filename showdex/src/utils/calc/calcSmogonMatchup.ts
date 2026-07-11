@@ -14,7 +14,7 @@ import {
 import { type ShowdexSettings } from '@showdex/interfaces/app';
 import { type CalcdexBattleState, type CalcdexPlayerKey, CalcdexPlayerKeys as AllPlayerKeys } from '@showdex/interfaces/calc';
 import { logger } from '@showdex/utils/debug';
-import { detectDisguiseFormat, isPhnnShadowDamagingMove, setPhnnCalcContext } from '@showdex/phnn';
+import { detectDisguiseFormat, isPhnnKamehamehaMove, isPhnnShadowDamagingMove, setPhnnCalcContext } from '@showdex/phnn';
 import { getGenDexForFormat } from '@showdex/utils/dex';
 import { createSmogonField } from './createSmogonField';
 import { createSmogonMove } from './createSmogonMove';
@@ -185,6 +185,13 @@ export const calcSmogonMatchup = (
     excludeEotDamage: (operatingMode === 'battle' && !settings?.calcdex?.includeEotDamage)
       || (operatingMode === 'standalone' && !settings?.honkdex?.includeEotDamage),
   };
+
+  if (isPhnnKamehamehaMove(playerMove)) {
+    matchup.damageRange = '100%';
+    matchup.koChance = 'guaranteed OHKO';
+    matchup.koColor = '#4CAF50';
+    return matchup;
+  }
 
   if (detectDisguiseFormat(format)) {
     matchup.damageRange = '???';

@@ -1414,6 +1414,9 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 	for (const [clientId, serverMod] of [
 		['gen9phnn', 'phnn'],
 		['gen1phnn', 'gen1phnn'],
+		['gen1phnneng', 'gen1phnneng'],
+		['gen2gs', 'gen2gs'],
+		['gen2spaceworld', 'spaceworld'],
 		['gen3phnn', 'gen3phnn'],
 	]) {
 		const modDex = Dex.mod(serverMod);
@@ -1612,7 +1615,9 @@ process.stdout.write("Building `data/moves,items,abilities,typechart,learnsets.j
 			};
 		}
 	}
-	if (Moves.nomove) delete Moves.nomove.isNonstandard;
+	for (const glitchMove of ['nomove', 'nomove2', 'nomovesw']) {
+		if (Moves[glitchMove]) delete Moves[glitchMove].isNonstandard;
+	}
 	const buf = 'exports.BattleMovedex = ' + es3stringify(Moves) + ';';
 	fs.writeFileSync('play.pokemonshowdown.com/data/moves.js', buf);
 	fs.writeFileSync('play.pokemonshowdown.com/data/moves.json', JSON.stringify(Moves));

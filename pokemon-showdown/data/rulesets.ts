@@ -275,6 +275,11 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 			}
 		},
 	},
+	critleveloverflow: {
+		effectType: 'Rule',
+		name: 'Crit Level Overflow',
+		desc: "Replicates the Gen 1 hardware bug where a critical hit doubles the level in an 8-bit register, so a critical hit above level 127 wraps around and deals far less damage.",
+	},
 	nomoveexclusivity: {
 		effectType: 'ValidatorRule',
 		name: 'No Move Exclusivity',

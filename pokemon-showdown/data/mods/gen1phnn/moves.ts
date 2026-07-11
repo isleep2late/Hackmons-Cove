@@ -57,9 +57,6 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 				return 0;
 			},
 			onAccuracy(accuracy, target, source, move) {
-				if (move.id === 'swift') {
-					return true;
-				}
 				return accuracy;
 			},
 		},
@@ -67,5 +64,10 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	swift: {
 		inherit: true,
 		accuracy: 100,
+		onModifyMove(move, pokemon, target) {
+			if (!target || !target.volatiles['substitute']) {
+				move.accuracy = true;
+			}
+		},
 	},
 };
