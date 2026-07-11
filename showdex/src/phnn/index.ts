@@ -271,6 +271,17 @@ export const isPhnnShadowDamagingMove = (moveName: string): boolean => (
   PHNN_SHADOW_DAMAGING_MOVE_IDS.includes(toPhnnId(moveName))
 );
 
+/**
+ * Kamehameha is a hard-coded guaranteed OHKO in PHNN (it faints every opposing
+ * Pokemon regardless of stats/typing/abilities), so the calc should always show
+ * it as a 100% OHKO rather than running the damage formula.
+ *
+ * @since 1.3.0
+ */
+export const isPhnnKamehamehaMove = (moveName: string): boolean => (
+  toPhnnId(moveName) === 'kamehameha'
+);
+
 export const setPhnnCalcContext = (format: string): void => {
   const key = detectPhnnKey(format);
 
