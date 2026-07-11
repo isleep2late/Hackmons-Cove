@@ -490,6 +490,14 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		ruleset: ['-Nonexistent', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100', 'Disguise Mod', 'No Move Exclusivity'],
 		unbanlist: ['No Move'],
 	},
+	{
+		name: "[Gen 1] Disguises (English)",
+		desc: "Gen 1 Disguises using the international (English) mechanics: Blizzard has a 10% chance to freeze and Substitute follows the non-Japanese rules.",
+		mod: 'gen1phnneng',
+		searchShow: false,
+		ruleset: ['-Nonexistent', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100', 'Disguise Mod', 'No Move Exclusivity'],
+		unbanlist: ['No Move'],
+	},
 	//////////////////////////////////
 	///// Pure Hackmons No Nerfs /////
 	//////////////////////////////////
