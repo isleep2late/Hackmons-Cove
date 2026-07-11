@@ -528,7 +528,6 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'phnn',
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Data Preview', 'Max Level = 255', 'Default Level = 100', 'Prestatus', 'Totem Aura', 'Shadow Tera Clause', 'No Alphas'],
-		unbanlist: ['No Move-2'],
 		banlist: [
 			'Mewtwo-Shadow', 'Mewtwo-Shadow-Mega-X', 'Lugia-Shadow', 'Arceus-Shadow', 'Mewtwo-Armored',
 			'Goku', 'Kamehameha',
@@ -537,7 +536,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 			'Shadow Bolt', 'Shadow Chill', 'Shadow Fire', 'Shadow Storm', 'Shadow Wave', 'Shadow Rave',
 			'Shadow Down', 'Shadow Mist', 'Shadow Panic', 'Shadow Hold', 'Shadow Half', 'Shadow Shed', 'Shadow Sky',
 		],
-		unbanlist: ['Past', 'Future', 'Unobtainable'],
+		unbanlist: ['Past', 'Future', 'Unobtainable', 'No Move', 'No Move-2'],
 	},
 	{
 		name: "[Gen 9 No Nerfs] Little Cup",

@@ -227,7 +227,12 @@ export const Teams = new class Teams {
 					}
 					if (set.phStats) {
 						const order = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'] as const;
-						buf += `,${order.map(statName => set.phStats![statName] ?? '').join('.')}`;
+						let overrideBuf = '';
+						for (const statName of order) {
+							if (overrideBuf) overrideBuf += '.';
+							overrideBuf += set.phStats[statName] ?? '';
+						}
+						buf += `,${overrideBuf}`;
 					}
 				}
 			}
