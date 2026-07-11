@@ -471,7 +471,7 @@ export const Teams = new class Teams {
 		}
 		if (set.startStatus) {
 			const statusNames: { [k: string]: string } = { brn: 'Burn', par: 'Paralysis', slp: 'Sleep', psn: 'Poison', tox: 'Toxic', frz: 'Freeze' };
-			out += `Status: ${statusNames[set.startStatus] || set.startStatus}  \n`;
+			out += `Status: ${set.startStatus.split('/').map(part => statusNames[part] || part).join(' / ')}  \n`;
 		}
 
 		// details
@@ -632,7 +632,8 @@ export const Teams = new class Teams {
 				tox: 'tox', toxic: 'tox', badlypoison: 'tox', badlypoisoned: 'tox',
 				frz: 'frz', freeze: 'frz', frozen: 'frz',
 			};
-			if (STATUS_MAP[raw]) set.startStatus = STATUS_MAP[raw];
+			const parts = raw.split('/').map(part => STATUS_MAP[part.trim().replace(/[^a-z]/g, '')]).filter(Boolean);
+			if (parts.length) set.startStatus = parts.join('/');
 		} else if (line.startsWith('EVs: ')) {
 			line = line.slice(5);
 			const evLines = line.split('/');

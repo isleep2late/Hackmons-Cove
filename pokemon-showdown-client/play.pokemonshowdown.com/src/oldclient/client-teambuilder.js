@@ -1398,7 +1398,8 @@
 					buf += '<span class="detailcell"><label>Type 2</label>' + (phT[1] || species.types[1] || '(none)') + '</span>';
 					buf += '<span class="detailcell"><label>Disguise</label>' + (set.disguise ? Dex.species.get(set.disguise).name : '(none)') + '</span>';
 				}
-				buf += '<span class="detailcell"><label>Status</label>' + (set.startStatus || 'None') + '</span>';
+				var startStatusCount = set.startStatus ? set.startStatus.split('/').length : 0;
+				buf += '<span class="detailcell"><label>Status</label>' + (startStatusCount > 1 ? 'Multi' : (set.startStatus || 'None')) + '</span>';
 				if (set.startHp) buf += '<span class="detailcell"><label>Start HP</label>' + set.startHp + '</span>';
 			}
 			buf += '</button></div></div>';
@@ -3265,12 +3266,18 @@
 					}
 					buf += '</select></div></div>';
 				}
-				buf += '<div class="formrow"><label class="formlabel" title="Bring this Pokemon in already afflicted with a status">Status:</label><div><select name="startstatus" class="button">';
-				var phStatuses = [['', 'None'], ['psn', 'Poisoned'], ['par', 'Paralyzed'], ['slp', 'Asleep'], ['brn', 'Burned'], ['frz', 'Frozen']];
-				for (var phk = 0; phk < phStatuses.length; phk++) {
-					buf += '<option value="' + phStatuses[phk][0] + '"' + ((set.startStatus || '') === phStatuses[phk][0] ? ' selected="selected"' : '') + '>' + phStatuses[phk][1] + '</option>';
+				buf += '<div class="formrow"><label class="formlabel" title="Bring this Pokemon in already afflicted with a status. Extra statuses beyond the first only apply when the Multistatus rule is active.">Status:</label><div>';
+				var phStatusOptions = ['Poisoned', 'Toxic', 'Paralyzed', 'Asleep', 'Burned', 'Frozen'];
+				var phStatusIdToName = { psn: 'Poisoned', tox: 'Toxic', par: 'Paralyzed', slp: 'Asleep', brn: 'Burned', frz: 'Frozen' };
+				var selectedStatuses = [];
+				if (set.startStatus) {
+					var ssParts = set.startStatus.split('/');
+					for (var ssk = 0; ssk < ssParts.length; ssk++) {
+						if (phStatusIdToName[ssParts[ssk]]) selectedStatuses.push(phStatusIdToName[ssParts[ssk]]);
+					}
 				}
-				buf += '</select></div></div>';
+				buf += this.renderPhnnMultiselect('startstatuses', phStatusOptions, selectedStatuses, 'None', false);
+				buf += '</div></div>';
 				buf += '<div class="formrow"><label class="formlabel">Starting HP:</label><div><input type="number" min="1" max="999" step="1" name="starthp" placeholder="Max" value="' + (set.startHp || '') + '" class="textbox inputform numform" /></div></div>';
 				
 				if (!set.moves) set.moves = [];
@@ -3564,9 +3571,27 @@
 						delete set.disguise;
 					}
 				}
-				var startStatus = this.$chart.find('select[name=startstatus]').val();
-				if (['psn', 'par', 'slp', 'brn', 'frz'].indexOf(startStatus) >= 0) {
-					set.startStatus = startStatus;
+				if (this.$chart.find('details.phnn-multiselect[data-name=startstatuses]').length) {
+					var phStatusNameToId = { Poisoned: 'psn', Toxic: 'tox', Paralyzed: 'par', Asleep: 'slp', Burned: 'brn', Frozen: 'frz' };
+					var checkedStatuses = this.phnnMultiselectValues('startstatuses').map(function (v) { return phStatusNameToId[v] || ''; }).filter(function (v) { return !!v; });
+					var prevStatuses = set.startStatus ? set.startStatus.split('/') : [];
+					var orderedStatuses = [];
+					for (var pss = 0; pss < prevStatuses.length; pss++) {
+						if (checkedStatuses.indexOf(prevStatuses[pss]) >= 0 && orderedStatuses.indexOf(prevStatuses[pss]) < 0) {
+							orderedStatuses.push(prevStatuses[pss]);
+						}
+					}
+					for (var css = 0; css < checkedStatuses.length; css++) {
+						if (orderedStatuses.indexOf(checkedStatuses[css]) < 0) {
+							orderedStatuses.push(checkedStatuses[css]);
+						}
+					}
+					if (orderedStatuses.length) {
+						set.startStatus = orderedStatuses.join('/');
+					} else {
+						delete set.startStatus;
+					}
+					this.phnnUpdateMultiselectLabel('startstatuses');
 				} else {
 					delete set.startStatus;
 				}
