@@ -477,17 +477,26 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 	},
 	{
 		name: "[Gen 2] Statuses",
-		desc: "Gen 2 Pure Hackmons, but Pokemon can start the battle pre-statused.",
+		desc: "Gen 2 Pure Hackmons, but Pokemon can start the battle pre-statused. Uses Crystal mechanics (No Move-2 has 9 base power).",
 		mod: 'gen2',
 		searchShow: false,
 		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100'],
+		unbanlist: ['No Move-2'],
+	},
+	{
+		name: "[Gen 2] Statuses (Gold/Silver)",
+		desc: "Gen 2 Statuses using Gold/Silver mechanics: No Move-2 has 5 base power instead of Crystal's 9.",
+		mod: 'gen2gs',
+		searchShow: false,
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100'],
+		unbanlist: ['No Move-2'],
 	},
 	{
 		name: "[Gen 1] Disguises",
 		desc: "Gen 1 Pure Hackmons, but Pokemon can have any type, disguise as any species, and even start the game pre-statused.",
 		mod: 'gen1phnn',
 		//searchShow: false,
-		ruleset: ['-Nonexistent', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100', 'Disguise Mod', 'No Move Exclusivity'],
+		ruleset: ['-Nonexistent', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100', 'Disguise Mod', 'No Move Exclusivity', 'Crit Level Overflow'],
 		unbanlist: ['No Move'],
 	},
 	{
@@ -495,7 +504,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		desc: "Gen 1 Disguises using the international (English) mechanics: Blizzard has a 10% chance to freeze and Substitute follows the non-Japanese rules.",
 		mod: 'gen1phnneng',
 		searchShow: false,
-		ruleset: ['-Nonexistent', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100', 'Disguise Mod', 'No Move Exclusivity'],
+		ruleset: ['-Nonexistent', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100', 'Disguise Mod', 'No Move Exclusivity', 'Crit Level Overflow'],
 		unbanlist: ['No Move'],
 	},
 	//////////////////////////////////
@@ -511,6 +520,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'phnn',
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Data Preview', 'Max Level = 255', 'Default Level = 100', 'Prestatus', 'Totem Aura', 'Shadow Tera Clause', 'No Alphas'],
+		unbanlist: ['No Move-2'],
 		banlist: [
 			'Mewtwo-Shadow', 'Mewtwo-Shadow-Mega-X', 'Lugia-Shadow', 'Arceus-Shadow', 'Mewtwo-Armored',
 			'Goku', 'Kamehameha',
@@ -820,6 +830,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: true,
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod', 'Totem Aura'],
+		unbanlist: ['No Move-2'],
 	},
 	{
 		name: "[Gen 9 Champions] Custom Disguises",
@@ -827,7 +838,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: false,
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod', 'Totem Aura'],
-		unbanlist: ['No Move'],
+		unbanlist: ['No Move', 'No Move-2'],
 	},
 	{
 		name: "[Gen 9] Custom Disguises",
@@ -835,7 +846,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: false,
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod', 'Totem Aura'],
-		unbanlist: ['No Move'],
+		unbanlist: ['No Move', 'No Move-2'],
 	},
 	{
 		name: "[Gen 8] Custom Disguises",
@@ -843,7 +854,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: false,
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod', 'Totem Aura'],
-		unbanlist: ['No Move'],
+		unbanlist: ['No Move', 'No Move-2'],
 	},
 	{
 		name: "[Gen 8] BDSP Custom Disguises",
@@ -851,7 +862,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: false,
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod', 'Totem Aura'],
-		unbanlist: ['No Move'],
+		unbanlist: ['No Move', 'No Move-2'],
 	},
 	{
 		name: "[Gen 7] Custom Disguises",
@@ -859,7 +870,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: false,
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod', 'Totem Aura'],
-		unbanlist: ['No Move'],
+		unbanlist: ['No Move', 'No Move-2'],
 	},
 	{
 		name: "[Gen 7] Let's Go Custom Disguises",
@@ -867,7 +878,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: false,
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod', 'Totem Aura'],
-		unbanlist: ['No Move'],
+		unbanlist: ['No Move', 'No Move-2'],
 	},
 	{
 		name: "[Gen 6] Custom Disguises",
@@ -875,7 +886,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: false,
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod', 'Totem Aura'],
-		unbanlist: ['No Move'],
+		unbanlist: ['No Move', 'No Move-2'],
 	},
 	{
 		name: "[Gen 5] Custom Disguises",
@@ -883,7 +894,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: false,
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod', 'Totem Aura'],
-		unbanlist: ['No Move'],
+		unbanlist: ['No Move', 'No Move-2'],
 	},
 	{
 		name: "[Gen 4] Custom Disguises",
@@ -891,7 +902,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: false,
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod', 'Totem Aura'],
-		unbanlist: ['No Move'],
+		unbanlist: ['No Move', 'No Move-2'],
 	},
 	{
 		name: "[Gen 3] Custom Disguises",
@@ -899,7 +910,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: false,
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Desync Clause Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod', 'Totem Aura'],
-		unbanlist: ['No Move'],
+		unbanlist: ['No Move', 'No Move-2'],
 	},
 	{
 		name: "[Gen 2] Custom Disguises",
@@ -907,7 +918,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: false,
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Desync Clause Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod', 'Totem Aura'],
-		unbanlist: ['No Move'],
+		unbanlist: ['No Move', 'No Move-2'],
 	},
 	{
 		name: "[Gen 1] Custom Disguises",

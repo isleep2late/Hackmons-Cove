@@ -928,7 +928,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		},
 	},
 	nomove: {
-		accuracy: 100 * 81 / 256,
+		accuracy: 32,
 		basePower: 102,
 		category: "Special",
 		isNonstandard: "Custom",
