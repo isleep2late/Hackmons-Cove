@@ -939,6 +939,11 @@
 					{ id: 'gen2statusesgoldsilver', name: 'Gold/Silver' },
 					{ id: 'gen2statusesspaceworld', name: 'SpaceWorld' },
 				] },
+				{ label: 'Generation', members: [
+					{ id: 'gen8255', name: 'Unified' },
+					{ id: 'gen8255swsh', name: 'SwSh' },
+					{ id: 'gen8255bdsp', name: 'BDSP' },
+				] },
 			];
 			for (var i = 0; i < families.length; i++) {
 				for (var j = 0; j < families[i].members.length; j++) {
