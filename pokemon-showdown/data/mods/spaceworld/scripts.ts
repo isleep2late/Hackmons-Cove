@@ -19,4 +19,22 @@ export const Scripts: ModdedBattleScriptsData = {
 			return Object.getPrototypeOf(this).trySetStatus.call(this, status, source, sourceEffect);
 		},
 	},
+	actions: {
+		inherit: true,
+		getDamage(source, target, move, suppressMessages) {
+			const activeMove = (typeof move === 'object' ? move : null) as ActiveMove | null;
+			if (activeMove && activeMove.category !== 'Status' && activeMove.willCrit === undefined &&
+				target && source.species?.baseStats) {
+				const highCrit = ['karatechop', 'razorleaf', 'crabhammer', 'slash'];
+				let counter = 6;
+				if (source.volatiles['focusenergy']) counter -= 3;
+				if (highCrit.includes(activeMove.id)) counter -= 2;
+				let critChance = source.species.baseStats.spe * 4;
+				for (let i = 1; i < counter; i++) critChance = Math.floor(critChance / 2);
+				critChance = Math.min(critChance, 255);
+				activeMove.willCrit = critChance > 0 ? this.battle.randomChance(critChance, 256) : false;
+			}
+			return Object.getPrototypeOf(this).getDamage.call(this, source, target, move, suppressMessages);
+		},
+	},
 };
