@@ -36,6 +36,8 @@
 				if ((this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')) && this.curTeam.gen === 9) {
 					this.curTeam.dex = Dex.mod('gen9phnn');
 				}
+				var focusVersionMod = this.phnnVersionModId(this.curTeam.format);
+				if (focusVersionMod) this.curTeam.dex = Dex.mod(focusVersionMod);
 				Storage.activeSetList = this.curSetList;
 			}
 		},
@@ -771,6 +773,8 @@
 			if ((this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')) && this.curTeam.gen === 9) {
 				this.curTeam.dex = Dex.mod('gen9phnn');
 			}
+			var selVersionMod = this.phnnVersionModId(this.curTeam.format);
+			if (selVersionMod) this.curTeam.dex = Dex.mod(selVersionMod);
 			Storage.activeSetList = this.curSetList = Storage.unpackTeam(this.curTeam.team);
 			this.curTeamIndex = i;
 			this.update();
@@ -1667,6 +1671,8 @@
 			if ((this.curTeam.format.includes('nonerfs') || this.curTeam.format.includes('phnn')) && this.curTeam.gen === 9) {
 				this.curTeam.dex = Dex.mod('gen9phnn');
 			}
+			var cfVersionMod = this.phnnVersionModId(this.curTeam.format);
+			if (cfVersionMod) this.curTeam.dex = Dex.mod(cfVersionMod);
 			this.save();
 			if (this.curTeam.gen === 5 && !Dex.loadedSpriteData['bw']) Dex.loadSpriteData('bw');
 			this.update();
@@ -1758,6 +1764,17 @@
 				}
 			}
 			return null;
+		},
+		// Maps a version/variant format id to the client mod dex that carries its
+		// version-accurate move data (Blizzard freeze %, No Move-2 BP, SpaceWorld
+		// move/type changes). Returns null for non-version formats.
+		phnnVersionModId: function (format) {
+			return {
+				gen1disguises: 'gen1phnn',
+				gen1disguisesenglish: 'gen1phnneng',
+				gen2statusesgoldsilver: 'gen2gs',
+				gen2statusesspaceworld: 'gen2spaceworld',
+			}[('' + (format || '')).split('@@@')[0]] || null;
 		},
 		renderVersionSelect: function () {
 			var fam = this.versionFamily(this.curTeam.format);
