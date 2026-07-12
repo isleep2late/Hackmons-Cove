@@ -430,6 +430,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		desc: "Gen 8 Pure Hackmons at level 255. Unified merges the Sword/Shield and BDSP Pokedex and has no stat overflow glitch.",
 		mod: 'gen8unified',
 		searchShow: false,
+		battle: {trunc: Math.trunc},
 		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'SwSh Plus BDSP Pokedex', 'Max Level = 255', 'Default Level = 100'],
 		unbanlist: ['Past', 'Unobtainable'],
 	},
