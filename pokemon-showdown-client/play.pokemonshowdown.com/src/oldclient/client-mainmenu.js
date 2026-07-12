@@ -1297,7 +1297,7 @@
 				}
 				if (this.curTeamFormat !== teamFormat) {
 					for (var i = 0; i < teams.length; i++) {
-						if (teams[i].format === teamFormat && teams[i].capacity === 6) {
+						if (String(teams[i].format || '').split('@@@')[0] === teamFormat && teams[i].capacity === 6) {
 							teamIndex = i;
 							break;
 						}
@@ -1718,7 +1718,7 @@
 					bufs[curBuf] = '<li><h3 style="margin-bottom: 5px;">' + BattleLog.escapeFormat(teamFormat) + ' teams</h3></li>';
 					bufs[curBuf] += '<li style="padding-bottom: 5px;"><label class="checkbox"><input type="checkbox"' + (this.folderToggleOn ? ' checked' : '') + '> Group by folders</label></li>';
 					for (var i = 0; i < teams.length; i++) {
-						if ((!teams[i].format && !teamFormat) || teams[i].format === teamFormat) {
+						if ((!teams[i].format && !teamFormat) || String(teams[i].format || '').split('@@@')[0] === teamFormat) {
 							var selected = (i === curTeam);
 							if (!this.folderToggleOn) {
 								bufs[curBuf] += '<li><button name="selectTeam" value="' + i + '" class="option' + (selected ? ' cur' : '') + '">' + BattleLog.escapeHTML(teams[i].name) + '</button></li>';
@@ -1777,7 +1777,7 @@
 						}
 						if (!isNoFolder) {
 							for (var i = 0; i < teams.length; i++) {
-								if ((!teams[i].format && !teamFormat) || teams[i].format === teamFormat) {
+								if ((!teams[i].format && !teamFormat) || String(teams[i].format || '').split('@@@')[0] === teamFormat) {
 									var selected = (i === curTeam);
 									if (teams[i].folder === "") {
 										bufs[curBuf] += '<li><button name="selectTeam" value="' + i + '" class="option' + (selected ? ' cur' : '') + '">' + BattleLog.escapeHTML(teams[i].name) + '</button></li>';
@@ -1798,7 +1798,7 @@
 				}
 				if (this.isMoreTeams) {
 					for (var i = 0; i < teams.length; i++) {
-						if (teamFormat && teams[i].format === teamFormat) continue;
+						if (teamFormat && String(teams[i].format || '').split('@@@')[0] === teamFormat) continue;
 						var selected = (i === curTeam);
 						bufs[curBuf] += '<li><button name="selectTeam" value="' + i + '" class="option' + (selected ? ' cur' : '') + '">' + BattleLog.escapeHTML(teams[i].name) + '</button></li>';
 						count++;
