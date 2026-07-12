@@ -51,6 +51,7 @@
 			// team changes
 			'change input.teamnameedit': 'teamNameChange',
 			'click button.formatselect': 'selectFormat',
+			'click button.statmodtoggle': 'toggleStatMod',
 			'change input[name=nickname]': 'nicknameChange',
 
 			// misc
@@ -1245,6 +1246,7 @@
 					buf += '<label class="label">Format:</label><button class="select formatselect teambuilderformatselect" name="format" value="' + this.curTeam.format + '">' + (isGenericFormat(this.curTeam.format) ? '<em>Select a format</em>' : BattleLog.escapeFormat(this.curTeam.format)) + '</button>';
 					buf += this.renderCdModeSelect();
 					buf += this.renderVersionSelect();
+					buf += this.renderStatModToggle();
 					var btnClass = 'button' + (!this.curSetList.length || app.isDisconnected ? ' disabled' : '');
 					buf += ' <button name="validate" class="' + btnClass + '"><i class="fa fa-check"></i> Validate</button></li>';
 				}
@@ -1761,6 +1763,33 @@
 				}
 			}
 			return null;
+		},
+		renderStatModToggle: function () {
+			var f = '' + (this.curTeam.format || '');
+			if (isGenericFormat(f) || f.includes('customdisguise') || f.includes('customgame')) return '';
+			var on = this.phnnStatModAllowed(f);
+			return ' <button class="button statmodtoggle' + (on ? ' cur' : '') + '" title="Allow manually overridden stats (1-65535), like cartridge save editing"><i class="fa fa-flask"></i> Stat Mod' + (on ? ': On' : '') + '</button>';
+		},
+		toggleStatMod: function () {
+			var f = '' + (this.curTeam.format || '');
+			var atIdx = f.indexOf('@@@');
+			var base = atIdx >= 0 ? f.slice(0, atIdx) : f;
+			var rules = atIdx >= 0 ? f.slice(atIdx + 3).split(',').map(function (r) { return r.trim(); }).filter(Boolean) : [];
+			var had = false;
+			rules = rules.filter(function (r) {
+				if (r.toLowerCase().replace(/\s/g, '') === 'statmod') { had = true; return false; }
+				return true;
+			});
+			if (!had) rules.push('Stat Mod');
+			var newFormat = rules.length ? base + '@@@' + rules.join(', ') : base;
+			this.changeFormat(newFormat);
+		},
+		phnnStatModAllowed: function (format) {
+			var f = '' + (format || this.curTeam && this.curTeam.format || '');
+			if (f.includes('customdisguise')) return true;
+			var atIdx = f.indexOf('@@@');
+			if (atIdx < 0) return false;
+			return f.slice(atIdx + 3).toLowerCase().replace(/\s/g, '').split(',').indexOf('statmod') >= 0;
 		},
 		phnnVersionModId: function (format) {
 			return {
@@ -2740,7 +2769,7 @@
 				}
 			}
 
-			if (this.curTeam.format.includes('customdisguise')) {
+			if (this.phnnStatModAllowed(this.curTeam.format)) {
 				buf += '<div class="col ivcol"><div><strong>Override</strong></div>';
 				for (var i in stats) {
 					var oval = set.phStats && set.phStats[i] !== undefined ? '' + set.phStats[i] : '';

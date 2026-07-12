@@ -988,6 +988,7 @@
 			}
 
 			var infiniteChecked = (rulesLc.indexOf('infinitemod') >= 0 || rulesLc.indexOf('infinite mod') >= 0) ? ' checked' : '';
+			var statmodChecked = (rulesLc.replace(/\s/g, '').indexOf('statmod') >= 0) ? ' checked' : '';
 
 			var genMatch = baseFormat.match(/^gen(\d+)/);
 			var genNum = genMatch ? +genMatch[1] : 9;
@@ -1021,7 +1022,7 @@
 			}
 			var gametypeHtml = '<p><label class="label">Gametype:</label> <select name="gameTypeSelect" class="textbox" style="width: 230px; box-sizing: border-box;">' + gtOptsHtml + '</select></p>';
 
-			return '<span class="cdmodewrap">' + genHtml + gametypeHtml + '<p><label class="checkbox"><input type="checkbox" name="infiniteMode"' + infiniteChecked + ' /> <abbr title="When a player runs out of Pokémon they can submit a new one instead of losing">Infinite Mod</abbr></label></p></span>';
+			return '<span class="cdmodewrap">' + genHtml + gametypeHtml + '<p><label class="checkbox"><input type="checkbox" name="infiniteMode"' + infiniteChecked + ' /> <abbr title="When a player runs out of Pokémon they can submit a new one instead of losing">Infinite Mod</abbr></label> <label class="checkbox"><input type="checkbox" name="statModMode"' + statmodChecked + ' /> <abbr title="Allows manually overridden stats (1-65535), like cartridge save editing">Stat Mod</abbr></label></p></span>';
 		},
 		cdMode: function (i, button) {
 			var self = this;
@@ -1036,6 +1037,7 @@
 			var suffix = format.slice(idx + kwLen);
 			app.addPopup(window.CdModePopup, { format: format, sourceEl: button, onselect: function (modeId) {
 				var infiniteChecked = $form.find('input[name=infiniteMode]').is(':checked');
+				var statmodPopupChecked = $form.find('input[name=statModMode]').is(':checked');
 				var prevGametype = $form.find('select[name=gameTypeSelect]').val();
 				var newFormat = modeId + kw + suffix;
 				$fmtBtn.val(newFormat).html(BattleLog.escapeFormat(newFormat));
@@ -1047,6 +1049,7 @@
 				var $vwrap = $form.find('.versionwrap');
 				if ($vwrap.length) $vwrap.replaceWith(self.renderVersionChallenge(newFormat));
 				if (infiniteChecked) $form.find('input[name=infiniteMode]').prop('checked', true);
+				if (statmodPopupChecked) $form.find('input[name=statModMode]').prop('checked', true);
 				if (prevGametype) $form.find('select[name=gameTypeSelect]').val(prevGametype);
 			} });
 		},
@@ -1145,6 +1148,7 @@
 				var cleanRules = format.slice(atIdx + 3).split(',').map(function (r) { return r.trim(); }).filter(function (r) {
 					var lc = r.toLowerCase().replace(/\s/g, '');
 					if (lc === 'infinitemod') return false;
+					if (lc === 'statmod') return false;
 					if (lc.indexOf('gametype=') === 0) return false;
 					return true;
 				}).join(', ');
@@ -1153,6 +1157,10 @@
 			var infiniteMode = $pmWindow.find('input[name=infiniteMode]').is(':checked');
 			if (infiniteMode) {
 				format += (format.includes('@@@') ? ', ' : '@@@') + 'Infinite Mod';
+			}
+			var statModMode = $pmWindow.find('input[name=statModMode]').is(':checked');
+			if (statModMode) {
+				format += (format.includes('@@@') ? ', ' : '@@@') + 'Stat Mod';
 			}
 			var gameTypeChoice = ('' + ($pmWindow.find('select[name=gameTypeSelect]').val() || '')).trim();
 			if (gameTypeChoice && gameTypeChoice !== 'Singles') {

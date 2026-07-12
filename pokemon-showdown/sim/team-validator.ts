@@ -642,8 +642,9 @@ export class TeamValidator {
 		if (set.phItems && !isCustomDisguises) {
 			problems.push(`${set.name || set.species} has multiple items, which is only allowed in Custom Disguises formats.`);
 		}
-		if (set.phStats && !isCustomDisguises) {
-			problems.push(`${set.name || set.species} has manual stat overrides, which are only allowed in Custom Disguises formats.`);
+		const statmodAllowed = isCustomDisguises || ruleTable.has('statmod');
+		if (set.phStats && !statmodAllowed) {
+			problems.push(`${set.name || set.species} has manual stat overrides, which are only allowed in Custom Disguises formats or with the Stat Mod rule.`);
 		}
 		const findTypeName = (typeText: string): string | null => {
 			const wanted = typeText.trim().toLowerCase();
@@ -786,7 +787,7 @@ export class TeamValidator {
 			set.phItems = extraItemNames.join('/');
 			if (!set.phItems) delete set.phItems;
 		}
-		if (set.phStats && isCustomDisguises) {
+		if (set.phStats && statmodAllowed) {
 			const statOrder = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'] as StatID[];
 			const cleaned: Partial<StatsTable> = {};
 			let any = false;
