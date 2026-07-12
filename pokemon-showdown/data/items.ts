@@ -8178,4 +8178,602 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 		gen: 8,
 		isNonstandard: "CAP",
 	},
+	strangethread: {
+		num: -6200,
+		name: "Strange Thread",
+		spritenum: 51,
+		isNonstandard: "Demo",
+		onModifyAccuracyPriority: -2,
+		onModifyAccuracy(accuracy) {
+			if (typeof accuracy !== 'number') return;
+			return this.chainModify([3616, 4096]);
+		},
+		desc: "SpaceWorld '97 demo item: attacks against the holder lose 30/256 accuracy.",
+		gen: 2,
+	},
+	quickneedle: {
+		num: -6201,
+		name: "Quick Needle",
+		spritenum: 373,
+		isNonstandard: "Demo",
+		onFractionalPriorityPriority: -2,
+		onFractionalPriority(priority, pokemon) {
+			if (priority <= 0 && this.randomChance(30, 256)) {
+				this.add('-activate', pokemon, 'item: Quick Needle');
+				return 0.1;
+			}
+		},
+		desc: "SpaceWorld '97 proto-Quick Claw: 30/256 chance to move first in its priority bracket.",
+		gen: 2,
+	},
+	focusorb: {
+		num: -6202,
+		name: "Focus Orb",
+		spritenum: 150,
+		isNonstandard: "Demo",
+		onDamagePriority: -40,
+		onDamage(damage, target, source, effect) {
+			if (this.randomChance(30, 256) && damage >= target.hp && effect && effect.effectType === 'Move') {
+				this.add("-activate", target, "item: Focus Orb");
+				return target.hp - 1;
+			}
+		},
+		desc: "SpaceWorld '97 proto-Focus Band: 30/256 chance to survive a KO hit with 1 HP.",
+		gen: 2,
+	},
+	sharpscythe: {
+		num: -6203,
+		name: "Sharp Scythe",
+		spritenum: 429,
+		isNonstandard: "Demo",
+		onModifyCritRatio(critRatio) {
+			return critRatio + 1;
+		},
+		desc: "SpaceWorld '97 demo item: raises the holder's critical hit ratio by 1 stage.",
+		gen: 2,
+	},
+	apple: {
+		num: -6204,
+		name: "Apple",
+		spritenum: 319,
+		isNonstandard: "Demo",
+		isBerry: true,
+		naturalGift: {
+			basePower: 80,
+			type: "Grass",
+		},
+		onResidualOrder: 10,
+		onResidual(pokemon) {
+			if (pokemon.hp <= pokemon.maxhp / 2) {
+				pokemon.eatItem();
+			}
+		},
+		onTryEatItem(item, pokemon) {
+			if (!this.runEvent('TryHeal', pokemon, null, this.effect, 50)) return false;
+		},
+		onEat(pokemon) {
+			this.heal(50);
+		},
+		desc: "SpaceWorld '97 proto-Sitrus Berry: restores 50 HP when the holder falls to half HP. Single use.",
+		gen: 2,
+	},
+	snakeskin: {
+		num: -6205,
+		name: "Snakeskin",
+		spritenum: 12,
+		isNonstandard: "Demo",
+		onSetStatus(status, target, source, effect) {
+			if (status.id !== 'psn' && status.id !== 'tox') return;
+			if ((effect as Move)?.status) {
+				this.add('-immune', target, '[from] item: Snakeskin');
+			}
+			return false;
+		},
+		desc: "SpaceWorld '97 demo item: the holder cannot be poisoned.",
+		gen: 2,
+	},
+	prettytail: {
+		num: -6206,
+		name: "Pretty Tail",
+		spritenum: 12,
+		isNonstandard: "Demo",
+		onSetStatus(status, target, source, effect) {
+			if (status.id !== 'psn' && status.id !== 'tox') return;
+			if ((effect as Move)?.status) {
+				this.add('-immune', target, '[from] item: Pretty Tail');
+			}
+			return false;
+		},
+		desc: "SpaceWorld '97 demo item: the holder cannot be poisoned.",
+		gen: 2,
+	},
+	earth: {
+		num: -6207,
+		name: "Earth",
+		spritenum: 12,
+		isNonstandard: "Demo",
+		onSetStatus(status, target, source, effect) {
+			if (status.id !== 'par') return;
+			if ((effect as Move)?.status) {
+				this.add('-immune', target, '[from] item: Earth');
+			}
+			return false;
+		},
+		desc: "SpaceWorld '97 demo item: the holder cannot be paralyzed.",
+		gen: 2,
+	},
+	thundertail: {
+		num: -6208,
+		name: "Thunder Tail",
+		spritenum: 12,
+		isNonstandard: "Demo",
+		onSetStatus(status, target, source, effect) {
+			if (status.id !== 'par') return;
+			if ((effect as Move)?.status) {
+				this.add('-immune', target, '[from] item: Thunder Tail');
+			}
+			return false;
+		},
+		desc: "SpaceWorld '97 demo item: the holder cannot be paralyzed.",
+		gen: 2,
+	},
+	stimulusorb: {
+		num: -6209,
+		name: "Stimulus Orb",
+		spritenum: 12,
+		isNonstandard: "Demo",
+		onSetStatus(status, target, source, effect) {
+			if (status.id !== 'slp') return;
+			if ((effect as Move)?.status) {
+				this.add('-immune', target, '[from] item: Stimulus Orb');
+			}
+			return false;
+		},
+		desc: "SpaceWorld '97 demo item: the holder cannot be put to sleep.",
+		gen: 2,
+	},
+	watertail: {
+		num: -6210,
+		name: "Water Tail",
+		spritenum: 12,
+		isNonstandard: "Demo",
+		onSetStatus(status, target, source, effect) {
+			if (status.id !== 'brn') return;
+			if ((effect as Move)?.status) {
+				this.add('-immune', target, '[from] item: Water Tail');
+			}
+			return false;
+		},
+		desc: "SpaceWorld '97 demo item: the holder cannot be burned.",
+		gen: 2,
+	},
+	firetail: {
+		num: -6211,
+		name: "Fire Tail",
+		spritenum: 12,
+		isNonstandard: "Demo",
+		onSetStatus(status, target, source, effect) {
+			if (status.id !== 'frz') return;
+			if ((effect as Move)?.status) {
+				this.add('-immune', target, '[from] item: Fire Tail');
+			}
+			return false;
+		},
+		desc: "SpaceWorld '97 demo item: the holder cannot be frozen.",
+		gen: 2,
+	},
+	calmberry: {
+		num: -6212,
+		name: "Calm Berry",
+		spritenum: 319,
+		isNonstandard: "Demo",
+		onTryAddVolatile(status, pokemon) {
+			if (status.id === 'confusion') {
+				this.add('-immune', pokemon, '[from] item: Calm Berry');
+				return null;
+			}
+		},
+		desc: "SpaceWorld '97 demo item: the holder cannot be confused.",
+		gen: 2,
+	},
+	bigleaf: {
+		num: -6213,
+		name: "Big Leaf",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to boost Grass-type moves (proto-Miracle Seed), but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	sharpstone: {
+		num: -6214,
+		name: "Sharp Stone",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to boost Rock-type moves (proto-Hard Stone), but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	blackfeather: {
+		num: -6215,
+		name: "Black Feather",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to boost Flying-type moves (proto-Sharp Beak), but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	sharpfang: {
+		num: -6216,
+		name: "Sharp Fang",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to boost Normal-type moves, but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	toxicneedle: {
+		num: -6217,
+		name: "Toxic Needle",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to boost Poison-type moves (proto-Poison Barb), but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	poisonfang: {
+		num: -6218,
+		name: "Poison Fang",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to boost Poison-type moves, but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	migraineseed: {
+		num: -6219,
+		name: "Migraine Seed",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to boost Psychic-type moves (proto-Twisted Spoon), but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	attackneedle: {
+		num: -6220,
+		name: "Attack Needle",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to boost Bug-type moves, but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	powerbracersw: {
+		num: -6221,
+		name: "Power Bracer SW",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to boost Fighting-type moves (proto-Black Belt; named Power Bracer in the demo), but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	icefang: {
+		num: -6222,
+		name: "Ice Fang",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to boost Ice-type moves (proto-Never-Melt Ice), but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	wethorn: {
+		num: -6223,
+		name: "Wet Horn",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to boost Water-type moves, but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	thunderfang: {
+		num: -6224,
+		name: "Thunder Fang",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to boost Electric-type moves, but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	fireclaw: {
+		num: -6225,
+		name: "Fire Claw",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to boost Fire-type moves (proto-Charcoal), but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	spike: {
+		num: -6226,
+		name: "Spike",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to boost Ghost-type moves (proto-Spell Tag), but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	mysticpetal: {
+		num: -6227,
+		name: "Mystic Petal",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to weaken incoming Grass-type moves, but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	whitefeather: {
+		num: -6228,
+		name: "White Feather",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to weaken incoming Flying-type moves, but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	electricpouch: {
+		num: -6229,
+		name: "Electric Pouch",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to weaken incoming Electric-type moves, but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	strangewater: {
+		num: -6230,
+		name: "Strange Water",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to weaken incoming Water-type moves (inverted into Mystic Water), but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	jigglingballoon: {
+		num: -6231,
+		name: "Jiggling Balloon",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to weaken incoming Normal-type moves, but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	firemane: {
+		num: -6232,
+		name: "Fire Mane",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to weaken incoming Fire-type moves, but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	fossilshard: {
+		num: -6233,
+		name: "Fossil Shard",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to weaken incoming Ground-type moves, but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	grossgarbage: {
+		num: -6234,
+		name: "Gross Garbage",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to weaken incoming Poison-type moves, but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	championbelt: {
+		num: -6235,
+		name: "Champion Belt",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to weaken incoming Fighting-type moves, but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	tag: {
+		num: -6236,
+		name: "Tag",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to weaken incoming Ghost-type moves, but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	fiveyencoin: {
+		num: -6237,
+		name: "5 Yen Coin",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to weaken incoming Psychic-type moves, but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	guardthread: {
+		num: -6238,
+		name: "Guard Thread",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to weaken incoming Bug-type moves, but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	wisdomorb: {
+		num: -6239,
+		name: "Wisdom Orb",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to raise Special Defense by 10, but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	steelshell: {
+		num: -6240,
+		name: "Steel Shell",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to raise Defense by 10, but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	sharphorn: {
+		num: -6241,
+		name: "Sharp Horn",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to raise Attack by 10, but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	twinhorns: {
+		num: -6242,
+		name: "Twin Horns",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to raise Attack by 10, but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	icewing: {
+		num: -6243,
+		name: "Ice Wing",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to raise Special Defense by 10, but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	thunderwing: {
+		num: -6244,
+		name: "Thunder Wing",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to raise Speed by 10, but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	firewing: {
+		num: -6245,
+		name: "Fire Wing",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to raise Special Attack by 10, but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	confuseclaw: {
+		num: -6246,
+		name: "Confuse Claw",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to damage the foe before battle, but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	detectorb: {
+		num: -6247,
+		name: "Detect Orb",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to make attacks against the holder miss more often, but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	lifetag: {
+		num: -6248,
+		name: "Life Tag",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to restore a fainted Pokemon after battle, but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	fleefeather: {
+		num: -6249,
+		name: "Flee Feather",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to let the holder switch without using a turn, but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	countercuff: {
+		num: -6250,
+		name: "Counter Cuff",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to counter-attack for 1/4 of damage received, but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	diggingclaw: {
+		num: -6251,
+		name: "Digging Claw",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to let the holder use Dig in the field, but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	momslove: {
+		num: -6252,
+		name: "Mom's Love",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to restore 1 HP per step taken, but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	invisiblewall: {
+		num: -6253,
+		name: "Invisible Wall",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to halve special damage against the holder, but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	smokescreen: {
+		num: -6254,
+		name: "Smokescreen",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was proto-Smoke Ball: guarantees escape from wild battles, but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	longtongue: {
+		num: -6255,
+		name: "Long Tongue",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to raise catch rates in wild battles, but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	longvine: {
+		num: -6256,
+		name: "Long Vine",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to raise catch rates in wild battles, but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	talismantag: {
+		num: -6257,
+		name: "Talisman Tag",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was proto-Cleanse Tag: meant to repel wild Pokemon, but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	cordyceps: {
+		num: -6258,
+		name: "Cordyceps",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was proto-Big Mushroom: a sale item, but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	crimsonjewel: {
+		num: -6259,
+		name: "Crimson Jewel",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was proto-Star Piece: a sale item, but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	strangepower: {
+		num: -6260,
+		name: "Strange Power",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 demo item. Its data says it was meant to nullify all type effectiveness, but the demo's battle engine never implements the effect, so it does nothing when held.",
+		gen: 2,
+	},
+	heartstone: {
+		num: -6261,
+		name: "Heart Stone",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 evolution stone. Evolves Eevee into Eifie (Espeon), Poliwhirl into Nyorotono, and Natu into Natio in the demo.",
+		gen: 2,
+	},
+	poisonstone: {
+		num: -6262,
+		name: "Poison Stone",
+		spritenum: 0,
+		isNonstandard: "Demo",
+		desc: "SpaceWorld '97 evolution stone. Evolves Eevee into Blacky (Umbreon), Gloom into Kireihana, and Weepinbell into Belmitt in the demo.",
+		gen: 2,
+	},
 };

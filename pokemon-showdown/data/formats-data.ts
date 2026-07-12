@@ -6470,4 +6470,580 @@ export const FormatsData: import('../sim/dex-species').SpeciesFormatsDataTable =
 		isNonstandard: "Demo",
 		tier: "Illegal",
 	},
+	charmandersw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	charmeleonsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	charizardsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	squirtlesw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	wartortlesw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	blastoisesw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	ekanssw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	arboksw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	sandshrewsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	sandslashsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	nidorinasw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	nidoqueensw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	nidorinosw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	nidokingsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	clefablesw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	vulpixsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	ninetalessw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	jigglypuffsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	wigglytuffsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	golbatsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	oddishsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	gloomsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	vileplumesw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	venonatsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	venomothsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	diglettsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	dugtriosw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	meowthsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	persiansw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	psyducksw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	golducksw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	primeapesw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	growlithesw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	arcaninesw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	poliwagsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	poliwhirlsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	poliwrathsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	abrasw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	kadabrasw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	alakazamsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	machopsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	machampsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	bellsproutsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	weepinbellsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	victreebelsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	tentacoolsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	geodudesw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	gravelersw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	golemsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	ponytasw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	rapidashsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	slowpokesw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	slowbrosw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	magnemitesw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	magnetonsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	farfetchdsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	dodriosw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	seelsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	dewgongsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	grimersw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	muksw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	shelldersw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	cloystersw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	gastlysw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	hauntersw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	onixsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	drowzeesw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	hypnosw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	krabbysw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	kinglersw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	exeggcutesw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	exeggutorsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	cubonesw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	marowaksw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	hitmonleesw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	hitmonchansw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	lickitungsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	koffingsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	weezingsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	rhyhornsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	rhydonsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	tangelasw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	horseasw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	seadrasw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	goldeensw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	scythersw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	jynxsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	electabuzzsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	magmarsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	pinsirsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	taurossw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	gyaradossw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	laprassw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	vaporeonsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	jolteonsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	flareonsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	porygonsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	aerodactylsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	snorlaxsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	hoothootsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	flaaffysw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	ampharossw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	mantinesw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	pichusw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	cleffasw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	igglybuffsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	natusw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	xatusw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	marillsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	spinaraksw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	skarmorysw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	donphansw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	girafarigsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	politoedsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	slowkingsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	unownsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	ledybasw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	espeonsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	umbreonsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	remoraidsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	octillerysw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	hitmontopsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	hoppipsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	skiploomsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	jumpluffsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	smoochumsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	elekidsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	bellossomsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	miltanksw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	murkrowsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	blisseysw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	scizorsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	houndoursw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	houndoomsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	porygon2sw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	steelixsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	kingdrasw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	raikousw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	enteisw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	suicunesw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	sneaselsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	hoohsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	togepisw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	snubbullsw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
 };
