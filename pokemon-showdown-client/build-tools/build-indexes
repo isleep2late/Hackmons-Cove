@@ -1513,6 +1513,36 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 		}
 	}
 
+	{
+		const demoIds = [];
+		for (const id in Dex.data.Pokedex) {
+			if (Dex.data.FormatsData[id] && Dex.data.FormatsData[id].isNonstandard === 'Demo') demoIds.push(id);
+		}
+		demoIds.sort((a, b) => Dex.species.get(b).num - Dex.species.get(a).num);
+		for (const target of [BattleTeambuilderTable, BattleTeambuilderTable.bh, BattleTeambuilderTable.gen9phnn]) {
+			if (!target || !target.tiers || target.tiers.includes('flambear')) continue;
+			if (target.tiers === BattleTeambuilderTable.tiers && target !== BattleTeambuilderTable) continue;
+			target.tiers.push(['header', 'SpaceWorld Beta']);
+			for (const id of demoIds) {
+				target.tiers.push(id);
+				target.overrideTier[id] = 'OU';
+			}
+		}
+		if (BattleTeambuilderTable.gen9phnn) {
+			for (const id of demoIds) BattleTeambuilderTable.gen9phnn.overrideTier[id] = 'OU';
+		}
+		for (const clientId of ['gen2spaceworld', 'gen3phnn']) {
+			const t = BattleTeambuilderTable[clientId];
+			if (!t || !t.tiers) continue;
+			t.tiers = t.tiers.slice();
+			t.tiers.push(['header', 'SpaceWorld Beta']);
+			for (const id of demoIds) {
+				t.tiers.push(id);
+				t.overrideTier[id] = 'OU';
+			}
+		}
+	}
+
 	buf += `exports.BattleTeambuilderTable = JSON.parse('${JSON.stringify(BattleTeambuilderTable).replace(/['\\]/g, "\\$&")}');\n\n`;
 
 	fs.writeFileSync('play.pokemonshowdown.com/data/teambuilder-tables.js', buf);

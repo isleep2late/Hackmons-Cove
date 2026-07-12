@@ -286,7 +286,17 @@ export default {
 				"Psychic": 0
 			},
 			"Dark": {
-				"Steel": 0.5
+				"Steel": 0.5,
+				"Dark": 2
+			},
+			"Normal": {
+				"Dark": 2
+			},
+			"Water": {
+				"Steel": 2
+			},
+			"Electric": {
+				"Steel": 2
 			}
 		},
 		"baseStats": {

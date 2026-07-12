@@ -213,6 +213,19 @@ export interface TeambuilderSpriteData {
 	ext?: string;
 }
 
+const SW97_SPRITE_SIZES: {[id: string]: number} = {
+	anchorage: 96, animon: 96, aqua: 96, aquaria: 112, ballerine: 80, bellboyant: 96,
+	belmitt: 112, bobo: 112, bomseel: 96, booby: 96, chiks: 80, cruz: 80,
+	dynabear: 112, eksing: 112, electiger: 112, flambear: 80, gelania: 112, gift: 96,
+	golppy: 80, gongu: 80, grimey: 80, grotess: 96, hanamogura: 96, hanaryu: 112,
+	happa: 80, kurstraw: 96, leafeo: 96, likk: 112, madame: 112, meowsy: 80,
+	minicorn: 80, mitsuboshi: 96, mizuuo: 96, numpuff: 112, pachimee: 80, painter: 112,
+	pangshi: 112, paon: 80, para: 80, plux: 112, puddi: 80, puku: 80,
+	rinring: 80, sunmola1: 80, sunny: 96, tail: 80, tangel: 80, tigrette: 80,
+	trifox: 80, turbann: 96, twinz: 96, twohead: 112, volbear: 96, warwolf: 112,
+	wolfman: 80,
+};
+
 export const Dex = new class implements ModdedDex {
 	readonly Ability = Ability;
 	readonly Item = Item;
@@ -611,6 +624,21 @@ export const Dex = new class implements ModdedDex {
 			goku: { fw: 114, fh: 160, fpx: false, back: 1, bw: 114, bh: 160, ext: 'gif' },
 			gokusupersaiyan: { fw: 179, fh: 160, fpx: false, back: 1, bw: 179, bh: 160, ext: 'gif' },
 		};
+		if (SW97_SPRITE_SIZES[species.id]) {
+			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
+			const host = window.Config ? Config.routes.client : 'beta.hackmons.com';
+			const useBack = !isFront;
+			const size = useBack ? 96 : SW97_SPRITE_SIZES[species.id];
+			return {
+				gen: mechanicsGen,
+				w: size, h: size, y: 0,
+				url: `${protocol}//${host}/sprites/sw97/${species.id}${useBack ? '-back' : ''}.png`,
+				pixelated: true,
+				isFrontSprite: isFront,
+				cryurl: '',
+				shiny: !!options.shiny,
+			};
+		}
 		const phnnMeta = phnnSpriteMeta[species.id];
 		if (phnnMeta) {
 			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
@@ -852,6 +880,11 @@ export const Dex = new class implements ModdedDex {
 			arceusshadow: 1, arceusquestion: 1, lugiashadow: 1, mewtwoshadow: 1, mewtwoshadowmegax: 1, mewtwoarmored: 1,
 			goku: 1, gokusupersaiyan: 1,
 		};
+		if (SW97_SPRITE_SIZES[id]) {
+			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
+			const host = window.Config ? Config.routes.client : 'beta.hackmons.com';
+			return `background:transparent url(${protocol}//${host}/sprites/sw97/${id}-icon.png) no-repeat scroll center/contain;image-rendering:pixelated`;
+		}
 		if (phnnIconIds[id]) {
 			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
 			const host = window.Config ? Config.routes.client : 'beta.hackmons.com';
@@ -885,6 +918,19 @@ export const Dex = new class implements ModdedDex {
 			arceusshadow: 1, arceusquestion: 1, mewtwoshadow: 1, mewtwoshadowmegax: 1, mewtwoarmored: 1, lugiashadow: 1, hakamoototem: 1, wishiwashitotem: 1,
 			goku: 1, gokusupersaiyan: 1,
 		};
+		if (SW97_SPRITE_SIZES[species.id]) {
+			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
+			const host = window.Config ? Config.routes.client : 'beta.hackmons.com';
+			const size = SW97_SPRITE_SIZES[species.id];
+			return {
+				spriteid: species.id,
+				spriteDir: 'sprites/sw97',
+				x: Math.max(0, Math.floor((96 - size) / 2)),
+				y: Math.max(0, Math.floor((96 - size) / 2)),
+				pixelated: true,
+				customPrefix: `${protocol}//${host}/`,
+			};
+		}
 		if (phnnLocalSpriteIds[species.id]) {
 			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
 			const host = window.Config ? Config.routes.client : 'beta.hackmons.com';

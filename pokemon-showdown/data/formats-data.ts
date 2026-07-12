@@ -6250,4 +6250,224 @@ export const FormatsData: import('../sim/dex-species').SpeciesFormatsDataTable =
 		isNonstandard: "Custom",
 		tier: "Illegal",
 	},
+	flambear: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	volbear: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	dynabear: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	cruz: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	aqua: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	aquaria: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	trifox: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	tangel: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	gelania: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	numpuff: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	golppy: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	sunmola1: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	anchorage: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	grotess: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	para: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	animon: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	chiks: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	twinz: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	meowsy: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	rinring: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	bellboyant: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	minicorn: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	turbann: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	grimey: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	puddi: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	ballerine: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	belmitt: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	bomseel: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	tigrette: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	electiger: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	madame: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	kurstraw: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	pangshi: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	plux: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	wolfman: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	warwolf: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	likk: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	leafeo: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	happa: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	hanamogura: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	hanaryu: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	bobo: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	pachimee: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	puku: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	mizuuo: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	eksing: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	twohead: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	sunny: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	paon: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	painter: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	mitsuboshi: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	gongu: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	booby: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	gift: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	tail: {
+		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
 };
