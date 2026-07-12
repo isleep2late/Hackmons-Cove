@@ -1557,6 +1557,14 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 				t.items = (t.items || []).filter(entry => Array.isArray(entry) || !swAbsentItems.has(entry));
 				t.items.push(['header', 'SpaceWorld Items']);
 				for (const id of swBetaItems) t.items.push(id);
+				const gen2Override = (BattleTeambuilderTable['gen2'] || {}).overrideTier || {};
+				for (const entry of t.tiers) {
+					if (Array.isArray(entry) || t.overrideTier[entry] !== undefined) continue;
+					let eff = gen2Override[entry];
+					if (eff === undefined) eff = Dex.mod('gen2').species.get(entry).tier || '';
+					if (eff === 'Illegal' || eff === 'Unreleased') eff = 'OU';
+					t.overrideTier[entry] = eff;
+				}
 			}
 			t.tiers.push(['header', 'SpaceWorld Beta']);
 			for (const id of clientDemoIds) {

@@ -624,6 +624,8 @@ export class TeamValidator {
 			const isArbitrary = isInf || parseInt(ppMatch[2]) !== naturalPP;
 			if (isArbitrary && !isArbitraryPPAllowed) {
 				problems.push(`${set.name || set.species} has a custom move PP for ${move}, which is only allowed in Custom Disguises or in Gen 1/Gen 2/No Nerfs formats.`);
+			} else if (isArbitrary && !isInf && dex.gen === 1 && parseInt(ppMatch[2]) > 63) {
+				problems.push(`${set.name || set.species}'s PP for ${move} exceeds the Gen 1 maximum of 63.`);
 			} else if (isArbitrary && !isBigPPAllowed && (isInf || parseInt(ppMatch[2]) > 255)) {
 				problems.push(`${set.name || set.species}'s PP for ${move} exceeds the maximum of 255 for this format.${isInf ? ` (Infinite PP requires a Gen 1/Gen 2 OM, No Nerfs, or Custom Disguises.)` : ``}`);
 			} else if (!isArbitrary && !isPPUpsAllowed) {
@@ -686,13 +688,24 @@ export class TeamValidator {
 			return null;
 		};
 		if (set.phType && ruleTable.has('disguisemod')) {
+			const phExtraTypes = dex.gen <= 1 ? ['Bird', '???'] :
+				dex.gen === 2 ? ['???'] :
+				dex.gen <= 4 ? ['???', 'Shadow'] :
+				dex.gen <= 8 ? ['Shadow'] :
+				['Bird', '???', 'Shadow', 'Stellar'];
 			const typeNames: string[] = [];
 			for (const part of set.phType.split('/')) {
 				const typeName = findTypeName(part);
 				if (!typeName) {
 					problems.push(`${set.name || set.species}'s custom type "${part.trim()}" is invalid.`);
 				} else if (!typeNames.includes(typeName)) {
-					typeNames.push(typeName);
+					const typeInfo = dex.types.get(typeName);
+					const isStandardHere = typeInfo.exists && !typeInfo.isNonstandard;
+					if (!isCustomDisguises && !isStandardHere && !phExtraTypes.includes(typeName)) {
+						problems.push(`${set.name || set.species}'s custom type "${typeName}" does not exist in Gen ${dex.gen}.`);
+					} else {
+						typeNames.push(typeName);
+					}
 				}
 			}
 			if (typeNames.length > 2 && !isCustomDisguises) {
