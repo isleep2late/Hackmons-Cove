@@ -53,7 +53,7 @@ The server and client are both included as regular folders rather than submodule
 - **Othienka** - Creation of Armored Mewtwo sprites for fangames: https://www.deviantart.com/othienka/art/Armored-Mewtwo-Battle-Sprite-and-Back-Sprite-v2-460897939 & https://www.deviantart.com/othienka/art/Armored-Mewtwo-V3-594576816
 
 **Special Thanks:**
-- **Sonja_Krystal** for creating the Shadow Mewtwo/Mega X & Arceus front battle sprites!
+- **Sonja_Krystal** for implementing SpaceWorld'97 and creating the Shadow Mewtwo/Mega X & Arceus front battle sprites!
 - **Siphonaptera** for leading the [Gen 8] Unified project
 - **psim tseng** for artistic contribution and leadership
 - **Penultimate Toast** for Hackmons.com database management as site admin
