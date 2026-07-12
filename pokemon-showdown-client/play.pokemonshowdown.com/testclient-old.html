@@ -41,8 +41,20 @@
 	</head>
 	<body>
 		<div id="header" class="header">
-			<img class="logo" src="pokemonshowdownbeta.png" alt="Pok&eacute;mon Hackmons! (beta)" width="146" height="44" /><div class="maintabbarbottom"></div>
+			<img class="logo" src="pokemonshowdownbeta.png" alt="Pok&eacute;mon Hackmons! (beta)" width="256" height="44" /><div class="maintabbarbottom"></div>
 		</div>
+		<script>
+		(function () {
+			function phnnFitTabbar() {
+				var logo = document.querySelector('.header img.logo');
+				if (!logo) return;
+				document.documentElement.style.setProperty('--phnn-tabbar-left', (logo.offsetLeft + logo.offsetWidth + 2) + 'px');
+			}
+			phnnFitTabbar();
+			window.addEventListener('load', phnnFitTabbar);
+			window.addEventListener('resize', phnnFitTabbar);
+		})();
+		</script>
 		<div class="ps-room scrollable" id="mainmenu"><div class="mainmenuwrapper">
 			<div class="leftmenu">
 				<div class="activitymenu">
