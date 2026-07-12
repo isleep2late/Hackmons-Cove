@@ -500,7 +500,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		desc: "Gen 2 Pure Hackmons, but Pokemon can start the battle pre-statused. Uses Crystal mechanics (No Move-2 has 9 base power).",
 		mod: 'gen2',
 		searchShow: false,
-		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100'],
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100', 'Prestatus'],
 		unbanlist: ['No Move-2'],
 	},
 	{
@@ -509,7 +509,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'gen2gs',
 		searchShow: false,
 		challengeShow: false,
-		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100'],
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100', 'Prestatus'],
 		unbanlist: ['No Move-2'],
 	},
 	{
@@ -518,7 +518,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'spaceworld',
 		searchShow: false,
 		challengeShow: false,
-		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100'],
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100', 'Prestatus'],
 		unbanlist: ['No Move-2', 'No Move-SW'],
 	},
 	{

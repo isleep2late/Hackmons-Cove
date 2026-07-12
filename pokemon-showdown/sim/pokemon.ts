@@ -371,7 +371,7 @@ export class Pokemon {
 						customPP = 255;
 					}
 				} else {
-					customPP = this.battle.clampIntRange(parseInt(match[2]), 1, bigPP ? 65535 : 255);
+					customPP = this.battle.clampIntRange(parseInt(match[2]), 1, this.battle.gen === 1 ? 63 : bigPP ? 65535 : 255);
 				}
 				if (match[3] !== undefined) customPpUps = parseInt(match[3]);
 			}

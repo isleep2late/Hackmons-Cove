@@ -3327,7 +3327,7 @@
 						if (pmatch[2]) mppup = pmatch[2];
 					}
 					var ppBig = this.curTeam.gen <= 2 || isCustomDisguise || ppFmt.includes('nonerfs') || ppFmt.includes('customgame');
-					var ppTitle = ppBig ? 'Enter a number up to 65535, or - / inf for infinite PP' : 'Enter a number up to 255 (the cartridge maximum)';
+					var ppTitle = this.curTeam.gen === 1 ? 'Enter a number up to 63 (the Gen 1 maximum), or - / inf for infinite PP' : ppBig ? 'Enter a number up to 65535, or - / inf for infinite PP' : 'Enter a number up to 255 (the cartridge maximum)';
 					buf += '<div class="formrow"><label class="formlabel"' + (allowBasePP ? ' title="' + ppTitle + '"' : '') + '>Move ' + (m+1) + (allowBasePP ? ' PP' : ' PP Ups') + ':</label><div>';
 					if (allowBasePP) {
 						buf += '<input type="text" name="move' + (m+1) + 'pp" placeholder="Base" value="' + mpp + '" class="textbox inputform numform" /> / ';
@@ -3362,11 +3362,19 @@
 			return 100;
 		},
 		phnnCDTypeList: function () {
-			var names = Dex.types.all().map(function (t) { return t.name; });
-			var extras = ['Stellar', 'Shadow', 'Bird', '???'];
+			var gen = (this.curTeam && this.curTeam.gen) || 9;
+			var isCD = ('' + (this.curTeam && this.curTeam.format || '')).indexOf('customdisguise') >= 0;
+			var dex = (this.curTeam && this.curTeam.dex) || Dex;
+			var extras = (isCD || gen >= 9) ? ['Stellar', 'Shadow', 'Bird', '???'] :
+				gen <= 1 ? ['Bird', '???'] :
+				gen === 2 ? ['???'] :
+				gen <= 4 ? ['???', 'Shadow'] : ['Shadow'];
+			var names = dex.types.names();
 			var list = [];
 			for (var i = 0; i < names.length; i++) {
-				if (extras.indexOf(names[i]) < 0) list.push(names[i]);
+				if (extras.indexOf(names[i]) >= 0) continue;
+				if (!isCD && gen < 9 && names[i] === 'Stellar') continue;
+				list.push(names[i]);
 			}
 			list.sort();
 			return list.concat(extras);
@@ -3642,6 +3650,9 @@
 				} else {
 					delete set.startHp;
 				}
+				if (set.phStats && !this.phnnStatModAllowed(this.curTeam.format)) {
+					delete set.phStats;
+				}
 				
 				var ppSaveFmt = this.curTeam.format;
 				var ppSaveStatMod = this.curTeam.gen !== 3 && this.phnnStatModAllowed(ppSaveFmt);
@@ -3653,7 +3664,7 @@
 					var mppInf = /^(inf|infinite|-|\u221E)$/i.test(mppRaw);
 					var mpp = parseInt(mppRaw, 10);
 					var ppSaveBig = this.curTeam.gen <= 2 || ppSaveFmt.includes('customdisguise') || ppSaveFmt.includes('nonerfs') || ppSaveFmt.includes('customgame');
-					var ppSaveMax = ppSaveBig ? 65535 : 255;
+					var ppSaveMax = this.curTeam.gen === 1 ? 63 : ppSaveBig ? 65535 : 255;
 					if (!ppSaveBig && mppInf) {
 						mppInf = false;
 						mpp = 255;
@@ -4278,7 +4289,7 @@
 			var supportsAVs = !supportsEVs;
 			if (!set) set = this.curSet;
 			if (!set) return 0;
-			if (set.phStats && set.phStats[stat] !== undefined && this.curTeam.format.includes('customdisguise')) {
+			if (set.phStats && set.phStats[stat] !== undefined && this.phnnStatModAllowed(this.curTeam.format)) {
 				return set.phStats[stat];
 			}
 
