@@ -123,9 +123,17 @@ export class DexSearch {
 			this.results = this.textSearch(query);
 			if (this.typedSearch?.sortRow) {
 				if (this.sortCol && !['type', 'ability', 'category'].includes(this.sortCol)) {
+					if (!this.typedSearch.illegalReasons) this.typedSearch.getResults();
+					const illegal = this.typedSearch.illegalReasons;
 					let sorted = this.results.filter(([rowType]) => rowType === this.typedSearch!.searchType);
+					let illegalSorted: SearchRow[] = illegal ? sorted.filter(([, id]) => id in illegal) : [];
+					if (illegal) sorted = sorted.filter(([, id]) => !(id in illegal));
 					sorted = this.typedSearch.sort(sorted, this.sortCol, this.reverseSort);
 					this.results = [this.typedSearch.sortRow, ...sorted];
+					if (illegalSorted.length) {
+						illegalSorted = this.typedSearch.sort(illegalSorted, this.sortCol, this.reverseSort);
+						this.results.push(['header', "Illegal results"], ...illegalSorted);
+					}
 				} else {
 					this.results = [this.typedSearch.sortRow, ...this.results];
 				}
