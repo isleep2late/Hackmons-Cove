@@ -275,11 +275,21 @@ export default {
 			}
 		},
 		"typeChart": {
-			"Bug": {
-				"Poison": 2
+			"Normal": {
+				"Dark": 2
 			},
 			"Poison": {
 				"Bug": 2
+			},
+			"Bug": {
+				"Poison": 2
+			},
+			"Ghost": {
+				"Steel": 0.5,
+				"Psychic": 0
+			},
+			"Water": {
+				"Steel": 2
 			},
 			"Electric": {
 				"Steel": 2
@@ -287,16 +297,6 @@ export default {
 			"Dark": {
 				"Steel": 0.5,
 				"Dark": 2
-			},
-			"Ghost": {
-				"Psychic": 0,
-				"Steel": 0.5
-			},
-			"Normal": {
-				"Dark": 2
-			},
-			"Water": {
-				"Steel": 2
 			}
 		},
 		"baseStats": {
@@ -655,244 +655,6 @@ export default {
 		"gen": 8,
 		"moves": {},
 		"typeChart": {},
-		"baseStats": {}
-	},
-	"gen2spaceworld": {
-		"gen": 2,
-		"moves": {
-			"doubleedge": {
-				"basePower": 100,
-				"type": "Normal",
-				"category": "Physical"
-			},
-			"karatechop": {
-				"basePower": 50,
-				"type": "Normal",
-				"category": "Physical"
-			},
-			"present": {
-				"basePower": 50,
-				"type": "Normal",
-				"category": "Physical"
-			},
-			"pursuit": {
-				"basePower": 40,
-				"type": "Normal",
-				"category": "Special"
-			},
-			"spikes": {
-				"basePower": 0,
-				"type": "Normal",
-				"category": "Status"
-			},
-			"triplekick": {
-				"basePower": 60,
-				"type": "Fighting",
-				"category": "Physical"
-			},
-			"twister": {
-				"basePower": 60,
-				"type": "Dragon",
-				"category": "Special"
-			},
-			"hiddenpower": {
-				"basePower": 70,
-				"type": "Water",
-				"category": "Special"
-			},
-			"bite": {
-				"basePower": 60,
-				"type": "Normal",
-				"category": "Special"
-			},
-			"sandattack": {
-				"basePower": 0,
-				"type": "Normal",
-				"category": "Status"
-			},
-			"mudslap": {
-				"basePower": 20,
-				"type": "Normal",
-				"category": "Physical"
-			},
-			"dragonbreath": {
-				"basePower": 40,
-				"type": "Dragon",
-				"category": "Special"
-			},
-			"furycutter": {
-				"basePower": 25,
-				"type": "Bug",
-				"category": "Physical"
-			},
-			"coinhurl": {
-				"basePower": 40,
-				"type": "Normal",
-				"category": "Physical"
-			},
-			"zapcannon": {
-				"basePower": 100,
-				"type": "Normal",
-				"category": "Special"
-			},
-			"synchronize": {
-				"basePower": 0,
-				"type": "Psychic",
-				"category": "Status"
-			},
-			"detect": {
-				"basePower": 0,
-				"type": "Normal",
-				"category": "Status"
-			},
-			"bonelock": {
-				"basePower": 25,
-				"type": "Ground",
-				"category": "Physical"
-			},
-			"stalker": {
-				"basePower": 0,
-				"type": "Psychic",
-				"category": "Status"
-			},
-			"sacredfire": {
-				"basePower": 80,
-				"type": "Fire",
-				"category": "Special"
-			},
-			"megaphone": {
-				"basePower": 0,
-				"type": "Normal",
-				"category": "Status"
-			},
-			"irontail": {
-				"basePower": 60,
-				"type": "Steel",
-				"category": "Physical"
-			},
-			"rockhead": {
-				"basePower": 90,
-				"type": "Rock",
-				"category": "Physical"
-			},
-			"vitalthrow": {
-				"basePower": 50,
-				"type": "Fighting",
-				"category": "Physical"
-			},
-			"crosscutter": {
-				"basePower": 50,
-				"type": "Bug",
-				"category": "Physical"
-			},
-			"uproot": {
-				"basePower": 30,
-				"type": "Normal",
-				"category": "Physical"
-			},
-			"windride": {
-				"basePower": 40,
-				"type": "Flying",
-				"category": "Physical"
-			},
-			"strongarm": {
-				"basePower": 30,
-				"type": "Steel",
-				"category": "Physical"
-			},
-			"brightmoss": {
-				"basePower": 0,
-				"type": "Grass",
-				"category": "Status"
-			},
-			"whirlpool": {
-				"basePower": 30,
-				"type": "Water",
-				"category": "Special"
-			},
-			"naildown": {
-				"basePower": 0,
-				"type": "Ghost",
-				"category": "Status"
-			},
-			"bellchime": {
-				"basePower": 0,
-				"type": "Normal",
-				"category": "Status"
-			},
-			"tempt": {
-				"basePower": 0,
-				"type": "Normal",
-				"category": "Status"
-			},
-			"nomovesw": {
-				"basePower": 214,
-				"type": "???",
-				"category": "Physical"
-			}
-		},
-		"typeChart": {
-			"Normal": {
-				"Dark": 2,
-				"Steel": 1
-			},
-			"Fire": {
-				"Steel": 1
-			},
-			"Water": {
-				"Electric": 0.5,
-				"Steel": 2
-			},
-			"Electric": {
-				"Steel": 2
-			},
-			"Grass": {
-				"Steel": 1
-			},
-			"Ice": {
-				"Steel": 1
-			},
-			"Fighting": {
-				"Dark": 1,
-				"Steel": 0.5
-			},
-			"Poison": {
-				"Bug": 2,
-				"Steel": 0.5
-			},
-			"Ground": {
-				"Steel": 1
-			},
-			"Flying": {
-				"Steel": 1
-			},
-			"Psychic": {
-				"Dark": 0.5,
-				"Steel": 1
-			},
-			"Bug": {
-				"Poison": 2,
-				"Steel": 1
-			},
-			"Ghost": {
-				"Ghost": 1,
-				"Steel": 1
-			},
-			"Dragon": {
-				"Steel": 1
-			},
-			"Dark": {
-				"Normal": 0.5,
-				"Fighting": 1,
-				"Dark": 2,
-				"Steel": 1
-			},
-			"Steel": {
-				"Fire": 1,
-				"Ice": 1,
-				"Steel": 0
-			}
-		},
 		"baseStats": {}
 	}
 } as const;
