@@ -214,40 +214,48 @@ export interface TeambuilderSpriteData {
 }
 
 const SW97_SPRITE_SIZES: {[id: string]: number} = {
-	abrasw: 80, aerodactylsw: 112, alakazamsw: 112, ampharossw: 112, arboksw: 112, arcaninesw: 112,
-	bellossomsw: 112, bellsproutsw: 80, blastoisesw: 112, blisseysw: 112, charizardsw: 112, charmandersw: 80,
-	charmeleonsw: 96, clefablesw: 96, cleffasw: 80, cloystersw: 112, cubonesw: 80, dewgongsw: 112,
-	diglettsw: 80, dodriosw: 112, donphansw: 112, drowzeesw: 96, dugtriosw: 112, ekanssw: 80,
-	electabuzzsw: 96, elekidsw: 80, enteisw: 112, espeonsw: 96, exeggcutesw: 112, exeggutorsw: 112,
-	farfetchdsw: 96, flaaffysw: 96, flareonsw: 96, gastlysw: 112, geodudesw: 80, girafarigsw: 112,
-	gloomsw: 96, golbatsw: 112, goldeensw: 96, golducksw: 112, golemsw: 96, gravelersw: 96,
-	grimersw: 80, growlithesw: 80, gyaradossw: 112, hauntersw: 96, hitmonchansw: 96, hitmonleesw: 112,
-	hitmontopsw: 112, hoohsw: 112, hoothootsw: 80, hoppipsw: 80, horseasw: 80, houndoomsw: 112,
-	houndoursw: 96, hypnosw: 112, igglybuffsw: 80, jigglypuffsw: 80, jolteonsw: 96, jumpluffsw: 112,
-	jynxsw: 96, kadabrasw: 96, kingdrasw: 112, kinglersw: 112, koffingsw: 96, krabbysw: 80,
-	laprassw: 112, ledybasw: 96, lickitungsw: 112, machampsw: 112, machopsw: 80, magmarsw: 96,
-	magnemitesw: 80, magnetonsw: 96, mantinesw: 96, marillsw: 80, marowaksw: 96, meowthsw: 80,
-	miltanksw: 96, muksw: 112, murkrowsw: 96, natusw: 80, nidokingsw: 112, nidoqueensw: 112,
-	nidorinasw: 96, nidorinosw: 96, ninetalessw: 112, octillerysw: 96, oddishsw: 80, onixsw: 112,
-	persiansw: 112, pichusw: 80, pinsirsw: 112, politoedsw: 112, poliwagsw: 80, poliwhirlsw: 96,
-	poliwrathsw: 112, ponytasw: 96, porygon2sw: 96, porygonsw: 96, primeapesw: 112, psyducksw: 80,
-	raikousw: 112, rapidashsw: 112, remoraidsw: 80, rhydonsw: 112, rhyhornsw: 112, sandshrewsw: 80,
-	sandslashsw: 96, scizorsw: 112, scythersw: 112, seadrasw: 96, seelsw: 96, shelldersw: 80,
-	skarmorysw: 112, skiploomsw: 96, slowbrosw: 112, slowkingsw: 112, slowpokesw: 80, smoochumsw: 80,
-	sneaselsw: 80, snorlaxsw: 112, snubbullsw: 96, spinaraksw: 80, squirtlesw: 80, steelixsw: 112,
-	suicunesw: 112, tangelasw: 96, taurossw: 112, tentacoolsw: 80, togepisw: 80, umbreonsw: 96,
-	unownsw: 80, vaporeonsw: 96, venomothsw: 112, venonatsw: 80, victreebelsw: 112, vileplumesw: 112,
-	vulpixsw: 96, wartortlesw: 96, weepinbellsw: 96, weezingsw: 112, wigglytuffsw: 96, xatusw: 96,
-	anchorage: 96, animon: 96, aqua: 96, aquaria: 112, ballerine: 80, bellboyant: 96,
-	belmitt: 112, bobo: 112, bomseel: 96, booby: 96, chiks: 80, cruz: 80,
-	dynabear: 112, eksing: 112, electiger: 112, flambear: 80, gelania: 112, gift: 96,
-	golppy: 80, gongu: 80, grimey: 80, grotess: 96, hanamogura: 96, hanaryu: 112,
-	happa: 80, kurstraw: 96, leafeo: 96, likk: 112, madame: 112, meowsy: 80,
-	minicorn: 80, mitsuboshi: 96, mizuuo: 96, numpuff: 112, pachimee: 80, painter: 112,
-	pangshi: 112, paon: 80, para: 80, plux: 112, puddi: 80, puku: 80,
-	rinring: 80, sunmola1: 80, sunny: 96, tail: 80, tangel: 80, tigrette: 80,
-	trifox: 80, turbann: 96, twinz: 96, twohead: 112, volbear: 96, warwolf: 112,
-	wolfman: 80,
+	abrasw: 80, aerodactylsw: 112, alakazamsw: 112, ampharossw: 112, anchorage: 96, animon: 96,
+	aqua: 96, aquaria: 112, arboksw: 112, arcaninesw: 112, articunosw: 112, ballerine: 80,
+	beedrillsw: 112, bellboyant: 96, bellossomsw: 112, bellsproutsw: 80, belmitt: 112, blastoisesw: 112,
+	blisseysw: 112, bobo: 112, bomseel: 96, booby: 96, bulbasaursw: 80, butterfreesw: 112,
+	caterpiesw: 80, chanseysw: 96, charizardsw: 112, charmandersw: 80, charmeleonsw: 96, chiks: 80,
+	clefablesw: 96, clefairysw: 80, cleffasw: 80, cloystersw: 112, cruz: 80, cubonesw: 80,
+	dewgongsw: 112, diglettsw: 80, dittosw: 80, dodriosw: 112, doduosw: 80, donphansw: 112,
+	dragonairsw: 96, dragonitesw: 112, dratinisw: 80, drowzeesw: 96, dugtriosw: 112, dynabear: 112,
+	eeveesw: 80, ekanssw: 80, eksing: 112, electabuzzsw: 96, electiger: 112, electrodesw: 80,
+	elekidsw: 80, enteisw: 112, espeonsw: 96, exeggcutesw: 112, exeggutorsw: 112, farfetchdsw: 96,
+	fearowsw: 112, flaaffysw: 96, flambear: 80, flareonsw: 96, gastlysw: 112, gelania: 112,
+	gengarsw: 96, geodudesw: 80, gift: 96, girafarigsw: 112, gloomsw: 96, golbatsw: 112,
+	goldeensw: 96, golducksw: 112, golemsw: 96, golppy: 80, gongu: 80, gravelersw: 96,
+	grimersw: 80, grimey: 80, grotess: 96, growlithesw: 80, gyaradossw: 112, hanamogura: 96,
+	hanaryu: 112, happa: 80, hauntersw: 96, hitmonchansw: 96, hitmonleesw: 112, hitmontopsw: 112,
+	hoohsw: 112, hoothootsw: 80, hoppipsw: 80, horseasw: 80, houndoomsw: 112, houndoursw: 96,
+	hypnosw: 112, igglybuffsw: 80, ivysaursw: 96, jigglypuffsw: 80, jolteonsw: 96, jumpluffsw: 112,
+	jynxsw: 96, kabutopssw: 96, kabutosw: 80, kadabrasw: 96, kakunasw: 80, kangaskhansw: 112,
+	kingdrasw: 112, kinglersw: 112, koffingsw: 96, krabbysw: 80, kurstraw: 96, laprassw: 112,
+	leafeo: 96, ledybasw: 96, lickitungsw: 112, likk: 112, machampsw: 112, machokesw: 112,
+	machopsw: 80, madame: 112, magikarpsw: 96, magmarsw: 96, magnemitesw: 80, magnetonsw: 96,
+	mankeysw: 80, mantinesw: 96, marillsw: 80, marowaksw: 96, meowsy: 80, meowthsw: 80,
+	metapodsw: 80, mewsw: 80, mewtwosw: 112, miltanksw: 96, minicorn: 80, mitsuboshi: 96,
+	mizuuo: 96, moltressw: 112, mrmimesw: 96, muksw: 112, murkrowsw: 96, natusw: 80,
+	nidokingsw: 112, nidoqueensw: 112, nidoranfsw: 80, nidoranmsw: 80, nidorinasw: 96, nidorinosw: 96,
+	ninetalessw: 112, numpuff: 112, octillerysw: 96, oddishsw: 80, omanytesw: 80, omastarsw: 96,
+	onixsw: 112, pachimee: 80, painter: 112, pangshi: 112, paon: 80, para: 80,
+	parasectsw: 112, parassw: 80, persiansw: 112, pichusw: 80, pidgeotsw: 112, pidgeottosw: 96,
+	pidgeysw: 80, pikachusw: 80, pinsirsw: 112, plux: 112, politoedsw: 112, poliwagsw: 80,
+	poliwhirlsw: 96, poliwrathsw: 112, ponytasw: 96, porygon2sw: 96, porygonsw: 96, primeapesw: 112,
+	psyducksw: 80, puddi: 80, puku: 80, raichusw: 112, raikousw: 112, rapidashsw: 112,
+	raticatesw: 96, rattatasw: 80, remoraidsw: 80, rhydonsw: 112, rhyhornsw: 112, rinring: 80,
+	sandshrewsw: 80, sandslashsw: 96, scizorsw: 112, scythersw: 112, seadrasw: 96, seakingsw: 112,
+	seelsw: 96, shelldersw: 80, skarmorysw: 112, skiploomsw: 96, slowbrosw: 112, slowkingsw: 112,
+	slowpokesw: 80, smoochumsw: 80, sneaselsw: 80, snorlaxsw: 112, snubbullsw: 96, spearowsw: 80,
+	spinaraksw: 80, squirtlesw: 80, starmiesw: 96, staryusw: 96, steelixsw: 112, suicunesw: 112,
+	sunmola1: 80, sunny: 96, tail: 80, tangel: 80, tangelasw: 96, taurossw: 112,
+	tentacoolsw: 80, tentacruelsw: 96, tigrette: 80, togepisw: 80, trifox: 80, turbann: 96,
+	twinz: 96, twohead: 112, umbreonsw: 96, unownsw: 80, vaporeonsw: 96, venomothsw: 112,
+	venonatsw: 80, venusaursw: 112, victreebelsw: 112, vileplumesw: 112, volbear: 96, voltorbsw: 80,
+	vulpixsw: 96, wartortlesw: 96, warwolf: 112, weedlesw: 80, weepinbellsw: 96, weezingsw: 112,
+	wigglytuffsw: 96, wolfman: 80, xatusw: 96, zapdossw: 112, zubatsw: 80,
 };
 
 export const Dex = new class implements ModdedDex {
@@ -648,15 +656,17 @@ export const Dex = new class implements ModdedDex {
 			goku: { fw: 114, fh: 160, fpx: false, back: 1, bw: 114, bh: 160, ext: 'gif' },
 			gokusupersaiyan: { fw: 179, fh: 160, fpx: false, back: 1, bw: 179, bh: 160, ext: 'gif' },
 		};
-		if (SW97_SPRITE_SIZES[species.id]) {
+		let sw97Id = species.id;
+		if (options.mod === 'gen2spaceworld' && SW97_SPRITE_SIZES[species.id + 'sw']) sw97Id = species.id + 'sw';
+		if (SW97_SPRITE_SIZES[sw97Id]) {
 			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
 			const host = window.Config ? Config.routes.client : 'beta.hackmons.com';
 			const useBack = !isFront;
-			const size = useBack ? 96 : SW97_SPRITE_SIZES[species.id];
+			const size = useBack ? 96 : SW97_SPRITE_SIZES[sw97Id];
 			return {
 				gen: mechanicsGen,
 				w: size, h: size, y: 0,
-				url: `${protocol}//${host}/sprites/sw97/${species.id}${useBack ? '-back' : ''}.png`,
+				url: `${protocol}//${host}/sprites/sw97/${sw97Id}${useBack ? '-back' : ''}.png`,
 				pixelated: true,
 				isFrontSprite: isFront,
 				cryurl: '',
@@ -942,12 +952,14 @@ export const Dex = new class implements ModdedDex {
 			arceusshadow: 1, arceusquestion: 1, mewtwoshadow: 1, mewtwoshadowmegax: 1, mewtwoarmored: 1, lugiashadow: 1, hakamoototem: 1, wishiwashitotem: 1,
 			goku: 1, gokusupersaiyan: 1,
 		};
-		if (SW97_SPRITE_SIZES[species.id]) {
+		let tbSw97Id = species.id;
+		if (dex.modid === 'gen2spaceworld' && SW97_SPRITE_SIZES[species.id + 'sw']) tbSw97Id = species.id + 'sw';
+		if (SW97_SPRITE_SIZES[tbSw97Id]) {
 			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
 			const host = window.Config ? Config.routes.client : 'beta.hackmons.com';
-			const size = SW97_SPRITE_SIZES[species.id];
+			const size = SW97_SPRITE_SIZES[tbSw97Id];
 			return {
-				spriteid: species.id,
+				spriteid: tbSw97Id,
 				spriteDir: 'sprites/sw97',
 				x: Math.max(0, Math.floor((96 - size) / 2)),
 				y: Math.max(0, Math.floor((96 - size) / 2)),
