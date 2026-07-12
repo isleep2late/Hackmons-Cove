@@ -649,11 +649,11 @@ export class TeamValidator {
 			const statusParts = set.startStatus.split('/').filter(Boolean);
 			if (statusParts.length > 1) {
 				if (!ruleTable.has('multistatus')) {
-					problems.push(`${set.name || set.species} has multiple starting statuses, which requires the Multistatus rule.`);
+					problems.push(`${set.name || set.species} has ${statusParts.length} starting statuses, which is only legal in battles with the Multistatus rule (add "Multistatus = ${Math.min(statusParts.length, 5)}" to the battle's custom rules).`);
 				} else {
 					const multiLimit = parseInt(ruleTable.valueRules.get('multistatus') || '0') || 0;
 					if (multiLimit && statusParts.length > multiLimit) {
-						problems.push(`${set.name || set.species} has ${statusParts.length} starting statuses, but this battle's Multistatus limit is ${multiLimit}.`);
+						problems.push(`${set.name || set.species} has ${statusParts.length} starting statuses, but this battle's Multistatus limit is ${multiLimit} (it would need "Multistatus = ${Math.min(statusParts.length, 5)}").`);
 					}
 				}
 			}
