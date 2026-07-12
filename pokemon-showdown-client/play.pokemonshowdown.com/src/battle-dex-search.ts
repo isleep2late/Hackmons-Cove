@@ -1040,7 +1040,10 @@ abstract class BattleTypedSearch<T extends SearchType> {
 			this.formatType === 'champions' ? `champions` :
 			this.formatType === 'natdexchampions' ? `natdexchampions` :
 			`gen${gen}`;
-		if (table?.[tableKey]) {
+		const phnnModTables = ['gen2spaceworld', 'gen2gs', 'gen1phnn', 'gen1phnneng', 'gen3phnn'];
+		if (phnnModTables.includes(this.dex.modid) && table[this.dex.modid]) {
+			table = table[this.dex.modid];
+		} else if (table?.[tableKey]) {
 			table = table[tableKey];
 		}
 		if (!table) return pokemon.tier;
@@ -1135,7 +1138,10 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 		const dex = this.dex;
 
 		let table = BattleTeambuilderTable;
-		if ((format.endsWith('cap') || format.endsWith('caplc')) && dex.gen < 9) {
+		const phnnModTables = ['gen2spaceworld', 'gen2gs', 'gen1phnn', 'gen1phnneng', 'gen3phnn'];
+		if (phnnModTables.includes(dex.modid) && table[dex.modid]) {
+			table = table[dex.modid];
+		} else if ((format.endsWith('cap') || format.endsWith('caplc')) && dex.gen < 9) {
 			table = table[`gen${dex.gen}`];
 		} else if (this.formatType === 'champions') {
 			table = table[`champions`];
