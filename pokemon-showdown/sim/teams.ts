@@ -293,7 +293,7 @@ export const Teams = new class Teams {
 			j = buf.indexOf('|', i);
 			if (j < 0) return null;
 			set.moves = buf.substring(i, j).split(',', 24).map(name => {
-				const match = /(.*)(\(\d+(?:\/\d+)?\))$/.exec(name);
+				const match = /(.*)(\((?:\d+|inf)(?:\/\d+)?\))$/i.exec(name);
 				if (match) return this.unpackName(match[1], Dex.moves) + ' ' + match[2];
 				return this.unpackName(name, Dex.moves);
 			});
@@ -405,7 +405,7 @@ export const Teams = new class Teams {
 	/** Very similar to toID but without the lowercase conversion */
 	packName(this: void, name: string | undefined | null) {
 		if (!name) return '';
-		const match = /(.*)\s+(\(\d+(?:\/\d+)?\))$/.exec(name);
+		const match = /(.*)\s+(\((?:\d+|inf)(?:\/\d+)?\))$/i.exec(name);
 		if (match) {
 			return match[1].replace(/[^A-Za-z0-9]+/g, '') + match[2];
 		}

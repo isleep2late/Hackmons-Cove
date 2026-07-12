@@ -1,3 +1,5 @@
+const SW_EVIOLITE: string[] = ['ballerine', 'ditto', 'farfetchd', 'golppy', 'minicorn', 'para', 'pinsir', 'slowbro', 'tangel'];
+
 export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 	// Classic Items Return
 
@@ -93,4 +95,17 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 		shortDesc: "Turns Arceus into its ??? (typeless) forme; Judgment becomes typeless.",
 	},
 
+	eviolite: {
+		inherit: true,
+		onModifyDef(def, pokemon) {
+			if (pokemon.baseSpecies.nfe || SW_EVIOLITE.includes(pokemon.baseSpecies.id)) {
+				return this.chainModify(1.5);
+			}
+		},
+		onModifySpD(spd, pokemon) {
+			if (pokemon.baseSpecies.nfe || SW_EVIOLITE.includes(pokemon.baseSpecies.id)) {
+				return this.chainModify(1.5);
+			}
+		},
+	},
 };

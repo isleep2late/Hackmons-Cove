@@ -121,6 +121,23 @@ export class DexSearch {
 			}
 		} else {
 			this.results = this.textSearch(query);
+			if (this.typedSearch?.sortRow) {
+				if (this.sortCol && !['type', 'ability', 'category'].includes(this.sortCol)) {
+					if (!this.typedSearch.illegalReasons) this.typedSearch.getResults();
+					const illegal = this.typedSearch.illegalReasons;
+					let sorted = this.results.filter(([rowType]) => rowType === this.typedSearch!.searchType);
+					let illegalSorted: SearchRow[] = illegal ? sorted.filter(([, id]) => id in illegal) : [];
+					if (illegal) sorted = sorted.filter(([, id]) => !(id in illegal));
+					sorted = this.typedSearch.sort(sorted, this.sortCol, this.reverseSort);
+					this.results = [this.typedSearch.sortRow, ...sorted];
+					if (illegalSorted.length) {
+						illegalSorted = this.typedSearch.sort(illegalSorted, this.sortCol, this.reverseSort);
+						this.results.push(['header', "Illegal results"], ...illegalSorted);
+					}
+				} else {
+					this.results = [this.typedSearch.sortRow, ...this.results];
+				}
+			}
 		}
 		this.selection = this.getFirstResultIndex();
 		return true;
@@ -665,7 +682,7 @@ abstract class BattleTypedSearch<T extends SearchType> {
 	illegalReasons: { [id: string]: string } | null = null;
 	results: SearchRow[] | null = null;
 
-	protected readonly sortRow: SearchRow | null = null;
+	readonly sortRow: SearchRow | null = null;
 
 	constructor(searchType: T, format = '' as ID, speciesOrSet: ID | Dex.PokemonSet = '' as ID) {
 		this.searchType = searchType;
@@ -736,6 +753,9 @@ abstract class BattleTypedSearch<T extends SearchType> {
 			this.dex = Dex.mod('gen2gs' as ID);
 		}
 		if (format.includes('statusesspaceworld') && this.dex.gen === 2) {
+			this.dex = Dex.mod('gen2spaceworld' as ID);
+		}
+		if (format.includes('spaceworldcustomdisguises') && this.dex.gen === 2) {
 			this.dex = Dex.mod('gen2spaceworld' as ID);
 		}
 		if (format === 'anyability' && this.dex.gen === 3) {
@@ -1037,7 +1057,10 @@ abstract class BattleTypedSearch<T extends SearchType> {
 			this.formatType === 'champions' ? `champions` :
 			this.formatType === 'natdexchampions' ? `natdexchampions` :
 			`gen${gen}`;
-		if (table?.[tableKey]) {
+		const phnnModTables = ['gen2spaceworld', 'gen2gs', 'gen1phnn', 'gen1phnneng', 'gen3phnn'];
+		if (phnnModTables.includes(this.dex.modid) && table[this.dex.modid]) {
+			table = table[this.dex.modid];
+		} else if (table?.[tableKey]) {
 			table = table[tableKey];
 		}
 		if (!table) return pokemon.tier;
@@ -1132,7 +1155,10 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 		const dex = this.dex;
 
 		let table = BattleTeambuilderTable;
-		if ((format.endsWith('cap') || format.endsWith('caplc')) && dex.gen < 9) {
+		const phnnModTables = ['gen2spaceworld', 'gen2gs', 'gen1phnn', 'gen1phnneng', 'gen3phnn'];
+		if (phnnModTables.includes(dex.modid) && table[dex.modid]) {
+			table = table[dex.modid];
+		} else if ((format.endsWith('cap') || format.endsWith('caplc')) && dex.gen < 9) {
 			table = table[`gen${dex.gen}`];
 		} else if (this.formatType === 'champions') {
 			table = table[`champions`];

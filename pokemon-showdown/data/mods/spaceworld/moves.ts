@@ -1,8 +1,4 @@
 export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
-	aeroblast: {
-		inherit: true,
-		critRatio: 3,
-	},
 	attract: {
 		inherit: true,
 		pp: 10,
@@ -18,14 +14,6 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	crabhammer: {
 		inherit: true,
 		critRatio: 3,
-	},
-	crosschop: {
-		inherit: true,
-		critRatio: 3,
-	},
-	curse: {
-		inherit: true,
-		type: "Ghost",
 	},
 	doubleedge: {
 		inherit: true,
@@ -72,10 +60,6 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		accuracy: 90,
 		basePower: 50,
 		secondary: {"chance":30,"volatileStatus":"flinch"},
-	},
-	mirrorcoat: {
-		inherit: true,
-		priority: -1,
 	},
 	moonlight: {
 		inherit: true,
@@ -243,7 +227,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	rollout: {
 		inherit: true,
-		accuracy: 80,
+		accuracy: 79,
 		pp: 10,
 	},
 	furycutter: {
@@ -293,10 +277,10 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		accuracy: 100,
 		basePower: 40,
 		pp: 10,
-		category: "physical",
+		category: "Physical",
 		type: "Normal",
 		secondary: null,
-		priority: "0",
+		priority: 0,
 		target: "normal",
 	},
 	machpunch: {
@@ -339,9 +323,9 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		accuracy: 100,
 		basePower: 0,
 		pp: 10,
-		category: "status",
+		category: "Status",
 		type: "Psychic",
-		priority: "0",
+		priority: 0,
 		target: "normal",
 	},
 	detect: {
@@ -354,10 +338,10 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		accuracy: 100,
 		basePower: 25,
 		pp: 10,
-		category: "physical",
+		category: "Physical",
 		type: "Ground",
 		secondary: null,
-		priority: "0",
+		priority: 0,
 		target: "normal",
 	},
 	charm: {
@@ -374,10 +358,10 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		accuracy: 100,
 		basePower: 0,
 		pp: 10,
-		category: "status",
+		category: "Status",
 		type: "Psychic",
 		secondary: null,
-		priority: "0",
+		priority: 0,
 		volatileStatus: "confusion",
 		target: "normal",
 	},
@@ -402,9 +386,9 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		accuracy: 85,
 		basePower: 0,
 		pp: 40,
-		category: "status",
+		category: "Status",
 		type: "Normal",
-		priority: "0",
+		priority: 0,
 		target: "normal",
 	},
 	rapidspin: {
@@ -423,9 +407,9 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		accuracy: 100,
 		basePower: 90,
 		pp: 10,
-		category: "physical",
+		category: "Physical",
 		type: "Rock",
-		priority: "0",
+		priority: 0,
 		target: "normal",
 	},
 	vitalthrow: {
@@ -437,9 +421,9 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		accuracy: 100,
 		basePower: 50,
 		pp: 10,
-		category: "physical",
+		category: "Physical",
 		type: "Bug",
-		priority: "0",
+		priority: 0,
 		target: "normal",
 	},
 	uproot: {
@@ -447,9 +431,9 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		accuracy: 100,
 		basePower: 30,
 		pp: 10,
-		category: "physical",
+		category: "Physical",
 		type: "Normal",
-		priority: "0",
+		priority: 0,
 		target: "normal",
 	},
 	windride: {
@@ -457,9 +441,9 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		accuracy: 100,
 		basePower: 40,
 		pp: 10,
-		category: "physical",
+		category: "Physical",
 		type: "Flying",
-		priority: "0",
+		priority: 0,
 		target: "normal",
 	},
 	watersport: {
@@ -467,9 +451,9 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		accuracy: 100,
 		basePower: 30,
 		pp: 10,
-		category: "special",
+		category: "Special",
 		type: "Water",
-		priority: "0",
+		priority: 0,
 		target: "normal",
 	},
 	strongarm: {
@@ -477,9 +461,9 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		accuracy: 100,
 		basePower: 30,
 		pp: 10,
-		category: "physical",
+		category: "Physical",
 		type: "Steel",
-		priority: "0",
+		priority: 0,
 		target: "normal",
 	},
 	brightmoss: {
@@ -495,9 +479,9 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		accuracy: 100,
 		basePower: 30,
 		pp: 10,
-		category: "special",
+		category: "Special",
 		type: "Water",
-		priority: "0",
+		priority: 0,
 		volatileStatus: null,
 		target: "normal",
 	},
@@ -506,9 +490,9 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		accuracy: 100,
 		basePower: 0,
 		pp: 10,
-		category: "special",
+		category: "Special",
 		type: "Water",
-		priority: "0",
+		priority: 0,
 		target: "normal",
 	},
 	clamp: {
@@ -531,5 +515,93 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	bind: {
 		inherit: true,
 		volatileStatus: "partiallytrapped",
+	},
+	naildown: {
+		inherit: true,
+		isNonstandard: null,
+	},
+	bellchime: {
+		inherit: true,
+		isNonstandard: null,
+	},
+	tempt: {
+		inherit: true,
+		isNonstandard: null,
+	},
+	aeroblast: {
+		inherit: true,
+		isNonstandard: "Future",
+	},
+	ancientpower: {
+		inherit: true,
+		isNonstandard: "Future",
+	},
+	beatup: {
+		inherit: true,
+		isNonstandard: "Future",
+	},
+	bonerush: {
+		inherit: true,
+		isNonstandard: "Future",
+	},
+	crosschop: {
+		inherit: true,
+		isNonstandard: "Future",
+	},
+	crunch: {
+		inherit: true,
+		isNonstandard: "Future",
+	},
+	curse: {
+		inherit: true,
+		isNonstandard: "Future",
+	},
+	extremespeed: {
+		inherit: true,
+		isNonstandard: "Future",
+	},
+	futuresight: {
+		inherit: true,
+		isNonstandard: "Future",
+	},
+	healbell: {
+		inherit: true,
+		isNonstandard: "Future",
+	},
+	icywind: {
+		inherit: true,
+		isNonstandard: "Future",
+	},
+	meanlook: {
+		inherit: true,
+		isNonstandard: "Future",
+	},
+	megahorn: {
+		inherit: true,
+		isNonstandard: "Future",
+	},
+	metalclaw: {
+		inherit: true,
+		isNonstandard: "Future",
+	},
+	mirrorcoat: {
+		inherit: true,
+		isNonstandard: "Future",
+	},
+	psychup: {
+		inherit: true,
+		isNonstandard: "Future",
+	},
+	rocksmash: {
+		inherit: true,
+		isNonstandard: "Future",
+	},
+	shadowball: {
+		inherit: true,
+		isNonstandard: "Future",
+	},
+	sweetscent: {
+		inherit: true,
+		isNonstandard: "Future",
 	},
 };

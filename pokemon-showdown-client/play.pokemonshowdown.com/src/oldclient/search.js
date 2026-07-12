@@ -51,7 +51,7 @@
 			var sortCol = e.currentTarget.dataset.sort;
 			self.engine.toggleSort(sortCol);
 			self.sortCol = self.engine.sortCol;
-			self.find('');
+			self.find(self.q || '');
 		});
 	}
 
@@ -496,7 +496,7 @@
 		}
 
 		// desc
-		buf += '<span class="col itemdesccol">' + BattleLog.escapeHTML(item.shortDesc) + '</span> ';
+		buf += '<span class="col itemdesccol" title="' + BattleLog.escapeHTML(item.desc || item.shortDesc) + '">' + BattleLog.escapeHTML(item.shortDesc) + '</span> ';
 
 		buf += '</a></li>';
 
@@ -522,7 +522,7 @@
 			return buf;
 		}
 
-		buf += '<span class="col abilitydesccol">' + BattleLog.escapeHTML(ability.shortDesc) + '</span> ';
+		buf += '<span class="col abilitydesccol" title="' + BattleLog.escapeHTML(ability.desc || ability.shortDesc) + '">' + BattleLog.escapeHTML(ability.shortDesc) + '</span> ';
 
 		buf += '</a></li>';
 
@@ -579,7 +579,7 @@
 		buf += '<span class="col pplabelcol"><em>PP</em><br />' + pp + '</span> ';
 
 		// desc
-		buf += '<span class="col movedesccol">' + BattleLog.escapeHTML(move.shortDesc) + '</span> ';
+		buf += '<span class="col movedesccol" title="' + BattleLog.escapeHTML(move.desc || move.shortDesc) + '">' + BattleLog.escapeHTML(move.shortDesc) + '</span> ';
 
 		buf += '</a></li>';
 
@@ -620,7 +620,7 @@
 		buf += '<span class="col pplabelcol"><em>PP</em><br />' + pp + '</span> ';
 
 		// desc
-		buf += '<span class="col movedesccol">' + BattleLog.escapeHTML(move.shortDesc || move.desc) + '</span> ';
+		buf += '<span class="col movedesccol" title="' + BattleLog.escapeHTML(move.desc || move.shortDesc) + '">' + BattleLog.escapeHTML(move.shortDesc || move.desc) + '</span> ';
 
 		buf += '</a>';
 
@@ -663,7 +663,7 @@
 		buf += '<span class="col pplabelcol"><em>PP</em><br />' + pp + '</span> ';
 
 		// desc
-		buf += '<span class="col movedesccol">' + BattleLog.escapeHTML(move.shortDesc || move.desc) + '</span> ';
+		buf += '<span class="col movedesccol" title="' + BattleLog.escapeHTML(move.desc || move.shortDesc) + '">' + BattleLog.escapeHTML(move.shortDesc || move.desc) + '</span> ';
 
 		buf += '</a></li>';
 

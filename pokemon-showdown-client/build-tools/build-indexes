@@ -1513,6 +1513,59 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 		}
 	}
 
+	{
+		const demoIds = [];
+		for (const id in Dex.data.Pokedex) {
+			if (Dex.data.FormatsData[id] && Dex.data.FormatsData[id].isNonstandard === 'Demo') demoIds.push(id);
+		}
+		demoIds.sort((a, b) => Dex.species.get(b).num - Dex.species.get(a).num);
+		for (const target of [BattleTeambuilderTable, BattleTeambuilderTable.bh, BattleTeambuilderTable.gen9phnn]) {
+			if (!target || !target.tiers || target.tiers.includes('flambear')) continue;
+			if (target.tiers === BattleTeambuilderTable.tiers && target !== BattleTeambuilderTable) continue;
+			target.tiers.push(['header', 'SpaceWorld Beta']);
+			for (const id of demoIds) {
+				target.tiers.push(id);
+				target.overrideTier[id] = 'OU';
+			}
+		}
+		if (BattleTeambuilderTable.gen9phnn) {
+			for (const id of demoIds) BattleTeambuilderTable.gen9phnn.overrideTier[id] = 'OU';
+		}
+		const demoItemIds = [];
+		for (const id in Dex.data.Items) {
+			if (Dex.data.Items[id].isNonstandard === 'Demo') demoItemIds.push(id);
+		}
+		demoItemIds.sort();
+		for (const target of [BattleTeambuilderTable, BattleTeambuilderTable.bh]) {
+			if (!target || !target.items || target.items.includes('strangethread')) continue;
+			target.items.push(['header', 'SpaceWorld Items']);
+			for (const id of demoItemIds) target.items.push(id);
+		}
+		for (const clientId of ['gen2spaceworld', 'gen3phnn']) {
+			const t = BattleTeambuilderTable[clientId];
+			if (!t || !t.tiers) continue;
+			t.tiers = t.tiers.slice();
+			let clientDemoIds = demoIds;
+			if (clientId === 'gen2spaceworld') {
+				const swOwnLearnsets = requireNoCache('../caches/pokemon-showdown/dist/data/mods/spaceworld/learnsets.js').Learnsets;
+				t.tiers = t.tiers.filter(entry => Array.isArray(entry) || swOwnLearnsets[entry] || demoIds.includes(entry));
+				clientDemoIds = demoIds.filter(id => swOwnLearnsets[id]);
+				t.tiers = t.tiers.filter(entry => Array.isArray(entry) || clientDemoIds.includes(entry) || !demoIds.includes(entry));
+				const swOwnItems = requireNoCache('../caches/pokemon-showdown/dist/data/mods/spaceworld/items.js').Items;
+				const swAbsentItems = new Set(Object.keys(swOwnItems).filter(id => swOwnItems[id].isNonstandard === 'Future'));
+				const swBetaItems = Object.keys(swOwnItems).filter(id => swOwnItems[id].isNonstandard === null).sort();
+				t.items = (t.items || []).filter(entry => Array.isArray(entry) || !swAbsentItems.has(entry));
+				t.items.push(['header', 'SpaceWorld Items']);
+				for (const id of swBetaItems) t.items.push(id);
+			}
+			t.tiers.push(['header', 'SpaceWorld Beta']);
+			for (const id of clientDemoIds) {
+				t.tiers.push(id);
+				t.overrideTier[id] = 'OU';
+			}
+		}
+	}
+
 	buf += `exports.BattleTeambuilderTable = JSON.parse('${JSON.stringify(BattleTeambuilderTable).replace(/['\\]/g, "\\$&")}');\n\n`;
 
 	fs.writeFileSync('play.pokemonshowdown.com/data/teambuilder-tables.js', buf);
@@ -1618,6 +1671,9 @@ process.stdout.write("Building `data/moves,items,abilities,typechart,learnsets.j
 	for (const glitchMove of ['nomove', 'nomove2', 'nomovesw']) {
 		if (Moves[glitchMove]) delete Moves[glitchMove].isNonstandard;
 	}
+	for (const id in Moves) {
+		if (Moves[id].isNonstandard === 'Demo') delete Moves[id].isNonstandard;
+	}
 	const buf = 'exports.BattleMovedex = ' + es3stringify(Moves) + ';';
 	fs.writeFileSync('play.pokemonshowdown.com/data/moves.js', buf);
 	fs.writeFileSync('play.pokemonshowdown.com/data/moves.json', JSON.stringify(Moves));
@@ -1651,6 +1707,9 @@ process.stdout.write("Building `data/moves,items,abilities,typechart,learnsets.j
 			if (it.forcedForme) e.forcedForme = it.forcedForme;
 			Items[id] = e;
 		}
+	}
+	for (const id in Items) {
+		if (Items[id].isNonstandard === 'Demo') delete Items[id].isNonstandard;
 	}
 	const buf = 'exports.BattleItems = ' + es3stringify(Items) + ';';
 	fs.writeFileSync('play.pokemonshowdown.com/data/items.js', buf);

@@ -422,7 +422,7 @@ export class PSSearchResults extends preact.Component<{
 				const sort = target.getAttribute('data-sort');
 				if (sort) {
 					search.toggleSort(sort);
-					search.find('');
+					search.find(search.query || '');
 					ev.preventDefault();
 					ev.stopPropagation();
 					this.props.onSelect?.(null, '');

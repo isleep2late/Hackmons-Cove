@@ -51,6 +51,7 @@
 			// team changes
 			'change input.teamnameedit': 'teamNameChange',
 			'click button.formatselect': 'selectFormat',
+			'click button.statmodtoggle': 'toggleStatMod',
 			'change input[name=nickname]': 'nicknameChange',
 
 			// misc
@@ -1245,6 +1246,7 @@
 					buf += '<label class="label">Format:</label><button class="select formatselect teambuilderformatselect" name="format" value="' + this.curTeam.format + '">' + (isGenericFormat(this.curTeam.format) ? '<em>Select a format</em>' : BattleLog.escapeFormat(this.curTeam.format)) + '</button>';
 					buf += this.renderCdModeSelect();
 					buf += this.renderVersionSelect();
+					buf += this.renderStatModToggle();
 					var btnClass = 'button' + (!this.curSetList.length || app.isDisconnected ? ' disabled' : '');
 					buf += ' <button name="validate" class="' + btnClass + '"><i class="fa fa-check"></i> Validate</button></li>';
 				}
@@ -1762,12 +1764,40 @@
 			}
 			return null;
 		},
+		renderStatModToggle: function () {
+			var f = '' + (this.curTeam.format || '');
+			if (!f || /^gen\d+$/.test(f) || f.includes('customdisguise') || f.includes('customgame')) return '';
+			var on = this.phnnStatModAllowed(f);
+			return ' <button class="button statmodtoggle' + (on ? ' cur' : '') + '" title="Allow manually overridden stats (1-65535), like cartridge save editing"><i class="fa fa-flask"></i> Stat Mod' + (on ? ': On' : '') + '</button>';
+		},
+		toggleStatMod: function () {
+			var f = '' + (this.curTeam.format || '');
+			var atIdx = f.indexOf('@@@');
+			var base = atIdx >= 0 ? f.slice(0, atIdx) : f;
+			var rules = atIdx >= 0 ? f.slice(atIdx + 3).split(',').map(function (r) { return r.trim(); }).filter(Boolean) : [];
+			var had = false;
+			rules = rules.filter(function (r) {
+				if (r.toLowerCase().replace(/\s/g, '') === 'statmod') { had = true; return false; }
+				return true;
+			});
+			if (!had) rules.push('Stat Mod');
+			var newFormat = rules.length ? base + '@@@' + rules.join(', ') : base;
+			this.changeFormat(newFormat);
+		},
+		phnnStatModAllowed: function (format) {
+			var f = '' + (format || this.curTeam && this.curTeam.format || '');
+			if (f.includes('customdisguise')) return true;
+			var atIdx = f.indexOf('@@@');
+			if (atIdx < 0) return false;
+			return f.slice(atIdx + 3).toLowerCase().replace(/\s/g, '').split(',').indexOf('statmod') >= 0;
+		},
 		phnnVersionModId: function (format) {
 			return {
 				gen1disguises: 'gen1phnn',
 				gen1disguisesenglish: 'gen1phnneng',
 				gen2statusesgoldsilver: 'gen2gs',
 				gen2statusesspaceworld: 'gen2spaceworld',
+				gen2spaceworldcustomdisguises: 'gen2spaceworld',
 			}[('' + (format || '')).split('@@@')[0]] || null;
 		},
 		renderVersionSelect: function () {
@@ -2739,7 +2769,7 @@
 				}
 			}
 
-			if (this.curTeam.format.includes('customdisguise')) {
+			if (this.phnnStatModAllowed(this.curTeam.format)) {
 				buf += '<div class="col ivcol"><div><strong>Override</strong></div>';
 				for (var i in stats) {
 					var oval = set.phStats && set.phStats[i] !== undefined ? '' + set.phStats[i] : '';
@@ -3279,19 +3309,29 @@
 				buf += this.renderPhnnMultiselect('startstatuses', phStatusOptions, selectedStatuses, 'None', false);
 				buf += '</div></div>';
 				buf += '<div class="formrow"><label class="formlabel">Starting HP:</label><div><input type="number" min="1" max="999" step="1" name="starthp" placeholder="Max" value="' + (set.startHp || '') + '" class="textbox inputform numform" /></div></div>';
-				
+			}
+
+			var ppFmt = this.curTeam.format;
+			var ppStatMod = this.curTeam.gen !== 3 && this.phnnStatModAllowed(ppFmt);
+			var isOMForPP = isDisguise || ppFmt.includes('status') || ppFmt.includes('nonerfs') || ppFmt.includes('anyability') || ppFmt.includes('nolimit') || ppFmt.includes('unified') || ppFmt.includes('255') || ppFmt.includes('rage') || ppStatMod;
+			var allowBasePP = isCustomDisguise || ppFmt.includes('nonerfs') || (this.curTeam.gen <= 2 && isOMForPP) || ppStatMod;
+			if (isOMForPP) {
 				if (!set.moves) set.moves = [];
 				for (var m = 0; m < 4; m++) {
 					var mv = set.moves[m] || '';
 					var mpp = '';
 					var mppup = '3';
-					var pmatch = mv.match(/\((\d+)\/(\d+)\)$/);
+					var pmatch = mv.match(/\((\d+|inf)(?:\/(\d+))?\)$/i);
 					if (pmatch) {
-						mpp = pmatch[1];
-						mppup = pmatch[2];
+						mpp = pmatch[1].toLowerCase() === 'inf' ? 'inf' : pmatch[1];
+						if (pmatch[2]) mppup = pmatch[2];
 					}
-					buf += '<div class="formrow"><label class="formlabel">Move ' + (m+1) + ' PP:</label><div>';
-					buf += '<input type="number" min="1" max="99" step="1" name="move' + (m+1) + 'pp" placeholder="Base" value="' + mpp + '" class="textbox inputform numform" /> / ';
+					var ppBig = this.curTeam.gen <= 2 || isCustomDisguise || ppFmt.includes('nonerfs') || ppFmt.includes('customgame');
+					var ppTitle = ppBig ? 'Enter a number up to 65535, or - / inf for infinite PP' : 'Enter a number up to 255 (the cartridge maximum)';
+					buf += '<div class="formrow"><label class="formlabel"' + (allowBasePP ? ' title="' + ppTitle + '"' : '') + '>Move ' + (m+1) + (allowBasePP ? ' PP' : ' PP Ups') + ':</label><div>';
+					if (allowBasePP) {
+						buf += '<input type="text" name="move' + (m+1) + 'pp" placeholder="Base" value="' + mpp + '" class="textbox inputform numform" /> / ';
+					}
 					buf += '<select name="move' + (m+1) + 'ppups" class="button">';
 					buf += '<option value="0"' + (mppup === '0' ? ' selected="selected"' : '') + '>0</option>';
 					buf += '<option value="1"' + (mppup === '1' ? ' selected="selected"' : '') + '>1</option>';
@@ -3603,16 +3643,39 @@
 					delete set.startHp;
 				}
 				
-				if (!set.moves) set.moves = [];
-				for (var m = 0; m < 4; m++) {
-					var mpp = parseInt(this.$chart.find('input[name=move' + (m+1) + 'pp]').val(), 10);
-					var mppup = this.$chart.find('select[name=move' + (m+1) + 'ppups]').val();
+				var ppSaveFmt = this.curTeam.format;
+				var ppSaveStatMod = this.curTeam.gen !== 3 && this.phnnStatModAllowed(ppSaveFmt);
+				var isOMForPPSave = ppSaveFmt.includes('disguise') || ppSaveFmt.includes('status') || ppSaveFmt.includes('nonerfs') || ppSaveFmt.includes('anyability') || ppSaveFmt.includes('nolimit') || ppSaveFmt.includes('unified') || ppSaveFmt.includes('255') || ppSaveFmt.includes('rage') || ppSaveStatMod;
+				var allowBasePPSave = ppSaveFmt.includes('customdisguise') || ppSaveFmt.includes('nonerfs') || (this.curTeam.gen <= 2 && isOMForPPSave) || ppSaveStatMod;
+				if (isOMForPPSave && !set.moves) set.moves = [];
+				for (var m = 0; isOMForPPSave && m < 4; m++) {
+					var mppRaw = allowBasePPSave ? String(this.$chart.find('input[name=move' + (m+1) + 'pp]').val() || '').trim() : '';
+					var mppInf = /^(inf|infinite|-|\u221E)$/i.test(mppRaw);
+					var mpp = parseInt(mppRaw, 10);
+					var ppSaveBig = this.curTeam.gen <= 2 || ppSaveFmt.includes('customdisguise') || ppSaveFmt.includes('nonerfs') || ppSaveFmt.includes('customgame');
+					var ppSaveMax = ppSaveBig ? 65535 : 255;
+					if (!ppSaveBig && mppInf) {
+						mppInf = false;
+						mpp = 255;
+					}
+					if (!isNaN(mpp) && mpp > ppSaveMax) mpp = ppSaveMax;
+					var mppup = this.$chart.find('select[name=move' + (m+1) + 'ppups]').val() || '3';
 					var mv = set.moves[m] || '';
-					var pmatch = mv.match(/\((\d+)\/(\d+)\)$/);
+					var pmatch = mv.match(/\((\d+|inf)(?:\/(\d+))?\)$/i);
 					if (pmatch) mv = mv.slice(0, pmatch.index).trim();
-					if (!isNaN(mpp) && mpp > 0 && mv) {
-						set.moves[m] = mv + ' (' + mpp + '/' + (mppup || '3') + ')';
-					} else if (pmatch) {
+					if (!mv) {
+						continue;
+					} else if (mppInf) {
+						set.moves[m] = mv + ' (inf)';
+					} else if (!isNaN(mpp) && mpp > 0) {
+						set.moves[m] = mv + ' (' + mpp + '/' + mppup + ')';
+					} else if (mppup !== '3') {
+						var ppMoveData = this.curTeam.dex.moves.get(mv);
+						var naturalPP = ppMoveData && ppMoveData.pp ? (ppMoveData.noPPBoosts ? ppMoveData.pp : ppMoveData.pp * (5 + (+mppup)) / 5) : 0;
+						if (this.curTeam.gen <= 2 && ppMoveData && ppMoveData.pp === 40) naturalPP -= (+mppup);
+						if (naturalPP > 0) set.moves[m] = mv + ' (' + naturalPP + '/' + mppup + ')';
+						else set.moves[m] = mv;
+					} else {
 						set.moves[m] = mv;
 					}
 				}
@@ -3782,7 +3845,7 @@
 			var rawValue = e.currentTarget.value;
 			var ppSuffix = '';
 			if (name === 'move1' || name === 'move2' || name === 'move3' || name === 'move4') {
-				var ppMatch = rawValue.match(/\s*(\((\d+)(?:\/(\d+))?\))\s*$/);
+				var ppMatch = rawValue.match(/\s*(\((\d+|inf)(?:\/(\d+))?\))\s*$/i);
 				if (ppMatch) {
 					ppSuffix = ' ' + ppMatch[1];
 					rawValue = rawValue.slice(0, ppMatch.index);

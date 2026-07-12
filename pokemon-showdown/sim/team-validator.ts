@@ -15,7 +15,7 @@ import { Teams } from './teams';
 import { PRNG } from './prng';
 import { type RuleTable } from './dex-formats';
 
-const EXISTENCE_TAGS = ['past', 'future', 'lgpe', 'unobtainable', 'cap', 'custom', 'nonexistent'];
+const EXISTENCE_TAGS = ['past', 'future', 'lgpe', 'unobtainable', 'cap', 'custom', 'demo', 'nonexistent'];
 
 /**
  * Describes a possible way to get a pokemon. Is not exhaustive!
@@ -598,16 +598,36 @@ export class TeamValidator {
 		set.nature = nature.name;
 		if (!Array.isArray(set.moves)) set.moves = [];
 
-		const isCustomPPAllowed = ruleTable.has('disguisemod') || dex.currentMod.includes('phnn');
+		const isCustomHpAllowed = ruleTable.has('disguisemod') || dex.currentMod.includes('phnn');
 		const isCustomDisguises = ruleTable.has('disguisemod') && format.id.includes('customdisguise');
-		if (!isCustomPPAllowed) {
-			if (set.startHp !== undefined) {
-				problems.push(`${set.name || set.species} has a custom starting HP, which is only allowed in Pure Hackmons No Nerfs or Custom Disguises formats.`);
-			}
-			for (const move of set.moves) {
-				if (/(.*)\s+\((\d+)(?:\/(\d+))?\)$/.test(move)) {
-					problems.push(`${set.name || set.species} has a custom move PP for ${move}, which is only allowed in Pure Hackmons No Nerfs or Custom Disguises formats.`);
-				}
+		const isArbitraryPPAllowed = isCustomDisguises ||
+			(dex.currentMod.includes('phnn') && dex.gen !== 3) ||
+			(dex.gen <= 2 && (format.id.includes('disguises') || format.id.includes('statuses'))) ||
+			(ruleTable.has('statmod') && dex.gen !== 3);
+		const isBigPPAllowed = isCustomDisguises || dex.currentMod.includes('phnn') || dex.gen <= 2 ||
+			format.id.includes('nonerfs');
+		const isPPUpsAllowed = isArbitraryPPAllowed || ruleTable.has('disguisemod') || dex.currentMod.includes('phnn') ||
+			['spaceworld', 'gen2gs'].includes(dex.currentMod) || format.id.includes('anyability') ||
+			format.id.includes('nolimit') || format.id.includes('unified') || format.id.includes('255') ||
+			format.id.includes('statuses') || format.id.includes('disguises') || format.id.includes('nonerfs');
+		if (!isCustomHpAllowed && set.startHp !== undefined) {
+			problems.push(`${set.name || set.species} has a custom starting HP, which is only allowed in Pure Hackmons No Nerfs or Custom Disguises formats.`);
+		}
+		for (const move of set.moves) {
+			const ppMatch = /(.*)\s+\((\d+|inf)(?:\/(\d+))?\)$/i.exec(move);
+			if (!ppMatch) continue;
+			const isInf = ppMatch[2].toLowerCase() === 'inf';
+			const ppUps = ppMatch[3] !== undefined ? Math.max(0, Math.min(3, parseInt(ppMatch[3]))) : 3;
+			const ppMove = dex.moves.get(ppMatch[1].trim());
+			let naturalPP = ppMove.noPPBoosts ? ppMove.pp : ppMove.pp * (5 + ppUps) / 5;
+			if (dex.gen <= 2 && ppMove.pp === 40) naturalPP -= ppUps;
+			const isArbitrary = isInf || parseInt(ppMatch[2]) !== naturalPP;
+			if (isArbitrary && !isArbitraryPPAllowed) {
+				problems.push(`${set.name || set.species} has a custom move PP for ${move}, which is only allowed in Custom Disguises or in Gen 1/Gen 2/No Nerfs formats.`);
+			} else if (isArbitrary && !isBigPPAllowed && (isInf || parseInt(ppMatch[2]) > 255)) {
+				problems.push(`${set.name || set.species}'s PP for ${move} exceeds the maximum of 255 for this format.${isInf ? ` (Infinite PP requires a Gen 1/Gen 2 OM, No Nerfs, or Custom Disguises.)` : ``}`);
+			} else if (!isArbitrary && !isPPUpsAllowed) {
+				problems.push(`${set.name || set.species} has custom PP Ups for ${move}, which is only allowed in Hackmons OM formats.`);
 			}
 		}
 		if (!ruleTable.has('disguisemod')) {
@@ -642,8 +662,9 @@ export class TeamValidator {
 		if (set.phItems && !isCustomDisguises) {
 			problems.push(`${set.name || set.species} has multiple items, which is only allowed in Custom Disguises formats.`);
 		}
-		if (set.phStats && !isCustomDisguises) {
-			problems.push(`${set.name || set.species} has manual stat overrides, which are only allowed in Custom Disguises formats.`);
+		const statmodAllowed = isCustomDisguises || ruleTable.has('statmod');
+		if (set.phStats && !statmodAllowed) {
+			problems.push(`${set.name || set.species} has manual stat overrides, which are only allowed in Custom Disguises formats or with the Stat Mod rule.`);
 		}
 		const findTypeName = (typeText: string): string | null => {
 			const wanted = typeText.trim().toLowerCase();
@@ -786,7 +807,7 @@ export class TeamValidator {
 			set.phItems = extraItemNames.join('/');
 			if (!set.phItems) delete set.phItems;
 		}
-		if (set.phStats && isCustomDisguises) {
+		if (set.phStats && statmodAllowed) {
 			const statOrder = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'] as StatID[];
 			const cleaned: Partial<StatsTable> = {};
 			let any = false;

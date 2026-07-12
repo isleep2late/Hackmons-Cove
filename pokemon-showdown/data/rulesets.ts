@@ -215,6 +215,11 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 		name: 'Infinite Mod',
 		desc: "When a player runs out of Pok&eacute;mon, instead of losing they may submit a new Pok&eacute;mon to continue the battle indefinitely.",
 	},
+	statmod: {
+		effectType: 'Rule',
+		name: 'Stat Mod',
+		desc: "Allows Pok&eacute;mon to have their actual stats manually overridden to any value from 1 to 65535 in the teambuilder, replicating cartridge save-file stat editing.",
+	},
 	prestatus: {
 		effectType: 'Rule',
 		name: 'Prestatus',

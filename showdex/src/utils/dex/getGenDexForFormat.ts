@@ -1,4 +1,5 @@
 import { type Generation, type GenerationNum, type Specie } from '@smogon/calc';
+import { isPhnnSwEvioliteNfe } from '@showdex/phnn';
 import { env } from '@showdex/utils/core';
 import { detectGenFromFormat } from './detectGenFromFormat';
 import { getDexForFormat } from './getDexForFormat';
@@ -45,6 +46,10 @@ export const getGenDexForFormat = (
 
       if (typeof specie?.nfe !== 'boolean') {
         (specie as Writable<Specie>).nfe = notFullyEvolved(id, format);
+      }
+
+      if (specie && !specie.nfe && isPhnnSwEvioliteNfe(String(format), specie.id)) {
+        return { ...specie, nfe: true } as Specie;
       }
 
       return specie;

@@ -275,6 +275,9 @@ export default {
 			}
 		},
 		"typeChart": {
+			"Normal": {
+				"Dark": 2
+			},
 			"Poison": {
 				"Bug": 2
 			},
@@ -285,8 +288,15 @@ export default {
 				"Steel": 0.5,
 				"Psychic": 0
 			},
+			"Water": {
+				"Steel": 2
+			},
+			"Electric": {
+				"Steel": 2
+			},
 			"Dark": {
-				"Steel": 0.5
+				"Steel": 0.5,
+				"Dark": 2
 			}
 		},
 		"baseStats": {

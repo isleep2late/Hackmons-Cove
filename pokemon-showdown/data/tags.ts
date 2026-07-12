@@ -314,6 +314,11 @@ export const Tags: { [id: IDEntry]: TagData } = {
 		desc: "Made up for the Smogon Create-A-Pokemon project.",
 		genericFilter: thing => thing.isNonstandard === 'CAP',
 	},
+	demo: {
+		name: "Demo",
+		desc: "Only obtainable in the 1997 SpaceWorld Gold and Silver demo.",
+		genericFilter: thing => thing.isNonstandard === 'Demo',
+	},
 	custom: {
 		name: "Custom",
 		desc: "Made up for... something or other. I don't recommend using this, it's not tagged very consistently.",

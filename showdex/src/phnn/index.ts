@@ -35,6 +35,10 @@ export const detectPhnnKey = (format: string): PhnnKey | null => {
 
   const f = format.toLowerCase();
 
+  if (f.includes('spaceworld')) {
+    return ('gen2spaceworld' in phnnData ? 'gen2spaceworld' : null) as PhnnKey | null;
+  }
+
   if (!(f.includes('phnn') || f.includes('nonerfs') || f.includes('unified'))) {
     return null;
   }
@@ -137,7 +141,7 @@ export const getPhnnMoveOverrides = (
     out.type = '???';
   }
 
-  if (ivs && id.startsWith('hiddenpower')) {
+  if (ivs && id.startsWith('hiddenpower') && key !== 'gen2spaceworld') {
     const bit = (value: number): number => Math.floor(((Number(value) || 0) % 4) / 2);
     const power = bit(ivs.atk) + 2 * bit(ivs.def) + 4 * bit(ivs.spe) + 8 * bit(ivs.spa) + 16 * bit(ivs.spd) + 32 * bit(ivs.hp);
     out.basePower = Math.floor((power * 40) / 63 + 30);
@@ -255,6 +259,14 @@ export const getPhnnArceusTypes = (
 
   return plateType ? [plateType] : null;
 };
+
+const PHNN_SW_EVIOLITE_IDS = [
+  'ballerine', 'ditto', 'farfetchd', 'golppy', 'minicorn', 'para', 'pinsir', 'slowbro', 'tangel',
+];
+
+export const isPhnnSwEvioliteNfe = (format: string, speciesId: string): boolean => (
+  detectPhnnKey(format) === 'gen9phnn' && PHNN_SW_EVIOLITE_IDS.includes(toPhnnId(speciesId))
+);
 
 const PHNN_SHADOW_MOVE_IDS = [
   'shadowrush', 'shadowblast', 'shadowblitz', 'shadowbreak', 'shadowend', 'shadowbolt',
