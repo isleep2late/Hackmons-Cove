@@ -3285,13 +3285,13 @@
 					var mv = set.moves[m] || '';
 					var mpp = '';
 					var mppup = '3';
-					var pmatch = mv.match(/\((\d+)\/(\d+)\)$/);
+					var pmatch = mv.match(/\((\d+|inf)(?:\/(\d+))?\)$/i);
 					if (pmatch) {
-						mpp = pmatch[1];
-						mppup = pmatch[2];
+						mpp = pmatch[1].toLowerCase() === 'inf' ? 'inf' : pmatch[1];
+						if (pmatch[2]) mppup = pmatch[2];
 					}
-					buf += '<div class="formrow"><label class="formlabel">Move ' + (m+1) + ' PP:</label><div>';
-					buf += '<input type="number" min="1" max="99" step="1" name="move' + (m+1) + 'pp" placeholder="Base" value="' + mpp + '" class="textbox inputform numform" /> / ';
+					buf += '<div class="formrow"><label class="formlabel" title="Enter a number, or - / inf for infinite PP">Move ' + (m+1) + ' PP:</label><div>';
+					buf += '<input type="text" name="move' + (m+1) + 'pp" placeholder="Base" value="' + mpp + '" class="textbox inputform numform" /> / ';
 					buf += '<select name="move' + (m+1) + 'ppups" class="button">';
 					buf += '<option value="0"' + (mppup === '0' ? ' selected="selected"' : '') + '>0</option>';
 					buf += '<option value="1"' + (mppup === '1' ? ' selected="selected"' : '') + '>1</option>';
@@ -3605,12 +3605,16 @@
 				
 				if (!set.moves) set.moves = [];
 				for (var m = 0; m < 4; m++) {
-					var mpp = parseInt(this.$chart.find('input[name=move' + (m+1) + 'pp]').val(), 10);
+					var mppRaw = String(this.$chart.find('input[name=move' + (m+1) + 'pp]').val() || '').trim();
+					var mppInf = /^(inf|infinite|-|\u221E)$/i.test(mppRaw);
+					var mpp = parseInt(mppRaw, 10);
 					var mppup = this.$chart.find('select[name=move' + (m+1) + 'ppups]').val();
 					var mv = set.moves[m] || '';
-					var pmatch = mv.match(/\((\d+)\/(\d+)\)$/);
+					var pmatch = mv.match(/\((\d+|inf)(?:\/(\d+))?\)$/i);
 					if (pmatch) mv = mv.slice(0, pmatch.index).trim();
-					if (!isNaN(mpp) && mpp > 0 && mv) {
+					if (mppInf && mv) {
+						set.moves[m] = mv + ' (inf)';
+					} else if (!isNaN(mpp) && mpp > 0 && mv) {
 						set.moves[m] = mv + ' (' + mpp + '/' + (mppup || '3') + ')';
 					} else if (pmatch) {
 						set.moves[m] = mv;
@@ -3782,7 +3786,7 @@
 			var rawValue = e.currentTarget.value;
 			var ppSuffix = '';
 			if (name === 'move1' || name === 'move2' || name === 'move3' || name === 'move4') {
-				var ppMatch = rawValue.match(/\s*(\((\d+)(?:\/(\d+))?\))\s*$/);
+				var ppMatch = rawValue.match(/\s*(\((\d+|inf)(?:\/(\d+))?\))\s*$/i);
 				if (ppMatch) {
 					ppSuffix = ' ' + ppMatch[1];
 					rawValue = rawValue.slice(0, ppMatch.index);

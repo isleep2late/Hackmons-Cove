@@ -20,6 +20,7 @@ interface MoveSlot {
 	disabledSource?: string;
 	used: boolean;
 	virtual?: boolean;
+	infinitePP?: boolean;
 }
 
 interface Attacker {
@@ -355,11 +356,16 @@ export class Pokemon {
 			let moveid = moveStr;
 			let customPP: number | undefined = undefined;
 			let customPpUps: number | undefined = undefined;
+			let infinitePP = false;
 
-			const match = /(.*)\s+\((\d+)(?:\/(\d+))?\)$/.exec(moveStr);
+			const match = /(.*)\s+\((\d+|inf)(?:\/(\d+))?\)$/i.exec(moveStr);
 			if (match) {
 				moveid = match[1].trim();
-				customPP = parseInt(match[2]);
+				if (match[2].toLowerCase() === 'inf') {
+					infinitePP = true;
+				} else {
+					customPP = parseInt(match[2]);
+				}
 				if (match[3] !== undefined) customPpUps = parseInt(match[3]);
 			}
 
@@ -372,7 +378,7 @@ export class Pokemon {
 			const ppUps = customPpUps !== undefined ? customPpUps : (move.noPPBoosts || move.id === 'trumpcard' ? 0 : 3);
 			const maxPP = this.battle.calculatePP(move, ppUps);
 			const basePP = customPP !== undefined ? customPP : maxPP;
-			this.baseMoveSlots.push({
+			const newSlot: MoveSlot = {
 				move: move.name,
 				id: move.id,
 				pp: basePP,
@@ -381,7 +387,9 @@ export class Pokemon {
 				disabled: false,
 				disabledSource: '',
 				used: false,
-			});
+			};
+			if (infinitePP) newSlot.infinitePP = true;
+			this.baseMoveSlots.push(newSlot);
 			this.ppUps.push(ppUps);
 		}
 
@@ -921,6 +929,7 @@ export class Pokemon {
 		const ppData = this.getMoveData(move);
 		if (!ppData) return 0;
 		ppData.used = true;
+		if (ppData.infinitePP) return amount || 1;
 		if (!ppData.pp) return 0;
 
 		if (!amount) amount = 1;

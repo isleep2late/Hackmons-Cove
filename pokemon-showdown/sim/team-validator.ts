@@ -605,7 +605,7 @@ export class TeamValidator {
 				problems.push(`${set.name || set.species} has a custom starting HP, which is only allowed in Pure Hackmons No Nerfs or Custom Disguises formats.`);
 			}
 			for (const move of set.moves) {
-				if (/(.*)\s+\((\d+)(?:\/(\d+))?\)$/.test(move)) {
+				if (/(.*)\s+\((\d+|inf)(?:\/(\d+))?\)$/i.test(move)) {
 					problems.push(`${set.name || set.species} has a custom move PP for ${move}, which is only allowed in Pure Hackmons No Nerfs or Custom Disguises formats.`);
 				}
 			}

@@ -805,7 +805,7 @@ Storage.packTeam = function (team) {
 		buf += '|';
 		if (set.moves) for (var j = 0; j < set.moves.length; j++) {
 			var moveEntry = set.moves[j] || '';
-			var ppMatch = moveEntry.match(/(.*)\s*(\(\d+(?:\/\d+)?\))$/);
+			var ppMatch = moveEntry.match(/(.*)\s*(\((?:\d+|inf)(?:\/\d+)?\))$/i);
 			var moveid = toID(ppMatch ? ppMatch[1] : moveEntry);
 			var ppSuffix = ppMatch ? ppMatch[2] : '';
 			if (j && !moveid) continue;
@@ -1084,7 +1084,7 @@ Storage.unpackTeam = function (buf) {
 		// moves
 		j = buf.indexOf('|', i);
 		set.moves = buf.substring(i, j).split(',').map(function (moveEntry) {
-			var ppMatch = moveEntry.match(/(.*)(\(\d+(?:\/\d+)?\))$/);
+			var ppMatch = moveEntry.match(/(.*)(\((?:\d+|inf)(?:\/\d+)?\))$/i);
 			if (ppMatch) return Dex.moves.get(ppMatch[1]).name + ' ' + ppMatch[2];
 			return Dex.moves.get(moveEntry).name;
 		});

@@ -30,6 +30,7 @@ export const Scripts: ModdedBattleScriptsData = {
 			const ppData = this.getMoveSlot(this.side.lastSelectedMoveSlot);
 			if (!ppData) return 0;
 			ppData.used = true;
+			if (ppData.infinitePP) return amount || 1;
 
 			if (!amount) amount = 1;
 			ppData.pp -= amount;

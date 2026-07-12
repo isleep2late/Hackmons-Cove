@@ -620,7 +620,7 @@ export class DexMoves {
 	get(name?: string | Move): Move {
 		if (name && typeof name !== 'string') return name;
 		let nameStr = name || '';
-		const match = /(.*)\s+\((\d+)(?:\/(\d+))?\)$/.exec(nameStr);
+		const match = /(.*)\s+\((\d+|inf)(?:\/(\d+))?\)$/i.exec(nameStr);
 		if (match) nameStr = match[1];
 		const id = nameStr ? toID(nameStr.trim()) : '' as ID;
 		return this.getByID(id);
