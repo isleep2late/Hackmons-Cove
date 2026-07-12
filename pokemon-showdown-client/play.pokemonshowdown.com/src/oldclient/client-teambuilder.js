@@ -3326,7 +3326,8 @@
 						mpp = pmatch[1].toLowerCase() === 'inf' ? 'inf' : pmatch[1];
 						if (pmatch[2]) mppup = pmatch[2];
 					}
-					var ppTitle = this.curTeam.gen === 5 ? 'Enter a number up to 255 (the Gen 5 maximum)' : 'Enter a number up to 65535, or - / inf for infinite PP';
+					var ppBig = this.curTeam.gen <= 2 || isCustomDisguise || ppFmt.includes('nonerfs') || ppFmt.includes('customgame');
+					var ppTitle = ppBig ? 'Enter a number up to 65535, or - / inf for infinite PP' : 'Enter a number up to 255 (the cartridge maximum)';
 					buf += '<div class="formrow"><label class="formlabel"' + (allowBasePP ? ' title="' + ppTitle + '"' : '') + '>Move ' + (m+1) + (allowBasePP ? ' PP' : ' PP Ups') + ':</label><div>';
 					if (allowBasePP) {
 						buf += '<input type="text" name="move' + (m+1) + 'pp" placeholder="Base" value="' + mpp + '" class="textbox inputform numform" /> / ';
@@ -3651,8 +3652,9 @@
 					var mppRaw = allowBasePPSave ? String(this.$chart.find('input[name=move' + (m+1) + 'pp]').val() || '').trim() : '';
 					var mppInf = /^(inf|infinite|-|\u221E)$/i.test(mppRaw);
 					var mpp = parseInt(mppRaw, 10);
-					var ppSaveMax = this.curTeam.gen === 5 ? 255 : 65535;
-					if (this.curTeam.gen === 5 && mppInf) {
+					var ppSaveBig = this.curTeam.gen <= 2 || ppSaveFmt.includes('customdisguise') || ppSaveFmt.includes('nonerfs') || ppSaveFmt.includes('customgame');
+					var ppSaveMax = ppSaveBig ? 65535 : 255;
+					if (!ppSaveBig && mppInf) {
 						mppInf = false;
 						mpp = 255;
 					}

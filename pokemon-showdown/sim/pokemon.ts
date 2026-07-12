@@ -352,6 +352,9 @@ export class Pokemon {
 		if (!this.set.moves?.length) {
 			throw new Error(`Set ${this.name} has no moves`);
 		}
+		const bigPP = this.battle.gen <= 2 || this.battle.format.mod.includes('phnn') ||
+			this.battle.format.id.includes('customdisguise') || this.battle.format.id.includes('customgame') ||
+			this.battle.format.id.includes('nonerfs');
 		for (const moveStr of this.set.moves) {
 			let moveid = moveStr;
 			let customPP: number | undefined = undefined;
@@ -362,13 +365,13 @@ export class Pokemon {
 			if (match) {
 				moveid = match[1].trim();
 				if (match[2].toLowerCase() === 'inf') {
-					if (this.battle.gen === 5) {
-						customPP = 255;
-					} else {
+					if (bigPP) {
 						infinitePP = true;
+					} else {
+						customPP = 255;
 					}
 				} else {
-					customPP = this.battle.clampIntRange(parseInt(match[2]), 1, this.battle.gen === 5 ? 255 : 65535);
+					customPP = this.battle.clampIntRange(parseInt(match[2]), 1, bigPP ? 65535 : 255);
 				}
 				if (match[3] !== undefined) customPpUps = parseInt(match[3]);
 			}

@@ -604,6 +604,8 @@ export class TeamValidator {
 			(dex.currentMod.includes('phnn') && dex.gen !== 3) ||
 			(dex.gen <= 2 && (format.id.includes('disguises') || format.id.includes('statuses'))) ||
 			(ruleTable.has('statmod') && dex.gen !== 3);
+		const isBigPPAllowed = isCustomDisguises || dex.currentMod.includes('phnn') || dex.gen <= 2 ||
+			format.id.includes('nonerfs');
 		const isPPUpsAllowed = isArbitraryPPAllowed || ruleTable.has('disguisemod') || dex.currentMod.includes('phnn') ||
 			['spaceworld', 'gen2gs'].includes(dex.currentMod) || format.id.includes('anyability') ||
 			format.id.includes('nolimit') || format.id.includes('unified') || format.id.includes('255') ||
@@ -622,8 +624,8 @@ export class TeamValidator {
 			const isArbitrary = isInf || parseInt(ppMatch[2]) !== naturalPP;
 			if (isArbitrary && !isArbitraryPPAllowed) {
 				problems.push(`${set.name || set.species} has a custom move PP for ${move}, which is only allowed in Custom Disguises or in Gen 1/Gen 2/No Nerfs formats.`);
-			} else if (isArbitrary && dex.gen === 5 && (isInf || parseInt(ppMatch[2]) > 255)) {
-				problems.push(`${set.name || set.species}'s PP for ${move} exceeds the Gen 5 maximum of 255.${isInf ? ` (Infinite PP is not possible in Gen 5.)` : ``}`);
+			} else if (isArbitrary && !isBigPPAllowed && (isInf || parseInt(ppMatch[2]) > 255)) {
+				problems.push(`${set.name || set.species}'s PP for ${move} exceeds the maximum of 255 for this format.${isInf ? ` (Infinite PP requires a Gen 1/Gen 2 OM, No Nerfs, or Custom Disguises.)` : ``}`);
 			} else if (!isArbitrary && !isPPUpsAllowed) {
 				problems.push(`${set.name || set.species} has custom PP Ups for ${move}, which is only allowed in Hackmons OM formats.`);
 			}
