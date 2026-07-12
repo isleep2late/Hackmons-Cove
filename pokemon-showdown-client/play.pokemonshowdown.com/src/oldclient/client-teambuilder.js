@@ -1766,7 +1766,7 @@
 		},
 		renderStatModToggle: function () {
 			var f = '' + (this.curTeam.format || '');
-			if (isGenericFormat(f) || f.includes('customdisguise') || f.includes('customgame')) return '';
+			if (!f || /^gen\d+$/.test(f) || f.includes('customdisguise') || f.includes('customgame')) return '';
 			var on = this.phnnStatModAllowed(f);
 			return ' <button class="button statmodtoggle' + (on ? ' cur' : '') + '" title="Allow manually overridden stats (1-65535), like cartridge save editing"><i class="fa fa-flask"></i> Stat Mod' + (on ? ': On' : '') + '</button>';
 		},
