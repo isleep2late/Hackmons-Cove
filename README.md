@@ -42,7 +42,6 @@ The server and client are both included as regular folders rather than submodule
 - **ifwih** - Coleader and Developer
 - **electra** - Lead Developer of Wondrous Hackmons, Co-Creator of Pure Hackmons No Nerfs
 - **Enigmatist** - Co-Creator of No Nerfs Generation, #1 Ranked Hackmons Player
-- **Alex BB** - Contributor
 
 **External recognition of those who made this possible:**
 - **Zarel** - Showdown Owner and Developer, along with staff: https://pokemonshowdown.com/credits
@@ -60,6 +59,7 @@ The server and client are both included as regular folders rather than submodule
 - **Wyrd & Viola Lunala** for promoting the server and leadership (And Wyrd for making the SHADOW type badge)
 - **ProKameron** for contributing to the bot and leadership
 - **aidan amoongus** for Room Intros and leadership
+- **Alex BB** - for early contributions to the project
 - The Pure Hackmons community for additional feedback
 
 [Join our Discord](https://discord.gg/hackmons)
