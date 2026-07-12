@@ -644,6 +644,17 @@ export class TeamValidator {
 		if (set.startStatus) {
 			const legalStatuses = ['brn', 'par', 'slp', 'psn', 'tox', 'frz'];
 			const seenFamilies = new Set<string>();
+			const statusParts = set.startStatus.split('/').filter(Boolean);
+			if (statusParts.length > 1) {
+				if (!ruleTable.has('multistatus')) {
+					problems.push(`${set.name || set.species} has multiple starting statuses, which requires the Multistatus rule.`);
+				} else {
+					const multiLimit = parseInt(ruleTable.valueRules.get('multistatus') || '0') || 0;
+					if (multiLimit && statusParts.length > multiLimit) {
+						problems.push(`${set.name || set.species} has ${statusParts.length} starting statuses, but this battle's Multistatus limit is ${multiLimit}.`);
+					}
+				}
+			}
 			for (const part of set.startStatus.split('/').filter(Boolean)) {
 				if (!legalStatuses.includes(part)) {
 					problems.push(`${set.name || set.species}'s starting status "${part}" is invalid.`);

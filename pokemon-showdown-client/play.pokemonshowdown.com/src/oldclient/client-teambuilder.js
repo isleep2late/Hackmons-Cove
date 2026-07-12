@@ -61,6 +61,7 @@
 			'change .detailsform input': 'detailsChange',
 			'change .detailsform select': 'detailsChange',
 			'submit .detailsform': 'detailsChange',
+			'change input[name=startstatuses]': 'phnnStartStatusLimit',
 			'input .phnn-ms-filter': 'phnnMultiselectFilter',
 			'keyup .phnn-ms-filter': 'phnnMultiselectFilter',
 			'click .phnn-ms-showsel': 'phnnMultiselectShowSelected',
@@ -3393,6 +3394,17 @@
 			}
 			buf += '</div></details>';
 			return buf;
+		},
+		phnnStartStatusLimit: function (e) {
+			var input = e.currentTarget;
+			if (!input.checked) return;
+			var f = ('' + (this.curTeam && this.curTeam.format || '')).toLowerCase();
+			var atIdx = f.indexOf('@@@');
+			var multiOk = atIdx >= 0 && f.slice(atIdx).replace(/\s/g, '').indexOf('multistatus') >= 0;
+			if (multiOk) return;
+			$(input).closest('details').find('input[name=startstatuses]').each(function () {
+				if (this !== input) this.checked = false;
+			});
 		},
 		phnnMultiselectFilter: function (e) {
 			var $input = $(e.currentTarget);
