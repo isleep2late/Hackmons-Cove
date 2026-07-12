@@ -121,6 +121,15 @@ export class DexSearch {
 			}
 		} else {
 			this.results = this.textSearch(query);
+			if (this.typedSearch?.sortRow) {
+				if (this.sortCol && !['type', 'ability', 'category'].includes(this.sortCol)) {
+					let sorted = this.results.filter(([rowType]) => rowType === this.typedSearch!.searchType);
+					sorted = this.typedSearch.sort(sorted, this.sortCol, this.reverseSort);
+					this.results = [this.typedSearch.sortRow, ...sorted];
+				} else {
+					this.results = [this.typedSearch.sortRow, ...this.results];
+				}
+			}
 		}
 		this.selection = this.getFirstResultIndex();
 		return true;
@@ -665,7 +674,7 @@ abstract class BattleTypedSearch<T extends SearchType> {
 	illegalReasons: { [id: string]: string } | null = null;
 	results: SearchRow[] | null = null;
 
-	protected readonly sortRow: SearchRow | null = null;
+	readonly sortRow: SearchRow | null = null;
 
 	constructor(searchType: T, format = '' as ID, speciesOrSet: ID | Dex.PokemonSet = '' as ID) {
 		this.searchType = searchType;
