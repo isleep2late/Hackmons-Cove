@@ -501,7 +501,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'gen2',
 		searchShow: false,
 		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100', 'Prestatus'],
-		unbanlist: ['No Move-2'],
+		banlist: ['No Move-2'],
 	},
 	{
 		name: "[Gen 2] Statuses (Gold/Silver)",
@@ -510,7 +510,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: false,
 		challengeShow: false,
 		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100', 'Prestatus'],
-		unbanlist: ['No Move-2'],
+		banlist: ['No Move-2'],
 	},
 	{
 		name: "[Gen 2] Statuses (SpaceWorld)",
@@ -519,7 +519,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: false,
 		challengeShow: false,
 		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100', 'Prestatus'],
-		unbanlist: ['No Move-2', 'No Move-SW'],
+		banlist: ['No Move-2', 'No Move-SW'],
 	},
 	{
 		name: "[Gen 1] Disguises",
@@ -527,7 +527,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'gen1phnn',
 		//searchShow: false,
 		ruleset: ['-Nonexistent', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100', 'Disguise Mod', 'No Move Exclusivity', 'Crit Level Overflow'],
-		unbanlist: ['No Move'],
+		banlist: ['No Move'],
 	},
 	{
 		name: "[Gen 1] Disguises (English)",
@@ -536,7 +536,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: false,
 		challengeShow: false,
 		ruleset: ['-Nonexistent', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100', 'Disguise Mod', 'No Move Exclusivity', 'Crit Level Overflow'],
-		unbanlist: ['No Move'],
+		banlist: ['No Move'],
 	},
 	//////////////////////////////////
 	///// Pure Hackmons No Nerfs /////
