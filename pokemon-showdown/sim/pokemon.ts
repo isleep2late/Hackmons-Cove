@@ -362,9 +362,13 @@ export class Pokemon {
 			if (match) {
 				moveid = match[1].trim();
 				if (match[2].toLowerCase() === 'inf') {
-					infinitePP = true;
+					if (this.battle.gen === 5) {
+						customPP = 255;
+					} else {
+						infinitePP = true;
+					}
 				} else {
-					customPP = this.battle.clampIntRange(parseInt(match[2]), 1, 65535);
+					customPP = this.battle.clampIntRange(parseInt(match[2]), 1, this.battle.gen === 5 ? 255 : 65535);
 				}
 				if (match[3] !== undefined) customPpUps = parseInt(match[3]);
 			}
