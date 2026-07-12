@@ -3312,8 +3312,9 @@
 			}
 
 			var ppFmt = this.curTeam.format;
-			var isOMForPP = isDisguise || ppFmt.includes('status') || ppFmt.includes('nonerfs') || ppFmt.includes('anyability') || ppFmt.includes('nolimit') || ppFmt.includes('unified') || ppFmt.includes('255') || ppFmt.includes('rage');
-			var allowBasePP = isCustomDisguise || ppFmt.includes('nonerfs') || (this.curTeam.gen <= 2 && isOMForPP);
+			var ppStatMod = this.curTeam.gen !== 3 && this.phnnStatModAllowed(ppFmt);
+			var isOMForPP = isDisguise || ppFmt.includes('status') || ppFmt.includes('nonerfs') || ppFmt.includes('anyability') || ppFmt.includes('nolimit') || ppFmt.includes('unified') || ppFmt.includes('255') || ppFmt.includes('rage') || ppStatMod;
+			var allowBasePP = isCustomDisguise || ppFmt.includes('nonerfs') || (this.curTeam.gen <= 2 && isOMForPP) || ppStatMod;
 			if (isOMForPP) {
 				if (!set.moves) set.moves = [];
 				for (var m = 0; m < 4; m++) {
@@ -3325,7 +3326,8 @@
 						mpp = pmatch[1].toLowerCase() === 'inf' ? 'inf' : pmatch[1];
 						if (pmatch[2]) mppup = pmatch[2];
 					}
-					buf += '<div class="formrow"><label class="formlabel"' + (allowBasePP ? ' title="Enter a number up to 65535, or - / inf for infinite PP"' : '') + '>Move ' + (m+1) + (allowBasePP ? ' PP' : ' PP Ups') + ':</label><div>';
+					var ppTitle = this.curTeam.gen === 5 ? 'Enter a number up to 255 (the Gen 5 maximum)' : 'Enter a number up to 65535, or - / inf for infinite PP';
+					buf += '<div class="formrow"><label class="formlabel"' + (allowBasePP ? ' title="' + ppTitle + '"' : '') + '>Move ' + (m+1) + (allowBasePP ? ' PP' : ' PP Ups') + ':</label><div>';
 					if (allowBasePP) {
 						buf += '<input type="text" name="move' + (m+1) + 'pp" placeholder="Base" value="' + mpp + '" class="textbox inputform numform" /> / ';
 					}
@@ -3641,14 +3643,20 @@
 				}
 				
 				var ppSaveFmt = this.curTeam.format;
-				var isOMForPPSave = ppSaveFmt.includes('disguise') || ppSaveFmt.includes('status') || ppSaveFmt.includes('nonerfs') || ppSaveFmt.includes('anyability') || ppSaveFmt.includes('nolimit') || ppSaveFmt.includes('unified') || ppSaveFmt.includes('255') || ppSaveFmt.includes('rage');
-				var allowBasePPSave = ppSaveFmt.includes('customdisguise') || ppSaveFmt.includes('nonerfs') || (this.curTeam.gen <= 2 && isOMForPPSave);
+				var ppSaveStatMod = this.curTeam.gen !== 3 && this.phnnStatModAllowed(ppSaveFmt);
+				var isOMForPPSave = ppSaveFmt.includes('disguise') || ppSaveFmt.includes('status') || ppSaveFmt.includes('nonerfs') || ppSaveFmt.includes('anyability') || ppSaveFmt.includes('nolimit') || ppSaveFmt.includes('unified') || ppSaveFmt.includes('255') || ppSaveFmt.includes('rage') || ppSaveStatMod;
+				var allowBasePPSave = ppSaveFmt.includes('customdisguise') || ppSaveFmt.includes('nonerfs') || (this.curTeam.gen <= 2 && isOMForPPSave) || ppSaveStatMod;
 				if (isOMForPPSave && !set.moves) set.moves = [];
 				for (var m = 0; isOMForPPSave && m < 4; m++) {
 					var mppRaw = allowBasePPSave ? String(this.$chart.find('input[name=move' + (m+1) + 'pp]').val() || '').trim() : '';
 					var mppInf = /^(inf|infinite|-|\u221E)$/i.test(mppRaw);
 					var mpp = parseInt(mppRaw, 10);
-					if (!isNaN(mpp) && mpp > 65535) mpp = 65535;
+					var ppSaveMax = this.curTeam.gen === 5 ? 255 : 65535;
+					if (this.curTeam.gen === 5 && mppInf) {
+						mppInf = false;
+						mpp = 255;
+					}
+					if (!isNaN(mpp) && mpp > ppSaveMax) mpp = ppSaveMax;
 					var mppup = this.$chart.find('select[name=move' + (m+1) + 'ppups]').val() || '3';
 					var mv = set.moves[m] || '';
 					var pmatch = mv.match(/\((\d+|inf)(?:\/(\d+))?\)$/i);
