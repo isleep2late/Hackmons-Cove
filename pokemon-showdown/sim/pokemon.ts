@@ -364,7 +364,7 @@ export class Pokemon {
 				if (match[2].toLowerCase() === 'inf') {
 					infinitePP = true;
 				} else {
-					customPP = parseInt(match[2]);
+					customPP = this.battle.clampIntRange(parseInt(match[2]), 1, 65535);
 				}
 				if (match[3] !== undefined) customPpUps = parseInt(match[3]);
 			}

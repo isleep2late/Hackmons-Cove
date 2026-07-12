@@ -3309,7 +3309,12 @@
 				buf += this.renderPhnnMultiselect('startstatuses', phStatusOptions, selectedStatuses, 'None', false);
 				buf += '</div></div>';
 				buf += '<div class="formrow"><label class="formlabel">Starting HP:</label><div><input type="number" min="1" max="999" step="1" name="starthp" placeholder="Max" value="' + (set.startHp || '') + '" class="textbox inputform numform" /></div></div>';
-				
+			}
+
+			var ppFmt = this.curTeam.format;
+			var isOMForPP = isDisguise || ppFmt.includes('status') || ppFmt.includes('nonerfs') || ppFmt.includes('anyability') || ppFmt.includes('nolimit') || ppFmt.includes('unified') || ppFmt.includes('255') || ppFmt.includes('rage');
+			var allowBasePP = isCustomDisguise || ppFmt.includes('nonerfs') || (this.curTeam.gen <= 2 && isOMForPP);
+			if (isOMForPP) {
 				if (!set.moves) set.moves = [];
 				for (var m = 0; m < 4; m++) {
 					var mv = set.moves[m] || '';
@@ -3320,8 +3325,10 @@
 						mpp = pmatch[1].toLowerCase() === 'inf' ? 'inf' : pmatch[1];
 						if (pmatch[2]) mppup = pmatch[2];
 					}
-					buf += '<div class="formrow"><label class="formlabel" title="Enter a number, or - / inf for infinite PP">Move ' + (m+1) + ' PP:</label><div>';
-					buf += '<input type="text" name="move' + (m+1) + 'pp" placeholder="Base" value="' + mpp + '" class="textbox inputform numform" /> / ';
+					buf += '<div class="formrow"><label class="formlabel"' + (allowBasePP ? ' title="Enter a number up to 65535, or - / inf for infinite PP"' : '') + '>Move ' + (m+1) + (allowBasePP ? ' PP' : ' PP Ups') + ':</label><div>';
+					if (allowBasePP) {
+						buf += '<input type="text" name="move' + (m+1) + 'pp" placeholder="Base" value="' + mpp + '" class="textbox inputform numform" /> / ';
+					}
 					buf += '<select name="move' + (m+1) + 'ppups" class="button">';
 					buf += '<option value="0"' + (mppup === '0' ? ' selected="selected"' : '') + '>0</option>';
 					buf += '<option value="1"' + (mppup === '1' ? ' selected="selected"' : '') + '>1</option>';
@@ -3633,20 +3640,32 @@
 					delete set.startHp;
 				}
 				
-				if (!set.moves) set.moves = [];
-				for (var m = 0; m < 4; m++) {
-					var mppRaw = String(this.$chart.find('input[name=move' + (m+1) + 'pp]').val() || '').trim();
+				var ppSaveFmt = this.curTeam.format;
+				var isOMForPPSave = ppSaveFmt.includes('disguise') || ppSaveFmt.includes('status') || ppSaveFmt.includes('nonerfs') || ppSaveFmt.includes('anyability') || ppSaveFmt.includes('nolimit') || ppSaveFmt.includes('unified') || ppSaveFmt.includes('255') || ppSaveFmt.includes('rage');
+				var allowBasePPSave = ppSaveFmt.includes('customdisguise') || ppSaveFmt.includes('nonerfs') || (this.curTeam.gen <= 2 && isOMForPPSave);
+				if (isOMForPPSave && !set.moves) set.moves = [];
+				for (var m = 0; isOMForPPSave && m < 4; m++) {
+					var mppRaw = allowBasePPSave ? String(this.$chart.find('input[name=move' + (m+1) + 'pp]').val() || '').trim() : '';
 					var mppInf = /^(inf|infinite|-|\u221E)$/i.test(mppRaw);
 					var mpp = parseInt(mppRaw, 10);
-					var mppup = this.$chart.find('select[name=move' + (m+1) + 'ppups]').val();
+					if (!isNaN(mpp) && mpp > 65535) mpp = 65535;
+					var mppup = this.$chart.find('select[name=move' + (m+1) + 'ppups]').val() || '3';
 					var mv = set.moves[m] || '';
 					var pmatch = mv.match(/\((\d+|inf)(?:\/(\d+))?\)$/i);
 					if (pmatch) mv = mv.slice(0, pmatch.index).trim();
-					if (mppInf && mv) {
+					if (!mv) {
+						continue;
+					} else if (mppInf) {
 						set.moves[m] = mv + ' (inf)';
-					} else if (!isNaN(mpp) && mpp > 0 && mv) {
-						set.moves[m] = mv + ' (' + mpp + '/' + (mppup || '3') + ')';
-					} else if (pmatch) {
+					} else if (!isNaN(mpp) && mpp > 0) {
+						set.moves[m] = mv + ' (' + mpp + '/' + mppup + ')';
+					} else if (mppup !== '3') {
+						var ppMoveData = this.curTeam.dex.moves.get(mv);
+						var naturalPP = ppMoveData && ppMoveData.pp ? (ppMoveData.noPPBoosts ? ppMoveData.pp : ppMoveData.pp * (5 + (+mppup)) / 5) : 0;
+						if (this.curTeam.gen <= 2 && ppMoveData && ppMoveData.pp === 40) naturalPP -= (+mppup);
+						if (naturalPP > 0) set.moves[m] = mv + ' (' + naturalPP + '/' + mppup + ')';
+						else set.moves[m] = mv;
+					} else {
 						set.moves[m] = mv;
 					}
 				}

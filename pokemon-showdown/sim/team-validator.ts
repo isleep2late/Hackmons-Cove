@@ -598,16 +598,33 @@ export class TeamValidator {
 		set.nature = nature.name;
 		if (!Array.isArray(set.moves)) set.moves = [];
 
-		const isCustomPPAllowed = ruleTable.has('disguisemod') || dex.currentMod.includes('phnn');
+		const isCustomHpAllowed = ruleTable.has('disguisemod') || dex.currentMod.includes('phnn');
 		const isCustomDisguises = ruleTable.has('disguisemod') && format.id.includes('customdisguise');
-		if (!isCustomPPAllowed) {
-			if (set.startHp !== undefined) {
-				problems.push(`${set.name || set.species} has a custom starting HP, which is only allowed in Pure Hackmons No Nerfs or Custom Disguises formats.`);
-			}
-			for (const move of set.moves) {
-				if (/(.*)\s+\((\d+|inf)(?:\/(\d+))?\)$/i.test(move)) {
-					problems.push(`${set.name || set.species} has a custom move PP for ${move}, which is only allowed in Pure Hackmons No Nerfs or Custom Disguises formats.`);
-				}
+		// Entering an arbitrary base PP (any number) or infinite PP: Gen 1/Gen 2 OMs, No Nerfs, and Custom Disguises.
+		const isArbitraryPPAllowed = isCustomDisguises ||
+			(dex.currentMod.includes('phnn') && dex.gen !== 3) ||
+			(dex.gen <= 2 && (format.id.includes('disguises') || format.id.includes('statuses')));
+		// Setting PP Ups (0-3, which naturally reduces max PP): all Hackmons OM formats.
+		const isPPUpsAllowed = isArbitraryPPAllowed || ruleTable.has('disguisemod') || dex.currentMod.includes('phnn') ||
+			['spaceworld', 'gen2gs'].includes(dex.currentMod) || format.id.includes('anyability') ||
+			format.id.includes('nolimit') || format.id.includes('unified') || format.id.includes('255') ||
+			format.id.includes('statuses') || format.id.includes('disguises') || format.id.includes('nonerfs');
+		if (!isCustomHpAllowed && set.startHp !== undefined) {
+			problems.push(`${set.name || set.species} has a custom starting HP, which is only allowed in Pure Hackmons No Nerfs or Custom Disguises formats.`);
+		}
+		for (const move of set.moves) {
+			const ppMatch = /(.*)\s+\((\d+|inf)(?:\/(\d+))?\)$/i.exec(move);
+			if (!ppMatch) continue;
+			const isInf = ppMatch[2].toLowerCase() === 'inf';
+			const ppUps = ppMatch[3] !== undefined ? Math.max(0, Math.min(3, parseInt(ppMatch[3]))) : 3;
+			const ppMove = dex.moves.get(ppMatch[1].trim());
+			let naturalPP = ppMove.noPPBoosts ? ppMove.pp : ppMove.pp * (5 + ppUps) / 5;
+			if (dex.gen <= 2 && ppMove.pp === 40) naturalPP -= ppUps;
+			const isArbitrary = isInf || parseInt(ppMatch[2]) !== naturalPP;
+			if (isArbitrary && !isArbitraryPPAllowed) {
+				problems.push(`${set.name || set.species} has a custom move PP for ${move}, which is only allowed in Custom Disguises or in Gen 1/Gen 2/No Nerfs formats.`);
+			} else if (!isArbitrary && !isPPUpsAllowed) {
+				problems.push(`${set.name || set.species} has custom PP Ups for ${move}, which is only allowed in Hackmons OM formats.`);
 			}
 		}
 		if (!ruleTable.has('disguisemod')) {
