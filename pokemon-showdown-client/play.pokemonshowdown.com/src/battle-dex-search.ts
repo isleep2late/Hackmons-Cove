@@ -738,6 +738,9 @@ abstract class BattleTypedSearch<T extends SearchType> {
 		if (format.includes('statusesspaceworld') && this.dex.gen === 2) {
 			this.dex = Dex.mod('gen2spaceworld' as ID);
 		}
+		if (format.includes('spaceworldcustomdisguises') && this.dex.gen === 2) {
+			this.dex = Dex.mod('gen2spaceworld' as ID);
+		}
 		if (format === 'anyability' && this.dex.gen === 3) {
 			this.dex = Dex.mod('gen3phnn' as ID);
 		}

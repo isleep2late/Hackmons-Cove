@@ -1768,6 +1768,7 @@
 				gen1disguisesenglish: 'gen1phnneng',
 				gen2statusesgoldsilver: 'gen2gs',
 				gen2statusesspaceworld: 'gen2spaceworld',
+				gen2spaceworldcustomdisguises: 'gen2spaceworld',
 			}[('' + (format || '')).split('@@@')[0]] || null;
 		},
 		renderVersionSelect: function () {

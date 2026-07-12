@@ -951,6 +951,15 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		unbanlist: ['No Move', 'No Move-2', 'No Move-SW', 'Demo'],
 	},
 	{
+		name: "[Gen 2] SpaceWorld Custom Disguises",
+		desc: "Custom Disguises on the 1997 SpaceWorld demo's battle engine, with the demo's Pokemon, stats, moves, and type chart.",
+		mod: 'spaceworld',
+		searchShow: false,
+		battle: {trunc: Math.trunc},
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Desync Clause Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod', 'Totem Aura'],
+		unbanlist: ['No Move', 'No Move-2', 'No Move-SW', 'Demo'],
+	},
+	{
 		name: "[Gen 1] Custom Disguises",
 		mod: 'gen1',
 		searchShow: false,
