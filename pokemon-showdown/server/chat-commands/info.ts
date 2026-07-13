@@ -117,16 +117,51 @@ const PHNN_TITAN_INFO: { [id: string]: [string, string] } = {
 	munkidorititan: ['+2 Sp. Def', 'Sp. Atk'],
 	fezandipitititan: ['+2 Speed', 'Speed'],
 };
+const PHNN_TOTEM_STAGES: { [id: string]: { [stat: string]: number } } = {
+	araquanidtotem: { spe: 1 },
+	marowakalolatotem: { spe: 2 },
+	lurantistotem: { spe: 2 },
+	togedemarutotem: { def: 2 },
+	wishiwashitotem: { def: 1 },
+	salazzletotem: { spd: 1 },
+	mimikyutotem: { atk: 1, def: 1, spa: 1, spd: 1, spe: 1 },
+	mimikyubustedtotem: { atk: 1, def: 1, spa: 1, spd: 1, spe: 1 },
+	kommoototem: { atk: 1, def: 1, spa: 1, spd: 1, spe: 1 },
+	vikavolttotem: { atk: 1, def: 1, spa: 1, spd: 1, spe: 1 },
+	hakamoototem: { atk: 1, def: 1, spa: 1, spd: 1, spe: 1 },
+	ribombeetotem: { atk: 2, def: 2, spa: 2, spd: 2, spe: 2 },
+	gumshoostotem: { atk: 2, def: 2, spa: 2, spd: 2, spe: 2 },
+	raticatealolatotem: { atk: 2, def: 2, spa: 2, spd: 2, spe: 2 },
+	okidogititan: { def: 2 },
+	munkidorititan: { spd: 2 },
+	fezandipitititan: { spe: 2 },
+};
+
+function phnnEffectiveBST(species: { id: string, name: string, baseStats: StatsTable }): number | null {
+	const bs = species.baseStats;
+	if (species.name.endsWith('-Alpha')) {
+		return bs.hp + bs.spe + 2 * (bs.atk + bs.def + bs.spa + bs.spd);
+	}
+	const stages = PHNN_TOTEM_STAGES[species.id];
+	if (!stages) return null;
+	let total = bs.hp;
+	for (const stat of ['atk', 'def', 'spa', 'spd', 'spe'] as const) {
+		const stage = stages[stat];
+		total += Math.floor(bs[stat] * (stage === 1 ? 1.5 : stage === 2 ? 2 : 1));
+	}
+	return total;
+}
+
 function phnnEntryNote(species: { id: string, name: string }): string | null {
 	if (species.name.endsWith('-Alpha')) {
-		return 'Alpha: enters battle with Wild Might, doubling its Attack, Defense, Sp. Atk, and Sp. Def (HP and Speed unchanged; kept even through Mega Evolution).';
+		return 'Alpha: Enters battle with Wild Might, doubling its Attack, Defense, Sp. Atk, and Sp. Def (HP and Speed unchanged; kept even through Mega Evolution).';
 	}
 	if (PHNN_TOTEM_AURAS[species.id]) {
-		return `Totem: gains ${PHNN_TOTEM_AURAS[species.id]} when it enters battle.`;
+		return `Totem: Gains ${PHNN_TOTEM_AURAS[species.id]} when it enters battle.`;
 	}
 	if (PHNN_TITAN_INFO[species.id]) {
 		const [entry, rally] = PHNN_TITAN_INFO[species.id];
-		return `Titan: gains ${entry} when it enters battle. Rally: the first time it ends a turn below half HP, its whole team gains +1 ${rally}.`;
+		return `Titan: Gains ${entry} when it enters battle. Rally: The first time it ends a turn below half HP, its whole team gains +1 ${rally}.`;
 	}
 	return null;
 }
@@ -690,7 +725,11 @@ export const commands: Chat.ChatCommands = {
 					pokemon.num >= 0 ? String(pokemon.num) : pokemon.tier;
 				buffer += `${prefix}${Chat.getDataPokemonHTML(pokemon, dex.gen, displayedTier)}\n`;
 				const entryNote = phnnEntryNote(pokemon);
-				if (entryNote) buffer += `${prefix}<small>${entryNote}</small>\n`;
+				if (entryNote) {
+					const effBST = phnnEffectiveBST(pokemon);
+					const bstText = effBST ? ` Effective BST: ${effBST} (base ${pokemon.bst}).` : ``;
+					buffer += `${prefix}<small>${entryNote}${bstText}</small>\n`;
+				}
 				if (showDetails) {
 					let weighthit = 20;
 					if (pokemon.weighthg >= 2000) {
