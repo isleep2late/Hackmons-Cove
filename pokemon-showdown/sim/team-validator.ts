@@ -928,7 +928,9 @@ export class TeamValidator {
 				set.ability = 'No Ability';
 			} else {
 				if (!ability.name || ability.name === 'No Ability') {
-					problems.push(`${name} needs to have an ability.`);
+					if (!ruleTable.has('+ability:noability')) {
+						problems.push(`${name} needs to have an ability.`);
+					}
 				} else if (!Object.values(species.abilities).includes(ability.name)) {
 					if (tierSpecies.abilities[0] === ability.name) {
 						set.ability = species.abilities[0];
