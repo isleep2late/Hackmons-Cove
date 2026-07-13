@@ -162,6 +162,32 @@
 		exportMode: false,
 		formatResources: {},
 		update: function () {
+			try {
+				return this.updateInner();
+			} catch (err) {
+				this.recoverFromError(err, 'rendering');
+			}
+		},
+		recoverFromError: function (err, where) {
+			try { console.error('teambuilder error while ' + where, err); } catch (e) {}
+			if (this.saveTimer) {
+				clearTimeout(this.saveTimer);
+				this.saveTimer = null;
+			}
+			if (this.curTeam) this.curTeam.iconCache = '';
+			this.curTeam = null;
+			this.curSet = null;
+			this.curSetList = null;
+			this.exportMode = false;
+			Storage.activeSetList = null;
+			try {
+				this.updateTeamInterface();
+			} catch (err2) {
+				this.$el.html('<div class="pad"><p>The teambuilder hit an error. Please reload the page (your saved teams are safe).</p></div>');
+			}
+			app.addPopupMessage('The teambuilder hit an error while ' + where + ' and returned to the team list. Your saved teams were not changed.\n\nPlease report this message: ' + ((err && err.message) || err));
+		},
+		updateInner: function () {
 			teams = Storage.teams;
 			if (this.curTeam) {
 				if (this.curTeam.format && !this.formatResources[this.curTeam.format]) {
@@ -765,11 +791,22 @@
 			Storage.nwLoadTeams();
 		},
 		edit: function (i) {
+			try {
+				return this.editInner(i);
+			} catch (err) {
+				this.recoverFromError(err, 'opening a team');
+			}
+		},
+		editInner: function (i) {
 			this.teamScrollPos = this.$('.teampane').scrollTop();
 			if (i && i.currentTarget) {
 				i = $(i.currentTarget).data('value');
 			}
 			i = +i;
+			if (!teams[i]) {
+				this.updateTeamList();
+				return;
+			}
 			this.curTeam = teams[i];
 			this.curTeam.iconCache = '!';
 			this.curTeam.gen = this.getGen(this.curTeam.format);
@@ -793,7 +830,15 @@
 			this.update();
 		},
 		"delete": function (i) {
+			try {
+				return this.deleteInner(i);
+			} catch (err) {
+				this.recoverFromError(err, 'deleting a team');
+			}
+		},
+		deleteInner: function (i) {
 			i = +i;
+			if (!teams[i]) return;
 			this.deletedTeamLoc = i;
 			this.deletedTeam = teams.splice(i, 1)[0];
 			for (var room in app.rooms) {
