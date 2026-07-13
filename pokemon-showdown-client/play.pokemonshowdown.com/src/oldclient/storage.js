@@ -1248,7 +1248,11 @@ Storage.getTeamIcons = function (team) {
 		// app.rooms.teambuilder.curSetList because the teambuilder
 		// room may have been closed by the time we need to get
 		// a packed team.
-		team.team = Storage.packTeam(Storage.activeSetList);
+		if (Storage.activeSetList) {
+			team.team = Storage.packTeam(Storage.activeSetList);
+		} else {
+			team.iconCache = '';
+		}
 		if ('teambuilder' in app.rooms) {
 			return Storage.packedTeamIcons(team.team);
 		}
@@ -1264,7 +1268,11 @@ Storage.getPackedTeam = function (team) {
 	if (!team) return null;
 	if (team.iconCache === '!') {
 		// see the same case in Storage.getTeamIcons
-		team.team = Storage.packTeam(Storage.activeSetList);
+		if (Storage.activeSetList) {
+			team.team = Storage.packTeam(Storage.activeSetList);
+		} else {
+			team.iconCache = '';
+		}
 		if (!('teambuilder' in app.rooms)) {
 			Storage.activeSetList = null;
 			team.iconCache = '';
@@ -1284,7 +1292,7 @@ Storage.importTeam = function (buffer, teams) {
 	if (teams === true) {
 		Storage.teams = [];
 		teams = Storage.teams;
-	} else if (text.length === 1 || (text.length === 2 && !text[1])) {
+	} else if ((text.length === 1 || (text.length === 2 && !text[1])) && text[0].includes('|')) {
 		return Storage.unpackTeam(text[0]);
 	}
 	for (var i = 0; i < text.length; i++) {
@@ -1327,8 +1335,19 @@ Storage.importTeam = function (buffer, teams) {
 		} else if (line.includes('|')) {
 			// packed format
 			curSet = null;
-			teams.push(Storage.unpackLine(line));
+			if (teams) {
+				teams.push(Storage.unpackLine(line));
+			} else {
+				var packedSets = Storage.unpackTeam(line);
+				for (var psi = 0; psi < packedSets.length; psi++) team.push(packedSets[psi]);
+			}
 		} else if (!curSet) {
+			if (!team) {
+				team = [];
+				teams.push({
+					name: 'Restored team', format: 'gen9', gen: 9, team: team, capacity: 6, folder: '', iconCache: ''
+				});
+			}
 			curSet = { name: '', species: '', gender: '' };
 			team.push(curSet);
 			var atIndex = line.lastIndexOf(' @ ');
@@ -1596,7 +1615,7 @@ Storage.exportTeam = function (team, hidestats) {
 			if (curSet.ivs) {
 				var defaultIvs = true;
 				var hpType = false;
-				for (var j = 0; j < curSet.moves.length; j++) {
+				for (var j = 0; curSet.moves && j < curSet.moves.length; j++) {
 					var move = curSet.moves[j];
 					if (move.substr(0, 13) === 'Hidden Power ' && move.substr(0, 14) !== 'Hidden Power [') {
 						hpType = move.substr(13);

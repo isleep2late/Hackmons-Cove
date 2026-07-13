@@ -820,8 +820,16 @@
 			}
 		},
 		saveBackup: function () {
+			var backupText = this.$('.teamedit textarea').val();
+			var savedTeams = Storage.teams;
 			Storage.deleteAllTeams();
-			Storage.importTeam(this.$('.teamedit textarea').val(), true);
+			try {
+				Storage.importTeam(backupText, true);
+			} catch (err) {
+				Storage.teams = savedTeams;
+				app.addPopupMessage("That backup couldn't be restored, so your teams were left unchanged. Check the pasted text and try again.");
+				return;
+			}
 			teams = Storage.teams;
 			Storage.saveAllTeams();
 			for (var room in app.rooms) {
@@ -1510,7 +1518,14 @@
 					}
 				});
 			} else {
-				Storage.activeSetList = this.curSetList = Storage.importTeam(text);
+				var imported;
+				try {
+					imported = Storage.importTeam(text);
+				} catch (err) {
+					app.addPopupMessage("That team couldn't be imported. Check the pasted text and try again.");
+					return;
+				}
+				Storage.activeSetList = this.curSetList = imported;
 				this.back();
 			}
 		},
@@ -2111,7 +2126,14 @@
 		},
 		savePokemonImport: function (i) {
 			i = +(this.$('li').attr('value'));
-			var curSet = Storage.importTeam(this.$('.pokemonedit').val())[0];
+			var curSet;
+			try {
+				curSet = Storage.importTeam(this.$('.pokemonedit').val())[0];
+			} catch (err) {
+				app.addPopupMessage("That Pokémon couldn't be imported. Check the pasted text and try again.");
+				this.closePokemonImport(true);
+				return;
+			}
 			if (curSet) {
 				this.curSet = curSet;
 				this.curSetList[i] = curSet;
