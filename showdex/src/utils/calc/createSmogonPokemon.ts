@@ -99,6 +99,23 @@ export const createSmogonPokemon = (
 
   const pseudoToggled = pseudoToggleAbility && pokemon.abilityToggled;
 
+  // Wild Might (PHNN Alpha formes) doubles Atk/Def/SpA/SpD as a raw modifier,
+  // not a stage boost, so it must be baked into the stats fed to the calc.
+  const wildMight = !!pokemon.volatiles?.wildmight || (pokemon.speciesForme || '').endsWith('-Alpha');
+  const calcRawStats = (
+    pokemon.source === 'server' && nonEmptyObject(pokemon.serverStats)
+      ? { ...pokemon.serverStats }
+      : { ...pokemon.spreadStats }
+  ) as SmogonPokemonOptions['rawStats'];
+
+  if (wildMight && nonEmptyObject(calcRawStats)) {
+    for (const stat of ['atk', 'def', 'spa', 'spd'] as const) {
+      if (typeof calcRawStats[stat] === 'number') {
+        calcRawStats[stat] *= 2;
+      }
+    }
+  }
+
   const options: SmogonPokemonOptions = {
     // note: curHP and originalCurHP in the SmogonPokemon's constructor both set the originalCurHP
     // of the class instance with curHP's value taking precedence over originalCurHP's value
@@ -158,11 +175,7 @@ export const createSmogonPokemon = (
     // update: actually, `stats` would've worked (since I internally passed it to this.rawStats of the Pokemon class anyway),
     // but I just had forgot purge the webpack cache for Showdex ... sooo don't forget to run `yarn cache:purge` when you
     // change anything in node_modules lol
-    rawStats: (
-      pokemon.source === 'server' && nonEmptyObject(pokemon.serverStats)
-        ? { ...pokemon.serverStats }
-        : { ...pokemon.spreadStats }
-    ) as SmogonPokemonOptions['rawStats'],
+    rawStats: calcRawStats,
 
     // update (2024/01/24): by this point, the EVs & IVs should be fully populated, so no need to repeat this logic
     ivs: { ...pokemon.ivs },
