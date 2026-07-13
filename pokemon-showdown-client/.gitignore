@@ -42,3 +42,11 @@ npm-debug.log
 /teams.pokemonshowdown.com/index.html
 /teams.pokemonshowdown.com/ads.txt
 config/routes.json
+
+# showdex (vendored damage-calc fork) build outputs are per-box builds
+/showdex/dist/
+/showdex/build/
+/showdex/cache/
+/play.pokemonshowdown.com/showdex/
+!/showdex/.env
+!/showdex/package.json

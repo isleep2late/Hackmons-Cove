@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const SIM = path.resolve(__dirname, '../../pokemon-showdown/dist/sim');
+const SIM = path.resolve(__dirname, '../../../pokemon-showdown/dist/sim');
 const OUT = path.resolve(__dirname, '../src/phnn/phnn-data.ts');
 
 const MODS = [
