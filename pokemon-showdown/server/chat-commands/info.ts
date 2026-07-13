@@ -96,6 +96,41 @@ export function destroy() {
 	clearInterval(resourceRefreshInterval);
 }
 
+const PHNN_TOTEM_AURAS: { [id: string]: string } = {
+	araquanidtotem: '+1 Speed',
+	marowakalolatotem: '+2 Speed',
+	lurantistotem: '+2 Speed',
+	togedemarutotem: '+2 Defense',
+	wishiwashitotem: '+1 Defense',
+	salazzletotem: '+1 Sp. Def',
+	mimikyutotem: '+1 Attack, Defense, Sp. Atk, Sp. Def, and Speed',
+	mimikyubustedtotem: '+1 Attack, Defense, Sp. Atk, Sp. Def, and Speed',
+	kommoototem: '+1 Attack, Defense, Sp. Atk, Sp. Def, and Speed',
+	vikavolttotem: '+1 Attack, Defense, Sp. Atk, Sp. Def, and Speed',
+	hakamoototem: '+1 Attack, Defense, Sp. Atk, Sp. Def, and Speed',
+	ribombeetotem: '+2 Attack, Defense, Sp. Atk, Sp. Def, and Speed',
+	gumshoostotem: '+2 Attack, Defense, Sp. Atk, Sp. Def, and Speed',
+	raticatealolatotem: '+2 Attack, Defense, Sp. Atk, Sp. Def, and Speed',
+};
+const PHNN_TITAN_INFO: { [id: string]: [string, string] } = {
+	okidogititan: ['+2 Defense', 'Attack'],
+	munkidorititan: ['+2 Sp. Def', 'Sp. Atk'],
+	fezandipitititan: ['+2 Speed', 'Speed'],
+};
+function phnnEntryNote(species: { id: string, name: string }): string | null {
+	if (species.name.endsWith('-Alpha')) {
+		return 'Alpha: enters battle with Wild Might, doubling its Attack, Defense, Sp. Atk, and Sp. Def (HP and Speed unchanged; kept even through Mega Evolution).';
+	}
+	if (PHNN_TOTEM_AURAS[species.id]) {
+		return `Totem: gains ${PHNN_TOTEM_AURAS[species.id]} when it enters battle.`;
+	}
+	if (PHNN_TITAN_INFO[species.id]) {
+		const [entry, rally] = PHNN_TITAN_INFO[species.id];
+		return `Titan: gains ${entry} when it enters battle. Rally: the first time it ends a turn below half HP, its whole team gains +1 ${rally}.`;
+	}
+	return null;
+}
+
 export const commands: Chat.ChatCommands = {
 	ip: 'whois',
 	rooms: 'whois',
@@ -654,6 +689,8 @@ export const commands: Chat.ChatCommands = {
 					tierDisplay === 'National Dex tiers' ? pokemon.natDexTier :
 					pokemon.num >= 0 ? String(pokemon.num) : pokemon.tier;
 				buffer += `${prefix}${Chat.getDataPokemonHTML(pokemon, dex.gen, displayedTier)}\n`;
+				const entryNote = phnnEntryNote(pokemon);
+				if (entryNote) buffer += `${prefix}<small>${entryNote}</small>\n`;
 				if (showDetails) {
 					let weighthit = 20;
 					if (pokemon.weighthg >= 2000) {
