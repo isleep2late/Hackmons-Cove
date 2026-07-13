@@ -42,6 +42,7 @@
 			}
 		},
 		blur: function () {
+			this.flushSave();
 			if (this.saveFlag) {
 				this.saveFlag = false;
 				app.user.trigger('saveteams');
@@ -107,6 +108,10 @@
 			if (this[e.currentTarget.value]) this[e.currentTarget.value](e);
 		},
 		back: function () {
+			if (this.saveTimer) {
+				clearTimeout(this.saveTimer);
+				this.saveTimer = null;
+			}
 			if (this.exportMode) {
 				if (this.curTeam) {
 					this.curTeam.team = Storage.packTeam(this.curSetList);
@@ -453,12 +458,18 @@
 				buf += '<li><p><em>you don\'t have any teams lol</em></p></li>';
 			} else {
 
+				var shownCount = 0;
+				var teamLimit = this.teamListLimit || 500;
 				for (var i = 0; i < teams.length + 1; i++) {
 					if (i === this.deletedTeamLoc) {
 						if (!atLeastOne) atLeastOne = true;
 						buf += '<li><button name="undoDelete"><i class="fa fa-undo"></i> Undo Delete</button></li>';
 					}
 					if (i >= teams.length) break;
+					if (shownCount >= teamLimit) {
+						buf += '<li><button name="moreTeams" class="button"><i class="fa fa-chevron-down"></i> Show more teams</button></li>';
+						break;
+					}
 
 					var team = teams[i];
 
@@ -497,6 +508,7 @@
 					}
 
 					if (!atLeastOne) atLeastOne = true;
+					shownCount++;
 					var formatText = '';
 					if (team.format) {
 						formatText = '[' + team.format + '] ';
@@ -796,6 +808,30 @@
 			}
 			Storage.deleteTeam(this.deletedTeam);
 			app.user.trigger('saveteams');
+			var $pane = this.$('.teampane');
+			var $row = $pane.find('button[name=delete][value="' + i + '"]').closest('li');
+			if (!$row.length) return this.updateTeamList();
+			$pane.find('button[name=undoDelete]').closest('li').remove();
+			$row.replaceWith('<li><button name="undoDelete"><i class="fa fa-undo"></i> Undo Delete</button></li>');
+			$pane.find('div[name=edit], button[name=edit], button[name=duplicate], button[name=delete]').each(function () {
+				var $el = $(this);
+				var dv = $el.attr('data-value');
+				if (dv !== undefined && +dv > i) {
+					$el.attr('data-value', +dv - 1).data('value', +dv - 1);
+				}
+				var v = $el.attr('value');
+				if (v !== undefined && +v > i) {
+					$el.attr('value', +v - 1);
+				}
+			});
+			var $count = $pane.find('h2 small').first();
+			if ($count.length) {
+				var m = $count.text().match(/\((\d+)\)/);
+				if (m) $count.text('(' + (+m[1] - 1) + ')');
+			}
+		},
+		moreTeams: function () {
+			this.teamListLimit = (this.teamListLimit || 500) + 1000;
 			this.updateTeamList();
 		},
 		undoDelete: function () {
@@ -1619,8 +1655,30 @@
 			this.save();
 		},
 		saveFlag: false,
+		saveTimer: null,
 		save: function () {
 			this.saveFlag = true;
+			var self = this;
+			if (!this.saveFlushBound) {
+				this.saveFlushBound = true;
+				$(window).on('beforeunload', function () {
+					self.flushSave();
+				});
+			}
+			if (this.saveTimer) clearTimeout(this.saveTimer);
+			this.saveTimer = setTimeout(function () {
+				self.saveTimer = null;
+				if (self.curTeam) {
+					Storage.saveTeam(self.curTeam);
+				} else {
+					Storage.saveTeams();
+				}
+			}, 300);
+		},
+		flushSave: function () {
+			if (!this.saveTimer) return;
+			clearTimeout(this.saveTimer);
+			this.saveTimer = null;
 			if (this.curTeam) {
 				Storage.saveTeam(this.curTeam);
 			} else {

@@ -1254,15 +1254,14 @@ Storage.getTeamIcons = function (team) {
 		// app.rooms.teambuilder.curSetList because the teambuilder
 		// room may have been closed by the time we need to get
 		// a packed team.
-		if (Storage.activeSetList) {
+		var tbRoom = 'teambuilder' in app.rooms ? app.rooms['teambuilder'] : null;
+		if (Storage.activeSetList && (!tbRoom || tbRoom.curTeam === team)) {
 			team.team = Storage.packTeam(Storage.activeSetList);
-		} else {
-			team.iconCache = '';
+			if (tbRoom) {
+				return Storage.packedTeamIcons(team.team);
+			}
+			Storage.activeSetList = null;
 		}
-		if ('teambuilder' in app.rooms) {
-			return Storage.packedTeamIcons(team.team);
-		}
-		Storage.activeSetList = null;
 		team.iconCache = Storage.packedTeamIcons(team.team);
 	} else if (!team.iconCache) {
 		team.iconCache = Storage.packedTeamIcons(team.team);
@@ -1274,12 +1273,13 @@ Storage.getPackedTeam = function (team) {
 	if (!team) return null;
 	if (team.iconCache === '!') {
 		// see the same case in Storage.getTeamIcons
-		if (Storage.activeSetList) {
+		var tbRoom = 'teambuilder' in app.rooms ? app.rooms['teambuilder'] : null;
+		if (Storage.activeSetList && (!tbRoom || tbRoom.curTeam === team)) {
 			team.team = Storage.packTeam(Storage.activeSetList);
 		} else {
 			team.iconCache = '';
 		}
-		if (!('teambuilder' in app.rooms)) {
+		if (!tbRoom) {
 			Storage.activeSetList = null;
 			team.iconCache = '';
 		}
