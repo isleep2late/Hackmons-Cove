@@ -29,7 +29,7 @@ This repository bundles the Pokémon Showdown server and web client together wit
 |---|---|
 | `pokemon-showdown/` | The game server. Upstream Pokémon Showdown with the Pure Hackmons No Nerfs mod in `data/mods/phnn/` and custom formats in `config/formats.ts`. |
 | `pokemon-showdown-client/` | The web client. The upstream Pokémon Showdown client, included directly in this repository. |
-| `showdex/` | A vendored copy of the Showdex damage calculator with Pure Hackmons No Nerfs customizations. |
+| `pokemon-showdown-client/showdex/` | A vendored copy of the Showdex damage calculator with Pure Hackmons No Nerfs customizations. Its build outputs are generated per machine and are not tracked. |
 
 The server and client are both included as regular folders rather than submodules. The `pokemon-showdown/` directory is tracked as a git subtree of upstream Pokémon Showdown, with the custom files (`config/formats.ts` and `data/mods/phnn/`) layered on top.
 

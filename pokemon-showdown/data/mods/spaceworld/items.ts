@@ -206,58 +206,142 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 	bigleaf: {
 		inherit: true,
 		isNonstandard: null,
+		onBasePower(basePower, user, target, move) {
+			if (move.type === 'Grass') {
+				return Math.floor(basePower * 1.2);
+			}
+		},
+		desc: "SpaceWorld '97: Boosts the holder's Grass-type moves by 20%.",
 	},
 	sharpstone: {
 		inherit: true,
 		isNonstandard: null,
+		onBasePower(basePower, user, target, move) {
+			if (move.type === 'Rock') {
+				return Math.floor(basePower * 1.2);
+			}
+		},
+		desc: "SpaceWorld '97: Boosts the holder's Rock-type moves by 20%.",
 	},
 	blackfeather: {
 		inherit: true,
 		isNonstandard: null,
+		onBasePower(basePower, user, target, move) {
+			if (move.type === 'Flying') {
+				return Math.floor(basePower * 1.2);
+			}
+		},
+		desc: "SpaceWorld '97: Boosts the holder's Flying-type moves by 20%.",
 	},
 	sharpfang: {
 		inherit: true,
 		isNonstandard: null,
+		onBasePower(basePower, user, target, move) {
+			if (move.type === 'Normal') {
+				return Math.floor(basePower * 1.2);
+			}
+		},
+		desc: "SpaceWorld '97: Boosts the holder's Normal-type moves by 20%.",
 	},
 	toxicneedle: {
 		inherit: true,
 		isNonstandard: null,
+		onBasePower(basePower, user, target, move) {
+			if (move.type === 'Poison') {
+				return Math.floor(basePower * 1.2);
+			}
+		},
+		desc: "SpaceWorld '97: Boosts the holder's Poison-type moves by 20%.",
 	},
 	poisonfang: {
 		inherit: true,
 		isNonstandard: null,
+		onBasePower(basePower, user, target, move) {
+			if (move.type === 'Poison') {
+				return Math.floor(basePower * 1.2);
+			}
+		},
+		desc: "SpaceWorld '97: Boosts the holder's Poison-type moves by 20%.",
 	},
 	migraineseed: {
 		inherit: true,
 		isNonstandard: null,
+		onBasePower(basePower, user, target, move) {
+			if (move.type === 'Psychic') {
+				return Math.floor(basePower * 1.2);
+			}
+		},
+		desc: "SpaceWorld '97: Boosts the holder's Psychic-type moves by 20%.",
 	},
 	attackneedle: {
 		inherit: true,
 		isNonstandard: null,
+		onBasePower(basePower, user, target, move) {
+			if (move.type === 'Bug') {
+				return Math.floor(basePower * 1.2);
+			}
+		},
+		desc: "SpaceWorld '97: Boosts the holder's Bug-type moves by 20%.",
 	},
 	powerbracersw: {
 		inherit: true,
 		isNonstandard: null,
+		onBasePower(basePower, user, target, move) {
+			if (move.type === 'Fighting') {
+				return Math.floor(basePower * 1.2);
+			}
+		},
+		desc: "SpaceWorld '97: Boosts the holder's Fighting-type moves by 20%.",
 	},
 	icefang: {
 		inherit: true,
 		isNonstandard: null,
+		onBasePower(basePower, user, target, move) {
+			if (move.type === 'Ice') {
+				return Math.floor(basePower * 1.2);
+			}
+		},
+		desc: "SpaceWorld '97: Boosts the holder's Ice-type moves by 20%.",
 	},
 	wethorn: {
 		inherit: true,
 		isNonstandard: null,
+		onBasePower(basePower, user, target, move) {
+			if (move.type === 'Water') {
+				return Math.floor(basePower * 1.2);
+			}
+		},
+		desc: "SpaceWorld '97: Boosts the holder's Water-type moves by 20%.",
 	},
 	thunderfang: {
 		inherit: true,
 		isNonstandard: null,
+		onBasePower(basePower, user, target, move) {
+			if (move.type === 'Electric') {
+				return Math.floor(basePower * 1.2);
+			}
+		},
+		desc: "SpaceWorld '97: Boosts the holder's Electric-type moves by 20%.",
 	},
 	fireclaw: {
 		inherit: true,
 		isNonstandard: null,
+		onBasePower(basePower, user, target, move) {
+			if (move.type === 'Fire') {
+				return Math.floor(basePower * 1.2);
+			}
+		},
+		desc: "SpaceWorld '97: Boosts the holder's Fire-type moves by 20%.",
 	},
 	spike: {
 		inherit: true,
 		isNonstandard: null,
+		onBasePower(basePower, user, target, move) {
+			if (move.type === 'Ghost') {
+				return Math.floor(basePower * 1.2);
+			}
+		},
+		desc: "SpaceWorld '97: Boosts the holder's Ghost-type moves by 20%.",
 	},
 	mysticpetal: {
 		inherit: true,
@@ -450,21 +534,36 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 		spritenum: 0,
 		num: 259,
 		gen: 2,
-		desc: "SpaceWorld '97: Its data says it was meant to boost Normal-type moves, but the demo engine never implements held type boosts.",
+		onBasePower(basePower, user, target, move) {
+			if (move.type === 'Normal') {
+				return Math.floor(basePower * 1.2);
+			}
+		},
+		desc: "SpaceWorld '97: Boosts the holder's Normal-type moves by 20%.",
 	},
 	thickclub: {
 		name: "Thick Club",
 		spritenum: 0,
 		num: 258,
 		gen: 2,
-		desc: "SpaceWorld '97: Its data says it was meant to boost Ground-type moves, but the demo engine never implements held type boosts.",
+		onBasePower(basePower, user, target, move) {
+			if (move.type === 'Ground') {
+				return Math.floor(basePower * 1.2);
+			}
+		},
+		desc: "SpaceWorld '97: Boosts the holder's Ground-type moves by 20%.",
 	},
 	dragonfang: {
 		name: "Dragon Fang",
 		spritenum: 0,
 		num: 250,
 		gen: 2,
-		desc: "SpaceWorld '97: Its data says it was meant to boost Dragon-type moves, but the demo engine never implements held type boosts.",
+		onBasePower(basePower, user, target, move) {
+			if (move.type === 'Dragon') {
+				return Math.floor(basePower * 1.2);
+			}
+		},
+		desc: "SpaceWorld '97: Boosts the holder's Dragon-type moves by 20%.",
 	},
 	berserkgene: {
 		name: "Berserk Gene",
@@ -490,7 +589,7 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 		},
 		onResidualOrder: 10,
 		onResidual(pokemon) {
-			if (pokemon.hp <= pokemon.maxhp / 2) {
+			if (pokemon.hp * 2 < pokemon.maxhp) {
 				pokemon.eatItem();
 			}
 		},

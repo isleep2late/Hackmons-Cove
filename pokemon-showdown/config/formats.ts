@@ -524,7 +524,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 	},
 	{
 		name: "[Gen 2] Statuses (SpaceWorld)",
-		desc: "Gen 2 Statuses using the 1997 Spaceworld demo's battle mechanics: status moves fail if the move's type is resisted or the target is immune (the Gen 1-style rule the final games dropped), plus the demo's move stats and type chart. Based on rby2k20's Spaceworld mod.",
+		desc: "Gen 2 Statuses using the 1997 Spaceworld demo's battle mechanics, decomp-verified: gen 1-style Counter (any physical type, shared last-damage), gen 1-style partial trapping with Rapid Spin escape, targeted permanent Sandstorm, no-recharge Hyper Beam on KOs, the Explosion HP-byte glitch, the Fly/Dig invulnerability glitch, Special Defense stages only applying after Baton Pass, held type-boost items, and RBY movesets via the working Time Capsule. Known conventions: Protect/Endure expire at end of turn, Morning Sun/Synthesis/Moonlight heal a flat 50%, and dual status is not modeled.",
 		mod: 'spaceworld',
 		searchShow: false,
 		challengeShow: false,
