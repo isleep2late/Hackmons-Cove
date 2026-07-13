@@ -677,10 +677,16 @@ Storage.saveTeams = function () {
 	try {
 		if (window.localStorage) {
 			localStorage.setItem('showdown_teams', Storage.packAllTeams(this.teams));
-			Storage.cantSave = false;
+			if (Storage.cantSave) {
+				Storage.cantSave = false;
+				if (window.app && app.addPopupMessage) app.addPopupMessage("Teams are saving normally again.");
+			}
 		}
 	} catch (e) {
-		if (e.code === DOMException.QUOTA_EXCEEDED_ERR) {
+		if (e.code === DOMException.QUOTA_EXCEEDED_ERR || (e.name === 'QuotaExceededError')) {
+			if (!Storage.cantSave && window.app && app.addPopupMessage) {
+				app.addPopupMessage("Your browser storage is full, so team changes (including deletions) can't be saved. Delete or export some teams to free up space, then try again.");
+			}
 			Storage.cantSave = true;
 		} else {
 			throw e;
@@ -805,7 +811,7 @@ Storage.packTeam = function (team) {
 		buf += '|';
 		if (set.moves) for (var j = 0; j < set.moves.length; j++) {
 			var moveEntry = set.moves[j] || '';
-			var ppMatch = moveEntry.match(/(.*)\s*(\((?:\d+|inf)(?:\/\d+)?\))$/i);
+			var ppMatch = moveEntry.match(/^(.*?)\s*(\((?:\d+|inf)(?:\/\d+)?\))$/i);
 			var moveid = toID(ppMatch ? ppMatch[1] : moveEntry);
 			var ppSuffix = ppMatch ? ppMatch[2] : '';
 			if (j && !moveid) continue;
@@ -1000,9 +1006,9 @@ Storage.fastUnpackTeam = function (buf) {
 		j = buf.indexOf(']', i);
 		var misc = undefined;
 		if (j < 0) {
-			if (i < buf.length) misc = buf.substring(i).split(',', 13);
+			if (i < buf.length) misc = buf.substring(i).split(',');
 		} else {
-			if (i !== j) misc = buf.substring(i, j).split(',', 13);
+			if (i !== j) misc = buf.substring(i, j).split(',');
 		}
 		if (misc) {
 			set.happiness = (misc[0] ? Number(misc[0]) : 255);
@@ -1084,7 +1090,7 @@ Storage.unpackTeam = function (buf) {
 		// moves
 		j = buf.indexOf('|', i);
 		set.moves = buf.substring(i, j).split(',').map(function (moveEntry) {
-			var ppMatch = moveEntry.match(/(.*)(\((?:\d+|inf)(?:\/\d+)?\))$/i);
+			var ppMatch = moveEntry.match(/^(.*?)\s*(\((?:\d+|inf)(?:\/\d+)?\))$/i);
 			if (ppMatch) return Dex.moves.get(ppMatch[1]).name + ' ' + ppMatch[2];
 			return Dex.moves.get(moveEntry).name;
 		});
@@ -1155,9 +1161,9 @@ Storage.unpackTeam = function (buf) {
 		j = buf.indexOf(']', i);
 		var misc = undefined;
 		if (j < 0) {
-			if (i < buf.length) misc = buf.substring(i).split(',', 13);
+			if (i < buf.length) misc = buf.substring(i).split(',');
 		} else {
-			if (i !== j) misc = buf.substring(i, j).split(',', 13);
+			if (i !== j) misc = buf.substring(i, j).split(',');
 		}
 		if (misc) {
 			set.happiness = (misc[0] ? Number(misc[0]) : 255);
