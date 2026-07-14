@@ -646,13 +646,8 @@ export class TeamValidator {
 			}
 		}
 		if (set.disguise && ruleTable.has('spaceworlddisguisemod')) {
-			// The disguise also sets the battle typing, so it must be a species that exists in the
-			// SpaceWorld demo (the 251 or a demo-exclusive beta mon) — otherwise a hacked disguise
-			// could smuggle in out-of-gen typings like Fairy.
 			const disguiseSpecies = dex.species.get(set.disguise);
-			const isDemoMon = disguiseSpecies.num <= -6000 && disguiseSpecies.num > -7000;
-			if (!disguiseSpecies.exists || disguiseSpecies.forme ||
-				(!isDemoMon && (disguiseSpecies.num < 1 || disguiseSpecies.num > 251))) {
+			if (!disguiseSpecies.exists || disguiseSpecies.forme || disguiseSpecies.isNonstandard) {
 				problems.push(`${set.name || set.species} can't disguise as ${set.disguise}: it isn't a Pokemon in the SpaceWorld demo.`);
 			}
 		}

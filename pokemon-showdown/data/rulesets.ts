@@ -2,16 +2,10 @@
 
 import type { Learnset } from "../sim/dex-species";
 
-// SpaceWorld Disguise Mod: resolve a set's disguise to a species that exists in the
-// SpaceWorld demo (the 251 or a demo-exclusive beta mon). The disguise also sets the
-// battle typing, so out-of-roster species (e.g. Fairy-types) must never resolve here
-// even if a hacked set slips past the validator.
 function getSpaceWorldDisguise(dex: any, pokemon: any) {
 	if (!pokemon.set.disguise) return null;
 	const disguise = dex.species.get(pokemon.set.disguise);
-	if (!disguise.exists || disguise.forme) return null;
-	const isDemoMon = disguise.num <= -6000 && disguise.num > -7000;
-	if (!isDemoMon && (disguise.num < 1 || disguise.num > 251)) return null;
+	if (!disguise.exists || disguise.forme || disguise.isNonstandard) return null;
 	return disguise;
 }
 

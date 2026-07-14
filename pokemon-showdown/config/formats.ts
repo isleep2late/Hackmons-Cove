@@ -528,7 +528,6 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'spaceworld',
 		searchShow: false,
 		challengeShow: false,
-		// No Team Preview: it would leak the real species behind each disguise.
 		ruleset: ['-Nonexistent', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100', 'Prestatus', 'SpaceWorld Disguise Mod'],
 		banlist: ['No Move-2', 'No Move-SW'],
 	},

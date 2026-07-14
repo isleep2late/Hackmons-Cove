@@ -1609,8 +1609,6 @@
 		shouldDisplayFormat: function (format) {
 			if (/customdisguises/.test(format.id) && format.id !== 'gen9nonerfscustomdisguises') return false;
 			if (/customgame/.test(format.id) && format.id !== 'gen9customgame') return false;
-			// Version-dropdown members: reachable via the [Gen 1] Disguises / [Gen 2] Statuses
-			// Version selector, not as their own rows in the format list.
 			if (/^(gen1ou|gen1ubers|gen2ou|gen2ubers|gen2spaceworldou|gen2spaceworldubers|gen2spaceworlddisguises)$/.test(format.id)) return false;
 			if (this.selectType === 'teambuilder') {
 				if (!format.isTeambuilderFormat) return false;
