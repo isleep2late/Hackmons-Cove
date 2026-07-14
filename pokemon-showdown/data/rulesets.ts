@@ -2,6 +2,13 @@
 
 import type { Learnset } from "../sim/dex-species";
 
+function getSpaceWorldDisguise(dex: any, pokemon: any) {
+	if (!pokemon.set.disguise) return null;
+	const disguise = dex.species.get(pokemon.set.disguise);
+	if (!disguise.exists || disguise.forme || disguise.isNonstandard) return null;
+	return disguise;
+}
+
 // The list of formats is stored in config/formats.js
 export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 
@@ -207,6 +214,32 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 					delete pokemon.volatiles[effect];
 					pokemon.addVolatile(effect);
 				}
+			}
+		},
+	},
+	spaceworlddisguisemod: {
+		effectType: 'Rule',
+		name: 'SpaceWorld Disguise Mod',
+		desc: "Pok&eacute;mon may disguise as another species' sprite and start the battle pre-statused, but there is no custom typing: the 1997 SpaceWorld demo derives a Pok&eacute;mon's types from its species byte, so a disguised Pok&eacute;mon takes on its disguise's typing.",
+		onBegin() {
+			for (const side of this.sides) {
+				for (const pokemon of side.pokemon) {
+					const disguise = getSpaceWorldDisguise(this.dex, pokemon);
+					if (disguise) {
+						(pokemon as any).name = disguise.name;
+						(pokemon as any).fullname = `${pokemon.side.id}: ${disguise.name}`;
+					}
+				}
+			}
+		},
+		onSwitchInPriority: 2,
+		onSwitchIn(pokemon) {
+			const disguise = getSpaceWorldDisguise(this.dex, pokemon);
+			if (disguise) {
+				pokemon.setType(disguise.types, true);
+				this.addSplit(pokemon.side.id, [
+					'-start', pokemon, 'typechange', disguise.types.join('/'), '[from] rule: SpaceWorld Disguise Mod',
+				]);
 			}
 		},
 	},

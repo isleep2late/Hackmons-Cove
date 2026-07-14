@@ -934,11 +934,17 @@
 				{ label: 'Version', members: [
 					{ id: 'gen1disguises', name: 'JP' },
 					{ id: 'gen1disguisesenglish', name: 'English' },
+					{ id: 'gen1ou', name: 'OU' },
+					{ id: 'gen1ubers', name: 'Ubers' },
+					{ id: 'gen2spaceworlddisguises', name: 'SpaceWorld' },
 				] },
 				{ label: 'Generation', members: [
 					{ id: 'gen2statuses', name: 'Crystal' },
 					{ id: 'gen2statusesgoldsilver', name: 'Gold/Silver' },
-					{ id: 'gen2statusesspaceworld', name: 'SpaceWorld' },
+					{ id: 'gen2ou', name: 'OU' },
+					{ id: 'gen2ubers', name: 'Ubers' },
+					{ id: 'gen2spaceworldou', name: 'SpaceWorld OU' },
+					{ id: 'gen2spaceworldubers', name: 'SpaceWorld Ubers' },
 				] },
 				{ label: 'Generation', members: [
 					{ id: 'gen8255', name: 'Unified' },
@@ -1603,6 +1609,7 @@
 		shouldDisplayFormat: function (format) {
 			if (/customdisguises/.test(format.id) && format.id !== 'gen9nonerfscustomdisguises') return false;
 			if (/customgame/.test(format.id) && format.id !== 'gen9customgame') return false;
+			if (/^(gen1ou|gen1ubers|gen2ou|gen2ubers|gen2spaceworldou|gen2spaceworldubers|gen2spaceworlddisguises)$/.test(format.id)) return false;
 			if (this.selectType === 'teambuilder') {
 				if (!format.isTeambuilderFormat) return false;
 			} else {
