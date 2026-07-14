@@ -238,7 +238,7 @@ export const FormatsData: import('../sim/dex-species').SpeciesFormatsDataTable =
 	},
 	pikachustarter: {
 		isNonstandard: "LGPE",
-		tier: "AG",
+		tier: "Illegal",
 	},
 	pikachugmax: {
 		isNonstandard: "Past",
@@ -1064,7 +1064,7 @@ export const FormatsData: import('../sim/dex-species').SpeciesFormatsDataTable =
 	},
 	eeveestarter: {
 		isNonstandard: "LGPE",
-		tier: "AG",
+		tier: "Illegal",
 	},
 	eeveegmax: {
 		isNonstandard: "Past",
