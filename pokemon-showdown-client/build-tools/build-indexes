@@ -446,7 +446,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 						!(species.isMega || species.isPrimal || ['Greninja-Ash', 'Necrozma-Ultra'].includes(species.name))) {
 						return 'Illegal';
 					}
-					if (species.isNonstandard && ['LGPE', 'CAP', 'Future'].includes(species.isNonstandard)) return 'Illegal';
+					if (species.isNonstandard && ['LGPE', 'CAP', 'Future'].includes(species.isNonstandard) && species.forme !== 'Starter') return 'Illegal';
 					return species.tags.includes('Mythical') ? 'Mythical' :
 						species.tags.includes('Restricted Legendary') ? 'Restricted' :
 						species.nfe ? (species.prevo ? 'NFE' : 'LC') : 'Regular';
