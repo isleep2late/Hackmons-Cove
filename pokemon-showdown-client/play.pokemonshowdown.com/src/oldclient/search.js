@@ -141,7 +141,11 @@
 			if ((label = this.engine.filterLabel(row[0]))) {
 				errorMessage = '<span class="col filtercol"><em>' + label + '</em></span>';
 			} else if ((label = this.engine.illegalLabel(row[1]))) {
-				errorMessage = '<span class="col illegalcol"><em>' + label + '</em></span>';
+				if (row[0] === 'pokemon' && Search.inspectableIllegal[row[1]]) {
+					errorMessage = 'INSPECTABLE_ILLEGAL';
+				} else {
+					errorMessage = '<span class="col illegalcol"><em>' + label + '</em></span>';
+				}
 			}
 
 			var mStart = 0;
@@ -293,16 +297,21 @@
 		buf += '</div></li>';
 		return buf;
 	};
+	Search.inspectableIllegal = {
+		pikachustarter: 1, eeveestarter: 1, eternatuseternamax: 1, zaciancrowned: 1, zamazentacrowned: 1,
+	};
 	Search.prototype.renderPokemonRow = function (pokemon, matchStart, matchLength, errorMessage, attrs) {
 		if (!attrs) attrs = '';
 		if (!pokemon) return '<li class="result">Unrecognized pokemon</li>';
 		var id = toID(pokemon.name);
+		var inspectableIllegal = (errorMessage === 'INSPECTABLE_ILLEGAL');
+		if (inspectableIllegal) errorMessage = '';
 		if (Search.urlRoot) attrs += ' href="' + Search.urlRoot + 'pokemon/' + id + '" data-target="push"';
 		var buf = '<li class="result"><a' + attrs + ' data-entry="pokemon|' + BattleLog.escapeHTML(pokemon.name) + '">';
 
 		// number
 		var tier = this.engine ? this.engine.getTier(pokemon) : pokemon.num;
-		// buf += '<span class="col numcol">' + (pokemon.num >= 0 ? pokemon.num : 'CAP') + '</span> ';
+		if (inspectableIllegal) tier = 'Illegal';
 		buf += '<span class="col numcol">' + tier + '</span> ';
 
 		// icon
