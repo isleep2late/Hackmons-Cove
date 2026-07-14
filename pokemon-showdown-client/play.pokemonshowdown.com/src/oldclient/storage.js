@@ -1354,7 +1354,7 @@ Storage.importTeam = function (buffer, teams) {
 					name: 'Restored team', format: 'gen9', gen: 9, team: team, capacity: 6, folder: '', iconCache: ''
 				});
 			}
-			curSet = { name: '', species: '', gender: '' };
+			curSet = { name: '', species: '', gender: '', evs: {}, ivs: {} };
 			team.push(curSet);
 			var atIndex = line.lastIndexOf(' @ ');
 			if (atIndex !== -1) {
@@ -1484,7 +1484,11 @@ Storage.importTeam = function (buffer, teams) {
 				var hptype = line.substr(14, line.length - 15);
 				line = 'Hidden Power ' + hptype;
 				var type = Dex.types.get(hptype);
-				if (!curSet.ivs && type) {
+				var hasIvs = false;
+				if (curSet.ivs) {
+					for (var ivStat in curSet.ivs) { hasIvs = true; break; }
+				}
+				if (!hasIvs && type) {
 					curSet.ivs = {};
 					for (var stat in type.HPivs) {
 						curSet.ivs[stat] = type.HPivs[stat];
