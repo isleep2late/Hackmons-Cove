@@ -1483,6 +1483,17 @@
 					var cdAbilityCount = (set.ability ? 1 : 0) + (set.phAbilities ? set.phAbilities.split('/').length : 0);
 					buf += '<span class="detailcell"><label>Abilities</label>' + (cdAbilityCount > 1 ? 'Multi' : (set.ability || '(none)')) + '</span>';
 					buf += '<span class="detailcell"><label>Disguise</label>' + (set.disguise ? Dex.species.get(set.disguise).name : '(none)') + '</span>';
+				} else if (this.curTeam.format.includes('spaceworlddisguises')) {
+					// SpaceWorld derives types from the species byte: no custom typing, the disguise sets
+					// the typing. Use the SpaceWorld dex — SW typings differ (e.g. Ho-Oh is pure Flying).
+					var swCellDex = this.curTeam.dex || Dex;
+					var swCellDisguise = set.disguise ? swCellDex.species.get(set.disguise) : null;
+					var swCellBase = swCellDex.species.get(set.species);
+					var swCellTypes = (swCellDisguise && swCellDisguise.exists ? swCellDisguise.types :
+						(swCellBase.exists && swCellBase.types ? swCellBase.types : species.types));
+					buf += '<span class="detailcell"><label>Type 1</label>' + swCellTypes[0] + '</span>';
+					buf += '<span class="detailcell"><label>Type 2</label>' + (swCellTypes[1] || '(none)') + '</span>';
+					buf += '<span class="detailcell"><label>Disguise</label>' + (swCellDisguise && swCellDisguise.exists ? swCellDisguise.name : '(none)') + '</span>';
 				} else if (this.curTeam.format.includes('disguise')) {
 					var phT = (set.phType || '').split('/');
 					buf += '<span class="detailcell"><label>Type 1</label>' + (phT[0] || species.types[0]) + '</span>';
@@ -1863,11 +1874,17 @@
 				{ label: 'Version', members: [
 					{ id: 'gen1disguises', name: 'JP' },
 					{ id: 'gen1disguisesenglish', name: 'English' },
+					{ id: 'gen1ou', name: 'OU' },
+					{ id: 'gen1ubers', name: 'Ubers' },
+					{ id: 'gen2spaceworlddisguises', name: 'SpaceWorld' },
 				] },
 				{ label: 'Version', members: [
 					{ id: 'gen2statuses', name: 'Crystal' },
 					{ id: 'gen2statusesgoldsilver', name: 'Gold/Silver' },
-					{ id: 'gen2statusesspaceworld', name: 'SpaceWorld' },
+					{ id: 'gen2ou', name: 'OU' },
+					{ id: 'gen2ubers', name: 'Ubers' },
+					{ id: 'gen2spaceworldou', name: 'SpaceWorld OU' },
+					{ id: 'gen2spaceworldubers', name: 'SpaceWorld Ubers' },
 				] },
 				{ label: 'Version', members: [
 					{ id: 'gen8255', name: 'Unified' },
@@ -1885,6 +1902,9 @@
 		renderStatModToggle: function () {
 			var f = '' + (this.curTeam.format || '');
 			if (!f || /^gen\d+$/.test(f) || f.includes('customdisguise') || f.includes('customgame')) return '';
+			// Standard OU/Ubers formats are plain Smogon rules — no stat modding. Still show the
+			// toggle if a Version switch carried "@@@Stat Mod" over, so it can be turned off.
+			if (/^gen[12](spaceworld)?(ou|ubers)(@@@|$)/.test(f) && !this.phnnStatModAllowed(f)) return '';
 			var on = this.phnnStatModAllowed(f);
 			return ' <button class="button statmodtoggle' + (on ? ' cur' : '') + '" title="Allow manually overridden stats (1-65535), like cartridge save editing"><i class="fa fa-flask"></i> Stat Mod' + (on ? ': On' : '') + '</button>';
 		},
@@ -1915,7 +1935,10 @@
 				gen1disguisesenglish: 'gen1phnneng',
 				gen2statusesgoldsilver: 'gen2gs',
 				gen2statusesspaceworld: 'gen2spaceworld',
+				gen2spaceworlddisguises: 'gen2spaceworld',
 				gen2spaceworldcustomdisguises: 'gen2spaceworld',
+				gen2spaceworldou: 'gen2spaceworld',
+				gen2spaceworldubers: 'gen2spaceworld',
 			}[('' + (format || '')).split('@@@')[0]] || null;
 		},
 		renderVersionSelect: function () {
@@ -3346,6 +3369,9 @@
 
 			var isDisguise = this.curTeam.format.includes('disguise');
 			var isCustomDisguise = this.curTeam.format.includes('customdisguise');
+			// SpaceWorld disguises: sprite disguise + prestatus, but NO custom typing —
+			// the demo derives types from the species byte, so the disguise sets the typing.
+			var isSWDisguise = this.curTeam.format.includes('spaceworlddisguises');
 			var isModded = isDisguise || this.curTeam.format.includes('status') || this.curTeam.format.includes('nonerfs');
 			if (isModded) {
 				if (isDisguise && isCustomDisguise) {
@@ -3383,7 +3409,7 @@
 						buf += this.renderPhnnMultiselect('phitems', itemNames, curItems, '(none)', true);
 						buf += '</div></div>';
 					}
-				} else if (isDisguise) {
+				} else if (isDisguise && !isSWDisguise) {
 					var phTypeList = Dex.types.all().map(function (t) { return t.name; });
 					var phTypes = (set.phType || '').split('/');
 					buf += '<div class="formrow"><label class="formlabel" title="Custom type used in battle (hidden from the opponent)">Type 1:</label><div><select name="phtype1" class="button">';
@@ -3400,13 +3426,20 @@
 					buf += '</select></div></div>';
 				}
 				if (isDisguise) {
-					buf += '<div class="formrow"><label class="formlabel" title="The Pokemon sprite your opponent and spectators see in place of the real one">Disguise:</label><div><select name="disguise" class="button">';
+					var disguiseTitle = isSWDisguise ?
+						'The species your opponent and spectators see in place of the real one. In SpaceWorld the disguise also sets your battle typing (types follow the species byte).' :
+						'The Pokemon sprite your opponent and spectators see in place of the real one';
+					buf += '<div class="formrow"><label class="formlabel" title="' + disguiseTitle + '">Disguise:</label><div><select name="disguise" class="button">';
 					buf += '<option value=""' + (!set.disguise ? ' selected="selected"' : '') + '>(none — show real sprite)</option>';
 					var disguiseMons = [];
 					var isGen1Disguises = this.curTeam.gen === 1 && !isCustomDisguise;
 					for (var dexid in BattlePokedex) {
 						var dsp = Dex.species.get(dexid);
-						if (isCustomDisguise) {
+						if (isSWDisguise) {
+							// SpaceWorld roster: the 251 plus the demo-exclusive beta mons (nums -6000..-6055).
+							if (!dsp.exists || dsp.forme) continue;
+							if ((dsp.num >= 1 && dsp.num <= 251) || (dsp.num <= -6000 && dsp.num > -7000)) disguiseMons.push(dsp);
+						} else if (isCustomDisguise) {
 							if (dsp.exists) disguiseMons.push(dsp);
 						} else if (isGen1Disguises) {
 							if (dsp.exists && dsp.num >= 0 && dsp.num <= 151 && !dsp.forme) disguiseMons.push(dsp);
@@ -3414,7 +3447,16 @@
 							disguiseMons.push(dsp);
 						}
 					}
-					disguiseMons.sort(function (a, b) { return a.num - b.num; });
+					if (isSWDisguise) {
+						// Dex order first, demo mons at the end (their nums are negative).
+						disguiseMons.sort(function (a, b) {
+							var an = a.num > 0 ? a.num : 10000 - a.num;
+							var bn = b.num > 0 ? b.num : 10000 - b.num;
+							return an - bn;
+						});
+					} else {
+						disguiseMons.sort(function (a, b) { return a.num - b.num; });
+					}
 					var curDisguiseId = toID(set.disguise);
 					for (var dgi = 0; dgi < disguiseMons.length; dgi++) {
 						buf += '<option value="' + disguiseMons[dgi].id + '"' + (curDisguiseId === disguiseMons[dgi].id ? ' selected="selected"' : '') + '>' + disguiseMons[dgi].name + '</option>';
