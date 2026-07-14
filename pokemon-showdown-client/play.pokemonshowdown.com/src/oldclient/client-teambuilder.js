@@ -4459,9 +4459,6 @@
 			var supportsAVs = !supportsEVs;
 			if (!set) set = this.curSet;
 			if (!set) return 0;
-			if (set.phStats && set.phStats[stat] !== undefined && this.phnnStatModAllowed(this.curTeam.format)) {
-				return set.phStats[stat];
-			}
 
 			if (!set.ivs) set.ivs = {
 				hp: 31,
@@ -4472,6 +4469,10 @@
 				spe: 31
 			};
 			if (!set.evs) set.evs = {};
+
+			if (set.phStats && set.phStats[stat] !== undefined && this.phnnStatModAllowed(this.curTeam.format)) {
+				return set.phStats[stat];
+			}
 
 			// do this after setting set.evs because it's assumed to exist
 			// after getStat is run
