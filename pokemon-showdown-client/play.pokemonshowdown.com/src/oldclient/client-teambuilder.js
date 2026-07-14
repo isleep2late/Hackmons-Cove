@@ -2618,7 +2618,7 @@
 			var set = this.curSet;
 			var species = this.curTeam.dex.species.get(this.curSet.species);
 
-			var baseStats = species.baseStats;
+			var baseStats = species.baseStats || { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
 
 			buf += '<div class="resultheader"><h3>EVs</h3></div>';
 			buf += '<div class="statform">';
@@ -4431,7 +4431,7 @@
 			// do this after setting set.evs because it's assumed to exist
 			// after getStat is run
 			var species = this.curTeam.dex.species.get(set.species);
-			if (!species.exists) return 0;
+			if (!species.exists || !species.baseStats) return 0;
 
 			if (!set.level) set.level = 100;
 			if (typeof set.ivs[stat] === 'undefined') set.ivs[stat] = 31;
