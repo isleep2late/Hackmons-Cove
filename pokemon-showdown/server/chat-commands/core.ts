@@ -1172,8 +1172,8 @@ export const commands: Chat.ChatCommands = {
 	savereplay(target, room, user, connection) {
 		if (!room?.battle) throw new Chat.ErrorMessage(this.tr`You can only save replays for battles.`);
 		const log = room.getLog(room.battle.ended ? -1 : 0);
-		const { id } = room.getReplayData();
-		connection.send(`|queryresponse|savereplay|${JSON.stringify({ id, log })}`);
+		const { id, password } = room.getReplayData();
+		connection.send(`|queryresponse|savereplay|${JSON.stringify({ id, log, password })}`);
 	},
 	savereplayhelp: [`/savereplay - Saves the replay for the current battle.`],
 

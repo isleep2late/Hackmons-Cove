@@ -29,7 +29,7 @@ This repository bundles the Pokémon Showdown server and web client together wit
 |---|---|
 | `pokemon-showdown/` | The game server. Upstream Pokémon Showdown with the Pure Hackmons No Nerfs mod in `data/mods/phnn/` and custom formats in `config/formats.ts`. |
 | `pokemon-showdown-client/` | The web client. The upstream Pokémon Showdown client, included directly in this repository. |
-| `showdex/` | A vendored copy of the Showdex damage calculator with Pure Hackmons No Nerfs customizations. |
+| `pokemon-showdown-client/showdex/` | A vendored copy of the Showdex damage calculator with Pure Hackmons No Nerfs customizations. Its build outputs are generated per machine and are not tracked. |
 
 The server and client are both included as regular folders rather than submodules. The `pokemon-showdown/` directory is tracked as a git subtree of upstream Pokémon Showdown, with the custom files (`config/formats.ts` and `data/mods/phnn/`) layered on top.
 
@@ -41,8 +41,8 @@ The server and client are both included as regular folders rather than submodule
 - **isleep2late** - Community Indentured Servant
 - **ifwih** - Coleader and Developer
 - **electra** - Lead Developer of Wondrous Hackmons, Co-Creator of Pure Hackmons No Nerfs
-- **Enigmatist** - Co-Creator of No Nerfs Generation, #1 Ranked Hackmons Player
-- **Alex BB** - Contributor
+- **Enigmatist** - Co-Creator of No Nerfs Generation, #1 Ranked Hackmos Player (at one point)
+- **Sonja_Krystal** - Implemented SpaceWorld'97 and created the Shadow Mewtwo/Mega X & Arceus front battle sprites!
 
 **External recognition of those who made this possible:**
 - **Zarel** - Showdown Owner and Developer, along with staff: https://pokemonshowdown.com/credits
@@ -53,13 +53,13 @@ The server and client are both included as regular folders rather than submodule
 - **Othienka** - Creation of Armored Mewtwo sprites for fangames: https://www.deviantart.com/othienka/art/Armored-Mewtwo-Battle-Sprite-and-Back-Sprite-v2-460897939 & https://www.deviantart.com/othienka/art/Armored-Mewtwo-V3-594576816
 
 **Special Thanks:**
-- **Sonja_Krystal** for implementing SpaceWorld'97 and creating the Shadow Mewtwo/Mega X & Arceus front battle sprites!
 - **Siphonaptera** for leading the [Gen 8] Unified project
 - **psim tseng** for artistic contribution and leadership
 - **Penultimate Toast** for Hackmons.com database management as site admin
 - **Wyrd & Viola Lunala** for promoting the server and leadership (And Wyrd for making the SHADOW type badge)
 - **ProKameron** for contributing to the bot and leadership
 - **aidan amoongus** for Room Intros and leadership
+- **Alex BB** - for early contributions to the project
 - The Pure Hackmons community for additional feedback
 
 [Join our Discord](https://discord.gg/hackmons)

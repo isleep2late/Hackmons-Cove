@@ -934,11 +934,17 @@
 				{ label: 'Version', members: [
 					{ id: 'gen1disguises', name: 'JP' },
 					{ id: 'gen1disguisesenglish', name: 'English' },
+					{ id: 'gen1ou', name: 'OU' },
+					{ id: 'gen1ubers', name: 'Ubers' },
+					{ id: 'gen2spaceworlddisguises', name: 'SpaceWorld' },
 				] },
 				{ label: 'Generation', members: [
 					{ id: 'gen2statuses', name: 'Crystal' },
 					{ id: 'gen2statusesgoldsilver', name: 'Gold/Silver' },
-					{ id: 'gen2statusesspaceworld', name: 'SpaceWorld' },
+					{ id: 'gen2ou', name: 'OU' },
+					{ id: 'gen2ubers', name: 'Ubers' },
+					{ id: 'gen2spaceworldou', name: 'SpaceWorld OU' },
+					{ id: 'gen2spaceworldubers', name: 'SpaceWorld Ubers' },
 				] },
 				{ label: 'Generation', members: [
 					{ id: 'gen8255', name: 'Unified' },
@@ -1297,7 +1303,7 @@
 				}
 				if (this.curTeamFormat !== teamFormat) {
 					for (var i = 0; i < teams.length; i++) {
-						if (teams[i].format === teamFormat && teams[i].capacity === 6) {
+						if (String(teams[i].format || '').split('@@@')[0] === teamFormat && teams[i].capacity === 6) {
 							teamIndex = i;
 							break;
 						}
@@ -1603,6 +1609,7 @@
 		shouldDisplayFormat: function (format) {
 			if (/customdisguises/.test(format.id) && format.id !== 'gen9nonerfscustomdisguises') return false;
 			if (/customgame/.test(format.id) && format.id !== 'gen9customgame') return false;
+			if (/^(gen1ou|gen1ubers|gen2ou|gen2ubers|gen2spaceworldou|gen2spaceworldubers|gen2spaceworlddisguises)$/.test(format.id)) return false;
 			if (this.selectType === 'teambuilder') {
 				if (!format.isTeambuilderFormat) return false;
 			} else {
@@ -1718,7 +1725,7 @@
 					bufs[curBuf] = '<li><h3 style="margin-bottom: 5px;">' + BattleLog.escapeFormat(teamFormat) + ' teams</h3></li>';
 					bufs[curBuf] += '<li style="padding-bottom: 5px;"><label class="checkbox"><input type="checkbox"' + (this.folderToggleOn ? ' checked' : '') + '> Group by folders</label></li>';
 					for (var i = 0; i < teams.length; i++) {
-						if ((!teams[i].format && !teamFormat) || teams[i].format === teamFormat) {
+						if ((!teams[i].format && !teamFormat) || String(teams[i].format || '').split('@@@')[0] === teamFormat) {
 							var selected = (i === curTeam);
 							if (!this.folderToggleOn) {
 								bufs[curBuf] += '<li><button name="selectTeam" value="' + i + '" class="option' + (selected ? ' cur' : '') + '">' + BattleLog.escapeHTML(teams[i].name) + '</button></li>';
@@ -1777,7 +1784,7 @@
 						}
 						if (!isNoFolder) {
 							for (var i = 0; i < teams.length; i++) {
-								if ((!teams[i].format && !teamFormat) || teams[i].format === teamFormat) {
+								if ((!teams[i].format && !teamFormat) || String(teams[i].format || '').split('@@@')[0] === teamFormat) {
 									var selected = (i === curTeam);
 									if (teams[i].folder === "") {
 										bufs[curBuf] += '<li><button name="selectTeam" value="' + i + '" class="option' + (selected ? ' cur' : '') + '">' + BattleLog.escapeHTML(teams[i].name) + '</button></li>';
@@ -1798,7 +1805,7 @@
 				}
 				if (this.isMoreTeams) {
 					for (var i = 0; i < teams.length; i++) {
-						if (teamFormat && teams[i].format === teamFormat) continue;
+						if (teamFormat && String(teams[i].format || '').split('@@@')[0] === teamFormat) continue;
 						var selected = (i === curTeam);
 						bufs[curBuf] += '<li><button name="selectTeam" value="' + i + '" class="option' + (selected ? ' cur' : '') + '">' + BattleLog.escapeHTML(teams[i].name) + '</button></li>';
 						count++;

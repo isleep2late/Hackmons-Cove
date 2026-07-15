@@ -690,6 +690,9 @@ abstract class BattleTypedSearch<T extends SearchType> {
 		this.baseResults = null;
 		this.baseIllegalResults = null;
 
+		const customRulesIndex = format.indexOf('@@@');
+		if (customRulesIndex >= 0) format = format.slice(0, customRulesIndex) as ID;
+
 		if (format.startsWith('gen')) {
 			const gen = (Number(format.charAt(3)) || 6);
 			format = (format.slice(4) || 'customgame') as ID;
@@ -754,6 +757,13 @@ abstract class BattleTypedSearch<T extends SearchType> {
 		}
 		if (format.includes('statusesspaceworld') && this.dex.gen === 2) {
 			this.dex = Dex.mod('gen2spaceworld' as ID);
+		}
+		if (format === 'spaceworlddisguises' && this.dex.gen === 2) {
+			this.dex = Dex.mod('gen2spaceworld' as ID);
+		}
+		if ((format === 'spaceworldou' || format === 'spaceworldubers') && this.dex.gen === 2) {
+			this.dex = Dex.mod('gen2spaceworld' as ID);
+			format = 'ubers' as ID;
 		}
 		if (format.includes('spaceworldcustomdisguises') && this.dex.gen === 2) {
 			this.dex = Dex.mod('gen2spaceworld' as ID);
@@ -864,7 +874,8 @@ abstract class BattleTypedSearch<T extends SearchType> {
 				if (!(id in legalityFilter)) {
 					const isOpenCustom = this.format.includes('customdisguises') || this.format.includes('customgame');
 					const isNoNerfs = this.format.includes('nonerfs') || this.format.includes('phnn') || this.format.includes('unified');
-					const allowMissingno = isOpenCustom || isNoNerfs || this.format.includes('disguises');
+					const allowMissingno = isOpenCustom || isNoNerfs ||
+						this.format === 'disguises' || this.format === 'disguisesenglish';
 					if (isOpenCustom) {
 						this.baseResults.push([this.searchType, id as ID]);
 						continue;
@@ -1917,7 +1928,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		const dex = this.dex;
 		let species = dex.species.get(this.species);
 		const format = this.format;
-		const isHackmons = ((format.includes('hackmons') || format.includes('phnn')) || format.endsWith('bh') || format.includes('anyability') || format.includes('unified') || format.includes('disguise') || format.includes('statuses') || format.includes('nolimit') || format.includes('nonerfs') || format.includes('customgame'));
+		const isHackmons = ((format.includes('hackmons') || format.includes('phnn')) || format.endsWith('bh') || format.includes('anyability') || format.includes('unified') || format.includes('disguise') || format.includes('statuses') || format.includes('nolimit') || format.includes('nonerfs') || format.includes('customgame') || this.dex.modid === 'gen2spaceworld');
 		const isPHNN = format.includes('nonerfs') || format.includes('phnn');
 		const phnnMaxMoves = ['maxguard', 'gmaxdrumsolo', 'gmaxfireball', 'gmaxhydrosnipe'];
 		const isSTABmons = (format.includes('stabmons') || format === 'staaabmons');

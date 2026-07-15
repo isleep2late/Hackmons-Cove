@@ -42,6 +42,7 @@
 			}
 		},
 		blur: function () {
+			this.flushSave();
 			if (this.saveFlag) {
 				this.saveFlag = false;
 				app.user.trigger('saveteams');
@@ -107,6 +108,10 @@
 			if (this[e.currentTarget.value]) this[e.currentTarget.value](e);
 		},
 		back: function () {
+			if (this.saveTimer) {
+				clearTimeout(this.saveTimer);
+				this.saveTimer = null;
+			}
 			if (this.exportMode) {
 				if (this.curTeam) {
 					this.curTeam.team = Storage.packTeam(this.curSetList);
@@ -157,6 +162,32 @@
 		exportMode: false,
 		formatResources: {},
 		update: function () {
+			try {
+				return this.updateInner();
+			} catch (err) {
+				this.recoverFromError(err, 'rendering');
+			}
+		},
+		recoverFromError: function (err, where) {
+			try { console.error('teambuilder error while ' + where, err); } catch (e) {}
+			if (this.saveTimer) {
+				clearTimeout(this.saveTimer);
+				this.saveTimer = null;
+			}
+			if (this.curTeam) this.curTeam.iconCache = '';
+			this.curTeam = null;
+			this.curSet = null;
+			this.curSetList = null;
+			this.exportMode = false;
+			Storage.activeSetList = null;
+			try {
+				this.updateTeamInterface();
+			} catch (err2) {
+				this.$el.html('<div class="pad"><p>The teambuilder hit an error. Please reload the page (your saved teams are safe).</p></div>');
+			}
+			app.addPopupMessage('The teambuilder hit an error while ' + where + ' and returned to the team list. Your saved teams were not changed.\n\nPlease report this message: ' + ((err && err.message) || err));
+		},
+		updateInner: function () {
 			teams = Storage.teams;
 			if (this.curTeam) {
 				if (this.curTeam.format && !this.formatResources[this.curTeam.format]) {
@@ -453,12 +484,18 @@
 				buf += '<li><p><em>you don\'t have any teams lol</em></p></li>';
 			} else {
 
+				var shownCount = 0;
+				var teamLimit = this.teamListLimit || 500;
 				for (var i = 0; i < teams.length + 1; i++) {
 					if (i === this.deletedTeamLoc) {
 						if (!atLeastOne) atLeastOne = true;
 						buf += '<li><button name="undoDelete"><i class="fa fa-undo"></i> Undo Delete</button></li>';
 					}
 					if (i >= teams.length) break;
+					if (shownCount >= teamLimit) {
+						buf += '<li><button name="moreTeams" class="button"><i class="fa fa-chevron-down"></i> Show more teams</button></li>';
+						break;
+					}
 
 					var team = teams[i];
 
@@ -497,6 +534,7 @@
 					}
 
 					if (!atLeastOne) atLeastOne = true;
+					shownCount++;
 					var formatText = '';
 					if (team.format) {
 						formatText = '[' + team.format + '] ';
@@ -753,11 +791,22 @@
 			Storage.nwLoadTeams();
 		},
 		edit: function (i) {
+			try {
+				return this.editInner(i);
+			} catch (err) {
+				this.recoverFromError(err, 'opening a team');
+			}
+		},
+		editInner: function (i) {
 			this.teamScrollPos = this.$('.teampane').scrollTop();
 			if (i && i.currentTarget) {
 				i = $(i.currentTarget).data('value');
 			}
 			i = +i;
+			if (!teams[i]) {
+				this.updateTeamList();
+				return;
+			}
 			this.curTeam = teams[i];
 			this.curTeam.iconCache = '!';
 			this.curTeam.gen = this.getGen(this.curTeam.format);
@@ -781,7 +830,15 @@
 			this.update();
 		},
 		"delete": function (i) {
+			try {
+				return this.deleteInner(i);
+			} catch (err) {
+				this.recoverFromError(err, 'deleting a team');
+			}
+		},
+		deleteInner: function (i) {
 			i = +i;
+			if (!teams[i]) return;
 			this.deletedTeamLoc = i;
 			this.deletedTeam = teams.splice(i, 1)[0];
 			for (var room in app.rooms) {
@@ -796,6 +853,30 @@
 			}
 			Storage.deleteTeam(this.deletedTeam);
 			app.user.trigger('saveteams');
+			var $pane = this.$('.teampane');
+			var $row = $pane.find('button[name=delete][value="' + i + '"]').closest('li');
+			if (!$row.length) return this.updateTeamList();
+			$pane.find('button[name=undoDelete]').closest('li').remove();
+			$row.replaceWith('<li><button name="undoDelete"><i class="fa fa-undo"></i> Undo Delete</button></li>');
+			$pane.find('div[name=edit], button[name=edit], button[name=duplicate], button[name=delete]').each(function () {
+				var $el = $(this);
+				var dv = $el.attr('data-value');
+				if (dv !== undefined && +dv > i) {
+					$el.attr('data-value', +dv - 1).data('value', +dv - 1);
+				}
+				var v = $el.attr('value');
+				if (v !== undefined && +v > i) {
+					$el.attr('value', +v - 1);
+				}
+			});
+			var $count = $pane.find('h2 small').first();
+			if ($count.length) {
+				var m = $count.text().match(/\((\d+)\)/);
+				if (m) $count.text('(' + (+m[1] - 1) + ')');
+			}
+		},
+		moreTeams: function () {
+			this.teamListLimit = (this.teamListLimit || 500) + 1000;
 			this.updateTeamList();
 		},
 		undoDelete: function () {
@@ -820,8 +901,16 @@
 			}
 		},
 		saveBackup: function () {
+			var backupText = this.$('.teamedit textarea').val();
+			var savedTeams = Storage.teams;
 			Storage.deleteAllTeams();
-			Storage.importTeam(this.$('.teamedit textarea').val(), true);
+			try {
+				Storage.importTeam(backupText, true);
+			} catch (err) {
+				Storage.teams = savedTeams;
+				app.addPopupMessage("That backup couldn't be restored, so your teams were left unchanged. Check the pasted text and try again.");
+				return;
+			}
 			teams = Storage.teams;
 			Storage.saveAllTeams();
 			for (var room in app.rooms) {
@@ -1394,6 +1483,15 @@
 					var cdAbilityCount = (set.ability ? 1 : 0) + (set.phAbilities ? set.phAbilities.split('/').length : 0);
 					buf += '<span class="detailcell"><label>Abilities</label>' + (cdAbilityCount > 1 ? 'Multi' : (set.ability || '(none)')) + '</span>';
 					buf += '<span class="detailcell"><label>Disguise</label>' + (set.disguise ? Dex.species.get(set.disguise).name : '(none)') + '</span>';
+				} else if (this.curTeam.format.includes('spaceworlddisguises')) {
+					var swCellDex = this.curTeam.dex || Dex;
+					var swCellDisguise = set.disguise ? swCellDex.species.get(set.disguise) : null;
+					var swCellBase = swCellDex.species.get(set.species);
+					var swCellTypes = (swCellDisguise && swCellDisguise.exists ? swCellDisguise.types :
+						(swCellBase.exists && swCellBase.types ? swCellBase.types : species.types));
+					buf += '<span class="detailcell"><label>Type 1</label>' + swCellTypes[0] + '</span>';
+					buf += '<span class="detailcell"><label>Type 2</label>' + (swCellTypes[1] || '(none)') + '</span>';
+					buf += '<span class="detailcell"><label>Disguise</label>' + (swCellDisguise && swCellDisguise.exists ? swCellDisguise.name : '(none)') + '</span>';
 				} else if (this.curTeam.format.includes('disguise')) {
 					var phT = (set.phType || '').split('/');
 					buf += '<span class="detailcell"><label>Type 1</label>' + (phT[0] || species.types[0]) + '</span>';
@@ -1510,7 +1608,14 @@
 					}
 				});
 			} else {
-				Storage.activeSetList = this.curSetList = Storage.importTeam(text);
+				var imported;
+				try {
+					imported = Storage.importTeam(text);
+				} catch (err) {
+					app.addPopupMessage("That team couldn't be imported. Check the pasted text and try again.");
+					return;
+				}
+				Storage.activeSetList = this.curSetList = imported;
 				this.back();
 			}
 		},
@@ -1604,8 +1709,30 @@
 			this.save();
 		},
 		saveFlag: false,
+		saveTimer: null,
 		save: function () {
 			this.saveFlag = true;
+			var self = this;
+			if (!this.saveFlushBound) {
+				this.saveFlushBound = true;
+				$(window).on('beforeunload', function () {
+					self.flushSave();
+				});
+			}
+			if (this.saveTimer) clearTimeout(this.saveTimer);
+			this.saveTimer = setTimeout(function () {
+				self.saveTimer = null;
+				if (self.curTeam) {
+					Storage.saveTeam(self.curTeam);
+				} else {
+					Storage.saveTeams();
+				}
+			}, 300);
+		},
+		flushSave: function () {
+			if (!this.saveTimer) return;
+			clearTimeout(this.saveTimer);
+			this.saveTimer = null;
 			if (this.curTeam) {
 				Storage.saveTeam(this.curTeam);
 			} else {
@@ -1745,11 +1872,17 @@
 				{ label: 'Version', members: [
 					{ id: 'gen1disguises', name: 'JP' },
 					{ id: 'gen1disguisesenglish', name: 'English' },
+					{ id: 'gen1ou', name: 'OU' },
+					{ id: 'gen1ubers', name: 'Ubers' },
+					{ id: 'gen2spaceworlddisguises', name: 'SpaceWorld' },
 				] },
 				{ label: 'Version', members: [
 					{ id: 'gen2statuses', name: 'Crystal' },
 					{ id: 'gen2statusesgoldsilver', name: 'Gold/Silver' },
-					{ id: 'gen2statusesspaceworld', name: 'SpaceWorld' },
+					{ id: 'gen2ou', name: 'OU' },
+					{ id: 'gen2ubers', name: 'Ubers' },
+					{ id: 'gen2spaceworldou', name: 'SpaceWorld OU' },
+					{ id: 'gen2spaceworldubers', name: 'SpaceWorld Ubers' },
 				] },
 				{ label: 'Version', members: [
 					{ id: 'gen8255', name: 'Unified' },
@@ -1767,6 +1900,7 @@
 		renderStatModToggle: function () {
 			var f = '' + (this.curTeam.format || '');
 			if (!f || /^gen\d+$/.test(f) || f.includes('customdisguise') || f.includes('customgame')) return '';
+			if (/^gen[12](spaceworld)?(ou|ubers)(@@@|$)/.test(f) && !this.phnnStatModAllowed(f)) return '';
 			var on = this.phnnStatModAllowed(f);
 			return ' <button class="button statmodtoggle' + (on ? ' cur' : '') + '" title="Allow manually overridden stats (1-65535), like cartridge save editing"><i class="fa fa-flask"></i> Stat Mod' + (on ? ': On' : '') + '</button>';
 		},
@@ -1797,7 +1931,10 @@
 				gen1disguisesenglish: 'gen1phnneng',
 				gen2statusesgoldsilver: 'gen2gs',
 				gen2statusesspaceworld: 'gen2spaceworld',
+				gen2spaceworlddisguises: 'gen2spaceworld',
 				gen2spaceworldcustomdisguises: 'gen2spaceworld',
+				gen2spaceworldou: 'gen2spaceworld',
+				gen2spaceworldubers: 'gen2spaceworld',
 			}[('' + (format || '')).split('@@@')[0]] || null;
 		},
 		renderVersionSelect: function () {
@@ -2111,7 +2248,14 @@
 		},
 		savePokemonImport: function (i) {
 			i = +(this.$('li').attr('value'));
-			var curSet = Storage.importTeam(this.$('.pokemonedit').val())[0];
+			var curSet;
+			try {
+				curSet = Storage.importTeam(this.$('.pokemonedit').val())[0];
+			} catch (err) {
+				app.addPopupMessage("That Pokémon couldn't be imported. Check the pasted text and try again.");
+				this.closePokemonImport(true);
+				return;
+			}
 			if (curSet) {
 				this.curSet = curSet;
 				this.curSetList[i] = curSet;
@@ -2493,7 +2637,7 @@
 			var set = this.curSet;
 			var species = this.curTeam.dex.species.get(this.curSet.species);
 
-			var baseStats = species.baseStats;
+			var baseStats = species.baseStats || { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
 
 			buf += '<div class="resultheader"><h3>EVs</h3></div>';
 			buf += '<div class="statform">';
@@ -3221,6 +3365,7 @@
 
 			var isDisguise = this.curTeam.format.includes('disguise');
 			var isCustomDisguise = this.curTeam.format.includes('customdisguise');
+			var isSWDisguise = this.curTeam.format.includes('spaceworlddisguises');
 			var isModded = isDisguise || this.curTeam.format.includes('status') || this.curTeam.format.includes('nonerfs');
 			if (isModded) {
 				if (isDisguise && isCustomDisguise) {
@@ -3258,7 +3403,7 @@
 						buf += this.renderPhnnMultiselect('phitems', itemNames, curItems, '(none)', true);
 						buf += '</div></div>';
 					}
-				} else if (isDisguise) {
+				} else if (isDisguise && !isSWDisguise) {
 					var phTypeList = Dex.types.all().map(function (t) { return t.name; });
 					var phTypes = (set.phType || '').split('/');
 					buf += '<div class="formrow"><label class="formlabel" title="Custom type used in battle (hidden from the opponent)">Type 1:</label><div><select name="phtype1" class="button">';
@@ -3275,21 +3420,46 @@
 					buf += '</select></div></div>';
 				}
 				if (isDisguise) {
-					buf += '<div class="formrow"><label class="formlabel" title="The Pokemon sprite your opponent and spectators see in place of the real one">Disguise:</label><div><select name="disguise" class="button">';
+					var disguiseTitle = isSWDisguise ?
+						'The species your opponent and spectators see in place of the real one. In SpaceWorld the disguise also sets your battle typing (types follow the species byte).' :
+						'The Pokemon sprite your opponent and spectators see in place of the real one';
+					buf += '<div class="formrow"><label class="formlabel" title="' + disguiseTitle + '">Disguise:</label><div><select name="disguise" class="button">';
 					buf += '<option value=""' + (!set.disguise ? ' selected="selected"' : '') + '>(none — show real sprite)</option>';
 					var disguiseMons = [];
 					var isGen1Disguises = this.curTeam.gen === 1 && !isCustomDisguise;
-					for (var dexid in BattlePokedex) {
-						var dsp = Dex.species.get(dexid);
-						if (isCustomDisguise) {
-							if (dsp.exists) disguiseMons.push(dsp);
-						} else if (isGen1Disguises) {
-							if (dsp.exists && dsp.num >= 0 && dsp.num <= 151 && !dsp.forme) disguiseMons.push(dsp);
-						} else if (dsp.exists && dsp.num >= 1 && !dsp.forme) {
-							disguiseMons.push(dsp);
+					if (isSWDisguise) {
+						var swTable = window.BattleTeambuilderTable && BattleTeambuilderTable['gen2spaceworld'];
+						var swList = (swTable && (swTable.tierSet || swTable.tiers)) || [];
+						var swSeen = {};
+						for (var swi = 0; swi < swList.length; swi++) {
+							var swEntry = swList[swi];
+							var swId = typeof swEntry === 'string' ? swEntry : (swEntry && swEntry[0] === 'pokemon' ? swEntry[1] : null);
+							if (!swId || swSeen[swId]) continue;
+							swSeen[swId] = true;
+							var swsp = Dex.species.get(swId);
+							if (swsp.exists && !swsp.forme) disguiseMons.push(swsp);
+						}
+					} else {
+						for (var dexid in BattlePokedex) {
+							var dsp = Dex.species.get(dexid);
+							if (isCustomDisguise) {
+								if (dsp.exists) disguiseMons.push(dsp);
+							} else if (isGen1Disguises) {
+								if (dsp.exists && dsp.num >= 0 && dsp.num <= 151 && !dsp.forme) disguiseMons.push(dsp);
+							} else if (dsp.exists && dsp.num >= 1 && !dsp.forme) {
+								disguiseMons.push(dsp);
+							}
 						}
 					}
-					disguiseMons.sort(function (a, b) { return a.num - b.num; });
+					if (isSWDisguise) {
+						disguiseMons.sort(function (a, b) {
+							var an = a.num > 0 ? a.num : 10000 - a.num;
+							var bn = b.num > 0 ? b.num : 10000 - b.num;
+							return an - bn;
+						});
+					} else {
+						disguiseMons.sort(function (a, b) { return a.num - b.num; });
+					}
 					var curDisguiseId = toID(set.disguise);
 					for (var dgi = 0; dgi < disguiseMons.length; dgi++) {
 						buf += '<option value="' + disguiseMons[dgi].id + '"' + (curDisguiseId === disguiseMons[dgi].id ? ' selected="selected"' : '') + '>' + disguiseMons[dgi].name + '</option>';
@@ -3327,7 +3497,7 @@
 						if (pmatch[2]) mppup = pmatch[2];
 					}
 					var ppBig = this.curTeam.gen <= 2 || isCustomDisguise || ppFmt.includes('nonerfs') || ppFmt.includes('customgame');
-					var ppTitle = ppBig ? 'Enter a number up to 65535, or - / inf for infinite PP' : 'Enter a number up to 255 (the cartridge maximum)';
+					var ppTitle = this.curTeam.gen === 1 ? 'Enter a number up to 63 (the Gen 1 maximum), or - / inf for infinite PP' : ppBig ? 'Enter a number up to 65535, or - / inf for infinite PP' : 'Enter a number up to 255 (the cartridge maximum)';
 					buf += '<div class="formrow"><label class="formlabel"' + (allowBasePP ? ' title="' + ppTitle + '"' : '') + '>Move ' + (m+1) + (allowBasePP ? ' PP' : ' PP Ups') + ':</label><div>';
 					if (allowBasePP) {
 						buf += '<input type="text" name="move' + (m+1) + 'pp" placeholder="Base" value="' + mpp + '" class="textbox inputform numform" /> / ';
@@ -3362,11 +3532,19 @@
 			return 100;
 		},
 		phnnCDTypeList: function () {
-			var names = Dex.types.all().map(function (t) { return t.name; });
-			var extras = ['Stellar', 'Shadow', 'Bird', '???'];
+			var gen = (this.curTeam && this.curTeam.gen) || 9;
+			var isCD = ('' + (this.curTeam && this.curTeam.format || '')).indexOf('customdisguise') >= 0;
+			var dex = (this.curTeam && this.curTeam.dex) || Dex;
+			var extras = (isCD || gen >= 9) ? ['Stellar', 'Shadow', 'Bird', '???'] :
+				gen <= 1 ? ['Bird', '???'] :
+				gen === 2 ? ['???'] :
+				gen <= 4 ? ['???', 'Shadow'] : ['Shadow'];
+			var names = dex.types.names();
 			var list = [];
 			for (var i = 0; i < names.length; i++) {
-				if (extras.indexOf(names[i]) < 0) list.push(names[i]);
+				if (extras.indexOf(names[i]) >= 0) continue;
+				if (!isCD && gen < 9 && names[i] === 'Stellar') continue;
+				list.push(names[i]);
 			}
 			list.sort();
 			return list.concat(extras);
@@ -3642,6 +3820,9 @@
 				} else {
 					delete set.startHp;
 				}
+				if (set.phStats && !this.phnnStatModAllowed(this.curTeam.format)) {
+					delete set.phStats;
+				}
 				
 				var ppSaveFmt = this.curTeam.format;
 				var ppSaveStatMod = this.curTeam.gen !== 3 && this.phnnStatModAllowed(ppSaveFmt);
@@ -3653,7 +3834,7 @@
 					var mppInf = /^(inf|infinite|-|\u221E)$/i.test(mppRaw);
 					var mpp = parseInt(mppRaw, 10);
 					var ppSaveBig = this.curTeam.gen <= 2 || ppSaveFmt.includes('customdisguise') || ppSaveFmt.includes('nonerfs') || ppSaveFmt.includes('customgame');
-					var ppSaveMax = ppSaveBig ? 65535 : 255;
+					var ppSaveMax = this.curTeam.gen === 1 ? 63 : ppSaveBig ? 65535 : 255;
 					if (!ppSaveBig && mppInf) {
 						mppInf = false;
 						mpp = 255;
@@ -4278,9 +4459,6 @@
 			var supportsAVs = !supportsEVs;
 			if (!set) set = this.curSet;
 			if (!set) return 0;
-			if (set.phStats && set.phStats[stat] !== undefined && this.curTeam.format.includes('customdisguise')) {
-				return set.phStats[stat];
-			}
 
 			if (!set.ivs) set.ivs = {
 				hp: 31,
@@ -4292,10 +4470,14 @@
 			};
 			if (!set.evs) set.evs = {};
 
+			if (set.phStats && set.phStats[stat] !== undefined && this.phnnStatModAllowed(this.curTeam.format)) {
+				return set.phStats[stat];
+			}
+
 			// do this after setting set.evs because it's assumed to exist
 			// after getStat is run
 			var species = this.curTeam.dex.species.get(set.species);
-			if (!species.exists) return 0;
+			if (!species.exists || !species.baseStats) return 0;
 
 			if (!set.level) set.level = 100;
 			if (typeof set.ivs[stat] === 'undefined') set.ivs[stat] = 31;

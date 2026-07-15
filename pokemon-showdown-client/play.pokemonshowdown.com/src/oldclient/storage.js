@@ -677,10 +677,16 @@ Storage.saveTeams = function () {
 	try {
 		if (window.localStorage) {
 			localStorage.setItem('showdown_teams', Storage.packAllTeams(this.teams));
-			Storage.cantSave = false;
+			if (Storage.cantSave) {
+				Storage.cantSave = false;
+				if (window.app && app.addPopupMessage) app.addPopupMessage("Teams are saving normally again.");
+			}
 		}
 	} catch (e) {
-		if (e.code === DOMException.QUOTA_EXCEEDED_ERR) {
+		if (e.code === DOMException.QUOTA_EXCEEDED_ERR || (e.name === 'QuotaExceededError')) {
+			if (!Storage.cantSave && window.app && app.addPopupMessage) {
+				app.addPopupMessage("Your browser storage is full, so team changes (including deletions) can't be saved. Delete or export some teams to free up space, then try again.");
+			}
 			Storage.cantSave = true;
 		} else {
 			throw e;
@@ -805,7 +811,7 @@ Storage.packTeam = function (team) {
 		buf += '|';
 		if (set.moves) for (var j = 0; j < set.moves.length; j++) {
 			var moveEntry = set.moves[j] || '';
-			var ppMatch = moveEntry.match(/(.*)\s*(\((?:\d+|inf)(?:\/\d+)?\))$/i);
+			var ppMatch = moveEntry.match(/^(.*?)\s*(\((?:\d+|inf)(?:\/\d+)?\))$/i);
 			var moveid = toID(ppMatch ? ppMatch[1] : moveEntry);
 			var ppSuffix = ppMatch ? ppMatch[2] : '';
 			if (j && !moveid) continue;
@@ -1000,9 +1006,9 @@ Storage.fastUnpackTeam = function (buf) {
 		j = buf.indexOf(']', i);
 		var misc = undefined;
 		if (j < 0) {
-			if (i < buf.length) misc = buf.substring(i).split(',', 13);
+			if (i < buf.length) misc = buf.substring(i).split(',');
 		} else {
-			if (i !== j) misc = buf.substring(i, j).split(',', 13);
+			if (i !== j) misc = buf.substring(i, j).split(',');
 		}
 		if (misc) {
 			set.happiness = (misc[0] ? Number(misc[0]) : 255);
@@ -1084,7 +1090,7 @@ Storage.unpackTeam = function (buf) {
 		// moves
 		j = buf.indexOf('|', i);
 		set.moves = buf.substring(i, j).split(',').map(function (moveEntry) {
-			var ppMatch = moveEntry.match(/(.*)(\((?:\d+|inf)(?:\/\d+)?\))$/i);
+			var ppMatch = moveEntry.match(/^(.*?)\s*(\((?:\d+|inf)(?:\/\d+)?\))$/i);
 			if (ppMatch) return Dex.moves.get(ppMatch[1]).name + ' ' + ppMatch[2];
 			return Dex.moves.get(moveEntry).name;
 		});
@@ -1155,9 +1161,9 @@ Storage.unpackTeam = function (buf) {
 		j = buf.indexOf(']', i);
 		var misc = undefined;
 		if (j < 0) {
-			if (i < buf.length) misc = buf.substring(i).split(',', 13);
+			if (i < buf.length) misc = buf.substring(i).split(',');
 		} else {
-			if (i !== j) misc = buf.substring(i, j).split(',', 13);
+			if (i !== j) misc = buf.substring(i, j).split(',');
 		}
 		if (misc) {
 			set.happiness = (misc[0] ? Number(misc[0]) : 255);
@@ -1248,11 +1254,14 @@ Storage.getTeamIcons = function (team) {
 		// app.rooms.teambuilder.curSetList because the teambuilder
 		// room may have been closed by the time we need to get
 		// a packed team.
-		team.team = Storage.packTeam(Storage.activeSetList);
-		if ('teambuilder' in app.rooms) {
-			return Storage.packedTeamIcons(team.team);
+		var tbRoom = 'teambuilder' in app.rooms ? app.rooms['teambuilder'] : null;
+		if (Storage.activeSetList && (!tbRoom || tbRoom.curTeam === team)) {
+			team.team = Storage.packTeam(Storage.activeSetList);
+			if (tbRoom) {
+				return Storage.packedTeamIcons(team.team);
+			}
+			Storage.activeSetList = null;
 		}
-		Storage.activeSetList = null;
 		team.iconCache = Storage.packedTeamIcons(team.team);
 	} else if (!team.iconCache) {
 		team.iconCache = Storage.packedTeamIcons(team.team);
@@ -1264,8 +1273,13 @@ Storage.getPackedTeam = function (team) {
 	if (!team) return null;
 	if (team.iconCache === '!') {
 		// see the same case in Storage.getTeamIcons
-		team.team = Storage.packTeam(Storage.activeSetList);
-		if (!('teambuilder' in app.rooms)) {
+		var tbRoom = 'teambuilder' in app.rooms ? app.rooms['teambuilder'] : null;
+		if (Storage.activeSetList && (!tbRoom || tbRoom.curTeam === team)) {
+			team.team = Storage.packTeam(Storage.activeSetList);
+		} else {
+			team.iconCache = '';
+		}
+		if (!tbRoom) {
 			Storage.activeSetList = null;
 			team.iconCache = '';
 		}
@@ -1284,7 +1298,7 @@ Storage.importTeam = function (buffer, teams) {
 	if (teams === true) {
 		Storage.teams = [];
 		teams = Storage.teams;
-	} else if (text.length === 1 || (text.length === 2 && !text[1])) {
+	} else if ((text.length === 1 || (text.length === 2 && !text[1])) && text[0].includes('|')) {
 		return Storage.unpackTeam(text[0]);
 	}
 	for (var i = 0; i < text.length; i++) {
@@ -1327,9 +1341,20 @@ Storage.importTeam = function (buffer, teams) {
 		} else if (line.includes('|')) {
 			// packed format
 			curSet = null;
-			teams.push(Storage.unpackLine(line));
+			if (teams) {
+				teams.push(Storage.unpackLine(line));
+			} else {
+				var packedSets = Storage.unpackTeam(line);
+				for (var psi = 0; psi < packedSets.length; psi++) team.push(packedSets[psi]);
+			}
 		} else if (!curSet) {
-			curSet = { name: '', species: '', gender: '' };
+			if (!team) {
+				team = [];
+				teams.push({
+					name: 'Restored team', format: 'gen9', gen: 9, team: team, capacity: 6, folder: '', iconCache: ''
+				});
+			}
+			curSet = { name: '', species: '', gender: '', evs: {}, ivs: {} };
 			team.push(curSet);
 			var atIndex = line.lastIndexOf(' @ ');
 			if (atIndex !== -1) {
@@ -1459,7 +1484,11 @@ Storage.importTeam = function (buffer, teams) {
 				var hptype = line.substr(14, line.length - 15);
 				line = 'Hidden Power ' + hptype;
 				var type = Dex.types.get(hptype);
-				if (!curSet.ivs && type) {
+				var hasIvs = false;
+				if (curSet.ivs) {
+					for (var ivStat in curSet.ivs) { hasIvs = true; break; }
+				}
+				if (!hasIvs && type) {
 					curSet.ivs = {};
 					for (var stat in type.HPivs) {
 						curSet.ivs[stat] = type.HPivs[stat];
@@ -1596,7 +1625,7 @@ Storage.exportTeam = function (team, hidestats) {
 			if (curSet.ivs) {
 				var defaultIvs = true;
 				var hpType = false;
-				for (var j = 0; j < curSet.moves.length; j++) {
+				for (var j = 0; curSet.moves && j < curSet.moves.length; j++) {
 					var move = curSet.moves[j];
 					if (move.substr(0, 13) === 'Hidden Power ' && move.substr(0, 14) !== 'Hidden Power [') {
 						hpType = move.substr(13);
@@ -1604,8 +1633,9 @@ Storage.exportTeam = function (team, hidestats) {
 							alert(move + " is not a valid Hidden Power type.");
 							continue;
 						}
+						var hpTypeIvs = Dex.types.get(hpType).HPivs || {};
 						for (var stat in BattleStatNames) {
-							if ((curSet.ivs[stat] === undefined ? 31 : curSet.ivs[stat]) !== (Dex.types.get(hpType).HPivs[stat] || 31)) {
+							if ((curSet.ivs[stat] === undefined ? 31 : curSet.ivs[stat]) !== (hpTypeIvs[stat] || 31)) {
 								defaultIvs = false;
 								break;
 							}

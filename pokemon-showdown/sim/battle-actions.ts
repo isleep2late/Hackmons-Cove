@@ -1908,6 +1908,11 @@ export class BattleActions {
 		// Generation 6-7 moves the check for minimum 1 damage after the final modifier...
 		if (this.battle.gen !== 5 && !baseDamage) return 1;
 
+		if (this.battle.gen >= 8 && this.battle.format.id.includes('customdisguise')) {
+			const glitchStat = move.overrideDefensiveStat || (move.category === 'Special' ? 'spd' : 'def');
+			if (target.storedStats[glitchStat] === 655) return 1;
+		}
+
 		// ...but 16-bit truncation happens even later, and can truncate to 0
 		return tr(baseDamage, 16);
 	}

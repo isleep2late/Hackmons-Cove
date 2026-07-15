@@ -1,0 +1,37 @@
+@use 'config/fonts';
+@use 'mixins/font';
+@use 'mixins/spacing';
+
+$label-font-size: 10px;
+$monospace-font-size: 10px;
+
+.label {
+  font-size: $label-font-size;
+}
+
+.input {
+  @include spacing.margin-none;
+  @include spacing.padding-none;
+  background: none;
+  border: none;
+  outline: none;
+
+  &, &::placeholder {
+    font-weight: inherit;
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+  }
+
+  &::placeholder {
+    opacity: 1; // overrides lowered opacity value on Firefox default UA stylesheet
+    user-select: none;
+  }
+
+  &.monospace {
+    &, &::placeholder {
+      @include font.apply(fonts.$mono);
+      font-size: $monospace-font-size;
+    }
+  }
+}

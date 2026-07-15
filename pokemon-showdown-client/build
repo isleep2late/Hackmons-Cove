@@ -32,6 +32,33 @@ try {
 var options = {cwd: __dirname, stdio: 'inherit'};
 var full = '';
 
+function newestMtime(dir) {
+	var newest = 0;
+	var entries;
+	try {
+		entries = fs.readdirSync(dir, {withFileTypes: true});
+	} catch (e) {
+		return 0;
+	}
+	for (var i = 0; i < entries.length; i++) {
+		var p = dir + '/' + entries[i].name;
+		var m = entries[i].isDirectory() ? newestMtime(p) : fs.statSync(p).mtimeMs;
+		if (m > newest) newest = m;
+	}
+	return newest;
+}
+
+function indexesStale() {
+	var out;
+	try {
+		out = fs.statSync('play.pokemonshowdown.com/data/teambuilder-tables.js').mtimeMs;
+	} catch (e) {
+		return true;
+	}
+	if (fs.statSync('./build-tools/build-indexes').mtimeMs > out) return true;
+	return newestMtime('caches/pokemon-showdown/dist/data') > out;
+}
+
 switch (process.argv[2] || '') {
 case 'full':
 	execSync(`node ./build-tools/build-indexes`, options);
@@ -60,6 +87,10 @@ case 'test-only':
 
 	break;
 case '':
+	if (indexesStale()) {
+		console.log('Server data or build-indexes changed since the last index build; rebuilding indexes...');
+		execSync(`node ./build-tools/build-indexes`, options);
+	}
 	break;
 default:
 	console.log(`Unrecognized command ${process.argv[2]}`);

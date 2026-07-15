@@ -96,6 +96,76 @@ export function destroy() {
 	clearInterval(resourceRefreshInterval);
 }
 
+const PHNN_TOTEM_AURAS: { [id: string]: string } = {
+	araquanidtotem: '+1 Speed',
+	marowakalolatotem: '+2 Speed',
+	lurantistotem: '+2 Speed',
+	togedemarutotem: '+2 Defense',
+	wishiwashitotem: '+1 Defense',
+	salazzletotem: '+1 Sp. Def',
+	mimikyutotem: '+1 Attack, Defense, Sp. Atk, Sp. Def, and Speed',
+	mimikyubustedtotem: '+1 Attack, Defense, Sp. Atk, Sp. Def, and Speed',
+	kommoototem: '+1 Attack, Defense, Sp. Atk, Sp. Def, and Speed',
+	vikavolttotem: '+1 Attack, Defense, Sp. Atk, Sp. Def, and Speed',
+	hakamoototem: '+1 Attack, Defense, Sp. Atk, Sp. Def, and Speed',
+	ribombeetotem: '+2 Attack, Defense, Sp. Atk, Sp. Def, and Speed',
+	gumshoostotem: '+2 Attack, Defense, Sp. Atk, Sp. Def, and Speed',
+	raticatealolatotem: '+2 Attack, Defense, Sp. Atk, Sp. Def, and Speed',
+};
+const PHNN_TITAN_INFO: { [id: string]: [string, string] } = {
+	okidogititan: ['+2 Defense', 'Attack'],
+	munkidorititan: ['+2 Sp. Def', 'Sp. Atk'],
+	fezandipitititan: ['+2 Speed', 'Speed'],
+};
+const PHNN_TOTEM_STAGES: { [id: string]: { [stat: string]: number } } = {
+	araquanidtotem: { spe: 1 },
+	marowakalolatotem: { spe: 2 },
+	lurantistotem: { spe: 2 },
+	togedemarutotem: { def: 2 },
+	wishiwashitotem: { def: 1 },
+	salazzletotem: { spd: 1 },
+	mimikyutotem: { atk: 1, def: 1, spa: 1, spd: 1, spe: 1 },
+	mimikyubustedtotem: { atk: 1, def: 1, spa: 1, spd: 1, spe: 1 },
+	kommoototem: { atk: 1, def: 1, spa: 1, spd: 1, spe: 1 },
+	vikavolttotem: { atk: 1, def: 1, spa: 1, spd: 1, spe: 1 },
+	hakamoototem: { atk: 1, def: 1, spa: 1, spd: 1, spe: 1 },
+	ribombeetotem: { atk: 2, def: 2, spa: 2, spd: 2, spe: 2 },
+	gumshoostotem: { atk: 2, def: 2, spa: 2, spd: 2, spe: 2 },
+	raticatealolatotem: { atk: 2, def: 2, spa: 2, spd: 2, spe: 2 },
+	okidogititan: { def: 2 },
+	munkidorititan: { spd: 2 },
+	fezandipitititan: { spe: 2 },
+};
+
+function phnnEffectiveBST(species: { id: string, name: string, baseStats: StatsTable }): number | null {
+	const bs = species.baseStats;
+	if (species.name.endsWith('-Alpha')) {
+		return bs.hp + bs.spe + 2 * (bs.atk + bs.def + bs.spa + bs.spd);
+	}
+	const stages = PHNN_TOTEM_STAGES[species.id];
+	if (!stages) return null;
+	let total = bs.hp;
+	for (const stat of ['atk', 'def', 'spa', 'spd', 'spe'] as const) {
+		const stage = stages[stat];
+		total += Math.floor(bs[stat] * (stage === 1 ? 1.5 : stage === 2 ? 2 : 1));
+	}
+	return total;
+}
+
+function phnnEntryNote(species: { id: string, name: string }): string | null {
+	if (species.name.endsWith('-Alpha')) {
+		return 'Alpha: Enters battle with Wild Might, doubling its Attack, Defense, Sp. Atk, and Sp. Def (HP and Speed unchanged; kept even through Mega Evolution).';
+	}
+	if (PHNN_TOTEM_AURAS[species.id]) {
+		return `Totem: Gains ${PHNN_TOTEM_AURAS[species.id]} when it enters battle.`;
+	}
+	if (PHNN_TITAN_INFO[species.id]) {
+		const [entry, rally] = PHNN_TITAN_INFO[species.id];
+		return `Titan: Gains ${entry} when it enters battle. Rally: The first time it ends a turn below half HP, its whole team gains +1 ${rally}.`;
+	}
+	return null;
+}
+
 export const commands: Chat.ChatCommands = {
 	ip: 'whois',
 	rooms: 'whois',
@@ -585,7 +655,9 @@ export const commands: Chat.ChatCommands = {
 		const gen = parseInt(cmd.substr(-1));
 		if (gen) target += `, gen${gen}`;
 
-		const { dex, format, targets } = this.splitFormat(target, true, true);
+		const splitResult = this.splitFormat(target, true, true);
+		const { format, targets } = splitResult;
+		let dex = splitResult.dex;
 
 		const prefix = `|c|${user.getIdentity(room)}|/raw `;
 		let buffer = '';
@@ -601,7 +673,15 @@ export const commands: Chat.ChatCommands = {
 				}
 			}
 		}
-		const newTargets = dex.dataSearch(target);
+		let newTargets = dex.dataSearch(target);
+		if (!newTargets?.length && !format && dex.currentMod === 'base') {
+			const phnnDex = Dex.mod('phnn');
+			const phnnTargets = phnnDex.dataSearch(target);
+			if (phnnTargets?.length) {
+				dex = phnnDex;
+				newTargets = phnnTargets;
+			}
+		}
 		const showDetails = (cmd.startsWith('dt') || cmd === 'details');
 		if (!newTargets?.length) {
 			throw new Chat.ErrorMessage(`'${target}' doesn't match any Pok\u00e9mon, item, move, ability or nature${Dex.gen > dex.gen ? ` in Gen ${dex.gen}` : ""}. (Check your spelling?)`);
@@ -644,6 +724,12 @@ export const commands: Chat.ChatCommands = {
 					tierDisplay === 'National Dex tiers' ? pokemon.natDexTier :
 					pokemon.num >= 0 ? String(pokemon.num) : pokemon.tier;
 				buffer += `${prefix}${Chat.getDataPokemonHTML(pokemon, dex.gen, displayedTier)}\n`;
+				const entryNote = phnnEntryNote(pokemon);
+				if (entryNote) {
+					const effBST = phnnEffectiveBST(pokemon);
+					const bstText = effBST ? ` Effective BST: ${effBST} (base ${pokemon.bst}).` : ``;
+					buffer += `${prefix}<small>${entryNote}${bstText}</small>\n`;
+				}
 				if (showDetails) {
 					let weighthit = 20;
 					if (pokemon.weighthg >= 2000) {

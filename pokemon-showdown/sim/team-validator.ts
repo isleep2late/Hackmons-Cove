@@ -624,6 +624,8 @@ export class TeamValidator {
 			const isArbitrary = isInf || parseInt(ppMatch[2]) !== naturalPP;
 			if (isArbitrary && !isArbitraryPPAllowed) {
 				problems.push(`${set.name || set.species} has a custom move PP for ${move}, which is only allowed in Custom Disguises or in Gen 1/Gen 2/No Nerfs formats.`);
+			} else if (isArbitrary && !isInf && dex.gen === 1 && parseInt(ppMatch[2]) > 63) {
+				problems.push(`${set.name || set.species}'s PP for ${move} exceeds the Gen 1 maximum of 63.`);
 			} else if (isArbitrary && !isBigPPAllowed && (isInf || parseInt(ppMatch[2]) > 255)) {
 				problems.push(`${set.name || set.species}'s PP for ${move} exceeds the maximum of 255 for this format.${isInf ? ` (Infinite PP requires a Gen 1/Gen 2 OM, No Nerfs, or Custom Disguises.)` : ``}`);
 			} else if (!isArbitrary && !isPPUpsAllowed) {
@@ -632,18 +634,37 @@ export class TeamValidator {
 		}
 		if (!ruleTable.has('disguisemod')) {
 			if (set.phType) {
-				problems.push(`${set.name || set.species} has a custom typing, which is only allowed in Disguises formats.`);
+				problems.push(ruleTable.has('spaceworlddisguisemod') ?
+					`${set.name || set.species} has a custom typing. The SpaceWorld demo derives types from the species byte, so a disguised Pokemon takes on its disguise's typing instead.` :
+					`${set.name || set.species} has a custom typing, which is only allowed in Disguises formats.`);
 			}
-			if (set.disguise) {
+			if (set.disguise && !ruleTable.has('spaceworlddisguisemod')) {
 				problems.push(`${set.name || set.species} has a disguise, which is only allowed in Disguises formats.`);
 			}
 			if (set.startStatus && !ruleTable.has('prestatus')) {
 				problems.push(`${set.name || set.species} has a starting status, which is not allowed in this format.`);
 			}
 		}
+		if (set.disguise && ruleTable.has('spaceworlddisguisemod')) {
+			const disguiseSpecies = dex.species.get(set.disguise);
+			if (!disguiseSpecies.exists || disguiseSpecies.forme || disguiseSpecies.isNonstandard) {
+				problems.push(`${set.name || set.species} can't disguise as ${set.disguise}: it isn't a Pokemon in the SpaceWorld demo.`);
+			}
+		}
 		if (set.startStatus) {
 			const legalStatuses = ['brn', 'par', 'slp', 'psn', 'tox', 'frz'];
 			const seenFamilies = new Set<string>();
+			const statusParts = set.startStatus.split('/').filter(Boolean);
+			if (statusParts.length > 1) {
+				if (!ruleTable.has('multistatus')) {
+					problems.push(`${set.name || set.species} has ${statusParts.length} starting statuses, which is only legal in battles with the Multistatus rule (add "Multistatus = ${Math.min(statusParts.length, 5)}" to the battle's custom rules).`);
+				} else {
+					const multiLimit = parseInt(ruleTable.valueRules.get('multistatus') || '0') || 0;
+					if (multiLimit && statusParts.length > multiLimit) {
+						problems.push(`${set.name || set.species} has ${statusParts.length} starting statuses, but this battle's Multistatus limit is ${multiLimit} (it would need "Multistatus = ${Math.min(statusParts.length, 5)}").`);
+					}
+				}
+			}
 			for (const part of set.startStatus.split('/').filter(Boolean)) {
 				if (!legalStatuses.includes(part)) {
 					problems.push(`${set.name || set.species}'s starting status "${part}" is invalid.`);
@@ -675,13 +696,24 @@ export class TeamValidator {
 			return null;
 		};
 		if (set.phType && ruleTable.has('disguisemod')) {
+			const phExtraTypes = dex.gen <= 1 ? ['Bird', '???'] :
+				dex.gen === 2 ? ['???'] :
+				dex.gen <= 4 ? ['???', 'Shadow'] :
+				dex.gen <= 8 ? ['Shadow'] :
+				['Bird', '???', 'Shadow', 'Stellar'];
 			const typeNames: string[] = [];
 			for (const part of set.phType.split('/')) {
 				const typeName = findTypeName(part);
 				if (!typeName) {
 					problems.push(`${set.name || set.species}'s custom type "${part.trim()}" is invalid.`);
 				} else if (!typeNames.includes(typeName)) {
-					typeNames.push(typeName);
+					const typeInfo = dex.types.get(typeName);
+					const isStandardHere = typeInfo.exists && !typeInfo.isNonstandard;
+					if (!isCustomDisguises && !isStandardHere && !phExtraTypes.includes(typeName)) {
+						problems.push(`${set.name || set.species}'s custom type "${typeName}" does not exist in Gen ${dex.gen}.`);
+					} else {
+						typeNames.push(typeName);
+					}
 				}
 			}
 			if (typeNames.length > 2 && !isCustomDisguises) {
@@ -904,7 +936,9 @@ export class TeamValidator {
 				set.ability = 'No Ability';
 			} else {
 				if (!ability.name || ability.name === 'No Ability') {
-					problems.push(`${name} needs to have an ability.`);
+					if (!ruleTable.has('+ability:noability')) {
+						problems.push(`${name} needs to have an ability.`);
+					}
 				} else if (!Object.values(species.abilities).includes(ability.name)) {
 					if (tierSpecies.abilities[0] === ability.name) {
 						set.ability = species.abilities[0];

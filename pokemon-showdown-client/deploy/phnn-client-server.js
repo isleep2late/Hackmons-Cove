@@ -173,21 +173,210 @@ function serveAvatar(res, pathname) {
 function saveReplay(params, res) {
 	const id = (params.get('id') || '').toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/^[a-z0-9]+-(?=gen\d)/, '');
 	const log = params.get('log') || '';
+	const password = (params.get('password') || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 	if (!id || !log) {
 		res.writeHead(200, { 'content-type': 'text/plain' });
 		res.end('invalid id');
 		return;
 	}
+	const fullid = id + (password ? '-' + password + 'pw' : '');
 	try {
 		fs.mkdirSync(REPLAYS_DIR, { recursive: true });
-		fs.writeFileSync(path.join(REPLAYS_DIR, id + '.log'), log);
+		fs.writeFileSync(path.join(REPLAYS_DIR, fullid + '.log'), log);
+		if (!password) fs.rmSync(path.join(REPLAYS_DIR, id + '.log.hidden'), { force: true });
+		replayIndex.set(fullid, parseReplayMeta(fullid, log, Date.now()));
 	} catch (err) {
 		res.writeHead(200, { 'content-type': 'text/plain' });
 		res.end('error: ' + err.message);
 		return;
 	}
 	res.writeHead(200, { 'content-type': 'text/plain' });
-	res.end('success:' + id);
+	res.end('success:' + fullid);
+}
+
+function toID(text) {
+	return ('' + (text || '')).toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+const replayIndex = new Map();
+let lastIndexScan = 0;
+
+function parseReplayMeta(fullid, logHead, mtimeMs) {
+	const meta = {
+		id: fullid,
+		private: fullid.endsWith('pw'),
+		players: [],
+		playerIds: [],
+		format: '',
+		formatid: '',
+		rating: null,
+		uploadtime: Math.floor(mtimeMs / 1000),
+		mtimeMs,
+	};
+	for (const line of logHead.split('\n').slice(0, 60)) {
+		if (line.startsWith('|player|')) {
+			const parts = line.split('|');
+			if (parts[3]) {
+				meta.players.push(parts[3]);
+				meta.playerIds.push(toID(parts[3]));
+				const rating = Number(parts[5]);
+				if (rating && (!meta.rating || rating > meta.rating)) meta.rating = rating;
+			}
+		} else if (line.startsWith('|tier|')) {
+			meta.format = line.slice(6).trim();
+			meta.formatid = toID(meta.format);
+		} else if (line.startsWith('|t:|') && meta.uploadtime === Math.floor(mtimeMs / 1000)) {
+			const t = Number(line.slice(4));
+			if (t) meta.uploadtime = t;
+		} else if (line === '|start' || line.startsWith('|turn|')) {
+			break;
+		}
+	}
+	if (!meta.format) {
+		const m = fullid.match(/^([a-z0-9]+)-\d+/);
+		meta.format = m ? m[1] : fullid;
+		meta.formatid = toID(meta.format);
+	}
+	return meta;
+}
+
+function refreshReplayIndex() {
+	const now = Date.now();
+	if (now - lastIndexScan < 10000) return;
+	lastIndexScan = now;
+	let names;
+	try {
+		names = fs.readdirSync(REPLAYS_DIR);
+	} catch (err) {
+		return;
+	}
+	const seen = new Set();
+	for (const name of names) {
+		if (!name.endsWith('.log')) continue;
+		const fullid = name.slice(0, -4);
+		if (!/^[a-z0-9-]+$/.test(fullid)) continue;
+		seen.add(fullid);
+		let stat;
+		try {
+			stat = fs.statSync(path.join(REPLAYS_DIR, name));
+		} catch (err) {
+			continue;
+		}
+		const cached = replayIndex.get(fullid);
+		if (cached && cached.mtimeMs === stat.mtimeMs) continue;
+		let head = '';
+		try {
+			const fd = fs.openSync(path.join(REPLAYS_DIR, name), 'r');
+			const buf = Buffer.alloc(4096);
+			const n = fs.readSync(fd, buf, 0, 4096, 0);
+			fs.closeSync(fd);
+			head = buf.toString('utf8', 0, n);
+		} catch (err) {
+			continue;
+		}
+		replayIndex.set(fullid, parseReplayMeta(fullid, head, stat.mtimeMs));
+	}
+	for (const key of replayIndex.keys()) {
+		if (!seen.has(key)) replayIndex.delete(key);
+	}
+}
+
+function searchReplays(userQuery, formatQuery, limit) {
+	refreshReplayIndex();
+	const users = (userQuery || '').split(',').map(toID).filter(Boolean);
+	const format = toID(formatQuery || '');
+	const results = [];
+	for (const meta of replayIndex.values()) {
+		if (meta.private) continue;
+		if (users.length && !users.every(u => meta.playerIds.includes(u))) continue;
+		if (format && !meta.formatid.includes(format)) continue;
+		results.push(meta);
+	}
+	results.sort((a, b) => b.uploadtime - a.uploadtime);
+	return results.slice(0, limit || 51);
+}
+
+function escapeHtml(text) {
+	return ('' + (text ?? '')).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function timeAgo(uploadtime) {
+	const s = Math.max(1, Math.floor(Date.now() / 1000) - uploadtime);
+	if (s < 3600) return Math.floor(s / 60) + 'm ago';
+	if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+	if (s < 30 * 86400) return Math.floor(s / 86400) + 'd ago';
+	return new Date(uploadtime * 1000).toISOString().slice(0, 10);
+}
+
+function replayListHtml(results, base) {
+	if (!results.length) return '<p><em>No replays found.</em></p>';
+	let buf = '<ul class="linklist">';
+	for (const r of results) {
+		buf += '<li><a href="' + base + escapeHtml(r.id) + '" class="blocklink">';
+		buf += '<small>[' + escapeHtml(r.format) + ']' + (r.rating ? ' <span style="color:#888">(Rating: ' + r.rating + ')</span>' : '') + '<span style="float:right;color:#888">' + timeAgo(r.uploadtime) + '</span></small><br />';
+		buf += '<strong>' + escapeHtml(r.players[0] || '?') + '</strong> vs. <strong>' + escapeHtml(r.players[1] || '?') + '</strong>';
+		if (r.players.length > 2) buf += ' vs. <strong>' + r.players.slice(2).map(escapeHtml).join('</strong> vs. <strong>') + '</strong>';
+		buf += '</a></li>';
+	}
+	buf += '</ul>';
+	return buf;
+}
+
+function replayPageShell(title, body) {
+	return '<!DOCTYPE html><html><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width" /><title>' + escapeHtml(title) + '</title><style>'
+		+ 'body{font-family:Verdana,Helvetica,Arial,sans-serif;font-size:10pt;background:#f8fbfd;color:#333;margin:0}'
+		+ '.mainbody{max-width:720px;margin:0 auto;padding:12px 16px 40px}'
+		+ 'h1{font-size:20pt;margin:16px 0 4px}h1 a{color:#333;text-decoration:none}'
+		+ 'h2{font-size:13pt;margin:20px 0 8px;color:#456}'
+		+ 'label{display:block;margin:8px 0 2px;font-weight:bold}'
+		+ 'input[type=text]{padding:4px 6px;font-size:10pt;border:1px solid #aaa;border-radius:3px;width:260px}'
+		+ 'button{padding:5px 14px;font-size:10pt;border:1px solid #6688aa;border-radius:4px;background:linear-gradient(to bottom,#fff,#dde7f0);cursor:pointer}'
+		+ 'button:hover{background:#dde7f0}'
+		+ 'ul.linklist{list-style:none;margin:8px 0;padding:0}'
+		+ 'ul.linklist li{margin-bottom:6px}'
+		+ 'a.blocklink{display:block;border:1px solid #c4c4c4;border-radius:4px;background:#fff;padding:6px 10px;text-decoration:none;color:#333}'
+		+ 'a.blocklink:hover{background:#eef4fa;border-color:#6688aa}'
+		+ 'a.blocklink strong{color:#226}'
+		+ '.searchbox{border:1px solid #c4c4c4;border-radius:4px;background:#fff;padding:10px 14px 14px}'
+		+ 'p.foot{color:#888;font-size:8pt;margin-top:24px}'
+		+ '</style></head><body><div class="mainbody">' + body + '</div></body></html>';
+}
+
+function replaySearchFormHtml(base, userVal, formatVal) {
+	return '<div class="searchbox"><form action="' + base + 'search" method="get">'
+		+ '<label>Username: <small style="font-weight:normal">(separate multiple usernames by commas)</small></label>'
+		+ '<input type="text" name="user" value="' + escapeHtml(userVal || '') + '" placeholder="(anyone)" /> '
+		+ '<label>Format:</label>'
+		+ '<input type="text" name="format" value="' + escapeHtml(formatVal || '') + '" placeholder="(any format)" /> '
+		+ '<div style="margin-top:10px"><button type="submit">&#128269; Search</button></div>'
+		+ '</form></div>';
+}
+
+function replayIndexPage(base) {
+	const recent = searchReplays('', '', 51);
+	let body = '<h1><a href="' + base + '">Hackmons Replays</a></h1>';
+	body += '<p>Watch replays of Hackmons Cove battles. Open any replay by its share link: <code>replay.hackmons.com/&lt;id&gt;</code>. Add <code>.log</code> or <code>.json</code> to a replay URL for its raw data, or <code>.html</code> for a standalone copy.</p>';
+	body += '<h2>Search replays</h2>' + replaySearchFormHtml(base, '', '');
+	body += '<h2>Recent replays</h2>' + replayListHtml(recent.slice(0, 50), base);
+	if (recent.length > 50) body += '<p class="foot">Showing the 50 most recent public replays. Use search to find more.</p>';
+	return replayPageShell('Replays - Hackmons Cove', body);
+}
+
+function replaySearchPage(base, reqUrl) {
+	const userVal = reqUrl.searchParams.get('user') || '';
+	const formatVal = reqUrl.searchParams.get('format') || '';
+	const results = searchReplays(userVal, formatVal, 201);
+	if (reqUrl.searchParams.get('json')) {
+		return { json: results.slice(0, 200).map(r => ({ id: r.id, format: r.format, players: r.players, uploadtime: r.uploadtime, rating: r.rating })) };
+	}
+	let body = '<h1><a href="' + base + '">Hackmons Replays</a></h1>';
+	body += '<h2>Search replays</h2>' + replaySearchFormHtml(base, userVal, formatVal);
+	let heading = 'Results';
+	if (userVal) heading = escapeHtml(userVal) + "'s replays";
+	if (formatVal) heading += ' [' + escapeHtml(formatVal) + ']';
+	body += '<h2>' + heading + '</h2>' + replayListHtml(results.slice(0, 200), base);
+	if (results.length > 200) body += '<p class="foot">Showing the first 200 results. Narrow your search to find more.</p>';
+	return { html: replayPageShell('Replay search - Hackmons Cove', body) };
 }
 
 const EMBED_SRC = process.env.PHNN_REPLAY_EMBED || 'https://play.hackmons.com/js/replay-embed.js';
@@ -204,10 +393,6 @@ function replayViewerHtml(id, log, downloadBar) {
 		+ '<script src="' + EMBED_SRC + '"></script>\n</body></html>';
 }
 
-function replayIndexHtml() {
-	return '<!DOCTYPE html><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Replays - Hackmons!</title><body style="font-family:Verdana,sans-serif;max-width:640px;margin:40px auto;padding:0 16px"><h2>Hackmons Replays</h2><p>Open a replay using its share link, e.g. <code>replay.hackmons.com/&lt;id&gt;</code>. Add <code>.log</code> or <code>.json</code> to a replay URL to get its raw data, or <code>.html</code> to download a standalone copy.</p></body>';
-}
-
 function serveReplay(req, res, reqUrl, root) {
 	let rel = decodeURIComponent(reqUrl.pathname);
 	rel = (root ? rel : rel.slice('/replays'.length)).replace(/^\/+/, '');
@@ -216,9 +401,22 @@ function serveReplay(req, res, reqUrl, root) {
 	else if (rel.endsWith('.json')) { ext = 'json'; rel = rel.slice(0, -5); }
 	else if (rel.endsWith('.html')) { ext = 'html'; rel = rel.slice(0, -5); }
 	const id = rel.toLowerCase().replace(/[^a-z0-9-]/g, '');
+	const base = root ? '/' : '/replays/';
 	if (!id) {
+		refreshReplayIndex();
 		res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' });
-		res.end(replayIndexHtml());
+		res.end(replayIndexPage(base));
+		return;
+	}
+	if (id === 'search') {
+		const result = replaySearchPage(base, reqUrl);
+		if (result.json) {
+			res.writeHead(200, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' });
+			res.end(JSON.stringify(result.json));
+		} else {
+			res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' });
+			res.end(result.html);
+		}
 		return;
 	}
 	const file = path.join(REPLAYS_DIR, id + '.log');

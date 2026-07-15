@@ -145,8 +145,8 @@ export const Teams = new class {
 						const overrideOrder = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'] as const;
 						let overrideBuf = '';
 						for (const statName of overrideOrder) {
-							if (overrideBuf) overrideBuf += '.';
-							overrideBuf += set.phStats[statName] ?? '';
+							if (statName !== 'hp') overrideBuf += '.';
+							overrideBuf += `${set.phStats[statName] ?? ''}`;
 						}
 						buf += `,${overrideBuf}`;
 					}

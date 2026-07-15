@@ -17,6 +17,8 @@ New sections will be added to the bottom of the specified column.
 The column value will be ignored for repeat sections.
 */
 
+const gen4RageGlitchEligible = ['abra','absol','aerodactyl','aggron','aipom','alakazam','altaria','ambipom','ampharos','anorith','arbok','arcanine','ariados','armaldo','aron','articuno','azumarill','azurill','bagon','baltoy','banette','barboach','bayleef','beautifly','beedrill','beldum','bellossom','bellsprout','blastoise','blaziken','blissey','bonsly','breloom','bulbasaur','butterfree','cacnea','cacturne','camerupt','carvanha','cascoon','castform','caterpie','celebi','chansey','charizard','charmander','charmeleon','chatot','chikorita','chimchar','chimecho','chinchou','clamperl','claydol','clefable','clefairy','cleffa','cloyster','combusken','corphish','corsola','cradily','crawdaunt','crobat','croconaw','cubone','cyndaquil','delcatty','delibird','deoxys','dewgong','diglett','ditto','dodrio','doduo','donphan','dragonair','dragonite','dratini','drowzee','dugtrio','dunsparce','dusclops','dusknoir','duskull','dustox','eevee','ekans','electabuzz','electivire','electrike','electrode','elekid','entei','espeon','exeggcute','exeggutor','exploud','farfetchd','fearow','feebas','feraligatr','flaaffy','flareon','flygon','forretress','froslass','furret','gallade','gardevoir','gastly','gengar','geodude','girafarig','glaceon','glalie','glameow','gligar','gliscor','gloom','golbat','goldeen','golduck','golem','gorebyss','granbull','graveler','grimer','groudon','grovyle','growlithe','grumpig','gulpin','gyarados','happiny','hariyama','haunter','heracross','hitmonchan','hitmonlee','hitmontop','honchkrow','hooh','hoothoot','hoppip','horsea','houndoom','houndour','huntail','hypno','igglybuff','illumise','infernape','ivysaur','jigglypuff','jirachi','jolteon','jumpluff','jynx','kabuto','kabutops','kadabra','kakuna','kangaskhan','kecleon','kingdra','kingler','kirlia','koffing','krabby','kyogre','lairon','lanturn','lapras','larvitar','latias','latios','leafeon','ledian','ledyba','lickilicky','lickitung','lileep','linoone','lombre','lotad','loudred','lucario','ludicolo','lugia','lunatone','luvdisc','machamp','machoke','machop','magby','magcargo','magikarp','magmar','magmortar','magnemite','magneton','magnezone','makuhita','mamoswine','manectric','mankey','mantine','mareep','marill','marowak','marshtomp','masquerain','mawile','medicham','meditite','meganium','meowth','mesprit','metagross','metang','metapod','mew','mewtwo','mightyena','milotic','miltank','mimejr','minun','misdreavus','mismagius','moltres','monferno','mrmime','mudkip','muk','munchlax','murkrow','natu','nidoking','nidoqueen','nidoranf','nidoranm','nidorina','nidorino','nincada','ninetales','ninjask','noctowl','nosepass','numel','nuzleaf','octillery','oddish','omanyte','omastar','onix','paras','parasect','pelipper','persian','phanpy','pichu','pidgeot','pidgeotto','pidgey','pikachu','piloswine','pineco','pinsir','plusle','politoed','poliwag','poliwhirl','poliwrath','ponyta','poochyena','porygon','porygon2','porygonz','primeape','probopass','psyduck','pupitar','purugly','quagsire','quilava','qwilfish','raichu','raikou','ralts','rapidash','raticate','rattata','rayquaza','regice','regirock','registeel','relicanth','remoraid','rhydon','rhyhorn','rhyperior','riolu','roselia','roserade','sableye','salamence','sandshrew','sandslash','sceptile','scizor','scyther','seadra','seaking','sealeo','seedot','seel','sentret','seviper','sharpedo','shedinja','shelgon','shellder','shiftry','shroomish','shuckle','shuppet','silcoon','skarmory','skiploom','skitty','slaking','slakoth','slowbro','slowking','slowpoke','slugma','smeargle','smoochum','sneasel','snorlax','snorunt','snubbull','solrock','spearow','spheal','spinarak','spinda','spoink','squirtle','stantler','starmie','staryu','steelix','sudowoodo','suicune','sunflora','sunkern','surskit','swablu','swalot','swampert','swellow','swinub','taillow','tangela','tangrowth','tauros','teddiursa','tentacool','tentacruel','togekiss','togepi','togetic','torchic','torkoal','totodile','trapinch','treecko','tropius','typhlosion','tyranitar','tyrogue','umbreon','unown','ursaring','vaporeon','venomoth','venonat','venusaur','vibrava','victreebel','vigoroth','vileplume','volbeat','voltorb','vulpix','wailmer','wailord','walrein','wartortle','weavile','weedle','weepinbell','weezing','whiscash','whismur','wigglytuff','wingull','wobbuffet','wooper','wurmple','wynaut','xatu','yanma','yanmega','zangoose','zapdos','zigzagoon','zubat'];
+
 export const Formats: import('../sim/dex-formats').FormatList = [
 		
 	//////////////////////////////////
@@ -464,13 +466,12 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 	},
 	{
 		name: "[Gen 4] Rage",
-		desc: "Gen 4 Anything Goes, but any Pokemon that connects to Smeargle via breeding can learn any move except Chatter and Struggle.",
+		desc: "Gen 4 Anything Goes with real cartridge glitches: any Pokemon that can reach the English Rage/Mimic glitch (Smeargle breeding web) or the Japanese D/P Transform faint glitch (learns Transform, Mimic, Copycat, Assist, Metronome, or Rage) can run any four moves except Chatter and Struggle. Pokemon that can reach neither glitch need fully legal movesets.",
 		mod: 'gen4',
 		searchShow: false,
 		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100'],
 		checkCanLearn(move, species, setSources, set) {
-			const glitchEligible = ['mew','ditto','jigglypuff','wigglytuff','mrmime','sudowoodo','bonsly','mimejr','chatot','caterpie','metapod','butterfree','weedle','kakuna','beedrill','magikarp','gyarados','unown','wobbuffet','smeargle','wurmple','silcoon','cascoon','wynaut','beldum','metagross','dustox','beautifly','metang','cleffa','clefairy','clefable','igglybuff','smoochum','jynx','skitty','delcatty','plusle','minun','spinda','riolu','lucario','happiny','chansey','blissey','mesprit','glameow','purugly','meowth','persian','drowzee','hypno','sentret','furret','sneasel','weavile','chimchar','monferno','infernape','togepi','togetic','togekiss','munchlax','snorlax','mankey','primeape','poliwhirl','poliwrath','abra','kadabra','alakazam','machop','machoke','machamp','geodude','graveler','golem','gengar','hitmonlee','hitmonchan','mewtwo','politoed','aipom','ambipom','snubbull','granbull','teddiursa','ursaring','miltank','celebi','ludicolo','makuhita','hariyama','sableye','meditite','medicham','volbeat','illumise','kecleon','banette','dusclops','dusknoir','jirachi'];
-			if (glitchEligible.includes(this.toID(species.baseSpecies)) && move.id !== 'chatter' && move.id !== 'struggle') {
+			if (gen4RageGlitchEligible.includes(this.toID(species.baseSpecies)) && move.id !== 'chatter' && move.id !== 'struggle') {
 				return null;
 			}
 			return this.checkCanLearn(move, species, setSources, set);
@@ -479,12 +480,21 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 			const species = this.dex.species.get(set.species);
 			const moves = set.moves || [];
 			if (!moves.length) return;
+			if (gen4RageGlitchEligible.includes(this.toID(species.baseSpecies))) {
+				for (const moveName of moves) {
+					const move = this.dex.moves.get(moveName);
+					if (move.id === 'chatter' || move.id === 'struggle') {
+						return [`${set.name || species.name} can't obtain ${move.name} through the Transform glitch.`];
+					}
+				}
+				return;
+			}
 			for (const moveName of moves) {
 				const move = this.dex.moves.get(moveName);
-				if (move.id === 'rage') return;
-				if (!this.checkCanLearn(move, species)) return;
+				if (this.checkCanLearn(move, species)) {
+					return [`${set.name || species.name} can't learn ${move.name}, and it can't perform the Rage or Transform glitches (it learns none of Transform, Mimic, Copycat, Assist, Metronome, or Rage).`];
+				}
 			}
-			return [`${set.name || species.name} needs at least one move that is Rage or a move it can legitimately learn (the Gen 4 Rage glitch requires one legal move slot).`];
 		},
 	},
 	{
@@ -500,8 +510,8 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		desc: "Gen 2 Pure Hackmons, but Pokemon can start the battle pre-statused. Uses Crystal mechanics (No Move-2 has 9 base power).",
 		mod: 'gen2',
 		searchShow: false,
-		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100'],
-		unbanlist: ['No Move-2'],
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100', 'Prestatus'],
+		banlist: ['No Move-2'],
 	},
 	{
 		name: "[Gen 2] Statuses (Gold/Silver)",
@@ -509,17 +519,50 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'gen2gs',
 		searchShow: false,
 		challengeShow: false,
-		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100'],
-		unbanlist: ['No Move-2'],
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100', 'Prestatus'],
+		banlist: ['No Move-2'],
 	},
 	{
-		name: "[Gen 2] Statuses (SpaceWorld)",
-		desc: "Gen 2 Statuses using the 1997 Spaceworld demo's battle mechanics: status moves fail if the move's type is resisted or the target is immune (the Gen 1-style rule the final games dropped), plus the demo's move stats and type chart. Based on rby2k20's Spaceworld mod.",
+		name: "[Gen 2] SpaceWorld Disguises",
+		desc: "Pure Hackmons on the 1997 SpaceWorld demo's decomp-verified battle engine, where Pokemon can disguise as any species and start the battle pre-statused. Unlike Gen 1 Disguises there is no custom typing: the demo derives a Pokemon's types from its species byte, so a disguised Pokemon takes on its disguise's typing. Engine quirks: gen 1-style Counter (any physical type, shared last-damage), gen 1-style partial trapping with Rapid Spin escape, targeted permanent Sandstorm, no-recharge Hyper Beam on KOs, the Explosion HP-byte glitch, the Fly/Dig invulnerability glitch, Special Defense stages only applying after Baton Pass, held type-boost items, and RBY movesets via the working Time Capsule. Known conventions: Protect/Endure expire at end of turn, Morning Sun/Synthesis/Moonlight heal a flat 50%, and dual status is not modeled.",
 		mod: 'spaceworld',
 		searchShow: false,
 		challengeShow: false,
-		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100'],
-		unbanlist: ['No Move-2', 'No Move-SW'],
+		ruleset: ['-Nonexistent', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100', 'Prestatus', 'SpaceWorld Disguise Mod'],
+		banlist: ['No Move-2', 'No Move-SW'],
+	},
+	{
+		name: "[Gen 2] OU",
+		desc: "Standard Gold/Silver/Crystal OU. Regular Pokemon, learnsets, and mechanics with no hackmons modding; Species and Sleep clauses apply. Doubles is supported natively by choosing the doubles game type.",
+		mod: 'gen2',
+		searchShow: false,
+		challengeShow: false,
+		ruleset: ['Standard'],
+		banlist: ['Uber', 'Mean Look + Baton Pass', 'Spider Web + Baton Pass'],
+	},
+	{
+		name: "[Gen 2] Ubers",
+		desc: "Standard Gold/Silver/Crystal Ubers: every Pokemon is legal, with the standard Species and Sleep clauses. No hackmons modding.",
+		mod: 'gen2',
+		searchShow: false,
+		challengeShow: false,
+		ruleset: ['Standard'],
+	},
+	{
+		name: "[Gen 2] SpaceWorld OU",
+		desc: "Standard OU played on the 1997 SpaceWorld demo's Pokemon, learnsets, and battle engine (no hackmons modding). Every Pokemon is currently allowed while the metagame is being tested.",
+		mod: 'spaceworld',
+		searchShow: false,
+		challengeShow: false,
+		ruleset: ['Standard'],
+	},
+	{
+		name: "[Gen 2] SpaceWorld Ubers",
+		desc: "Standard Ubers played on the 1997 SpaceWorld demo's Pokemon, learnsets, and battle engine: every Pokemon is legal, with the standard Species and Sleep clauses. No hackmons modding.",
+		mod: 'spaceworld',
+		searchShow: false,
+		challengeShow: false,
+		ruleset: ['Standard'],
 	},
 	{
 		name: "[Gen 1] Disguises",
@@ -527,7 +570,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'gen1phnn',
 		//searchShow: false,
 		ruleset: ['-Nonexistent', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100', 'Disguise Mod', 'No Move Exclusivity', 'Crit Level Overflow'],
-		unbanlist: ['No Move'],
+		banlist: ['No Move'],
 	},
 	{
 		name: "[Gen 1] Disguises (English)",
@@ -536,7 +579,24 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: false,
 		challengeShow: false,
 		ruleset: ['-Nonexistent', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100', 'Disguise Mod', 'No Move Exclusivity', 'Crit Level Overflow'],
-		unbanlist: ['No Move'],
+		banlist: ['No Move'],
+	},
+	{
+		name: "[Gen 1] OU",
+		desc: "Standard Gen 1 (Red/Blue/Yellow) OU. Regular Pokemon, learnsets, and mechanics with no hackmons modding; Species and Sleep clauses apply. Doubles is supported natively by choosing the doubles game type.",
+		mod: 'gen1',
+		searchShow: false,
+		challengeShow: false,
+		ruleset: ['Standard'],
+		banlist: ['Uber'],
+	},
+	{
+		name: "[Gen 1] Ubers",
+		desc: "Standard Gen 1 (Red/Blue/Yellow) Ubers: every Pokemon is legal, with the standard Species and Sleep clauses. No hackmons modding.",
+		mod: 'gen1',
+		searchShow: false,
+		challengeShow: false,
+		ruleset: ['Standard'],
 	},
 	//////////////////////////////////
 	///// Pure Hackmons No Nerfs /////
@@ -592,13 +652,14 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 	},
 	{
 		name: "[Gen 9] Wondrous Hackmons",
-		desc: "A custom Hackmons format with select bans for a balanced experience.",
+		desc: "Pure Hackmons with select clauses and bans for a balanced experience. Permanent Mega formes and the LGPE partner Pikachu/Eevee are usable; Eternatus-Eternamax and the Crowned formes revert to their base formes, with the Rusted Sword/Shield still transforming Zacian/Zamazenta.",
 		mod: 'gen9',
-		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause',
-			'Forme Clause', 'Freeze Clause Mod', 'Sleep Clause Mod', 'Dry Pass Clause', 'NatDex Mod'],
+		ruleset: ['[Gen 9] Pure Hackmons',
+			'Forme Clause', 'Sleep Moves Clause', 'Freeze Clause Mod', 'Dry Pass Clause', 'Evasion Clause', 'Hacked Forme Revert'],
 		banlist: [
 			'Arena Trap', 'Calyrex-Shadow', 'Innards Out', 'Last Respects', 'Mewtwo-Mega-X', 'Neutralizing Gas', 'Revival Blessing', 'Shadow Tag', 'Shed Tail',
 		],
+		unbanlist: ['Eternatus-Eternamax', 'Zacian-Crowned', 'Zamazenta-Crowned'],
 	},
 	{
 		name: "[Gen 8] Wondrous Hackmons",
@@ -606,7 +667,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'gen8',
 		searchShow: false,
 		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod',
-			'Endless Battle Clause', 'Freeze Clause Mod', 'Sleep Moves Clause'],
+			'Endless Battle Clause', 'Freeze Clause Mod', 'Sleep Moves Clause', 'Evasion Clause', 'Forme Clause'],
 		banlist: [
 			'Arena Trap', 'Eternatus-Eternamax', 'Neutralizing Gas', 'Shadow Tag', 'Zacian-Crowned',
 		],
