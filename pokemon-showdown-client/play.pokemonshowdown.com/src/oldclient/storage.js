@@ -1633,8 +1633,9 @@ Storage.exportTeam = function (team, hidestats) {
 							alert(move + " is not a valid Hidden Power type.");
 							continue;
 						}
+						var hpTypeIvs = Dex.types.get(hpType).HPivs || {};
 						for (var stat in BattleStatNames) {
-							if ((curSet.ivs[stat] === undefined ? 31 : curSet.ivs[stat]) !== (Dex.types.get(hpType).HPivs[stat] || 31)) {
+							if ((curSet.ivs[stat] === undefined ? 31 : curSet.ivs[stat]) !== (hpTypeIvs[stat] || 31)) {
 								defaultIvs = false;
 								break;
 							}
