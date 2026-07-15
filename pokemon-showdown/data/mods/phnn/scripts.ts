@@ -177,7 +177,7 @@ export const Scripts: ModdedBattleScriptsData = {
 
 	actions: {
 		hitStepInvulnerabilityEvent(targets: Pokemon[], pokemon: Pokemon, move: ActiveMove) {
-			if (move.id === 'helpinghand' || move.id === 'kamehameha') return new Array(targets.length).fill(true);
+			if (move.id === 'helpinghand') return new Array(targets.length).fill(true);
 			const hitResults: boolean[] = [];
 			for (const [i, target] of targets.entries()) {
 				if (target.volatiles['commanding']) {

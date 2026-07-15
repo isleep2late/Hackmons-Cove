@@ -110,7 +110,6 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 			},
 			onTryHitPriority: 4,
 			onTryHit(target, source, effect) {
-				if (effect && effect.id === 'kamehameha') return;
 				if (effect && (effect.priority <= 0.1 || effect.target === 'self')) {
 					return;
 				}
@@ -1310,35 +1309,6 @@ clangoroussoulblaze: {
 		target: "all",
 		type: "Shadow",
 	},
-	kamehameha: {
-		accuracy: true,
-		basePower: 0,
-		category: "Physical",
-		name: "Kamehameha",
-		shortDesc: "Ignores abilities and items. Cannot be stopped by anything.",
-		desc: "Ignores abilities and items. Bypasses Protect, Substitute, terrains, semi-invulnerability, and every condition that would prevent the user from moving or the move from hitting. All opposing Pokemon faint.",
-		pp: 100,
-		noPPBoosts: true,
-		priority: 10,
-		flags: {mirror: 1, bypasssub: 1, defrost: 1},
-		sleepUsable: true,
-		breaksProtect: true,
-		ignoreAbility: true,
-		ignoreImmunity: true,
-		onHit(target, source, move) {
-			target.faint(source, move);
-		},
-		onAfterMove(source, target, move) {
-			for (const pokemon of this.getAllActive()) {
-				if (pokemon.hp && !pokemon.fainted && !pokemon.isAlly(source)) {
-					pokemon.faint(source, move);
-				}
-			}
-		},
-		secondary: null,
-		target: "allAdjacentFoes",
-		type: "Fighting",
-	},
 	attract: {
 		inherit: true,
 		condition: {
@@ -1369,7 +1339,6 @@ clangoroussoulblaze: {
 			},
 			onBeforeMovePriority: 2,
 			onBeforeMove(pokemon, target, move) {
-				if (move.id === 'kamehameha') return;
 				this.add('-activate', pokemon, 'move: Attract', '[of] ' + this.effectState.source);
 				if (this.randomChance(1, 2)) {
 					this.add('cant', pokemon, 'Attract');
