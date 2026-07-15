@@ -243,6 +243,31 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 			}
 		},
 	},
+	hackedformerevert: {
+		effectType: 'ValidatorRule',
+		name: 'Hacked Forme Revert',
+		desc: "Replicates cartridge behavior for hacked special formes: Zacian-Crowned, Zamazenta-Crowned, and Eternatus-Eternamax can be hacked onto a set but revert to their base formes when the battle starts. The Rusted Sword/Shield still transform Zacian/Zamazenta, but force Intrepid Sword/Dauntless Shield as the ability.",
+		onValidateSet(set) {
+			const species = this.dex.species.get(set.species);
+			const id = species.id;
+			if (id === 'eternatuseternamax') {
+				set.species = 'Eternatus';
+			} else if (id === 'zaciancrowned' || id === 'zamazentacrowned') {
+				const neededItem = id === 'zaciancrowned' ? 'rustedsword' : 'rustedshield';
+				if (this.toID(set.item) === neededItem) {
+					set.ability = id === 'zaciancrowned' ? 'Intrepid Sword' : 'Dauntless Shield';
+				} else {
+					set.species = id === 'zaciancrowned' ? 'Zacian' : 'Zamazenta';
+				}
+			} else if (id === 'zacian' || id === 'zamazenta') {
+				const neededItem = id === 'zacian' ? 'rustedsword' : 'rustedshield';
+				if (this.toID(set.item) === neededItem) {
+					set.species = id === 'zacian' ? 'Zacian-Crowned' : 'Zamazenta-Crowned';
+					set.ability = id === 'zacian' ? 'Intrepid Sword' : 'Dauntless Shield';
+				}
+			}
+		},
+	},
 	infinitemod: {
 		effectType: 'Rule',
 		name: 'Infinite Mod',

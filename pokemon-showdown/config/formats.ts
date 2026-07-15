@@ -653,13 +653,14 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 	},
 	{
 		name: "[Gen 9] Wondrous Hackmons",
-		desc: "A custom Hackmons format with select bans for a balanced experience.",
+		desc: "Pure Hackmons with select clauses and bans for a balanced experience. Permanent Mega formes and the LGPE partner Pikachu/Eevee are usable; Eternatus-Eternamax and the Crowned formes revert to their base formes, with the Rusted Sword/Shield still transforming Zacian/Zamazenta.",
 		mod: 'gen9',
-		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause',
-			'Forme Clause', 'Freeze Clause Mod', 'Sleep Clause Mod', 'Dry Pass Clause', 'NatDex Mod'],
+		ruleset: ['[Gen 9] Pure Hackmons',
+			'Forme Clause', 'Sleep Moves Clause', 'Freeze Clause Mod', 'Dry Pass Clause', 'Evasion Clause', 'Hacked Forme Revert'],
 		banlist: [
 			'Arena Trap', 'Calyrex-Shadow', 'Innards Out', 'Last Respects', 'Mewtwo-Mega-X', 'Neutralizing Gas', 'Revival Blessing', 'Shadow Tag', 'Shed Tail',
 		],
+		unbanlist: ['Eternatus-Eternamax', 'Zacian-Crowned', 'Zamazenta-Crowned'],
 	},
 	{
 		name: "[Gen 8] Wondrous Hackmons",
@@ -667,7 +668,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'gen8',
 		searchShow: false,
 		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod',
-			'Endless Battle Clause', 'Freeze Clause Mod', 'Sleep Moves Clause'],
+			'Endless Battle Clause', 'Freeze Clause Mod', 'Sleep Moves Clause', 'Evasion Clause', 'Forme Clause'],
 		banlist: [
 			'Arena Trap', 'Eternatus-Eternamax', 'Neutralizing Gas', 'Shadow Tag', 'Zacian-Crowned',
 		],
