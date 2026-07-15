@@ -168,7 +168,7 @@ export const Learnsets: import('../../../sim/dex-species').ModdedLearnsetDataTab
 		],
 	},
 	nidoranf: {
-		learnset: { cottonspore: ["2M"], spite: ["2M"], powdersnow: ["2M"], machpunch: ["2M"], sludgebomb: ["2M"], lockon: ["2M"], falseswipe: ["2M"], milkdrink: ["2M"], painsplit: ["2M"], sacredfire: ["2M"], dynamicpunch: ["2M"], megaphone: ["2M"], triplekick: ["2M"], flamewheel: ["2M"], magnitude: ["2M"], bide: ["1M"], bite: ["1L30", "1L29"], blizzard: ["1M"], bodyslam: ["1M"], doubleedge: ["1M"], doublekick: ["1L12", "1L43"], doubleteam: ["1M"], furyswipes: ["1L38", "1L36"], growl: ["1L1"], mimic: ["1M"], poisonsting: ["1L17", "1L14"], rage: ["1M"], reflect: ["1M"], rest: ["1M"], scratch: ["1L8"], skullbash: ["1M"], substitute: ["1M"], tackle: ["1L1"], tailwhip: ["1L23", "1L21"], takedown: ["1M"], thunder: ["1M"], thunderbolt: ["1M"], toxic: ["1M"] },
+		learnset: { cottonspore: ["2M"], spite: ["2M"], powdersnow: ["2M"], machpunch: ["2M"], sludgebomb: ["2M"], lockon: ["2M"], falseswipe: ["2M"], milkdrink: ["2M"], painsplit: ["2M"], sacredfire: ["2M"], dynamicpunch: ["2M"], megaphone: ["2M"], triplekick: ["2M"], flamewheel: ["2M"], magnitude: ["2M"], bide: ["1M"], bite: ["2L34", "1L30", "1L29"], blizzard: ["1M"], bodyslam: ["1M"], doubleedge: ["1M"], doublekick: ["2L19", "1L12", "1L43"], doubleteam: ["1M"], furyswipes: ["2L43", "1L38", "1L36"], growl: ["2L4", "1L1"], mimic: ["1M"], poisonsting: ["2L13", "1L17", "1L14"], rage: ["1M"], reflect: ["1M"], rest: ["1M"], scratch: ["2L8", "1L8"], skullbash: ["1M"], substitute: ["1M"], tackle: ["2L1", "1L1"], tailwhip: ["2L26", "1L23", "1L21"], takedown: ["1M"], thunder: ["1M"], thunderbolt: ["1M"], toxic: ["1M"] },
 		encounters: [
 			{generation: 2, level: 5},
 		],
@@ -186,7 +186,7 @@ export const Learnsets: import('../../../sim/dex-species').ModdedLearnsetDataTab
 		],
 	},
 	nidoranm: {
-		learnset: { cottonspore: ["2M"], reversal: ["2M"], spite: ["2M"], powdersnow: ["2M"], machpunch: ["2M"], sludgebomb: ["2M"], lockon: ["2M"], falseswipe: ["2M"], milkdrink: ["2M"], painsplit: ["2M"], sacredfire: ["2M"], dynamicpunch: ["2M"], megaphone: ["2M"], triplekick: ["2M"], flamewheel: ["2M"], magnitude: ["2M"], bide: ["1M"], blizzard: ["1M"], bodyslam: ["1M"], doubleedge: ["1M"], doublekick: ["1L12", "1L43"], doubleteam: ["1M"], focusenergy: ["1L23", "1L21"], furyattack: ["1L30", "1L29"], hornattack: ["1L8"], horndrill: ["1M", "1L38", "1L36"], leer: ["1L1"], mimic: ["1M"], poisonsting: ["1L17", "1L14"], rage: ["1M"], reflect: ["1M"], rest: ["1M"], skullbash: ["1M"], substitute: ["1M"], tackle: ["1L1"], takedown: ["1M"], thunder: ["1M"], thunderbolt: ["1M"], toxic: ["1M"] },
+		learnset: { cottonspore: ["2M"], reversal: ["2M"], spite: ["2M"], powdersnow: ["2M"], machpunch: ["2M"], sludgebomb: ["2M"], lockon: ["2M"], falseswipe: ["2M"], milkdrink: ["2M"], painsplit: ["2M"], sacredfire: ["2M"], dynamicpunch: ["2M"], megaphone: ["2M"], triplekick: ["2M"], flamewheel: ["2M"], magnitude: ["2M"], bide: ["1M"], blizzard: ["1M"], bodyslam: ["1M"], doubleedge: ["1M"], doublekick: ["2L19", "1L12", "1L43"], doubleteam: ["1M"], focusenergy: ["2L26", "1L23", "1L21"], furyattack: ["2L43", "1L30", "1L29"], hornattack: ["2L13", "1L8"], horndrill: ["2L34", "1M", "1L38", "1L36"], leer: ["2L4", "1L1"], mimic: ["1M"], poisonsting: ["2L8", "1L17", "1L14"], rage: ["1M"], reflect: ["1M"], rest: ["1M"], skullbash: ["1M"], substitute: ["1M"], tackle: ["2L1", "1L1"], takedown: ["1M"], thunder: ["1M"], thunderbolt: ["1M"], toxic: ["1M"] },
 		encounters: [
 			{generation: 2, level: 5},
 		],

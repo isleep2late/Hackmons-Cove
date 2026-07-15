@@ -199,7 +199,6 @@ export const Scripts: ModdedBattleScriptsData = {
 			return hitResults;
 		},
 		canMegaEvo(pokemon: Pokemon) {
-			if (pokemon.species.id === 'goku' && !pokemon.transformed) return 'Goku-Super-Saiyan';
 			const species = pokemon.baseSpecies;
 			const altForme = species.otherFormes && this.dex.species.get(species.otherFormes[0]);
 			const item = pokemon.getItem();
@@ -216,20 +215,6 @@ export const Scripts: ModdedBattleScriptsData = {
 			return megaEvolution && megaEvolution !== species.name ? megaEvolution : null;
 		},
 		runMegaEvo(pokemon: Pokemon) {
-			if (pokemon.canMegaEvo === 'Goku-Super-Saiyan' && pokemon.species.id === 'goku') {
-				pokemon.formeChange('Goku-Super-Saiyan', null, true);
-				this.battle.add('-message', `${pokemon.name} has ascended to Super Saiyan!`);
-				const maxed = {atk: 6, def: 6, spa: 6, spd: 6, spe: 6, accuracy: 6, evasion: 6} as const;
-				pokemon.setBoost({...maxed});
-				for (const stat of Object.keys(maxed)) {
-					this.battle.add('-setboost', pokemon, stat, 6, '[from] move: Super Saiyan');
-				}
-				for (const ally of pokemon.side.pokemon) {
-					ally.canMegaEvo = false;
-				}
-				this.battle.runEvent('AfterMega', pokemon);
-				return true;
-			}
 			const speciesid = pokemon.canMegaEvo || pokemon.canUltraBurst;
 			if (!speciesid) return false;
 			pokemon.formeChange(speciesid, pokemon.getItem(), true);
