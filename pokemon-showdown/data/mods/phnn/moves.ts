@@ -990,7 +990,7 @@ clangoroussoulblaze: {
 		priority: 0,
 		flags: {contact: 1, protect: 1},
 		recoil: [1, 16],
-		secondary: null,
+		secondary: undefined,
 		target: "normal",
 		type: "Shadow",
 		onEffectiveness(typeMod, target, type) {
@@ -1009,7 +1009,7 @@ clangoroussoulblaze: {
 		pp: 5,
 		priority: 0,
 		flags: {protect: 1},
-		secondary: null,
+		secondary: undefined,
 		target: "normal",
 		type: "Shadow",
 		onEffectiveness(typeMod, target, type) {
@@ -1028,7 +1028,7 @@ clangoroussoulblaze: {
 		pp: 10,
 		priority: 0,
 		flags: {contact: 1, protect: 1},
-		secondary: null,
+		secondary: undefined,
 		target: "normal",
 		type: "Shadow",
 		onEffectiveness(typeMod, target, type) {
@@ -1047,7 +1047,7 @@ clangoroussoulblaze: {
 		pp: 5,
 		priority: 0,
 		flags: {contact: 1, protect: 1},
-		secondary: null,
+		secondary: undefined,
 		target: "normal",
 		type: "Shadow",
 		onEffectiveness(typeMod, target, type) {
@@ -1067,7 +1067,7 @@ clangoroussoulblaze: {
 		priority: 0,
 		flags: {contact: 1, protect: 1},
 		recoil: [33, 100],
-		secondary: null,
+		secondary: undefined,
 		target: "normal",
 		type: "Shadow",
 		onEffectiveness(typeMod, target, type) {
@@ -1143,7 +1143,7 @@ clangoroussoulblaze: {
 		pp: 5,
 		priority: 0,
 		flags: {protect: 1},
-		secondary: null,
+		secondary: undefined,
 		target: "allAdjacentFoes",
 		type: "Shadow",
 		onEffectiveness(typeMod, target, type) {
@@ -1162,7 +1162,7 @@ clangoroussoulblaze: {
 		pp: 10,
 		priority: 0,
 		flags: {protect: 1},
-		secondary: null,
+		secondary: undefined,
 		target: "allAdjacentFoes",
 		type: "Shadow",
 		onEffectiveness(typeMod, target, type) {
@@ -1181,7 +1181,7 @@ clangoroussoulblaze: {
 		pp: 5,
 		priority: 0,
 		flags: {protect: 1},
-		secondary: null,
+		secondary: undefined,
 		target: "allAdjacentFoes",
 		type: "Shadow",
 		onEffectiveness(typeMod, target, type) {
@@ -1201,7 +1201,7 @@ clangoroussoulblaze: {
 		priority: 0,
 		flags: {protect: 1},
 		boosts: {def: -2},
-		secondary: null,
+		secondary: undefined,
 		target: "allAdjacentFoes",
 		type: "Shadow",
 	},
@@ -1217,7 +1217,7 @@ clangoroussoulblaze: {
 		priority: 0,
 		flags: {protect: 1},
 		boosts: {evasion: -2},
-		secondary: null,
+		secondary: undefined,
 		target: "allAdjacentFoes",
 		type: "Shadow",
 	},
@@ -1233,7 +1233,7 @@ clangoroussoulblaze: {
 		priority: 0,
 		flags: {protect: 1},
 		volatileStatus: 'confusion',
-		secondary: null,
+		secondary: undefined,
 		target: "allAdjacentFoes",
 		type: "Shadow",
 	},
@@ -1251,7 +1251,7 @@ clangoroussoulblaze: {
 		onHit(target, source, move) {
 			return target.addVolatile('trapped', source, move, 'trapper');
 		},
-		secondary: null,
+		secondary: undefined,
 		target: "allAdjacentFoes",
 		type: "Shadow",
 	},
@@ -1269,7 +1269,7 @@ clangoroussoulblaze: {
 		onHit(target) {
 			this.damage(this.clampIntRange(Math.floor(target.hp / 2), 1), target);
 		},
-		secondary: null,
+		secondary: undefined,
 		target: "all",
 		type: "Shadow",
 	},
@@ -1289,7 +1289,7 @@ clangoroussoulblaze: {
 				side.removeSideCondition(condition);
 			}
 		},
-		secondary: null,
+		secondary: undefined,
 		target: "foeSide",
 		type: "Shadow",
 	},
@@ -1305,7 +1305,7 @@ clangoroussoulblaze: {
 		priority: 0,
 		flags: {},
 		weather: 'shadowsky',
-		secondary: null,
+		secondary: undefined,
 		target: "all",
 		type: "Shadow",
 	},
@@ -1360,7 +1360,7 @@ clangoroussoulblaze: {
 		pp: 10,
 		priority: 0,
 		flags: {},
-		secondary: null,
+		secondary: undefined,
 		target: "normal",
 		type: "???",
 	},
