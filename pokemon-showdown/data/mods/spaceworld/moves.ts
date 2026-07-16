@@ -113,7 +113,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	powdersnow: {
 		inherit: true,
 		pp: 10,
-		secondary: {"chance":null,"status":"frz"},
+		secondary: null,
 	},
 	present: {
 		inherit: true,
@@ -390,7 +390,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	smog: {
 		inherit: true,
-		secondary: {"chance":0,"status":"psn"},
+		secondary: null,
 	},
 	dizzypunch: {
 		inherit: true,
@@ -399,7 +399,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	flamewheel: {
 		inherit: true,
 		pp: 10,
-		secondary: {"chance":0,"status":"brn"},
+		secondary: null,
 	},
 	snore: {
 		inherit: true,
@@ -438,12 +438,12 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	sludgebomb: {
 		inherit: true,
-		secondary: {"chance":null,"status":"psn"},
+		secondary: null,
 	},
 	octazooka: {
 		inherit: true,
 		accuracy: 100,
-		secondary: {"chance":null,"boosts":{"accuracy":-1}},
+		secondary: null,
 	},
 	zapcannon: {
 		inherit: true,
@@ -564,7 +564,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		accuracy: 100,
 		basePower: 60,
 		pp: 10,
-		secondary: {"chance":null,"boosts":{"def":-1}},
+		secondary: null,
 	},
 	rockhead: {
 		inherit: true,
@@ -614,6 +614,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	watersport: {
 		inherit: true,
+		isNonstandard: null,
+		gen: 2,
 		accuracy: 100,
 		basePower: 30,
 		pp: 10,
@@ -653,6 +655,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	bounce: {
 		inherit: true,
+		isNonstandard: null,
+		gen: 2,
 		accuracy: 100,
 		basePower: 0,
 		pp: 10,

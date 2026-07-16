@@ -1,4 +1,4 @@
-const SW_EVIOLITE: string[] = ['ballerine', 'ditto', 'farfetchd', 'golppy', 'minicorn', 'para', 'pinsir', 'slowbro', 'tangel'];
+const SW_EVIOLITE: string[] = ['ballerine', 'ditto', 'farfetchd', 'farfetchdsw', 'golppy', 'minicorn', 'para', 'pinsir', 'pinsirmega', 'pinsirsw', 'slowbro', 'slowbromega', 'slowbrosw', 'tangel'];
 
 export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 	// Classic Items Return
@@ -107,5 +107,23 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 				return this.chainModify(1.5);
 			}
 		},
+	},
+
+	metalpowder: {
+		inherit: true,
+		isNonstandard: null,
+		onModifyDef(def, pokemon) {
+			if (pokemon.baseSpecies.id === 'ditto' || pokemon.species.id === 'ditto') {
+				return this.chainModify(2);
+			}
+		},
+		onModifySpDPriority: 2,
+		onModifySpD(spd, pokemon) {
+			if (pokemon.baseSpecies.id === 'ditto' || pokemon.species.id === 'ditto') {
+				return this.chainModify(1.5);
+			}
+		},
+		shortDesc: "If holder is a Ditto: 2x Defense, 1.5x Sp. Def, even while transformed.",
+		desc: "If held by a Ditto, its Defense is doubled and its Special Defense is raised by 50%. This works even while the holder is transformed, and for Pokemon that have transformed into a Ditto.",
 	},
 };

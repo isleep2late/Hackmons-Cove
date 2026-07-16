@@ -356,17 +356,17 @@ export class RuleTable extends Map<string, string> {
 		// involves less string conversion.
 
 		// engine hard limits
-		if (this.maxTeamSize > 24) {
-			throw new Error(`Max team size ${this.maxTeamSize}${this.blame('maxteamsize')} is unsupported (we only support up to 24).`);
+		if (this.maxTeamSize > 255) {
+			throw new Error(`Max team size ${this.maxTeamSize}${this.blame('maxteamsize')} is unsupported (we only support up to 255).`);
 		}
 		if (this.maxLevel > 99999) {
 			throw new Error(`Max level ${this.maxLevel}${this.blame('maxlevel')} is unsupported (we only support up to 99999)`);
 		}
-		if (this.maxMoveCount > 24) {
+		if (this.maxMoveCount > 255) {
 			// A limit is imposed here to prevent too much engine strain or
 			// too much layout deformation - to be exact, this is the limit
 			// allowed in Custom Game.
-			throw new Error(`Max move count ${this.maxMoveCount}${this.blame('maxmovecount')} is unsupported (we only support up to 24)`);
+			throw new Error(`Max move count ${this.maxMoveCount}${this.blame('maxmovecount')} is unsupported (we only support up to 255)`);
 		}
 
 		if (!this.defaultLevel) {

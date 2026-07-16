@@ -146,6 +146,9 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	leechseed: {
 		inherit: true,
+		onTryImmunity: undefined,
+		shortDesc: "1/8 of target's max HP drained each turn. Hits Grass-types.",
+		desc: "Plants a seed on the target that drains 1/8 of its maximum HP each turn, restoring the same amount to the user, and the drain scales with Toxic's counter in No Nerfs. Unlike other generations, Grass-type Pokemon are NOT immune (SpaceWorld '97 behavior).",
 		condition: {
 			onStart(target) {
 				this.add('-start', target, 'move: Leech Seed');
@@ -178,6 +181,10 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	highjumpkick: {
 		inherit: true,
 		pp: 20,
+		hasCrashDamage: undefined,
+		onMoveFail: undefined,
+		shortDesc: "No crash damage on miss (SpaceWorld '97 behavior).",
+		desc: "Unlike other generations, the user takes no crash damage if this move misses or fails, matching its SpaceWorld '97 demo behavior.",
 	},
 	surf: {
 		inherit: true,
@@ -267,6 +274,9 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	solarbeam: {
 		inherit: true,
 		basePower: 200,
+		onBasePower: undefined,
+		shortDesc: "Charges turn 1, hits turn 2. No charge in sun. Never weakened by weather.",
+		desc: "This attack charges on the first turn and executes on the second. If the weather is sunny, the move completes in one turn. Unlike other generations, its damage is never halved by rain, sandstorm, hail, or snow.",
 	},
 	magmastorm: {
 		inherit: true,
@@ -279,6 +289,53 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	dig: {
 		inherit: true,
 		basePower: 100,
+		condition: {
+			duration: 2,
+			onInvulnerability(target, source, move) {
+				if (['earthquake', 'fissure', 'swift'].includes(move.id)) {
+					return;
+				}
+				return false;
+			},
+		},
+		shortDesc: "Digs underground turn 1, strikes turn 2. Only EQ/Fissure/Swift can hit.",
+		desc: "This attack charges on the first turn and executes on the second. While underground, only Earthquake, Fissure, and Swift can hit the user, and none of them deal doubled damage (SpaceWorld '97 behavior - Magnitude cannot reach the user at all).",
+	},
+	fly: {
+		inherit: true,
+		condition: {
+			duration: 2,
+			onInvulnerability(target, source, move) {
+				if (['whirlwind', 'thunder', 'swift'].includes(move.id)) {
+					return;
+				}
+				return false;
+			},
+		},
+		shortDesc: "Flies up turn 1, strikes turn 2. Only Whirlwind/Thunder/Swift can hit.",
+		desc: "This attack charges on the first turn and executes on the second. While airborne, only Whirlwind, Thunder, and Swift can hit the user, and none of them deal doubled damage (SpaceWorld '97 behavior - Gust and Twister cannot reach the user at all).",
+	},
+	counter: {
+		inherit: true,
+		accuracy: true,
+		priority: -1,
+		ignoreImmunity: true,
+		onTry: undefined,
+		damageCallback(pokemon, target) {
+			if (pokemon.volatiles['counter'] && pokemon.volatiles['counter'].damage) {
+				return pokemon.volatiles['counter'].damage;
+			}
+			const lastMove = target.lastMove;
+			if (!lastMove || lastMove.id === 'counter' || !lastMove.basePower) return false;
+			let moveType = lastMove.type;
+			if (lastMove.id === 'hiddenpower') moveType = target.hpType || 'Dark';
+			const specialTypes = ['Fire', 'Water', 'Grass', 'Electric', 'Psychic', 'Ice', 'Dragon', 'Dark'];
+			if (specialTypes.includes(moveType)) return false;
+			if (!this.lastDamage) return false;
+			return this.clampIntRange(2 * this.lastDamage, 1, 65535);
+		},
+		shortDesc: "2x damage taken this turn, or 2x the target's last physical-type hit (any turn). Never misses; hits Ghosts; priority -1.",
+		desc: "Deals double the damage the user took from a physical attack this turn; if the user was not hit this turn, it instead deals double the damage of the target's last physical-band move, even from a previous turn (SpaceWorld '97 behavior - moves of the Fire, Water, Grass, Electric, Psychic, Ice, Dragon, and Dark types cannot be countered this way). This move never misses, can hit Ghost-types, and has -1 priority instead of -5.",
 	},
 	heatwave: {
 		inherit: true,
@@ -335,7 +392,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	swagger: {
 		inherit: true,
-		accuracy: 90,
+		accuracy: 100,
 	},
 	willowisp: {
 		inherit: true,
@@ -389,6 +446,10 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	jumpkick: {
 		inherit: true,
 		pp: 25,
+		hasCrashDamage: undefined,
+		onMoveFail: undefined,
+		shortDesc: "No crash damage on miss (SpaceWorld '97 behavior).",
+		desc: "Unlike other generations, the user takes no crash damage if this move misses or fails, matching its SpaceWorld '97 demo behavior.",
 	},
 	submission: {
 		inherit: true,
@@ -656,21 +717,256 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 
 	selfdestruct: {
 		inherit: true,
+		selfdestruct: undefined,
 		onBasePowerPriority: 6,
 		onBasePower(basePower, attacker, defender, move) {
 			return this.chainModify(2);
 		},
-		shortDesc: "User faints. Target's defenses are halved (2x damage).",
-		desc: "The user faints after using this move, even if it misses or fails. The target's defenses are halved, effectively doubling this move's power.",
+		onAfterMove(pokemon) {
+			if (!pokemon.hp) return;
+			const chip = pokemon.hp <= 255 ? pokemon.hp : pokemon.hp % 256;
+			if (chip) this.directDamage(chip, pokemon);
+			if (!pokemon.hp) return;
+			if (pokemon.status) pokemon.cureStatus();
+			pokemon.removeVolatile('leechseed');
+			pokemon.maxhp = this.clampIntRange(pokemon.maxhp % 256, 1);
+		},
+		shortDesc: "2x damage. User survives at 256+ HP but its Max HP collapses to (max % 256); cures own status.",
+		desc: "The target's defenses are halved, effectively doubling this move's power. SpaceWorld '97 demo behavior: instead of always fainting, the user's HP is rounded down to the nearest multiple of 256, its status and Leech Seed are cured, and its Maximum HP is corrupted to its remainder mod 256 - the user keeps its current HP but can no longer heal above the tiny new maximum. The user faints only if it had 255 HP or less.",
 	},
 	explosion: {
 		inherit: true,
+		selfdestruct: undefined,
 		onBasePowerPriority: 6,
 		onBasePower(basePower, attacker, defender, move) {
 			return this.chainModify(2);
 		},
-		shortDesc: "User faints. Target's defenses are halved (2x damage).",
-		desc: "The user faints after using this move, even if it misses or fails. The target's defenses are halved, effectively doubling this move's power.",
+		onAfterMove(pokemon) {
+			if (!pokemon.hp) return;
+			const chip = pokemon.hp <= 255 ? pokemon.hp : pokemon.hp % 256;
+			if (chip) this.directDamage(chip, pokemon);
+			if (!pokemon.hp) return;
+			if (pokemon.status) pokemon.cureStatus();
+			pokemon.removeVolatile('leechseed');
+			pokemon.maxhp = this.clampIntRange(pokemon.maxhp % 256, 1);
+		},
+		shortDesc: "2x damage. User survives at 256+ HP but its Max HP collapses to (max % 256); cures own status.",
+		desc: "The target's defenses are halved, effectively doubling this move's power. SpaceWorld '97 demo behavior: instead of always fainting, the user's HP is rounded down to the nearest multiple of 256, its status and Leech Seed are cured, and its Maximum HP is corrupted to its remainder mod 256 - the user keeps its current HP but can no longer heal above the tiny new maximum. The user faints only if it had 255 HP or less.",
+	},
+
+	sunnyday: {
+		inherit: true,
+		pp: 10,
+	},
+	raindance: {
+		inherit: true,
+		pp: 10,
+	},
+	encore: {
+		inherit: true,
+		pp: 10,
+		condition: {
+			durationCallback() {
+				return this.random(3, 7);
+			},
+			noCopy: true,
+			onStart(target) {
+				let move: any = target.lastMove;
+				if (!move || target.volatiles['dynamax']) return false;
+
+				if (move.isMax && move.baseMove) move = this.dex.moves.get(move.baseMove);
+				const moveSlot = target.getMoveData(move.id);
+				if (move.isZ || move.isMax || move.flags['failencore'] || !moveSlot || moveSlot.pp <= 0) {
+					return false;
+				}
+				this.effectState.move = move.id;
+				this.add('-start', target, 'Encore');
+				if (!this.queue.willMove(target)) {
+					this.effectState.duration!++;
+				}
+			},
+			onOverrideAction(pokemon, target, move) {
+				if (move.id !== this.effectState.move) return this.effectState.move;
+			},
+			onResidualOrder: 16,
+			onResidual(target) {
+				const moveSlot = target.getMoveData(this.effectState.move);
+				if (!moveSlot || moveSlot.pp <= 0) {
+					target.removeVolatile('encore');
+				}
+			},
+			onEnd(target) {
+				this.add('-end', target, 'Encore');
+			},
+		},
+		shortDesc: "Target repeats its last move for 3-6 turns.",
+		desc: "The target is forced to repeat its last used move for 3 to 6 turns, chosen at random (SpaceWorld '97 duration; other generations lock exactly 3 turns).",
+	},
+	perishsong: {
+		inherit: true,
+		pp: 10,
+	},
+	lockon: {
+		inherit: true,
+		pp: 10,
+	},
+	moonlight: {
+		inherit: true,
+		pp: 10,
+		onHit(pokemon) {
+			let factor = 0.5;
+			switch (pokemon.effectiveWeather(undefined, true)) {
+			case 'sunnyday':
+			case 'desolateland':
+				factor = 0.667;
+				break;
+			}
+			const success = !!this.heal(this.modify(pokemon.maxhp, factor));
+			if (!success) {
+				this.add('-fail', pokemon, 'heal');
+				return this.NOT_FAIL;
+			}
+			return success;
+		},
+		shortDesc: "Heals 50% max HP; 66% in sun. Never reduced by weather.",
+		desc: "The user restores 1/2 of its maximum HP, or 2/3 in Sun. Unlike other generations, this move is never weakened by other weather.",
+	},
+	morningsun: {
+		inherit: true,
+		pp: 10,
+		onHit(pokemon) {
+			let factor = 0.5;
+			switch (pokemon.effectiveWeather(undefined, true)) {
+			case 'sunnyday':
+			case 'desolateland':
+				factor = 0.667;
+				break;
+			}
+			const success = !!this.heal(this.modify(pokemon.maxhp, factor));
+			if (!success) {
+				this.add('-fail', pokemon, 'heal');
+				return this.NOT_FAIL;
+			}
+			return success;
+		},
+		shortDesc: "Heals 50% max HP; 66% in sun. Never reduced by weather.",
+		desc: "The user restores 1/2 of its maximum HP, or 2/3 in Sun. Unlike other generations, this move is never weakened by other weather.",
+	},
+	synthesis: {
+		inherit: true,
+		pp: 10,
+		onHit(pokemon) {
+			let factor = 0.5;
+			switch (pokemon.effectiveWeather(undefined, true)) {
+			case 'sunnyday':
+			case 'desolateland':
+				factor = 0.667;
+				break;
+			}
+			const success = !!this.heal(this.modify(pokemon.maxhp, factor));
+			if (!success) {
+				this.add('-fail', pokemon, 'heal');
+				return this.NOT_FAIL;
+			}
+			return success;
+		},
+		shortDesc: "Heals 50% max HP; 66% in sun. Never reduced by weather.",
+		desc: "The user restores 1/2 of its maximum HP, or 2/3 in Sun. Unlike other generations, this move is never weakened by other weather.",
+	},
+
+	dynamicpunch: {
+		inherit: true,
+		accuracy: 100,
+		pp: 10,
+	},
+	sweetkiss: {
+		inherit: true,
+		accuracy: 100,
+	},
+	irontail: {
+		inherit: true,
+		accuracy: 100,
+	},
+	octazooka: {
+		inherit: true,
+		accuracy: 100,
+	},
+	steelwing: {
+		inherit: true,
+		accuracy: 100,
+	},
+	sacredfire: {
+		inherit: true,
+		accuracy: 100,
+		pp: 10,
+	},
+	present: {
+		inherit: true,
+		accuracy: 100,
+	},
+	twister: {
+		inherit: true,
+		basePower: 60,
+	},
+	lowkick: {
+		inherit: true,
+		secondary: {
+			chance: 30,
+			volatileStatus: 'flinch',
+		},
+		shortDesc: "Damage based on target's weight. 30% flinch chance.",
+		desc: "This move's power is based on the target's weight, and it has a 30% chance to make the target flinch (its Gen 2 / SpaceWorld secondary, which later generations removed).",
+	},
+	vitalthrow: {
+		inherit: true,
+		priority: 0,
+		shortDesc: "This move does not check accuracy. Normal priority.",
+		desc: "This move does not check accuracy. Unlike other generations, it has normal priority instead of moving last (its SpaceWorld '97 behavior).",
+	},
+	mindreader: {
+		inherit: true,
+		pp: 10,
+	},
+	charm: {
+		inherit: true,
+		pp: 40,
+	},
+	scaryface: {
+		inherit: true,
+		pp: 40,
+	},
+	whirlpool: {
+		inherit: true,
+		accuracy: 100,
+	},
+	furycutter: {
+		inherit: true,
+		accuracy: 100,
+		basePowerCallback(pokemon, target, move) {
+			if (!pokemon.volatiles['furycutter'] || move.hit === 1) {
+				pokemon.addVolatile('furycutter');
+			}
+			return this.clampIntRange(move.basePower * pokemon.volatiles['furycutter'].multiplier, 1, 65535);
+		},
+		condition: {
+			duration: 2,
+			onStart() {
+				this.effectState.multiplier = 1;
+			},
+			onRestart() {
+				if (this.effectState.multiplier < 16384) {
+					this.effectState.multiplier <<= 1;
+				}
+				this.effectState.duration = 2;
+			},
+		},
+		shortDesc: "Power doubles with each consecutive hit, uncapped (40/80/160/320/...).",
+		desc: "Power doubles with each successful consecutive use, with no cap (SpaceWorld '97 behavior - 40, 80, 160, 320, and so on, up to 65535). In other generations the power caps at 160.",
+	},
+	sandstorm: {
+		inherit: true,
+		shortDesc: "Permanent sandstorm: 1/8 dmg/turn to ALL types; Rock gets 1.5x SpD.",
+		desc: "Summons a permanent sandstorm that never expires (it can only be replaced by another weather). At the end of each turn, every Pokemon takes 1/8 of its maximum HP in damage regardless of type - Rock, Ground, and Steel are NOT immune in No Nerfs. Rock-types still get 1.5x Special Defense. Abilities such as Magic Guard, Overcoat, Sand Veil, Sand Rush, and Sand Force still prevent the damage.",
 	},
 
 	hiddenpower: {
@@ -902,6 +1198,18 @@ clangoroussoulblaze: {
 		},
 		shortDesc: "100% chance to poison and lower the target's Speed by 2.",
 		desc: "This move does not deal damage. Has a 100% chance to poison the target and lower its Speed stat by 2 stages.",
+	},
+
+	triplekick: {
+		inherit: true,
+		accuracy: 100,
+		basePower: 60,
+		multihit: [1, 3],
+		basePowerCallback(pokemon, target, move) {
+			return 60 * move.hit;
+		},
+		shortDesc: "Hits 1-3 times. Hit N has 60*N power. 100% accuracy.",
+		desc: "Hits one to three times. The first hit has 60 power, the second 120, and the third 180, for up to 360 total. This is the move's SpaceWorld '97 demo behavior, its strongest version across all generations.",
 	},
 
 	bouncybubble: {

@@ -732,7 +732,7 @@ Storage.unpackAllTeams = function (buffer) {
 			if (format && format.slice(0, 3) !== 'gen') format = 'gen6' + format;
 			if (format && format.endsWith('-box')) {
 				format = format.slice(0, -4);
-				capacity = 24;
+				capacity = 255;
 			}
 			return {
 				name: oldTeam.name || '',
@@ -768,7 +768,7 @@ Storage.unpackLine = function (line) {
 		format: format,
 		gen: parseInt(format[3], 10) || 6,
 		team: line.slice(pipeIndex + 1),
-		capacity: isBox ? 24 : 6,
+		capacity: isBox ? 255 : 6,
 		folder: line.slice(bracketIndex + 1, slashIndex > 0 ? slashIndex : bracketIndex + 1),
 		iconCache: ''
 	};
@@ -778,7 +778,7 @@ Storage.packAllTeams = function (teams) {
 	return teams.map(function (team) {
 		return (
 			(team.teamid ? '' + team.teamid + '[' : '') +
-			(team.format ? '' + team.format + (team.capacity === 24 ? '-box]' : ']') : '') +
+			(team.format ? '' + team.format + (team.capacity > 6 ? '-box]' : ']') : '') +
 			(team.folder ? '' + team.folder + '/' : '') + team.name + '|' +
 			Storage.getPackedTeam(team)
 		);
@@ -1316,7 +1316,7 @@ Storage.importTeam = function (buffer, teams) {
 				if (format && format.slice(0, 3) !== 'gen') format = 'gen6' + format;
 				if (format && format.endsWith('-box')) {
 					format = format.slice(0, -4);
-					capacity = 24;
+					capacity = 255;
 				}
 				line = $.trim(line.substr(bracketIndex + 1));
 			}

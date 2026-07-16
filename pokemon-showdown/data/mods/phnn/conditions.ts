@@ -15,6 +15,24 @@ export const Conditions: import('../../../sim/dex-conditions').ModdedConditionDa
 			this.damage(pokemon.baseMaxhp / 8);
 		},
 	},
+	slp: {
+		inherit: true,
+		onStart(target, source, sourceEffect) {
+			if (sourceEffect && sourceEffect.effectType === 'Ability') {
+				this.add('-status', target, 'slp', '[from] ability: ' + sourceEffect.name, `[of] ${source}`);
+			} else if (sourceEffect && sourceEffect.effectType === 'Move') {
+				this.add('-status', target, 'slp', `[from] move: ${sourceEffect.name}`);
+			} else {
+				this.add('-status', target, 'slp');
+			}
+			this.effectState.startTime = this.random(2, 9);
+			this.effectState.time = this.effectState.startTime;
+
+			if (target.removeVolatile('nightmare')) {
+				this.add('-end', target, 'Nightmare', '[silent]');
+			}
+		},
+	},
 	confusion: {
 		inherit: true,
 		onBeforeMove(pokemon, target, move) {
@@ -113,6 +131,11 @@ export const Conditions: import('../../../sim/dex-conditions').ModdedConditionDa
 	},
 	sandstorm: {
 		inherit: true,
+		duration: 0,
+		durationCallback: undefined,
+		onWeather(target) {
+			this.damage(target.baseMaxhp / 8);
+		},
 		onFieldStart(field, source, effect) {
 			if (effect?.effectType === 'Ability') {
 				this.effectState.duration = 0;

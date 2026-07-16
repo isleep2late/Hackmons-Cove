@@ -256,8 +256,8 @@ export const Teams = new class Teams {
 		let i = 0;
 		let j = 0;
 
-		// limit to 24
-		for (let count = 0; count < 24; count++) {
+		// limit to 255
+		for (let count = 0; count < 255; count++) {
 			const set: PokemonSet = {} as PokemonSet;
 			team.push(set);
 
@@ -292,7 +292,7 @@ export const Teams = new class Teams {
 			// moves
 			j = buf.indexOf('|', i);
 			if (j < 0) return null;
-			set.moves = buf.substring(i, j).split(',', 24).map(name => {
+			set.moves = buf.substring(i, j).split(',', 255).map(name => {
 				const match = /(.*)(\((?:\d+|inf)(?:\/\d+)?\))$/i.exec(name);
 				if (match) return this.unpackName(match[1], Dex.moves) + ' ' + match[2];
 				return this.unpackName(name, Dex.moves);
