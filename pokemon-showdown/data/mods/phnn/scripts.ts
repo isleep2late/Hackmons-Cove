@@ -26,6 +26,18 @@ export const Scripts: ModdedBattleScriptsData = {
 
 	},
 
+	spreadDamage(damage: any, targetArray: any = null, source: any = null, effect: any = null, instafaint = false) {
+		const retVals = Object.getPrototypeOf(this).spreadDamage.call(this, damage, targetArray, source, effect, instafaint);
+		if (source && effect && effect.effectType === 'Move') {
+			for (const dealt of retVals) {
+				if (typeof dealt === 'number' && dealt > 0) {
+					this.lastDamage = dealt;
+				}
+			}
+		}
+		return retVals;
+	},
+
 	statModify(baseStats: StatsTable, set: PokemonSet, statName: StatID) {
 		let stat = Object.getPrototypeOf(this).statModify.call(this, baseStats, set, statName);
 		if (statName === 'hp') {

@@ -59,6 +59,9 @@ export default {
 			"dig": {
 				"basePower": 100
 			},
+			"counter": {
+				"ignoreImmunity": true
+			},
 			"heatwave": {
 				"basePower": 100
 			},
@@ -94,6 +97,9 @@ export default {
 			},
 			"superfang": {
 				"ignoreImmunity": true
+			},
+			"twister": {
+				"basePower": 60
 			},
 			"hiddenpower": {
 				"basePower": 0
@@ -154,6 +160,9 @@ export default {
 			},
 			"tropkick": {
 				"basePower": 85
+			},
+			"triplekick": {
+				"basePower": 60
 			},
 			"bouncybubble": {
 				"basePower": 90

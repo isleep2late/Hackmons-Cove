@@ -920,7 +920,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'phnn',
 		searchShow: true,
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod', 'Totem Aura'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 255', 'Max Move Count = 255', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod', 'Totem Aura'],
 		unbanlist: ['No Move', 'No Move-2', 'No Move-SW', 'Demo'],
 	},
 	{
@@ -928,7 +928,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'champions',
 		searchShow: false,
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod', 'Totem Aura'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 255', 'Max Move Count = 255', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod', 'Totem Aura'],
 		unbanlist: ['No Move', 'No Move-2', 'No Move-SW', 'Demo'],
 	},
 	{
@@ -936,7 +936,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'gen9',
 		searchShow: false,
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod', 'Totem Aura'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 255', 'Max Move Count = 255', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod', 'Totem Aura'],
 		unbanlist: ['No Move', 'No Move-2', 'No Move-SW', 'Demo'],
 	},
 	{
@@ -944,7 +944,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'gen8',
 		searchShow: false,
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod', 'Totem Aura'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 255', 'Max Move Count = 255', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod', 'Totem Aura'],
 		unbanlist: ['No Move', 'No Move-2', 'No Move-SW', 'Demo'],
 	},
 	{
@@ -952,7 +952,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'gen8bdsp',
 		searchShow: false,
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod', 'Totem Aura'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 255', 'Max Move Count = 255', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod', 'Totem Aura'],
 		unbanlist: ['No Move', 'No Move-2', 'No Move-SW', 'Demo'],
 	},
 	{
@@ -960,7 +960,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'gen7',
 		searchShow: false,
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod', 'Totem Aura'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 255', 'Max Move Count = 255', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod', 'Totem Aura'],
 		unbanlist: ['No Move', 'No Move-2', 'No Move-SW', 'Demo'],
 	},
 	{
@@ -968,7 +968,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'gen7letsgo',
 		searchShow: false,
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod', 'Totem Aura'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 255', 'Max Move Count = 255', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod', 'Totem Aura'],
 		unbanlist: ['No Move', 'No Move-2', 'No Move-SW', 'Demo'],
 	},
 	{
@@ -976,7 +976,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'gen6',
 		searchShow: false,
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod', 'Totem Aura'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 255', 'Max Move Count = 255', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod', 'Totem Aura'],
 		unbanlist: ['No Move', 'No Move-2', 'No Move-SW', 'Demo'],
 	},
 	{
@@ -984,7 +984,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'gen5',
 		searchShow: false,
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod', 'Totem Aura'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 255', 'Max Move Count = 255', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod', 'Totem Aura'],
 		unbanlist: ['No Move', 'No Move-2', 'No Move-SW', 'Demo'],
 	},
 	{
@@ -992,7 +992,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'gen4',
 		searchShow: false,
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod', 'Totem Aura'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 255', 'Max Move Count = 255', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod', 'Totem Aura'],
 		unbanlist: ['No Move', 'No Move-2', 'No Move-SW', 'Demo'],
 	},
 	{
@@ -1000,7 +1000,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'gen3',
 		searchShow: false,
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Desync Clause Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod', 'Totem Aura'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Desync Clause Mod', 'Max Team Size = 255', 'Max Move Count = 255', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod', 'Totem Aura'],
 		unbanlist: ['No Move', 'No Move-2', 'No Move-SW', 'Demo'],
 	},
 	{
@@ -1008,7 +1008,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'gen2',
 		searchShow: false,
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Desync Clause Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod', 'Totem Aura'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Desync Clause Mod', 'Max Team Size = 255', 'Max Move Count = 255', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod', 'Totem Aura'],
 		unbanlist: ['No Move', 'No Move-2', 'No Move-SW', 'Demo'],
 	},
 	{
@@ -1017,7 +1017,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'spaceworld',
 		searchShow: false,
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Desync Clause Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod', 'Totem Aura'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Desync Clause Mod', 'Max Team Size = 255', 'Max Move Count = 255', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod', 'Totem Aura'],
 		unbanlist: ['No Move', 'No Move-2', 'No Move-SW', 'Demo'],
 	},
 	{
@@ -1025,7 +1025,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'gen1',
 		searchShow: false,
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Desync Clause Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod', 'Totem Aura', 'No Move Exclusivity'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Desync Clause Mod', 'Max Team Size = 255', 'Max Move Count = 255', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod', 'Totem Aura', 'No Move Exclusivity'],
 		unbanlist: ['No Move'],
 	},
 	{
@@ -1034,7 +1034,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: true,
 		debug: true,
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 255', 'Max Move Count = 255', 'Max Level = 9999', 'Default Level = 100'],
 	},
 	{
 		name: "[Gen 8] Custom Game",
@@ -1042,7 +1042,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: false,
 		debug: true,
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 255', 'Max Move Count = 255', 'Max Level = 9999', 'Default Level = 100'],
 	},
 	{
 		name: "[Gen 7] Custom Game",
@@ -1050,7 +1050,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: false,
 		debug: true,
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 255', 'Max Move Count = 255', 'Max Level = 9999', 'Default Level = 100'],
 	},
 	{
 		name: "[Gen 6] Custom Game",
@@ -1058,7 +1058,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: false,
 		debug: true,
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 255', 'Max Move Count = 255', 'Max Level = 9999', 'Default Level = 100'],
 	},
 	{
 		name: "[Gen 5] Custom Game",
@@ -1066,7 +1066,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: false,
 		debug: true,
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 255', 'Max Move Count = 255', 'Max Level = 9999', 'Default Level = 100'],
 	},
 	{
 		name: "[Gen 4] Custom Game",
@@ -1074,7 +1074,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: false,
 		debug: true,
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 255', 'Max Move Count = 255', 'Max Level = 9999', 'Default Level = 100'],
 	},
 	{
 		name: "[Gen 3] Custom Game",
@@ -1082,7 +1082,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: false,
 		debug: true,
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Desync Clause Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Desync Clause Mod', 'Max Team Size = 255', 'Max Move Count = 255', 'Max Level = 9999', 'Default Level = 100'],
 	},
 	{
 		name: "[Gen 2] Custom Game",
@@ -1090,7 +1090,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: false,
 		debug: true,
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 255', 'Max Move Count = 255', 'Max Level = 9999', 'Default Level = 100'],
 	},
 	{
 		name: "[Gen 1] Custom Game",
@@ -1098,6 +1098,6 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: false,
 		debug: true,
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 255', 'Max Move Count = 255', 'Max Level = 9999', 'Default Level = 100'],
 	},
 ];
