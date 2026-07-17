@@ -481,7 +481,7 @@
 				if (!this.choice) {
 					this.choice = {
 						choices: null,
-						teamPreview: Array.apply(null, Array(Math.min(switchables.length, 255))).map(function (_, n) { return n + 1; }),
+						teamPreview: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24].slice(0, switchables.length),
 						done: 0,
 						count: 1
 					};
@@ -1074,7 +1074,7 @@
 		},
 		updateTeamControls: function (type) {
 			var switchables = this.request && this.request.side ? this.battle.myPokemon : [];
-			var maxIndex = Math.min(switchables.length, 255);
+			var maxIndex = Math.min(switchables.length, 24);
 
 			var requestTitle = "";
 			if (this.choice.done) {

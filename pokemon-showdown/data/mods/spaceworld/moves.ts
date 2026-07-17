@@ -351,6 +351,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		accuracy: 100,
 		basePower: 25,
 		type: "Bug",
+		shortDesc: "Power doubles with each consecutive hit, uncapped (25/50/100/200/...).",
+		desc: "Power doubles with each successful consecutive use, with no cap (25, 50, 100, 200, and so on, saturating at 65535). The demo's counter has no limit, unlike the final game's 160 cap - the decomp marks this as a bug, and this format keeps it.",
 		basePowerCallback(pokemon, target, move) {
 			const multiplier = pokemon.volatiles['furycutter']?.multiplier || 1;
 			return Math.min(25 * multiplier, 65535);

@@ -544,7 +544,7 @@
 					// teams and boxes are <div>s rather than <button>s because Firefox doesn't
 					// support dragging and dropping buttons.
 					buf += '<li><div name="edit" data-value="' + i + '" class="team';
-					if (team.capacity > 6) buf += ' pc-box';
+					if (team.capacity === 24) buf += ' pc-box';
 					buf += '" draggable="true">' + BattleLog.escapeHTML(formatText) + '<strong>' + BattleLog.escapeHTML(team.name) + '</strong><br /><small>';
 					buf += Storage.getTeamIcons(team);
 					buf += '</small></div><button name="edit" value="' + i + '"><i class="fa fa-pencil" aria-label="Edit" title="Edit (you can also just click on the team)"></i></button><button name="duplicate" value="' + i + '" title="Duplicate" aria-label="Duplicate"><i class="fa fa-clone"></i></button><button name="delete" value="' + i + '"><i class="fa fa-trash"></i> Delete</button></li>';
@@ -972,7 +972,7 @@
 					name: (isBox ? 'Box ' : 'Untitled ') + (teams.length + 1),
 					format: format,
 					team: '',
-					capacity: isBox ? 255 : 6,
+					capacity: isBox ? 24 : 6,
 					folder: folder,
 					iconCache: ''
 				};
@@ -1279,7 +1279,7 @@
 						if (format && format.slice(0, 3) !== 'gen') format = 'gen6' + format;
 						if (format && format.endsWith('-box')) {
 							format = format.slice(0, -4);
-							capacity = 255;
+							capacity = 50;
 						}
 						name = $.trim(name.substr(bracketIndex + 1));
 					}
@@ -1702,7 +1702,7 @@
 			if (team.length >= this.curTeam.capacity) return;
 			if (!this.clipboardCount()) return;
 
-			if (team.push($.extend(true, {}, this.clipboard[0])) >= this.curTeam.capacity) {
+			if (team.push($.extend(true, {}, this.clipboard[0])) >= 6) {
 				$(btn).css('display', 'none');
 			}
 			this.update();
@@ -2155,7 +2155,7 @@
 			var duplicateNameIndices = {};
 			for (var i = 0; i < teams.length; i++) {
 				var team = teams[i];
-				if (team.format !== format || team.capacity <= 6) continue;
+				if (team.format !== format || team.capacity !== 24) continue;
 
 				var setList = Storage.unpackTeam(team.team);
 				for (var j = 0; j < setList.length; j++) {
@@ -2172,7 +2172,7 @@
 			if (!this.curTeam || !this.userSets) return;
 
 			// clear cached user sets if we have just been in a box for given format
-			if (this.curTeam.capacity > 6 && this.userSets[format]) {
+			if (this.curTeam.capacity === 24 && this.userSets[format]) {
 				this.userSets[format] = undefined;
 			}
 		},

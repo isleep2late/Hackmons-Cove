@@ -66,6 +66,174 @@ export const Scripts: ModdedBattleScriptsData = {
 	},
 	actions: {
 		inherit: true,
+		moveHit(target, pokemon, move, moveData, isSecondary, isSelf) {
+			let damage: number | false | null | undefined = undefined;
+			move = this.dex.getActiveMove(move);
+
+			if (!moveData) moveData = move;
+			let hitResult: boolean | number | null = true;
+			let subBroke: any = null;
+
+			if (move.target === 'all' && !isSelf) {
+				hitResult = this.battle.singleEvent('TryHitField', moveData, {}, target, pokemon, move);
+			} else if ((move.target === 'foeSide' || move.target === 'allySide') && !isSelf) {
+				hitResult = this.battle.singleEvent('TryHitSide', moveData, {}, (target ? target.side : null), pokemon, move);
+			} else if (target) {
+				hitResult = this.battle.singleEvent('TryHit', moveData, {}, target, pokemon, move);
+			}
+			if (!hitResult) {
+				if (hitResult === false) this.battle.add('-fail', target);
+				return false;
+			}
+
+			if (target && !isSecondary && !isSelf) {
+				hitResult = this.battle.runEvent('TryPrimaryHit', target, pokemon, moveData);
+				if (hitResult === 0) {
+					hitResult = true;
+					if (!target.volatiles['substitute']) {
+						subBroke = target;
+					}
+					target = null;
+				}
+			}
+			if (target && isSecondary && !moveData.self) {
+				hitResult = true;
+			}
+			if (!hitResult) {
+				return false;
+			}
+
+			if (target) {
+				let didSomething: boolean | number | null = false;
+				damage = this.getDamage(pokemon, target, moveData);
+
+				if ((damage || damage === 0) && !target.fainted) {
+					damage = this.battle.damage(damage, target, pokemon, move);
+					if (!(damage || damage === 0)) {
+						this.battle.debug('damage interrupted');
+						return false;
+					}
+					didSomething = true;
+				}
+				if (damage === false || damage === null) {
+					if (damage === false && !isSecondary && !isSelf) {
+						this.battle.add('-fail', target);
+					}
+					this.battle.debug('damage calculation interrupted');
+					return false;
+				}
+
+				if (moveData.boosts && !target.fainted) {
+					if (
+						pokemon.volatiles['lockon'] && target === pokemon.volatiles['lockon'].source &&
+						target.isSemiInvulnerable() && !isSelf
+					) {
+						if (!isSecondary) this.battle.add('-fail', target);
+						return false;
+					}
+					hitResult = this.battle.boost(moveData.boosts, target, pokemon, move);
+					didSomething = didSomething || hitResult;
+				}
+				if (moveData.heal && !target.fainted) {
+					const d = target.heal(Math.round(target.maxhp * moveData.heal[0] / moveData.heal[1]));
+					if (!d && d !== 0) {
+						this.battle.add('-fail', target);
+						this.battle.debug('heal interrupted');
+						return false;
+					}
+					this.battle.add('-heal', target, target.getHealth);
+					didSomething = true;
+				}
+				if (moveData.status) {
+					hitResult = target.trySetStatus(moveData.status, pokemon, move);
+					if (!hitResult && move.status) return hitResult;
+					didSomething = didSomething || hitResult;
+				}
+				if (moveData.forceStatus) {
+					hitResult = target.setStatus(moveData.forceStatus, pokemon, move);
+					didSomething = didSomething || hitResult;
+				}
+				if (moveData.volatileStatus) {
+					hitResult = target.addVolatile(moveData.volatileStatus, pokemon, move);
+					didSomething = didSomething || hitResult;
+				}
+				if (moveData.sideCondition) {
+					hitResult = target.side.addSideCondition(moveData.sideCondition, pokemon, move);
+					didSomething = didSomething || hitResult;
+				}
+				if (moveData.weather) {
+					hitResult = this.battle.field.setWeather(moveData.weather, pokemon, move);
+					didSomething = didSomething || hitResult;
+				}
+				if (moveData.pseudoWeather) {
+					hitResult = this.battle.field.addPseudoWeather(moveData.pseudoWeather, pokemon, move);
+					didSomething = didSomething || hitResult;
+				}
+				if (moveData.forceSwitch) {
+					if (this.battle.canSwitch(target.side)) didSomething = true;
+				}
+				if (moveData.selfSwitch) {
+					if (this.battle.canSwitch(pokemon.side)) didSomething = true;
+				}
+				hitResult = null;
+				if (move.target === 'all' && !isSelf) {
+					if (moveData.onHitField) hitResult = this.battle.singleEvent('HitField', moveData, {}, target, pokemon, move);
+				} else if ((move.target === 'foeSide' || move.target === 'allySide') && !isSelf) {
+					if (moveData.onHitSide) hitResult = this.battle.singleEvent('HitSide', moveData, {}, target.side, pokemon, move);
+				} else {
+					if (moveData.onHit) hitResult = this.battle.singleEvent('Hit', moveData, {}, target, pokemon, move);
+					if (!isSelf && !isSecondary) {
+						this.battle.runEvent('Hit', target, pokemon, move);
+					}
+					if (moveData.onAfterHit) hitResult = this.battle.singleEvent('AfterHit', moveData, {}, target, pokemon, move);
+				}
+
+				if (!hitResult && !didSomething && !moveData.self && !moveData.selfdestruct) {
+					if (!isSelf && !isSecondary) {
+						if (hitResult === false || didSomething === false) this.battle.add('-fail', target);
+					}
+					this.battle.debug('move failed because it did nothing');
+					return false;
+				}
+			}
+			if (moveData.self) {
+				if (!isSecondary && moveData.self.boosts) this.battle.random(100);
+				this.moveHit(pokemon, pokemon, move, moveData.self, isSecondary, true);
+			}
+			const secondaryTarget = target || subBroke;
+			if (secondaryTarget?.hp && moveData.secondaries && this.battle.runEvent('TrySecondaryHit', secondaryTarget, pokemon, moveData)) {
+				for (const secondary of moveData.secondaries) {
+					if (secondary.status && ['brn', 'frz'].includes(secondary.status) && secondaryTarget.hasType(move.type)) {
+						this.battle.debug('Target immune to [' + secondary.status + ']');
+						continue;
+					}
+					if (secondary.volatileStatus === 'flinch' && ['slp', 'frz'].includes(secondaryTarget.status) && !secondary.kingsrock) {
+						this.battle.debug('Cannot flinch a sleeping or frozen target');
+						continue;
+					}
+					if (!move.multihit || move.lastHit) {
+						const effectChance = Math.floor((secondary.chance || 100) * 255 / 100);
+						if (typeof secondary.chance === 'undefined' || this.battle.randomChance(effectChance, 256)) {
+							this.moveHit(secondaryTarget, pokemon, move, secondary, true, isSelf);
+						} else if (effectChance === 255) {
+							this.battle.hint("In Gen 2, moves with a 100% secondary effect chance will not trigger in 1/256 uses.");
+						}
+					}
+				}
+			}
+			if (target && target.hp > 0 && pokemon.hp > 0 && moveData.forceSwitch && this.battle.canSwitch(target.side)) {
+				hitResult = this.battle.runEvent('DragOut', target, pokemon, move);
+				if (hitResult) {
+					this.dragIn(target.side, target.position);
+				} else if (hitResult === false) {
+					this.battle.add('-fail', target);
+				}
+			}
+			if (move.selfSwitch && pokemon.hp) {
+				pokemon.switchFlag = move.id;
+			}
+			return damage;
+		},
 		tryMoveHit(target, pokemon, move) {
 			const positiveBoostTable = [1, 1.5, 2, 2.5, 3, 3.5, 4];
 			const negativeBoostTable = [1, 0.66, 0.5, 0.4, 0.33, 0.28, 0.25];

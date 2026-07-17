@@ -200,6 +200,14 @@ function requireNoCache(pathSpec) {
 		index.push('questionmarkplate item');
 		pushPhnnAliases('questionmarkplate', 'Question Mark Plate', 'item');
 	}
+	if (phnnSI.items.get('blankplate').exists && !index.includes('blankplate item')) {
+		index.push('blankplate item');
+		pushPhnnAliases('blankplate', 'Blank Plate', 'item');
+	}
+	if (phnnSI.items.get('legendplate').exists && !index.includes('legendplate item')) {
+		index.push('legendplate item');
+		pushPhnnAliases('legendplate', 'Legend Plate', 'item');
+	}
 
 	index.sort();
 
@@ -1698,7 +1706,7 @@ process.stdout.write("Building `data/moves,items,abilities,typechart,learnsets.j
 		if (item.desc) Items[id].desc = item.desc;
 		if (item.shortDesc) Items[id].shortDesc = item.shortDesc;
 	}
-	for (const id of ['shadowsynergystone', 'shadowplate', 'questionmarkplate']) {
+	for (const id of ['shadowsynergystone', 'shadowplate', 'questionmarkplate', 'blankplate', 'legendplate']) {
 		const it = Dex.mod('phnn').items.get(id);
 		if (it.exists && !Items[id]) {
 			const e = {

@@ -55,8 +55,8 @@ export class TeamValidatorAsync {
 	validateTeam(team: string, options?: { removeNicknames?: boolean, user?: ID }) {
 		let formatid = this.format.id;
 		if (this.format.customRules) formatid += '@@@' + this.format.customRules.join(',');
-		if (team.length > (8 * 1024 * 1024 - 6)) { // don't even let it go to the child process
-			return Promise.resolve('0Your team is over 8MB. Please use a smaller team.');
+		if (team.length > (25 * 1024 - 6)) { // don't even let it go to the child process
+			return Promise.resolve('0Your team is over 25KB. Please use a smaller team.');
 		}
 		return PM.query({ formatid, options, team });
 	}
@@ -102,6 +102,8 @@ if (!PM.isParentProcess) {
 	// eslint-disable-next-line no-eval
 	PM.startRepl((cmd: string) => eval(cmd));
 }
+
+export { TeamValidator };
 
 export function start(processCount: ConfigLoader.SubProcessesConfig) {
 	PM.spawn(processCount['validator'] ?? 1);

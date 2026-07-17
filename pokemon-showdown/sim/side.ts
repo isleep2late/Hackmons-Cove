@@ -314,7 +314,7 @@ export class Side {
 	}
 
 	addPokemon(set: PokemonSet) {
-		if (this.pokemon.length >= 255) return null;
+		if (this.pokemon.length >= 24) return null;
 		const newPokemon = new Pokemon(set, this);
 		newPokemon.position = this.pokemon.length;
 		this.pokemon.push(newPokemon);

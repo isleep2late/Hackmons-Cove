@@ -129,6 +129,26 @@ export const Conditions: import('../../../sim/dex-conditions').ModdedConditionDa
 			}
 		},
 	},
+	arceus: {
+		inherit: true,
+		onStart(pokemon) {
+			delete (pokemon as any).m.legendplateType;
+		},
+		onType(types, pokemon) {
+			if (pokemon.transformed || pokemon.ability !== 'multitype' && this.gen >= 8) return types;
+			if (pokemon.getItem().id === 'legendplate') {
+				return (pokemon as any).m.legendplateType || ['Normal'];
+			}
+			let type: string | undefined = 'Normal';
+			if (pokemon.ability === 'multitype') {
+				type = pokemon.getItem().onPlate;
+				if (!type) {
+					type = 'Normal';
+				}
+			}
+			return [type];
+		},
+	},
 	sandstorm: {
 		inherit: true,
 		duration: 0,
