@@ -677,8 +677,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	hyperbeam: {
 		inherit: true,
 		onAfterMove(pokemon, target, move) {
-			if (target.fainted) return;
-			pokemon.addVolatile('mustrecharge');
+			if (target && target.fainted) pokemon.removeVolatile('mustrecharge');
 		},
 		shortDesc: "User cannot move next turn, unless this KOes the target.",
 		desc: "If this move is successful, the user must recharge on the following turn and cannot select a move. The user does not need to recharge if this move knocks out the target.",
@@ -996,13 +995,15 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		desc: "Has an increased chance for a critical hit. If this move is successful, it sets up Stealth Rock on the opposing side, damaging foes that switch in.",
 	},
 
-clangoroussoulblaze: {
-    inherit: true,
-    onAfterMove(source, target, move) {
-        if (source.hasAbility('parentalbond') && move.multihitType === 'parentalbond') {
-            this.boost({atk: 1, def: 1, spa: 1, spd: 1, spe: 1}, source, source, move);
-        	}
-    	},
+	clangoroussoulblaze: {
+		inherit: true,
+		selfBoost: undefined,
+		secondary: {
+			chance: 100,
+			self: {
+				boosts: { atk: 1, def: 1, spa: 1, spd: 1, spe: 1 },
+			},
+		},
 	},
 
 	gmaxdrumsolo: {
