@@ -435,12 +435,8 @@ const SV: TypeChart = extend(true, {}, SS, {
 
 const CHAMPIONS = SS;
 
-// Pure Hackmons: No Nerfs (gen 10) — Gen 9 chart plus the phnn changes
-// (Normal>Dark, Ghost 0 vs Psychic, Bug<>Poison, Water/Electric>Steel,
-// Dark>Dark, Steel resists Ghost/Dark, plus Shadow/Bird types).
 const NN: TypeChart = extend(true, {}, SV, NN_TYPECHART_PATCH);
 
-// SpaceWorld '97 (gen 11) — the demo's rewritten chart, generated verbatim.
 const SW: TypeChart = SW_TYPECHART;
 
 export const TYPE_CHART = [CHAMPIONS, RBY, GSC, ADV, DPP, BW, XY, SM, SS, SV, NN, SW];

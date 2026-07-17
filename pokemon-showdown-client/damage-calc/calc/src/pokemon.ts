@@ -67,7 +67,6 @@ export class Pokemon implements State.Pokemon {
     this.isDynamaxed = options.isDynamaxed;
     this.dynamaxLevel = this.isDynamaxed
       ? (options.dynamaxLevel === undefined ? 10 : options.dynamaxLevel) : undefined;
-    // No Nerfs: Wild Might (x2 Atk/Def/SpA/SpD) — automatic for -Alpha formes
     this.isWildMight = options.isWildMight ||
       (gen.num === 10 && this.name.endsWith('-Alpha')) || undefined;
     this.weightkg = this.isDynamaxed ? 0 : this.species.weightkg;
@@ -77,7 +76,6 @@ export class Pokemon implements State.Pokemon {
     this.item = options.item;
     this.nature = options.nature || ('Serious' as I.NatureName);
     this.ivs = Pokemon.withDefault(gen, gen.num === 0 ? {} : options.ivs, 31);
-    // SpaceWorld '97 (11) uses Gen 2 Stat Exp semantics (default maxed).
     this.evs = Pokemon.withDefault(
       gen, options.evs, gen.num === 0 || (gen.num >= 3 && gen.num !== 11) ? 0 : 252
     );
@@ -102,10 +100,6 @@ export class Pokemon implements State.Pokemon {
       this.stats[stat] = val;
     }
 
-    // No Nerfs: permanent G-Max (a -Gmax forme or the G-Max Factor flag)
-    // doubles HP at all times, exactly like the server's statModify. Such a
-    // Pokemon cannot Dynamax again (the server rejects it), so this never
-    // stacks with the Dynamax multiplier.
     this.gigantamax = options.gigantamax;
     if (gen.num === 10 && (this.name.includes('-Gmax') || this.gigantamax) &&
         this.rawStats.hp !== 1) {
@@ -113,8 +107,6 @@ export class Pokemon implements State.Pokemon {
       this.stats.hp *= 2;
     }
 
-    // No Nerfs statmod (the server's phStats): direct final-stat overrides
-    // replace the computed value outright, clamped like the server (1-65535).
     if (options.statOverrides) {
       this.statOverrides = options.statOverrides;
       let stat: I.StatID;

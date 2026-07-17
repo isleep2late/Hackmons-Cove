@@ -626,10 +626,6 @@ $(document).ready(function () {
 });
 
 
-// ---- Per-panel Import / Export ----------------------------------------
-// Export dumps the panel into its own textarea; Import applies a pasted set
-// directly to that panel (species, level, item, ability, nature, EVs,
-// IVs/DVs, moves, Tera Type, custom Types:, statmod Overrides:, HP:).
 
 $(document).on("click", ".panel-export", function () {
 	ExportPokemon($(this).closest(".poke-info"));

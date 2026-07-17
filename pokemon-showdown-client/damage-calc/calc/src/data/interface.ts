@@ -1,6 +1,5 @@
 export interface As<T> {__brand: T}
 export type ID = (string & As<'ID'>) | (string & { __isID: true }) | '';
-// 10 = Pure Hackmons: No Nerfs (Gen 9 based), 11 = SpaceWorld '97 (Gen 2 based)
 export type GenerationNum = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
 export type GenderName = 'M' | 'F' | 'N';
 export type StatID = 'hp' | StatIDExceptHP;

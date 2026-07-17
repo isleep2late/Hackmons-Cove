@@ -98,7 +98,6 @@ export class Side implements State.Side {
   isPowerSpot: boolean;
   isSteelySpirit: boolean;
   isSwitching?: 'out' | 'in';
-  // SpaceWorld '97: SpD stat stages only apply when passed in via Baton Pass
   isBatonBoost?: boolean;
 
   constructor(side: State.Side = {}) {

@@ -1,5 +1,3 @@
-// Pure Hackmons: No Nerfs (gen 10) — a fork of the Gen 7/8/9 mechanics
-// matching data/mods/phnn/ on the PHNN server (battle-verified 2026-07-17).
 import type {Generation, AbilityName, StatID, Terrain, TypeName} from '../data/interface';
 import {toID} from '../util';
 import {
@@ -230,8 +228,6 @@ export function calculateNoNerfs(
     }
   }
 
-  // Merciless does not ignore Shell Armor, damage dealt to a poisoned Pokemon with Shell Armor
-  // will not be a critical hit (UltiMario)
   const isCritical = !defender.hasAbility('Battle Armor', 'Shell Armor') &&
     (move.isCrit || (attacker.hasAbility('Merciless') && defender.hasStatus('psn', 'tox'))) &&
     move.timesUsed === 1;
@@ -431,7 +427,6 @@ export function calculateNoNerfs(
     typeEffectiveness = 1;
   }
 
-  // phnn: Seismic Toss / Night Shade / Sonic Boom ignore type immunities
   if (move.named('Seismic Toss', 'Night Shade', 'Sonic Boom')) {
     const fixed = move.named('Sonic Boom') ? 20 : attacker.level;
     if (attacker.hasAbility('Parental Bond')) {
@@ -646,8 +641,6 @@ export function calculateNoNerfs(
     desc.defenderItem = defender.item;
   }
 
-  // the random factor is applied between the crit mod and the stab mod, so don't apply anything
-  // below this until we're inside the loop
   let preStellarStabMod = getStabMod(attacker, move, desc);
   let stabMod = getStellarStabMod(attacker, move, preStellarStabMod);
 
@@ -697,8 +690,6 @@ export function calculateNoNerfs(
       getFinalDamage(baseDamage, i, typeEffectiveness, applyBurn, stabMod, finalMod, protect);
   }
 
-  // Custom Disguises 655 glitch: if the defender's relevant raw defensive
-  // stat is EXACTLY 655, every hit deals 1 damage (Eternamax rule).
   if (field.isCustomDisguises) {
     const glitchStat = move.overrideDefensiveStat ||
       (move.category === 'Special' ? 'spd' : 'def');
@@ -889,7 +880,6 @@ export function calculateBasePowerSMSSSV(
     break;
   case 'Assurance':
     basePower = move.bp * (defender.hasAbility('Parental Bond (Child)') ? 2 : 1);
-    // NOTE: desc.attackerAbility = 'Parental Bond' will already reflect this boost
     break;
   case 'Wake-Up Slap':
     // Wake-Up Slap deals double damage to Pokemon with Comatose (ih8ih8sn0w)
@@ -999,12 +989,10 @@ export function calculateBasePowerSMSSSV(
     basePower = hit * 20;
     desc.moveBP = move.hits === 2 ? 60 : move.hits === 3 ? 120 : 20;
     break;
-  // phnn Triple Kick hits at 60 / 120 / 180 (up to 360 total)
   case 'Triple Kick':
     basePower = hit * 60;
     desc.moveBP = move.hits === 2 ? 180 : move.hits === 3 ? 360 : 60;
     break;
-  // phnn Fury Cutter doubles uncapped, saturating at 65535
   case 'Fury Cutter':
     basePower = Math.min(65535, 40 * Math.pow(2, Math.min(15, (move.timesUsed || 1) - 1)));
     desc.moveBP = basePower;
@@ -1598,7 +1586,6 @@ export function calculateDefenseSMSSSV(
     desc.defenseBoost = boosts;
   }
 
-  // unlike all other defense modifiers, Sandstorm SpD boost gets applied directly
   if (field.hasWeather('Sand') && defender.hasType('Rock') && !hitsPhysical) {
     defense = pokeRound((defense * 3) / 2);
     desc.weather = field.weather;
@@ -1705,7 +1692,6 @@ export function calculateDfModsSMSSSV(
     (defender.hasItem('Metal Powder') && defender.named('Ditto')) ||
     (defender.hasItem('Deep Sea Scale') && defender.named('Clamperl') && !hitsPhysical)
   ) {
-    // phnn Metal Powder: 2x Def / 1.5x SpD, works while transformed
     dfMods.push(defender.hasItem('Metal Powder') && !hitsPhysical ? 6144 : 8192);
     desc.defenderItem = defender.item;
   }
@@ -1738,7 +1724,6 @@ function calculateBaseDamageSMSSSV(
   }
 
   if (attacker.hasAbility('Parental Bond (Child)')) {
-    // phnn: the second Parental Bond hit deals 0.5x (base 0.25 doubled)
     baseDamage = pokeRound(NN_OF(baseDamage * 2048) / 4096);
   }
 
@@ -1891,20 +1876,15 @@ function hasTerrainSeed(pokemon: Pokemon) {
   return pokemon.hasItem('Electric Seed', 'Misty Seed', 'Grassy Seed', 'Psychic Seed');
 }
 
-// phnn formats override Battle.trunc with Math.trunc: no 16/32-bit wraps.
 function NN_OF(n: number) {
   return n;
 }
 
-// phnn Eviolite extension: the SpaceWorld under-evolvers (mod items.ts)
 const NN_EVIOLITE = [
   'ballerine', 'ditto', 'farfetchd', 'farfetchdsw', 'golppy', 'minicorn', 'para',
   'pinsir', 'pinsirmega', 'pinsirsw', 'slowbro', 'slowbromega', 'slowbrosw', 'tangel',
 ];
 
-// Judgment + Legend Plate: becomes the best type against the target
-// (immune = -9, score = +-1 per type slot; resist-based tie-breaks per the
-// phnn mod's algorithm; deterministic first-candidate pick on final ties)
 function getBestJudgmentType(gen: Generation, defender: Pokemon): TypeName {
   const ALL: TypeName[] = [
     'Normal', 'Fighting', 'Flying', 'Poison', 'Ground', 'Rock', 'Bug', 'Ghost', 'Steel',

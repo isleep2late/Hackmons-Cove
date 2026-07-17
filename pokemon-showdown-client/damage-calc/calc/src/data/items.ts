@@ -783,8 +783,6 @@ const BERRIES: {[berry: string]: {t: I.TypeName; p: number}} = {
 
 export const MEGA_STONES = Object.assign({}, GEN_6_MEGA_STONES, ZA_MEGA_STONES);
 
-// Pure Hackmons: No Nerfs (gen 10) — every Gen 9 item plus the phnn mod's
-// restored/custom items. SpaceWorld '97 (gen 11) — only demo items.
 const NN = SV.concat(NN_ITEMS_EXTRA).sort();
 const SW = SW_ITEMS;
 

@@ -334,10 +334,7 @@ export function checkMultihitBoost(
   attackerUsedItem = false,
   defenderUsedItem = false
 ) {
-  // NOTE: attacker.ability must be Parental Bond for these moves to be multi-hit
   if (move.named('Gyro Ball', 'Electro Ball') && defender.hasAbility('Gooey', 'Tangling Hair')) {
-    // Gyro Ball (etc) makes contact into Gooey (etc) whenever its inflicting multiple hits because
-    // this can only happen if the attacker ability is Parental Bond (and thus can't be Long Reach)
     if (attacker.hasItem('White Herb') && !attackerUsedItem) {
       desc.attackerItem = attacker.item;
       attackerUsedItem = true;

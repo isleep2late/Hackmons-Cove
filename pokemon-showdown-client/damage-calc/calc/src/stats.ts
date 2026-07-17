@@ -129,7 +129,6 @@ export const Stats = new (class {
   ) {
     if (gen.num < 0 || gen.num > 11) throw new Error(`Invalid generation ${gen.num}`);
     if (gen.num === 0) return this.calcStatChampions(gen.natures, stat, base, ev, nature);
-    // SpaceWorld '97 (11) inherits the Gen 2 stat formula (DVs + Stat Exp).
     if (gen.num < 3 || gen.num === 11) return this.calcStatRBY(stat, base, iv, ev, level);
     return this.calcStatADV(gen.natures, stat, base, iv, ev, level, nature);
   }
@@ -248,8 +247,6 @@ export const Stats = new (class {
       }
       return {
         type: HP_TYPES[tr(hpTypeX * 15 / 63)] as TypeName,
-        // After Gen 6, Hidden Power is always 60 base power. No Nerfs (10)
-        // restores the variable 30-70 IV-based power.
         power: (gen.num && (gen.num < 6 || gen.num === 10)) ? tr(hpPowerX * 40 / 63) + 30 : 60,
       };
     }

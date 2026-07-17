@@ -6,28 +6,7 @@ import type {Pokemon} from '../pokemon';
 import {Result} from '../result';
 import {computeFinalStats, getMoveEffectiveness, handleFixedDamageMoves} from './util';
 
-// SpaceWorld '97 (gen 11) — a decomp-faithful fork of the GSC mechanics
-// matching data/mods/spaceworld/ on the PHNN server. Key deviations from
-// stock Gen 2 (all verified against the mod code):
-//  - Crits are Gen 1 style: level is doubled and BOTH sides use raw,
-//    unboosted/unmodified stats (burn/screens ignored) regardless of stage
-//    advantage.
-//  - Reflect AND Light Screen both double PHYSICAL Defense (single
-//    swreflect effect); they do not stack and Light Screen does not guard
-//    special attacks.
-//  - Special Defense stat stages are inert unless passed in via Baton Pass
-//    (the UI exposes this as the defender's "Baton Passed boost" toggle,
-//    field.defenderSide.isBatonBoost).
-//  - Stat rollover: at/df >= 256 are divided by 4 WITHOUT Gen 2's % 256.
-//  - No Light Ball / Thick Club / Metal Powder / Dragon Scale item logic;
-//    instead the demo's type-boost items give a flat +20% to ANY holder.
-//  - No Present glitch (plain BP), Pursuit always fails, Solar Beam is not
-//    weakened by rain.
-//  - Triple Kick hits at 60/120/180 and Fury Cutter doubles uncapped
-//    (saturating at 65535).
-//  - Explosion / Self-Destruct halve the defender's Defense (kept).
 
-// The demo's type-boost items: +20% to the matching move type for ANY holder.
 const SW_ITEM_BOOSTS: {[item: string]: TypeName} = {
   'Big Leaf': 'Grass',
   'Sharp Stone': 'Rock',
@@ -113,7 +92,6 @@ export function calculateSpaceWorld(
     }
   }
 
-  // Typeless damage (Struggle) is neutral against everything.
   const typeless = move.type === '???';
   const type1Effectiveness = typeless
     ? 1
@@ -137,19 +115,16 @@ export function calculateSpaceWorld(
     desc.hits = move.hits;
   }
 
-  // Triple Kick hits at 60 / 120 / 180 in the demo (up to 360 total).
   if (move.name === 'Triple Kick') {
     move.bp = move.hits === 2 ? 90 : move.hits === 3 ? 120 : 60;
     desc.moveBP = move.bp;
   }
 
-  // Fury Cutter doubles without the Gen 2 160 BP cap, saturating at 65535.
   if (move.named('Fury Cutter')) {
     move.bp = Math.min(65535, 25 * Math.pow(2, Math.min(15, move.timesUsed! - 1)));
     desc.moveBP = move.bp;
   }
 
-  // Flail and Reversal are variable BP and never crit
   if (move.named('Flail', 'Reversal')) {
     move.isCrit = false;
     const p = Math.floor((48 * attacker.curHP()) / attacker.maxHP());
@@ -167,16 +142,11 @@ export function calculateSpaceWorld(
   let at = attacker.stats[attackStat]!;
   let df = defender.stats[defenseStat]!;
 
-  // Special Defense stat stages are inert in the demo unless the boost was
-  // passed in via Baton Pass (ApplyStatLevelMultiplierOnAllStats emulation).
   if (!isPhysical && !field.defenderSide.isBatonBoost &&
       defender.boosts.spd !== 0) {
     df = defender.rawStats.spd!;
   }
 
-  // Demo crits are Gen 1 style: doubled level, raw unboosted/unmodified
-  // stats on both sides, regardless of boost parity. Burn and screens are
-  // ignored too.
   const ignoreMods = move.isCrit;
 
   let lv = attacker.level;
@@ -197,8 +167,6 @@ export function calculateSpaceWorld(
     }
   }
 
-  // Reflect and Light Screen both map to a single effect that doubles
-  // PHYSICAL Defense in the demo. They do not stack.
   if (!ignoreMods && isPhysical &&
       (field.defenderSide.isReflect || field.defenderSide.isLightScreen)) {
     df *= 2;
@@ -206,13 +174,11 @@ export function calculateSpaceWorld(
     else desc.isLightScreen = true;
   }
 
-  // Stat rollover: 256+ is divided by 4 WITHOUT Gen 2's % 256 wraparound.
   if (at >= 256 || df >= 256) {
     at = Math.floor(at / 4);
     df = Math.floor(df / 4);
   }
 
-  // Explosion/Self-Destruct halve the defender's Defense AFTER the rescale.
   if (move.named('Explosion', 'Self-Destruct')) {
     df = Math.max(1, Math.floor(df / 2));
   }
@@ -221,7 +187,6 @@ export function calculateSpaceWorld(
     Math.floor((Math.floor((2 * lv) / 5 + 2) * Math.max(1, at) * move.bp) / Math.max(1, df)) / 50
   );
 
-  // The demo's type-boost items: flat +20% for any holder.
   const itemBoostType = attacker.item && SW_ITEM_BOOSTS[attacker.item];
   if (itemBoostType && move.hasType(itemBoostType)) {
     baseDamage = Math.floor(baseDamage * 1.2);
@@ -238,12 +203,10 @@ export function calculateSpaceWorld(
     (field.hasWeather('Sun') && move.hasType('Water')) ||
     (field.hasWeather('Rain') && move.hasType('Fire'))
   ) {
-    // Solar Beam is NOT weakened by rain in the demo.
     baseDamage = Math.floor(baseDamage / 2);
     desc.weather = field.weather;
   }
 
-  // Typeless Struggle gets no STAB.
   if (!typeless && move.hasType(...attacker.types)) {
     baseDamage = Math.floor(baseDamage * 1.5);
   }
@@ -264,7 +227,6 @@ export function calculateSpaceWorld(
   result.damage = damage;
 
   if (move.hits > 1) {
-    // Triple Kick's rising BP means each hit must be computed separately.
     if (move.name === 'Triple Kick') {
       const damageMatrix = [];
       for (let hit = 1; hit <= move.hits; hit++) {

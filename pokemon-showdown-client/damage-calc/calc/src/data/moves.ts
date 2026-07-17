@@ -5483,13 +5483,9 @@ const CHAMPIONS: {[name: string]: MoveData} = extend(
 // @ts-expect-error readonly
 delete CHAMPIONS['Freeze-Dry'].secondaries;
 
-// Pure Hackmons: No Nerfs (gen 10) — Gen 9 plus the phnn mod's move changes
-// (restored BP/mechanics, Shadow moves, LGPE + demo ports), generated from
-// the live server dex.
 const NN: {[name: string]: MoveData} =
   extend(true, {}, SV, NN_MOVES_PATCH, NN_MOVES_NEW);
 
-// SpaceWorld '97 (gen 11) — only the moves the demo engine implements.
 const SW: {[name: string]: MoveData} = SW_MOVES;
 
 export const MOVES = [CHAMPIONS, RBY, GSC, ADV, DPP, BW, XY, SM, SS, SV, NN, SW];

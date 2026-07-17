@@ -6831,8 +6831,6 @@ const SM_PATCH: {[name: string]: DeepPartial<SpeciesData>} = {
     gender: 'N',
     abilities: {0: 'Iron Fist'},
   },
-  // Meltan does NOT benefit from Eviolite and should not have nfe: true (credit: Anubis)
-  // https://smogon.com/forums/threads/sword-shield-battle-mechanics-research.3655528/post-8295399
   Meltan: {
     types: ['Steel'],
     bs: {hp: 46, at: 65, df: 65, sa: 55, sd: 35, sp: 34},
@@ -10820,12 +10818,9 @@ for (const species of Object.values(CHAMPIONS)) {
   }
 }
 
-// Pure Hackmons: No Nerfs (gen 10) — Gen 9 plus the phnn mod's stat
-// restorations and added species, generated from the live server dex.
 const NN: {[name: string]: SpeciesData} =
   extend(true, {}, SV, NN_SPECIES_PATCH, NN_SPECIES_NEW);
 
-// SpaceWorld '97 (gen 11) — standalone demo dex, generated from the server.
 const SW: {[name: string]: SpeciesData} = SW_SPECIES;
 
 export const SPECIES = [CHAMPIONS, RBY, GSC, ADV, DPP, BW, XY, SM, SS, SV, NN, SW];

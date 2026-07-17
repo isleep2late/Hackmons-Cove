@@ -550,8 +550,6 @@ const CHAMPIONS = [
   'Zero to Hero',
 ];
 
-// Pure Hackmons: No Nerfs (gen 10) shares the full Gen 9 ability pool;
-// SpaceWorld '97 (gen 11) has no abilities (Gen 2 demo engine).
 const NN = SV;
 const SW: string[] = [];
 

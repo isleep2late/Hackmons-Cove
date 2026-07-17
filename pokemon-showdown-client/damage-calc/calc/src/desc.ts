@@ -145,8 +145,6 @@ export function getRecovery(
   }
 
   if (move.drain) {
-    // Parental Bond counts as multiple heals for drain moves, but not for Shell Bell
-    // Currently no drain moves are multihit, however this covers for it.
     if (attacker.hasAbility('Parental Bond') || move.hits > 1) {
       [minD, maxD] = multiDamageRange(damage) as [number[], number[]];
     }
@@ -254,8 +252,6 @@ export function getRecoil(
   } else if (move.struggleRecoil) {
     recoil = notation === '%' ? 12 : 25;
     text = '25% struggle damage';
-    // Struggle recoil is actually rounded down in Gen 4 per DaWoblefet's research, but until we
-    // return recoil damage as exact HP the best we can do is add some more text to this effect
     if (gen.num === 4) text += ' (rounded down)';
   } else if (move.mindBlownRecoil) {
     recoil = notation === '%' ? 24 : 50;
@@ -462,7 +458,6 @@ function combine(damage: Damage): [number[], boolean] {
   if (damage.length >= 16 && typeof damage[0] === 'number') {
     return [damage as number[], false];
   }
-  // Fixed Multi-hit Damage (currently only parental bond)
   if (typeof damage[0] === 'number' && typeof damage[1] === 'number') {
     return [[damage[0] + damage[1]], false];
   }
@@ -604,7 +599,6 @@ function getEndOfTurn(
     }
   } else if (field.hasWeather('Sand')) {
     if (gen.num === 10 || gen.num === 11) {
-      // No Nerfs / SpaceWorld: sandstorm chips ALL types for 1/8
       if (!defender.hasAbility('Magic Guard', 'Overcoat', 'Sand Force', 'Sand Rush', 'Sand Veil') &&
           !defender.hasItem('Safety Goggles')) {
         damage -= Math.floor(defender.maxHP() / 8);
@@ -639,7 +633,6 @@ function getEndOfTurn(
     }
   }
 
-  // Leftovers is defined but inert in the SpaceWorld '97 demo engine (11)
   if (defender.hasItem('Leftovers') && !loseItem && !healBlock && gen.num !== 11) {
     damage += Math.floor(defender.maxHP() / 16);
     texts.push('Leftovers recovery');
@@ -790,10 +783,6 @@ function computeKOChance(
   }
   const n = damage.length;
   if (hits === 1) {
-    // ignore end of turn healing for the hit that KOs
-    // so that the pokemon doesnt "revive" from being KO'd
-    // since recovery happens before toxic damage (and therefore always reduces toxic damage),
-    // if the net healing is greater than zero, toxicDamage should also be set to zero.
     if (eot - toxicDamage > 0) {
       eot = 0;
       toxicDamage = 0;
@@ -960,7 +949,6 @@ function squashMultihit(gen: Generation, d: number[], hits: number, err = true) 
     if (hits > 1) {
       error(err, `Unexpected # of hits for Parental Bond: ${hits}`);
     }
-    // FIXME: Come up with a better Parental Bond approximation
     const r: number[] = [];
     for (let i = 0; i < 16; i++) {
       let val = 0;

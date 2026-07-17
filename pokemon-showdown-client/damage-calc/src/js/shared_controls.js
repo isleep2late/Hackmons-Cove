@@ -529,9 +529,6 @@ $(".move-selector").change(function () {
 	moveGroupObj.children(".move-type").val(move.type);
 	moveGroupObj.children(".move-cat").val(move.category);
 	var isDynamaxed = $(this).closest(".poke-info").find(".max").prop("checked");
-	// Always-crit moves (willCrit) force the crit in the engine, so lock the
-	// toggle on as an indicator (a Dynamaxed attacker turns them into Max
-	// Moves and loses the guarantee, so it unlocks there).
 	var forcedCrit = !isDynamaxed && move.willCrit === true;
 	moveGroupObj.children(".move-crit").prop("checked", forcedCrit).prop("disabled", forcedCrit);
 
@@ -1448,8 +1445,6 @@ function calcStat(poke, StatID) {
 	}
 	// Shedinja still has 1 max HP during the effect even if its Dynamax Level is maxed (DaWoblefet)
 	var total = calc.calcStat(gen, legacyStatToStat(StatID), base, ivs, evs, level, nature);
-	// No Nerfs: permanent G-Max (a -Gmax forme or the G-Max Factor toggle)
-	// has doubled HP at all times, matching the server exactly.
 	if (gen === 10 && StatID === "hp" && total !== 1 &&
 		(String(poke.find(".set-selector").val() || '').indexOf('-Gmax') > -1 ||
 		poke.find(".gmaxToggle").prop("checked"))) {
@@ -1458,8 +1453,6 @@ function calcStat(poke, StatID) {
 	if (gen > 7 && StatID === "hp" && poke.isDynamaxed && total !== 1) {
 		total *= 2;
 	}
-	// Statmod: a user-typed value in the total box overrides the computed stat
-	// outright (the server's phStats / "Overrides:" paste line).
 	var totalBox = stat.find(".total");
 	if (totalBox.attr("data-user") === "1") {
 		var typed = parseInt(totalBox.val(), 10);
@@ -1643,7 +1636,6 @@ $(".notation").change(function () {
 	notation = $(this).val();
 });
 
-// Typing in a stat's total box turns it into a direct override (statmod)
 $(document).on("input", ".total", function () {
 	$(this).attr("data-user", "1");
 });
@@ -1658,8 +1650,6 @@ function clearStatOverrides(pokeObj) {
 	pokeObj.find(".total").removeAttr("data-user");
 }
 
-// No Nerfs: a permanent G-Max (a -Gmax forme or the G-Max Factor toggle)
-// cannot Dynamax again - the server rejects the request outright.
 function enforcePermanentGmax(pokeObj) {
 	if (gen !== 10) {
 		pokeObj.find(".max").prop("disabled", false);
@@ -2019,7 +2009,6 @@ function loadCustomList(id) {
 
 $(document).ready(function () {
 	var params = new URLSearchParams(window.location.search);
-	// No Nerfs (gen 10) is the default on the Hackmons Cove calculator.
 	var g = GENERATION[params.get('gen')] || 10;
 	if ($("#champions").prop("checked")) {
 		/* eslint-disable */
