@@ -109,6 +109,35 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 		},
 	},
 
+	blankplate: {
+		name: "Blank Plate",
+		spritenum: 463,
+		onPlate: 'Normal',
+		onTakeItem(item, pokemon, source) {
+			if ((source && source.baseSpecies.num === 493) || pokemon.baseSpecies.num === 493) {
+				return false;
+			}
+			return true;
+		},
+		num: 0,
+		gen: 9,
+		shortDesc: "Judgment is Normal type. Arceus stays its base Normal forme.",
+		desc: "A common stone tablet. The holder's Judgment becomes Normal type, and Arceus keeps its base Normal-type forme. Engraving: Three beings whose power can hold both time and space fixed.",
+	},
+	legendplate: {
+		name: "Legend Plate",
+		spritenum: 610,
+		onTakeItem(item, pokemon, source) {
+			if ((source && source.baseSpecies.num === 493) || pokemon.baseSpecies.num === 493) {
+				return false;
+			}
+			return true;
+		},
+		num: 0,
+		gen: 9,
+		shortDesc: "Judgment becomes the type that hits the target hardest and changes the holder to that type.",
+		desc: "When the holder uses Judgment, the move becomes a type that is super effective against the selected target, prioritizing double weaknesses; ties are broken by which type best resists the target's primary type (immunities first), then its secondary type, then at random. The holder's own type changes to match before the attack. Engraving: From all creations, over all creations, does the Original One watch over all.",
+	},
 	metalpowder: {
 		inherit: true,
 		isNonstandard: null,

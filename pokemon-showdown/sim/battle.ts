@@ -16,7 +16,6 @@
 
 import { Dex, toID } from './dex';
 import { Teams } from './teams';
-import { TeamValidator } from './team-validator';
 import { Field } from './field';
 import { Pokemon, type EffectState, RESTORATIVE_BERRIES } from './pokemon';
 import { PRNG, type PRNGSeed } from './prng';
@@ -2724,39 +2723,6 @@ export class Battle {
 			if (typesValue) {
 				sets[0].phType = typesValue.replace(/\s*\/\s*/g, '/');
 			}
-			let problems: string[] = [];
-			try {
-				const validator = new TeamValidator(this.format);
-				problems = validator.validateSet(sets[0], {}) || [];
-			} catch (e) {
-				const msg = (e instanceof Error) ? e.message : String(e);
-				console.error('[infiniteSubmit] validateSet failed:', msg);
-				problems = [];
-			}
-			const speciesCheck = this.dex.species.get(sets[0].species);
-			if (speciesCheck.exists && speciesCheck.isNonstandard === 'Future') {
-				problems.push(`${speciesCheck.name} doesn't exist in Gen ${this.gen}.`);
-			}
-			for (const moveName of sets[0].moves || []) {
-				const moveCheck = this.dex.moves.get(moveName);
-				if (moveCheck.exists && moveCheck.isNonstandard === 'Future') {
-					problems.push(`${moveCheck.name} doesn't exist in Gen ${this.gen}.`);
-				}
-			}
-			const itemCheck = this.dex.items.get(sets[0].item);
-			if (itemCheck.exists && itemCheck.isNonstandard === 'Future') {
-				problems.push(`${itemCheck.name} doesn't exist in Gen ${this.gen}.`);
-			}
-			const abilityCheck = this.dex.abilities.get(sets[0].ability);
-			if (abilityCheck.exists && abilityCheck.isNonstandard === 'Future') {
-				problems.push(`${abilityCheck.name} doesn't exist in Gen ${this.gen}.`);
-			}
-			if (problems.length) {
-				const shown = problems.slice(0, 3).join(' ');
-				this.add('-message', `That Pokémon isn't legal in this format: ${shown} Try again.`);
-				this.add('infinite', side.id, 1);
-				return;
-			}
 			let newPokemon: any;
 			try {
 				newPokemon = side.addPokemon(sets[0]);
@@ -2767,12 +2733,7 @@ export class Battle {
 				this.add('infinite', side.id, 1);
 				return;
 			}
-			if (!newPokemon) {
-				this.add('-message', `Your team is full, so a new Pokémon can't be added. Revive an existing Pokémon or type defer. Try again.`);
-				this.add('infinite', side.id, 1);
-				return;
-			}
-			(side as any).infiniteQueue.push(newPokemon);
+			if (newPokemon) (side as any).infiniteQueue.push(newPokemon);
 			(side as any).infiniteSlotsNeeded--;
 		}
 

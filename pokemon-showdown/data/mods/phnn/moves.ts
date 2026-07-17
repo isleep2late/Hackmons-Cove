@@ -1200,6 +1200,57 @@ clangoroussoulblaze: {
 		desc: "This move does not deal damage. Has a 100% chance to poison the target and lower its Speed stat by 2 stages.",
 	},
 
+	judgment: {
+		inherit: true,
+		onModifyType(move, pokemon, target) {
+			if (pokemon.ignoringItem()) return;
+			const item = pokemon.getItem();
+			if (item.id === 'legendplate' && target) {
+				const candidates = this.dex.types.names().filter(t => !['Stellar', 'Shadow'].includes(t));
+				let best: string[] = [];
+				let bestScore = -99;
+				for (const type of candidates) {
+					const score = !this.dex.getImmunity(type, target) ? -9 : this.dex.getEffectiveness(type, target);
+					if (score > bestScore) {
+						bestScore = score;
+						best = [type];
+					} else if (score === bestScore) {
+						best.push(type);
+					}
+				}
+				const rankAgainst = (defType: string) => (candidate: string) => {
+					if (!this.dex.getImmunity(defType, [candidate])) return 3;
+					return -this.dex.getEffectiveness(defType, [candidate]);
+				};
+				if (best.length > 1 && target.types[0]) {
+					const rank = rankAgainst(target.types[0]);
+					const top = Math.max(...best.map(rank));
+					best = best.filter(c => rank(c) === top);
+				}
+				if (best.length > 1 && target.types[1]) {
+					const rank = rankAgainst(target.types[1]);
+					const top = Math.max(...best.map(rank));
+					best = best.filter(c => rank(c) === top);
+				}
+				move.type = best.length > 1 ? this.sample(best) : best[0];
+				return;
+			}
+			if (item.id && item.onPlate && !item.zMove) {
+				move.type = item.onPlate;
+			}
+		},
+		onPrepareHit(target, source, move) {
+			if (source.hasItem('legendplate') && move.type && source.getTypes().join() !== move.type) {
+				(source as any).m.legendplateType = [move.type];
+				if (source.setType(move.type, true)) {
+					this.add('-start', source, 'typechange', move.type);
+				}
+			}
+		},
+		shortDesc: "Type matches held Plate. Legend Plate: becomes the best type vs the target and retypes the user.",
+		desc: "This move's type depends on the user's held Plate. With a Legend Plate, it instead becomes a type that is super effective against the target (double weaknesses first; ties broken by which type best resists the target's primary type, prioritizing immunities, then its secondary type, then at random), and the user's type changes to match before the attack.",
+	},
+
 	triplekick: {
 		inherit: true,
 		accuracy: 100,

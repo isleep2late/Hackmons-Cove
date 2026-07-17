@@ -192,8 +192,8 @@ export const TeamsHandler = new class {
 			if (speciesid.length <= 6 && speciesid.startsWith('unown')) {
 				unownWord += speciesid.charAt(5) || 'a';
 			}
-			if (set.moves.length > 255) {
-				connection.popup("Only 255 moves are allowed per set.");
+			if (set.moves.length > 24) {
+				connection.popup("Only 24 moves are allowed per set.");
 				return null;
 			}
 			for (const m of set.moves) {

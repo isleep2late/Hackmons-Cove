@@ -278,6 +278,101 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 		name: 'Stat Mod',
 		desc: "Allows Pok&eacute;mon to have their actual stats manually overridden to any value from 1 to 65535 in the teambuilder, replicating cartridge save-file stat editing.",
 	},
+	sw97ppuplegality: {
+		effectType: 'ValidatorRule',
+		name: 'SW97 PP Up Legality',
+		desc: "PP Ups only exist in Gen 1 (the demo's PP Up is debug-only), so a move may hold PP Ups only if the Pok&eacute;mon could learn it in Gen 1 and transfer forward before obtaining its Gen 2 moves. Unannotated moves are silently clamped to base PP when infeasible.",
+		onValidateSet(set) {
+			const dex = this.dex;
+			const species = dex.species.get(set.species);
+			const problems: string[] = [];
+			const swLevel = set.level || 100;
+			const swTags: { [moveid: string]: string[] } = {};
+			const swAllTagged = new Set<string>();
+			for (const entry of dex.species.getFullLearnset(species.id)) {
+				const chainSpecies = dex.species.get((entry as any).species.name);
+				let reachable = chainSpecies.gen === 1;
+				let walker = chainSpecies;
+				while (!reachable && walker.prevo) {
+					walker = dex.species.get(walker.prevo);
+					if (walker.gen === 1) reachable = true;
+				}
+				for (const moveKey in entry.learnset) {
+					const mid = dex.moves.get(moveKey).id;
+					swAllTagged.add(mid);
+					if (!reachable) continue;
+					if (!swTags[mid]) swTags[mid] = [];
+					swTags[mid].push(...entry.learnset[moveKey]);
+				}
+			}
+			const swGen1OK = (mid: string, transferLevel: number) => {
+				for (const tag of swTags[mid] || []) {
+					if (tag.charAt(0) !== '1') continue;
+					if (tag === '1M' || tag === '1T') return true;
+					const lvl = parseInt(tag.slice(2));
+					if (tag.charAt(1) === 'L' && lvl <= transferLevel && lvl <= swLevel) return true;
+				}
+				return false;
+			};
+			const swGen2OK = (mid: string, transferLevel: number) => {
+				const tags = swTags[mid];
+				if (!tags || !tags.length) return !swAllTagged.has(mid);
+				for (const tag of tags) {
+					if (tag.charAt(0) !== '2') continue;
+					if (tag.charAt(1) === 'M') return true;
+					const lvl = parseInt(tag.slice(2));
+					if (tag.charAt(1) === 'L' && transferLevel < lvl && lvl <= swLevel) return true;
+				}
+				return false;
+			};
+			const swIds = set.moves.map(m => dex.moves.get(m).id);
+			const swFeasible = (group: Set<number>) => {
+				for (let t = 2; t <= swLevel; t++) {
+					let ok = true;
+					for (let i = 0; i < swIds.length; i++) {
+						if (group.has(i)) {
+							if (!swGen1OK(swIds[i], t)) {
+								ok = false;
+								break;
+							}
+						} else if (!swGen1OK(swIds[i], t) && !swGen2OK(swIds[i], t)) {
+							ok = false;
+							break;
+						}
+					}
+					if (ok) return true;
+				}
+				return false;
+			};
+			const swExplicit = new Set<number>();
+			const swImplicit: number[] = [];
+			for (const [i, moveStr] of set.moves.entries()) {
+				const ppMove = dex.moves.get(moveStr);
+				if (ppMove.noPPBoosts) continue;
+				const ppm = /(.*)\s+\((\d+|inf)(?:\/(\d+))?\)$/i.exec(moveStr);
+				if (!ppm) {
+					swImplicit.push(i);
+				} else if (ppm[2].toLowerCase() !== 'inf' && parseInt(ppm[2]) > ppMove.pp) {
+					swExplicit.add(i);
+				}
+			}
+			if (swExplicit.size && !swFeasible(swExplicit)) {
+				const names = [...swExplicit].map(i => dex.moves.get(set.moves[i]).name).join(', ');
+				problems.push(`${set.name || set.species}'s PP Ups on ${names} are illegal here: PP Up only exists in Gen 1, so a move keeps PP Ups only if this Pokemon could have learned it in Gen 1 and transferred forward before obtaining its Gen 2 moves.`);
+			} else if (swImplicit.length) {
+				const swGroup = new Set(swExplicit);
+				for (const i of swImplicit) {
+					swGroup.add(i);
+					if (!swFeasible(swGroup)) {
+						swGroup.delete(i);
+						const baseMove = dex.moves.get(set.moves[i]);
+						set.moves[i] = `${baseMove.name} (${baseMove.pp}/0)`;
+					}
+				}
+			}
+			return problems;
+		},
+	},
 	prestatus: {
 		effectType: 'Rule',
 		name: 'Prestatus',
