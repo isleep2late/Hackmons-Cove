@@ -627,6 +627,7 @@ function smogonAnalysis(pokemonName) {
 // auto-update set details on select
 $(".set-selector").change(function () {
 	clearStatOverrides($(this).closest(".poke-info"));
+	enforcePermanentGmax($(this).closest(".poke-info"));
 	var fullSetName = $(this).val();
 	var pokemonName = fullSetName.substring(0, fullSetName.indexOf(" ("));
 	var setName = fullSetName.substring(fullSetName.indexOf("(") + 1, fullSetName.lastIndexOf(")"));
@@ -1179,6 +1180,14 @@ function createPokemon(pokeInfo) {
 		}
 		var teraType = pokeInfo.find(".teraToggle").is(":checked") ? pokeInfo.find(".teraType").val() : undefined;
 		var isWildMight = pokeInfo.find(".wildMight").prop("checked");
+		var isPermanentGmax = gen === 10 &&
+			(String(pokeInfo.find(".set-selector").val() || '').indexOf('-Gmax') > -1 ||
+			pokeInfo.find(".gmaxToggle").prop("checked"));
+		if (isPermanentGmax && isDynamaxed) {
+			isDynamaxed = false;
+			overrideMove = undefined;
+			pokeInfo.find(".max").prop("checked", false);
+		}
 		var statOverrides;
 		for (var oi = 0; oi < LEGACY_STATS[gen].length; oi++) {
 			var oBox = pokeInfo.find("." + LEGACY_STATS[gen][oi] + " .total");
@@ -1221,6 +1230,7 @@ function createPokemon(pokeInfo) {
 			isDynamaxed: isDynamaxed,
 			isWildMight: isWildMight,
 			statOverrides: statOverrides,
+			gigantamax: gen === 10 ? pokeInfo.find(".gmaxToggle").prop("checked") : undefined,
 			overrideMove: overrideMove,
 			boosts: boosts,
 			curHP: curHP,
@@ -1438,9 +1448,11 @@ function calcStat(poke, StatID) {
 	}
 	// Shedinja still has 1 max HP during the effect even if its Dynamax Level is maxed (DaWoblefet)
 	var total = calc.calcStat(gen, legacyStatToStat(StatID), base, ivs, evs, level, nature);
-	// No Nerfs: permanent G-Max species have doubled HP at all times
+	// No Nerfs: permanent G-Max (a -Gmax forme or the G-Max Factor toggle)
+	// has doubled HP at all times, matching the server exactly.
 	if (gen === 10 && StatID === "hp" && total !== 1 &&
-		String(poke.find(".set-selector").val() || '').indexOf('-Gmax') > -1) {
+		(String(poke.find(".set-selector").val() || '').indexOf('-Gmax') > -1 ||
+		poke.find(".gmaxToggle").prop("checked"))) {
 		total *= 2;
 	}
 	if (gen > 7 && StatID === "hp" && poke.isDynamaxed && total !== 1) {
@@ -1645,6 +1657,29 @@ $(document).on("blur", ".total", function () {
 function clearStatOverrides(pokeObj) {
 	pokeObj.find(".total").removeAttr("data-user");
 }
+
+// No Nerfs: a permanent G-Max (a -Gmax forme or the G-Max Factor toggle)
+// cannot Dynamax again - the server rejects the request outright.
+function enforcePermanentGmax(pokeObj) {
+	if (gen !== 10) {
+		pokeObj.find(".max").prop("disabled", false);
+		return;
+	}
+	var permanent = String(pokeObj.find(".set-selector").val() || '').indexOf('-Gmax') > -1 ||
+		pokeObj.find(".gmaxToggle").prop("checked");
+	if (permanent) {
+		pokeObj.find(".max").prop("checked", false).prop("disabled", true);
+	} else {
+		pokeObj.find(".max").prop("disabled", false);
+	}
+}
+
+$(document).on("change", ".gmaxToggle", function () {
+	var pokeObj = $(this).closest(".poke-info");
+	enforcePermanentGmax(pokeObj);
+	calcStats(pokeObj);
+	calcHP(pokeObj);
+});
 
 function clearField() {
 	$("#singles-format").prop("checked", true);

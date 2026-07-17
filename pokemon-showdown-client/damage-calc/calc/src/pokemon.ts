@@ -23,6 +23,7 @@ export class Pokemon implements State.Pokemon {
   dynamaxLevel?: number;
   isWildMight?: boolean;
   statOverrides?: Partial<I.StatsTable>;
+  gigantamax?: boolean;
   alliesFainted?: number;
   boostedStat?: I.StatIDExceptHP | 'auto';
   item?: I.ItemName;
@@ -101,9 +102,13 @@ export class Pokemon implements State.Pokemon {
       this.stats[stat] = val;
     }
 
-    // No Nerfs: permanent G-Max formes have their HP doubled at all times
-    // (Dynamaxing doubles it again via maxHP()).
-    if (gen.num === 10 && this.name.includes('-Gmax') && this.rawStats.hp !== 1) {
+    // No Nerfs: permanent G-Max (a -Gmax forme or the G-Max Factor flag)
+    // doubles HP at all times, exactly like the server's statModify. Such a
+    // Pokemon cannot Dynamax again (the server rejects it), so this never
+    // stacks with the Dynamax multiplier.
+    this.gigantamax = options.gigantamax;
+    if (gen.num === 10 && (this.name.includes('-Gmax') || this.gigantamax) &&
+        this.rawStats.hp !== 1) {
       this.rawStats.hp *= 2;
       this.stats.hp *= 2;
     }
@@ -191,6 +196,7 @@ export class Pokemon implements State.Pokemon {
       dynamaxLevel: this.dynamaxLevel,
       isWildMight: this.isWildMight,
       statOverrides: this.statOverrides,
+      gigantamax: this.gigantamax,
       alliesFainted: this.alliesFainted,
       boostedStat: this.boostedStat,
       item: this.item,

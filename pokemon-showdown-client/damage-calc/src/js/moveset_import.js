@@ -719,6 +719,8 @@ function importSetToPanel(pokeInfo, text) {
 				oBox.val(Math.min(~~om[1], 65535));
 				oBox.attr("data-user", "1");
 			}
+		} else if (line === "Gigantamax: Yes" || line === "Gigantamax") {
+			pokeInfo.find(".gmaxToggle").prop("checked", true).change();
 		} else if (line.indexOf("HP: ") === 0) {
 			pokeInfo.find(".current-hp").val(~~line.slice(4));
 		} else if (/ Nature/.test(line)) {

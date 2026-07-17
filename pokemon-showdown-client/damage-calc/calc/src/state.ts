@@ -12,6 +12,8 @@ export namespace State {
     isWildMight?: boolean;
     // No Nerfs statmod: direct final-stat overrides (the server's phStats)
     statOverrides?: Partial<I.StatsTable>;
+    // G-Max Factor (the server's set.gigantamax): permanent 2x HP in No Nerfs
+    gigantamax?: boolean;
     alliesFainted?: number;
     boostedStat?: I.StatIDExceptHP | 'auto';
     item?: I.ItemName;
