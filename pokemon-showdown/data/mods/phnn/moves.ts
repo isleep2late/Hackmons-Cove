@@ -5,9 +5,6 @@ function phnnIsShadowMon(target: any): boolean {
 	return target.moveSlots.some((s: any) => PHNN_SHADOW_MOVE_IDS.includes(s.id));
 }
 export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
-	// Generic Z-Moves for the Shadow and ??? (typeless) crystals. Their power
-	// is derived from the underlying move's zMove.basePower (set in the phnn
-	// scripts init), exactly like every other type-based Z-Move.
 	shadowrift: {
 		num: 0,
 		accuracy: true,
@@ -667,7 +664,6 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 				}
 				const lockedmove = source.getVolatile('lockedmove');
 				if (lockedmove) {
-					// Outrage counter is reset
 					if (source.volatiles['lockedmove'].duration === 2) {
 						delete source.volatiles['lockedmove'];
 					}

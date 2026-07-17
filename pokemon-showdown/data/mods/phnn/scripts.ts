@@ -22,10 +22,6 @@ export const Scripts: ModdedBattleScriptsData = {
 			if (id.startsWith('gmax')) {
 				move.isMax = false;
 			}
-			// Give Shadow / ??? moves their Z-Move data so the Shadowinium and
-			// Questinium Z crystals behave like every other type crystal. Power
-			// uses the standard Z-power table; Shadow status moves get a small
-			// +1 Speed Z-bonus on top of their normal effect.
 			if ((move.type === 'Shadow' || move.type === '???') && !move.isZ && !move.isMax) {
 				if (move.category === 'Status') {
 					if (!move.zMove) move.zMove = { boost: { spe: 1 } };
@@ -256,7 +252,6 @@ export const Scripts: ModdedBattleScriptsData = {
 			this.battle.runEvent('AfterMega', pokemon);
 			return true;
 		},
-		// Any assigned Tera type terastallizes (Stellar included); with no Tera type the Pokemon Dynamaxes.
 		canTerastallize(pokemon: Pokemon) {
 			if (pokemon.getItem().zMove || pokemon.canMegaEvo || pokemon.canUltraBurst) return null;
 			if (!pokemon.set.teraType) return null;
@@ -304,7 +299,6 @@ export const Scripts: ModdedBattleScriptsData = {
 		getActiveMaxMove(this: BattleActions, move: Move, pokemon: Pokemon) {
 			if (typeof move === 'string') move = this.dex.getActiveMove(move);
 			if (move.name === 'Struggle') return this.dex.getActiveMove(move);
-			// Shadow and ??? moves are never converted into Max Moves.
 			if (move.type === 'Shadow' || move.type === '???') return this.dex.getActiveMove(move);
 			let maxMove = this.dex.getActiveMove(this.MAX_MOVES[move.category === 'Status' ? move.category : move.type]);
 			if (move.category !== 'Status') {
@@ -368,7 +362,6 @@ export const Scripts: ModdedBattleScriptsData = {
 			return damage;
 		},
 
-		// Z-Move routes for the custom Shadow and ??? types.
 		Z_MOVES: {
 			Poison: "Acid Downpour", Fighting: "All-Out Pummeling", Dark: "Black Hole Eclipse",
 			Grass: "Bloom Doom", Normal: "Breakneck Blitz", Rock: "Continental Crush",
@@ -378,26 +371,19 @@ export const Scripts: ModdedBattleScriptsData = {
 			Flying: "Supersonic Skystrike", Ground: "Tectonic Rage", Fairy: "Twinkle Tackle",
 			Shadow: "Shadow Rift", "???": "Glitch Cascade",
 		},
-		// A Dynamaxed / G-Max Pokemon keeps its Shadow and ??? moves as-is
-		// (they are never converted into Max Moves; see getActiveMaxMove above).
 		getMaxMove(this: BattleActions, move: Move, pokemon: Pokemon) {
 			if (typeof move === 'string') move = this.dex.moves.get(move);
 			if (move.type === 'Shadow' || move.type === '???') return move;
 			return Object.getPrototypeOf(this).getMaxMove.call(this, move, pokemon);
 		},
-		// Seismic Toss/Night Shade/SonicBoom/Counter/Bide hit immunities
 		tryMoveHit(this: BattleActions, target: Pokemon, pokemon: Pokemon, move: ActiveMove) {
-			// Make these moves hit normally immune types
 			if (['seismictoss', 'nightshade'].includes(move.id)) {
-				// Hits Ghost types
 				move.type = '???';
 			}
 			if (move.id === 'sonicboom') {
-				// Hits Psychic types
 				move.type = '???';
 			}
 			if (['counter', 'bide'].includes(move.id)) {
-				// Hit normally immune types
 				move.type = '???';
 			}
 

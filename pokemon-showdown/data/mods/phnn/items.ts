@@ -1,9 +1,7 @@
 const SW_EVIOLITE: string[] = ['ballerine', 'ditto', 'farfetchd', 'farfetchdsw', 'golppy', 'minicorn', 'para', 'pinsir', 'pinsirmega', 'pinsirsw', 'slowbro', 'slowbromega', 'slowbrosw', 'tangel'];
 
 export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
-	// Classic Items Return
 
-	// Soul Dew - Pre-Gen 7 mechanics (50% boost to Latios/Latias SpAtk and SpDef)
 	souldew: {
 		inherit: true,
 		onBasePower: undefined, // no inherit
