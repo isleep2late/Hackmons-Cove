@@ -19,8 +19,6 @@ import { detectToggledAbility } from './detectToggledAbility';
 import { sanitizeMoveTrack } from './sanitizeMoveTrack';
 import { sanitizeVolatiles } from './sanitizeVolatiles';
 
-/* eslint-disable @typescript-eslint/indent */
-
 /**
  * Essentially converts a `Showdown.Pokemon` into our custom `CalcdexPokemon`.
  *
@@ -139,7 +137,9 @@ export const sanitizePokemon = <
     // update (2023/05/15): typically only used for Protosynthesis & Quark Drive
     // (populated in syncPokemon() & used in createSmogonPokemon())
     boostedStat: (pokemon as CalcdexPokemon)?.boostedStat || null,
-    dirtyBoostedStat: (pokemon as CalcdexPokemon)?.boostedStat || null,
+    // note: reads dirtyBoostedStat, NOT boostedStat -- seeding the user's override from the client-reported
+    // stat would make every synced booster mon look like it had been manually overridden
+    dirtyBoostedStat: (pokemon as CalcdexPokemon)?.dirtyBoostedStat || null,
 
     boosts: PokemonBoostNames.reduce((table, stat) => {
       const boosts = (pokemon as Partial<Showdown.Pokemon>)?.boosts;
@@ -415,5 +415,3 @@ export const sanitizePokemon = <
 
   return sanitizedPokemon;
 };
-
-/* eslint-enable @typescript-eslint/indent */
