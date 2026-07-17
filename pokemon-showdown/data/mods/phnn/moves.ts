@@ -5,6 +5,41 @@ function phnnIsShadowMon(target: any): boolean {
 	return target.moveSlots.some((s: any) => PHNN_SHADOW_MOVE_IDS.includes(s.id));
 }
 export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
+	// Generic Z-Moves for the Shadow and ??? (typeless) crystals. Their power
+	// is derived from the underlying move's zMove.basePower (set in the phnn
+	// scripts init), exactly like every other type-based Z-Move.
+	shadowrift: {
+		num: 0,
+		accuracy: true,
+		basePower: 1,
+		category: "Physical",
+		name: "Shadow Rift",
+		pp: 1,
+		priority: 0,
+		flags: {},
+		isZ: "shadowiniumz",
+		secondary: null,
+		target: "normal",
+		type: "Shadow",
+		onEffectiveness(typeMod, target, type) {
+			if (!target || type !== target.getTypes()[0]) return typeMod;
+			return phnnIsShadowMon(target) ? -1 : 1;
+		},
+	},
+	glitchcascade: {
+		num: 0,
+		accuracy: true,
+		basePower: 1,
+		category: "Physical",
+		name: "Glitch Cascade",
+		pp: 1,
+		priority: 0,
+		flags: {},
+		isZ: "questiniumz",
+		secondary: null,
+		target: "normal",
+		type: "???",
+	},
 	spore: {
 		inherit: true,
 		flags: { protect: 1, reflectable: 1, mirror: 1, metronome: 1 },

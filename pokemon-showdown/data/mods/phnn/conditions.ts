@@ -212,7 +212,8 @@ export const Conditions: import('../../../sim/dex-conditions').ModdedConditionDa
 	},
 	wildmight: {
 		name: 'Wild Might',
-		noCopy: true,
+		// Passable through Baton Pass (a banned-in-standard mechanic): the
+		// incoming Pokemon inherits Wild Might along with the stat boosts.
 		onStart(pokemon) {
 			this.add('-start', pokemon, 'Wild Might');
 			this.add('-message', `${pokemon.name} is filled with Wild Might!`);
