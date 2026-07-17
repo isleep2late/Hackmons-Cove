@@ -531,7 +531,10 @@ export class Pokemon {
 		this.clearVolatile();
 		this.hp = this.maxhp;
 		if (this.set.startHp !== undefined) {
-			this.hp = Math.max(1, Math.min(this.set.startHp, this.maxhp));
+			const startHp = Math.floor(Number(this.set.startHp));
+			if (Number.isFinite(startHp)) {
+				this.hp = Math.max(1, Math.min(startHp, this.maxhp));
+			}
 		}
 	}
 

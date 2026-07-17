@@ -543,9 +543,15 @@ const server = http.createServer((req, res) => {
 });
 
 // Proxy the game WebSocket (/showdown upgrade) to the local PS server.
+const MAX_WS_PROXIES = 1000;
+let activeWsProxies = 0;
 server.on('upgrade', (req, socket, head) => {
 	const reqUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
 	if (!reqUrl.pathname.startsWith('/showdown')) { socket.destroy(); return; }
+	if (activeWsProxies >= MAX_WS_PROXIES) { socket.destroy(); return; }
+	activeWsProxies++;
+	let released = false;
+	const release = () => { if (!released) { released = true; activeWsProxies--; } };
 	const upstream = net.connect(GAME_PORT, GAME_HOST, () => {
 		let reqLine = `${req.method} ${req.url} HTTP/1.1\r\n`;
 		for (let i = 0; i < req.rawHeaders.length; i += 2) {
@@ -558,6 +564,8 @@ server.on('upgrade', (req, socket, head) => {
 	});
 	upstream.on('error', () => socket.destroy());
 	socket.on('error', () => upstream.destroy());
+	upstream.on('close', release);
+	socket.on('close', release);
 });
 
 // Never let an unexpected error crash the process. A crash would drop the
@@ -570,7 +578,7 @@ process.on('unhandledRejection', err => {
 	console.error('[unhandledRejection]', err && (err.message || err));
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, '127.0.0.1', () => {
 	console.log(`PHNN client server on http://localhost:${PORT}`);
 	console.log(`  static dir: ${STATIC_DIR}`);
 	console.log(`  login proxy: /action.php -> ${LOGIN_ORIGIN}/action.php`);

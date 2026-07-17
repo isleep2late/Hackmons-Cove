@@ -2723,6 +2723,21 @@ export class Battle {
 			if (typesValue) {
 				sets[0].phType = typesValue.replace(/\s*\/\s*/g, '/');
 			}
+			try {
+				const { TeamValidator } = require('./team-validator');
+				const problems = new TeamValidator(this.format).validateSet(sets[0], {});
+				if (problems && problems.length) {
+					this.add('-message', `That set isn't legal in this format: ${problems[0]}`);
+					this.add('infinite', side.id, 1);
+					return;
+				}
+			} catch (e) {
+				const msg = (e instanceof Error) ? e.message : String(e);
+				console.error('[infiniteSubmit] validation failed:', msg);
+				this.add('-message', `That Pokémon couldn't be validated. Try again.`);
+				this.add('infinite', side.id, 1);
+				return;
+			}
 			let newPokemon: any;
 			try {
 				newPokemon = side.addPokemon(sets[0]);
