@@ -456,7 +456,11 @@ const server = http.createServer((req, res) => {
 		res.end('404 Not Found');
 		return;
 	}
-	if (isLoginPath(reqUrl.pathname)) {
+	if (reqUrl.pathname === '/calc') {
+		// Damage calculator lives at /calc/ (static dir play.pokemonshowdown.com/calc)
+		res.writeHead(301, { location: '/calc/' + (reqUrl.search || '') });
+		res.end();
+	} else if (isLoginPath(reqUrl.pathname)) {
 		proxyLogin(req, res, reqUrl);
 	} else if (reqUrl.pathname.startsWith('/showdown')) {
 		proxyGame(req, res, reqUrl);
