@@ -98,6 +98,15 @@ export default {
 			"superfang": {
 				"ignoreImmunity": true
 			},
+			"seismictoss": {
+				"ignoreImmunity": true
+			},
+			"nightshade": {
+				"ignoreImmunity": true
+			},
+			"sonicboom": {
+				"ignoreImmunity": true
+			},
 			"twister": {
 				"basePower": 60
 			},
