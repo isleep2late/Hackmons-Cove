@@ -473,6 +473,19 @@ $(".move-selector").change(function () {
 	var move = moves[moveName] || moves['(No Move)'];
 	var moveGroupObj = $(this).parent();
 	moveGroupObj.children(".move-bp").val(moveName === 'Present' ? 40 : move.bp);
+	// If the selected move IS a Z-Move already, light the Z button up as an
+	// indicator and lock it (there is nothing to convert); restore it for
+	// regular moves.
+	var zBox = moveGroupObj.children("input.move-z");
+	if (zBox.length) {
+		if (move.isZ) {
+			zBox.prop("checked", true).prop("disabled", true).attr("data-auto", "1");
+		} else if (zBox.attr("data-auto") === "1") {
+			zBox.prop("checked", false).prop("disabled", false).removeAttr("data-auto");
+		} else {
+			zBox.prop("disabled", false);
+		}
+	}
 	var m = moveName.match(HIDDEN_POWER_REGEX);
 	if (m) {
 		var pokeObj = $(this).closest(".poke-info");
@@ -516,7 +529,11 @@ $(".move-selector").change(function () {
 	moveGroupObj.children(".move-type").val(move.type);
 	moveGroupObj.children(".move-cat").val(move.category);
 	var isDynamaxed = $(this).closest(".poke-info").find(".max").prop("checked");
-	moveGroupObj.children(".move-crit").prop("checked", !isDynamaxed && move.willCrit === true);
+	// Always-crit moves (willCrit) force the crit in the engine, so lock the
+	// toggle on as an indicator (a Dynamaxed attacker turns them into Max
+	// Moves and loses the guarantee, so it unlocks there).
+	var forcedCrit = !isDynamaxed && move.willCrit === true;
+	moveGroupObj.children(".move-crit").prop("checked", forcedCrit).prop("disabled", forcedCrit);
 
 	var stat = move.category === 'Special' ? 'spa' : 'atk';
 	if (Array.isArray(move.multihit) || (!isNaN(move.multihit) && move.multiaccuracy)) {
@@ -555,7 +572,7 @@ $(".move-selector").change(function () {
 		moveGroupObj.children(".move-hits").hide();
 		moveGroupObj.children(".move-times").show();
 	}
-	moveGroupObj.children(".move-z").prop("checked", false);
+	moveGroupObj.children(".move-z").prop("checked", !!move.isZ);
 });
 
 $(".item").change(function () {
@@ -1250,7 +1267,8 @@ function checkRivalry(ability) {
 
 function getMoveDetails(moveInfo, opts) {
 	var moveName = moveInfo.find("select.move-selector").val();
-	var isZMove = gen > 6 && gen !== 11 && moveInfo.find("input.move-z").prop("checked");
+	var isZMove = gen > 6 && gen !== 11 && moveInfo.find("input.move-z").prop("checked") &&
+		!(moves[moveInfo.find("select.move-selector").val()] || {}).isZ;
 	var isCrit = moveInfo.find(".move-crit").prop("checked");
 	var isStellarFirstUse = moveInfo.find(".move-stellar").prop("checked");
 	var hits = +moveInfo.find(".move-hits").val();
