@@ -398,12 +398,12 @@ export function getKOChance(
 
     for (let i = 5; i <= 9; i++) {
       if (
-        predictTotal(damage[0], eot.damage, i, 1, toxicCounter, defender.maxHP()) >=
+        predictTotal(damage[0], eot.damage, i, 1, toxicCounter, defender.maxHP(), gen.num === 11 ? 8 : 16) >=
         defender.curHP() - hazards.damage
       ) {
         return KOChance(0, 1, i);
       } else if (
-        predictTotal(damage[damage.length - 1], eot.damage, i, 1, toxicCounter, defender.maxHP()) >=
+        predictTotal(damage[damage.length - 1], eot.damage, i, 1, toxicCounter, defender.maxHP(), gen.num === 11 ? 8 : 16) >=
         defender.curHP() - hazards.damage
       ) {
         // possible but no concrete chance
@@ -427,7 +427,8 @@ export function getKOChance(
       1,
       move.timesUsed,
       toxicCounter,
-      defender.maxHP()
+      defender.maxHP(),
+      gen.num === 11 ? 8 : 16
     ) >=
       defender.curHP() - hazards.damage
     ) {
@@ -439,7 +440,8 @@ export function getKOChance(
         1,
         move.timesUsed,
         toxicCounter,
-        defender.maxHP()
+        defender.maxHP(),
+        gen.num === 11 ? 8 : 16
       ) >=
       defender.curHP() - hazards.damage
     ) {
@@ -601,8 +603,8 @@ function getEndOfTurn(
       texts.push('Rain Dish recovery');
     }
   } else if (field.hasWeather('Sand')) {
-    if (gen.num === 10) {
-      // No Nerfs: permanent sandstorm chips ALL types for 1/8
+    if (gen.num === 10 || gen.num === 11) {
+      // No Nerfs / SpaceWorld: sandstorm chips ALL types for 1/8
       if (!defender.hasAbility('Magic Guard', 'Overcoat', 'Sand Force', 'Sand Rush', 'Sand Veil') &&
           !defender.hasItem('Safety Goggles')) {
         damage -= Math.floor(defender.maxHP() / 8);
@@ -613,7 +615,7 @@ function getEndOfTurn(
       !defender.hasAbility('Magic Guard', 'Overcoat', 'Sand Force', 'Sand Rush', 'Sand Veil') &&
       !defender.hasItem('Safety Goggles')
     ) {
-      damage -= Math.floor(defender.maxHP() / (gen.num === 2 || gen.num === 11 ? 8 : 16));
+      damage -= Math.floor(defender.maxHP() / (gen.num === 2 ? 8 : 16));
       texts.push('sandstorm damage');
     }
   } else if (field.hasWeather('Shadow Sky')) {
@@ -838,7 +840,8 @@ function predictTotal(
   hits: number,
   timesUsed: number,
   toxicCounter: number,
-  maxHP: number
+  maxHP: number,
+  toxicDivisor = 16
 ) {
   let toxicDamage = 0;
   // hits - 1 is used in this for loop, as well as in the total = ...  calcs later
@@ -850,9 +853,9 @@ function predictTotal(
   let lastTurnEot = eot;
   if (toxicCounter > 0) {
     for (let i = 0; i < hits - 1; i++) {
-      toxicDamage += Math.floor(((toxicCounter + i) * maxHP) / 16);
+      toxicDamage += Math.floor(((toxicCounter + i) * maxHP) / toxicDivisor);
     }
-    lastTurnEot -= Math.floor(((toxicCounter + (hits - 1)) * maxHP) / 16);
+    lastTurnEot -= Math.floor(((toxicCounter + (hits - 1)) * maxHP) / toxicDivisor);
   }
   let total = 0;
   if (hits > 1 && timesUsed === 1) {

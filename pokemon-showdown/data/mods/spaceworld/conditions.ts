@@ -157,4 +157,14 @@ export const Conditions: import('../../../sim/dex-conditions').ModdedConditionDa
 		name: 'residualdmg',
 		onStart() {},
 	},
+	sandstormed: {
+		name: 'sandstormed',
+		onSideStart(side) {
+			this.add('-sidestart', side, 'move: Sandstorm');
+		},
+		onResidualOrder: 12,
+		onResidual(pokemon) {
+			this.damage(this.clampIntRange(Math.floor(pokemon.maxhp / 8), 1), pokemon);
+		},
+	},
 };

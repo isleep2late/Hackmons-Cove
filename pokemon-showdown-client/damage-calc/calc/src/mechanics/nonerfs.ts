@@ -431,6 +431,18 @@ export function calculateNoNerfs(
     typeEffectiveness = 1;
   }
 
+  // phnn: Seismic Toss / Night Shade / Sonic Boom ignore type immunities
+  if (move.named('Seismic Toss', 'Night Shade', 'Sonic Boom')) {
+    const fixed = move.named('Sonic Boom') ? 20 : attacker.level;
+    if (attacker.hasAbility('Parental Bond')) {
+      result.damage = [fixed, fixed];
+      desc.attackerAbility = attacker.ability;
+    } else {
+      result.damage = fixed;
+    }
+    return result;
+  }
+
   if (typeEffectiveness === 0) {
     return result;
   }
@@ -1168,8 +1180,8 @@ export function calculateBPModsSMSSSV(
     bpMods.push(8192); // phnn: target's defenses effectively halved
   }
   if (attacker.hasAbility('Transistor') && move.hasType('Electric')) {
-    // phnn inherit bug: 1.5x BP stacks with the base 1.3x Atk/SpA modifier
     bpMods.push(6144);
+    desc.attackerAbility = attacker.ability;
   }
   if (field.hasWeather('Shadow Sky') && move.hasType('Shadow')) {
     bpMods.push(6144);
@@ -1442,9 +1454,6 @@ export function calculateAtModsSMSSSV(
     (attacker.hasAbility('Fire Mane') && move.hasType('Fire'))
   ) {
     atMods.push(6144);
-    desc.attackerAbility = attacker.ability;
-  } else if (attacker.hasAbility('Transistor') && move.hasType('Electric')) {
-    atMods.push(gen.num >= 9 ? 5325 : 6144);
     desc.attackerAbility = attacker.ability;
   }
   if (attacker.isWildMight) {

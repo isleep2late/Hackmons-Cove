@@ -275,6 +275,10 @@ export const Abilities: import('../../../sim/dex-abilities').ModdedAbilityDataTa
 	},
 	transistor: {
 		inherit: true,
+		onModifyAtk: undefined,
+		onModifyAtkPriority: undefined,
+		onModifySpA: undefined,
+		onModifySpAPriority: undefined,
 		onBasePowerPriority: 30,
 		onBasePower(basePower, attacker, defender, move) {
 			if (move.type === 'Electric') {
