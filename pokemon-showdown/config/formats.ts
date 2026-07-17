@@ -498,11 +498,20 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		},
 	},
 	{
-		name: "[Gen 3] Any Ability",
-		desc: "Gen 3 Pure Hackmons, but any Pokemon can have any ability. Shadow moves are usable.",
+		name: "[Gen 3] BH AAA",
+		desc: "Balanced Hackmons Almost Any Ability on Gen 3 mechanics: any Pokemon can have almost any ability, played with Balanced Hackmons clauses and bans. BH AAA stands for Balanced Hackmons Almost Any Ability.",
 		mod: 'gen3phnn',
 		searchShow: false,
-		ruleset: ['[Gen 3] Pure Hackmons', '!Obtainable Abilities', 'Max Level = 255', 'Default Level = 100'],
+		ruleset: ['[Gen 3] Pure Hackmons', '!Obtainable Abilities', 'Max Level = 255', 'Default Level = 100',
+			'Species Clause', 'OHKO Clause', 'Evasion Clause', 'Sleep Moves Clause', 'Dry Pass Clause'],
+		banlist: [
+			'Slaking',
+			'Huge Power', 'Shadow Tag', 'Arena Trap', 'Wonder Guard',
+			'Belly Drum',
+			'Shadow Rush', 'Shadow Blast', 'Shadow Blitz', 'Shadow Break', 'Shadow End',
+			'Shadow Bolt', 'Shadow Chill', 'Shadow Fire', 'Shadow Storm', 'Shadow Wave', 'Shadow Rave',
+			'Shadow Down', 'Shadow Mist', 'Shadow Panic', 'Shadow Hold', 'Shadow Half', 'Shadow Shed', 'Shadow Sky',
+		],
 		unbanlist: ['Demo'],
 	},
 	{
