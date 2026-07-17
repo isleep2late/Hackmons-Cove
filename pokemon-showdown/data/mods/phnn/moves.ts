@@ -5,6 +5,38 @@ function phnnIsShadowMon(target: any): boolean {
 	return target.moveSlots.some((s: any) => PHNN_SHADOW_MOVE_IDS.includes(s.id));
 }
 export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
+	shadowrift: {
+		num: 0,
+		accuracy: true,
+		basePower: 1,
+		category: "Physical",
+		name: "Shadow Rift",
+		pp: 1,
+		priority: 0,
+		flags: {},
+		isZ: "shadowiniumz",
+		secondary: null,
+		target: "normal",
+		type: "Shadow",
+		onEffectiveness(typeMod, target, type) {
+			if (!target || type !== target.getTypes()[0]) return typeMod;
+			return phnnIsShadowMon(target) ? -1 : 1;
+		},
+	},
+	glitchcascade: {
+		num: 0,
+		accuracy: true,
+		basePower: 1,
+		category: "Physical",
+		name: "Glitch Cascade",
+		pp: 1,
+		priority: 0,
+		flags: {},
+		isZ: "questiniumz",
+		secondary: null,
+		target: "normal",
+		type: "???",
+	},
 	spore: {
 		inherit: true,
 		flags: { protect: 1, reflectable: 1, mirror: 1, metronome: 1 },
@@ -632,7 +664,6 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 				}
 				const lockedmove = source.getVolatile('lockedmove');
 				if (lockedmove) {
-					// Outrage counter is reset
 					if (source.volatiles['lockedmove'].duration === 2) {
 						delete source.volatiles['lockedmove'];
 					}
@@ -693,6 +724,24 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	ignoreImmunity: {'Normal': true},
 		shortDesc: "Halves the target's current HP. Hits Ghost types.",
 		desc: "Deals damage to the target equal to half of its current HP, rounded down, but not less than 1 HP. This move can hit Ghost types.",
+	},
+	seismictoss: {
+		inherit: true,
+		ignoreImmunity: true,
+		shortDesc: "Deals damage equal to the user's level. Hits through immunities.",
+		desc: "Deals damage to the target equal to the user's level. This move ignores type immunities, so it can hit Ghost types.",
+	},
+	nightshade: {
+		inherit: true,
+		ignoreImmunity: true,
+		shortDesc: "Deals damage equal to the user's level. Hits through immunities.",
+		desc: "Deals damage to the target equal to the user's level. This move ignores type immunities, so it can hit Normal types.",
+	},
+	sonicboom: {
+		inherit: true,
+		ignoreImmunity: true,
+		shortDesc: "Deals 20 HP of damage. Hits through immunities.",
+		desc: "Deals 20 HP of damage to the target. This move ignores type immunities, so it can hit Ghost types.",
 	},
 
 	roar: {

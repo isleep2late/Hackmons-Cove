@@ -10,9 +10,10 @@ import TerserPlugin from 'terser-webpack-plugin';
 import ZipPlugin from 'zip-webpack-plugin';
 import CircularDependencyPlugin from 'circular-dependency-plugin';
 import VisualizerPlugin from 'webpack-visualizer-plugin2';
-import manifest from './src/manifest' assert { type: 'json' };
+import manifest from './src/manifest.json' with { type: 'json' };
+import pkg from './package.json' with { type: 'json' };
 
-// todo: import your dank node-babel-loader & turn this into ts (I miss you)
+// todo: turn this into ts (I miss you)
 
 const __DEV__ = process.env.NODE_ENV !== 'production';
 const mode = __DEV__ ? 'development' : 'production';
@@ -43,22 +44,24 @@ const { parsed: envFile } = dotenv.config({
 const finalEnv = {
   ...envFile,
 
-  BUILD_DATE: Date.now().toString(16).toUpperCase(),
+  // note: overridable so a given release can be rebuilt byte-for-byte (e.g., AMO source review
+  // reproducing a shipped .xpi) -- BUILD_DATE otherwise bakes the wall clock into BUILD_NAME,
+  // main.js, content.js & the i18n bundles, which alone makes every build unique
+  BUILD_DATE: (process.env.BUILD_DATE || Date.now().toString(16)).replace(/[^a-f0-9]+/gi, '').toUpperCase(),
   BUILD_SUFFIX: sanitizeEnv(process.env.BUILD_SUFFIX),
   BUILD_TARGET: sanitizeEnv(process.env.BUILD_TARGET, buildTargets[0] || 'chrome'),
   DEV_HOSTNAME: process.env.DEV_HOSTNAME || envFile.DEV_HOSTNAME,
   DEV_PORT: process.env.DEV_PORT || envFile.DEV_PORT,
-  DEV_BABEL_CACHE_ENABLED: process.env.DEV_BABEL_CACHE_ENABLED || envFile.DEV_BABEL_CACHE_ENABLED,
   DEV_WEBPACK_CACHE_ENABLED: process.env.DEV_WEBPACK_CACHE_ENABLED || envFile.DEV_WEBPACK_CACHE_ENABLED,
   DEV_SPRING_CLEANING: process.env.DEV_SPRING_CLEANING || envFile.DEV_SPRING_CLEANING,
   PROD_ANALYZE_BUNDLES: process.env.PROD_ANALYZE_BUNDLES || envFile.PROD_ANALYZE_BUNDLES,
   NODE_ENV: mode,
-  PACKAGE_AUTHOR_EMAIL: process.env.npm_package_author_email,
-  PACKAGE_AUTHOR_NAME: process.env.npm_package_author_name,
-  PACKAGE_DESCRIPTION: process.env.npm_package_description,
-  PACKAGE_NAME: process.env.npm_package_name || 'showdex',
-  PACKAGE_URL: process.env.npm_package_homepage,
-  PACKAGE_VERSION: process.env.npm_package_version,
+  PACKAGE_AUTHOR_EMAIL: pkg.author?.split('<')[1]?.replace('>', '').trim(),
+  PACKAGE_AUTHOR_NAME: pkg.author?.split('<')[0]?.trim(),
+  PACKAGE_DESCRIPTION: pkg.description,
+  PACKAGE_NAME: pkg.name || 'showdex',
+  PACKAGE_URL: pkg.homepage,
+  PACKAGE_VERSION: pkg.version,
   PACKAGE_VERSION_SUFFIX: sanitizeEnv(process.env.PACKAGE_VERSION_SUFFIX),
 };
 
@@ -80,6 +83,31 @@ finalEnv.UUID_NAMESPACE = (
 if (!finalEnv.UUID_NAMESPACE || finalEnv.UUID_NAMESPACE === NIL_UUID) {
   finalEnv.UUID_NAMESPACE = uuidv4();
 }
+
+// ms epoch that BUILD_DATE encodes; any timestamp baked into an asset must derive from this
+// (never from its own new Date()) or the build won't reproduce
+const buildTimestamp = parseInt(finalEnv.BUILD_DATE, 16) || Date.now();
+
+// ZipPlugin walks Object.keys(compilation.assets), whose insertion order depends on the order
+// CopyWebpackPlugin's parallel reads happen to finish -- so the archive's entries get shuffled
+// between otherwise identical runs. sorting them just before ZipPlugin's stage pins the layout.
+const sortAssetsPlugin = {
+  apply: (compiler) => {
+    compiler.hooks.thisCompilation.tap('SortAssets', (compilation) => {
+      compilation.hooks.processAssets.tap({
+        name: 'SortAssets',
+        stage: webpack.Compilation.PROCESS_ASSETS_STAGE_OPTIMIZE_TRANSFER - 1,
+      }, (assets) => {
+        Object.keys(assets).sort().forEach((name) => {
+          const source = assets[name];
+
+          delete assets[name];
+          assets[name] = source;
+        });
+      });
+    });
+  },
+};
 
 finalEnv.BUILD_NAME = [
   finalEnv.PACKAGE_NAME,
@@ -146,6 +174,8 @@ const moduleRules = [
           modules: {
             auto: true, // only files ending in .module.s?css will be treated as CSS modules
             localIdentName: '[name]-[local]--[hash:base64:5]', // e.g., 'Caldex-module-content--mvN2w'
+            namedExport: false, // keep default-export object (v7 changed default to true)
+            exportLocalsConvention: 'as-is', // v7 + namedExport:false defaults to camel-case-only, breaking styles['top-right'] etc.
           },
         },
       },
@@ -165,7 +195,7 @@ const moduleRules = [
           sourceMap: true,
           sassOptions: {
             // allows for `@use 'mixins/flex';` instead of `@use '../../../styles/mixins/flex';`
-            includePaths: [path.join(__dirname, 'src', 'styles')],
+            loadPaths: [path.join(__dirname, 'src', 'styles')],
           },
         },
       },
@@ -186,12 +216,33 @@ const moduleRules = [
     test: /\.(?:jsx?|tsx?)$/i,
     use: [
       {
-        loader: 'babel-loader',
+        loader: 'swc-loader',
         options: {
-          cacheDirectory: __DEV__
-            && finalEnv.DEV_BABEL_CACHE_ENABLED === 'true'
-            && path.join(__dirname, 'node_modules', '.cache', 'babel'), // default: false
-          // cacheCompression: false, // default: true
+          sync: false,
+          parseMap: true,
+          jsc: {
+            parser: {
+              syntax: 'typescript',
+              tsx: true,
+              decorators: false,
+              dynamicImport: true,
+            },
+            transform: {
+              react: {
+                runtime: 'automatic',
+                development: __DEV__,
+                refresh: false,
+              },
+            },
+            loose: false,
+          },
+          module: {
+            type: 'es6',
+          },
+          env: {
+            targets: 'defaults, > 1%, last 2 versions, last 3 iOS versions',
+          },
+          sourceMaps: true,
         },
       },
       'source-map-loader',
@@ -286,7 +337,9 @@ const copyPatterns = [
         }
 
         if (key === 'common' && typeof parsed['--meta'] === 'object') {
-          parsed['--meta'].built = new Date().toISOString();
+          // note: BUILD_DATE is a hex ms epoch, so this ISO stamp follows it -- i.e., pinning
+          // BUILD_DATE pins the i18n bundles too (otherwise this is a second, unpinnable clock)
+          parsed['--meta'].built = new Date(buildTimestamp).toISOString();
         }
 
         // e.g., prev = { common: { ... }, pokedex: { ... }, ... }
@@ -499,6 +552,9 @@ const plugins = [
       }),
 
     (finalEnv.BUILD_TARGET !== 'standalone' && (!__DEV__ || finalEnv.BUILD_TARGET === 'firefox'))
+      && sortAssetsPlugin,
+
+    (finalEnv.BUILD_TARGET !== 'standalone' && (!__DEV__ || finalEnv.BUILD_TARGET === 'firefox'))
       && new ZipPlugin({
         // spit out the file in either `build` or `dist`
         path: '..',
@@ -506,6 +562,12 @@ const plugins = [
         // extension will be appended to the end of the filename
         filename: finalEnv.BUILD_NAME,
         extension: finalEnv.BUILD_TARGET === 'firefox' ? 'xpi' : 'zip',
+
+        // yazl stamps each zip entry with `new Date()` unless told otherwise, which would make
+        // the archive bytes unique per run even when its contents are identical
+        fileOptions: {
+          mtime: new Date(buildTimestamp),
+        },
       }),
 
     !__DEV__
@@ -572,6 +634,17 @@ const envConfig = {
   }),
 };
 
+// silence Sass if() deprecation until CSS if() has broad browser support and we can safely migrate
+const ignoreWarnings = [
+  (warning) => {
+    const msg = String(warning.message || '');
+    const inner = String(warning.error?.message || '');
+    // filter the individual if() deprecation warnings AND their "N omitted" summary lines
+    return msg.includes('if() syntax') || inner.includes('if() syntax')
+      || msg.includes('repetitive deprecation warnings omitted');
+  },
+];
+
 export const config = {
   mode,
   entry,
@@ -579,6 +652,7 @@ export const config = {
   module: { rules: moduleRules },
   resolve,
   plugins,
+  ignoreWarnings,
   ...envConfig,
 };
 

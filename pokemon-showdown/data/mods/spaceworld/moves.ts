@@ -190,15 +190,6 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		priority: 0,
 		flags: {protect: 1, mirror: 1, metronome: 1},
 		sideCondition: "sandstormed",
-		condition: {
-			onSideStart(side) {
-				this.add('-sidestart', side, 'move: Sandstorm');
-			},
-			onResidualOrder: 12,
-			onResidual(pokemon) {
-				this.damage(this.clampIntRange(Math.floor(pokemon.maxhp / 8), 1), pokemon);
-			},
-		},
 		secondary: null,
 		target: "normal",
 		type: "Rock",

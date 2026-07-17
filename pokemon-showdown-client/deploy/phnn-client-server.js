@@ -53,15 +53,39 @@ function isLoginPath(pathname) {
 	return pathname === '/action.php' || pathname.endsWith('/action.php');
 }
 
+const MAX_LOGIN_BODY = 2 * 1024 * 1024;
+
 function proxyLogin(req, res, reqUrl) {
 	const target = new URL(LOGIN_ORIGIN);
+	const declared = Number(req.headers['content-length']);
+	if (declared && declared > MAX_LOGIN_BODY) {
+		res.writeHead(413, { 'content-type': 'text/plain' });
+		res.end('payload too large');
+		req.destroy();
+		return;
+	}
 	const chunks = [];
-	req.on('data', c => chunks.push(c));
+	let received = 0;
+	let aborted = false;
+	req.on('data', c => {
+		if (aborted) return;
+		received += c.length;
+		if (received > MAX_LOGIN_BODY) {
+			aborted = true;
+			chunks.length = 0;
+			res.writeHead(413, { 'content-type': 'text/plain' });
+			res.end('payload too large');
+			req.destroy();
+			return;
+		}
+		chunks.push(c);
+	});
 	req.on('end', () => {
+		if (aborted) return;
 		const body = Buffer.concat(chunks);
 		try {
 			const params = new URLSearchParams(body.toString('utf8'));
-			if (params.get('act') === 'uploadreplay') { saveReplay(params, res); return; }
+			if (params.get('act') === 'uploadreplay') { saveReplay(params, res, req); return; }
 		} catch (e) {}
 		const headers = {
 			'content-type': req.headers['content-type'] || 'application/x-www-form-urlencoded',
@@ -170,24 +194,62 @@ function serveAvatar(res, pathname) {
 	});
 }
 
-function saveReplay(params, res) {
-	const id = (params.get('id') || '').toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/^[a-z0-9]+-(?=gen\d)/, '');
+const MAX_REPLAY_LOG = 1024 * 1024;
+const REPLAY_RATE = new Map();
+function replayRateOk(ip) {
+	const now = Date.now();
+	const windowMs = 10 * 60 * 1000;
+	const max = 30;
+	const rec = REPLAY_RATE.get(ip);
+	if (!rec || now - rec.start > windowMs) {
+		REPLAY_RATE.set(ip, { start: now, count: 1 });
+		if (REPLAY_RATE.size > 5000) {
+			for (const [k, v] of REPLAY_RATE) if (now - v.start > windowMs) REPLAY_RATE.delete(k);
+		}
+		return true;
+	}
+	rec.count++;
+	return rec.count <= max;
+}
+
+function saveReplay(params, res, req) {
+	const ip = (req && (req.headers['cf-connecting-ip'] || req.socket?.remoteAddress)) || 'unknown';
+	if (!replayRateOk(ip)) {
+		res.writeHead(429, { 'content-type': 'text/plain' });
+		res.end('too many uploads');
+		return;
+	}
+	const id = (params.get('id') || '').toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/^[a-z0-9]+-(?=gen\d)/, '').slice(0, 60);
 	const log = params.get('log') || '';
-	const password = (params.get('password') || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+	const password = (params.get('password') || '').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 32);
 	if (!id || !log) {
 		res.writeHead(200, { 'content-type': 'text/plain' });
 		res.end('invalid id');
 		return;
 	}
+	if (log.length > MAX_REPLAY_LOG) {
+		res.writeHead(413, { 'content-type': 'text/plain' });
+		res.end('replay too large');
+		return;
+	}
 	const fullid = id + (password ? '-' + password + 'pw' : '');
+	const file = path.join(REPLAYS_DIR, fullid + '.log');
+	if (!file.startsWith(REPLAYS_DIR)) { res.writeHead(403); res.end('forbidden'); return; }
 	try {
 		fs.mkdirSync(REPLAYS_DIR, { recursive: true });
-		fs.writeFileSync(path.join(REPLAYS_DIR, fullid + '.log'), log);
+		// Exclusive write: never overwrite an existing replay (first writer wins),
+		// so an anonymous client cannot clobber someone else's shared replay.
+		fs.writeFileSync(file, log, { flag: 'wx' });
 		if (!password) fs.rmSync(path.join(REPLAYS_DIR, id + '.log.hidden'), { force: true });
 		replayIndex.set(fullid, parseReplayMeta(fullid, log, Date.now()));
 	} catch (err) {
+		if (err && err.code === 'EEXIST') {
+			res.writeHead(200, { 'content-type': 'text/plain' });
+			res.end('success:' + fullid);
+			return;
+		}
 		res.writeHead(200, { 'content-type': 'text/plain' });
-		res.end('error: ' + err.message);
+		res.end('error saving replay');
 		return;
 	}
 	res.writeHead(200, { 'content-type': 'text/plain' });
@@ -456,7 +518,11 @@ const server = http.createServer((req, res) => {
 		res.end('404 Not Found');
 		return;
 	}
-	if (isLoginPath(reqUrl.pathname)) {
+	if (reqUrl.pathname === '/calc') {
+		// Damage calculator lives at /calc/ (static dir play.pokemonshowdown.com/calc)
+		res.writeHead(301, { location: '/calc/' + (reqUrl.search || '') });
+		res.end();
+	} else if (isLoginPath(reqUrl.pathname)) {
 		proxyLogin(req, res, reqUrl);
 	} else if (reqUrl.pathname.startsWith('/showdown')) {
 		proxyGame(req, res, reqUrl);
@@ -477,9 +543,15 @@ const server = http.createServer((req, res) => {
 });
 
 // Proxy the game WebSocket (/showdown upgrade) to the local PS server.
+const MAX_WS_PROXIES = 1000;
+let activeWsProxies = 0;
 server.on('upgrade', (req, socket, head) => {
 	const reqUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
 	if (!reqUrl.pathname.startsWith('/showdown')) { socket.destroy(); return; }
+	if (activeWsProxies >= MAX_WS_PROXIES) { socket.destroy(); return; }
+	activeWsProxies++;
+	let released = false;
+	const release = () => { if (!released) { released = true; activeWsProxies--; } };
 	const upstream = net.connect(GAME_PORT, GAME_HOST, () => {
 		let reqLine = `${req.method} ${req.url} HTTP/1.1\r\n`;
 		for (let i = 0; i < req.rawHeaders.length; i += 2) {
@@ -492,9 +564,21 @@ server.on('upgrade', (req, socket, head) => {
 	});
 	upstream.on('error', () => socket.destroy());
 	socket.on('error', () => upstream.destroy());
+	upstream.on('close', release);
+	socket.on('close', release);
 });
 
-server.listen(PORT, () => {
+// Never let an unexpected error crash the process. A crash would drop the
+// Cloudflare tunnel and could expose the origin, and a printed stack trace can
+// leak internal paths; log and keep serving instead.
+process.on('uncaughtException', err => {
+	console.error('[uncaughtException]', err && err.message);
+});
+process.on('unhandledRejection', err => {
+	console.error('[unhandledRejection]', err && (err.message || err));
+});
+
+server.listen(PORT, '127.0.0.1', () => {
 	console.log(`PHNN client server on http://localhost:${PORT}`);
 	console.log(`  static dir: ${STATIC_DIR}`);
 	console.log(`  login proxy: /action.php -> ${LOGIN_ORIGIN}/action.php`);

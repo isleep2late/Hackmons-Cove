@@ -653,8 +653,6 @@ export const Dex = new class implements ModdedDex {
 			mewtwoarmored: { fw: 120, fh: 120, fpx: false, back: 1, bw: 95, bh: 155, shinyFront: 1, sfw: 120, sfh: 135, shinyBack: 1, battle: 1, btw: 120, bth: 135 },
 			hakamoototem: { fw: 120, fh: 120, fpx: false },
 			wishiwashitotem: { fw: 120, fh: 120, fpx: false },
-			goku: { fw: 114, fh: 160, fpx: false, back: 1, bw: 114, bh: 160, ext: 'gif' },
-			gokusupersaiyan: { fw: 179, fh: 160, fpx: false, back: 1, bw: 179, bh: 160, ext: 'gif' },
 		};
 		let sw97Id = species.id;
 		if (options.mod === 'gen2spaceworld' && SW97_SPRITE_SIZES[species.id + 'sw']) sw97Id = species.id + 'sw';
@@ -912,7 +910,6 @@ export const Dex = new class implements ModdedDex {
 		}
 		const phnnIconIds: {[id: string]: number} = {
 			arceusshadow: 1, arceusquestion: 1, lugiashadow: 1, mewtwoshadow: 1, mewtwoshadowmegax: 1, mewtwoarmored: 1,
-			goku: 1, gokusupersaiyan: 1,
 		};
 		if (SW97_SPRITE_SIZES[id]) {
 			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
@@ -922,8 +919,7 @@ export const Dex = new class implements ModdedDex {
 		if (phnnIconIds[id]) {
 			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
 			const host = window.Config ? Config.routes.client : 'beta.hackmons.com';
-			const iconFile = id === 'gokusupersaiyan' ? 'goku' : id;
-			return `background:transparent url(${protocol}//${host}/sprites/phnn/${iconFile}-icon.png) no-repeat scroll center/contain;image-rendering:pixelated`;
+			return `background:transparent url(${protocol}//${host}/sprites/phnn/${id}-icon.png) no-repeat scroll center/contain;image-rendering:pixelated`;
 		}
 		let num = this.getPokemonIconNum(id, pokemon?.gender === 'F', facingLeft);
 
@@ -950,7 +946,6 @@ export const Dex = new class implements ModdedDex {
 		if (species.exists === false) return { spriteDir: 'sprites/gen5', spriteid: '0', x: 10, y: 5, pixelated: true };
 		const phnnLocalSpriteIds: {[id: string]: number} = {
 			arceusshadow: 1, arceusquestion: 1, mewtwoshadow: 1, mewtwoshadowmegax: 1, mewtwoarmored: 1, lugiashadow: 1, hakamoototem: 1, wishiwashitotem: 1,
-			goku: 1, gokusupersaiyan: 1,
 		};
 		let tbSw97Id = species.id;
 		if (dex.modid === 'gen2spaceworld' && SW97_SPRITE_SIZES[species.id + 'sw']) tbSw97Id = species.id + 'sw';
@@ -970,17 +965,6 @@ export const Dex = new class implements ModdedDex {
 		if (phnnLocalSpriteIds[species.id]) {
 			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
 			const host = window.Config ? Config.routes.client : 'beta.hackmons.com';
-			if (species.id === 'goku' || species.id === 'gokusupersaiyan') {
-				return {
-					spriteid: 'goku-teambuilder',
-					spriteDir: 'sprites/phnn',
-					x: 1,
-					y: 14,
-					h: 94,
-					ext: 'gif',
-					customPrefix: `${protocol}//${host}/`,
-				};
-			}
 			const isPixel = species.id === 'lugiashadow';
 			const phnnShinyFrontIds: {[id: string]: number} = { arceusshadow: 1, arceusquestion: 1, mewtwoshadow: 1, mewtwoshadowmegax: 1, mewtwoarmored: 1 };
 			const useShiny = pokemon.shiny && phnnShinyFrontIds[species.id];
@@ -1069,7 +1053,7 @@ export const Dex = new class implements ModdedDex {
 	getItemIcon(item: any) {
 		let num = 0;
 		if (typeof item === 'string' && window.BattleItems) item = window.BattleItems[toID(item)];
-		const phnnPlateIcons: {[id: string]: string} = { shadowplate: 'shadowplate', questionmarkplate: 'questionmarkplate' };
+		const phnnPlateIcons: {[id: string]: string} = { shadowplate: 'shadowplate', questionmarkplate: 'questionmarkplate', shadowiniumz: 'shadowiniumz', questiniumz: 'questiniumz', shadowscarf: 'shadowscarf', questionscarf: 'questionscarf' };
 		const phnnPlateId = phnnPlateIcons[toID(item?.name)];
 		if (phnnPlateId) {
 			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';

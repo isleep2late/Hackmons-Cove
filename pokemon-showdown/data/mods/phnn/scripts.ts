@@ -22,6 +22,17 @@ export const Scripts: ModdedBattleScriptsData = {
 			if (id.startsWith('gmax')) {
 				move.isMax = false;
 			}
+			if ((move.type === 'Shadow' || move.type === '???') && !move.isZ && !move.isMax) {
+				if (move.category === 'Status') {
+					if (!move.zMove) move.zMove = { boost: { spe: 1 } };
+				} else if (move.basePower) {
+					const bp = move.basePower;
+					const zbp = bp <= 55 ? 100 : bp <= 65 ? 120 : bp <= 75 ? 140 : bp <= 85 ? 160 :
+						bp <= 95 ? 175 : bp <= 100 ? 180 : bp <= 110 ? 185 : bp <= 125 ? 190 :
+						bp <= 130 ? 195 : 200;
+					move.zMove = { basePower: zbp };
+				}
+			}
 		}
 
 	},
@@ -241,7 +252,6 @@ export const Scripts: ModdedBattleScriptsData = {
 			this.battle.runEvent('AfterMega', pokemon);
 			return true;
 		},
-		// Any assigned Tera type terastallizes (Stellar included); with no Tera type the Pokemon Dynamaxes.
 		canTerastallize(pokemon: Pokemon) {
 			if (pokemon.getItem().zMove || pokemon.canMegaEvo || pokemon.canUltraBurst) return null;
 			if (!pokemon.set.teraType) return null;
@@ -289,6 +299,7 @@ export const Scripts: ModdedBattleScriptsData = {
 		getActiveMaxMove(this: BattleActions, move: Move, pokemon: Pokemon) {
 			if (typeof move === 'string') move = this.dex.getActiveMove(move);
 			if (move.name === 'Struggle') return this.dex.getActiveMove(move);
+			if (move.type === 'Shadow' || move.type === '???') return this.dex.getActiveMove(move);
 			let maxMove = this.dex.getActiveMove(this.MAX_MOVES[move.category === 'Status' ? move.category : move.type]);
 			if (move.category !== 'Status') {
 				const isGmax = pokemon.species.forme === 'Gmax' || pokemon.baseSpecies.forme === 'Gmax';
@@ -351,19 +362,28 @@ export const Scripts: ModdedBattleScriptsData = {
 			return damage;
 		},
 
-		// Seismic Toss/Night Shade/SonicBoom/Counter/Bide hit immunities
+		Z_MOVES: {
+			Poison: "Acid Downpour", Fighting: "All-Out Pummeling", Dark: "Black Hole Eclipse",
+			Grass: "Bloom Doom", Normal: "Breakneck Blitz", Rock: "Continental Crush",
+			Steel: "Corkscrew Crash", Dragon: "Devastating Drake", Electric: "Gigavolt Havoc",
+			Water: "Hydro Vortex", Fire: "Inferno Overdrive", Ghost: "Never-Ending Nightmare",
+			Bug: "Savage Spin-Out", Psychic: "Shattered Psyche", Ice: "Subzero Slammer",
+			Flying: "Supersonic Skystrike", Ground: "Tectonic Rage", Fairy: "Twinkle Tackle",
+			Shadow: "Shadow Rift", "???": "Glitch Cascade",
+		},
+		getMaxMove(this: BattleActions, move: Move, pokemon: Pokemon) {
+			if (typeof move === 'string') move = this.dex.moves.get(move);
+			if (move.type === 'Shadow' || move.type === '???') return move;
+			return Object.getPrototypeOf(this).getMaxMove.call(this, move, pokemon);
+		},
 		tryMoveHit(this: BattleActions, target: Pokemon, pokemon: Pokemon, move: ActiveMove) {
-			// Make these moves hit normally immune types
 			if (['seismictoss', 'nightshade'].includes(move.id)) {
-				// Hits Ghost types
 				move.type = '???';
 			}
 			if (move.id === 'sonicboom') {
-				// Hits Psychic types
 				move.type = '???';
 			}
 			if (['counter', 'bide'].includes(move.id)) {
-				// Hit normally immune types
 				move.type = '???';
 			}
 

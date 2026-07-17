@@ -6,8 +6,8 @@ const DIST = path.resolve(__dirname, '../node_modules/@smogon/calc/dist/mechanic
 const PATCHES = [
 	{
 		file: 'util.js',
-		find: '        let effectiveness = gen.types.get((0, util_1.toID)(move.type)).effectiveness[type];\n        if (effectiveness === 0 && isRingTarget) {',
-		replace: '        let effectiveness = gen.types.get((0, util_1.toID)(move.type)).effectiveness[type];\n        var __pc = (typeof globalThis !== \'undefined\') && globalThis.__phnnCalc && globalThis.__phnnCalc.typeChart;\n        if (__pc && __pc[move.type] && Object.prototype.hasOwnProperty.call(__pc[move.type], type)) {\n            effectiveness = __pc[move.type][type];\n        }\n        if (effectiveness === 0 && isRingTarget) {',
+		find: '        if (effectiveness === 0 && isRingTarget) {',
+		replace: '        var __pc = (typeof globalThis !== \'undefined\') && globalThis.__phnnCalc && globalThis.__phnnCalc.typeChart;\n        if (__pc && __pc[move.type] && Object.prototype.hasOwnProperty.call(__pc[move.type], type)) {\n            effectiveness = __pc[move.type][type];\n        }\n        if (effectiveness === 0 && isRingTarget) {',
 	},
 	{
 		file: 'gen789.js',

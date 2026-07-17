@@ -1,9 +1,7 @@
 const SW_EVIOLITE: string[] = ['ballerine', 'ditto', 'farfetchd', 'farfetchdsw', 'golppy', 'minicorn', 'para', 'pinsir', 'pinsirmega', 'pinsirsw', 'slowbro', 'slowbromega', 'slowbrosw', 'tangel'];
 
 export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
-	// Classic Items Return
 
-	// Soul Dew - Pre-Gen 7 mechanics (50% boost to Latios/Latias SpAtk and SpDef)
 	souldew: {
 		inherit: true,
 		onBasePower: undefined, // no inherit
@@ -51,6 +49,58 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 		num: 0,
 		gen: 9,
 		shortDesc: "Mega Evolves Mewtwo or Shadow Mewtwo into Shadow Mega Mewtwo X.",
+	},
+	shadowiniumz: {
+		name: "Shadowinium Z",
+		spritenum: 642,
+		onTakeItem: false,
+		zMove: true,
+		zMoveType: "Shadow",
+		num: 0,
+		gen: 9,
+		shortDesc: "If holder has a Shadow move, this item allows it to use a Shadow Z-Move.",
+	},
+	questiniumz: {
+		name: "Questinium Z",
+		spritenum: 642,
+		onTakeItem: false,
+		zMove: true,
+		zMoveType: "???",
+		num: 0,
+		gen: 9,
+		shortDesc: "If holder has a ??? move, this item allows it to use a typeless Z-Move.",
+	},
+	shadowscarf: {
+		name: "Shadow Scarf",
+		spritenum: 444,
+		fling: {
+			basePower: 10,
+		},
+		onBasePowerPriority: 15,
+		onBasePower(basePower, user, target, move) {
+			if (move.type === 'Shadow') {
+				return this.chainModify([4915, 4096]);
+			}
+		},
+		num: 0,
+		gen: 9,
+		shortDesc: "Holder's Shadow-type moves have 1.2x power.",
+	},
+	questionscarf: {
+		name: "Question Scarf",
+		spritenum: 444,
+		fling: {
+			basePower: 10,
+		},
+		onBasePowerPriority: 15,
+		onBasePower(basePower, user, target, move) {
+			if (move.type === '???') {
+				return this.chainModify([4915, 4096]);
+			}
+		},
+		num: 0,
+		gen: 9,
+		shortDesc: "Holder's ???-type moves have 1.2x power.",
 	},
 	shadowplate: {
 		name: "Shadow Plate",

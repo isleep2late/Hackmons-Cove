@@ -2,6 +2,16 @@ export default {
 	"gen9phnn": {
 		"gen": 9,
 		"moves": {
+			"shadowrift": {
+				"basePower": 1,
+				"type": "Shadow",
+				"category": "Physical"
+			},
+			"glitchcascade": {
+				"basePower": 1,
+				"type": "???",
+				"category": "Physical"
+			},
 			"nihillight": {
 				"basePower": 200
 			},
@@ -96,6 +106,15 @@ export default {
 				"basePower": 40
 			},
 			"superfang": {
+				"ignoreImmunity": true
+			},
+			"seismictoss": {
+				"ignoreImmunity": true
+			},
+			"nightshade": {
+				"ignoreImmunity": true
+			},
+			"sonicboom": {
 				"ignoreImmunity": true
 			},
 			"twister": {
