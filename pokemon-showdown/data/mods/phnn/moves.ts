@@ -685,9 +685,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	sheercold: {
 		inherit: true,
-		onTryHit(target, source) {
-			return this.randomChance(1, 1);
-		},
+		ohko: true,
 		shortDesc: "OHKOs the target. Ice types are not immune.",
 		desc: "Deals damage to the target equal to the target's maximum HP, causing a one-hit KO. Ignores accuracy and evasion modifiers. Fails if the user is a lower level than the target. Unlike in standard play, Ice-type Pokemon are not immune to this move.",
 	},
