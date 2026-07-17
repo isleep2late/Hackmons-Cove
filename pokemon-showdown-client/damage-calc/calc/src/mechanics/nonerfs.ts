@@ -568,7 +568,7 @@ export function calculateNoNerfs(
           attacker.hasAbility('Contrary') ? -defender.boosts[stat]! : defender.boosts[stat]!;
         if (attacker.boosts[stat] > 6) attacker.boosts[stat] = 6;
         if (attacker.boosts[stat] < -6) attacker.boosts[stat] = -6;
-        attacker.stats[stat] = getModifiedStat(attacker.rawStats[stat]!, attacker.boosts[stat]!);
+        attacker.stats[stat] = getModifiedStat(attacker.rawStats[stat]!, attacker.boosts[stat]!, undefined, true);
         defender.boosts[stat] = 0;
         defender.stats[stat] = defender.rawStats[stat];
       }
@@ -1375,7 +1375,7 @@ export function calculateAttackSMSSSV(
     attack = attackSource.rawStats[attackStat];
     desc.defenderAbility = defender.ability;
   } else {
-    attack = getModifiedStat(attackSource.rawStats[attackStat]!, boosts);
+    attack = getModifiedStat(attackSource.rawStats[attackStat]!, boosts, undefined, true);
     desc.attackBoost = boosts;
   }
 
@@ -1582,7 +1582,7 @@ export function calculateDefenseSMSSSV(
     defense = defender.rawStats[defenseStat];
     desc.attackerAbility = attacker.ability;
   } else {
-    defense = getModifiedStat(defender.rawStats[defenseStat]!, boosts);
+    defense = getModifiedStat(defender.rawStats[defenseStat]!, boosts, undefined, true);
     desc.defenseBoost = boosts;
   }
 

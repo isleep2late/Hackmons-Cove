@@ -34,7 +34,7 @@ export function isGrounded(pokemon: Pokemon, field: Field) {
       !pokemon.hasItem('Air Balloon')));
 }
 
-export function getModifiedStat(stat: number, mod: number, gen?: Generation) {
+export function getModifiedStat(stat: number, mod: number, gen?: Generation, noOverflow?: boolean) {
   if (gen && (gen.num === 1 || gen.num === 2)) {
     if (mod >= 0) {
       const pastGenBoostTable = [1, 1.5, 2, 2.5, 3, 3.5, 4];
@@ -63,7 +63,8 @@ export function getModifiedStat(stat: number, mod: number, gen?: Generation) {
     [7, 2],
     [8, 2],
   ];
-  stat = OF16(stat * modernGenBoostTable[6 + mod][numerator]);
+  const boosted = stat * modernGenBoostTable[6 + mod][numerator];
+  stat = noOverflow ? boosted : OF16(boosted);
   stat = Math.floor(stat / modernGenBoostTable[6 + mod][denominator]);
 
   return stat;

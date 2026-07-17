@@ -101,11 +101,6 @@ export class Pokemon implements State.Pokemon {
     }
 
     this.gigantamax = options.gigantamax;
-    if (gen.num === 10 && (this.name.includes('-Gmax') || this.gigantamax) &&
-        this.rawStats.hp !== 1) {
-      this.rawStats.hp *= 2;
-      this.stats.hp *= 2;
-    }
 
     if (options.statOverrides) {
       this.statOverrides = options.statOverrides;
@@ -118,6 +113,12 @@ export class Pokemon implements State.Pokemon {
           this.stats[stat] = clamped;
         }
       }
+    }
+
+    if (gen.num === 10 && (this.name.includes('-Gmax') || this.gigantamax) &&
+        this.rawStats.hp !== 1) {
+      this.rawStats.hp *= 2;
+      this.stats.hp *= 2;
     }
 
     const curHP = options.curHP || options.originalCurHP;

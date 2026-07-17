@@ -111,6 +111,10 @@ $("input:radio[name='format']").change(function () {
 });
 
 var defaultLevel = 100;
+function phnnStartingLevel(g) {
+	if (g === 10) return $("#customDisguises").prop("checked") ? 9999 : 255;
+	return defaultLevel;
+}
 $("input:radio[name='defaultLevel']").change(function () {
 	defaultLevel = $("input:radio[name='defaultLevel']:checked").val();
 	$("#levelL1").val(defaultLevel);
@@ -772,7 +776,7 @@ $(".set-selector").change(function () {
 		} else {
 			pokeObj.find(".teraType").val(getForcedTeraType(pokemonName) || pokemon.types[0]);
 			pokeObj.find(".gmaxToggle").prop("checked", false);
-			pokeObj.find(".level").val(defaultLevel);
+			pokeObj.find(".level").val(phnnStartingLevel(gen));
 			pokeObj.find(".hp .sps").val(0);
 			pokeObj.find(".hp .evs").val(gen > 2 && gen !== 11 ? 0 : 252);
 			pokeObj.find(".hp .ivs").val(31);
