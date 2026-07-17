@@ -699,10 +699,12 @@ export function calculateNoNerfs(
 
   // Custom Disguises 655 glitch: if the defender's relevant raw defensive
   // stat is EXACTLY 655, every hit deals 1 damage (Eternamax rule).
-  const glitchStat = move.overrideDefensiveStat ||
-    (move.category === 'Special' ? 'spd' : 'def');
-  if (defender.rawStats[glitchStat] === 655) {
-    for (let i = 0; i < 16; i++) damage[i] = 1;
+  if (field.isCustomDisguises) {
+    const glitchStat = move.overrideDefensiveStat ||
+      (move.category === 'Special' ? 'spd' : 'def');
+    if (defender.rawStats[glitchStat] === 655) {
+      for (let i = 0; i < 16; i++) damage[i] = 1;
+    }
   }
 
   result.damage = childDamage ? [damage, childDamage] : damage;

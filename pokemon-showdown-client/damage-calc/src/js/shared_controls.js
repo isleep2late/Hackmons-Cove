@@ -84,7 +84,12 @@ for (var bounded in bounds) {
 }
 function attachValidation(clazz, min, max) {
 	$("." + clazz).keyup(function () {
-		validate($(this), min, max);
+		var effectiveMax = max;
+		if (gen === 10) {
+			if (clazz === "level") effectiveMax = 9999;
+			else if (clazz === "base") effectiveMax = 65535;
+		}
+		validate($(this), min, effectiveMax);
 	});
 }
 function validate(obj, min, max) {
@@ -604,6 +609,7 @@ function smogonAnalysis(pokemonName) {
 
 // auto-update set details on select
 $(".set-selector").change(function () {
+	clearStatOverrides($(this).closest(".poke-info"));
 	var fullSetName = $(this).val();
 	var pokemonName = fullSetName.substring(0, fullSetName.indexOf(" ("));
 	var setName = fullSetName.substring(fullSetName.indexOf("(") + 1, fullSetName.lastIndexOf(")"));
@@ -807,7 +813,7 @@ $(".set-selector").change(function () {
 			pokeObj.find(".gmaxToggle").parent().hide();
 		}
 		calcStats(pokeObj);
-		var total = pokeObj.find(".hp").find(".total").text();
+		var total = pokeObj.find(".hp").find(".total").val();
 		pokeObj.find(".max-hp").text(total);
 		pokeObj.find(".max-hp").attr("data-prev", total);
 		pokeObj.find(".current-hp").val(total);
@@ -1156,6 +1162,19 @@ function createPokemon(pokeInfo) {
 		}
 		var teraType = pokeInfo.find(".teraToggle").is(":checked") ? pokeInfo.find(".teraType").val() : undefined;
 		var isWildMight = pokeInfo.find(".wildMight").prop("checked");
+		var statOverrides;
+		for (var oi = 0; oi < LEGACY_STATS[gen].length; oi++) {
+			var oBox = pokeInfo.find("." + LEGACY_STATS[gen][oi] + " .total");
+			if (oBox.attr("data-user") === "1") {
+				var oVal = parseInt(oBox.val(), 10);
+				if (oVal >= 1) {
+					statOverrides = statOverrides || {};
+					var oStat = legacyStatToStat(LEGACY_STATS[gen][oi]);
+					statOverrides[oStat] = Math.min(oVal, 65535);
+					if (gen === 1 && oStat === "spa") statOverrides.spd = statOverrides.spa;
+				}
+			}
+		}
 		var opts = {
 			ability: ability,
 			item: item,
@@ -1184,6 +1203,7 @@ function createPokemon(pokeInfo) {
 			teraType: teraType,
 			isDynamaxed: isDynamaxed,
 			isWildMight: isWildMight,
+			statOverrides: statOverrides,
 			overrideMove: overrideMove,
 			boosts: boosts,
 			curHP: curHP,
@@ -1268,6 +1288,7 @@ function createField() {
 	var isMagicRoom = $("#magicroom").prop("checked");
 	var isWonderRoom = $("#wonderroom").prop("checked");
 	var isGravity = $("#gravity").prop("checked");
+	var isCustomDisguises = $("#customDisguises").prop("checked");
 	var isSR = [$("#srL").prop("checked"), $("#srR").prop("checked")];
 	var weather;
 	var spikes;
@@ -1333,6 +1354,7 @@ function createField() {
 	};
 	return new calc.Field({
 		gameType: gameType,
+		isCustomDisguises: isCustomDisguises,
 		terrain: terrain,
 		isBeadsOfRuin: isBeadsOfRuin,
 		isTabletsOfRuin: isTabletsOfRuin,
@@ -1406,7 +1428,15 @@ function calcStat(poke, StatID) {
 	if (gen > 7 && StatID === "hp" && poke.isDynamaxed && total !== 1) {
 		total *= 2;
 	}
-	stat.find(".total").text(total);
+	// Statmod: a user-typed value in the total box overrides the computed stat
+	// outright (the server's phStats / "Overrides:" paste line).
+	var totalBox = stat.find(".total");
+	if (totalBox.attr("data-user") === "1") {
+		var typed = parseInt(totalBox.val(), 10);
+		if (typed >= 1) return Math.min(typed, 65535);
+		totalBox.removeAttr("data-user");
+	}
+	totalBox.val(total);
 	return total;
 }
 
@@ -1582,6 +1612,21 @@ function getFirstValidSetOption() {
 $(".notation").change(function () {
 	notation = $(this).val();
 });
+
+// Typing in a stat's total box turns it into a direct override (statmod)
+$(document).on("input", ".total", function () {
+	$(this).attr("data-user", "1");
+});
+$(document).on("blur", ".total", function () {
+	if ($(this).val() === "") {
+		$(this).removeAttr("data-user");
+		calcStat($(this).closest(".poke-info"), $(this).closest("tr").attr("class").split(" ")[0]);
+	}
+});
+
+function clearStatOverrides(pokeObj) {
+	pokeObj.find(".total").removeAttr("data-user");
+}
 
 function clearField() {
 	$("#singles-format").prop("checked", true);

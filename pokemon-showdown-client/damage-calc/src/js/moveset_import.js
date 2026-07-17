@@ -19,9 +19,9 @@ function ExportPokemon(pokeInfo) {
 	finalText += "\n";
 	if (pokemon.ability) finalText += "Ability: " + pokemon.ability + "\n";
 	if (pokemon.level !== 100) finalText += "Level: " + pokemon.level + "\n";
-	if (gen === 9 || gen === 10) {
+	if ((gen === 9 || gen === 10) && pokeInfo.find(".teraToggle").prop("checked")) {
 		var teraType = pokeInfo.find(".teraType").val();
-		if (teraType !== undefined && teraType !== pokemon.types[0]) {
+		if (teraType !== undefined) {
 			finalText += "Tera Type: " + teraType + "\n";
 		}
 	}
@@ -58,6 +58,30 @@ function ExportPokemon(pokeInfo) {
 		finalText += "\n";
 	}
 
+	var shownTypes = [pokeInfo.find(".type1").val(), pokeInfo.find(".type2").val()].filter(Boolean);
+	var speciesData = pokedex[pokemon.name];
+	var baseTypes = speciesData ? speciesData.types.filter(Boolean) : [];
+	if (shownTypes.length && shownTypes.join("/") !== baseTypes.join("/")) {
+		finalText += "Types: " + shownTypes.join(" / ") + "\n";
+	}
+
+	var overrideParts = [];
+	for (var oi = 0; oi < LEGACY_STATS[gen].length; oi++) {
+		var legacy = LEGACY_STATS[gen][oi];
+		var oBox = pokeInfo.find("." + legacy + " .total");
+		if (oBox.attr("data-user") === "1") {
+			var oVal = parseInt(oBox.val(), 10);
+			if (oVal >= 1) {
+				overrideParts.push(Math.min(oVal, 65535) + " " + calc.Stats.displayStat(legacyStatToStat(legacy)));
+			}
+		}
+	}
+	if (overrideParts.length) finalText += "Overrides: " + overrideParts.join(" / ") + "\n";
+
+	var curHP = ~~pokeInfo.find(".current-hp").val();
+	var maxHP = ~~pokeInfo.find(".max-hp").text();
+	if (curHP && maxHP && curHP < maxHP) finalText += "HP: " + curHP + "\n";
+
 	for (var i = 0; i < 4; i++) {
 		var moveName = pokemon.moves[i].name;
 		if (moveName !== "(No Move)") {
@@ -65,7 +89,9 @@ function ExportPokemon(pokeInfo) {
 		}
 	}
 	finalText = finalText.trim();
-	$("textarea.import-team-text").val(finalText);
+	var panelBox = pokeInfo.find("textarea.panel-set-text");
+	if (panelBox.length) panelBox.val(finalText);
+	else $("textarea.import-team-text").val(finalText);
 }
 
 $("#exportL").click(function () {
@@ -598,3 +624,119 @@ $(document).ready(function () {
 		loadDefaultLists();
 	}
 });
+
+
+// ---- Per-panel Import / Export ----------------------------------------
+// Export dumps the panel into its own textarea; Import applies a pasted set
+// directly to that panel (species, level, item, ability, nature, EVs,
+// IVs/DVs, moves, Tera Type, custom Types:, statmod Overrides:, HP:).
+
+$(document).on("click", ".panel-export", function () {
+	ExportPokemon($(this).closest(".poke-info"));
+});
+
+$(document).on("click", ".panel-import", function () {
+	var pokeInfo = $(this).closest(".poke-info");
+	var text = pokeInfo.find("textarea.panel-set-text").val() || "";
+	if (!text.trim()) return;
+	importSetToPanel(pokeInfo, text);
+});
+
+function importSetToPanel(pokeInfo, text) {
+	var lines = text.split("\n").map(function (l) { return l.replace(/\r/g, ""); })
+		.filter(function (l) { return l.trim().length; });
+	if (!lines.length) return;
+
+	// Header: "Name (Species) (G) @ Item" | "Species (G) @ Item" | "Species @ Item"
+	var header = lines[0];
+	var item = "";
+	var atSplit = header.split(" @ ");
+	if (atSplit.length > 1) item = atSplit[1].trim();
+	var namePart = atSplit[0].trim();
+	var gender = "";
+	var gm = /\((M|F)\)\s*$/.exec(namePart);
+	if (gm) { gender = gm[1]; namePart = namePart.replace(/\((M|F)\)\s*$/, "").trim(); }
+	var species = namePart;
+	var pm = /\(([^()]+)\)\s*$/.exec(namePart);
+	if (pm && pokedex[pm[1]]) species = pm[1];
+	if (!pokedex[species]) {
+		var gmaxStripped = species.replace(/-Gmax$/, "");
+		if (pokedex[gmaxStripped + "-Gmax"]) species = gmaxStripped + "-Gmax";
+	}
+	if (!pokedex[species]) {
+		alert("Couldn't find \"" + species + "\" in this mode's Pok\u00e9dex.");
+		return;
+	}
+
+	pokeInfo.find(".set-selector").val(species + " (Blank Set)");
+	pokeInfo.find(".set-selector").change();
+
+	if (item !== "") pokeInfo.find(".item").val(item);
+	if (gender) pokeInfo.find(".gender").val(gender);
+
+	var statIds = { hp: "hp", atk: "at", def: "df", spa: "sa", spd: "sd", spe: "sp",
+		spc: gen === 1 ? "sl" : "sa" };
+	var moveIndex = 0;
+
+	for (var i = 1; i < lines.length; i++) {
+		var line = lines[i].trim();
+		if (line.indexOf("Ability: ") === 0) {
+			pokeInfo.find(".ability").val(line.slice(9).trim());
+		} else if (line.indexOf("Abilities: ") === 0) {
+			pokeInfo.find(".ability").val(line.slice(11).split("/")[0].trim());
+		} else if (line.indexOf("Level: ") === 0) {
+			pokeInfo.find(".level").val(~~line.slice(7));
+		} else if (line.indexOf("Tera Type: ") === 0) {
+			pokeInfo.find(".teraType").val(line.slice(11).trim());
+		} else if (line.indexOf("Types: ") === 0) {
+			var tps = line.slice(7).split("/").map(function (t) { return t.trim(); });
+			if (tps[0]) pokeInfo.find(".type1").val(tps[0]);
+			pokeInfo.find(".type2").val(tps[1] || "");
+		} else if (line.indexOf("EVs: ") === 0 || line.indexOf("IVs: ") === 0) {
+			var isEV = line.indexOf("EVs: ") === 0;
+			var parts = line.slice(5).split("/");
+			for (var j = 0; j < parts.length; j++) {
+				var mm = /^\s*(\d+)\s+([A-Za-z]+)\s*$/.exec(parts[j]);
+				if (!mm) continue;
+				var lid = statIds[mm[2].toLowerCase()];
+				if (!lid) continue;
+				if (isEV) {
+					pokeInfo.find("." + lid + " .evs").val(~~mm[1]);
+				} else if (gen < 3 || gen === 11) {
+					pokeInfo.find("." + lid + " .dvs").val(Math.floor(~~mm[1] / 2));
+				} else {
+					pokeInfo.find("." + lid + " .ivs").val(~~mm[1]);
+				}
+			}
+		} else if (line.indexOf("Overrides: ") === 0) {
+			var oparts = line.slice(11).split("/");
+			for (var k = 0; k < oparts.length; k++) {
+				var om = /^\s*(\d+)\s+([A-Za-z]+)\s*$/.exec(oparts[k]);
+				if (!om) continue;
+				var olid = statIds[om[2].toLowerCase()];
+				if (!olid) continue;
+				var oBox = pokeInfo.find("." + olid + " .total");
+				oBox.val(Math.min(~~om[1], 65535));
+				oBox.attr("data-user", "1");
+			}
+		} else if (line.indexOf("HP: ") === 0) {
+			pokeInfo.find(".current-hp").val(~~line.slice(4));
+		} else if (/ Nature/.test(line)) {
+			pokeInfo.find(".nature").val(line.split(" Nature")[0].trim());
+		} else if (line.indexOf("- ") === 0 && moveIndex < 4) {
+			moveIndex++;
+			var moveName = line.slice(2).trim().replace(/\s*\[(\w+)\]$/, " $1");
+			pokeInfo.find(".move" + moveIndex + " select.move-selector").val(moveName);
+			pokeInfo.find(".move" + moveIndex + " select.move-selector").change();
+		}
+	}
+	for (var rest = moveIndex + 1; rest <= 4; rest++) {
+		pokeInfo.find(".move" + rest + " select.move-selector").val("(No Move)");
+		pokeInfo.find(".move" + rest + " select.move-selector").change();
+	}
+	pokeInfo.find(".ability").change();
+	pokeInfo.find(".item").change();
+	pokeInfo.find(".level").keyup();
+	pokeInfo.change();
+	if (typeof performCalculations === "function") setTimeout(performCalculations, 0);
+}

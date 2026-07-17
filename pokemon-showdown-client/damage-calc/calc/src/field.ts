@@ -3,6 +3,7 @@ import type {GameType, Weather, Terrain} from './data/interface';
 
 export class Field implements State.Field {
   gameType: GameType;
+  isCustomDisguises?: boolean;
   weather?: Weather;
   terrain?: Terrain;
   isMagicRoom: boolean;
@@ -20,6 +21,7 @@ export class Field implements State.Field {
 
   constructor(field: Partial<State.Field> = {}) {
     this.gameType = field.gameType || 'Singles';
+    this.isCustomDisguises = !!field.isCustomDisguises;
     this.terrain = field.terrain;
     this.weather = field.weather;
     this.isMagicRoom = !!field.isMagicRoom;
@@ -53,6 +55,7 @@ export class Field implements State.Field {
   clone() {
     return new Field({
       gameType: this.gameType,
+      isCustomDisguises: this.isCustomDisguises,
       weather: this.weather,
       terrain: this.terrain,
       isMagicRoom: this.isMagicRoom,

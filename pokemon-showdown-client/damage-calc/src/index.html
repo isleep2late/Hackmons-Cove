@@ -221,7 +221,7 @@
                             <td class="gen-specific g1 g2 g11 hide">
                                 <input class="dvs calc-trigger" value="15" disabled="disabled" inputmode="decimal" />
                             </td>
-                            <td><span class="total">341</span>
+                            <td><input class="total calc-trigger" value="341" inputmode="decimal" style="width:3.8em" title="Final stat. Type a number to override it directly (statmod / Overrides). Cleared when you pick a new Pok&eacute;mon." />
                             </td>
                             <td></td>
                         </tr>
@@ -241,7 +241,7 @@
                             <td class="gen-specific g1 g2 g11 hide">
                                 <input class="dvs calc-trigger" value="15" inputmode="decimal" />
                             </td>
-                            <td><span class="total">236</span>
+                            <td><input class="total calc-trigger" value="236" inputmode="decimal" style="width:3.8em" title="Final stat. Type a number to override it directly (statmod / Overrides). Cleared when you pick a new Pok&eacute;mon." />
                             </td>
                             <td>
                                 <select class="boost calc-trigger">
@@ -277,7 +277,7 @@
                             <td class="gen-specific g1 g2 g11 hide">
                                 <input class="dvs calc-trigger" value="15" inputmode="decimal" />
                             </td>
-                            <td><span class="total">236</span>
+                            <td><input class="total calc-trigger" value="236" inputmode="decimal" style="width:3.8em" title="Final stat. Type a number to override it directly (statmod / Overrides). Cleared when you pick a new Pok&eacute;mon." />
                             </td>
                             <td>
                                 <select class="boost calc-trigger">
@@ -313,7 +313,7 @@
                             <td class="gen-specific g1 g2 g11 hide">
                                 <input class="dvs calc-trigger" value="15" inputmode="decimal" />
                             </td>
-                            <td><span class="total">236</span>
+                            <td><input class="total calc-trigger" value="236" inputmode="decimal" style="width:3.8em" title="Final stat. Type a number to override it directly (statmod / Overrides). Cleared when you pick a new Pok&eacute;mon." />
                             </td>
                             <td>
                                 <select class="boost calc-trigger">
@@ -349,7 +349,7 @@
                             <td class="gen-specific g1 g2 g11 hide">
                                 <input class="dvs calc-trigger" value="15" disabled="disabled" inputmode="decimal" />
                             </td>
-                            <td><span class="total">236</span>
+                            <td><input class="total calc-trigger" value="236" inputmode="decimal" style="width:3.8em" title="Final stat. Type a number to override it directly (statmod / Overrides). Cleared when you pick a new Pok&eacute;mon." />
                             </td>
                             <td>
                                 <select class="boost calc-trigger">
@@ -382,7 +382,7 @@
                             <td>
                                 <input class="dvs calc-trigger" value="15" inputmode="decimal" />
                             </td>
-                            <td><span class="total">236</span>
+                            <td><input class="total calc-trigger" value="236" inputmode="decimal" style="width:3.8em" title="Final stat. Type a number to override it directly (statmod / Overrides). Cleared when you pick a new Pok&eacute;mon." />
                             </td>
                             <td>
                                 <select class="boost calc-trigger">
@@ -418,7 +418,7 @@
                             <td class="gen-specific g1 g2 g11 hide">
                                 <input class="dvs calc-trigger" value="15" inputmode="decimal" />
                             </td>
-                            <td><span class="total">236</span>
+                            <td><input class="total calc-trigger" value="236" inputmode="decimal" style="width:3.8em" title="Final stat. Type a number to override it directly (statmod / Overrides). Cleared when you pick a new Pok&eacute;mon." />
                             </td>
                             <td>
                                 <select class="boost calc-trigger">
@@ -719,6 +719,13 @@
                     <option class="gen-specific g4 g10 g11" value="9">9 times</option>
                     <option class="gen-specific g4 g10 g11" value="10">10 times</option>
                 </select>
+            </div>
+
+            <div class="info-group" aria-label="Import or export this Pok&eacute;mon">
+                <label>Import / Export this Pok&eacute;mon</label><br />
+                <textarea class="panel-set-text" rows="5" style="width:97%" placeholder="Paste a set here and press Import, or press Export to dump this Pok&eacute;mon (supports Overrides:, Types:, Tera Type, EVs/IVs, Level, HP)."></textarea><br />
+                <button type="button" class="panel-import" data-side="p1">Import</button>
+                <button type="button" class="panel-export" data-side="p1">Export</button>
             </div>
         </fieldset>
     </div>
@@ -1093,12 +1100,10 @@
                                 <label class="btn btn-xxwide" for="switchingR">Switching Out</label>
                             </div></td>
                         </tr>
-                        <tr>
-                            <td><div class="left" title="Export the leftmost Pok&eacute;mon set">
-                                <button id="exportL">Export</button>
-                            </div></td>
-                            <td><div class="right" title="Export the rightmost Pok&eacute;mon set">
-                                <button id="exportR">Export</button>
+                        <tr class="gen-specific g10">
+                            <td colspan="2"><div style="text-align:center" title="Apply Custom Disguises rules: a defender whose raw Def/Sp. Def is exactly 655 only ever takes 1 damage per hit (the Eternamax glitch).">
+                                <input class="visually-hidden calc-trigger" type="checkbox" id="customDisguises" />
+                                <label class="btn btn-xxwide" for="customDisguises">Custom Disguises</label>
                             </div></td>
                         </tr>
                     </tbody>
@@ -1107,9 +1112,10 @@
         </div>
         <div aria-label="Import team" role="region">
             <fieldset class="poke-import">
-                <legend align="center">Import / Export</legend>
+                <legend align="center">Set Library</legend>
                 <div id="import-1_wrapper" class="dataTables_wrapper no-footer">
                     <form class="import-team">
+                        <div style="font-size:8pt;margin-bottom:3px">Imports here are saved as named sets in the Pok&eacute;mon dropdowns. To load a paste straight into a panel, use that panel's own Import box below it.</div>
                         <input class="import-name-text" value="Custom Set"></input>
                         <textarea class="import-team-text"></textarea>
                         <!--<button style='position:absolute' class='bs-btn bs-btn-default'>Import</button>-->
@@ -1189,7 +1195,7 @@
                             <td class="gen-specific g1 g2 g11 hide">
                                 <input class="dvs calc-trigger" value="15" disabled="disabled" inputmode="decimal" />
                             </td>
-                            <td><span class="total">341</span>
+                            <td><input class="total calc-trigger" value="341" inputmode="decimal" style="width:3.8em" title="Final stat. Type a number to override it directly (statmod / Overrides). Cleared when you pick a new Pok&eacute;mon." />
                             </td>
                             <td></td>
                         </tr>
@@ -1209,7 +1215,7 @@
                             <td class="gen-specific g1 g2 g11 hide">
                                 <input class="dvs calc-trigger" value="15" inputmode="decimal" />
                             </td>
-                            <td><span class="total">236</span>
+                            <td><input class="total calc-trigger" value="236" inputmode="decimal" style="width:3.8em" title="Final stat. Type a number to override it directly (statmod / Overrides). Cleared when you pick a new Pok&eacute;mon." />
                             </td>
                             <td>
                                 <select class="boost calc-trigger">
@@ -1245,7 +1251,7 @@
                             <td class="gen-specific g1 g2 g11 hide">
                                 <input class="dvs calc-trigger" value="15" inputmode="decimal" />
                             </td>
-                            <td><span class="total">236</span>
+                            <td><input class="total calc-trigger" value="236" inputmode="decimal" style="width:3.8em" title="Final stat. Type a number to override it directly (statmod / Overrides). Cleared when you pick a new Pok&eacute;mon." />
                             </td>
                             <td>
                                 <select class="boost calc-trigger">
@@ -1281,7 +1287,7 @@
                             <td class="gen-specific g1 g2 g11 hide">
                                 <input class="dvs calc-trigger" value="15" inputmode="decimal" />
                             </td>
-                            <td><span class="total">236</span>
+                            <td><input class="total calc-trigger" value="236" inputmode="decimal" style="width:3.8em" title="Final stat. Type a number to override it directly (statmod / Overrides). Cleared when you pick a new Pok&eacute;mon." />
                             </td>
                             <td>
                                 <select class="boost calc-trigger">
@@ -1317,7 +1323,7 @@
                             <td class="gen-specific g1 g2 g11 hide">
                                 <input class="dvs calc-trigger" value="15" disabled="disabled" inputmode="decimal" />
                             </td>
-                            <td><span class="total">236</span>
+                            <td><input class="total calc-trigger" value="236" inputmode="decimal" style="width:3.8em" title="Final stat. Type a number to override it directly (statmod / Overrides). Cleared when you pick a new Pok&eacute;mon." />
                             </td>
                             <td>
                                 <select class="boost calc-trigger">
@@ -1350,7 +1356,7 @@
                             <td>
                                 <input class="dvs calc-trigger" value="15" inputmode="decimal" />
                             </td>
-                            <td><span class="total">236</span>
+                            <td><input class="total calc-trigger" value="236" inputmode="decimal" style="width:3.8em" title="Final stat. Type a number to override it directly (statmod / Overrides). Cleared when you pick a new Pok&eacute;mon." />
                             </td>
                             <td>
                                 <select class="boost calc-trigger">
@@ -1386,7 +1392,7 @@
                             <td class="gen-specific g1 g2 g11 hide">
                                 <input class="dvs calc-trigger" value="15" inputmode="decimal" />
                             </td>
-                            <td><span class="total">236</span>
+                            <td><input class="total calc-trigger" value="236" inputmode="decimal" style="width:3.8em" title="Final stat. Type a number to override it directly (statmod / Overrides). Cleared when you pick a new Pok&eacute;mon." />
                             </td>
                             <td>
                                 <select class="boost calc-trigger">
@@ -1685,6 +1691,13 @@
                     <option class="gen-specific g4 g10 g11" value="9">9 times</option>
                     <option class="gen-specific g4 g10 g11" value="10">10 times</option>
                 </select>
+            </div>
+
+            <div class="info-group" aria-label="Import or export this Pok&eacute;mon">
+                <label>Import / Export this Pok&eacute;mon</label><br />
+                <textarea class="panel-set-text" rows="5" style="width:97%" placeholder="Paste a set here and press Import, or press Export to dump this Pok&eacute;mon (supports Overrides:, Types:, Tera Type, EVs/IVs, Level, HP)."></textarea><br />
+                <button type="button" class="panel-import" data-side="p2">Import</button>
+                <button type="button" class="panel-export" data-side="p2">Export</button>
             </div>
         </fieldset>
     </div>

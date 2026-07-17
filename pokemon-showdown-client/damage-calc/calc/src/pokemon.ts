@@ -22,6 +22,7 @@ export class Pokemon implements State.Pokemon {
   isDynamaxed?: boolean | 'gmax';
   dynamaxLevel?: number;
   isWildMight?: boolean;
+  statOverrides?: Partial<I.StatsTable>;
   alliesFainted?: number;
   boostedStat?: I.StatIDExceptHP | 'auto';
   item?: I.ItemName;
@@ -107,6 +108,21 @@ export class Pokemon implements State.Pokemon {
       this.stats.hp *= 2;
     }
 
+    // No Nerfs statmod (the server's phStats): direct final-stat overrides
+    // replace the computed value outright, clamped like the server (1-65535).
+    if (options.statOverrides) {
+      this.statOverrides = options.statOverrides;
+      let stat: I.StatID;
+      for (stat in options.statOverrides) {
+        const value = options.statOverrides[stat];
+        if (typeof value === 'number' && !isNaN(value)) {
+          const clamped = Math.min(Math.max(Math.trunc(value), 1), 65535);
+          this.rawStats[stat] = clamped;
+          this.stats[stat] = clamped;
+        }
+      }
+    }
+
     const curHP = options.curHP || options.originalCurHP;
     this.originalCurHP = curHP && curHP <= this.rawStats.hp ? curHP : this.rawStats.hp;
     this.status = options.status || '';
@@ -174,6 +190,7 @@ export class Pokemon implements State.Pokemon {
       isDynamaxed: this.isDynamaxed,
       dynamaxLevel: this.dynamaxLevel,
       isWildMight: this.isWildMight,
+      statOverrides: this.statOverrides,
       alliesFainted: this.alliesFainted,
       boostedStat: this.boostedStat,
       item: this.item,

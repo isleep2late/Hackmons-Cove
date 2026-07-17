@@ -10,6 +10,8 @@ export namespace State {
     dynamaxLevel?: number;
     // No Nerfs: the Wild Might volatile (Alpha Pokemon)
     isWildMight?: boolean;
+    // No Nerfs statmod: direct final-stat overrides (the server's phStats)
+    statOverrides?: Partial<I.StatsTable>;
     alliesFainted?: number;
     boostedStat?: I.StatIDExceptHP | 'auto';
     item?: I.ItemName;
@@ -40,6 +42,8 @@ export namespace State {
 
   export interface Field {
     gameType: I.GameType;
+    // No Nerfs: Custom Disguises rules (enables the 655-defense glitch)
+    isCustomDisguises?: boolean;
     weather?: I.Weather;
     terrain?: I.Terrain;
     isMagicRoom?: boolean;
