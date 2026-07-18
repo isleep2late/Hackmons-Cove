@@ -1161,7 +1161,7 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 		if (!format) return this.getDefaultResults();
 		const isVGCOrBS = format.startsWith('battlespot') || format.startsWith('bss') ||
 			format.startsWith('battlestadium') || format.startsWith('vgc');
-		const isHackmons = (format.includes('hackmons') || format.includes('phnn')) || format.endsWith('bh') || format.includes('anyability') || format.includes('glitch') || format.includes('unified') || format.includes('disguise') || format.includes('statuses') || format.includes('nolimit') || format.includes('nonerfs') || format.includes('customgame');
+		const isHackmons = (format.includes('hackmons') || format.includes('phnn')) || format.includes('bh') || format.includes('anyability') || format.includes('glitch') || format.includes('unified') || format.includes('disguise') || format.includes('statuses') || format.includes('nolimit') || format.includes('nonerfs') || format.includes('customgame');
 		let isDoublesOrBS = isVGCOrBS || this.formatType?.includes('doubles');
 		const dex = this.dex;
 
@@ -1461,7 +1461,7 @@ class BattleAbilitySearch extends BattleTypedSearch<'ability'> {
 	getBaseResults(): SearchRow[] {
 		if (!this.species) return this.getDefaultResults();
 		const format = this.format;
-		const isHackmons = ((format.includes('hackmons') || format.includes('phnn')) || format.endsWith('bh') || format.includes('anyability') || format.includes('unified') || format.includes('disguise') || format.includes('statuses') || format.includes('nolimit') || format.includes('nonerfs') || format.includes('customgame'));
+		const isHackmons = ((format.includes('hackmons') || format.includes('phnn')) || format.includes('bh') || format.includes('anyability') || format.includes('unified') || format.includes('disguise') || format.includes('statuses') || format.includes('nolimit') || format.includes('nonerfs') || format.includes('customgame'));
 		const isAAA = (format === 'almostanyability' || format.includes('aaa'));
 		const dex = this.dex;
 		let species = dex.species.get(this.species);
@@ -1928,7 +1928,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		const dex = this.dex;
 		let species = dex.species.get(this.species);
 		const format = this.format;
-		const isHackmons = ((format.includes('hackmons') || format.includes('phnn')) || format.endsWith('bh') || format.includes('anyability') || format.includes('unified') || format.includes('disguise') || format.includes('statuses') || format.includes('nolimit') || format.includes('nonerfs') || format.includes('customgame') || this.dex.modid === 'gen2spaceworld');
+		const isHackmons = ((format.includes('hackmons') || format.includes('phnn')) || format.includes('bh') || format.includes('anyability') || format.includes('unified') || format.includes('disguise') || format.includes('statuses') || format.includes('nolimit') || format.includes('nonerfs') || format.includes('customgame') || this.dex.modid === 'gen2spaceworld');
 		const isPHNN = format.includes('nonerfs') || format.includes('phnn');
 		const phnnMaxMoves = ['maxguard', 'gmaxdrumsolo', 'gmaxfireball', 'gmaxhydrosnipe'];
 		const isSTABmons = (format.includes('stabmons') || format === 'staaabmons');

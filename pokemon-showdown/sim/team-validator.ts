@@ -1528,8 +1528,6 @@ export class TeamValidator {
 				} else {
 					problems.push(`${name} has exactly 0 EVs - did you forget to EV it? (If this was intentional, add exactly 1 to one of your EVs, which won't change its stats but will tell us that it wasn't a mistake).`);
 				}
-			} else if (![508, 510].includes(evLimit!) && [508, 510].includes(totalEV)) {
-				problems.push(`${name} has exactly ${totalEV} EVs, but this format does not restrict you to 510 EVs (If this was intentional, add exactly 1 to one of your EVs, which won't change its stats but will tell us that it wasn't a mistake).`);
 			}
 			// Check for level import errors from user in VGC -> DOU, etc.
 			// Note that in VGC etc (Adjust Level Down = 50), `set.level` will be 100 here for validation purposes
