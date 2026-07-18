@@ -506,7 +506,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 			'Species Clause', 'OHKO Clause', 'Evasion Clause', 'Sleep Moves Clause', 'Dry Pass Clause'],
 		banlist: [
 			'Slaking',
-			'Huge Power', 'Shadow Tag', 'Arena Trap', 'Wonder Guard',
+			'Huge Power', 'Pure Power', 'Shadow Tag', 'Arena Trap', 'Wonder Guard',
 			'Belly Drum',
 			'Shadow Rush', 'Shadow Blast', 'Shadow Blitz', 'Shadow Break', 'Shadow End',
 			'Shadow Bolt', 'Shadow Chill', 'Shadow Fire', 'Shadow Storm', 'Shadow Wave', 'Shadow Rave',
