@@ -220,7 +220,7 @@ export const TypeChart: import('../../../sim/dex-data').ModdedTypeDataTable = {
 			Poison: 0,
 			Psychic: 0,
 			Rock: 0,
-			Shadow: 0,
+			Shadow: 2,
 			Steel: 0,
 			Stellar: 0,
 			Water: 0,
