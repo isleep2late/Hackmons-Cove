@@ -198,7 +198,7 @@
 					return this.updateTeamView();
 				}
 				this.ignoreEVLimits = (this.curTeam.gen < 3 ||
-					(((this.curTeam.format.includes('hackmons') || this.curTeam.format.includes('phnn')) || this.curTeam.format.endsWith('bh')) && (this.curTeam.gen !== 6 || this.curTeam.format.includes('nolimit'))) ||
+					(((this.curTeam.format.includes('hackmons') || this.curTeam.format.includes('phnn')) || this.curTeam.format.includes('bh')) && (this.curTeam.gen !== 6 || this.curTeam.format.includes('nolimit'))) ||
 					this.curTeam.format.includes('metronomebattle'));
 				if (this.curSet) {
 					return this.updateSetView();
@@ -2649,7 +2649,7 @@
 			var guessedMinus = guess.minusStat;
 			var fmt = this.curTeam.format;
 			var is252Format = (
-				(fmt.endsWith('hackmons') || fmt.endsWith('bh')) && this.curTeam.gen !== 6
+				(fmt.endsWith('hackmons') || fmt.includes('bh')) && this.curTeam.gen !== 6
 			) || fmt.includes('nonerfs') || fmt.includes('phnn') || fmt.includes('510') ||
 				fmt.includes('nolimit') || fmt.includes('disguise') || fmt.includes('statuses') ||
 				fmt.includes('anyability') || fmt.includes('unified') || fmt.includes('customgame');
@@ -3262,7 +3262,7 @@
 			var isLetsGo = this.curTeam.format.includes('letsgo');
 			var isBDSP = this.curTeam.format.includes('bdsp');
 			var isNatDex = this.curTeam.format.includes('nationaldex') || this.curTeam.format.includes('natdex');
-			var isHackmons = (this.curTeam.format.includes('hackmons') || this.curTeam.format.includes('phnn')) || this.curTeam.format.endsWith('bh');
+			var isHackmons = (this.curTeam.format.includes('hackmons') || this.curTeam.format.includes('phnn')) || this.curTeam.format.includes('bh');
 			var species = this.curTeam.dex.species.get(set.species);
 			if (!set) return;
 			buf += '<div class="resultheader"><h3>Details</h3></div>';
@@ -4404,7 +4404,7 @@
 			if (set.dynamaxLevel) delete set.dynamaxLevel;
 			if (set.gigantamax) delete set.gigantamax;
 			if (set.teraType) delete set.teraType;
-			if (!((this.curTeam.format.includes('hackmons') || this.curTeam.format.includes('phnn')) || this.curTeam.format.endsWith('bh')) && species.requiredItems.length === 1) {
+			if (!((this.curTeam.format.includes('hackmons') || this.curTeam.format.includes('phnn')) || this.curTeam.format.includes('bh')) && species.requiredItems.length === 1) {
 				set.item = species.requiredItems[0];
 			} else {
 				set.item = '';
