@@ -57,6 +57,11 @@ html = html.replace(/<img([^>]*)src="\.\/([^"?]+)(\?[^"]*)?"/g, (m, pre, file) =
   return `<img${pre}src="data:image/${ext === 'svg' ? 'svg+xml' : ext};base64,${b64}"`;
 });
 
+html = html.replace(
+  /(<a class="button nav-first"[^>]*>)[\s\S]*?(<\/a>)/,
+  '$1<span aria-label="Hackmons Hub" style="display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;background:#7c3aed;border-radius:9px;color:#fff;font:800 24px/1 -apple-system,Segoe UI,Arial,sans-serif;">H</span>$2'
+);
+
 // Mobile viewport: the calc is a wide two-column layout; start zoomed out a
 // touch and let the user pinch.
 if (!/name="viewport"/.test(html)) {

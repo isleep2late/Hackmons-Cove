@@ -128,3 +128,12 @@ If you're doing _anything_ else other than forking, _especially_ if you want to 
   [6]: http://www.gnu.org/licenses/agpl-3.0.html
 
 **WARNING:** This is **NOT** the same license as Pokémon Showdown's server.
+
+### Bundled third-party software
+
+This repository also vendors third-party components that keep their own licenses:
+
+- **Damage calculator** — `damage-calc/`, from [smogon/damage-calc](https://github.com/smogon/damage-calc), is licensed under the **MIT License** (Copyright © 2013–2025 Honko and other contributors). Its full copyright and permission notice are retained in [`damage-calc/LICENSE`](damage-calc/LICENSE).
+- **Showdex** — `showdex/` is distributed under the AGPLv3, the same license as the client; see [`showdex/LICENSE`](showdex/LICENSE).
+
+Each component is used under its respective license, and the notices above are kept intact in those directories.
