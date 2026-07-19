@@ -3512,12 +3512,6 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 					`(Restricted Pok\u00e9mon can only be used as impersonations.)`,
 				];
 			}
-			const rt = this.ruleTable;
-			if ((this.toID(set.name) !== species.id && this.toID(set.name) !== impersonation.id) ||
-				(impersonation.isNonstandard && !(rt.has(`+tag:${this.toID(impersonation.isNonstandard)}`) ||
-					rt.has(`+pokemon:${impersonation.id}`) || rt.has(`+basepokemon:${this.toID(impersonation.baseSpecies)}`)))) {
-				return [`All Pok\u00e9mon must either have no nickname or must be nicknamed after a Pok\u00e9mon.`];
-			}
 		},
 		checkCanLearn(move, species, setSources, set) {
 			const impersonation = this.dex.species.get(set.name);
