@@ -17,19 +17,88 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	counter: {
 		inherit: true,
-		priority: -1,
-		accuracy: true,
 		ignoreImmunity: true,
+		willCrit: false,
+		basePower: 1,
 		damageCallback(pokemon, target) {
-			const lastMove = target.lastMove;
-			if (!lastMove || lastMove.id === 'counter' || !lastMove.basePower) return false;
-			let moveType = lastMove.type;
-			if (lastMove.id === 'hiddenpower') moveType = target.hpType || 'Dark';
-			const specialTypes = ['Fire', 'Water', 'Grass', 'Electric', 'Psychic', 'Ice', 'Dragon', 'Dark'];
-			if (specialTypes.includes(moveType)) return false;
-			if (!this.lastDamage) return false;
-			return this.clampIntRange(2 * this.lastDamage, 1, 65535);
+			// Counter mechanics in gen 1:
+			// - a move is Counterable if it is Normal or Fighting type, has nonzero Base Power, and is not Counter
+			// - if Counter is used by the player, it will succeed if the opponent's last used move is Counterable
+			// - if Counter is used by the opponent, it will succeed if the player's last selected move is Counterable
+			// - (Counter will thus desync if the target's last used move is not as counterable as the target's last selected move)
+			// - if Counter succeeds it will deal twice the last move damage dealt in battle (even if it's from a different pokemon because of a switch)
+
+			// With the new Desync Clause Mod, that uses the acting Pokemon Online POV, Counter succeeds if
+			// - the last selected move by the opponent is not Counter
+			// - the last used move by the opponent is Counterable
+
+			const isCounterable = (move: { basePower: number, type: string } | null) => {
+				move ??= { basePower: 0, type: 'Normal' };
+				return ['Normal', 'Fighting', 'Ground', 'Rock', 'Flying', 'Bug', 'Poison', 'Ghost', 'Steel'].includes(move.type) && move.basePower > 0;
+			};
+
+			// These are the Counter user's POV and are used to determine if Counter will succeed
+			const isLastEnemySelectedMoveCounterable = target.side.lastEnemySelectedMove !== 'counter';
+			const isLastEnemyMoveCounterable = isCounterable(target.side.lastEnemyMove);
+
+			// These are the target's POV and are used for the hint messages
+			const isLastSelectedMoveCounterable = target.side.lastSelectedMove !== 'counter';
+			const isLastMoveCounterable = isCounterable(target.side.lastMove);
+
+			const isLastDamageNonZero = this.lastDamage > 0;
+
+			const willCounterSucceed = isLastEnemySelectedMoveCounterable && isLastEnemyMoveCounterable && isLastDamageNonZero;
+
+			// this.debug("COUNTER: isLastEnemySelectedMoveCounterable:" + isLastEnemySelectedMoveCounterable + " (" + target.side.lastEnemySelectedMove + ")");
+			// this.debug("COUNTER: isLastEnemyMoveCounterable:" + isLastEnemyMoveCounterable + " (" + target.side.lastEnemyMove + ")");
+			// this.debug("COUNTER: isLastSelectedMoveCounterable:" + isLastSelectedMoveCounterable + " (" + target.side.lastSelectedMove + ")");
+			// this.debug("COUNTER: isLastMoveCounterable:" + isLastMoveCounterable + " (" + (target.side.lastMove) + ")");
+			// this.debug("COUNTER: isLastDamageNonZero:" + isLastDamageNonZero + " (" + this.lastDamage + ")");
+
+			// Hint messages
+			if (!willCounterSucceed) {
+				if (isLastDamageNonZero) {
+					if (!isLastEnemySelectedMoveCounterable && isLastSelectedMoveCounterable) {
+						// the target has Counter in its first slot
+						if (isLastEnemyMoveCounterable) {
+							// and it didn't fail for other reason
+							this.hint("Desync Clause Mod activated!");
+							this.hint(
+								"In Gen 1, if Counter is used against a target that switched in and spent the turn sleeping, " +
+								"from the Counter user's perspective, " +
+								"it will fail if the move in the target's first slot is also Counter.",
+							);
+						}
+					} else if (!isLastEnemyMoveCounterable && isLastMoveCounterable) {
+						// the target selected a counterable move that was never announced
+						this.hint("Desync Clause Mod activated!", false, target.side);
+						this.hint(
+							"In Gen 1, from the Counter user's perspective, " +
+							"Counter uses the last announced move by the target's team to determine if it will succeed.",
+							false, target.side,
+						);
+					}
+				}
+
+				this.add('-fail', pokemon);
+				return false;
+			}
+
+			if (!isLastSelectedMoveCounterable) {
+				// too obscure, don't hint
+			} else if (!isLastMoveCounterable) {
+				// the target selected a non-counterable move that was never announced
+				this.hint("Desync Clause Mod activated!", false, target.side);
+				this.hint(
+					"In Gen 1, from the Counter user's perspective, " +
+					"Counter uses the last announced move by the target's team to determine if it will succeed.",
+					false, target.side,
+				);
+			}
+
+			return 2 * this.lastDamage;
 		},
+		flags: { contact: 1, protect: 1, metronome: 1 },
 	},
 	crabhammer: {
 		inherit: true,
@@ -541,7 +610,91 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	rapidspin: {
 		inherit: true,
 		pp: 10,
-		self: {
+		self: {counter: {
+		inherit: true,
+		ignoreImmunity: true,
+		willCrit: false,
+		basePower: 1,
+		damageCallback(pokemon, target) {
+			// Counter mechanics in gen 1:
+			// - a move is Counterable if it is Normal or Fighting type, has nonzero Base Power, and is not Counter
+			// - if Counter is used by the player, it will succeed if the opponent's last used move is Counterable
+			// - if Counter is used by the opponent, it will succeed if the player's last selected move is Counterable
+			// - (Counter will thus desync if the target's last used move is not as counterable as the target's last selected move)
+			// - if Counter succeeds it will deal twice the last move damage dealt in battle (even if it's from a different pokemon because of a switch)
+
+			// With the new Desync Clause Mod, that uses the acting Pokemon Online POV, Counter succeeds if
+			// - the last selected move by the opponent is not Counter
+			// - the last used move by the opponent is Counterable
+
+			const isCounterable = (move: { basePower: number, type: string } | null) => {
+				move ??= { basePower: 0, type: 'Normal' };
+				return ['Normal', 'Fighting'].includes(move.type) && move.basePower > 0;
+			};
+
+			// These are the Counter user's POV and are used to determine if Counter will succeed
+			const isLastEnemySelectedMoveCounterable = target.side.lastEnemySelectedMove !== 'counter';
+			const isLastEnemyMoveCounterable = isCounterable(target.side.lastEnemyMove);
+
+			// These are the target's POV and are used for the hint messages
+			const isLastSelectedMoveCounterable = target.side.lastSelectedMove !== 'counter';
+			const isLastMoveCounterable = isCounterable(target.side.lastMove);
+
+			const isLastDamageNonZero = this.lastDamage > 0;
+
+			const willCounterSucceed = isLastEnemySelectedMoveCounterable && isLastEnemyMoveCounterable && isLastDamageNonZero;
+
+			// this.debug("COUNTER: isLastEnemySelectedMoveCounterable:" + isLastEnemySelectedMoveCounterable + " (" + target.side.lastEnemySelectedMove + ")");
+			// this.debug("COUNTER: isLastEnemyMoveCounterable:" + isLastEnemyMoveCounterable + " (" + target.side.lastEnemyMove + ")");
+			// this.debug("COUNTER: isLastSelectedMoveCounterable:" + isLastSelectedMoveCounterable + " (" + target.side.lastSelectedMove + ")");
+			// this.debug("COUNTER: isLastMoveCounterable:" + isLastMoveCounterable + " (" + (target.side.lastMove) + ")");
+			// this.debug("COUNTER: isLastDamageNonZero:" + isLastDamageNonZero + " (" + this.lastDamage + ")");
+
+			// Hint messages
+			if (!willCounterSucceed) {
+				if (isLastDamageNonZero) {
+					if (!isLastEnemySelectedMoveCounterable && isLastSelectedMoveCounterable) {
+						// the target has Counter in its first slot
+						if (isLastEnemyMoveCounterable) {
+							// and it didn't fail for other reason
+							this.hint("Desync Clause Mod activated!");
+							this.hint(
+								"In Gen 1, if Counter is used against a target that switched in and spent the turn sleeping, " +
+								"from the Counter user's perspective, " +
+								"it will fail if the move in the target's first slot is also Counter.",
+							);
+						}
+					} else if (!isLastEnemyMoveCounterable && isLastMoveCounterable) {
+						// the target selected a counterable move that was never announced
+						this.hint("Desync Clause Mod activated!", false, target.side);
+						this.hint(
+							"In Gen 1, from the Counter user's perspective, " +
+							"Counter uses the last announced move by the target's team to determine if it will succeed.",
+							false, target.side,
+						);
+					}
+				}
+
+				this.add('-fail', pokemon);
+				return false;
+			}
+
+			if (!isLastSelectedMoveCounterable) {
+				// too obscure, don't hint
+			} else if (!isLastMoveCounterable) {
+				// the target selected a non-counterable move that was never announced
+				this.hint("Desync Clause Mod activated!", false, target.side);
+				this.hint(
+					"In Gen 1, from the Counter user's perspective, " +
+					"Counter uses the last announced move by the target's team to determine if it will succeed.",
+					false, target.side,
+				);
+			}
+
+			return 2 * this.lastDamage;
+		},
+		flags: { contact: 1, protect: 1, metronome: 1 },
+	},
 			onHit(pokemon) {
 				if (pokemon.removeVolatile('partiallytrapped')) {
 					this.add('-end', pokemon, 'partiallytrapped');
@@ -662,26 +815,56 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		inherit: true,
 		accuracy: 75,
 		pp: 10,
-		volatileStatus: "partiallytrapped",
-		self: {volatileStatus: 'partialtrappinglock'},
+		self: {
+			volatileStatus: 'partialtrappinglock',
+		},
+		onTryMove(source, target) {
+			if (target.volatiles['mustrecharge']) {
+				target.removeVolatile('mustrecharge');
+				this.hint("In Gen 1, partial trapping moves negate the recharge turn of Hyper Beam, even if they miss.", true);
+			}
+		},
 	},
 	firespin: {
 		inherit: true,
 		accuracy: 70,
 		basePower: 15,
-		volatileStatus: "partiallytrapped",
-		self: {volatileStatus: 'partialtrappinglock'},
+		self: {
+			volatileStatus: 'partialtrappinglock',
+		},
+		onTryMove(source, target) {
+			if (target.volatiles['mustrecharge']) {
+				target.removeVolatile('mustrecharge');
+				this.hint("In Gen 1, partial trapping moves negate the recharge turn of Hyper Beam, even if they miss.", true);
+			}
+		},
 	},
 	wrap: {
 		inherit: true,
 		accuracy: 85,
-		volatileStatus: "partiallytrapped",
-		self: {volatileStatus: 'partialtrappinglock'},
+		ignoreImmunity: true,
+		self: {
+			volatileStatus: 'partialtrappinglock',
+		},
+		onTryMove(source, target) {
+			if (target.volatiles['mustrecharge']) {
+				target.removeVolatile('mustrecharge');
+				this.hint("In Gen 1, partial trapping moves negate the recharge turn of Hyper Beam, even if they miss.", true);
+			}
+		},
 	},
 	bind: {
 		inherit: true,
-		volatileStatus: "partiallytrapped",
-		self: {volatileStatus: 'partialtrappinglock'},
+		ignoreImmunity: true,
+		self: {
+			volatileStatus: 'partialtrappinglock',
+		},
+		onTryMove(source, target) {
+			if (target.volatiles['mustrecharge']) {
+				target.removeVolatile('mustrecharge');
+				this.hint("In Gen 1, partial trapping moves negate the recharge turn of Hyper Beam, even if they miss.", true);
+			}
+		},
 	},
 	psychic: {
 		inherit: true,

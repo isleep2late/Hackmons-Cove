@@ -563,7 +563,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'spaceworld',
 		searchShow: false,
 		challengeShow: false,
-		ruleset: ['Standard', 'SW97 PP Up Legality'],
+		ruleset: ['Standard'],
 	},
 	{
 		name: "[Gen 2] SpaceWorld Ubers",
@@ -571,7 +571,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'spaceworld',
 		searchShow: false,
 		challengeShow: false,
-		ruleset: ['Standard', 'SW97 PP Up Legality'],
+		ruleset: ['Standard'],
 	},
 	{
 		name: "[Gen 1] Disguises",

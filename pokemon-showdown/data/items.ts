@@ -8178,6 +8178,7 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 		gen: 8,
 		isNonstandard: "CAP",
 	},
+	// Sw97 Items
 	strangethread: {
 		num: -6200,
 		name: "Strange Thread",
