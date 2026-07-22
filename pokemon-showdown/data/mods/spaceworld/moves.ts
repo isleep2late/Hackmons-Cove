@@ -354,8 +354,23 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	hiddenpower: {
 		inherit: true,
+		shortDesc: "???-type: hits every type neutrally. Power (up to 78) depends on the user's DVs.",
+		desc: "This move is ???-type, dealing neutral damage to every type. Its base power is determined by the user's DVs using the demo's formula, which omits the final games' halving and +31 offset, so power ranges from the formula minimum up to 78 instead of 31 to 70.",
 		type: "???",
 		pp: 10,
+		onModifyType(move) {
+			move.type = '???';
+		},
+		basePowerCallback(pokemon) {
+			const ivs = pokemon.set.ivs;
+			const tr = this.dex.trunc;
+			const atkDV = tr(ivs.atk / 2);
+			const defDV = tr(ivs.def / 2);
+			const speDV = tr(ivs.spe / 2);
+			const spcDV = tr(ivs.spa / 2);
+			const power = 5 * ((spcDV >> 3) + (2 * (speDV >> 3)) + (4 * (defDV >> 3)) + (8 * (atkDV >> 3))) + (spcDV % 4);
+			return this.clampIntRange(power, 1, 78);
+		},
 	},
 	bite: {
 		inherit: true,
@@ -742,17 +757,24 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	bounce: {
 		inherit: true,
-		shortDesc: "Charges turn 1; fails and deals no damage turn 2 (0 power).",
-		desc: "This attack charges on the first turn, but with 0 power it fails on the second turn, dealing no damage and never paralyzing the target.",
+		shortDesc: "Hits in one turn for minimal damage (0 power in the demo).",
+		desc: "A single-turn attack with no charge turn and no paralysis chance. The demo assigns it 0 power, so it deals only the damage formula's minimum (about 2 HP).",
 		isNonstandard: null,
 		gen: 2,
 		accuracy: 100,
 		basePower: 0,
+		basePowerCallback() {
+			return 1;
+		},
 		pp: 10,
 		category: "Special",
 		type: "Water",
 		priority: 0,
 		target: "normal",
+		flags: {protect: 1, mirror: 1, metronome: 1},
+		onTryMove: undefined,
+		secondary: null,
+		condition: undefined,
 	},
 	clamp: {
 		inherit: true,

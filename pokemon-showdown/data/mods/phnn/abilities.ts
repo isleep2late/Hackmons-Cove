@@ -160,11 +160,11 @@ export const Abilities: import('../../../sim/dex-abilities').ModdedAbilityDataTa
 				return false;
 			}
 		},
-		onTryAddVolatile(status, target) {
-			if (status.id === 'toxicspikes') return null;
+		onSetStatus(status, target, source, effect) {
+			if (effect?.id === 'toxicspikes') return false;
 		},
-		shortDesc: "This Pokemon can only be damaged by attacks; it cannot be fully paralyzed.",
-		desc: "This Pokemon can only be damaged by direct attacks. It also cannot be fully paralyzed by paralysis. Burn, poison, weather, entry hazard, and all other indirect damage is prevented, but it can still be poisoned by Toxic Spikes.",
+		shortDesc: "This Pokemon can only be damaged by attacks; immune to full paralysis and Toxic Spikes.",
+		desc: "This Pokemon can only be damaged by direct attacks. It also cannot be fully paralyzed by paralysis, and it cannot be poisoned by Toxic Spikes. Burn, poison, weather, entry hazard, and all other indirect damage is prevented.",
 	},
 	moody: {
 		inherit: true,
