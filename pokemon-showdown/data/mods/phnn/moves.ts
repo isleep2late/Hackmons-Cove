@@ -22,6 +22,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 			if (!target || type !== target.getTypes()[0]) return typeMod;
 			return phnnIsShadowMon(target) ? -1 : 1;
 		},
+		shortDesc: "Power is equal to the base move's Z-Power.",
+		desc: "Power is equal to the base move's Z-Power. This move is super effective against non-Shadow Pokemon and resisted by Shadow Pokemon.",
 	},
 	glitchcascade: {
 		num: 0,
@@ -36,10 +38,14 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		secondary: null,
 		target: "normal",
 		type: "???",
+		shortDesc: "Power is equal to the base move's Z-Power.",
+		desc: "Power is equal to the base move's Z-Power.",
 	},
 	spore: {
 		inherit: true,
 		flags: { protect: 1, reflectable: 1, mirror: 1, metronome: 1 },
+		shortDesc: "Causes the target to fall asleep. Grass-types are not immune.",
+		desc: "Causes the target to fall asleep. Unlike other generations, this is not a powder move: Grass-type Pokemon, Pokemon with the Overcoat Ability, and Pokemon holding Safety Goggles are not immune to it.",
 	},
 	electricterrain: {
 		inherit: true,
@@ -86,6 +92,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 				this.add('-fieldend', 'move: Electric Terrain');
 			},
 		},
+		shortDesc: "5 turns. Grounded: +Electric power (1.5x), can't sleep.",
+		desc: "For 5 turns, the terrain becomes Electric Terrain. During the effect, the power of Electric-type attacks made by grounded Pokemon is multiplied by 1.5 and grounded Pokemon cannot fall asleep; Pokemon already asleep do not wake up. Grounded Pokemon cannot become affected by Yawn or fall asleep from its effect. Fails if the current terrain is Electric Terrain.",
 	},
 	grassyterrain: {
 		inherit: true,
@@ -128,6 +136,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 				this.add('-fieldend', 'move: Grassy Terrain');
 			},
 		},
+		shortDesc: "5 turns. Grounded: +Grass power (1.5x), +1/16 max HP.",
+		desc: "For 5 turns, the terrain becomes Grassy Terrain. During the effect, the power of Grass-type attacks used by grounded Pokemon is multiplied by 1.5, the power of Bulldoze, Earthquake, and Magnitude used against grounded Pokemon is multiplied by 0.5, and grounded Pokemon have 1/16 of their maximum HP, rounded down, restored at the end of each turn, including the last turn. Fails if the current terrain is Grassy Terrain.",
 	},
 	psychicterrain: {
 		inherit: true,
@@ -175,6 +185,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 				this.add('-fieldend', 'move: Psychic Terrain');
 			},
 		},
+		shortDesc: "5 turns. Grounded: +Psychic power (1.5x), priority-safe.",
+		desc: "For 5 turns, the terrain becomes Psychic Terrain. During the effect, the power of Psychic-type attacks made by grounded Pokemon is multiplied by 1.5 and grounded Pokemon cannot be hit by moves with priority greater than 0, unless the target is an ally. Fails if the current terrain is Psychic Terrain.",
 	},
 	leechseed: {
 		inherit: true,
@@ -207,8 +219,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		basePower: 200,
 		ignoreEvasion: false,
         ignoreImmunity: { 'Dragon': true },
-		shortDesc: "Ignores target's stat/Sp. Def boosts; ignores Fairy's immunity to Dragon (hits Fairy types).",
-		desc: "Damage ignores the target's stat stage changes and Special Defense boosts. Ignores Fairy's immunity to Dragon, so it can hit Fairy types; a Fairy/Dragon target is treated as Dragon-only and takes super-effective damage.",
+		shortDesc: "Ignores the target's Sp. Def stat stages. Hits Fairy-types. Hits adjacent foes.",
+		desc: "Damage is calculated ignoring the target's Special Defense stat stage changes; the target's evasiveness and other stat stages are not ignored. This move ignores Fairy's type immunity to Dragon, so it can hit Fairy-types; a Fairy/Dragon-type target still takes super-effective damage from its Dragon typing. Hits all adjacent foes.",
 	},
 	highjumpkick: {
 		inherit: true,
@@ -247,8 +259,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 				spd: -1,
 			},
 		},
-		shortDesc: "33.2% chance to lower the target's Sp. Atk and Sp. Def by 1.",
-		desc: "Has a 33.2% chance to lower the target's Special Attack and Special Defense by 1 stage each.",
+		shortDesc: "34% chance to lower the target's Sp. Atk and Sp. Def by 1.",
+		desc: "Has a 34% chance to lower the target's Special Attack and Special Defense by 1 stage each, approximating Gen 1's 85/256 chance.",
 	},
 	muddywater: {
 		inherit: true,
@@ -262,8 +274,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 			chance: 30,
 			status: 'frz',
 		},
-		shortDesc: "30% chance to freeze the target.",
-		desc: "Has a 30% chance to freeze the target.",
+		shortDesc: "30% chance to freeze the foe(s). Can't miss in Hail or Snow.",
+		desc: "Has a 30% chance to freeze the target. If the weather is Hail or Snow, this move does not check accuracy.",
 	},
 	hydropump: {
 		inherit: true,
@@ -313,6 +325,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	magmastorm: {
 		inherit: true,
 		basePower: 120,
+		shortDesc: "Traps the target for 4-5 turns; it cannot move. 1/8 damage per turn.",
+		desc: "Prevents the target from switching for four or five turns (seven turns if the user is holding Grip Claw), and the trapped Pokemon cannot use moves while the effect lasts (Gen 1 binding behavior). Causes damage to the target equal to 1/8 of its maximum HP (1/6 if the user is holding Binding Band), rounded down, at the end of each turn during effect. The target can still switch out if it is holding Shed Shell. The effect ends if either the user or the target leaves the field. This effect is not stackable or reset by using this or another binding move.",
 	},
 	glaciallance: {
 		inherit: true,
@@ -332,6 +346,11 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		},
 		shortDesc: "Digs underground turn 1, strikes turn 2. Only EQ/Fissure/Swift can hit.",
 		desc: "This attack charges on the first turn and executes on the second. While underground, only Earthquake, Fissure, and Swift can hit the user, and none of them deal doubled damage (SpaceWorld '97 behavior - Magnitude cannot reach the user at all).",
+	},
+	earthquake: {
+		inherit: true,
+		shortDesc: "No additional effect. Hits adjacent Pokemon.",
+		desc: "Deals damage to all adjacent Pokemon. This move can hit a target using Dig, but unlike other generations it does not deal doubled damage to it.",
 	},
 	fly: {
 		inherit: true,
@@ -366,8 +385,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 			if (!this.lastDamage) return false;
 			return this.clampIntRange(2 * this.lastDamage, 1, 65535);
 		},
-		shortDesc: "2x damage taken this turn, or 2x the target's last physical-type hit (any turn). Never misses; hits Ghosts; priority -1.",
-		desc: "Deals double the damage the user took from a physical attack this turn; if the user was not hit this turn, it instead deals double the damage of the target's last physical-band move, even from a previous turn (SpaceWorld '97 behavior - moves of the Fire, Water, Grass, Electric, Psychic, Ice, Dragon, and Dark types cannot be countered this way). This move never misses, can hit Ghost-types, and has -1 priority instead of -5.",
+		shortDesc: "2x damage taken this turn, or 2x the last move damage dealt in the battle (any turn) if the target's last move was physical-band. Never misses; hits Ghosts; priority -1.",
+		desc: "Deals double the damage the user took from a physical attack this turn. If the user was not hit by a physical attack this turn, this move instead deals double the last damage dealt by any move in the battle, including damage dealt by the user's own attacks, but fails unless the target's last used move was a physical-band move (SpaceWorld '97 behavior - moves of the Fire, Water, Grass, Electric, Psychic, Ice, Dragon, and Dark types cannot be countered this way). This move never misses, can hit Ghost-types, and has -1 priority instead of -5.",
 	},
 	heatwave: {
 		inherit: true,
@@ -545,8 +564,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		boosts: {
 			evasion: 1,
 		},
-		shortDesc: "Heals the user and its party, and raises the user's evasion by 1.",
-		desc: "The user and its allies are healed and the user's evasion is raised by 1 stage.",
+		shortDesc: "User and allies: healed 1/4 max HP, status cured, evasion +1.",
+		desc: "The user and its allies on the field have 1/4 of their maximum HP restored, rounded half up, have their non-volatile status conditions cured, and have their evasion raised by 1 stage.",
 	},
 	milkdrink: {
 		inherit: true,
@@ -590,8 +609,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 				def: -1,
 			},
 		},
-		shortDesc: "33.2% chance to lower the target's Defense by 1.",
-		desc: "Has a 33.2% chance to lower the target's Defense by 1 stage.",
+		shortDesc: "34% chance to lower the target's Defense by 1.",
+		desc: "Has a 34% chance to lower the target's Defense by 1 stage, approximating Gen 1's 85/256 chance.",
 	},
 	aurorabeam: {
 		inherit: true,
@@ -601,8 +620,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 				atk: -1,
 			},
 		},
-		shortDesc: "33.2% chance to lower the target's Attack by 1.",
-		desc: "Has a 33.2% chance to lower the target's Attack by 1 stage.",
+		shortDesc: "34% chance to lower the target's Attack by 1.",
+		desc: "Has a 34% chance to lower the target's Attack by 1 stage, approximating Gen 1's 85/256 chance.",
 	},
 	bubble: {
 		inherit: true,
@@ -612,8 +631,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 				spe: -1,
 			},
 		},
-		shortDesc: "33.2% chance to lower the target's Speed by 1.",
-		desc: "Has a 33.2% chance to lower the target's Speed by 1 stage.",
+		shortDesc: "34% chance to lower the target's Speed by 1.",
+		desc: "Has a 34% chance to lower the target's Speed by 1 stage, approximating Gen 1's 85/256 chance.",
 	},
 	bubblebeam: {
 		inherit: true,
@@ -623,8 +642,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 				spe: -1,
 			},
 		},
-		shortDesc: "33.2% chance to lower the target's Speed by 1.",
-		desc: "Has a 33.2% chance to lower the target's Speed by 1 stage.",
+		shortDesc: "34% chance to lower the target's Speed by 1.",
+		desc: "Has a 34% chance to lower the target's Speed by 1 stage, approximating Gen 1's 85/256 chance.",
 	},
 	constrict: {
 		inherit: true,
@@ -634,8 +653,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 				spe: -1,
 			},
 		},
-		shortDesc: "33.2% chance to lower the target's Speed by 1.",
-		desc: "Has a 33.2% chance to lower the target's Speed by 1 stage.",
+		shortDesc: "34% chance to lower the target's Speed by 1.",
+		desc: "Has a 34% chance to lower the target's Speed by 1 stage, approximating Gen 1's 85/256 chance.",
 	},
 	razorwind: {
 		inherit: true,
@@ -679,8 +698,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 				}
 			},
 		},
-		shortDesc: "Protects from damaging attacks. Contact: lowers Atk by 2.",
-		desc: "The user is protected from most attacks made by other Pokemon during this turn, and Pokemon that make contact with the user have their Attack lowered by 2 stages. This move has a 1/X chance of being successful, where X starts at 1 and triples each time this move is successfully used. X resets to 1 if this move fails, if the user's last move used is not Baneful Bunker, Detect, Endure, King's Shield, Max Guard, Obstruct, Protect, Quick Guard, Silk Trap, Spiky Shield, or Wide Guard, or if it was one of those moves and the user's protection was broken. Fails if the user moves last this turn.",
+		shortDesc: "Protects from moves, including status moves. Contact: lowers Atk by 2.",
+		desc: "The user is protected from most attacks made by other Pokemon during this turn, including Status moves, and Pokemon that make contact with the user have their Attack lowered by 2 stages. Z-Moves and Max Moves are not blocked, but deal 25% of their usual damage. This move has a 1/X chance of being successful, where X starts at 1 and triples each time this move is successfully used. X resets to 1 if this move fails, if the user's last move used is not Baneful Bunker, Detect, Endure, King's Shield, Max Guard, Obstruct, Protect, Quick Guard, Silk Trap, Spiky Shield, or Wide Guard, or if it was one of those moves and the user's protection was broken. Fails if the user moves last this turn.",
 	},
 	amnesia: {
 		inherit: true,
@@ -702,8 +721,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		onEffectiveness(typeMod, target, type) {
 			if (target?.hasAbility('wonderguard')) return 1;
 		},
-		shortDesc: "10% burn + 10% flinch. Hits through Wonder Guard.",
-		desc: "Has a 10% chance to burn the target and a 10% chance to make it flinch. This move can hit a target with the Wonder Guard ability regardless of type effectiveness.",
+		shortDesc: "10% burn + 10% flinch. Super effective on Wonder Guard.",
+		desc: "Has a 10% chance to burn the target and a 10% chance to make it flinch. If the target has the Wonder Guard Ability, this move is treated as super effective against each of the target's types, allowing it to hit through Wonder Guard; against a dual-typed Wonder Guard Pokemon it deals 4x damage.",
 	},
 	hyperbeam: {
 		inherit: true,
@@ -953,6 +972,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	twister: {
 		inherit: true,
 		basePower: 60,
+		shortDesc: "20% chance to make the foe(s) flinch.",
+		desc: "Has a 20% chance to make the target flinch. Power doubles if the target is using Bounce. Unlike other generations, this move cannot hit a target using Fly.",
 	},
 	lowkick: {
 		inherit: true,
@@ -984,6 +1005,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	whirlpool: {
 		inherit: true,
 		accuracy: 100,
+		shortDesc: "Traps the target for 4-5 turns; it cannot move. 1/8 damage per turn.",
+		desc: "Prevents the target from switching for four or five turns (seven turns if the user is holding Grip Claw), and the trapped Pokemon cannot use moves while the effect lasts (Gen 1 binding behavior). Causes damage to the target equal to 1/8 of its maximum HP (1/6 if the user is holding Binding Band), rounded down, at the end of each turn during effect. The target can still switch out if it is holding Shed Shell. The effect ends if either the user or the target leaves the field. This effect is not stackable or reset by using this or another binding move.",
 	},
 	furycutter: {
 		inherit: true,
@@ -1028,7 +1051,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 			return Math.floor(((Math.floor((ivs.atk % 4) / 2) + 2 * Math.floor((ivs.def % 4) / 2) + 4 * Math.floor((ivs.spe % 4) / 2) + 8 * Math.floor((ivs.spa % 4) / 2) + 16 * Math.floor((ivs.spd % 4) / 2) + 32 * Math.floor((ivs.hp % 4) / 2)) * 40 / 63) + 30);
 		},
 		shortDesc: "Type and power (30-70) depend on the user's IVs.",
-		desc: "This move's type and base power (which ranges from 30 to 70) are both determined by the user's individual values (IVs), using the Gen 2-5 formula.",
+		desc: "This move's type and base power (which ranges from 30 to 70) are both determined by the user's individual values (IVs), using the Gen 3-5 formula.",
 	},
 
 	ceaselessedge: {
@@ -1053,6 +1076,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 				boosts: { atk: 1, def: 1, spa: 1, spd: 1, spe: 1 },
 			},
 		},
+		shortDesc: "100% chance to raise user's Atk/Def/SpA/SpD/Spe by 1 per foe hit.",
+		desc: "Has a 100% chance to raise the user's Attack, Defense, Special Attack, Special Defense, and Speed by 1 stage for each opposing Pokemon this move damages. In Double Battles, damaging both foes raises each stat by 2 stages. The boosts do not occur if the move fails or if the user has the Sheer Force Ability.",
 	},
 
 	gmaxdrumsolo: {
@@ -1384,6 +1409,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 				break;
 			}
 		},
+		shortDesc: "Power doubles and type varies in each weather; ???-type in Shadow Sky.",
+		desc: "Power doubles if a weather condition other than Delta Stream is active, and this move's type changes to match. Ice type during Snow, Water type during Primordial Sea or Rain Dance, Rock type during Sandstorm, Fire type during Desolate Land or Sunny Day, and ??? type during Shadow Sky. If the user is holding Utility Umbrella and uses Weather Ball during Primordial Sea, Rain Dance, Desolate Land, or Sunny Day, this move remains Normal type and does not double in power.",
 	},
 	shadowrush: {
 		num: 0,
@@ -1763,7 +1790,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		category: "Special",
 		name: "No Move",
 		shortDesc: "The Gen 1 corrupted move. Not blocked by Protect.",
-		desc: "A replica of the corrupted move a Gen 1 Pokemon uses when it thaws before its team has selected a move: Fissure's animation, 102 base power, ??? type, Special category, and 81/256 (~31.6%) accuracy. Its empty flags mean it is not blocked by Protect.",
+		desc: "A replica of the corrupted move a Gen 1 Pokemon uses when it thaws before its team has selected a move: Fissure's animation, 102 base power, ??? type, Special category, and 32% effective accuracy (approximating Gen 1's 81/256). Its empty flags mean it is not blocked by Protect.",
 		pp: 10,
 		priority: 0,
 		flags: {},
