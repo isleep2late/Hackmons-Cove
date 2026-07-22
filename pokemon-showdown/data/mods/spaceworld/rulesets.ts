@@ -12123,6 +12123,7 @@ export const Rulesets: import('../../../sim/dex-formats').ModdedFormatDataTable 
 					if (legality) {
 						if (legality === 'illegal') {
 							problems.push(`${set.species} can't learn ${this.dex.moves.get(moveid).name} without the use of a TM in SW'97.`);
+						}
 					}
 				}
 			}
