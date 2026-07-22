@@ -180,7 +180,7 @@ export const Scripts: ModdedBattleScriptsData = {
 							moveSlotIndex = moveIndex;
 						}
 					} else if (moveText) {
-						chosenMoveid = toID(moveText);
+						chosenMoveid = this.battle.toID(moveText);
 						if (chosenMoveid.startsWith('hiddenpower')) chosenMoveid = 'hiddenpower';
 						moveSlotIndex = request.moves.findIndex(m => m.id === chosenMoveid);
 					}
