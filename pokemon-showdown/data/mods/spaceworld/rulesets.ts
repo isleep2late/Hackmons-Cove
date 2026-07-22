@@ -12118,7 +12118,7 @@ export const Rulesets: import('../../../sim/dex-formats').ModdedFormatDataTable 
 			if (!legalityList) return;
 			const problems = [];
 			if (set.moves) {
-				for (const moveid of set.moves.map(this.toID)) {
+				for (const moveid of set.moves.map(m => this.dex.moves.get(m).id)) {
 					const legality = legalityList[moveid];
 					if (legality) {
 						if (legality === 'illegal') {
