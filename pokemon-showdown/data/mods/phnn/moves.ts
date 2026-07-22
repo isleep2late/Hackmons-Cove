@@ -352,6 +352,16 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		shortDesc: "No additional effect. Hits adjacent Pokemon.",
 		desc: "Deals damage to all adjacent Pokemon. This move can hit a target using Dig, but unlike other generations it does not deal doubled damage to it.",
 	},
+	magnitude: {
+		inherit: true,
+		shortDesc: "Hits adjacent Pokemon. Power varies.",
+		desc: "The power of this move varies; 5% chances for 10 and 150 power, 10% chances for 30 and 110 power, 20% chances for 50 and 90 power, and 30% chance for 70 power. Damage is calculated for all adjacent Pokemon. This move cannot hit a target using Dig.",
+	},
+	gust: {
+		inherit: true,
+		shortDesc: "No additional effect.",
+		desc: "No additional effect. This move cannot hit a target using Fly.",
+	},
 	fly: {
 		inherit: true,
 		condition: {
