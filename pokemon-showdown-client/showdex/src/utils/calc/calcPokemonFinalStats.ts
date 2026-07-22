@@ -1,4 +1,5 @@
 import { type GenerationNum } from '@smogon/calc';
+import { detectPhnnKey } from '@showdex/phnn';
 import { PokemonSpeedReductionItems } from '@showdex/consts/dex';
 import { type CalcdexBattleField, type CalcdexPlayer, type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { countRuinAbilities, ruinAbilitiesActive } from '@showdex/utils/battle';
@@ -254,7 +255,8 @@ export const calcPokemonFinalStats = (
       }
     }
 
-    if (item === 'souldew' && gen < 7 && ['latios', 'latias'].includes(baseForme)) {
+    if (item === 'souldew' && (gen < 7 || (typeof format === 'string' && detectPhnnKey(format) === 'gen9phnn')) &&
+      ['latios', 'latias'].includes(baseForme)) {
       // 50% SPA/SPD boost if "Soul Dew" is held by a Latios/Latias (gens 3-6)
       record.apply('spa', 1.5, 'items', 'Soul Dew');
       record.apply('spd', 1.5, 'items', 'Soul Dew');
