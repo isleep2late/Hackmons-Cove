@@ -154,22 +154,28 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 	strangethread: {
 		inherit: true,
 		isNonstandard: null,
+		shortDesc: "SpaceWorld '97 demo item: attacks against the holder lose 30/256 accuracy.",
 	},
 	quickneedle: {
 		inherit: true,
 		isNonstandard: null,
+		shortDesc: "SpaceWorld '97 proto-Quick Claw: 30/256 chance to move first in its priority bracket.",
 	},
 	focusorb: {
 		inherit: true,
 		isNonstandard: null,
+		shortDesc: "SpaceWorld '97 proto-Focus Band: 30/256 chance to survive a KO hit with 1 HP.",
 	},
 	sharpscythe: {
 		inherit: true,
 		isNonstandard: null,
+		shortDesc: "SpaceWorld '97: No effect - the demo's crit formula ignores held items.",
+		desc: "SpaceWorld '97: Meant to raise the holder's critical hit ratio, but the demo engine's critical hit formula only considers base Speed, Focus Energy, and specific high-crit moves, so this item has no effect.",
 	},
 	apple: {
 		inherit: true,
 		isNonstandard: null,
+		shortDesc: "SpaceWorld '97 proto-Sitrus Berry: restores 50 HP when the holder falls to half HP. Single use.",
 	},
 	snakeskin: {
 		inherit: true,
@@ -211,6 +217,7 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 				return Math.floor(basePower * 1.2);
 			}
 		},
+		shortDesc: "SpaceWorld '97: Boosts the holder's Grass-type moves by 20%.",
 		desc: "SpaceWorld '97: Boosts the holder's Grass-type moves by 20%.",
 	},
 	sharpstone: {
@@ -221,6 +228,7 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 				return Math.floor(basePower * 1.2);
 			}
 		},
+		shortDesc: "SpaceWorld '97: Boosts the holder's Rock-type moves by 20%.",
 		desc: "SpaceWorld '97: Boosts the holder's Rock-type moves by 20%.",
 	},
 	blackfeather: {
@@ -231,6 +239,7 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 				return Math.floor(basePower * 1.2);
 			}
 		},
+		shortDesc: "SpaceWorld '97: Boosts the holder's Flying-type moves by 20%.",
 		desc: "SpaceWorld '97: Boosts the holder's Flying-type moves by 20%.",
 	},
 	sharpfang: {
@@ -241,6 +250,7 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 				return Math.floor(basePower * 1.2);
 			}
 		},
+		shortDesc: "SpaceWorld '97: Boosts the holder's Normal-type moves by 20%.",
 		desc: "SpaceWorld '97: Boosts the holder's Normal-type moves by 20%.",
 	},
 	toxicneedle: {
@@ -251,6 +261,7 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 				return Math.floor(basePower * 1.2);
 			}
 		},
+		shortDesc: "SpaceWorld '97: Boosts the holder's Poison-type moves by 20%.",
 		desc: "SpaceWorld '97: Boosts the holder's Poison-type moves by 20%.",
 	},
 	poisonfang: {
@@ -261,6 +272,7 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 				return Math.floor(basePower * 1.2);
 			}
 		},
+		shortDesc: "SpaceWorld '97: Boosts the holder's Poison-type moves by 20%.",
 		desc: "SpaceWorld '97: Boosts the holder's Poison-type moves by 20%.",
 	},
 	migraineseed: {
@@ -271,6 +283,7 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 				return Math.floor(basePower * 1.2);
 			}
 		},
+		shortDesc: "SpaceWorld '97: Boosts the holder's Psychic-type moves by 20%.",
 		desc: "SpaceWorld '97: Boosts the holder's Psychic-type moves by 20%.",
 	},
 	attackneedle: {
@@ -281,6 +294,7 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 				return Math.floor(basePower * 1.2);
 			}
 		},
+		shortDesc: "SpaceWorld '97: Boosts the holder's Bug-type moves by 20%.",
 		desc: "SpaceWorld '97: Boosts the holder's Bug-type moves by 20%.",
 	},
 	powerbracersw: {
@@ -291,6 +305,7 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 				return Math.floor(basePower * 1.2);
 			}
 		},
+		shortDesc: "SpaceWorld '97: Boosts the holder's Fighting-type moves by 20%.",
 		desc: "SpaceWorld '97: Boosts the holder's Fighting-type moves by 20%.",
 	},
 	icefang: {
@@ -301,6 +316,7 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 				return Math.floor(basePower * 1.2);
 			}
 		},
+		shortDesc: "SpaceWorld '97: Boosts the holder's Ice-type moves by 20%.",
 		desc: "SpaceWorld '97: Boosts the holder's Ice-type moves by 20%.",
 	},
 	wethorn: {
@@ -311,6 +327,7 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 				return Math.floor(basePower * 1.2);
 			}
 		},
+		shortDesc: "SpaceWorld '97: Boosts the holder's Water-type moves by 20%.",
 		desc: "SpaceWorld '97: Boosts the holder's Water-type moves by 20%.",
 	},
 	thunderfang: {
@@ -321,6 +338,7 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 				return Math.floor(basePower * 1.2);
 			}
 		},
+		shortDesc: "SpaceWorld '97: Boosts the holder's Electric-type moves by 20%.",
 		desc: "SpaceWorld '97: Boosts the holder's Electric-type moves by 20%.",
 	},
 	fireclaw: {
@@ -331,6 +349,7 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 				return Math.floor(basePower * 1.2);
 			}
 		},
+		shortDesc: "SpaceWorld '97: Boosts the holder's Fire-type moves by 20%.",
 		desc: "SpaceWorld '97: Boosts the holder's Fire-type moves by 20%.",
 	},
 	spike: {
@@ -341,6 +360,7 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 				return Math.floor(basePower * 1.2);
 			}
 		},
+		shortDesc: "SpaceWorld '97: Boosts the holder's Ghost-type moves by 20%.",
 		desc: "SpaceWorld '97: Boosts the holder's Ghost-type moves by 20%.",
 	},
 	mysticpetal: {
@@ -492,6 +512,7 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 		spritenum: 0,
 		num: 234,
 		gen: 2,
+		shortDesc: "SpaceWorld '97: No effect - the demo never implements held HP recovery.",
 		desc: "SpaceWorld '97: Its data assigns a 30 HP per-turn heal, but the demo engine never implements held recovery, so it does nothing.",
 	},
 	metalcoat: {
@@ -499,6 +520,7 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 		spritenum: 0,
 		num: 233,
 		gen: 2,
+		shortDesc: "SpaceWorld '97: No battle effect. Evolves Ditto into Animon.",
 		desc: "SpaceWorld '97: Evolves Ditto into Animon. Its battle effect is not implemented by the demo engine.",
 	},
 	silverpowder: {
@@ -506,6 +528,7 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 		spritenum: 0,
 		num: 222,
 		gen: 2,
+		shortDesc: "SpaceWorld '97: No effect - the demo never implements this item.",
 		desc: "SpaceWorld '97: Its data says it was meant to weaken incoming Bug-type moves, but the demo engine never implements the effect.",
 	},
 	twistedspoon: {
@@ -513,6 +536,7 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 		spritenum: 0,
 		num: 248,
 		gen: 2,
+		shortDesc: "SpaceWorld '97: No effect - the demo never implements this item.",
 		desc: "SpaceWorld '97: Its data says it was meant to weaken incoming Psychic-type moves, but the demo engine never implements the effect.",
 	},
 	hardstone: {
@@ -520,6 +544,7 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 		spritenum: 0,
 		num: 238,
 		gen: 2,
+		shortDesc: "SpaceWorld '97: No effect - the demo never implements this item.",
 		desc: "SpaceWorld '97: Its data says it was meant to weaken incoming Rock-type moves, but the demo engine never implements the effect.",
 	},
 	spelltag: {
@@ -527,6 +552,7 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 		spritenum: 0,
 		num: 247,
 		gen: 2,
+		shortDesc: "SpaceWorld '97: A wild-Pokemon lure; no battle effect.",
 		desc: "SpaceWorld '97: A wild-Pokemon lure in the demo. It has no battle effect.",
 	},
 	stick: {
@@ -534,6 +560,7 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 		spritenum: 0,
 		num: 259,
 		gen: 2,
+		shortDesc: "SpaceWorld '97: Holder's Normal-type moves have 1.2x power.",
 		onBasePower(basePower, user, target, move) {
 			if (move.type === 'Normal') {
 				return Math.floor(basePower * 1.2);
@@ -546,6 +573,7 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 		spritenum: 0,
 		num: 258,
 		gen: 2,
+		shortDesc: "SpaceWorld '97: Holder's Ground-type moves have 1.2x power.",
 		onBasePower(basePower, user, target, move) {
 			if (move.type === 'Ground') {
 				return Math.floor(basePower * 1.2);
@@ -558,6 +586,7 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 		spritenum: 0,
 		num: 250,
 		gen: 2,
+		shortDesc: "SpaceWorld '97: Holder's Dragon-type moves have 1.2x power.",
 		onBasePower(basePower, user, target, move) {
 			if (move.type === 'Dragon') {
 				return Math.floor(basePower * 1.2);
@@ -570,6 +599,7 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 		spritenum: 0,
 		num: 388,
 		gen: 2,
+		shortDesc: "SpaceWorld '97: No effect - its +10-stats data is never implemented.",
 		desc: "SpaceWorld '97: Its data assigns +10 to all stats, but the demo engine never implements the effect.",
 	},
 	upgrade: {
@@ -577,6 +607,7 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 		spritenum: 0,
 		num: 252,
 		gen: 2,
+		shortDesc: "SpaceWorld '97: No effect - its +5-stats data is never implemented.",
 		desc: "SpaceWorld '97: Its data assigns +5 to all stats, but the demo engine never implements the effect.",
 	},
 	berry: {
@@ -601,6 +632,7 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 		},
 		num: 155,
 		gen: 2,
-		desc: "SpaceWorld '97: restores 20 HP when the holder falls to half HP (10 HP in the final games). Single use.",
+		shortDesc: "SpaceWorld '97: Restores 20 HP when below 1/2 max HP. Single use.",
+		desc: "SpaceWorld '97: Restores 20 HP when the holder falls below half of its maximum HP (10 HP in the final games). Single use.",
 	},
 };

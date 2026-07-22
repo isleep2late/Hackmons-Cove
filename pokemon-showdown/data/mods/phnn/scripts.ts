@@ -73,6 +73,7 @@ export const Scripts: ModdedBattleScriptsData = {
 		getDynamaxRequest(skipChecks?: boolean) {
 			if (!skipChecks) {
 				if (!this.side.canDynamaxNow()) return;
+				if (this.species.forme === 'Gmax' || this.baseSpecies.forme === 'Gmax' || this.gigantamax) return;
 				if (
 					this.species.isMega || this.species.isPrimal || this.species.forme === 'Ultra' ||
 					this.getItem().zMove || this.canMegaEvo || this.canUltraBurst
@@ -180,7 +181,7 @@ export const Scripts: ModdedBattleScriptsData = {
 							moveSlotIndex = moveIndex;
 						}
 					} else if (moveText) {
-						chosenMoveid = toID(moveText);
+						chosenMoveid = this.battle.toID(moveText);
 						if (chosenMoveid.startsWith('hiddenpower')) chosenMoveid = 'hiddenpower';
 						moveSlotIndex = request.moves.findIndex(m => m.id === chosenMoveid);
 					}

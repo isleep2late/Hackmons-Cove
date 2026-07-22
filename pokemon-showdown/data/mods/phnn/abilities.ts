@@ -26,8 +26,8 @@ export const Abilities: import('../../../sim/dex-abilities').ModdedAbilityDataTa
 				}
 			}
 		},
-		shortDesc: "33% chance to cause sleep/paralysis/poison on Pokemon making contact.",
-		desc: "There is a 33% chance a Pokemon making contact with this Pokemon will be put to sleep, paralyzed, or poisoned (equal chance of each).",
+		shortDesc: "99% chance to cause sleep, paralysis, or poison (33% each) on Pokemon making contact.",
+		desc: "There is a 33% chance each that a Pokemon making contact with this Pokemon will be put to sleep, paralyzed, or poisoned, for a 99% total chance of receiving one of the three. Pokemon that already have a non-volatile status condition, Grass-type Pokemon, Pokemon with the Overcoat Ability, and holders of Safety Goggles are unaffected.",
 	},
 	flamebody: {
 		inherit: true,
@@ -160,11 +160,11 @@ export const Abilities: import('../../../sim/dex-abilities').ModdedAbilityDataTa
 				return false;
 			}
 		},
-		onTryAddVolatile(status, target) {
-			if (status.id === 'toxicspikes') return null;
+		onSetStatus(status, target, source, effect) {
+			if (effect?.id === 'toxicspikes') return false;
 		},
-		shortDesc: "Only takes damage from attacks; immune to full paralysis and Toxic Spikes.",
-		desc: "This Pokemon can only be damaged by direct attacks. It cannot be fully paralyzed by paralysis, and it cannot be poisoned by Toxic Spikes. Burn, poison, and other indirect damage are also prevented.",
+		shortDesc: "This Pokemon can only be damaged by attacks; immune to full paralysis and Toxic Spikes.",
+		desc: "This Pokemon can only be damaged by direct attacks. It also cannot be fully paralyzed by paralysis, and it cannot be poisoned by Toxic Spikes. Burn, poison, weather, entry hazard, and all other indirect damage is prevented.",
 	},
 	moody: {
 		inherit: true,
@@ -401,5 +401,7 @@ export const Abilities: import('../../../sim/dex-abilities').ModdedAbilityDataTa
 				return null;
 			}
 		},
+		shortDesc: "This Pokemon can only be damaged by supereffective moves, ???-type moves, and indirect damage.",
+		desc: "This Pokemon is immune to damaging moves that are not super effective against it. ???-type moves (including Seismic Toss, Night Shade, Sonic Boom, Counter, and Bide in this mod), Struggle, and indirect damage ignore this Ability.",
 	},
 };

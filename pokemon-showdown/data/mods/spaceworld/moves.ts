@@ -5,6 +5,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	conversion2: {
 		inherit: true,
+		shortDesc: "Changes the target's type to a random type it doesn't have.",
+		desc: "Changes the target's type to a single type chosen at random from the demo's 16 types (including Bird) that the target does not already have. Fails if no new type is available.",
 		pp: 15,
 		target: "normal",
 		onHit(target, source) {
@@ -17,88 +19,21 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	counter: {
 		inherit: true,
+		shortDesc: "Deals double the last damage dealt in battle; counters physical-type moves.",
+		desc: "Deals damage equal to twice the last damage dealt in the battle by a damaging move, even if it was dealt to or by a different Pokemon. Fails if no damage has been dealt yet, or if the target's last used move was Counter, had 0 power, or was a special-type move (Fire, Water, Grass, Electric, Psychic, Ice, Dragon, or Dark; Hidden Power counts as its actual type). Hits Ghost-types and does not check accuracy.",
+		priority: -1,
+		accuracy: true,
 		ignoreImmunity: true,
-		willCrit: false,
-		basePower: 1,
 		damageCallback(pokemon, target) {
-			// Counter mechanics in gen 1:
-			// - a move is Counterable if it is Normal or Fighting type, has nonzero Base Power, and is not Counter
-			// - if Counter is used by the player, it will succeed if the opponent's last used move is Counterable
-			// - if Counter is used by the opponent, it will succeed if the player's last selected move is Counterable
-			// - (Counter will thus desync if the target's last used move is not as counterable as the target's last selected move)
-			// - if Counter succeeds it will deal twice the last move damage dealt in battle (even if it's from a different pokemon because of a switch)
-
-			// With the new Desync Clause Mod, that uses the acting Pokemon Online POV, Counter succeeds if
-			// - the last selected move by the opponent is not Counter
-			// - the last used move by the opponent is Counterable
-
-			const isCounterable = (move: { basePower: number, type: string } | null) => {
-				move ??= { basePower: 0, type: 'Normal' };
-				return ['Normal', 'Fighting', 'Ground', 'Rock', 'Flying', 'Bug', 'Poison', 'Ghost', 'Steel'].includes(move.type) && move.basePower > 0;
-			};
-
-			// These are the Counter user's POV and are used to determine if Counter will succeed
-			const isLastEnemySelectedMoveCounterable = target.side.lastEnemySelectedMove !== 'counter';
-			const isLastEnemyMoveCounterable = isCounterable(target.side.lastEnemyMove);
-
-			// These are the target's POV and are used for the hint messages
-			const isLastSelectedMoveCounterable = target.side.lastSelectedMove !== 'counter';
-			const isLastMoveCounterable = isCounterable(target.side.lastMove);
-
-			const isLastDamageNonZero = this.lastDamage > 0;
-
-			const willCounterSucceed = isLastEnemySelectedMoveCounterable && isLastEnemyMoveCounterable && isLastDamageNonZero;
-
-			// this.debug("COUNTER: isLastEnemySelectedMoveCounterable:" + isLastEnemySelectedMoveCounterable + " (" + target.side.lastEnemySelectedMove + ")");
-			// this.debug("COUNTER: isLastEnemyMoveCounterable:" + isLastEnemyMoveCounterable + " (" + target.side.lastEnemyMove + ")");
-			// this.debug("COUNTER: isLastSelectedMoveCounterable:" + isLastSelectedMoveCounterable + " (" + target.side.lastSelectedMove + ")");
-			// this.debug("COUNTER: isLastMoveCounterable:" + isLastMoveCounterable + " (" + (target.side.lastMove) + ")");
-			// this.debug("COUNTER: isLastDamageNonZero:" + isLastDamageNonZero + " (" + this.lastDamage + ")");
-
-			// Hint messages
-			if (!willCounterSucceed) {
-				if (isLastDamageNonZero) {
-					if (!isLastEnemySelectedMoveCounterable && isLastSelectedMoveCounterable) {
-						// the target has Counter in its first slot
-						if (isLastEnemyMoveCounterable) {
-							// and it didn't fail for other reason
-							this.hint("Desync Clause Mod activated!");
-							this.hint(
-								"In Gen 1, if Counter is used against a target that switched in and spent the turn sleeping, " +
-								"from the Counter user's perspective, " +
-								"it will fail if the move in the target's first slot is also Counter.",
-							);
-						}
-					} else if (!isLastEnemyMoveCounterable && isLastMoveCounterable) {
-						// the target selected a counterable move that was never announced
-						this.hint("Desync Clause Mod activated!", false, target.side);
-						this.hint(
-							"In Gen 1, from the Counter user's perspective, " +
-							"Counter uses the last announced move by the target's team to determine if it will succeed.",
-							false, target.side,
-						);
-					}
-				}
-
-				this.add('-fail', pokemon);
-				return false;
-			}
-
-			if (!isLastSelectedMoveCounterable) {
-				// too obscure, don't hint
-			} else if (!isLastMoveCounterable) {
-				// the target selected a non-counterable move that was never announced
-				this.hint("Desync Clause Mod activated!", false, target.side);
-				this.hint(
-					"In Gen 1, from the Counter user's perspective, " +
-					"Counter uses the last announced move by the target's team to determine if it will succeed.",
-					false, target.side,
-				);
-			}
-
-			return 2 * this.lastDamage;
+			const lastMove = target.lastMove;
+			if (!lastMove || lastMove.id === 'counter' || !lastMove.basePower) return false;
+			let moveType = lastMove.type;
+			if (lastMove.id === 'hiddenpower') moveType = target.hpType || 'Dark';
+			const specialTypes = ['Fire', 'Water', 'Grass', 'Electric', 'Psychic', 'Ice', 'Dragon', 'Dark'];
+			if (specialTypes.includes(moveType)) return false;
+			if (!this.lastDamage) return false;
+			return this.clampIntRange(2 * this.lastDamage, 1, 65535);
 		},
-		flags: { contact: 1, protect: 1, metronome: 1 },
 	},
 	crabhammer: {
 		inherit: true,
@@ -111,6 +46,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	dynamicpunch: {
 		inherit: true,
+		shortDesc: "No additional effect.",
+		desc: "No additional effect. Unlike the final games, the demo's Dynamic Punch has 100% accuracy and no confusion chance.",
 		accuracy: 100,
 		basePower: 100,
 		pp: 10,
@@ -119,6 +56,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	endure: {
 		inherit: true,
+		shortDesc: "User survives all hits with at least 1 HP this turn; fails if it moves last.",
+		desc: "The user survives all hits with at least 1 HP for the rest of the turn. Has no increased priority and never fails from consecutive use; it fails only if the user is the last Pokemon to act this turn. The effect expires at the end of the turn.",
 		priority: 0,
 		stallingMove: false,
 		onTryHit(pokemon) {
@@ -138,6 +77,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	gust: {
 		inherit: true,
+		shortDesc: "No additional effect.",
+		desc: "No additional effect. It cannot hit a Pokemon using Fly.",
 		accuracy: 100,
 		basePower: 40,
 		type: "Flying",
@@ -158,6 +99,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	moonlight: {
 		inherit: true,
+		shortDesc: "Heals the user by 1/2 its max HP in any weather.",
+		desc: "The user restores 1/2 of its maximum HP, rounded down, regardless of the weather.",
 		pp: 10,
 		onHit(pokemon) {
 			return !!this.heal(Math.floor(pokemon.maxhp / 2));
@@ -165,6 +108,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	morningsun: {
 		inherit: true,
+		shortDesc: "Heals the user by 1/2 its max HP in any weather.",
+		desc: "The user restores 1/2 of its maximum HP, rounded down, regardless of the weather.",
 		pp: 10,
 		onHit(pokemon) {
 			return !!this.heal(Math.floor(pokemon.maxhp / 2));
@@ -181,17 +126,23 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	powdersnow: {
 		inherit: true,
+		shortDesc: "No additional effect.",
+		desc: "No additional effect.",
 		pp: 10,
 		secondary: null,
 	},
 	present: {
 		inherit: true,
+		shortDesc: "40, 80, or 120 power; or 50 power plus healing the target 1/4.",
+		desc: "Has a 40% chance for 40 power, a 30% chance for 80 power, and a 10% chance for 120 power. The remaining 20% of the time, it deals damage with 50 power and then heals the target for 1/4 of its maximum HP.",
 		basePower: 50,
 		pp: 10,
 		accuracy: 100,
 	},
 	protect: {
 		inherit: true,
+		shortDesc: "Protects the user this turn. No priority; fails if the user moves last.",
+		desc: "The user is protected from attacks for the rest of the turn. Has no increased priority and never fails from consecutive use; it fails only if the user is the last Pokemon to act this turn. The effect expires at the end of the turn.",
 		priority: 0,
 		stallingMove: false,
 		onPrepareHit(pokemon) {
@@ -201,6 +152,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	pursuit: {
 		num: 228,
+		shortDesc: "Does nothing; the demo never implements this move.",
+		desc: "This move's effect is not implemented by the demo's engine; it always fails.",
 		accuracy: 100,
 		basePower: 0,
 		category: "Status",
@@ -226,6 +179,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	razorwind: {
 		inherit: true,
+		shortDesc: "Charges turn 1. Hits turn 2.",
+		desc: "This attack charges on the first turn and executes on the second. It does not have a high critical hit ratio in the demo's engine.",
 		accuracy: 75,
 	},
 	rest: {
@@ -239,6 +194,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	roar: {
 		inherit: true,
+		shortDesc: "Does nothing; the demo never implements forced switching.",
+		desc: "This move's effect is not implemented by the demo's engine; it always fails and never forces a switch.",
 		priority: 0,
 		forceSwitch: false,
 		onTry() {
@@ -251,6 +208,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	sandstorm: {
 		num: 201,
+		shortDesc: "Permanently damages the target's side 1/8 per turn; no type is immune.",
+		desc: "Applies a permanent condition to the target's side of the field: at the end of each turn, the active Pokemon on that side loses 1/8 of its maximum HP, rounded down - Rock, Ground, and Steel types included. Does not change the weather and never wears off. Fails if the target's side is already sandstormed.",
 		accuracy: 100,
 		basePower: 0,
 		category: "Status",
@@ -283,6 +242,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	struggle: {
 		inherit: true,
+		shortDesc: "User loses 1/2 the HP lost by the target. Ghosts are immune.",
+		desc: "Deals Normal-type damage, so Ghost-types are immune and Rock- and Steel-types resist it. If this move is successful, the user takes recoil equal to 1/2 the HP lost by the target, but not less than 1 HP. Automatically used if no other move can be selected.",
 		pp: 0,
 		recoil: [1, 2],
 		struggleRecoil: false,
@@ -290,8 +251,10 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	hyperbeam: {
 		inherit: true,
-		onAfterHit(target, source) {
-			if (!target.hp) {
+		shortDesc: "User cannot move next turn, unless this move KOes the target.",
+		desc: "If this move is successful, the user must recharge on the following turn - unless it knocks the target out, in which case no recharge is needed. A partial-trapping move used against the recharging Pokemon also cancels the recharge, even if it misses.",
+		onAfterMove(source, target) {
+			if (target && !target.hp) {
 				delete source.volatiles['mustrecharge'];
 			} else if (source.volatiles['mustrecharge']) {
 				this.add('-mustrecharge', source);
@@ -300,10 +263,14 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	explosion: {
 		inherit: true,
+		shortDesc: "Target's Def halved. Zeroes the user's HP low byte; faints only under 256 HP.",
+		desc: "The target's Defense is halved during damage calculation. Instead of fainting outright, the demo zeroes the low byte of the user's HP: the user faints if its current HP is 255 or less, but with 256 or more HP it survives with its HP rounded down to a multiple of 256 and its maximum HP reduced to its old value mod 256 (the demo's HP-byte glitch). The user's status condition and Leech Seed are removed before it attacks.",
 		selfdestruct: null,
 	},
 	selfdestruct: {
 		inherit: true,
+		shortDesc: "Target's Def halved. Zeroes the user's HP low byte; faints only under 256 HP.",
+		desc: "The target's Defense is halved during damage calculation. Instead of fainting outright, the demo zeroes the low byte of the user's HP: the user faints if its current HP is 255 or less, but with 256 or more HP it survives with its HP rounded down to a multiple of 256 and its maximum HP reduced to its old value mod 256 (the demo's HP-byte glitch). The user's status condition and Leech Seed are removed before it attacks.",
 		selfdestruct: null,
 	},
 	sunnyday: {
@@ -318,6 +285,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	synthesis: {
 		inherit: true,
+		shortDesc: "Heals the user by 1/2 its max HP in any weather.",
+		desc: "The user restores 1/2 of its maximum HP, rounded down, regardless of the weather.",
 		pp: 10,
 		onHit(pokemon) {
 			return !!this.heal(Math.floor(pokemon.maxhp / 2));
@@ -325,10 +294,14 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	thief: {
 		inherit: true,
+		shortDesc: "No additional effect; does not steal the target's item.",
+		desc: "No additional effect. The demo's Thief never steals the target's held item.",
 		secondary: null,
 	},
 	thunder: {
 		inherit: true,
+		shortDesc: "10% chance to paralyze. Can hit during Fly.",
+		desc: "Has a 10% chance to paralyze the target. This move can hit a target using Fly. Weather does not change its accuracy.",
 		accuracy: 70,
 		basePower: 120,
 		pp: 10,
@@ -338,10 +311,14 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	triattack: {
 		inherit: true,
+		shortDesc: "No additional effect.",
+		desc: "No additional effect.",
 		secondary: null,
 	},
 	triplekick: {
 		inherit: true,
+		shortDesc: "Hits 1-3 times; power is 60, then 120, then 180.",
+		desc: "Hits one to three times, at random. Power is 60 for the first hit, 120 for the second, and 180 for the third. Accuracy is checked only once.",
 		accuracy: 100,
 		basePower: 60,
 		multihit: [1,3],
@@ -351,12 +328,16 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	twister: {
 		inherit: true,
+		shortDesc: "No additional effect.",
+		desc: "No additional effect. It cannot hit a Pokemon using Fly.",
 		basePower: 60,
 		pp: 10,
 		secondary: null,
 	},
 	whirlwind: {
 		inherit: true,
+		shortDesc: "Does nothing; the demo never implements forced switching.",
+		desc: "This move's effect is not implemented by the demo's engine; it always fails and never forces a switch.",
 		accuracy: 85,
 		priority: 0,
 		forceSwitch: false,
@@ -366,16 +347,35 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	gigadrain: {
 		inherit: true,
+		shortDesc: "Deals damage with no HP drain.",
+		desc: "No additional effect. The demo's Giga Drain does not recover any HP.",
 		pp: 10,
 		drain: null,
 	},
 	hiddenpower: {
 		inherit: true,
+		shortDesc: "???-type: hits every type neutrally. Power (up to 78) depends on the user's DVs.",
+		desc: "This move is ???-type, dealing neutral damage to every type. Its base power is determined by the user's DVs using the demo's formula, which omits the final games' halving and +31 offset, so power ranges from the formula minimum up to 78 instead of 31 to 70.",
 		type: "???",
 		pp: 10,
+		onModifyType(move) {
+			move.type = '???';
+		},
+		basePowerCallback(pokemon) {
+			const ivs = pokemon.set.ivs;
+			const tr = this.dex.trunc;
+			const atkDV = tr(ivs.atk / 2);
+			const defDV = tr(ivs.def / 2);
+			const speDV = tr(ivs.spe / 2);
+			const spcDV = tr(ivs.spa / 2);
+			const power = 5 * ((spcDV >> 3) + (2 * (speDV >> 3)) + (4 * (defDV >> 3)) + (8 * (atkDV >> 3))) + (spcDV % 4);
+			return this.clampIntRange(power, 1, 78);
+		},
 	},
 	bite: {
 		inherit: true,
+		shortDesc: "10% chance to make the target flinch.",
+		desc: "Has a 10% chance to make the target flinch.",
 		type: "Normal",
 		category: "Physical",
 		secondary: {"chance":10,"volatileStatus":"flinch"},
@@ -396,6 +396,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	dragonbreath: {
 		inherit: true,
+		shortDesc: "No additional effect.",
+		desc: "No additional effect.",
 		basePower: 40,
 		pp: 10,
 		type: "Dragon",
@@ -430,10 +432,14 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	poisonsting: {
 		inherit: true,
+		shortDesc: "10% chance to poison the target.",
+		desc: "Has a 10% chance to poison the target.",
 		secondary: {"chance":10,"status":"psn"},
 	},
 	blizzard: {
 		inherit: true,
+		shortDesc: "30% chance to freeze the target.",
+		desc: "Has a 30% chance to freeze the target.",
 		accuracy: 90,
 		basePower: 120,
 		secondary: {"chance":30,"status":"frz"},
@@ -452,19 +458,27 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	smog: {
 		inherit: true,
+		shortDesc: "No additional effect.",
+		desc: "No additional effect.",
 		secondary: null,
 	},
 	dizzypunch: {
 		inherit: true,
+		shortDesc: "No additional effect.",
+		desc: "No additional effect.",
 		secondary: null,
 	},
 	flamewheel: {
 		inherit: true,
+		shortDesc: "No additional effect. Thaws user.",
+		desc: "No additional effect. Can be used while frozen to force the user to defrost.",
 		pp: 10,
 		secondary: null,
 	},
 	snore: {
 		inherit: true,
+		shortDesc: "User must be asleep. 30% chance to confuse the target.",
+		desc: "Has a 30% chance to confuse the target. Fails if the user is not asleep.",
 		pp: 10,
 		secondary: {chance: 30, volatileStatus: 'confusion'},
 	},
@@ -485,12 +499,16 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	scaryface: {
 		inherit: true,
+		shortDesc: "Lowers the target's Defense by 2 stages.",
+		desc: "Lowers the target's Defense by 2 stages.",
 		accuracy: 85,
 		pp: 40,
 		boosts: {def: -2},
 	},
 	feintattack: {
 		inherit: true,
+		shortDesc: "No additional effect.",
+		desc: "No additional effect. Unlike the final games, the demo's Faint Attack checks accuracy normally (100%).",
 		accuracy: 100,
 		pp: 10,
 	},
@@ -500,10 +518,14 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	sludgebomb: {
 		inherit: true,
+		shortDesc: "No additional effect.",
+		desc: "No additional effect.",
 		secondary: null,
 	},
 	octazooka: {
 		inherit: true,
+		shortDesc: "No additional effect.",
+		desc: "No additional effect.",
 		accuracy: 100,
 		secondary: null,
 	},
@@ -516,6 +538,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	synchronize: {
 		inherit: true,
+		shortDesc: "User copies the target's types.",
+		desc: "The user's types change to match the target's current types (the same effect as the demo's Conversion).",
 		accuracy: 100,
 		basePower: 0,
 		pp: 10,
@@ -530,6 +554,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	detect: {
 		num: 197,
+		shortDesc: "User's next move will not miss the target (works like Lock-On).",
+		desc: "The demo's Detect works like Lock-On: the user's next accuracy check against the target succeeds, and its moves can hit the target through Fly and Dig. Fails if the user already has a Lock-On effect. It does not protect the user.",
 		accuracy: 100,
 		basePower: 0,
 		category: "Status",
@@ -582,6 +608,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	steelwing: {
 		inherit: true,
+		shortDesc: "No additional effect.",
+		desc: "No additional effect.",
 		accuracy: 100,
 		pp: 10,
 		secondary: null,
@@ -592,6 +620,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	sacredfire: {
 		inherit: true,
+		shortDesc: "No additional effect. Thaws user.",
+		desc: "No additional effect. Can be used while frozen to force the user to defrost.",
 		accuracy: 100,
 		basePower: 80,
 		pp: 10,
@@ -609,92 +639,10 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	rapidspin: {
 		inherit: true,
+		shortDesc: "Frees the user from partial-trapping moves; usable while trapped.",
+		desc: "If this move is successful, the effects of partial-trapping moves end for the user. It is the only move that can be used while trapped. It does not remove Leech Seed or Spikes.",
 		pp: 10,
-		self: {counter: {
-		inherit: true,
-		ignoreImmunity: true,
-		willCrit: false,
-		basePower: 1,
-		damageCallback(pokemon, target) {
-			// Counter mechanics in gen 1:
-			// - a move is Counterable if it is Normal or Fighting type, has nonzero Base Power, and is not Counter
-			// - if Counter is used by the player, it will succeed if the opponent's last used move is Counterable
-			// - if Counter is used by the opponent, it will succeed if the player's last selected move is Counterable
-			// - (Counter will thus desync if the target's last used move is not as counterable as the target's last selected move)
-			// - if Counter succeeds it will deal twice the last move damage dealt in battle (even if it's from a different pokemon because of a switch)
-
-			// With the new Desync Clause Mod, that uses the acting Pokemon Online POV, Counter succeeds if
-			// - the last selected move by the opponent is not Counter
-			// - the last used move by the opponent is Counterable
-
-			const isCounterable = (move: { basePower: number, type: string } | null) => {
-				move ??= { basePower: 0, type: 'Normal' };
-				return ['Normal', 'Fighting'].includes(move.type) && move.basePower > 0;
-			};
-
-			// These are the Counter user's POV and are used to determine if Counter will succeed
-			const isLastEnemySelectedMoveCounterable = target.side.lastEnemySelectedMove !== 'counter';
-			const isLastEnemyMoveCounterable = isCounterable(target.side.lastEnemyMove);
-
-			// These are the target's POV and are used for the hint messages
-			const isLastSelectedMoveCounterable = target.side.lastSelectedMove !== 'counter';
-			const isLastMoveCounterable = isCounterable(target.side.lastMove);
-
-			const isLastDamageNonZero = this.lastDamage > 0;
-
-			const willCounterSucceed = isLastEnemySelectedMoveCounterable && isLastEnemyMoveCounterable && isLastDamageNonZero;
-
-			// this.debug("COUNTER: isLastEnemySelectedMoveCounterable:" + isLastEnemySelectedMoveCounterable + " (" + target.side.lastEnemySelectedMove + ")");
-			// this.debug("COUNTER: isLastEnemyMoveCounterable:" + isLastEnemyMoveCounterable + " (" + target.side.lastEnemyMove + ")");
-			// this.debug("COUNTER: isLastSelectedMoveCounterable:" + isLastSelectedMoveCounterable + " (" + target.side.lastSelectedMove + ")");
-			// this.debug("COUNTER: isLastMoveCounterable:" + isLastMoveCounterable + " (" + (target.side.lastMove) + ")");
-			// this.debug("COUNTER: isLastDamageNonZero:" + isLastDamageNonZero + " (" + this.lastDamage + ")");
-
-			// Hint messages
-			if (!willCounterSucceed) {
-				if (isLastDamageNonZero) {
-					if (!isLastEnemySelectedMoveCounterable && isLastSelectedMoveCounterable) {
-						// the target has Counter in its first slot
-						if (isLastEnemyMoveCounterable) {
-							// and it didn't fail for other reason
-							this.hint("Desync Clause Mod activated!");
-							this.hint(
-								"In Gen 1, if Counter is used against a target that switched in and spent the turn sleeping, " +
-								"from the Counter user's perspective, " +
-								"it will fail if the move in the target's first slot is also Counter.",
-							);
-						}
-					} else if (!isLastEnemyMoveCounterable && isLastMoveCounterable) {
-						// the target selected a counterable move that was never announced
-						this.hint("Desync Clause Mod activated!", false, target.side);
-						this.hint(
-							"In Gen 1, from the Counter user's perspective, " +
-							"Counter uses the last announced move by the target's team to determine if it will succeed.",
-							false, target.side,
-						);
-					}
-				}
-
-				this.add('-fail', pokemon);
-				return false;
-			}
-
-			if (!isLastSelectedMoveCounterable) {
-				// too obscure, don't hint
-			} else if (!isLastMoveCounterable) {
-				// the target selected a non-counterable move that was never announced
-				this.hint("Desync Clause Mod activated!", false, target.side);
-				this.hint(
-					"In Gen 1, from the Counter user's perspective, " +
-					"Counter uses the last announced move by the target's team to determine if it will succeed.",
-					false, target.side,
-				);
-			}
-
-			return 2 * this.lastDamage;
-		},
-		flags: { contact: 1, protect: 1, metronome: 1 },
-	},
+		self: {
 			onHit(pokemon) {
 				if (pokemon.removeVolatile('partiallytrapped')) {
 					this.add('-end', pokemon, 'partiallytrapped');
@@ -707,6 +655,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	irontail: {
 		inherit: true,
+		shortDesc: "No additional effect.",
+		desc: "No additional effect.",
 		accuracy: 100,
 		basePower: 60,
 		pp: 10,
@@ -724,6 +674,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	vitalthrow: {
 		inherit: true,
+		shortDesc: "No additional effect.",
+		desc: "No additional effect. Unlike the final games, it checks accuracy (100%) and has normal priority.",
 		basePower: 50,
 		accuracy: 100,
 		priority: 0,
@@ -760,6 +712,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	watersport: {
 		inherit: true,
+		shortDesc: "No additional effect.",
+		desc: "No additional effect. The demo's Water Sport is a 30-power Water-type attack, not a field effect.",
 		isNonstandard: null,
 		gen: 2,
 		accuracy: 100,
@@ -790,6 +744,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	whirlpool: {
 		inherit: true,
+		shortDesc: "No additional effect.",
+		desc: "No additional effect. The demo's Whirlpool is a plain Water-type attack with no trapping effect.",
 		accuracy: 100,
 		basePower: 30,
 		pp: 10,
@@ -801,18 +757,29 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	bounce: {
 		inherit: true,
+		shortDesc: "Hits in one turn for minimal damage (0 power in the demo).",
+		desc: "A single-turn attack with no charge turn and no paralysis chance. The demo assigns it 0 power, so it deals only the damage formula's minimum (about 2 HP).",
 		isNonstandard: null,
 		gen: 2,
 		accuracy: 100,
 		basePower: 0,
+		basePowerCallback() {
+			return 1;
+		},
 		pp: 10,
 		category: "Special",
 		type: "Water",
 		priority: 0,
 		target: "normal",
+		flags: {protect: 1, mirror: 1, metronome: 1},
+		onTryMove: undefined,
+		secondary: null,
+		condition: undefined,
 	},
 	clamp: {
 		inherit: true,
+		shortDesc: "Traps the target for 2-5 turns; it can only use Rapid Spin meanwhile.",
+		desc: "The user attacks for two to five turns in a row (37.5% chance each for 2 or 3 turns, 12.5% chance each for 4 or 5); while trapped, the target cannot use any move except Rapid Spin (Gen 1-style trapping) and takes no end-of-turn damage. After the first hit, the user's follow-up hits do not check accuracy. The effect ends if the user leaves the field or the target switches out, makes a Substitute, or uses Rapid Spin. Using this move against a Pokemon recharging from Hyper Beam cancels the recharge, even if this move misses.",
 		accuracy: 75,
 		pp: 10,
 		self: {
@@ -827,6 +794,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	firespin: {
 		inherit: true,
+		shortDesc: "Traps the target for 2-5 turns; it can only use Rapid Spin meanwhile.",
+		desc: "The user attacks for two to five turns in a row (37.5% chance each for 2 or 3 turns, 12.5% chance each for 4 or 5); while trapped, the target cannot use any move except Rapid Spin (Gen 1-style trapping) and takes no end-of-turn damage. After the first hit, the user's follow-up hits do not check accuracy. The effect ends if the user leaves the field or the target switches out, makes a Substitute, or uses Rapid Spin. Using this move against a Pokemon recharging from Hyper Beam cancels the recharge, even if this move misses.",
 		accuracy: 70,
 		basePower: 15,
 		self: {
@@ -841,6 +810,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	wrap: {
 		inherit: true,
+		shortDesc: "Traps the target for 2-5 turns; it can only use Rapid Spin meanwhile.",
+		desc: "The user attacks for two to five turns in a row (37.5% chance each for 2 or 3 turns, 12.5% chance each for 4 or 5); while trapped, the target cannot use any move except Rapid Spin (Gen 1-style trapping) and takes no end-of-turn damage. After the first hit, the user's follow-up hits do not check accuracy. The effect ends if the user leaves the field or the target switches out, makes a Substitute, or uses Rapid Spin. Using this move against a Pokemon recharging from Hyper Beam cancels the recharge, even if this move misses. This move can also hit Ghost-types.",
 		accuracy: 85,
 		ignoreImmunity: true,
 		self: {
@@ -855,6 +826,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	bind: {
 		inherit: true,
+		shortDesc: "Traps the target for 2-5 turns; it can only use Rapid Spin meanwhile.",
+		desc: "The user attacks for two to five turns in a row (37.5% chance each for 2 or 3 turns, 12.5% chance each for 4 or 5); while trapped, the target cannot use any move except Rapid Spin (Gen 1-style trapping) and takes no end-of-turn damage. After the first hit, the user's follow-up hits do not check accuracy. The effect ends if the user leaves the field or the target switches out, makes a Substitute, or uses Rapid Spin. Using this move against a Pokemon recharging from Hyper Beam cancels the recharge, even if this move misses. This move can also hit Ghost-types.",
 		ignoreImmunity: true,
 		self: {
 			volatileStatus: 'partialtrappinglock',
@@ -868,28 +841,40 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	psychic: {
 		inherit: true,
+		shortDesc: "No additional effect.",
+		desc: "No additional effect.",
 		secondary: null,
 	},
 	twineedle: {
 		inherit: true,
+		shortDesc: "Hits 2 times. No additional effect.",
+		desc: "Hits twice. The demo's Twineedle has no poison chance.",
 		secondary: null,
 	},
 	spark: {
 		inherit: true,
+		shortDesc: "10% chance to paralyze the target.",
+		desc: "Has a 10% chance to paralyze the target.",
 		secondary: {chance: 10, status: 'par'},
 	},
 	jumpkick: {
 		inherit: true,
+		shortDesc: "No additional effect.",
+		desc: "No additional effect. The user takes no crash damage if this move misses.",
 		hasCrashDamage: false,
 		onMoveFail() {},
 	},
 	highjumpkick: {
 		inherit: true,
+		shortDesc: "No additional effect.",
+		desc: "No additional effect. The user takes no crash damage if this move misses.",
 		hasCrashDamage: false,
 		onMoveFail() {},
 	},
 	bellydrum: {
 		num: 187,
+		shortDesc: "Raises the user's Attack by 1 stage; no HP cost.",
+		desc: "Raises the user's Attack by 1 stage. The demo's Belly Drum costs no HP and does not maximize Attack.",
 		accuracy: true,
 		basePower: 0,
 		category: "Status",
@@ -904,12 +889,16 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	cottonspore: {
 		inherit: true,
+		shortDesc: "Lowers the target's Speed by 1 stage.",
+		desc: "Lowers the target's Speed by 1 stage.",
 		accuracy: 100,
 		pp: 10,
 		boosts: {spe: -1},
 	},
 	conversion: {
 		inherit: true,
+		shortDesc: "Changes the user's types to match the target's.",
+		desc: "The user's types change to match the target's current types.",
 		target: "normal",
 		onHit(target, source) {
 			if (!source.setType(target.getTypes(true))) return false;
@@ -918,6 +907,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	frustration: {
 		inherit: true,
+		shortDesc: "Power is 100 minus Happiness; fixed 30 power at 70+ Happiness.",
+		desc: "If the user's Happiness is 70 or more, power is 30. Otherwise, power is equal to 100 minus the user's Happiness, up to a maximum of 100.",
 		pp: 10,
 		basePowerCallback(pokemon) {
 			const happiness = pokemon.happiness ?? 0;
@@ -926,6 +917,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	rage: {
 		num: 99,
+		shortDesc: "No additional effect.",
+		desc: "No additional effect. The demo's Rage is a plain attack with no damage-building effect.",
 		accuracy: 100,
 		basePower: 20,
 		category: "Physical",
@@ -951,6 +944,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	magnitude: {
 		inherit: true,
+		shortDesc: "Power varies from 10 to 150.",
+		desc: "The power of this move varies: 5% chances for 10 and 150 power, 10% chances for 30 and 110 power, 20% chances for 50 and 90 power, and a 30% chance for 70 power. It cannot hit a Pokemon using Dig.",
 		pp: 10,
 	},
 	batonpass: {
@@ -964,6 +959,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	solarbeam: {
 		inherit: true,
+		shortDesc: "Charges turn 1. Hits turn 2, in any weather.",
+		desc: "This attack charges on the first turn and executes on the second, regardless of the weather. Its damage is not reduced in rain.",
 		onTryMove(attacker, defender, move) {
 			if (attacker.removeVolatile(move.id)) {
 				return;
@@ -979,12 +976,16 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	leechseed: {
 		inherit: true,
+		shortDesc: "Leeches 1/8 target's max HP each turn. Grass-types are not immune.",
+		desc: "The Pokemon at the user's position steals 1/8 of the target's maximum HP, rounded down, after the target moves each turn. Grass-types are not immune; instead, due to the demo's type-byte check, this move fails against a target whose current HP has 22 (the Grass type's internal index) as its low byte or high byte.",
 		onTryImmunity(target) {
 			return !(target.hp % 256 === 22 || Math.floor(target.hp / 256) === 22);
 		},
 	},
 	haze: {
 		inherit: true,
+		shortDesc: "Resets both actives' stat stages; also cures the target's status.",
+		desc: "Resets the stat stages of the user and the target to 0 and removes confusion, Disable, Mist, Focus Energy, Leech Seed, and the effects of Reflect and Light Screen from both. The target is also cured of its non-volatile status condition, and if the user is badly poisoned it becomes regular poison.",
 		target: "normal",
 		onHit(target, source) {
 			this.add('-activate', source, 'move: Haze');
@@ -1003,6 +1004,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	reflect: {
 		num: 115,
+		shortDesc: "Doubles user's Defense vs physical moves until it leaves the field.",
+		desc: "While active, the user's Defense is doubled against physical-type moves (and against its own confusion self-hits). Critical hits ignore this effect. Personal to the user with no turn limit: it lasts until the user leaves the field or is hit by Haze. Fails if the user already has this effect.",
 		accuracy: true,
 		basePower: 0,
 		category: "Status",
@@ -1020,6 +1023,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	lightscreen: {
 		num: 113,
+		shortDesc: "Works like the demo's Reflect: doubles Defense vs physical moves.",
+		desc: "Identical to the demo's Reflect: while active, the user's Defense is doubled against physical-type moves. It does not reduce special damage at all. Personal to the user with no turn limit; it ends when the user leaves the field or is hit by Haze, and it does not stack with Reflect.",
 		accuracy: true,
 		basePower: 0,
 		category: "Status",
@@ -1037,6 +1042,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	substitute: {
 		inherit: true,
+		shortDesc: "1/4 max HP substitute; paralysis and Leech Seed pierce it.",
+		desc: "The user takes 1/4 of its maximum HP, rounded down, to create a substitute. It can be made with exactly 1/4 HP remaining, causing the user to faint. The substitute blocks most status moves, stat-lowering moves, confusion, and Lock-On effects, but paralysis-inducing moves and Leech Seed go through it. Creating a substitute frees the user from partial-trapping moves.",
 		onTryHit(target) {
 			const cost = Math.floor(target.maxhp / 4);
 			if (target.volatiles['substitute']) {
@@ -1106,6 +1113,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	fly: {
 		inherit: true,
+		shortDesc: "Flies up turn 1; only Thunder, Swift, or Lock-On can hit. Buggy.",
+		desc: "This attack charges on the first turn and executes on the second. While flying, the user can only be hit by Thunder, Swift, or by a Pokemon with the Lock-On effect; no move deals doubled power against it. If the user is fully paralyzed or immobilized by attraction on its attack turn, it remains semi-invulnerable indefinitely while still able to act (the demo's Fly glitch).",
 		condition: {
 			duration: 2,
 			onInvulnerability(target, source, move) {
@@ -1121,6 +1130,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	dig: {
 		inherit: true,
+		shortDesc: "Digs turn 1; only Earthquake, Fissure, Swift, or Lock-On can hit.",
+		desc: "This attack charges on the first turn and executes on the second. While underground, the user can only be hit by Earthquake, Fissure, Swift, or by a Pokemon with the Lock-On effect; Magnitude cannot hit it and no move deals doubled power against it. If the user is fully paralyzed or immobilized by attraction on its attack turn, it remains semi-invulnerable indefinitely while still able to act (the demo's Dig glitch).",
 		condition: {
 			duration: 2,
 			onInvulnerability(target, source, move) {
@@ -1133,6 +1144,11 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 				return false;
 			},
 		},
+	},
+	earthquake: {
+		inherit: true,
+		shortDesc: "No additional effect. Can hit a Pokemon using Dig.",
+		desc: "No additional effect. This move can hit a Pokemon using Dig, but without doubled power.",
 	},
 	naildown: {
 		inherit: true,

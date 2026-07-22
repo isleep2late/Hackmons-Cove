@@ -3541,6 +3541,9 @@ export class Battle {
 			if (this.tier.includes(`Champions`)) {
 				this.dex = Dex.mod('champions' as ID);
 			}
+			if (this.tier.includes('No Nerfs') && this.gen === 9) {
+				this.dex = Dex.mod('gen9phnn' as ID);
+			}
 			this.log(args);
 			break;
 		}

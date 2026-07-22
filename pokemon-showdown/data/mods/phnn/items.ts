@@ -121,7 +121,7 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 		forcedForme: "Arceus-Shadow",
 		num: 0,
 		gen: 9,
-		shortDesc: "Holder's Shadow-type moves have 1.2x power; turns Arceus into its Shadow forme.",
+		shortDesc: "Holder's Shadow-type moves have 1.2x power; Judgment is Shadow type; turns Arceus into its Shadow forme.",
 	},
 	questionmarkplate: {
 		name: "Question Mark Plate",
@@ -142,7 +142,7 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 		forcedForme: "Arceus-Question",
 		num: 0,
 		gen: 9,
-		shortDesc: "Turns Arceus into its ??? (typeless) forme; Judgment becomes typeless.",
+		shortDesc: "Holder's ???-type moves have 1.2x power; Judgment is typeless; turns Arceus into its ??? forme.",
 	},
 
 	eviolite: {
@@ -157,6 +157,8 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 				return this.chainModify(1.5);
 			}
 		},
+		shortDesc: "If holder's species can evolve, or could evolve in Space World '97, its Def and Sp. Def are 1.5x.",
+		desc: "If the holder's species can evolve, its Defense and Special Defense are multiplied by 1.5. This also applies to species that could evolve in the Space World '97 demo: Ballerine, Ditto, Farfetch'd, Golppy, Minicorn, Para, Pinsir, Slowbro, and Tangel, including their SW formes and even after Mega Evolution.",
 	},
 
 	blankplate: {

@@ -100,16 +100,47 @@ export const Conditions: import('../../../sim/dex-conditions').ModdedConditionDa
 			pokemon.trapped = true;
 		},
 	},
+	partialtrappinglock: {
+		name: 'partialtrappinglock',
+		durationCallback() {
+			return this.sample([2, 2, 2, 3, 3, 3, 4, 5]);
+		},
+		onStart(target, source, effect) {
+			const foe = target.foes()[0];
+			if (!foe) return false;
+			this.effectState.move = effect.id;
+			this.effectState.locked = foe;
+			foe.addVolatile('partiallytrapped', target, effect);
+		},
+		onBeforeMove(pokemon, target, move) {
+			if (target !== this.effectState.locked) {
+				pokemon.removeVolatile('partialtrappinglock');
+			}
+		},
+		onAfterMoveSelfPriority: 1,
+		onAfterMoveSelf(pokemon) {
+			const target = this.effectState.locked;
+			if (!target || target.hp <= 0 || !target.isActive) {
+				delete pokemon.volatiles['partialtrappinglock'];
+				return;
+			}
+			if (this.effectState.duration !== 1) {
+				target.addVolatile('partiallytrapped', pokemon, this.dex.getActiveMove(this.effectState.move));
+			}
+		},
+		onSemiLockMove() {
+			return this.effectState.move;
+		},
+	},
 	partiallytrapped: {
 		name: 'partiallytrapped',
-		// this is the duration of Wrap if it doesn't continue.
-		// (i.e. if the attacker switches out.)
-		// the full duration is tracked in partialtrappinglock
 		duration: 2,
-		// defender still takes PSN damage, etc
-		// TODO: research exact mechanics
+		onStart(target, source, sourceEffect) {
+			this.add('-activate', target, 'move: ' + (sourceEffect?.name || 'Wrap'), '[of] ' + source);
+		},
 		onBeforeMovePriority: 9,
-		onBeforeMove(pokemon) {
+		onBeforeMove(pokemon, target, move) {
+			if (move.id === 'rapidspin') return;
 			this.add('cant', pokemon, 'partiallytrapped');
 			return false;
 		},
@@ -119,83 +150,10 @@ export const Conditions: import('../../../sim/dex-conditions').ModdedConditionDa
 		onAccuracy(accuracy, target, source, move) {
 			if (source === this.effectState.source) return true;
 		},
-		onDisableMovePriority: 1, // higher priority so it gets undone by frz, slp or Bide
-		onDisableMove(target) {
-			if (this.effectState.maybeLocked) {
-				target.maybeLocked = true;
-			}
-		},
-	},
-	fakepartiallytrapped: {
-		name: 'fakepartiallytrapped',
-		// Wrap ended this turn, but you don't know that
-		// until you try to use an attack
-		duration: 2,
-		onDisableMovePriority: 1, // higher priority so it gets undone by frz, slp or Bide
-		onDisableMove(target) {
-			target.maybeLocked = true;
-		},
-	},
-	partialtrappinglock: {
-		name: 'partialtrappinglock',
-		durationCallback() {
-			return this.sample([2, 2, 2, 3, 3, 3, 4, 5]);
-		},
-		onStart(target, source, effect) {
-			const foe = target.foes()[0];
-			if (!foe) return false;
-
-			this.effectState.move = effect.id;
-			this.effectState.totalDuration = this.effectState.duration!;
-			this.effectState.damage = this.lastDamage;
-			this.effectState.locked = foe;
-			foe.addVolatile('partiallytrapped', target, effect);
-		},
-		onBeforeMove(pokemon, target, move) {
-			if (target !== this.effectState.locked) {
-				pokemon.removeVolatile('partialtrappinglock');
-			}
-		},
-		onAfterMove(pokemon, target, move) {
-			if (target && target.hp <= 0) {
-				delete pokemon.volatiles['partialtrappinglock'];
-				return;
-			}
-			if (this.effectState.duration === 1) {
-				if (this.effectState.totalDuration !== 5) {
-					pokemon.addVolatile('fakepartiallytrapped');
-					pokemon.volatiles['fakepartiallytrapped'].counterpart = target;
-					target.addVolatile('fakepartiallytrapped');
-					target.volatiles['fakepartiallytrapped'].counterpart = pokemon;
-				}
-			} else {
-				target.addVolatile('partiallytrapped', pokemon, move);
-				if (this.effectState.totalDuration - this.effectState.duration! > 0) {
-					target.volatiles['partiallytrapped'].maybeLocked = true;
-				}
-			}
-		},
-		onSemiLockMove() {
-			return this.effectState.move;
-		},
-		onDisableMove(pokemon) {
-			if (this.effectState.totalDuration - this.effectState.duration! > 1) {
-				pokemon.maybeLocked = true;
-			}
-		},
 	},
 	mustrecharge: {
 		inherit: true,
-		duration: 0,
-		onBeforeMovePriority: 7,
-		onStart: undefined, // no inherit
-		onAfterMove(pokemon, target, move) {
-			if (target && target.hp <= 0) {
-				delete pokemon.volatiles['mustrecharge'];
-				return;
-			}
-			this.add('-mustrecharge', pokemon);
-		},
+		onStart() {},
 	},
 	swreflect: {
 		name: 'swreflect',

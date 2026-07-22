@@ -559,7 +559,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 	},
 	{
 		name: "[Gen 2] SpaceWorld OU",
-		desc: "Standard OU played on the 1997 SpaceWorld demo's Pokemon, learnsets, and battle engine (no hackmons modding). Every Pokemon is currently allowed while the metagame is being tested.",
+		desc: "Standard OU played on the 1997 SpaceWorld demo's Pokemon, learnsets, and battle engine (no hackmons modding). Every Pokemon except Smeargle (which has no legal moves in the demo) is currently allowed while the metagame is being tested; Dig, Fly, and TM-only moves are banned.",
 		mod: 'spaceworld',
 		searchShow: false,
 		challengeShow: false,
@@ -567,7 +567,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 	},
 	{
 		name: "[Gen 2] SpaceWorld Ubers",
-		desc: "Standard Ubers played on the 1997 SpaceWorld demo's Pokemon, learnsets, and battle engine: every Pokemon is legal, with the standard Species and Sleep clauses. No hackmons modding.",
+		desc: "Standard Ubers played on the 1997 SpaceWorld demo's Pokemon, learnsets, and battle engine: every Pokemon except Smeargle (which has no legal moves in the demo) is legal, with the standard Species and Sleep clauses. Dig, Fly, and TM-only moves are banned. No hackmons modding.",
 		mod: 'spaceworld',
 		searchShow: false,
 		challengeShow: false,
