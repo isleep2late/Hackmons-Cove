@@ -5851,7 +5851,7 @@ export const FormatsData: import('../sim/dex-species').SpeciesFormatsDataTable =
 		natDexTier: "UUBL",
 	},
 	missingno: {
-		isNonstandard: "Custom",
+		isNonstandard: "Glitch",
 		tier: "Illegal",
 	},
 	syclar: {

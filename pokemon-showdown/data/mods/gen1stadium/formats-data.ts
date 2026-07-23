@@ -453,7 +453,7 @@ export const FormatsData: import('../../../sim/dex-species').ModdedSpeciesFormat
 		tier: "Uber",
 	},
 	missingno: {
-		isNonstandard: "Unobtainable",
+		isNonstandard: "Glitch",
 		tier: "Illegal",
 	},
 };

@@ -258,6 +258,34 @@ const SW97_SPRITE_SIZES: {[id: string]: number} = {
 	wigglytuffsw: 96, wolfman: 80, xatusw: 96, zapdossw: 112, zubatsw: 80,
 };
 
+const GLITCH_SPRITE_SIZES: {[id: string]: number} = {
+	'00fc': 96, '019c': 96, '3trainerpok': 112, '44hy': 112, '44ybf': 112, '44yf8': 112,
+	'44yfe': 80, '4894': 96, '4b848': 112, '4c2': 112, '4cf': 112, '4dd': 96,
+	'4h': 112, '4h4': 112, '4h4hi': 112, '4hi': 112, '4mn': 112, '4yc5': 96,
+	'6': 96, '7g': 112, '7pkmnv': 112, '8b48': 112, '8c9': 112, '8de': 112,
+	'8p': 112, '8ycc': 112, '9': 112, '94': 112, '94h': 112, a: 112,
+	ac0: 96, aea: 112, af3: 96, af6: 96, ag: 96, bd7: 112,
+	bda: 112, bh: 112, bycd: 112, bydb: 112, byf1: 112, c1: 112,
+	clowercase: 96, crystal00: 112, crystalfc: 112, crystalfe: 112, crystalff: 112, cuppercase: 112,
+	d2: 112, d4: 112, d9: 112, decamark: 96, e2: 112, e3: 112,
+	e6: 112, f0: 112, f4: 112, f5: 112, fq: 112, g: 96,
+	gg: 112, gj1: 112, glitchca: 112, glitchd7: 96, glitchdb: 112, glitchdc: 96,
+	glitche4: 96, glitcheb: 112, glitchec: 112, glitchfa: 112, gmp: 96, gs00: 112,
+	gsfc: 112, gsfe: 112, gsff: 112, h: 96, h4p: 112, h4to89: 112,
+	hi: 96, hpok: 112, i: 112, lf2: 112, lf3: 112, lm4: 112,
+	m: 96, m00: 112, mfe: 80, mff: 112, missingno: 112, missingnoyellow: 112,
+	mng: 112, mpu: 112, ng: 112, ngmp: 112, o: 112, opkmn4x: 112,
+	p4e7: 112, p4yeb: 96, pc4sh: 112, pcb: 96, pd5: 112, pid: 112,
+	pkmna: 112, pkmnapkmnfpkmnk: 112, pkmnc5: 112, pkmnd8: 112, pkmndc: 112, pkmnde: 112,
+	pkmndf: 112, pkmnf7: 112, pkmnn: 80, pkmnpce: 112, pkmnpd6: 112, pkmnpkmn: 112,
+	pkmnpkmnt: 112, pkmnrpkmn: 112, pokwtrainer: 112, ppkmnp: 112, pt: 112, pycb: 112,
+	pyf4: 112, pyf5: 112, q: 112, r: 112, r4: 112, rr4: 112,
+	trainer: 112, uc8: 112, uyc7: 112, v: 112, wgd: 112, xc: 112,
+	xx: 96, yc1: 112, yd0: 112, yd3: 112, yd5: 112, yda: 112,
+	yec: 112, yee: 96, yf2: 112, yf9: 112, yfa: 96, z: 112,
+	z4: 112,
+};
+
 export const Dex = new class implements ModdedDex {
 	readonly Ability = Ability;
 	readonly Item = Item;
@@ -671,6 +699,20 @@ export const Dex = new class implements ModdedDex {
 				shiny: !!options.shiny,
 			};
 		}
+		if (GLITCH_SPRITE_SIZES[species.id]) {
+			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
+			const host = window.Config ? Config.routes.client : 'beta.hackmons.com';
+			const size = GLITCH_SPRITE_SIZES[species.id];
+			return {
+				gen: mechanicsGen,
+				w: size, h: size, y: 0,
+				url: `${protocol}//${host}/sprites/glitch/${species.id}${!isFront ? '-back' : ''}.png`,
+				pixelated: true,
+				isFrontSprite: isFront,
+				cryurl: '',
+				shiny: !!options.shiny,
+			};
+		}
 		const phnnMeta = phnnSpriteMeta[species.id];
 		if (phnnMeta) {
 			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
@@ -916,6 +958,11 @@ export const Dex = new class implements ModdedDex {
 			const host = window.Config ? Config.routes.client : 'beta.hackmons.com';
 			return `background:transparent url(${protocol}//${host}/sprites/sw97/${id}-icon.png) no-repeat scroll center/contain;image-rendering:pixelated`;
 		}
+		if (GLITCH_SPRITE_SIZES[id]) {
+			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
+			const host = window.Config ? Config.routes.client : 'beta.hackmons.com';
+			return `background:transparent url(${protocol}//${host}/sprites/glitch/${id}-icon.png) no-repeat scroll center/contain;image-rendering:pixelated`;
+		}
 		if (phnnIconIds[id]) {
 			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
 			const host = window.Config ? Config.routes.client : 'beta.hackmons.com';
@@ -956,6 +1003,19 @@ export const Dex = new class implements ModdedDex {
 			return {
 				spriteid: tbSw97Id,
 				spriteDir: 'sprites/sw97',
+				x: Math.max(0, Math.floor((96 - size) / 2)),
+				y: Math.max(0, Math.floor((96 - size) / 2)),
+				pixelated: true,
+				customPrefix: `${protocol}//${host}/`,
+			};
+		}
+		if (GLITCH_SPRITE_SIZES[species.id]) {
+			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
+			const host = window.Config ? Config.routes.client : 'beta.hackmons.com';
+			const size = GLITCH_SPRITE_SIZES[species.id];
+			return {
+				spriteid: species.id,
+				spriteDir: 'sprites/glitch',
 				x: Math.max(0, Math.floor((96 - size) / 2)),
 				y: Math.max(0, Math.floor((96 - size) / 2)),
 				pixelated: true,
