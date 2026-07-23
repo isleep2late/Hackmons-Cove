@@ -74,6 +74,23 @@ select {
 .header .logo {
 	float: left;
 	margin: 2px 0 0 2px;
+	width: auto;
+	height: 44px;
+	max-width: calc(100vw - 210px);
+	object-fit: contain;
+	object-position: left center;
+}
+@media (max-width: 700px) {
+	.header .logo {
+		height: 34px;
+		margin-top: 6px;
+	}
+}
+@media (max-width: 500px) {
+	.header .logo {
+		height: 26px;
+		margin-top: 10px;
+	}
 }
 
 .userbar {
