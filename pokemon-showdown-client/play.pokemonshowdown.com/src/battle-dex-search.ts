@@ -1547,7 +1547,10 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 	}
 	getDefaultResults(): SearchRow[] {
 		let table = BattleTeambuilderTable;
-		if (this.formatType?.startsWith('bdsp')) {
+		const phnnModTables = ['gen2spaceworld', 'gen2gs', 'gen1phnn', 'gen1phnneng', 'gen3phnn'];
+		if (phnnModTables.includes(this.dex.modid) && (table[this.dex.modid]?.items || table[this.dex.modid]?.itemSet)) {
+			table = table[this.dex.modid];
+		} else if (this.formatType?.startsWith('bdsp')) {
 			table = table['gen8bdsp'];
 		} else if (this.formatType === 'bw1') {
 			table = table['gen5bw1'];
@@ -2037,6 +2040,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 					if (move.isMax && dex.gen > 8 && !phnnMaxOk) continue;
 					if (move.isNonstandard === 'Past' && this.formatType !== 'natdex' && !isPHNN) continue;
 					if (move.isNonstandard === 'LGPE' && this.formatType !== 'letsgo' && !isPHNN) continue;
+					if (dex.modid === 'gen2spaceworld' && move.isNonstandard && move.isNonstandard !== 'Custom') continue;
 					moves.push(move.id);
 				}
 			}

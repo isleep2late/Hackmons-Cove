@@ -1253,7 +1253,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 		'abilities', 'baseStats', 'cosmeticFormes', 'isNonstandard', 'requiredItems', 'types', 'unreleasedHidden',
 	];
 	const overrideMoveKeys = [
-		'accuracy', 'basePower', 'category', 'desc', 'flags', 'isNonstandard', 'pp', 'priority', 'shortDesc', 'target', 'type',
+		'accuracy', 'basePower', 'category', 'desc', 'flags', 'gen', 'isNonstandard', 'pp', 'priority', 'shortDesc', 'target', 'type',
 	];
 	const overrideAbilityKeys = ['desc', 'flags', 'isNonstandard', 'rating', 'shortDesc'];
 	const overrideItemKeys = ['desc', 'fling', 'isNonstandard', 'naturalGift', 'shortDesc'];
@@ -1543,7 +1543,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 			let clientDemoIds = demoIds;
 			if (clientId === 'gen2spaceworld') {
 				const swModDex = Dex.mod('spaceworld');
-				const swTierOrder = ['Uber', 'OU', '(OU)', 'UU', 'Brick'];
+				const swTierOrder = ['Uber', 'OU', '(OU)', 'UU', 'NFE', 'LC', 'Brick'];
 				const swTierTable = {};
 				for (const swSpecies of swModDex.species.all()) {
 					if (!swSpecies.exists || !swTierOrder.includes(swSpecies.tier)) continue;
@@ -1572,7 +1572,18 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 				const swOwnItems = requireNoCache('../caches/pokemon-showdown/dist/data/mods/spaceworld/items.js').Items;
 				const swAbsentItems = new Set(Object.keys(swOwnItems).filter(id => swOwnItems[id].isNonstandard === 'Future'));
 				const swBetaItems = Object.keys(swOwnItems).filter(id => swOwnItems[id].isNonstandard === null).sort();
-				t.items = (t.items || []).filter(entry => Array.isArray(entry) || !swAbsentItems.has(entry));
+				const swBetaSet = new Set(swBetaItems);
+				t.items = (t.items || []).filter(entry => {
+					if (Array.isArray(entry)) return true;
+					if (swAbsentItems.has(entry) || swBetaSet.has(entry)) return false;
+					const swItem = swModDex.items.get(entry);
+					return swItem.exists && !swItem.isNonstandard;
+				});
+				t.items = t.items.filter((entry, i) => {
+					if (!Array.isArray(entry)) return true;
+					const next = t.items[i + 1];
+					return next !== undefined && !Array.isArray(next);
+				});
 				t.items.push(['header', 'SpaceWorld Items']);
 				for (const id of swBetaItems) t.items.push(id);
 				continue;
