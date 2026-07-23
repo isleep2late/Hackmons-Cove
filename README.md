@@ -2,7 +2,7 @@
 
 ![Mewtwo](https://i.ibb.co/qfKMGc9/Mewtwo-Gen1-NN.png)
 
-# **PURE HACKMONS: NO NERFS**
+# **HACKMONS COVE**
 
 ![Eternamax](https://i.ibb.co/GfpjyjLP/Emax-Gen8-NN.png)
 
@@ -17,9 +17,17 @@
 
 ## About
 
-Pure Hackmons: No Nerfs is a Pokémon battling format and server where every move, ability, and Pokémon across all generations is legal and restored to its peak. Many later-generation stat and move nerfs are reversed, the Gen 1 Special split is undone, and a wide range of formats is supported, including Pure Hackmons, Balanced Hackmons, Wondrous Hackmons, NatDex, Champions, and No Nerfs variants across every generation, with full teambuilder support.
+Hackmons Cove is the official repository of the Hackmons Cove Showdown server, housing a modded version of Smogon's Pokemon Showdown, Client, and Calculator with Showdex support all bundled together. Our server officially hosts all standardized Pure Hackmons and Balanced Hackmons formats developed by the Smogon community. We also host Pure Hackmons: No Nerfs.
 
-This repository bundles the Pokémon Showdown server and web client together with the Pure Hackmons No Nerfs modifications.
+Pure Hackmons: No Nerfs is a Pokémon battling format and server where every move, ability, and Pokémon across all generations is legal and restored to its peak. Many later-generation stat and move nerfs are reversed, the Gen 1 Special split is undone, and abilities like Gale Wings and Prankster revert to their original power (Gen 6) while Soul Dew boosts the Latios and Latias species' Special Attack and Special Defense by 50%.
+
+Hackmons Cove is also proud to be the only known community that officially supports SpaceWorld '97, a real Pokemon pseudo-generation based on a beta version of Gold/Silver from 1997. Hackmons Cove boasts a true-to-the-game set of mechanics for this generation that no other Showdown server supports as of July 2026. We hope that other communities who want their own implementation of SpaceWorld studies our repository. You are of course welcome to use our open sourced code under the AGPL-3.0 license.
+
+Additionally, a wide range of formats are supported, including Custom Game, Custom Disguises, Gen 1 Disguises, Gen 2 Statuses, Gen 3 BH AAA (Balanced Hackmons Almost Any Ability), Gen 4 Rage, Gen 6 No Limit, and Gen 8 255 (SwSh, BDSP, and Unified). Our client also supports the innovative "Infinite Mode" where you can send out more Pokemon to battle after you have lost, additional generational drop-down menus per format, and a custom rules text box when challenging other players so you can customize the rules to what you want!
+
+If you enjoy our work, please consider supporting our community by [joining our Discord server](https://discord.gg/hackmons) or signing up for free to be a member [on our website.](https://hackmons.com)
+
+*Hackmons Cove, Hackmons Haven, and Hackmons Hub are NOT affiliated with Smogon. Our community resides in hackmons.com, purehackmons.com, balancedhackmons.com, and [our subreddit r/purehackmons.](https://reddit.com/r/purehackmons)*
 
 ---
 
@@ -40,8 +48,6 @@ The server and client are both included as regular folders rather than submodule
 **Main Contributors:**
 - **isleep2late** - Community Indentured Servant
 - **ifwih** - Coleader and Developer
-- **electra** - Lead Developer of Wondrous Hackmons, Co-Creator of Pure Hackmons No Nerfs
-- **Enigmatist** - Co-Creator of No Nerfs Generation, #1 Ranked Hackmos Player (at one point)
 - **Sonja_Krystal** - Implemented SpaceWorld'97 and created the Shadow Mewtwo/Mega X & Arceus front battle sprites!
 
 **External recognition of those who made this possible:**
@@ -59,7 +65,7 @@ The server and client are both included as regular folders rather than submodule
 - **Wyrd & Viola Lunala** for promoting the server and leadership (And Wyrd for making the SHADOW type badge)
 - **ProKameron** for contributing to the bot and leadership
 - **aidan amoongus** for Room Intros and leadership
-- **Alex BB** - for early contributions to the project
+- **Enigmatist** for early contributions to the project
 - The Pure Hackmons community for additional feedback
 
 [Join our Discord](https://discord.gg/hackmons)
