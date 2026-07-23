@@ -110,6 +110,7 @@ export const Conditions: import('../../../sim/dex-conditions').ModdedConditionDa
 			if (!foe) return false;
 			this.effectState.move = effect.id;
 			this.effectState.locked = foe;
+			foe.removeVolatile('mustrecharge');
 			foe.addVolatile('partiallytrapped', target, effect);
 		},
 		onBeforeMove(pokemon, target, move) {
@@ -117,15 +118,27 @@ export const Conditions: import('../../../sim/dex-conditions').ModdedConditionDa
 				pokemon.removeVolatile('partialtrappinglock');
 			}
 		},
+		onMoveAborted(pokemon) {
+			pokemon.removeVolatile('partialtrappinglock');
+		},
 		onAfterMoveSelfPriority: 1,
 		onAfterMoveSelf(pokemon) {
 			const target = this.effectState.locked;
-			if (!target || target.hp <= 0 || !target.isActive) {
-				delete pokemon.volatiles['partialtrappinglock'];
+			if (!target || target.hp <= 0 || !target.isActive || this.effectState.duration === 1) {
+				pokemon.removeVolatile('partialtrappinglock');
 				return;
 			}
-			if (this.effectState.duration !== 1) {
-				target.addVolatile('partiallytrapped', pokemon, this.dex.getActiveMove(this.effectState.move));
+			target.addVolatile('partiallytrapped', pokemon, this.dex.getActiveMove(this.effectState.move));
+		},
+		onFoeFaint(target) {
+			if (target === this.effectState.locked) {
+				(this.effectState.target as Pokemon).removeVolatile('partialtrappinglock');
+			}
+		},
+		onEnd(pokemon) {
+			const target = this.effectState.locked;
+			if (target?.isActive && target.volatiles['partiallytrapped']?.source === pokemon) {
+				target.removeVolatile('partiallytrapped');
 			}
 		},
 		onSemiLockMove() {
@@ -140,6 +153,11 @@ export const Conditions: import('../../../sim/dex-conditions').ModdedConditionDa
 		},
 		onBeforeMovePriority: 9,
 		onBeforeMove(pokemon, target, move) {
+			const source = this.effectState.source;
+			if (!source?.isActive || source.volatiles['partialtrappinglock']?.locked !== pokemon) {
+				pokemon.removeVolatile('partiallytrapped');
+				return;
+			}
 			if (move.id === 'rapidspin') return;
 			this.add('cant', pokemon, 'partiallytrapped');
 			return false;
@@ -148,7 +166,7 @@ export const Conditions: import('../../../sim/dex-conditions').ModdedConditionDa
 			this.effectState.duration = 2;
 		},
 		onAccuracy(accuracy, target, source, move) {
-			if (source === this.effectState.source) return true;
+			if (source === this.effectState.source && source.volatiles['partialtrappinglock']?.locked === target) return true;
 		},
 	},
 	mustrecharge: {

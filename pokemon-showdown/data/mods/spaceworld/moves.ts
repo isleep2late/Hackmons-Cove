@@ -779,64 +779,40 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	clamp: {
 		inherit: true,
 		shortDesc: "Traps the target for 2-5 turns; it can only use Rapid Spin meanwhile.",
-		desc: "The user attacks for two to five turns in a row (37.5% chance each for 2 or 3 turns, 12.5% chance each for 4 or 5); while trapped, the target cannot use any move except Rapid Spin (Gen 1-style trapping) and takes no end-of-turn damage. After the first hit, the user's follow-up hits do not check accuracy. The effect ends if the user leaves the field or the target switches out, makes a Substitute, or uses Rapid Spin. Using this move against a Pokemon recharging from Hyper Beam cancels the recharge, even if this move misses.",
+		desc: "The user attacks for two to five turns in a row (37.5% chance each for 2 or 3 turns, 12.5% chance each for 4 or 5); while trapped, the target cannot use any move except Rapid Spin (Gen 1-style trapping) and takes no end-of-turn damage. Follow-up hits do not check accuracy or use PP, and each recalculates damage and can be a critical hit. The trap ends the moment the final hit lands, if either Pokemon leaves the field, if the target uses Rapid Spin, or if the user is prevented from attacking (by full paralysis, confusion, or infatuation); the target can act normally from then on, including on that very turn. If the first hit lands on a Pokemon recharging from Hyper Beam, the recharge turn is skipped; a missed use does not skip it.",
 		accuracy: 75,
 		pp: 10,
 		self: {
 			volatileStatus: 'partialtrappinglock',
 		},
-		onTryMove(source, target) {
-			if (target.volatiles['mustrecharge']) {
-				target.removeVolatile('mustrecharge');
-				this.hint("In Gen 1, partial trapping moves negate the recharge turn of Hyper Beam, even if they miss.", true);
-			}
-		},
 	},
 	firespin: {
 		inherit: true,
 		shortDesc: "Traps the target for 2-5 turns; it can only use Rapid Spin meanwhile.",
-		desc: "The user attacks for two to five turns in a row (37.5% chance each for 2 or 3 turns, 12.5% chance each for 4 or 5); while trapped, the target cannot use any move except Rapid Spin (Gen 1-style trapping) and takes no end-of-turn damage. After the first hit, the user's follow-up hits do not check accuracy. The effect ends if the user leaves the field or the target switches out, makes a Substitute, or uses Rapid Spin. Using this move against a Pokemon recharging from Hyper Beam cancels the recharge, even if this move misses.",
+		desc: "The user attacks for two to five turns in a row (37.5% chance each for 2 or 3 turns, 12.5% chance each for 4 or 5); while trapped, the target cannot use any move except Rapid Spin (Gen 1-style trapping) and takes no end-of-turn damage. Follow-up hits do not check accuracy or use PP, and each recalculates damage and can be a critical hit. The trap ends the moment the final hit lands, if either Pokemon leaves the field, if the target uses Rapid Spin, or if the user is prevented from attacking (by full paralysis, confusion, or infatuation); the target can act normally from then on, including on that very turn. If the first hit lands on a Pokemon recharging from Hyper Beam, the recharge turn is skipped; a missed use does not skip it.",
 		accuracy: 70,
 		basePower: 15,
 		self: {
 			volatileStatus: 'partialtrappinglock',
 		},
-		onTryMove(source, target) {
-			if (target.volatiles['mustrecharge']) {
-				target.removeVolatile('mustrecharge');
-				this.hint("In Gen 1, partial trapping moves negate the recharge turn of Hyper Beam, even if they miss.", true);
-			}
-		},
 	},
 	wrap: {
 		inherit: true,
 		shortDesc: "Traps the target for 2-5 turns; it can only use Rapid Spin meanwhile.",
-		desc: "The user attacks for two to five turns in a row (37.5% chance each for 2 or 3 turns, 12.5% chance each for 4 or 5); while trapped, the target cannot use any move except Rapid Spin (Gen 1-style trapping) and takes no end-of-turn damage. After the first hit, the user's follow-up hits do not check accuracy. The effect ends if the user leaves the field or the target switches out, makes a Substitute, or uses Rapid Spin. Using this move against a Pokemon recharging from Hyper Beam cancels the recharge, even if this move misses. This move can also hit Ghost-types.",
+		desc: "The user attacks for two to five turns in a row (37.5% chance each for 2 or 3 turns, 12.5% chance each for 4 or 5); while trapped, the target cannot use any move except Rapid Spin (Gen 1-style trapping) and takes no end-of-turn damage. Follow-up hits do not check accuracy or use PP, and each recalculates damage and can be a critical hit. The trap ends the moment the final hit lands, if either Pokemon leaves the field, if the target uses Rapid Spin, or if the user is prevented from attacking (by full paralysis, confusion, or infatuation); the target can act normally from then on, including on that very turn. If the first hit lands on a Pokemon recharging from Hyper Beam, the recharge turn is skipped; a missed use does not skip it. This move can also hit Ghost-types.",
 		accuracy: 85,
 		ignoreImmunity: true,
 		self: {
 			volatileStatus: 'partialtrappinglock',
 		},
-		onTryMove(source, target) {
-			if (target.volatiles['mustrecharge']) {
-				target.removeVolatile('mustrecharge');
-				this.hint("In Gen 1, partial trapping moves negate the recharge turn of Hyper Beam, even if they miss.", true);
-			}
-		},
 	},
 	bind: {
 		inherit: true,
 		shortDesc: "Traps the target for 2-5 turns; it can only use Rapid Spin meanwhile.",
-		desc: "The user attacks for two to five turns in a row (37.5% chance each for 2 or 3 turns, 12.5% chance each for 4 or 5); while trapped, the target cannot use any move except Rapid Spin (Gen 1-style trapping) and takes no end-of-turn damage. After the first hit, the user's follow-up hits do not check accuracy. The effect ends if the user leaves the field or the target switches out, makes a Substitute, or uses Rapid Spin. Using this move against a Pokemon recharging from Hyper Beam cancels the recharge, even if this move misses. This move can also hit Ghost-types.",
+		desc: "The user attacks for two to five turns in a row (37.5% chance each for 2 or 3 turns, 12.5% chance each for 4 or 5); while trapped, the target cannot use any move except Rapid Spin (Gen 1-style trapping) and takes no end-of-turn damage. Follow-up hits do not check accuracy or use PP, and each recalculates damage and can be a critical hit. The trap ends the moment the final hit lands, if either Pokemon leaves the field, if the target uses Rapid Spin, or if the user is prevented from attacking (by full paralysis, confusion, or infatuation); the target can act normally from then on, including on that very turn. If the first hit lands on a Pokemon recharging from Hyper Beam, the recharge turn is skipped; a missed use does not skip it. This move can also hit Ghost-types.",
 		ignoreImmunity: true,
 		self: {
 			volatileStatus: 'partialtrappinglock',
-		},
-		onTryMove(source, target) {
-			if (target.volatiles['mustrecharge']) {
-				target.removeVolatile('mustrecharge');
-				this.hint("In Gen 1, partial trapping moves negate the recharge turn of Hyper Beam, even if they miss.", true);
-			}
 		},
 	},
 	psychic: {
