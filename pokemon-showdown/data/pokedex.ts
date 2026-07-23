@@ -23701,7 +23701,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	},
 	yda: {
 		num: -7095,
-		name: "] (Y DA)",
+		name: ") (Y DA)",
 		types: ["Normal", "Flying"],
 		gen: 1,
 		baseStats: { hp: 40, atk: 60, def: 30, spa: 31, spd: 31, spe: 70 },
