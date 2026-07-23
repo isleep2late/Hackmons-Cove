@@ -484,6 +484,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	coinhurl: {
 		inherit: true,
+		isNonstandard: null,
 		accuracy: 100,
 		basePower: 40,
 		pp: 10,
@@ -540,6 +541,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		inherit: true,
 		shortDesc: "User copies the target's types.",
 		desc: "The user's types change to match the target's current types (the same effect as the demo's Conversion).",
+		isNonstandard: null,
 		accuracy: 100,
 		basePower: 0,
 		pp: 10,
@@ -576,6 +578,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	bonelock: {
 		inherit: true,
+		isNonstandard: null,
 		accuracy: 100,
 		basePower: 25,
 		pp: 10,
@@ -596,6 +599,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	stalker: {
 		inherit: true,
+		isNonstandard: null,
 		accuracy: 100,
 		basePower: 0,
 		pp: 10,
@@ -629,6 +633,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	megaphone: {
 		inherit: true,
+		isNonstandard: null,
 		accuracy: 85,
 		basePower: 0,
 		pp: 40,
@@ -664,6 +669,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	rockhead: {
 		inherit: true,
+		isNonstandard: null,
 		accuracy: 100,
 		basePower: 90,
 		pp: 10,
@@ -682,6 +688,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	crosscutter: {
 		inherit: true,
+		isNonstandard: null,
 		accuracy: 100,
 		basePower: 50,
 		pp: 10,
@@ -692,6 +699,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	uproot: {
 		inherit: true,
+		isNonstandard: null,
 		accuracy: 100,
 		basePower: 30,
 		pp: 10,
@@ -702,6 +710,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	windride: {
 		inherit: true,
+		isNonstandard: null,
 		accuracy: 100,
 		basePower: 40,
 		pp: 10,
@@ -726,6 +735,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	strongarm: {
 		inherit: true,
+		isNonstandard: null,
 		accuracy: 100,
 		basePower: 30,
 		pp: 10,
@@ -736,6 +746,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	brightmoss: {
 		inherit: true,
+		isNonstandard: null,
 		accuracy: 100,
 		basePower: 0,
 		pp: 10,
