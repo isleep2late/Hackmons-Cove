@@ -19,7 +19,7 @@
 
 Hackmons Cove is the official repository of the Hackmons Cove Showdown server, housing a modded version of Smogon's Pokemon Showdown, Client, and Calculator with Showdex support all bundled together. Our server officially hosts all standardized Pure Hackmons and Balanced Hackmons formats developed by the Smogon community. We also host Pure Hackmons: No Nerfs.
 
-Pure Hackmons: No Nerfs is a Pokémon battling format and server where every move, ability, and Pokémon across all generations is legal and restored to its peak. Many later-generation stat and move nerfs are reversed, the Gen 1 Special split is undone, and abilities like Gale Wings and Prankster revert to their original power (Gen 6) while Soul Dew boosts the Latios and Latias species' Special Attack and Special Defense by 50%.
+Pure Hackmons: No Nerfs is a Pokémon battling format where every move, ability, and Pokémon across all generations is legal and restored to its peak. Many later-generation stat and move nerfs are reversed, the Gen 1 Special split is undone, and abilities like Gale Wings and Prankster revert to their original power (Gen 6) while Soul Dew boosts the Latios and Latias species' Special Attack and Special Defense by 50%.
 
 Hackmons Cove is also proud to be the only known community that officially supports SpaceWorld '97, a real Pokemon pseudo-generation based on a beta version of Gold/Silver from 1997. Hackmons Cove boasts a true-to-the-game set of mechanics for this generation that no other Showdown server supports as of July 2026. We hope that other communities who want their own implementation of SpaceWorld studies our repository. You are of course welcome to use our open sourced code under the AGPL-3.0 license.
 
@@ -37,6 +37,7 @@ If you enjoy our work, please consider supporting our community by [joining our 
 |---|---|
 | `pokemon-showdown/` | The game server. Upstream Pokémon Showdown with the Pure Hackmons No Nerfs mod in `data/mods/phnn/` and custom formats in `config/formats.ts`. |
 | `pokemon-showdown-client/` | The web client. The upstream Pokémon Showdown client, included directly in this repository. |
+| `pokemon-showdown-client/damage-calc/` | A modified copy of the Smogon damage calculator with Pure Hackmons No Nerfs and SpaceWorld customizations. |
 | `pokemon-showdown-client/showdex/` | A vendored copy of the Showdex damage calculator with Pure Hackmons No Nerfs customizations. Its build outputs are generated per machine and are not tracked. |
 
 The server and client are both included as regular folders rather than submodules. The `pokemon-showdown/` directory is tracked as a git subtree of upstream Pokémon Showdown, with the custom files (`config/formats.ts` and `data/mods/phnn/`) layered on top.
