@@ -574,6 +574,24 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		ruleset: ['Standard'],
 	},
 	{
+		name: "[Gen 2] SpaceWorld Bricks",
+		desc: "Only Brick-tier Pokemon are allowed: the 1997 SpaceWorld demo's unfinished placeholders whose base stats are all exactly 50. Every Pokemon can learn any move, which is what Sketch already allows in practice&mdash;every Brick can learn any of Smeargle's moves, and Smeargle's Sketch copies anything&mdash;so learnset checking, the TM Clause, and SW97 PP Up restrictions are lifted entirely.",
+		mod: 'spaceworld',
+		searchShow: false,
+		challengeShow: false,
+		ruleset: ['Standard', '!Obtainable Moves', '!TM Clause', '!SW97 PP Up Legality'],
+		banlist: ['No Move-2', 'No Move-SW'],
+		onValidateSet(set) {
+			const species = this.dex.species.get(set.species || set.name);
+			if (species.tier !== 'Brick') {
+				return [
+					`${species.name} is not a Brick-tier Pokémon.`,
+					`(Only the SpaceWorld demo's all-50 placeholder Pokémon are allowed in SpaceWorld Bricks.)`,
+				];
+			}
+		},
+	},
+	{
 		name: "[Gen 1] Disguises",
 		desc: "Gen 1 Pure Hackmons, but Pokemon can have any type, disguise as any species, and even start the game pre-statused.",
 		mod: 'gen1phnn',

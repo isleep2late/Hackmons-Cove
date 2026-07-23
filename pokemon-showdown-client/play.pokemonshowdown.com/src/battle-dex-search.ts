@@ -231,6 +231,7 @@ export class DexSearch {
 					uber: "Uber",
 					caplc: "CAP LC",
 					capnfe: "CAP NFE",
+					brick: "Brick",
 				};
 				entry[1] = toID(entry[1]);
 				entry[1] = tierTable[entry[1]] || entry[1].toUpperCase();
@@ -765,6 +766,9 @@ abstract class BattleTypedSearch<T extends SearchType> {
 			this.dex = Dex.mod('gen2spaceworld' as ID);
 			format = 'ubers' as ID;
 		}
+		if (format === 'spaceworldbricks' && this.dex.gen === 2) {
+			this.dex = Dex.mod('gen2spaceworld' as ID);
+		}
 		if (format.includes('spaceworldcustomdisguises') && this.dex.gen === 2) {
 			this.dex = Dex.mod('gen2spaceworld' as ID);
 		}
@@ -1254,6 +1258,8 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 			format === '4v4doublesuu' || format === 'nationaldexdoubles'
 		) {
 			tierSet = tierSet.slice(slices.Uber);
+		} else if (format === 'spaceworldbricks') {
+			tierSet = tierSet.slice(slices.Brick);
 		} else if (isVGCOrBS || (isHackmons && dex.gen === 9 && !this.formatType)) {
 			if (format.endsWith('series13') || format.endsWith('regj') || isHackmons) {
 				// Show Mythicals
@@ -1928,7 +1934,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		const dex = this.dex;
 		let species = dex.species.get(this.species);
 		const format = this.format;
-		const isHackmons = ((format.includes('hackmons') || format.includes('phnn')) || format.includes('bh') || format.includes('anyability') || format.includes('unified') || format.includes('disguise') || format.includes('statuses') || format.includes('nolimit') || format.includes('nonerfs') || format.includes('customgame') || this.dex.modid === 'gen2spaceworld');
+		const isHackmons = ((format.includes('hackmons') || format.includes('phnn')) || format.includes('bh') || format.includes('anyability') || format.includes('unified') || format.includes('disguise') || format.includes('statuses') || format.includes('nolimit') || format.includes('nonerfs') || format.includes('customgame') || format.includes('bricks') || this.dex.modid === 'gen2spaceworld');
 		const isPHNN = format.includes('nonerfs') || format.includes('phnn');
 		const phnnMaxMoves = ['maxguard', 'gmaxdrumsolo', 'gmaxfireball', 'gmaxhydrosnipe'];
 		const isSTABmons = (format.includes('stabmons') || format === 'staaabmons');

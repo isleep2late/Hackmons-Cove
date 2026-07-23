@@ -1542,24 +1542,40 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 			t.tiers = t.tiers.slice();
 			let clientDemoIds = demoIds;
 			if (clientId === 'gen2spaceworld') {
-				const swOwnLearnsets = requireNoCache('../caches/pokemon-showdown/dist/data/mods/spaceworld/learnsets.js').Learnsets;
-				t.tiers = t.tiers.filter(entry => Array.isArray(entry) || swOwnLearnsets[entry] || demoIds.includes(entry));
-				clientDemoIds = demoIds.filter(id => swOwnLearnsets[id]);
-				t.tiers = t.tiers.filter(entry => Array.isArray(entry) || clientDemoIds.includes(entry) || !demoIds.includes(entry));
+				const swModDex = Dex.mod('spaceworld');
+				const swTierOrder = ['Uber', 'OU', '(OU)', 'UU', 'Brick'];
+				const swTierTable = {};
+				for (const swSpecies of swModDex.species.all()) {
+					if (!swSpecies.exists || !swTierOrder.includes(swSpecies.tier)) continue;
+					if (!swTierTable[swSpecies.tier]) swTierTable[swSpecies.tier] = [];
+					swTierTable[swSpecies.tier].push(swSpecies.id);
+				}
+				t.tiers = [];
+				t.formatSlices = {};
+				t.overrideTier = {};
+				for (const swTier of swTierOrder) {
+					if (swTier !== '(OU)') t.formatSlices[swTier] = t.tiers.length;
+					const swIds = (swTierTable[swTier] || []).sort((a, b) => {
+						const na = swModDex.species.get(a).num;
+						const nb = swModDex.species.get(b).num;
+						if (na >= 0 && nb >= 0) return na - nb;
+						if (na < 0 && nb < 0) return nb - na;
+						return na >= 0 ? -1 : 1;
+					});
+					if (!swIds.length) continue;
+					t.tiers.push(['header', swTier.charAt(0) === '(' ? swTier.slice(1, -1) + ' by technicality' : swTier]);
+					for (const id of swIds) {
+						t.tiers.push(id);
+						t.overrideTier[id] = swTier;
+					}
+				}
 				const swOwnItems = requireNoCache('../caches/pokemon-showdown/dist/data/mods/spaceworld/items.js').Items;
 				const swAbsentItems = new Set(Object.keys(swOwnItems).filter(id => swOwnItems[id].isNonstandard === 'Future'));
 				const swBetaItems = Object.keys(swOwnItems).filter(id => swOwnItems[id].isNonstandard === null).sort();
 				t.items = (t.items || []).filter(entry => Array.isArray(entry) || !swAbsentItems.has(entry));
 				t.items.push(['header', 'SpaceWorld Items']);
 				for (const id of swBetaItems) t.items.push(id);
-				const gen2Override = (BattleTeambuilderTable['gen2'] || {}).overrideTier || {};
-				for (const entry of t.tiers) {
-					if (Array.isArray(entry) || t.overrideTier[entry] !== undefined) continue;
-					let eff = gen2Override[entry];
-					if (eff === undefined) eff = Dex.mod('gen2').species.get(entry).tier || '';
-					if (eff === 'Illegal' || eff === 'Unreleased') eff = 'OU';
-					t.overrideTier[entry] = eff;
-				}
+				continue;
 			}
 			t.tiers.push(['header', 'SpaceWorld Beta']);
 			for (const id of clientDemoIds) {

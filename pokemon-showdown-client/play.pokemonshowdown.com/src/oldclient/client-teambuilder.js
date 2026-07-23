@@ -1883,6 +1883,7 @@
 					{ id: 'gen2ubers', name: 'Ubers' },
 					{ id: 'gen2spaceworldou', name: 'SpaceWorld OU' },
 					{ id: 'gen2spaceworldubers', name: 'SpaceWorld Ubers' },
+					{ id: 'gen2spaceworldbricks', name: 'SpaceWorld Bricks' },
 				] },
 				{ label: 'Version', members: [
 					{ id: 'gen8255', name: 'Unified' },
@@ -1935,6 +1936,7 @@
 				gen2spaceworldcustomdisguises: 'gen2spaceworld',
 				gen2spaceworldou: 'gen2spaceworld',
 				gen2spaceworldubers: 'gen2spaceworld',
+				gen2spaceworldbricks: 'gen2spaceworld',
 			}[('' + (format || '')).split('@@@')[0]] || null;
 		},
 		renderVersionSelect: function () {
