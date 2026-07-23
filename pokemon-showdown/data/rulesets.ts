@@ -1417,6 +1417,28 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 			}
 		},
 	},
+	ateclause: {
+		effectType: 'ValidatorRule',
+		name: 'Ate Clause',
+		desc: "Limit one of Aerilate/Refrigerate/Pixilate per team",
+		onBegin() {
+			this.add('rule', 'Ate Clause: Limit one of Aerilate/Refrigerate/Pixilate');
+		},
+		onValidateTeam(team) {
+			const ateAbilities = ['aerilate', 'refrigerate', 'pixilate'];
+			let ateCount = 0;
+			for (const set of team) {
+				if (ateAbilities.includes(this.toID(set.ability))) {
+					ateCount++;
+					if (ateCount > 1) {
+						return [
+							`You are limited to one Pok\u00e9mon with Aerilate, Refrigerate, or Pixilate by Ate Clause.`,
+						];
+					}
+				}
+			}
+		},
+	},
 	ohkoclause: {
 		effectType: 'ValidatorRule',
 		name: 'OHKO Clause',
