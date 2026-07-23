@@ -364,6 +364,8 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 					if (species.isNonstandard) {
 						if (species.isNonstandard === 'Past') {
 							tier = Dex.mod('gen7').species.get(species.name).tier;
+						} else if (species.isNonstandard === 'Glitch') {
+							tier = 'Illegal';
 						} else {
 							tier = 'OU';
 						}
