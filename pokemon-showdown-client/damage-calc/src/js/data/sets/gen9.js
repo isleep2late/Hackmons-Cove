@@ -703,7 +703,7 @@ var SETDEX_SV = {
     "RU Choice Specs": {"ability":"Magic Bounce","item":"Choice Specs","nature":"Timid","teraType":"Fairy","ivs":{"at":0},"evs":{"sa":252,"sd":4,"sp":252},"moves":["Psyshock","Shadow Ball","Alluring Voice","Trick"]},
     "RU Calm Mind": {"ability":"Magic Bounce","item":"Heavy-Duty Boots","nature":"Timid","teraType":"Fairy","ivs":{"at":0},"evs":{"sa":252,"sd":4,"sp":252},"moves":["Calm Mind","Psyshock","Draining Kiss","Shadow Ball"]},
     "RU Choice Scarf": {"ability":"Magic Bounce","item":"Choice Scarf","nature":"Timid","teraType":"Fairy","ivs":{"at":0},"evs":{"sa":252,"sd":4,"sp":252},"moves":["Psychic","Shadow Ball","Dazzling Gleam","Trick"]},
-    "NU Showdown Usage": {"ability":"Magic Bounce","item":"Leftovers","nature":"Timid","teraType":"Fairy","evs":{"sa":252,"sd":4,"sp":252},"moves":["Morning Sun","Psychic Noise","Grass Knot","Shadow Ball"]},
+    "NU Magic Bounce Support": {"ability":"Magic Bounce","item":"Rocky Helmet","nature":"Timid","teraType":"Fairy","evs":{"hp":252,"df":80,"sp":176},"moves":["Psychic Noise","Thunder Wave","Grass Knot","Morning Sun"]},
     "National Dex RU Showdown Usage": {"ability":"Magic Bounce","item":"Normalium Z","nature":"Timid","evs":{"sa":252,"sd":4,"sp":252},"moves":["Psychic","Shadow Ball","Alluring Voice","Celebrate"]}
   },
   "Umbreon": {
@@ -721,7 +721,7 @@ var SETDEX_SV = {
     "UU Utility Pivot": {"ability":"Regenerator","item":"Heavy-Duty Boots","nature":"Sassy","teraType":"Fairy","ivs":{"at":0,"sp":0},"evs":{"hp":252,"df":240,"sd":16},"moves":["Scald","Thunder Wave","Slack Off","Chilly Reception"]},
     "Monotype Bulky Pivot (Psychic)": {"ability":"Regenerator","item":"Heavy-Duty Boots","nature":"Bold","ivs":{"at":0},"evs":{"hp":252,"df":252,"sd":4},"moves":["Chilly Reception","Scald","Thunder Wave","Slack Off"]},
     "Monotype Bulky Pivot (Water)": {"ability":"Regenerator","item":"Heavy-Duty Boots","nature":"Sassy","ivs":{"at":0,"sp":0},"evs":{"hp":248,"df":8,"sd":252},"moves":["Future Sight","Scald","Slack Off","Chilly Reception"]},
-    "National Dex Defensive Pivot": {"ability":"Regenerator","item":"Heavy-Duty Boots","nature":"Relaxed","ivs":{"at":0,"sp":0},"evs":{"hp":252,"df":188,"sd":68},"moves":["Scald","Future Sight","Teleport","Thunder Wave"]},
+    "National Dex Defensive Pivot": {"ability":"Regenerator","item":"Heavy-Duty Boots","nature":"Sassy","ivs":{"at":0,"sp":0},"evs":{"hp":252,"df":156,"sd":100},"moves":["Scald","Future Sight","Teleport","Thunder Wave"]},
     "National Dex UU Specially Defensive Pivot": {"ability":"Regenerator","item":"Heavy-Duty Boots","nature":"Sassy","ivs":{"at":0,"sp":0},"evs":{"hp":252,"df":4,"sd":252},"moves":["Scald","Future Sight","Slack Off","Teleport"]},
     "National Dex Monotype Specially Defensive (Water)": {"ability":"Regenerator","item":"Heavy-Duty Boots","nature":"Sassy","ivs":{"at":0,"sp":0},"evs":{"hp":252,"df":4,"sd":252},"moves":["Future Sight","Scald","Slack Off","Teleport"]}
   },
@@ -2371,7 +2371,7 @@ var SETDEX_SV = {
     "BSS Reg J Defensive": {"level":50,"ability":"Regenerator","item":"Leftovers","nature":"Bold","teraType":"Water","evs":{"hp":252,"df":252,"sd":4},"moves":["Spore","Foul Play","Synthesis","Sludge Bomb"]},
     "Monotype Physically Defensive (Poison)": {"ability":"Regenerator","item":"Heavy-Duty Boots","nature":"Bold","ivs":{"at":0},"evs":{"hp":248,"df":252,"sd":8},"moves":["Giga Drain","Foul Play","Spore","Synthesis"]},
     "Monotype Mixed Wall (Grass)": {"ability":"Regenerator","item":"Rocky Helmet","nature":"Calm","ivs":{"at":0},"evs":{"hp":240,"df":164,"sd":104},"moves":["Foul Play","Sludge Bomb","Synthesis","Spore"]},
-    "National Dex Defensive": {"ability":"Regenerator","item":"Heavy-Duty Boots","nature":"Bold","ivs":{"at":0},"evs":{"hp":252,"df":252,"sd":4},"moves":["Giga Drain","Sludge Bomb","Synthesis","Spore"]},
+    "National Dex Defensive": {"ability":"Regenerator","item":"Heavy-Duty Boots","nature":"Bold","ivs":{"at":0},"evs":{"hp":252,"df":252,"sd":4},"moves":["Giga Drain","Synthesis","Spore","Sludge Bomb"]},
     "National Dex UU Specially Defensive": {"ability":"Regenerator","item":"Heavy-Duty Boots","nature":"Calm","evs":{"hp":252,"df":72,"sd":184},"moves":["Giga Drain","Sludge Bomb","Foul Play","Spore"]},
     "National Dex Doubles Redirection Support": {"ability":"Regenerator","item":"Sitrus Berry","nature":"Sassy","teraType":"Fire","ivs":{"at":0,"sp":0},"evs":{"hp":232,"df":96,"sd":180},"moves":["Pollen Puff","Rage Powder","Spore","Protect"]}
   },
