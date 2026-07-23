@@ -5851,7 +5851,7 @@ export const FormatsData: import('../sim/dex-species').SpeciesFormatsDataTable =
 		natDexTier: "UUBL",
 	},
 	missingno: {
-		isNonstandard: "Custom",
+		isNonstandard: "Glitch",
 		tier: "Illegal",
 	},
 	syclar: {
@@ -6978,6 +6978,582 @@ export const FormatsData: import('../sim/dex-species').SpeciesFormatsDataTable =
 	},
 	snubbullsw: {
 		isNonstandard: "Demo",
+		tier: "Illegal",
+	},
+	yf9: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	p4yeb: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	byf1: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	mng: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	m00: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	mfe: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	mff: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	ng: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	ngmp: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	rr4: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	r: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	v: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	yd5: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	h4to89: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	yda: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	'019c': {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	e6: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	pkmnde: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	pycb: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	i: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	'8ycc': {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	pkmndf: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	g: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	pkmnpkmn: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	'3trainerpok': {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	'44ybf': {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	'44hy': {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	'4894': {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	'4h4': {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	'4h4hi': {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	'4cf': {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	'4dd': {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	'4yc5': {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	'4b848': {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	'4hi': {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	'4h': {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	'7pkmnv': {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	'8de': {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	'8p': {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	'8b48': {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	'9': {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	'94': {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	'94h': {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	'00fc': {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	yec: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	crystal00: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	crystalfc: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	crystalfe: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	crystalff: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	gs00: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	gsfc: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	gsfe: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	gsff: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	ac0: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	aea: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	agd4: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	bd7: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	bda: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	bhyd1: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	clowercase: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	cuppercase: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	fq: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	ggyc8: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	gmp: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	glitchca: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	glitchd7: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	glitchdb: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	glitchdc: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	glitche4: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	glitcheb: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	glitchec: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	glitchfa: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	h4p: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	hpok: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	h: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	mpu: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	missingnoyellow: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	o: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	opkmn4x: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	pcb: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	pid: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	pc4sh: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	ppkmnp: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	pkmnc5: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	pkmnd8: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	pkmndc: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	pkmnf7: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	pkmna: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	pkmnpkmnt: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	pkmnpce: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	pkmnpd6: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	pkmnn: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	pkmnrpkmn: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	pkmnapkmnfpkmnk: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	pokwtrainer: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	p4e7: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	pd5: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	q: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	decamark: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	trainer: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	uyc7: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	xc: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	xx: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	z: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	r4: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	e2: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	a: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	wgd: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	pyf5: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	'8c9': {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	yc1: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	pt: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	pyf4: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	gj1: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	'7g': {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	af3: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	af6: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	d2: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	z4: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	c1: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	d4: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	d9: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	e3: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	f5: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	'4c2': {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	'44yf8': {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	lf2: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	lf3: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	yf2: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	f0: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	f4: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	'4mn': {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	'6': {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	m: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	yd0: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	bydb: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	bycd: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	'44yfe': {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	hi: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	lm4: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	uc8: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	yee: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	yfa: {
+		isNonstandard: "Glitch",
+		tier: "Illegal",
+	},
+	yd3: {
+		isNonstandard: "Glitch",
 		tier: "Illegal",
 	},
 };

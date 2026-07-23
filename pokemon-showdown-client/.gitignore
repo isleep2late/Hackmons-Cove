@@ -12,6 +12,7 @@ npm-debug.log
 /play.pokemonshowdown.com/sprites/*
 !/play.pokemonshowdown.com/sprites/phnn/
 !/play.pokemonshowdown.com/sprites/sw97/
+!/play.pokemonshowdown.com/sprites/glitch/
 !/play.pokemonshowdown.com/sprites/types/
 /play.pokemonshowdown.com/sprites/types/*
 !/play.pokemonshowdown.com/sprites/types/Shadow.png

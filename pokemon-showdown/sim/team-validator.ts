@@ -15,7 +15,7 @@ import { Teams } from './teams';
 import { PRNG } from './prng';
 import { type RuleTable } from './dex-formats';
 
-const EXISTENCE_TAGS = ['past', 'future', 'lgpe', 'unobtainable', 'cap', 'custom', 'demo', 'nonexistent'];
+const EXISTENCE_TAGS = ['past', 'future', 'lgpe', 'unobtainable', 'cap', 'custom', 'demo', 'glitch', 'glitchgen1', 'glitchgen2', 'glitchgen3', 'nonexistent'];
 
 /**
  * Describes a possible way to get a pokemon. Is not exhaustive!

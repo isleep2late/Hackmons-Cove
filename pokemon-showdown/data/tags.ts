@@ -319,6 +319,26 @@ export const Tags: { [id: IDEntry]: TagData } = {
 		desc: "Only obtainable in the 1997 SpaceWorld Gold and Silver demo.",
 		genericFilter: thing => thing.isNonstandard === 'Demo',
 	},
+	glitch: {
+		name: "Glitch",
+		desc: "A glitch Pokemon or glitch move: exists in game data only through invalid indices or data corruption.",
+		genericFilter: thing => thing.isNonstandard === 'Glitch',
+	},
+	glitchgen1: {
+		name: "Glitch Gen 1",
+		desc: "A Generation 1 glitch Pokemon or glitch move (Red/Blue/Yellow invalid indices).",
+		genericFilter: thing => thing.isNonstandard === 'Glitch' && thing.gen === 1,
+	},
+	glitchgen2: {
+		name: "Glitch Gen 2",
+		desc: "A Generation 2 glitch Pokemon (Gold/Silver/Crystal invalid indices).",
+		genericFilter: thing => thing.isNonstandard === 'Glitch' && thing.gen === 2,
+	},
+	glitchgen3: {
+		name: "Glitch Gen 3",
+		desc: "A Generation 3 glitch Pokemon (Ruby/Sapphire/Emerald/FireRed/LeafGreen invalid indices).",
+		genericFilter: thing => thing.isNonstandard === 'Glitch' && thing.gen === 3,
+	},
 	custom: {
 		name: "Custom",
 		desc: "Made up for... something or other. I don't recommend using this, it's not tagged very consistently.",

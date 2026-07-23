@@ -5,7 +5,7 @@ import type { SpeciesData } from './dex-species';
 import { Tags } from '../data/tags';
 
 const DEFAULT_MOD = 'gen9';
-const EXISTENCE_TAGS = ['past', 'future', 'lgpe', 'unobtainable', 'cap', 'custom', 'demo', 'nonexistent'];
+const EXISTENCE_TAGS = ['past', 'future', 'lgpe', 'unobtainable', 'cap', 'custom', 'demo', 'glitch', 'glitchgen1', 'glitchgen2', 'glitchgen3', 'nonexistent'];
 
 export interface FormatData extends Partial<Format>, EventMethods {
 	name: string;
