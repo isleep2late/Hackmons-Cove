@@ -1580,7 +1580,15 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 			});
 			table.items = null;
 		}
-		return table.itemSet;
+		const fmt = this.format || '';
+		const allowsDemoItems = fmt.includes('nonerfs') || fmt.includes('customgame') || fmt.includes('customdisguise') || this.dex.modid === 'gen2spaceworld';
+		if (allowsDemoItems) return table.itemSet;
+		const filtered: SearchRow[] = table.itemSet.filter((row: SearchRow) =>
+			row[0] !== 'item' || this.dex.items.get(row[1]).isNonstandard !== 'Demo'
+		);
+		return filtered.filter((row: SearchRow, i: number) =>
+			row[0] !== 'header' || (i + 1 < filtered.length && filtered[i + 1][0] === 'item')
+		);
 	}
 	getBaseResults(): SearchRow[] {
 		if (!this.species) return this.getDefaultResults();
@@ -2041,6 +2049,15 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 					if (move.isNonstandard === 'Past' && this.formatType !== 'natdex' && !isPHNN) continue;
 					if (move.isNonstandard === 'LGPE' && this.formatType !== 'letsgo' && !isPHNN) continue;
 					if (dex.modid === 'gen2spaceworld' && move.isNonstandard && move.isNonstandard !== 'Custom') continue;
+					if (move.type !== 'Shadow' && (move.isNonstandard === 'Custom' || move.isNonstandard === 'Glitch' || move.isNonstandard === 'Demo')) {
+						const allowsCustom = isPHNN || format.includes('customgame') || format.includes('customdisguise');
+						let visible = allowsCustom;
+						if (move.isNonstandard === 'Glitch' && !isPHNN && move.gen !== dex.gen) visible = false;
+						if (!visible && move.id === 'nomove' && format.includes('disguises')) visible = true;
+						if (!visible && move.id === 'nomove2' && format.includes('statuses')) visible = true;
+						if (!visible && move.id === 'nomovesw' && dex.modid === 'gen2spaceworld' && (format.includes('statuses') || format.includes('disguise'))) visible = true;
+						if (!visible) continue;
+					}
 					moves.push(move.id);
 				}
 			}

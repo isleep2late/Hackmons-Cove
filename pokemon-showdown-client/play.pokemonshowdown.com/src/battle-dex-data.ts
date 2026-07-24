@@ -1169,6 +1169,7 @@ export class Item implements Effect {
 	readonly naturalGift: { basePower: number, type: TypeName };
 	readonly isPokeball: boolean;
 	readonly itemUser?: readonly string[];
+	readonly isNonstandard: string | null;
 
 	constructor(id: ID, name: string, data: any) {
 		if (!data || typeof data !== 'object') data = {};
@@ -1177,6 +1178,7 @@ export class Item implements Effect {
 		this.id = id;
 		this.gen = data.gen || 0;
 		this.exists = ('exists' in data ? !!data.exists : true);
+		this.isNonstandard = data.isNonstandard || null;
 
 		this.num = data.num || 0;
 		this.spritenum = data.spritenum || 0;
