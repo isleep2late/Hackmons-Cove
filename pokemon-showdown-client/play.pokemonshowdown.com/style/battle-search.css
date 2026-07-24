@@ -280,16 +280,14 @@
 	white-space: nowrap;
 	padding-top: 8px;
 	font-size: 8pt;
-	width: 488px;
+	float: none;
+	display: block;
+	width: auto;
+	max-width: 488px;
 	height: 21px;
 	overflow: hidden;
+	text-overflow: ellipsis;
 	color: #777777;
-}
-.dexlist .movedesccol {
-	width: 284px;
-}
-.dexlist .itemdesccol {
-	width: 464px;
 }
 
 .dexlist .sortrow {
