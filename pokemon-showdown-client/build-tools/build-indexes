@@ -1729,13 +1729,9 @@ process.stdout.write("Building `data/moves,items,abilities,typechart,learnsets.j
 				desc: m.desc || '',
 				shortDesc: m.shortDesc || m.desc || '',
 			};
+			if (m.isNonstandard) Moves[id].isNonstandard = m.isNonstandard;
+			if (m.gen) Moves[id].gen = m.gen;
 		}
-	}
-	for (const glitchMove of ['nomove', 'nomove2', 'nomovesw']) {
-		if (Moves[glitchMove]) delete Moves[glitchMove].isNonstandard;
-	}
-	for (const id in Moves) {
-		if (Moves[id].isNonstandard === 'Demo' || Moves[id].isNonstandard === 'Glitch') delete Moves[id].isNonstandard;
 	}
 	const buf = 'exports.BattleMovedex = ' + es3stringify(Moves) + ';';
 	fs.writeFileSync('play.pokemonshowdown.com/data/moves.js', buf);
@@ -1773,9 +1769,6 @@ process.stdout.write("Building `data/moves,items,abilities,typechart,learnsets.j
 			if (it.onTakeItem === false) e.onTakeItem = false;
 			Items[id] = e;
 		}
-	}
-	for (const id in Items) {
-		if (Items[id].isNonstandard === 'Demo') delete Items[id].isNonstandard;
 	}
 	const buf = 'exports.BattleItems = ' + es3stringify(Items) + ';';
 	fs.writeFileSync('play.pokemonshowdown.com/data/items.js', buf);

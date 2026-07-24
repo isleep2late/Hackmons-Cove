@@ -6,6 +6,7 @@ function phnnIsShadowMon(target: any): boolean {
 }
 export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	shadowrift: {
+		gen: 9,
 		num: 0,
 		accuracy: true,
 		basePower: 1,
@@ -26,6 +27,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		desc: "Power is equal to the base move's Z-Power. This move is super effective against non-Shadow Pokemon and resisted by Shadow Pokemon.",
 	},
 	glitchcascade: {
+		gen: 9,
 		num: 0,
 		accuracy: true,
 		basePower: 1,
@@ -517,10 +519,6 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		pp: 25,
 	},
 	recover: {
-		inherit: true,
-		pp: 20,
-	},
-	hijumpkick: {
 		inherit: true,
 		pp: 20,
 	},
@@ -1423,6 +1421,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		desc: "Power doubles if a weather condition other than Delta Stream is active, and this move's type changes to match. Ice type during Snow, Water type during Primordial Sea or Rain Dance, Rock type during Sandstorm, Fire type during Desolate Land or Sunny Day, and ??? type during Shadow Sky. If the user is holding Utility Umbrella and uses Weather Ball during Primordial Sea, Rain Dance, Desolate Land, or Sunny Day, this move remains Normal type and does not double in power.",
 	},
 	shadowrush: {
+		gen: 3,
 		num: 0,
 		accuracy: 100,
 		basePower: 90,
@@ -1443,6 +1442,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		},
 	},
 	shadowblast: {
+		gen: 3,
 		num: 0,
 		accuracy: 100,
 		basePower: 80,
@@ -1462,6 +1462,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		},
 	},
 	shadowblitz: {
+		gen: 3,
 		num: 0,
 		accuracy: 100,
 		basePower: 40,
@@ -1481,6 +1482,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		},
 	},
 	shadowbreak: {
+		gen: 3,
 		num: 0,
 		accuracy: 100,
 		basePower: 75,
@@ -1500,6 +1502,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		},
 	},
 	shadowend: {
+		gen: 3,
 		num: 0,
 		accuracy: 60,
 		basePower: 120,
@@ -1520,6 +1523,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		},
 	},
 	shadowbolt: {
+		gen: 3,
 		num: 0,
 		accuracy: 100,
 		basePower: 75,
@@ -1539,6 +1543,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		},
 	},
 	shadowchill: {
+		gen: 3,
 		num: 0,
 		accuracy: 100,
 		basePower: 75,
@@ -1558,6 +1563,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		},
 	},
 	shadowfire: {
+		gen: 3,
 		num: 0,
 		accuracy: 100,
 		basePower: 75,
@@ -1577,6 +1583,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		},
 	},
 	shadowstorm: {
+		gen: 3,
 		num: 0,
 		accuracy: 100,
 		basePower: 95,
@@ -1596,6 +1603,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		},
 	},
 	shadowwave: {
+		gen: 3,
 		num: 0,
 		accuracy: 100,
 		basePower: 50,
@@ -1615,6 +1623,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		},
 	},
 	shadowrave: {
+		gen: 3,
 		num: 0,
 		accuracy: 100,
 		basePower: 70,
@@ -1634,6 +1643,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		},
 	},
 	shadowdown: {
+		gen: 3,
 		num: 0,
 		accuracy: 100,
 		basePower: 0,
@@ -1650,6 +1660,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		type: "Shadow",
 	},
 	shadowmist: {
+		gen: 3,
 		num: 0,
 		accuracy: 100,
 		basePower: 0,
@@ -1666,6 +1677,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		type: "Shadow",
 	},
 	shadowpanic: {
+		gen: 3,
 		num: 0,
 		accuracy: 60,
 		basePower: 0,
@@ -1682,6 +1694,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		type: "Shadow",
 	},
 	shadowhold: {
+		gen: 3,
 		num: 0,
 		accuracy: 80,
 		basePower: 0,
@@ -1700,6 +1713,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		type: "Shadow",
 	},
 	shadowhalf: {
+		gen: 3,
 		num: 0,
 		accuracy: 100,
 		basePower: 0,
@@ -1718,6 +1732,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		type: "Shadow",
 	},
 	shadowshed: {
+		gen: 3,
 		num: 0,
 		accuracy: 100,
 		basePower: 0,
@@ -1738,6 +1753,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		type: "Shadow",
 	},
 	shadowsky: {
+		gen: 3,
 		num: 0,
 		accuracy: true,
 		basePower: 0,

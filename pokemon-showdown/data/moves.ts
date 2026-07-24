@@ -21313,6 +21313,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 	},
 	nomove2: {
 		num: 0,
+		gen: 2,
 		accuracy: 20.5,
 		basePower: 9,
 		category: "Special",
@@ -21333,6 +21334,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 	},
 	nomovesw: {
 		num: 0,
+		gen: 2,
 		accuracy: 13,
 		basePower: 214,
 		category: "Special",
@@ -21350,6 +21352,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 	},
 	nomove: {
 		num: 0,
+		gen: 1,
 		accuracy: 32,
 		basePower: 102,
 		category: "Special",
@@ -21366,6 +21369,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 	},
 	naildown: {
 		num: -6100,
+		gen: 2,
 		accuracy: 100,
 		basePower: 0,
 		category: "Status",
@@ -21389,6 +21393,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 	},
 	coinhurl: {
 		num: -6101,
+		gen: 2,
 		accuracy: 100,
 		basePower: 40,
 		category: "Physical",
@@ -21404,6 +21409,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 	},
 	synchronize: {
 		num: -6102,
+		gen: 2,
 		accuracy: true,
 		basePower: 0,
 		category: "Status",
@@ -21433,6 +21439,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 	},
 	bonelock: {
 		num: -6103,
+		gen: 2,
 		accuracy: 100,
 		basePower: 25,
 		category: "Physical",
@@ -21448,6 +21455,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 	},
 	stalker: {
 		num: -6104,
+		gen: 2,
 		accuracy: 100,
 		basePower: 0,
 		category: "Status",
@@ -21464,6 +21472,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 	},
 	bellchime: {
 		num: -6105,
+		gen: 2,
 		accuracy: true,
 		basePower: 0,
 		category: "Status",
@@ -21491,6 +21500,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 	},
 	megaphone: {
 		num: -6106,
+		gen: 2,
 		accuracy: 85,
 		basePower: 0,
 		category: "Status",
@@ -21507,6 +21517,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 	},
 	tempt: {
 		num: -6107,
+		gen: 2,
 		accuracy: 100,
 		basePower: 0,
 		category: "Status",
@@ -21523,6 +21534,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 	},
 	rockhead: {
 		num: -6108,
+		gen: 2,
 		accuracy: 100,
 		basePower: 90,
 		category: "Physical",
@@ -21538,6 +21550,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 	},
 	crosscutter: {
 		num: -6109,
+		gen: 2,
 		accuracy: 100,
 		basePower: 50,
 		category: "Physical",
@@ -21553,6 +21566,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 	},
 	uproot: {
 		num: -6110,
+		gen: 2,
 		accuracy: 100,
 		basePower: 30,
 		category: "Physical",
@@ -21568,6 +21582,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 	},
 	windride: {
 		num: -6111,
+		gen: 2,
 		accuracy: 100,
 		basePower: 40,
 		category: "Special",
@@ -21583,6 +21598,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 	},
 	strongarm: {
 		num: -6112,
+		gen: 2,
 		accuracy: 100,
 		basePower: 30,
 		category: "Physical",
@@ -21598,6 +21614,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 	},
 	brightmoss: {
 		num: -6113,
+		gen: 2,
 		accuracy: 100,
 		basePower: 0,
 		category: "Status",
