@@ -21189,7 +21189,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 		num: -6012,
 		name: "Sunmola1",
 		types: ["Water"],
-		baseStats: { hp: 50, atk: 50, def: 50, spa: 50, spd: 50, spe: 50 },
+		baseStats: { hp: 50, atk: 50, def: 50, spa: 50, spd: 50, spe: 30 },
 		abilities: { 0: "" },
 		heightm: 0,
 		weightkg: 0,

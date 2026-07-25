@@ -543,7 +543,7 @@ export const FormatsData: import('../../../sim/dex-species').ModdedSpeciesFormat
 		tier: "UU",
 	},
 	murkrow: {
-		tier: "UU",
+		tier: "Brick",
 	},
 	blissey: {
 		tier: "Brick",
@@ -622,7 +622,7 @@ export const FormatsData: import('../../../sim/dex-species').ModdedSpeciesFormat
 		tier: "Brick",
 	},
 	sunmola1: {
-		tier: "Brick",
+		tier: "LC",
 	},
 	anchorage: {
 		tier: "NFE",
