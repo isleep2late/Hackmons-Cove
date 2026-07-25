@@ -928,12 +928,31 @@
 				}
 				panel += '</div>';
 			}
+			var switchRow = '';
+			for (var sw = this.battle.pokemonControlled; sw < switchables.length; sw++) {
+				var benchPoke = switchables[sw];
+				if (!benchPoke) continue;
+				benchPoke.name = benchPoke.ident.substr(4);
+				if (benchPoke.fainted) {
+					switchRow += '<button class="disabled" name="chooseDisabled" value="' + BattleLog.escapeHTML(benchPoke.name) + ',fainted"><span class="picon" style="' + Dex.getPokemonIcon(benchPoke) + '"></span>' + BattleLog.escapeHTML(benchPoke.name) + '</button> ';
+				} else {
+					switchRow += '<button name="chooseRotationSwitch" value="' + (sw + 1) + '"><span class="picon" style="' + Dex.getPokemonIcon(benchPoke) + '"></span>' + BattleLog.escapeHTML(benchPoke.name) + '</button> ';
+				}
+			}
+			if (switchRow) switchRow = '<div class="switchcontrols rotation-switchrow"><div class="switchselect"><button name="rotationSwitchLabel" class="button disabled" disabled>Or switch the center out:</button></div><div class="switchmenu">' + switchRow + '</div></div>';
 			this.$controls.html(
 				'<div class="controls">' +
 				'<div class="whatdo">Rotation &mdash; check a Pok&eacute;mon\'s gimmick (Mega/Dynamax/Tera/etc.) if you want it, then pick its move. The center attacks directly; an edge Pok&eacute;mon rotates to the center first.' + this.getTimerHTML() + '</div>' +
+				switchRow +
 				'<div class="movecontrols"><div class="movemenu" style="display:block;text-align:center;">' + panel + '</div></div>' +
 				'</div>'
 			);
+		},
+		chooseRotationSwitch: function (value) {
+			if (!this.choice) return;
+			this.tooltips.hideTooltip();
+			this.choice.choices = ['switch ' + parseInt(value, 10)];
+			this.endChoice();
 		},
 		chooseRotationMove: function (value) {
 			if (!this.choice) return;
