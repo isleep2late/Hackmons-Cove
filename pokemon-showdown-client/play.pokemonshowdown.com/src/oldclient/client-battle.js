@@ -759,7 +759,8 @@
 						movebuttons += '<button class="movebutton type-' + moveType + ' has-tooltip" name="chooseMove" value="' + (i + 1) + '" data-move="' + BattleLog.escapeHTML(moveData.move) + '" data-target="' + BattleLog.escapeHTML(moveData.target) + '" data-tooltip="' + BattleLog.escapeHTML(tooltipArgs) + '">';
 						hasMoves = true;
 					}
-					movebuttons += name + '<br /><small class="type">' + (moveType ? Dex.types.get(moveType).name : "Unknown") + ' <span class="effectiveness-icon">' + moveEffectiveness + '</span></small> <small class="pp">' + pp + '</small>&nbsp;</button> ';
+					var bpaccText = (move.basePower ? move.basePower : '&mdash;') + ' / ' + (move.accuracy === true || !move.accuracy ? '&mdash;' : move.accuracy + '%');
+					movebuttons += name + '<br /><small class="type">' + (moveType ? Dex.types.get(moveType).name : "Unknown") + ' <span class="effectiveness-icon">' + moveEffectiveness + '</span></small> <small class="bpacc">' + bpaccText + '</small> <small class="pp">' + pp + '</small>&nbsp;</button> ';
 				}
 				if (!hasMoves) {
 					moveMenu += '<button class="movebutton" name="chooseMove" value="0" data-move="Struggle" data-target="randomNormal">Struggle<br /><small class="type">Normal</small> <small class="pp">&ndash;</small>&nbsp;</button> ';
@@ -903,24 +904,25 @@
 				for (var j = 0; j < a.moves.length; j++) {
 					var move = a.moves[j];
 					if (!move) continue;
-					var moveData = Dex.moves.get(move.id || move.move);
+					var moveData = ((this.battle && this.battle.dex) || Dex).moves.get(move.id || move.move);
 					var dis = move.disabled ? ' disabled' : '';
 					var pp = (move.pp !== undefined) ? (move.pp + '/' + move.maxpp) : '';
-					panel += '<button class="movebutton type-' + moveData.type + ' rotmove-base-' + i + '"' + dis + ' name="chooseRotationMove" value="' + i + ',' + (j + 1) + '" style="display:block;width:100%;margin-bottom:2px;text-align:left;">' + BattleLog.escapeHTML(move.move) + ' <small class="type">' + moveData.type + '</small> <small class="pp">' + pp + '</small></button>';
+					var rotBpAcc = (moveData.basePower ? moveData.basePower : '&mdash;') + ' / ' + (moveData.accuracy === true || !moveData.accuracy ? '&mdash;' : moveData.accuracy + '%');
+					panel += '<button class="movebutton type-' + moveData.type + ' rotmove-base-' + i + '"' + dis + ' name="chooseRotationMove" value="' + i + ',' + (j + 1) + '" style="display:block;width:100%;margin-bottom:2px;text-align:left;">' + BattleLog.escapeHTML(move.move) + ' <small class="type">' + moveData.type + '</small> <small class="bpacc">' + rotBpAcc + '</small> <small class="pp">' + pp + '</small></button>';
 				}
 				if (gimSuffix === 'dynamax' && a.maxMoves && a.maxMoves.maxMoves) {
 					for (var dm = 0; dm < a.moves.length; dm++) {
 						if (!a.moves[dm]) continue;
 						var mm = a.maxMoves.maxMoves[dm];
-						var mmData = Dex.moves.get(mm ? mm.move : (a.moves[dm].id || a.moves[dm].move));
+						var mmData = ((this.battle && this.battle.dex) || Dex).moves.get(mm ? mm.move : (a.moves[dm].id || a.moves[dm].move));
 						panel += '<button class="movebutton type-' + mmData.type + ' rotmove-alt-' + i + '" name="chooseRotationMove" value="' + i + ',' + (dm + 1) + '" style="display:none;width:100%;margin-bottom:2px;text-align:left;">' + BattleLog.escapeHTML(mmData.name) + ' <small class="type">' + mmData.type + '</small></button>';
 					}
 				} else if (gimSuffix === 'zmove' && a.canZMove) {
 					for (var zk = 0; zk < a.moves.length; zk++) {
 						if (!a.moves[zk]) continue;
 						var zm = a.canZMove[zk];
-						var zType = Dex.moves.get(a.moves[zk].id || a.moves[zk].move).type;
-						var zName = zm ? Dex.moves.get(zm.move).name : a.moves[zk].move;
+						var zType = ((this.battle && this.battle.dex) || Dex).moves.get(a.moves[zk].id || a.moves[zk].move).type;
+						var zName = zm ? ((this.battle && this.battle.dex) || Dex).moves.get(zm.move).name : a.moves[zk].move;
 						panel += '<button class="movebutton type-' + zType + ' rotmove-alt-' + i + '" name="chooseRotationMove" value="' + i + ',' + (zk + 1) + '" style="display:none;width:100%;margin-bottom:2px;text-align:left;">' + BattleLog.escapeHTML(zName) + ' <small class="type">' + zType + '</small></button>';
 					}
 				}
