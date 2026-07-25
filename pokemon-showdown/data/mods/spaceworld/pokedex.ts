@@ -34,16 +34,19 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	},
 	squirtle: {
 		inherit: true,
+		baseStats: { hp: 44, atk: 48, def: 65, spa: 50, spd: 55, spe: 43 },
 		gender: null,
 		eggGroups: ["Undiscovered"],
 	},
 	wartortle: {
 		inherit: true,
+		baseStats: { hp: 59, atk: 63, def: 80, spa: 65, spd: 75, spe: 58 },
 		gender: null,
 		eggGroups: ["Undiscovered"],
 	},
 	blastoise: {
 		inherit: true,
+		baseStats: { hp: 79, atk: 83, def: 100, spa: 85, spd: 100, spe: 78 },
 		gender: null,
 		eggGroups: ["Undiscovered"],
 	},
@@ -57,6 +60,7 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	},
 	butterfree: {
 		inherit: true,
+		baseStats: { hp: 60, atk: 45, def: 50, spa: 80, spd: 80, spe: 70 },
 		eggGroups: ["Undiscovered"],
 	},
 	weedle: {
@@ -69,6 +73,7 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	},
 	beedrill: {
 		inherit: true,
+		baseStats: { hp: 65, atk: 80, def: 40, spa: 45, spd: 80, spe: 75 },
 		eggGroups: ["Undiscovered"],
 	},
 	pidgey: {
@@ -81,6 +86,7 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	},
 	pidgeot: {
 		inherit: true,
+		baseStats: { hp: 83, atk: 80, def: 75, spa: 70, spd: 70, spe: 91 },
 		eggGroups: ["Undiscovered"],
 	},
 	rattata: {
@@ -111,12 +117,14 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	},
 	pikachu: {
 		inherit: true,
+		baseStats: { hp: 35, atk: 55, def: 30, spa: 50, spd: 40, spe: 90 },
         evoType: undefined,
         evoLevel: 12,
 		eggGroups: ["Undiscovered"],
 	},
 	raichu: {
 		inherit: true,
+		baseStats: { hp: 60, atk: 90, def: 55, spa: 90, spd: 80, spe: 100 },
 		eggGroups: ["Undiscovered"],
 	},
 	sandshrew: {
@@ -232,6 +240,7 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	},
 	venonat: {
 		inherit: true,
+		baseStats: { hp: 60, atk: 55, def: 50, spa: 40, spd: 50, spe: 45 },
 		eggGroups: ["Undiscovered"],
 	},
 	venomoth: {
@@ -241,7 +250,7 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	},
 	diglett: {
 		inherit: true,
-		baseStats: { hp: 10, atk: 55, def: 25, spa: 60, spd: 45, spe: 95 },
+		baseStats: { hp: 10, atk: 55, def: 25, spa: 50, spd: 45, spe: 95 },
 		eggGroups: ["Undiscovered"],
 	},
 	dugtrio: {
@@ -336,7 +345,7 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	machoke: {
 		inherit: true,
 		gender: null,
-		baseStats: { hp: 80, atk: 100, def: 70, spa: 50, spd: 70, spe: 45 },
+		baseStats: { hp: 80, atk: 100, def: 70, spa: 50, spd: 60, spe: 45 },
 		eggGroups: ["Undiscovered"],
 	},
 	machamp: {
@@ -372,17 +381,17 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	},
 	geodude: {
 		inherit: true,
-		baseStats: { hp: 40, atk: 80, def: 100, spa: 45, spd: 30, spe: 20 },
+		baseStats: { hp: 40, atk: 80, def: 100, spa: 30, spd: 45, spe: 20 },
 		eggGroups: ["Undiscovered"],
 	},
 	graveler: {
 		inherit: true,
-		baseStats: { hp: 55, atk: 95, def: 115, spa: 65, spd: 45, spe: 35 },
+		baseStats: { hp: 55, atk: 95, def: 115, spa: 45, spd: 65, spe: 35 },
 		eggGroups: ["Undiscovered"],
 	},
 	golem: {
 		inherit: true,
-		baseStats: { hp: 80, atk: 110, def: 130, spa: 80, spd: 55, spe: 45 },
+		baseStats: { hp: 80, atk: 110, def: 130, spa: 55, spd: 80, spe: 45 },
 		eggGroups: ["Undiscovered"],
 	},
 	ponyta: {
@@ -509,6 +518,10 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 		baseStats: { hp: 55, atk: 130, def: 115, spa: 65, spd: 50, spe: 75 },
 		eggGroups: ["Undiscovered"],
 	},
+	electrode: {
+		inherit: true,
+		baseStats: { hp: 60, atk: 50, def: 70, spa: 80, spd: 80, spe: 140 },
+	},
 	exeggcute: {
 		inherit: true,
 		baseStats: { hp: 60, atk: 40, def: 80, spa: 60, spd: 55, spe: 40 },
@@ -575,7 +588,7 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	},
 	tangela: {
 		inherit: true,
-		baseStats: { hp: 65, atk: 55, def: 115, spa: 100, spd: 100, spe: 60 },
+		baseStats: { hp: 65, atk: 55, def: 115, spa: 55, spd: 100, spe: 60 },
 		prevo: "Tangel",
 		evoLevel: 22,
 		evos: ["Gelania"],
@@ -642,7 +655,7 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	magmar: {
 		inherit: true,
 		gender: null,
-		baseStats: { hp: 65, atk: 95, def: 57, spa: 85, spd: 75, spe: 93 },
+		baseStats: { hp: 65, atk: 95, def: 57, spa: 85, spd: 70, spe: 93 },
 		evoLevel: 15,
 		eggGroups: ["Undiscovered"],
 	},
@@ -847,7 +860,7 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	quagsire: {
 		inherit: true,
 		types: ["Water"],
-		baseStats: { hp: 50, atk: 45, def: 50, spa: 75, spd: 50, spe: 50 },
+		baseStats: { hp: 50, atk: 45, def: 50, spa: 75, spd: 50, spe: 55 },
 		prevo: undefined,
 		eggGroups: ["Undiscovered"],
 	},
@@ -959,7 +972,7 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	},
 	slowking: {
 		inherit: true,
-		baseStats: { hp: 90, atk: 75, def: 110, spa: 80, spd: 50, spe: 30 },
+		baseStats: { hp: 95, atk: 75, def: 110, spa: 80, spd: 50, spe: 30 },
 		prevo: "Slowbro",
 		eggGroups: ["Undiscovered"],
 	},
@@ -1042,7 +1055,7 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	},
 	skiploom: {
 		inherit: true,
-		baseStats: { hp: 50, atk: 50, def: 50, spa: 60, spd: 50, spe: 45 },
+		baseStats: { hp: 50, atk: 50, def: 45, spa: 60, spd: 50, spe: 50 },
 		eggGroups: ["Undiscovered"],
 	},
 	jumpluff: {
@@ -1101,6 +1114,10 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 		prevo: "Farfetch'd",
 		evoLevel: 24,
 	},
+	murkrow: {
+		inherit: true,
+		baseStats: { hp: 50, atk: 50, def: 50, spa: 50, spd: 50, spe: 50 },
+	},
 	blissey: {
 		inherit: true,
 		gender: null,
@@ -1117,7 +1134,7 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 		evoLevel: 41,
 		eggGroups: ["Undiscovered"],
 	},
-	plucks: {
+	plux: {
 		inherit: true,
 		prevo: "Pinsir",
 		evoLevel: 42,
@@ -1173,7 +1190,7 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	suicune: {
 		inherit: true,
 		gender: null,
-		baseStats: { hp: 90, atk: 85, def: 100, spa: 125, spd: 98, spe: 100 },
+		baseStats: { hp: 90, atk: 85, def: 100, spa: 125, spd: 97, spe: 85 },
 	},
 	sneasel: {
 		inherit: true,
