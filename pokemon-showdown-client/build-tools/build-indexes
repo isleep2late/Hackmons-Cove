@@ -1629,6 +1629,20 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 		}
 	}
 
+	{
+		const betaIds = ['jynxmega'];
+		for (const target of [BattleTeambuilderTable, BattleTeambuilderTable.bh, BattleTeambuilderTable.gen9phnn]) {
+			if (!target || !target.tiers || target.tiers.includes(betaIds[0])) continue;
+			if (target.tiers === BattleTeambuilderTable.tiers && target !== BattleTeambuilderTable) continue;
+			target.tiers.push(['header', 'Beta Pokemon']);
+			target.overrideTier = target.overrideTier || {};
+			for (const id of betaIds) {
+				target.tiers.push(id);
+				target.overrideTier[id] = 'Illegal';
+			}
+		}	if (BattleTeambuilderTable.gen9phnn?.overrideTier) BattleTeambuilderTable.gen9phnn.overrideTier['jynxmega'] = 'Illegal';
+	}
+
 	buf += `exports.BattleTeambuilderTable = JSON.parse('${JSON.stringify(BattleTeambuilderTable).replace(/['\\]/g, "\\$&")}');\n\n`;
 
 	fs.writeFileSync('play.pokemonshowdown.com/data/teambuilder-tables.js', buf);

@@ -679,6 +679,7 @@ export const Dex = new class implements ModdedDex {
 			mewtwoshadow: { fw: 120, fh: 120, fpx: false, back: 1, bw: 124, bh: 117, shinyFront: 1, sfw: 130, sfh: 130, shinyBack: 1, battle: 1, btw: 135, bth: 130 },
 			mewtwoshadowmegax: { fw: 120, fh: 120, fpx: false, back: 1, bw: 93, bh: 132, shinyFront: 1, sfw: 140, sfh: 140, shinyBack: 1, battle: 1, btw: 100, bth: 142 },
 			mewtwoarmored: { fw: 120, fh: 120, fpx: false, back: 1, bw: 95, bh: 155, shinyFront: 1, sfw: 120, sfh: 135, shinyBack: 1, battle: 1, btw: 120, bth: 135 },
+			jynxmega: { fw: 113, fh: 91, fpx: false, back: 1, bw: 110, bh: 86 },
 			hakamoototem: { fw: 120, fh: 120, fpx: false },
 			wishiwashitotem: { fw: 120, fh: 120, fpx: false },
 		};
@@ -735,7 +736,7 @@ export const Dex = new class implements ModdedDex {
 				url: `${protocol}//${host}/sprites/phnn/${file}.${phnnMeta.ext || 'png'}`,
 				pixelated: px,
 				isFrontSprite: isFront,
-				cryurl: '',
+				cryurl: species.id === 'jynxmega' ? `${protocol}//${host}/audio/cries/jynx-mega.mp3` : '',
 				shiny: !!options.shiny,
 			};
 		}
@@ -807,6 +808,9 @@ export const Dex = new class implements ModdedDex {
 				}
 			}
 			spriteData.cryurl += '.mp3';
+		}
+		if (speciesid === 'jynxmega') {
+			spriteData.cryurl = `https://${window.Config?.routes?.client || 'play.hackmons.com'}/audio/cries/jynx-mega.mp3`;
 		}
 
 		if (options.shiny && mechanicsGen > 1) dir += '-shiny';
@@ -951,7 +955,7 @@ export const Dex = new class implements ModdedDex {
 			id = toID(pokemon.volatiles.formechange[1]);
 		}
 		const phnnIconIds: {[id: string]: number} = {
-			arceusshadow: 1, arceusquestion: 1, lugiashadow: 1, mewtwoshadow: 1, mewtwoshadowmegax: 1, mewtwoarmored: 1,
+			arceusshadow: 1, arceusquestion: 1, lugiashadow: 1, mewtwoshadow: 1, mewtwoshadowmegax: 1, mewtwoarmored: 1, jynxmega: 1,
 		};
 		if (SW97_SPRITE_SIZES[id]) {
 			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
@@ -992,7 +996,7 @@ export const Dex = new class implements ModdedDex {
 		}
 		if (species.exists === false) return { spriteDir: 'sprites/gen5', spriteid: '0', x: 10, y: 5, pixelated: true };
 		const phnnLocalSpriteIds: {[id: string]: number} = {
-			arceusshadow: 1, arceusquestion: 1, mewtwoshadow: 1, mewtwoshadowmegax: 1, mewtwoarmored: 1, lugiashadow: 1, hakamoototem: 1, wishiwashitotem: 1,
+			arceusshadow: 1, arceusquestion: 1, mewtwoshadow: 1, mewtwoshadowmegax: 1, mewtwoarmored: 1, lugiashadow: 1, hakamoototem: 1, wishiwashitotem: 1, jynxmega: 1,
 		};
 		let tbSw97Id = species.id;
 		if (dex.modid === 'gen2spaceworld' && SW97_SPRITE_SIZES[species.id + 'sw']) tbSw97Id = species.id + 'sw';

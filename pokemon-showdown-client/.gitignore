@@ -18,7 +18,8 @@ npm-debug.log
 !/play.pokemonshowdown.com/sprites/types/Shadow.png
 !/play.pokemonshowdown.com/sprites/types/Question.png
 !/play.pokemonshowdown.com/sprites/types/Bird.png
-/play.pokemonshowdown.com/audio/
+/play.pokemonshowdown.com/audio/*
+!/play.pokemonshowdown.com/audio/cries/
 
 # built from other sources
 /play.pokemonshowdown.com/caches/
