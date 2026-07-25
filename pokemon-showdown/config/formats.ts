@@ -69,28 +69,28 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'gen4',
 		searchShow: false,
 		banlist: ['Arceus-Question', 'Question Mark Plate'],
-		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
+		ruleset: ['-Nonexistent', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
 	},
 	{
 		name: "[Gen 3] Pure Hackmons",
 		desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
 		mod: 'gen3',
 		searchShow: false,
-		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', '+No Ability', 'Obtainable Abilities'],
+		ruleset: ['-Nonexistent', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', '+No Ability', 'Obtainable Abilities'],
 	},
 	{
 		name: "[Gen 2] Pure Hackmons",
 		desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
 		mod: 'gen2',
 		searchShow: false,
-		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
+		ruleset: ['-Nonexistent', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
 	},
 	{
 		name: "[Gen 1] Pure Hackmons",
 		desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
 		mod: 'gen1',
 		searchShow: false,
-		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100'],
+		ruleset: ['-Nonexistent', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100'],
 	},
 	{
 		name: "[Gen 9] National Dex Pure Hackmons",
@@ -469,7 +469,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		desc: "Gen 4 Anything Goes with real cartridge glitches: any Pokemon that can reach the English Rage/Mimic glitch (Smeargle breeding web) or the Japanese D/P Transform faint glitch (learns Transform, Mimic, Copycat, Assist, Metronome, or Rage) can run any four moves except Chatter and Struggle. Pokemon that can reach neither glitch need fully legal movesets.",
 		mod: 'gen4',
 		searchShow: false,
-		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100'],
+		ruleset: ['-Nonexistent', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100'],
 		checkCanLearn(move, species, setSources, set) {
 			if (gen4RageGlitchEligible.includes(this.toID(species.baseSpecies)) && move.id !== 'chatter' && move.id !== 'struggle') {
 				return null;
@@ -519,7 +519,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		desc: "Gen 2 Pure Hackmons, but Pokemon can start the battle pre-statused. Uses Crystal mechanics (No Move-2 has 9 base power).",
 		mod: 'gen2',
 		searchShow: false,
-		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100', 'Prestatus'],
+		ruleset: ['-Nonexistent', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100', 'Prestatus'],
 		banlist: ['No Move-2'],
 	},
 	{
@@ -528,7 +528,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'gen2gs',
 		searchShow: false,
 		challengeShow: false,
-		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100', 'Prestatus'],
+		ruleset: ['-Nonexistent', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100', 'Prestatus'],
 		banlist: ['No Move-2'],
 	},
 	{
