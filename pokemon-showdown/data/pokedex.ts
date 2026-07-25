@@ -2831,7 +2831,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 		forme: "Mega",
 		types: ["Ice", "Psychic"],
 		gender: "F",
-		baseStats: { hp: 65, atk: 50, def: 55, spa: 105, spd: 145, spe: 135 },
+		baseStats: { hp: 65, atk: 50, def: 55, spa: 145, spd: 135, spe: 105 },
 		abilities: { 0: "Magic Guard" },
 		heightm: 1.4,
 		weightkg: 40.6,
