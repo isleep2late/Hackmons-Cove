@@ -3122,6 +3122,19 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 		gen: 6,
 		isNonstandard: "Past",
 	},
+	jynxite: {
+		name: "Jynxite",
+		spritenum: 587,
+		megaStone: { "Jynx": "Jynx-Mega" },
+		itemUser: ["Jynx"],
+		onTakeItem(item, source) {
+			return !item.megaStone?.[source.baseSpecies.baseSpecies];
+		},
+		num: -6300,
+		gen: 6,
+		isNonstandard: "Custom",
+		desc: "If held by a Jynx, this item allows it to Mega Evolve in battle.",
+	},
 	kasibberry: {
 		name: "Kasib Berry",
 		spritenum: 233,

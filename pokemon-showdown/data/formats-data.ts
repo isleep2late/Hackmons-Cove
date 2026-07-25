@@ -980,6 +980,10 @@ export const FormatsData: import('../sim/dex-species').SpeciesFormatsDataTable =
 		tier: "Illegal",
 		natDexTier: "RU",
 	},
+	jynxmega: {
+		isNonstandard: "Custom",
+		tier: "Illegal",
+	},
 	elekid: {
 		tier: "LC",
 	},
