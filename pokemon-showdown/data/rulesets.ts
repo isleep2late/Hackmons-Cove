@@ -383,19 +383,33 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 	},
 	multistatus: {
 		effectType: 'Rule',
-		name: 'Multistatus',
-		desc: "Allows each Pok&eacute;mon to have multiple major status conditions at the same time, up to the chosen limit. Poison and Toxic still can't stack with each other, and full-cure effects heal every status at once. Usage: Multistatus = 2 to 5, e.g. \"Multistatus = 3\"",
+		name: 'MultiStatus',
+		desc: "Custom Disguises only: sets the maximum number of simultaneous major status conditions per Pok&eacute;mon and turns on MultiStatus Mod. Usage: \"MultiStatus = 2\" to \"MultiStatus = 5\"",
 		hasValue: 'positive-integer',
+		ruleset: ['MultiStatus Mod'],
 		onValidateRule(value) {
+			if (!this.format.id.includes('customdisguise')) {
+				throw new Error(`MultiStatus is only available in Custom Disguises formats.`);
+			}
 			const num = parseInt(value);
 			if (isNaN(num) || num < 2 || num > 5) {
-				throw new Error(`Multistatus must be an integer between 2 and 5 (there are only 5 status families: sleep, poison, burn, freeze, and paralysis).`);
+				throw new Error(`MultiStatus must be an integer between 2 and 5 (there are only 5 status families: sleep, poison, burn, freeze, and paralysis).`);
 			}
 			return `${num}`;
 		},
+	},
+	multistatusmod: {
+		effectType: 'Rule',
+		name: 'MultiStatus Mod',
+		desc: "Custom Disguises only: allows each Pok&eacute;mon to have multiple major status conditions at the same time (one per family: sleep, poison, burn, freeze, paralysis). Poison and Toxic still can't stack with each other, and full-cure effects heal every status at once. Add \"MultiStatus Mod\" to the battle's custom rules to turn it on, or \"MultiStatus = 2\" to \"MultiStatus = 5\" to also cap the count.",
+		onValidateRule() {
+			if (!this.format.id.includes('customdisguise') && this.format.id !== 'multistatus') {
+				throw new Error(`MultiStatus Mod is only available in Custom Disguises formats.`);
+			}
+		},
 		onBegin() {
 			const battle = this;
-			const limit = parseInt(this.ruleTable.valueRules.get('multistatus')!);
+			const limit = parseInt(this.ruleTable.valueRules.get('multistatus') || '') || 5;
 			const family = (id: string) => (id === 'tox' ? 'psn' : id);
 			const wrap = (id: string): string => {
 				const conditions: any = battle.dex.conditions;
@@ -577,6 +591,20 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 			const species = this.dex.species.get(set.species);
 			if (species.forme?.endsWith('Alpha')) {
 				return [`${species.name} is banned in this format.`];
+			}
+		},
+	},
+	standardrosterclause: {
+		effectType: 'ValidatorRule',
+		name: 'Standard Roster Clause',
+		desc: "Only allows species that are usable in Gen 7, 8, or 9 Pure Hackmons.",
+		onValidateSet(set) {
+			const species = this.dex.species.get(set.species);
+			if (
+				species.num <= 0 || species.forme === 'SW' || species.types.includes('Shadow') ||
+				['CAP', 'Future'].includes(species.isNonstandard as string)
+			) {
+				return [`${species.name} is not usable in Gen 7, 8, or 9 Pure Hackmons, so it is banned in this format.`];
 			}
 		},
 	},

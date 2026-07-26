@@ -1362,13 +1362,33 @@ export class Battle {
 	applyStartStatus(pokemon: Pokemon) {
 		if (!pokemon.set.startStatus || pokemon.m.phnnStartStatusApplied) return;
 		pokemon.m.phnnStartStatusApplied = true;
-		const statuses = pokemon.set.startStatus.split('/').filter(Boolean);
-		if (!statuses.length) return;
-		pokemon.setStatus(statuses[0], pokemon, null, true);
-		if (statuses.length > 1 && this.ruleTable.has('multistatus')) {
-			const limit = parseInt(this.ruleTable.valueRules.get('multistatus') || '1') || 1;
-			for (const extra of statuses.slice(1, limit)) {
-				pokemon.trySetStatus(extra, pokemon);
+		const parts = pokemon.set.startStatus.split('/').filter(Boolean);
+		if (!parts.length) return;
+		const volatileStatuses = ['confusion', 'attract'];
+		const majors = parts.filter(part => !volatileStatuses.includes(part));
+		const volatiles = parts.filter(part => volatileStatuses.includes(part));
+		if (majors.length) {
+			pokemon.setStatus(majors[0], pokemon, null, true);
+			if (majors.length > 1 && this.ruleTable.has('multistatusmod')) {
+				const limit = parseInt(this.ruleTable.valueRules.get('multistatus') || '') || 5;
+				for (const extra of majors.slice(1, limit)) {
+					pokemon.trySetStatus(extra, pokemon);
+				}
+			}
+		}
+		for (const extra of volatiles) {
+			if (extra === 'attract') {
+				const source = pokemon.foes()[0] || pokemon.side.foe.pokemon.find(p => p && !p.fainted);
+				if (!source) continue;
+				const sourceGender = source.gender;
+				const targetGender = pokemon.gender;
+				source.gender = 'F';
+				pokemon.gender = 'M';
+				pokemon.addVolatile('attract', source);
+				source.gender = sourceGender;
+				pokemon.gender = targetGender;
+			} else {
+				pokemon.addVolatile(extra, pokemon);
 			}
 		}
 	}
