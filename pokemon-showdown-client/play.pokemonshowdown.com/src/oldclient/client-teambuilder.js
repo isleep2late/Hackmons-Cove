@@ -3471,7 +3471,7 @@
 				var isStandardNN = this.curTeam.format.includes('nonerfsstandard');
 				var phStatusIdToName = { psn: 'Poisoned', tox: 'Toxic', par: 'Paralyzed', slp: 'Asleep', brn: 'Burned', frz: 'Frozen', confusion: 'Confused', attract: 'Infatuated' };
 				if (isCustomDisguise) {
-					buf += '<div class="formrow"><label class="formlabel" title="Bring this Pokemon in already afflicted with a status. Confusion and infatuation stack freely; extra major statuses beyond the first only apply with the MultiStatus Mod challenge rule.">Status:</label><div>';
+					buf += '<div class="formrow"><label class="formlabel" title="Bring this Pokemon in already afflicted with a status. Confusion and infatuation stack freely; extra major statuses beyond the first only apply with the MultiStatus Mod challenge rule (MultiStatus = N sets a limit).">Status:</label><div>';
 					var phStatusOptions = ['Poisoned', 'Toxic', 'Paralyzed', 'Asleep', 'Burned', 'Frozen', 'Confused', 'Infatuated'];
 					var selectedStatuses = [];
 					if (set.startStatus) {
@@ -3492,7 +3492,9 @@
 					}
 					buf += '</select></div></div>';
 				}
-				buf += '<div class="formrow"><label class="formlabel">Starting HP:</label><div><input type="number" min="1" max="999" step="1" name="starthp" placeholder="Max" value="' + (set.startHp || '') + '" class="textbox inputform numform" /></div></div>';
+				if (!isStandardNN) {
+					buf += '<div class="formrow"><label class="formlabel">Starting HP:</label><div><input type="number" min="1" max="999" step="1" name="starthp" placeholder="Max" value="' + (set.startHp || '') + '" class="textbox inputform numform" /></div></div>';
+				}
 			}
 
 			var ppFmt = this.curTeam.format;

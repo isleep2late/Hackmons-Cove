@@ -1370,7 +1370,8 @@ export class Battle {
 		if (majors.length) {
 			pokemon.setStatus(majors[0], pokemon, null, true);
 			if (majors.length > 1 && this.ruleTable.has('multistatusmod')) {
-				for (const extra of majors.slice(1, 5)) {
+				const limit = parseInt(this.ruleTable.valueRules.get('multistatus') || '') || 5;
+				for (const extra of majors.slice(1, limit)) {
 					pokemon.trySetStatus(extra, pokemon);
 				}
 			}

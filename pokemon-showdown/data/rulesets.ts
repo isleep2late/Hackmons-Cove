@@ -381,18 +381,35 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 			this.applyStartStatus(pokemon);
 		},
 	},
+	multistatus: {
+		effectType: 'Rule',
+		name: 'MultiStatus',
+		desc: "Custom Disguises only: sets the maximum number of simultaneous major status conditions per Pok&eacute;mon and turns on MultiStatus Mod. Usage: \"MultiStatus = 2\" to \"MultiStatus = 5\"",
+		hasValue: 'positive-integer',
+		ruleset: ['MultiStatus Mod'],
+		onValidateRule(value) {
+			if (!this.format.id.includes('customdisguise')) {
+				throw new Error(`MultiStatus is only available in Custom Disguises formats.`);
+			}
+			const num = parseInt(value);
+			if (isNaN(num) || num < 2 || num > 5) {
+				throw new Error(`MultiStatus must be an integer between 2 and 5 (there are only 5 status families: sleep, poison, burn, freeze, and paralysis).`);
+			}
+			return `${num}`;
+		},
+	},
 	multistatusmod: {
 		effectType: 'Rule',
 		name: 'MultiStatus Mod',
-		desc: "Custom Disguises only: allows each Pok&eacute;mon to have multiple major status conditions at the same time (one per family: sleep, poison, burn, freeze, paralysis). Poison and Toxic still can't stack with each other, and full-cure effects heal every status at once. Add \"MultiStatus Mod\" to the battle's custom rules to turn it on.",
+		desc: "Custom Disguises only: allows each Pok&eacute;mon to have multiple major status conditions at the same time (one per family: sleep, poison, burn, freeze, paralysis). Poison and Toxic still can't stack with each other, and full-cure effects heal every status at once. Add \"MultiStatus Mod\" to the battle's custom rules to turn it on, or \"MultiStatus = 2\" to \"MultiStatus = 5\" to also cap the count.",
 		onValidateRule() {
-			if (!this.format.id.includes('customdisguise')) {
+			if (!this.format.id.includes('customdisguise') && this.format.id !== 'multistatus') {
 				throw new Error(`MultiStatus Mod is only available in Custom Disguises formats.`);
 			}
 		},
 		onBegin() {
 			const battle = this;
-			const limit = 5;
+			const limit = parseInt(this.ruleTable.valueRules.get('multistatus') || '') || 5;
 			const family = (id: string) => (id === 'tox' ? 'psn' : id);
 			const wrap = (id: string): string => {
 				const conditions: any = battle.dex.conditions;

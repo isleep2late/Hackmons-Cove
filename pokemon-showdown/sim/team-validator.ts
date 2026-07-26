@@ -598,7 +598,7 @@ export class TeamValidator {
 		set.nature = nature.name;
 		if (!Array.isArray(set.moves)) set.moves = [];
 
-		const isCustomHpAllowed = ruleTable.has('disguisemod') || dex.currentMod.includes('phnn');
+		const isCustomHpAllowed = (ruleTable.has('disguisemod') || dex.currentMod.includes('phnn')) && !format.id.includes('nonerfsstandard');
 		const isCustomDisguises = ruleTable.has('disguisemod') && format.id.includes('customdisguise');
 		const isArbitraryPPAllowed = isCustomDisguises ||
 			(dex.currentMod.includes('phnn') && dex.gen !== 3) ||
@@ -658,8 +658,15 @@ export class TeamValidator {
 			const statusParts = set.startStatus.split('/').filter(Boolean);
 			const majorParts = statusParts.filter(part => !volatileStatuses.includes(part));
 			const volatileParts = statusParts.filter(part => volatileStatuses.includes(part));
-			if (majorParts.length > 1 && !ruleTable.has('multistatusmod')) {
-				problems.push(`${set.name || set.species} has ${majorParts.length} major starting statuses, which is only legal in Custom Disguises battles with the MultiStatus Mod rule (add "MultiStatus Mod" to the battle's custom rules).`);
+			if (majorParts.length > 1) {
+				if (!ruleTable.has('multistatusmod')) {
+					problems.push(`${set.name || set.species} has ${majorParts.length} major starting statuses, which is only legal in Custom Disguises battles with the MultiStatus Mod rule (add "MultiStatus Mod" to the battle's custom rules).`);
+				} else {
+					const multiLimit = parseInt(ruleTable.valueRules.get('multistatus') || '') || 5;
+					if (majorParts.length > multiLimit) {
+						problems.push(`${set.name || set.species} has ${majorParts.length} major starting statuses, but this battle's MultiStatus limit is ${multiLimit} (it would need "MultiStatus = ${Math.min(majorParts.length, 5)}").`);
+					}
+				}
 			}
 			if (volatileParts.length && !isCustomDisguises) {
 				problems.push(`${set.name || set.species} has a ${volatileParts.includes('attract') ? 'infatuation' : 'confusion'} starting status, which is only allowed in Custom Disguises formats.`);
