@@ -580,6 +580,20 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 			}
 		},
 	},
+	standardrosterclause: {
+		effectType: 'ValidatorRule',
+		name: 'Standard Roster Clause',
+		desc: "Only allows species that are usable in Gen 7, 8, or 9 Pure Hackmons.",
+		onValidateSet(set) {
+			const species = this.dex.species.get(set.species);
+			if (
+				species.num <= 0 || species.forme === 'SW' || species.types.includes('Shadow') ||
+				['CAP', 'Future'].includes(species.isNonstandard as string)
+			) {
+				return [`${species.name} is not usable in Gen 7, 8, or 9 Pure Hackmons, so it is banned in this format.`];
+			}
+		},
+	},
 	standardcustom: {
 		effectType: 'ValidatorRule',
 		name: 'Standard Custom',
