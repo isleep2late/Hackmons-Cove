@@ -381,21 +381,18 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 			this.applyStartStatus(pokemon);
 		},
 	},
-	multistatus: {
+	multistatusmod: {
 		effectType: 'Rule',
-		name: 'Multistatus',
-		desc: "Allows each Pok&eacute;mon to have multiple major status conditions at the same time, up to the chosen limit. Poison and Toxic still can't stack with each other, and full-cure effects heal every status at once. Usage: Multistatus = 2 to 5, e.g. \"Multistatus = 3\"",
-		hasValue: 'positive-integer',
-		onValidateRule(value) {
-			const num = parseInt(value);
-			if (isNaN(num) || num < 2 || num > 5) {
-				throw new Error(`Multistatus must be an integer between 2 and 5 (there are only 5 status families: sleep, poison, burn, freeze, and paralysis).`);
+		name: 'MultiStatus Mod',
+		desc: "Custom Disguises only: allows each Pok&eacute;mon to have multiple major status conditions at the same time (one per family: sleep, poison, burn, freeze, paralysis). Poison and Toxic still can't stack with each other, and full-cure effects heal every status at once. Add \"MultiStatus Mod\" to the battle's custom rules to turn it on.",
+		onValidateRule() {
+			if (!this.format.id.includes('customdisguise')) {
+				throw new Error(`MultiStatus Mod is only available in Custom Disguises formats.`);
 			}
-			return `${num}`;
 		},
 		onBegin() {
 			const battle = this;
-			const limit = parseInt(this.ruleTable.valueRules.get('multistatus')!);
+			const limit = 5;
 			const family = (id: string) => (id === 'tox' ? 'psn' : id);
 			const wrap = (id: string): string => {
 				const conditions: any = battle.dex.conditions;

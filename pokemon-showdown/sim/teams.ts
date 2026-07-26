@@ -470,7 +470,7 @@ export const Teams = new class Teams {
 			out += `Types: ${set.phType.split('/').join(' / ')}  \n`;
 		}
 		if (set.startStatus) {
-			const statusNames: { [k: string]: string } = { brn: 'Burn', par: 'Paralysis', slp: 'Sleep', psn: 'Poison', tox: 'Toxic', frz: 'Freeze' };
+			const statusNames: { [k: string]: string } = { brn: 'Burn', par: 'Paralysis', slp: 'Sleep', psn: 'Poison', tox: 'Toxic', frz: 'Freeze', confusion: 'Confusion', attract: 'Infatuation' };
 			out += `Status: ${set.startStatus.split('/').map(part => statusNames[part] || part).join(' / ')}  \n`;
 		}
 
@@ -631,6 +631,8 @@ export const Teams = new class Teams {
 				psn: 'psn', poison: 'psn', poisoned: 'psn',
 				tox: 'tox', toxic: 'tox', badlypoison: 'tox', badlypoisoned: 'tox',
 				frz: 'frz', freeze: 'frz', frozen: 'frz',
+				confusion: 'confusion', confused: 'confusion',
+				attract: 'attract', infatuation: 'attract', infatuated: 'attract', inlove: 'attract',
 			};
 			const parts = raw.split('/').map(part => STATUS_MAP[part.trim().replace(/[^a-z]/g, '')]).filter(Boolean);
 			if (parts.length) set.startStatus = parts.join('/');

@@ -637,7 +637,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		desc: "Pure Hackmons where Pokemon are at the highest power level across all their available generations. Only species usable in Gen 7, 8, or 9 Pure Hackmons are allowed. Level 100.",
 		mod: 'phnn',
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Team Preview', 'Data Preview', 'Prestatus', 'Shadow Tera Clause', 'No Alphas', 'Standard Roster Clause'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Team Preview', 'Data Preview', 'Species Clause', 'Evasion Clause', 'Freeze Clause Mod', 'Sleep Moves Clause', 'Shadow Tera Clause', 'No Alphas', 'Standard Roster Clause'],
 		banlist: [
 			'Mewtwo-Shadow', 'Mewtwo-Shadow-Mega-X', 'Lugia-Shadow', 'Arceus-Shadow', 'Mewtwo-Armored',
 			'Shadow Plate', 'Shadow Synergy Stone', 'Blank Plate', 'Legend Plate',

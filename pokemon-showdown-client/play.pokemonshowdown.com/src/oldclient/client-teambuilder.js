@@ -3468,18 +3468,30 @@
 					}
 					buf += '</select></div></div>';
 				}
-				buf += '<div class="formrow"><label class="formlabel" title="Bring this Pokemon in already afflicted with a status. Extra statuses beyond the first only apply when the Multistatus rule is active.">Status:</label><div>';
-				var phStatusOptions = ['Poisoned', 'Toxic', 'Paralyzed', 'Asleep', 'Burned', 'Frozen'];
-				var phStatusIdToName = { psn: 'Poisoned', tox: 'Toxic', par: 'Paralyzed', slp: 'Asleep', brn: 'Burned', frz: 'Frozen' };
-				var selectedStatuses = [];
-				if (set.startStatus) {
-					var ssParts = set.startStatus.split('/');
-					for (var ssk = 0; ssk < ssParts.length; ssk++) {
-						if (phStatusIdToName[ssParts[ssk]]) selectedStatuses.push(phStatusIdToName[ssParts[ssk]]);
+				var isStandardNN = this.curTeam.format.includes('nonerfsstandard');
+				var phStatusIdToName = { psn: 'Poisoned', tox: 'Toxic', par: 'Paralyzed', slp: 'Asleep', brn: 'Burned', frz: 'Frozen', confusion: 'Confused', attract: 'Infatuated' };
+				if (isCustomDisguise) {
+					buf += '<div class="formrow"><label class="formlabel" title="Bring this Pokemon in already afflicted with a status. Confusion and infatuation stack freely; extra major statuses beyond the first only apply with the MultiStatus Mod challenge rule.">Status:</label><div>';
+					var phStatusOptions = ['Poisoned', 'Toxic', 'Paralyzed', 'Asleep', 'Burned', 'Frozen', 'Confused', 'Infatuated'];
+					var selectedStatuses = [];
+					if (set.startStatus) {
+						var ssParts = set.startStatus.split('/');
+						for (var ssk = 0; ssk < ssParts.length; ssk++) {
+							if (phStatusIdToName[ssParts[ssk]]) selectedStatuses.push(phStatusIdToName[ssParts[ssk]]);
+						}
 					}
+					buf += this.renderPhnnMultiselect('startstatuses', phStatusOptions, selectedStatuses, 'None', false);
+					buf += '</div></div>';
+				} else if (!isStandardNN) {
+					buf += '<div class="formrow"><label class="formlabel" title="Bring this Pokemon in already afflicted with a status.">Status:</label><div><select name="startstatusone" class="button">';
+					var singleStatusIds = ['', 'psn', 'tox', 'par', 'slp', 'brn', 'frz'];
+					var curSingleStatus = (set.startStatus || '').split('/')[0] || '';
+					for (var ssi = 0; ssi < singleStatusIds.length; ssi++) {
+						var ssid = singleStatusIds[ssi];
+						buf += '<option value="' + ssid + '"' + (curSingleStatus === ssid ? ' selected="selected"' : '') + '>' + (ssid ? phStatusIdToName[ssid] : 'None') + '</option>';
+					}
+					buf += '</select></div></div>';
 				}
-				buf += this.renderPhnnMultiselect('startstatuses', phStatusOptions, selectedStatuses, 'None', false);
-				buf += '</div></div>';
 				buf += '<div class="formrow"><label class="formlabel">Starting HP:</label><div><input type="number" min="1" max="999" step="1" name="starthp" placeholder="Max" value="' + (set.startHp || '') + '" class="textbox inputform numform" /></div></div>';
 			}
 
@@ -3793,7 +3805,7 @@
 					}
 				}
 				if (this.$chart.find('details.phnn-multiselect[data-name=startstatuses]').length) {
-					var phStatusNameToId = { Poisoned: 'psn', Toxic: 'tox', Paralyzed: 'par', Asleep: 'slp', Burned: 'brn', Frozen: 'frz' };
+					var phStatusNameToId = { Poisoned: 'psn', Toxic: 'tox', Paralyzed: 'par', Asleep: 'slp', Burned: 'brn', Frozen: 'frz', Confused: 'confusion', Infatuated: 'attract' };
 					var checkedStatuses = this.phnnMultiselectValues('startstatuses').map(function (v) { return phStatusNameToId[v] || ''; }).filter(function (v) { return !!v; });
 					var prevStatuses = set.startStatus ? set.startStatus.split('/') : [];
 					var orderedStatuses = [];
@@ -3813,6 +3825,13 @@
 						delete set.startStatus;
 					}
 					this.phnnUpdateMultiselectLabel('startstatuses');
+				} else if (this.$chart.find('select[name=startstatusone]').length) {
+					var singleStatusVal = this.$chart.find('select[name=startstatusone]').val();
+					if (singleStatusVal) {
+						set.startStatus = singleStatusVal;
+					} else {
+						delete set.startStatus;
+					}
 				} else {
 					delete set.startStatus;
 				}

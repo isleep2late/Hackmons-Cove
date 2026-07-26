@@ -1435,7 +1435,7 @@ Storage.importTeam = function (buffer, teams) {
 		} else if (line.substr(0, 7) === 'Types: ') {
 			curSet.phType = line.substr(7).split('/').map(function (s) { return $.trim(s); }).join('/');
 		} else if (line.substr(0, 8) === 'Status: ') {
-			var phStatusCodes = { burn: 'brn', paralysis: 'par', sleep: 'slp', poison: 'psn', toxic: 'tox', freeze: 'frz', brn: 'brn', par: 'par', slp: 'slp', psn: 'psn', tox: 'tox', frz: 'frz' };
+			var phStatusCodes = { burn: 'brn', paralysis: 'par', sleep: 'slp', poison: 'psn', toxic: 'tox', freeze: 'frz', brn: 'brn', par: 'par', slp: 'slp', psn: 'psn', tox: 'tox', frz: 'frz', confusion: 'confusion', confused: 'confusion', infatuation: 'attract', infatuated: 'attract', attract: 'attract', inlove: 'attract' };
 			var phStatusParts = line.substr(8).split('/').map(function (part) { return phStatusCodes[toID(part)] || ''; }).filter(function (part) { return !!part; });
 			curSet.startStatus = phStatusParts.join('/');
 		} else if (line.substr(0, 15) === 'Dynamax Level: ') {
@@ -1571,7 +1571,7 @@ Storage.exportTeam = function (team, hidestats) {
 			text += 'Types: ' + curSet.phType.split('/').join(' / ') + "  \n";
 		}
 		if (curSet.startStatus) {
-			var phStatusNames = { brn: 'Burn', par: 'Paralysis', slp: 'Sleep', psn: 'Poison', tox: 'Toxic', frz: 'Freeze' };
+			var phStatusNames = { brn: 'Burn', par: 'Paralysis', slp: 'Sleep', psn: 'Poison', tox: 'Toxic', frz: 'Freeze', confusion: 'Confusion', attract: 'Infatuation' };
 			text += 'Status: ' + curSet.startStatus.split('/').map(function (part) { return phStatusNames[part] || part; }).join(' / ') + "  \n";
 		}
 		if (curSet.level && curSet.level !== 100) {

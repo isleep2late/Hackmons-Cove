@@ -652,20 +652,19 @@ export class TeamValidator {
 			}
 		}
 		if (set.startStatus) {
-			const legalStatuses = ['brn', 'par', 'slp', 'psn', 'tox', 'frz'];
+			const legalStatuses = ['brn', 'par', 'slp', 'psn', 'tox', 'frz', 'confusion', 'attract'];
+			const volatileStatuses = ['confusion', 'attract'];
 			const seenFamilies = new Set<string>();
 			const statusParts = set.startStatus.split('/').filter(Boolean);
-			if (statusParts.length > 1) {
-				if (!ruleTable.has('multistatus')) {
-					problems.push(`${set.name || set.species} has ${statusParts.length} starting statuses, which is only legal in battles with the Multistatus rule (add "Multistatus = ${Math.min(statusParts.length, 5)}" to the battle's custom rules).`);
-				} else {
-					const multiLimit = parseInt(ruleTable.valueRules.get('multistatus') || '0') || 0;
-					if (multiLimit && statusParts.length > multiLimit) {
-						problems.push(`${set.name || set.species} has ${statusParts.length} starting statuses, but this battle's Multistatus limit is ${multiLimit} (it would need "Multistatus = ${Math.min(statusParts.length, 5)}").`);
-					}
-				}
+			const majorParts = statusParts.filter(part => !volatileStatuses.includes(part));
+			const volatileParts = statusParts.filter(part => volatileStatuses.includes(part));
+			if (majorParts.length > 1 && !ruleTable.has('multistatusmod')) {
+				problems.push(`${set.name || set.species} has ${majorParts.length} major starting statuses, which is only legal in Custom Disguises battles with the MultiStatus Mod rule (add "MultiStatus Mod" to the battle's custom rules).`);
 			}
-			for (const part of set.startStatus.split('/').filter(Boolean)) {
+			if (volatileParts.length && !isCustomDisguises) {
+				problems.push(`${set.name || set.species} has a ${volatileParts.includes('attract') ? 'infatuation' : 'confusion'} starting status, which is only allowed in Custom Disguises formats.`);
+			}
+			for (const part of statusParts) {
 				if (!legalStatuses.includes(part)) {
 					problems.push(`${set.name || set.species}'s starting status "${part}" is invalid.`);
 					continue;
