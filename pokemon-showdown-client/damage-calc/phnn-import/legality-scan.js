@@ -11,7 +11,7 @@ const {Dex} = require('/srv/phnn-beta/pokemon-showdown/dist/sim/dex');
 const {TeamValidator} = require('/srv/phnn-beta/pokemon-showdown/dist/sim/team-validator');
 
 const FORMATS = {
-  phnn: ['gen9nonerfspurehackmons', 'gen9nonerfscustomdisguises'],
+  phnn: ['gen9nonerfsextended', 'gen9nonerfscustomdisguises'],
   spaceworld: ['gen2spaceworldou', 'gen2spaceworldcustomdisguises'],
 };
 // Anchors known-legal in every listed format, used as the test-bed set.
