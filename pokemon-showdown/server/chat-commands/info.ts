@@ -1796,29 +1796,30 @@ export const commands: Chat.ChatCommands = {
 		this.sendReplyBox(
 			`Pok&eacute;mon Showdown is open source:<br />` +
 			`- Language: mostly TypeScript, a little PHP<br />` +
-			`- <a href="https://github.com/smogon/pokemon-showdown/commits/master">What's new?</a><br />` +
-			`- <a href="https://github.com/smogon/pokemon-showdown">Server source code</a><br />` +
-			`- <a href="https://github.com/smogon/pokemon-showdown-client">Client source code</a><br />` +
+			`- <a href="https://github.com/isleep2late/Hackmons-Cove/commits/main">What's new?</a><br />` +
+			`- <a href="https://github.com/isleep2late/Hackmons-Cove/blob/main/pokemon-showdown">Server source code</a><br />` +
+			`- <a href="https://github.com/isleep2late/Hackmons-Cove/blob/main/pokemon-showdown-client">Client source code</a><br />` +
+			`- <a href="https://github.com/isleep2late/Hackmons-Cove/tree/main/pokemon-showdown-client/showdex">Showdex Plugin</a><br />` +
 			`- <a href="https://github.com/Zarel/Pokemon-Showdown-Dex">Dex source code</a><br />` +
 			`- <a href="https://github.com/smogon/pokemon-showdown-loginserver">Login server source code</a>`
 		);
 	},
 	opensourcehelp: [
-		`/opensource - Links to PS's source code repository.`,
+		`/opensource - Links to HC's source code repository.`,
 		`!opensource - Show everyone that information. Requires: + % @ # ~`,
 	],
-
+/*
 	staff(target, room, user) {
 		if (!this.runBroadcast()) return;
 		this.sendReplyBox(`<a href="https://www.smogon.com/forums/posts/10715136/">Pok&eacute;mon Showdown Staff List</a>`);
 	},
 	staffhelp: [`/staff - View the staff list.`],
-
+*/
 	forums(target, room, user) {
 		if (!this.runBroadcast()) return;
-		this.sendReplyBox(`<a href="https://www.smogon.com/forums/forums/209/">Pok&eacute;mon Showdown Forums</a>`);
+		this.sendReplyBox(`<a href="https://www.hackmons.com">Hackmons Forums</a>`);
 	},
-	forumshelp: [`/forums - Links to the PS forums.`],
+	forumshelp: [`/forums - Links to the Hackmon forums.`],
 
 	privacypolicy(target, room, user) {
 		if (!this.runBroadcast()) return;
@@ -1830,7 +1831,7 @@ export const commands: Chat.ChatCommands = {
 		].join(`<br />`));
 	},
 	privacypolicyhelp: [`/privacypolicy - Displays PS's privacy policy.`],
-
+/*
 	suggest: 'suggestions',
 	suggestion: 'suggestions',
 	suggestions(target, room, user) {
@@ -1854,7 +1855,7 @@ export const commands: Chat.ChatCommands = {
 		}
 	},
 	bugshelp: [`/bugs - Links to the various bug reporting services.`],
-
+*/
 	optionbutton: 'optionsbutton',
 	optionsbutton(target, room, user) {
 		if (!this.runBroadcast()) return;
