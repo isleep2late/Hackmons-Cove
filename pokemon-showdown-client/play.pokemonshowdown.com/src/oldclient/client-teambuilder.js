@@ -3524,6 +3524,7 @@
 			if (format === undefined) format = this.curTeam.format;
 			if (gen === undefined) gen = this.curTeam.gen;
 			if (format.includes('customdisguises') || format.includes('customgame')) return 9999;
+			if (gen === 9 && format.includes('nonerfsstandard')) return 100;
 			if ((gen === 1 && format.includes('disguises')) ||
 				(gen === 2 && (format.includes('noclerics') || format.includes('statuses'))) ||
 				((gen === 9 || gen === 5) && (format.includes('nonerfs') || format.includes('phnn')) && !format.includes('cup')) ||
