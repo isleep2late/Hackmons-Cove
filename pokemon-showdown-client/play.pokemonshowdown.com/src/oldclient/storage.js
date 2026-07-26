@@ -734,6 +734,7 @@ Storage.unpackAllTeams = function (buffer) {
 				format = format.slice(0, -4);
 				capacity = 24;
 			}
+			if (format === 'gen9nonerfspurehackmons') format = 'gen9nonerfsextended';
 			return {
 				name: oldTeam.name || '',
 				format: format,
@@ -762,6 +763,7 @@ Storage.unpackLine = function (line) {
 	if (slashIndex < 0) slashIndex = bracketIndex; // line.slice(slashIndex + 1, pipeIndex) will be ''
 	var format = bracketIndex > 0 ? line.slice((leftBracketIndex ? leftBracketIndex + 1 : 0), isBox ? bracketIndex - 4 : bracketIndex) : 'gen9';
 	if (format && format.slice(0, 3) !== 'gen') format = 'gen6' + format;
+	if (format === 'gen9nonerfspurehackmons') format = 'gen9nonerfsextended';
 	return {
 		teamid: leftBracketIndex > 0 ? Number(line.slice(0, leftBracketIndex)) : undefined,
 		name: line.slice(slashIndex + 1, pipeIndex),
@@ -1318,6 +1320,7 @@ Storage.importTeam = function (buffer, teams) {
 					format = format.slice(0, -4);
 					capacity = 24;
 				}
+				if (format === 'gen9nonerfspurehackmons') format = 'gen9nonerfsextended';
 				line = $.trim(line.substr(bracketIndex + 1));
 			}
 			if (teams.length && typeof teams[teams.length - 1].team !== 'string') {
@@ -1845,6 +1848,7 @@ Storage.nwLoadTeamFile = function (filename, localApp) {
 			format = format.slice(0, -4);
 			capacity = 24;
 		}
+		if (format === 'gen9nonerfspurehackmons') format = 'gen9nonerfsextended';
 		line = $.trim(line.slice(bracketIndex + 1));
 	}
 	fs.readFile(this.dir + 'Teams/' + filename, function (err, data) {

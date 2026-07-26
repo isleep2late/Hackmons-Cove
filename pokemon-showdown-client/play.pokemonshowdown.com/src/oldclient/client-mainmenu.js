@@ -1335,6 +1335,15 @@
 			var $privacyCheckbox = $searchForm.find('input[name=private]');
 
 			var format = $formatButton.val();
+			if (format === 'gen9nonerfspurehackmons' && window.BattleFormats['gen9nonerfsextended']) {
+				format = 'gen9nonerfsextended';
+				$formatButton.val(format);
+				this.curFormat = format;
+			}
+			if (!window.BattleFormats[format]) {
+				app.addPopupMessage("The format \"" + format + "\" is no longer available. Please pick another format.");
+				return;
+			}
 			var teamIndex = $teamButton.val();
 			var team = null;
 			if (Storage.teams[teamIndex]) team = Storage.teams[teamIndex];
