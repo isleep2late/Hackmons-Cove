@@ -570,17 +570,17 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		unbanlist: ['Demo'],
 	},
 	{
-		name: "[Gen 2] Statuses",
-		desc: "Gen 2 Pure Hackmons, but Pokemon can start the battle pre-statused. Uses Crystal mechanics (No Move-2 has 9 base power).",
-		mod: 'gen2',
+		name: "[Gen 2 GS] Statuses",
+		desc: "Gen 2 Statuses using Gold/Silver mechanics: No Move-2 has 5 base power instead of Crystal's 9.",
+		mod: 'gen2gs',
 		searchShow: false,
 		ruleset: ['-Nonexistent', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100', 'Prestatus'],
 		banlist: ['No Move-2'],
 	},
 	{
-		name: "[Gen 2 GS] Statuses",
-		desc: "Gen 2 Statuses using Gold/Silver mechanics: No Move-2 has 5 base power instead of Crystal's 9.",
-		mod: 'gen2gs',
+		name: "[Gen 2] Statuses",
+		desc: "Gen 2 Pure Hackmons, but Pokemon can start the battle pre-statused. Uses Crystal mechanics (No Move-2 has 9 base power).",
+		mod: 'gen2',
 		searchShow: false,
 		ruleset: ['-Nonexistent', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100', 'Prestatus'],
 		banlist: ['No Move-2'],
@@ -783,7 +783,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 	//////////////////////////////////
 	{
 		section: "Balanced Hackmons",
-		column: 2,
+		column: 3,
 	},
 	{
 		name: "[Gen 9] Balanced Hackmons",
