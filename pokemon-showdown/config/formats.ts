@@ -578,7 +578,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		banlist: ['No Move-2'],
 	},
 	{
-		name: "[Gen 2] Statuses",
+		name: "[Gen 2 GS] Statuses",
 		desc: "Gen 2 Statuses using Gold/Silver mechanics: No Move-2 has 5 base power instead of Crystal's 9.",
 		mod: 'gen2gs',
 		searchShow: false,
