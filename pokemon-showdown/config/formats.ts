@@ -17,7 +17,37 @@ New sections will be added to the bottom of the specified column.
 The column value will be ignored for repeat sections.
 */
 
-const gen4RageGlitchEligible = ['abra','absol','aerodactyl','aggron','aipom','alakazam','altaria','ambipom','ampharos','anorith','arbok','arcanine','ariados','armaldo','aron','articuno','azumarill','azurill','bagon','baltoy','banette','barboach','bayleef','beautifly','beedrill','beldum','bellossom','bellsprout','blastoise','blaziken','blissey','bonsly','breloom','bulbasaur','butterfree','cacnea','cacturne','camerupt','carvanha','cascoon','castform','caterpie','celebi','chansey','charizard','charmander','charmeleon','chatot','chikorita','chimchar','chimecho','chinchou','clamperl','claydol','clefable','clefairy','cleffa','cloyster','combusken','corphish','corsola','cradily','crawdaunt','crobat','croconaw','cubone','cyndaquil','delcatty','delibird','deoxys','dewgong','diglett','ditto','dodrio','doduo','donphan','dragonair','dragonite','dratini','drowzee','dugtrio','dunsparce','dusclops','dusknoir','duskull','dustox','eevee','ekans','electabuzz','electivire','electrike','electrode','elekid','entei','espeon','exeggcute','exeggutor','exploud','farfetchd','fearow','feebas','feraligatr','flaaffy','flareon','flygon','forretress','froslass','furret','gallade','gardevoir','gastly','gengar','geodude','girafarig','glaceon','glalie','glameow','gligar','gliscor','gloom','golbat','goldeen','golduck','golem','gorebyss','granbull','graveler','grimer','groudon','grovyle','growlithe','grumpig','gulpin','gyarados','happiny','hariyama','haunter','heracross','hitmonchan','hitmonlee','hitmontop','honchkrow','hooh','hoothoot','hoppip','horsea','houndoom','houndour','huntail','hypno','igglybuff','illumise','infernape','ivysaur','jigglypuff','jirachi','jolteon','jumpluff','jynx','kabuto','kabutops','kadabra','kakuna','kangaskhan','kecleon','kingdra','kingler','kirlia','koffing','krabby','kyogre','lairon','lanturn','lapras','larvitar','latias','latios','leafeon','ledian','ledyba','lickilicky','lickitung','lileep','linoone','lombre','lotad','loudred','lucario','ludicolo','lugia','lunatone','luvdisc','machamp','machoke','machop','magby','magcargo','magikarp','magmar','magmortar','magnemite','magneton','magnezone','makuhita','mamoswine','manectric','mankey','mantine','mareep','marill','marowak','marshtomp','masquerain','mawile','medicham','meditite','meganium','meowth','mesprit','metagross','metang','metapod','mew','mewtwo','mightyena','milotic','miltank','mimejr','minun','misdreavus','mismagius','moltres','monferno','mrmime','mudkip','muk','munchlax','murkrow','natu','nidoking','nidoqueen','nidoranf','nidoranm','nidorina','nidorino','nincada','ninetales','ninjask','noctowl','nosepass','numel','nuzleaf','octillery','oddish','omanyte','omastar','onix','paras','parasect','pelipper','persian','phanpy','pichu','pidgeot','pidgeotto','pidgey','pikachu','piloswine','pineco','pinsir','plusle','politoed','poliwag','poliwhirl','poliwrath','ponyta','poochyena','porygon','porygon2','porygonz','primeape','probopass','psyduck','pupitar','purugly','quagsire','quilava','qwilfish','raichu','raikou','ralts','rapidash','raticate','rattata','rayquaza','regice','regirock','registeel','relicanth','remoraid','rhydon','rhyhorn','rhyperior','riolu','roselia','roserade','sableye','salamence','sandshrew','sandslash','sceptile','scizor','scyther','seadra','seaking','sealeo','seedot','seel','sentret','seviper','sharpedo','shedinja','shelgon','shellder','shiftry','shroomish','shuckle','shuppet','silcoon','skarmory','skiploom','skitty','slaking','slakoth','slowbro','slowking','slowpoke','slugma','smeargle','smoochum','sneasel','snorlax','snorunt','snubbull','solrock','spearow','spheal','spinarak','spinda','spoink','squirtle','stantler','starmie','staryu','steelix','sudowoodo','suicune','sunflora','sunkern','surskit','swablu','swalot','swampert','swellow','swinub','taillow','tangela','tangrowth','tauros','teddiursa','tentacool','tentacruel','togekiss','togepi','togetic','torchic','torkoal','totodile','trapinch','treecko','tropius','typhlosion','tyranitar','tyrogue','umbreon','unown','ursaring','vaporeon','venomoth','venonat','venusaur','vibrava','victreebel','vigoroth','vileplume','volbeat','voltorb','vulpix','wailmer','wailord','walrein','wartortle','weavile','weedle','weepinbell','weezing','whiscash','whismur','wigglytuff','wingull','wobbuffet','wooper','wurmple','wynaut','xatu','yanma','yanmega','zangoose','zapdos','zigzagoon','zubat'];
+const gen4RageGlitchEligible = [
+	'abra','absol','aerodactyl','aggron','aipom','alakazam','altaria','ambipom','ampharos','anorith','arbok','arcanine',
+	'ariados','armaldo','aron','articuno','azumarill','azurill','bagon','baltoy','banette','barboach','bayleef','beautifly','beedrill','beldum','bellossom',
+	'bellsprout','blastoise','blaziken','blissey','bonsly','breloom','bulbasaur','butterfree','cacnea','cacturne','camerupt','carvanha','cascoon','castform',
+	'caterpie','celebi','chansey','charizard','charmander','charmeleon','chatot','chikorita','chimchar','chimecho','chinchou','clamperl','claydol','clefable',
+	'clefairy','cleffa','cloyster','combusken','corphish','corsola','cradily','crawdaunt','crobat','croconaw','cubone','cyndaquil','delcatty','delibird',
+	'deoxys','dewgong','diglett','ditto','dodrio','doduo','donphan','dragonair','dragonite','dratini','drowzee','dugtrio','dunsparce','dusclops','dusknoir',
+	'duskull','dustox','eevee','ekans','electabuzz','electivire','electrike','electrode','elekid','entei','espeon','exeggcute','exeggutor','exploud','farfetchd',
+	'fearow','feebas','feraligatr','flaaffy','flareon','flygon','forretress','froslass','furret','gallade','gardevoir','gastly','gengar','geodude','girafarig',
+	'glaceon','glalie','glameow','gligar','gliscor','gloom','golbat','goldeen','golduck','golem','gorebyss','granbull','graveler','grimer','groudon','grovyle',
+	'growlithe','grumpig','gulpin','gyarados','happiny','hariyama','haunter','heracross','hitmonchan','hitmonlee','hitmontop','honchkrow','hooh','hoothoot',
+	'hoppip','horsea','houndoom','houndour','huntail','hypno','igglybuff','illumise','infernape','ivysaur','jigglypuff','jirachi','jolteon','jumpluff','jynx',
+	'kabuto','kabutops','kadabra','kakuna','kangaskhan','kecleon','kingdra','kingler','kirlia','koffing','krabby','kyogre','lairon','lanturn','lapras','larvitar',
+	'latias','latios','leafeon','ledian','ledyba','lickilicky','lickitung','lileep','linoone','lombre','lotad','loudred','lucario','ludicolo','lugia','lunatone',
+	'luvdisc','machamp','machoke','machop','magby','magcargo','magikarp','magmar','magmortar','magnemite','magneton','magnezone','makuhita','mamoswine','manectric',
+	'mankey','mantine','mareep','marill','marowak','marshtomp','masquerain','mawile','medicham','meditite','meganium','meowth','mesprit','metagross','metang',
+	'metapod','mew','mewtwo','mightyena','milotic','miltank','mimejr','minun','misdreavus','mismagius','moltres','monferno','mrmime','mudkip','muk','munchlax',
+	'murkrow','natu','nidoking','nidoqueen','nidoranf','nidoranm','nidorina','nidorino','nincada','ninetales','ninjask','noctowl','nosepass','numel','nuzleaf',
+	'octillery','oddish','omanyte','omastar','onix','paras','parasect','pelipper','persian','phanpy','pichu','pidgeot','pidgeotto','pidgey','pikachu','piloswine',
+	'pineco','pinsir','plusle','politoed','poliwag','poliwhirl','poliwrath','ponyta','poochyena','porygon','porygon2','porygonz','primeape','probopass','psyduck',
+	'pupitar','purugly','quagsire','quilava','qwilfish','raichu','raikou','ralts','rapidash','raticate','rattata','rayquaza','regice','regirock','registeel',
+	'relicanth','remoraid','rhydon','rhyhorn','rhyperior','riolu','roselia','roserade','sableye','salamence','sandshrew','sandslash','sceptile','scizor','scyther',
+	'seadra','seaking','sealeo','seedot','seel','sentret','seviper','sharpedo','shedinja','shelgon','shellder','shiftry','shroomish','shuckle','shuppet','silcoon',
+	'skarmory','skiploom','skitty','slaking','slakoth','slowbro','slowking','slowpoke','slugma','smeargle','smoochum','sneasel','snorlax','snorunt','snubbull',
+	'solrock','spearow','spheal','spinarak','spinda','spoink','squirtle','stantler','starmie','staryu','steelix','sudowoodo','suicune','sunflora','sunkern',
+	'surskit','swablu','swalot','swampert','swellow','swinub','taillow','tangela','tangrowth','tauros','teddiursa','tentacool','tentacruel','togekiss','togepi',
+	'togetic','torchic','torkoal','totodile','trapinch','treecko','tropius','typhlosion','tyranitar','tyrogue','umbreon','unown','ursaring','vaporeon','venomoth',
+	'venonat','venusaur','vibrava','victreebel','vigoroth','vileplume','volbeat','voltorb','vulpix','wailmer','wailord','walrein','wartortle','weavile','weedle',
+	'weepinbell','weezing','whiscash','whismur','wigglytuff','wingull','wobbuffet','wooper','wurmple','wynaut','xatu','yanma','yanmega','zangoose','zapdos',
+	'zigzagoon','zubat'
+];
 
 export const Formats: import('../sim/dex-formats').FormatList = [
 		
@@ -53,7 +83,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		name: "[Gen 6] Pure Hackmons",
 		desc: `Anything that can be hacked in-game and is usable in local battles is allowed.`,
 		mod: 'gen6',
-		//searchShow: false,
+		searchShow: false,
 		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'EV limit = 510'],
 	},
 	{
@@ -419,6 +449,33 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 			}
 		},
 	},
+	{
+		name: "[Gen 9] Pokebilities Balanced Hackmons",
+		desc: `Balanced Hackmons where Pok&eacute;mon have all of their released abilities simultaneously.`,
+		mod: 'pokebilities',
+		searchShow: false,
+		ruleset: [
+			'[Gen 9] Pokebilities', '!Obtainable', 'Hackmons Forme Legality', 'Species Reveal Clause', 'Terastal Clause', 'AAA Restricted Abilities',
+		],
+		banlist: [
+			'Blaziken-Mega', 'Darmanitan-Galar', 'Diancie-Mega', 'Enamorus-Base', 'Gardevoir-Mega', 'Gengar-Mega', 'Groudon-Primal', 'Gyarados-Mega', 'Hawlucha', 'Kangaskhan-Mega',
+			'Kartana', 'Kyogre-Primal', 'Lucario-Mega', 'Mawile-Mega', 'Medicham-Mega', 'Mewtwo-Mega-X', 'Mewtwo-Mega-Y', 'Rayquaza-Mega', 'Shedinja', 'Jynxite',
+			'Comatose', 'Magnet Pull', 'Neutralizing Gas', 'Regenerator + Emergency Exit', 'Regenerator + Fur Coat', 'Regenerator + Ice Scales', 'Regenerator + Wimp Out',
+			'Belly Drum', 'Burning Bulwark', 'Ceaseless Edge', 'Clangorous Soul', 'Dire Claw', 'Electro Shot', 'Fillet Away', 'Imprison', 'Lumina Crash', 'No Retreat',
+			'Photon Geyser', 'Population Bomb', 'Power Trip', 'Quiver Dance', 'Rage Fist', 'Revival Blessing', 'Substitute', 'Shell Smash', 'Tail Glow', 'Triple Arrows', 'V-create',
+		],
+		unbanlist: [
+			'Annihilape', 'Arceus', 'Archaludon', 'Baxcalibur', 'Braviary-Hisui', 'Calyrex-Ice', 'Conkeldurr', 'Chi-Yu', 'Chien-Pao', 'Deoxys-Normal', 'Dialga', 'Dialga-Origin',
+			'Espathra', 'Eternatus', 'Flutter Mane', 'Giratina', 'Giratina-Origin', 'Groudon', 'Ho-Oh', 'Iron Bundle', 'Kingambit', 'Kyogre', 'Landorus-Base', 'Lugia', 'Lunala',
+			'Magearna', 'Mewtwo', 'Necrozma-Dusk-Mane', 'Necrozma-Dawn-Wings', 'Palafin', 'Palkia', 'Palkia-Origin', 'Rayquaza', 'Regieleki', 'Roaring Moon', 'Shaymin-Sky',
+			'Smeargle', 'Sneasler', 'Solgaleo', 'Spectrier', 'Terapagos', 'Ursaluna-Bloodmoon', 'Urshifu', 'Zacian',
+			'Bright Powder', 'Damp Rock', 'Icy Rock', 'Smooth Rock',
+		],
+		restricted: [
+			'Contrary', 'Gorilla Tactics', 'Hadron Engine', 'Huge Power', 'Illusion', 'Innards Out', 'Libero', 'Liquid Ooze', 'Orichalcum Pulse', 'Parental Bond',
+			'Poison Heal', 'Protean', 'Pure Power', 'Stakeout', 'Stench', 'Unburden', 'Water Bubble', 'Wonder Guard',
+		],
+	},
 
 	//////////////////////////////////
 	////// Miscellaneous Tiers ///////
@@ -428,7 +485,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		column: 1,
 	},
 	{
-		name: "[Gen 8] 255",
+		name: "[Gen 8] 255 Pure Hackmons Unified",
 		desc: "Gen 8 Pure Hackmons at level 255. Unified merges the Sword/Shield and BDSP Pokedex and has no stat overflow glitch.",
 		mod: 'gen8unified',
 		searchShow: false,
@@ -437,25 +494,23 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		unbanlist: ['Past', 'Unobtainable'],
 	},
 	{
-		name: "[Gen 8] 255 (SwSh)",
+		name: "[Gen 8] 255 Pure Hackmons",
 		desc: "Gen 8 Sword/Shield Pure Hackmons at level 255, with the stat overflow glitch.",
 		mod: 'gen8',
 		searchShow: false,
-		challengeShow: false,
 		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Overflow Stat Mod', 'Max Level = 255', 'Default Level = 100'],
 		unbanlist: ['Past', 'Unobtainable'],
 	},
 	{
-		name: "[Gen 8] 255 (BDSP)",
+		name: "[Gen 8 BDSP] 255 Pure Hackmons",
 		desc: "Gen 8 Brilliant Diamond/Shining Pearl Pure Hackmons at level 255, with the stat overflow glitch.",
 		mod: 'gen8bdsp',
 		searchShow: false,
-		challengeShow: false,
 		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Overflow Stat Mod', 'Max Level = 255', 'Default Level = 100'],
 		unbanlist: ['Past', 'Unobtainable'],
 	},
 	{
-		name: "[Gen 6] No Limit",
+		name: "[Gen 6] No EV Limit",
 		desc: "Gen 6 Pure Hackmons without the 510 EV limit.",
 		mod: 'gen6',
 		searchShow: false,
@@ -465,7 +520,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		},
 	},
 	{
-		name: "[Gen 4] Rage",
+		name: "[Gen 4] Glitch Anything Goes",
 		desc: "Gen 4 Anything Goes with real cartridge glitches: any Pokemon that can reach the English Rage/Mimic glitch (Smeargle breeding web) or the Japanese D/P Transform faint glitch (learns Transform, Mimic, Copycat, Assist, Metronome, or Rage) can run any four moves except Chatter and Struggle. Pokemon that can reach neither glitch need fully legal movesets.",
 		mod: 'gen4',
 		searchShow: false,
@@ -523,11 +578,10 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		banlist: ['No Move-2'],
 	},
 	{
-		name: "[Gen 2] Statuses (Gold/Silver)",
+		name: "[Gen 2] Statuses",
 		desc: "Gen 2 Statuses using Gold/Silver mechanics: No Move-2 has 5 base power instead of Crystal's 9.",
 		mod: 'gen2gs',
 		searchShow: false,
-		challengeShow: false,
 		ruleset: ['-Nonexistent', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100', 'Prestatus'],
 		banlist: ['No Move-2'],
 	},
@@ -536,7 +590,6 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		desc: "Pure Hackmons on the 1997 SpaceWorld demo's decomp-verified battle engine, where Pokemon can disguise as any species and start the battle pre-statused. Unlike Gen 1 Disguises there is no custom typing: the demo derives a Pokemon's types from its species byte, so a disguised Pokemon takes on its disguise's typing. Engine quirks: gen 1-style Counter (any physical type, shared last-damage), gen 1-style partial trapping with Rapid Spin escape, targeted permanent Sandstorm, no-recharge Hyper Beam on KOs, the Explosion HP-byte glitch, the Fly/Dig invulnerability glitch, Special Defense stages only applying after Baton Pass, held type-boost items, and RBY movesets via the working Time Capsule. Known conventions: Protect/Endure expire at end of turn, Morning Sun/Synthesis/Moonlight heal a flat 50%, and dual status is not modeled.",
 		mod: 'spaceworld',
 		searchShow: false,
-		challengeShow: false,
 		ruleset: ['-Nonexistent', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100', 'Prestatus', 'SpaceWorld Disguise Mod'],
 		banlist: ['No Move-2', 'No Move-SW'],
 	},
@@ -545,7 +598,6 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		desc: "Standard Gold/Silver/Crystal OU. Regular Pokemon, learnsets, and mechanics with no hackmons modding; Species and Sleep clauses apply. Doubles is supported natively by choosing the doubles game type.",
 		mod: 'gen2',
 		searchShow: false,
-		challengeShow: false,
 		ruleset: ['Standard'],
 		banlist: ['Uber', 'Mean Look + Baton Pass', 'Spider Web + Baton Pass'],
 	},
@@ -737,6 +789,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		name: "[Gen 9] Balanced Hackmons",
 		desc: `Anything directly hackable onto a set (EVs, IVs, forme, ability, item, and move) and is usable in local battles is allowed.`,
 		mod: 'gen9',
+		//searchShow: false,
 		ruleset: [
 			'OHKO Clause', 'Evasion Clause', 'Species Clause', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Sleep Moves Clause',
 			'Endless Battle Clause', 'Hackmons Forme Legality', 'Species Reveal Clause', 'Terastal Clause',
@@ -854,35 +907,10 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		},
 	},
 	{
-		name: "[Gen 9] Pokebilities Balanced Hackmons",
-		desc: `Balanced Hackmons where Pok&eacute;mon have all of their released abilities simultaneously.`,
-		mod: 'pokebilities',
-		ruleset: [
-			'[Gen 9] Pokebilities', '!Obtainable', 'Hackmons Forme Legality', 'Species Reveal Clause', 'Terastal Clause', 'AAA Restricted Abilities',
-		],
-		banlist: [
-			'Blaziken-Mega', 'Darmanitan-Galar', 'Diancie-Mega', 'Enamorus-Base', 'Gardevoir-Mega', 'Gengar-Mega', 'Groudon-Primal', 'Gyarados-Mega', 'Hawlucha', 'Kangaskhan-Mega',
-			'Kartana', 'Kyogre-Primal', 'Lucario-Mega', 'Mawile-Mega', 'Medicham-Mega', 'Mewtwo-Mega-X', 'Mewtwo-Mega-Y', 'Rayquaza-Mega', 'Shedinja', 'Jynxite',
-			'Comatose', 'Magnet Pull', 'Neutralizing Gas', 'Regenerator + Emergency Exit', 'Regenerator + Fur Coat', 'Regenerator + Ice Scales', 'Regenerator + Wimp Out',
-			'Belly Drum', 'Burning Bulwark', 'Ceaseless Edge', 'Clangorous Soul', 'Dire Claw', 'Electro Shot', 'Fillet Away', 'Imprison', 'Lumina Crash', 'No Retreat',
-			'Photon Geyser', 'Population Bomb', 'Power Trip', 'Quiver Dance', 'Rage Fist', 'Revival Blessing', 'Substitute', 'Shell Smash', 'Tail Glow', 'Triple Arrows', 'V-create',
-		],
-		unbanlist: [
-			'Annihilape', 'Arceus', 'Archaludon', 'Baxcalibur', 'Braviary-Hisui', 'Calyrex-Ice', 'Conkeldurr', 'Chi-Yu', 'Chien-Pao', 'Deoxys-Normal', 'Dialga', 'Dialga-Origin',
-			'Espathra', 'Eternatus', 'Flutter Mane', 'Giratina', 'Giratina-Origin', 'Groudon', 'Ho-Oh', 'Iron Bundle', 'Kingambit', 'Kyogre', 'Landorus-Base', 'Lugia', 'Lunala',
-			'Magearna', 'Mewtwo', 'Necrozma-Dusk-Mane', 'Necrozma-Dawn-Wings', 'Palafin', 'Palkia', 'Palkia-Origin', 'Rayquaza', 'Regieleki', 'Roaring Moon', 'Shaymin-Sky',
-			'Smeargle', 'Sneasler', 'Solgaleo', 'Spectrier', 'Terapagos', 'Ursaluna-Bloodmoon', 'Urshifu', 'Zacian',
-			'Bright Powder', 'Damp Rock', 'Icy Rock', 'Smooth Rock',
-		],
-		restricted: [
-			'Contrary', 'Gorilla Tactics', 'Hadron Engine', 'Huge Power', 'Illusion', 'Innards Out', 'Libero', 'Liquid Ooze', 'Orichalcum Pulse', 'Parental Bond',
-			'Poison Heal', 'Protean', 'Pure Power', 'Stakeout', 'Stench', 'Unburden', 'Water Bubble', 'Wonder Guard',
-		],
-	},
-	{
 		name: "[Gen 8] Balanced Hackmons",
 		desc: `Anything that can be hacked in-game and is usable in local battles is allowed.`,
 		mod: 'gen8',
+		searchShow: false,
 		ruleset: [
 			'Standard AG', '!Obtainable',
 			'OHKO Clause', 'Dynamax Clause', 'Evasion Moves Clause', 'Sleep Moves Clause', 'Forme Clause',
@@ -899,6 +927,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		name: "[Gen 7] Balanced Hackmons",
 		desc: `Anything that can be hacked in-game and is usable in local battles is allowed.`,
 		mod: 'gen7',
+		searchShow: false,
 		ruleset: [
 			'Standard AG', '!Obtainable Moves', '!Obtainable Abilities', '!Obtainable Formes', '!EV Limit',
 			'OHKO Clause', 'Ability Clause = 2', 'CFZ Clause', 'Evasion Moves Clause', 'Sleep Clause Mod', 'Forme Clause',
@@ -913,6 +942,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		name: "[Gen 6] Balanced Hackmons",
 		desc: `Anything that can be hacked in-game and is usable in local battles is allowed.`,
 		mod: 'gen6',
+		searchShow: false,
 		ruleset: [
 			'Standard AG', '!Obtainable Moves', '!Obtainable Abilities', '!Obtainable Formes',
 			'OHKO Clause', 'Ability Clause = 2', 'Evasion Moves Clause', 'Ate Clause',
@@ -926,6 +956,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		name: "[Gen 5] Balanced Hackmons",
 		desc: `Anything that can be hacked in-game and is usable in local battles is allowed.`,
 		mod: 'gen5',
+		searchShow: false,
 		ruleset: [
 			'Standard', 'Evasion Abilities Clause', 'Sleep Moves Clause', 'Gems Clause', 'Baton Pass Stat Clause',
 			'!Obtainable Moves', '!Obtainable Abilities', '!Obtainable Formes', '!EV Limit', 'Sleep Clause Mod',
@@ -940,6 +971,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		name: "[Gen 4] Balanced Hackmons",
 		desc: `Anything that can be hacked in-game and is usable in local battles is allowed.`,
 		mod: 'gen4',
+		searchShow: false,
 		ruleset: [
 			'Standard', 'Evasion Abilities Clause', 'Baton Pass Stat Trap Clause', 'Freeze Clause Mod', 'Sleep Moves Clause', '!Sleep Clause Mod',
 			'!Obtainable Moves', '!Obtainable Abilities', '!Obtainable Formes', '!EV Limit', 'Ability Clause = 2',
@@ -1128,7 +1160,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		},
 	},
 	//////////////////////////////////
-	/////////// Disguises ////////////
+	///// Disguises / Custom Game ////
 	//////////////////////////////////
 	{
 		section: "Custom",
@@ -1263,7 +1295,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 	{
 		name: "[Gen 9] Custom Game",
 		mod: 'gen9',
-		searchShow: true,
+		searchShow: false,
 		debug: true,
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100'],
