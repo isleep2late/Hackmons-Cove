@@ -482,7 +482,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 	//////////////////////////////////
 	{
 		section: "Hackmons Other Tiers",
-		column: 1,
+		column: 2,
 	},
 	{
 		name: "[Gen 8] 255 Pure Hackmons Unified",
@@ -987,7 +987,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 	//////////////////////////////////
 	{
 		section: "Random Hackmons",
-		column: 2,
+		column: 3,
 	},
 	{
 		name: "[Gen 9] Hackmons Cup",
@@ -1163,8 +1163,8 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 	///// Disguises / Custom Game ////
 	//////////////////////////////////
 	{
-		section: "Custom",
-		column: 2,
+		section: "Custom Games",
+		column: 3,
 	},
 	{
 		name: "[Gen 9 No Nerfs] Custom Disguises",
