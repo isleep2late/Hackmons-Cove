@@ -155,7 +155,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 			) {
 				return this.validateSet(set, teamHas);
 			}
-			const allThings = [set.ability, set.item, ...set.moves].filter(e => e.length);
+			const allThings = [set.ability, set.item, ...set.moves].filter(e => !!e?.length);
 			for (const thing of allThings) {
 				if (this.toID(thing) === 'trace' || this.toID(thing) === 'neutralizinggas') {
 					return [`${thing} is currently bugged and is banned.`];
@@ -166,7 +166,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 			}
 			if (
 				allThings.some(y => effectFunctions.some(x => x.get(y).isNonstandard &&
-					!this.ruleTable.has(`+pokemontag:${this.toID(x.get(y).isNonstandard)}`)))
+					!this.ruleTable.has(`+tag:${this.toID(x.get(y).isNonstandard)}`)))
 			) {
 				return this.validateSet(set, teamHas);
 			}
