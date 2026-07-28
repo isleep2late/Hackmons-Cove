@@ -891,6 +891,11 @@ abstract class BattleTypedSearch<T extends SearchType> {
 						this.baseResults.push([this.searchType, id as ID]);
 						continue;
 					}
+					if (this.searchType === 'pokemon' && id === 'pokestarspirit' &&
+						this.dex.gen === 5 && this.format.includes('purehackmons')) {
+						this.baseResults.push([this.searchType, id as ID]);
+						continue;
+					}
 					if (isNoNerfs && (this.searchType !== 'pokemon' || this.dex.species.get(id).num > 0 || id.startsWith('pokestar'))) {
 						this.baseResults.push([this.searchType, id as ID]);
 						continue;
