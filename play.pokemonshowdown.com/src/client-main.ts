@@ -1343,7 +1343,7 @@ export class PSRoom extends PSStreamModel<Args | null> implements RoomOptions {
 		},
 		'workoffline'() {
 			if (PS.isOffline) {
-				return this.add(`|error|You are already offline.`);
+				return this.errorReply(`You are already offline.`);
 			}
 			PS.connection?.disconnect();
 		},
@@ -1405,10 +1405,10 @@ export class PSRoom extends PSStreamModel<Args | null> implements RoomOptions {
 			}
 			if (PS.user.userid) PS.send(`/cmd userdetails ${PS.user.userid}`);
 		},
-		'open,user'(target) {
-			let roomid = `user-${toID(target)}` as RoomID;
+		'open,user'(target, cmd, elem) {
+			const roomid = (toID(target) ? `user-${toID(target)}` : `users`) as RoomID;
 			PS.join(roomid, {
-				args: { username: target },
+				args: { username: target }, parentElem: elem,
 			});
 		},
 		'ignore'(target) {
@@ -1600,11 +1600,15 @@ export class PSRoom extends PSStreamModel<Args | null> implements RoomOptions {
 							try {
 								new RegExp(targets[i]);
 							} catch (e: any) {
-								return this.add(`|error|${(e.message.substr(0, 28) === 'Invalid regular expression: ' ? e.message : 'Invalid regular expression: /' + targets[i] + '/: ' + e.message)}`);
+								return this.errorReply(
+									e.message.startsWith('Invalid regular expression: ') ?
+										e.message :
+										'Invalid regular expression: /' + targets[i] + '/: ' + e.message
+								);
 							}
 						}
 						if (highlightList.includes(targets[i])) {
-							return this.add(`|error|${targets[i]} is already on your highlights list.`);
+							return this.errorReply(`${targets[i]} is already on your highlights list.`);
 						}
 					}
 					highlights[key] = highlightList.concat(targets);
@@ -1820,6 +1824,9 @@ export class PSRoom extends PSStreamModel<Args | null> implements RoomOptions {
 		if (this.connected) {
 			this.sendDirect(`/noreply /leave ${this.id}`);
 			this.connected = false;
+		}
+		for (let i = this.notifications.length - 1; i >= 0; i--) {
+			this.dismissNotificationAt(i);
 		}
 	}
 }
@@ -2158,12 +2165,15 @@ export const PS = new class extends PSModel {
 				width: 660,
 				maxWidth: 660,
 			};
-		case 'battle':
+		case 'battle': {
+			const sideBySide = !this.prefs.battlelayout ||
+				this.prefs.battlelayout === 'side-by-side' || this.prefs.battlelayout === 'side-by-side-overlay';
 			return {
 				minWidth: 320,
-				width: 956,
-				maxWidth: 1180,
+				width: sideBySide ? 956 : 640,
+				maxWidth: sideBySide ? 1180 : 640,
 			};
+		}
 		}
 		return {
 			minWidth: 640,
@@ -2883,7 +2893,6 @@ export const PS = new class extends PSModel {
 	}
 	removeRoom(room: PSRoom) {
 		const wasFocused = this.room === room;
-		room.destroy();
 		delete PS.rooms[room.id];
 
 		const leftRoomIndex = PS.leftRoomList.indexOf(room.id);
@@ -2937,6 +2946,7 @@ export const PS = new class extends PSModel {
 		if (wasFocused) {
 			this.room.focusNextUpdate = { preventScroll: true };
 		}
+		room.destroy();
 	}
 	/** do NOT use this in a while loop: see `closePopupsUntil */
 	closePopup(skipUpdate?: boolean) {

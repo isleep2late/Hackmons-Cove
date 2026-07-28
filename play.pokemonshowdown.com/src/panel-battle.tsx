@@ -166,6 +166,37 @@ export class BattleRoom extends ChatRoom {
 	isPlaying() {
 		return this.battle && !this.battle.ended && this.request && this.connectMode !== 'deleted';
 	}
+	updateChoiceNotification() {
+		let oName = this.battle?.farSide.name;
+		if (oName) oName = " against " + oName;
+		let title = '';
+		let body = '';
+		switch (this.request?.requestType) {
+		case 'move':
+			title = "Your move!";
+			body = "Move in your battle" + oName;
+			break;
+		case 'switch':
+			title = "Your switch!";
+			body = "Switch in your battle" + oName;
+			break;
+		case 'team':
+			title = "Team preview!";
+			body = "Choose your team order in your battle" + oName;
+			break;
+		}
+
+		if (!this.choices || this.choices.isDone()) body = '';
+
+		const current = this.notifications.find(notification => notification.id === 'choice');
+		if ((current?.body || '') === body) return;
+
+		if (!body) {
+			this.dismissNotification('choice');
+		} else {
+			this.notify({ title, body, id: 'choice', noAutoDismiss: true });
+		}
+	}
 
 	override handleReconnect(): boolean | void {
 		if (this.battle) {
@@ -176,7 +207,14 @@ export class BattleRoom extends ChatRoom {
 		this.side = null;
 		this.request = null;
 		this.choices = null;
+		this.updateChoiceNotification();
 		return false;
+	}
+
+	override destroy() {
+		this.request = null;
+		this.choices = null;
+		super.destroy();
 	}
 
 	loadReplay() {
@@ -473,9 +511,23 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 		case 'error':
 			if (args[1].startsWith('[Invalid choice]') && room.request) {
 				room.choices = new BattleChoiceBuilder(room.request);
+				room.updateChoiceNotification();
 				room.update(null);
 			}
 			break;
+		case 'sentchoice':
+			if (room.request) {
+				let choices = new BattleChoiceBuilder(room.request);
+				const possibleError = choices.addChoices(args[1]);
+				if (possibleError || !choices.isDone()) {
+					choices = new BattleChoiceBuilder(room.request);
+					choices.serializedChoice = args[1];
+				}
+				room.choices = choices;
+			}
+			room.updateChoiceNotification();
+			room.update(null);
+			return;
 		}
 		room.battle.add('|' + args.join('|'));
 		if (PS.prefs.noanim) this.props.room.battle.seekTurn(Infinity);
@@ -485,6 +537,7 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 		if (!request) {
 			room.request = null;
 			room.choices = null;
+			room.updateChoiceNotification();
 			return;
 		}
 
@@ -508,24 +561,10 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 
 		room.request = request;
 		room.choices = new BattleChoiceBuilder(request);
-		this.notifyRequest();
+		// A reconnect can send `|sentchoice|` immediately after `|request|`.
+		// Wait until the entire protocol message has been processed before notifying.
+		Promise.resolve().then(() => room.updateChoiceNotification());
 		room.update(null);
-	}
-	notifyRequest() {
-		const room = this.props.room;
-		let oName = room.battle.farSide.name;
-		if (oName) oName = " against " + oName;
-		switch (room.request?.requestType) {
-		case 'move':
-			room.notify({ title: "Your move!", body: "Move in your battle" + oName });
-			break;
-		case 'switch':
-			room.notify({ title: "Your switch!", body: "Switch in your battle" + oName });
-			break;
-		case 'team':
-			room.notify({ title: "Team preview!", body: "Choose your team order in your battle" + oName });
-			break;
-		}
 	}
 	renderConnectError() {
 		const room = this.props.room;
@@ -829,11 +868,10 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 	renderSwitchMenu(
 		request: BattleMoveRequest | BattleSwitchRequest, choices: BattleChoiceBuilder, ignoreTrapping?: boolean
 	) {
-		const battle = this.props.room.battle;
 		const numActive = choices.requestLength();
 		const maybeTrapped = !ignoreTrapping && choices.currentMoveRequest()?.maybeTrapped;
 		const trapped = !ignoreTrapping && !maybeTrapped && choices.currentMoveRequest()?.trapped;
-		const isReviving = battle.myPokemon!.some(p => p.reviving);
+		const isReviving = choices.isReviving();
 
 		return <div class="switchmenu">
 			{maybeTrapped && <em class="movewarning">
@@ -843,11 +881,11 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 				You're <strong>trapped</strong> and cannot switch!<br />
 			</em>}
 			{isReviving && <em class="movewarning">
-				Choose a pokemon to revive!<br />
+				Choose a Pokémon to revive!<br />
 			</em>}
 			{request.side.pokemon.map((serverPokemon, i) => {
 				let cantSwitch = trapped || i < numActive || choices.alreadySwitchingIn.includes(i + 1) || serverPokemon.fainted;
-				if (isReviving) cantSwitch = !serverPokemon.fainted;
+				if (isReviving) cantSwitch = !serverPokemon.fainted || choices.alreadySwitchingIn.includes(i + 1);
 				return this.renderPokemonButton({
 					pokemon: serverPokemon,
 					cmd: `/switch ${i + 1}`,
@@ -899,7 +937,6 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 			return this.renderPokemonButton({
 				pokemon: serverPokemon,
 				cmd: `/switch ${slot}`,
-				disabled: true,
 				tooltip: `switchpokemon|${slot - 1}`,
 			});
 		});
@@ -910,19 +947,28 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 			(request.requestType !== 'move' && request.requestType !== 'switch' && request.requestType !== 'team') ||
 			choices.isEmpty()
 		) {
-			return choices.isDone() ? ['Waiting for opponent...', <br />] : null;
+			return null;
 		}
 
 		let buf: preact.ComponentChild[] = [
-			<button data-cmd="/cancel" class="button"><i class="fa fa-chevron-left" aria-hidden></i> Back</button>, ' ',
+			<button data-cmd="/cancelone" class="button"><i class="fa fa-chevron-left" aria-hidden></i> Back</button>, ' ',
 		];
-		if (choices.isDone() && (choices.noCancel || this.props.room.battle.hardcoreMode)) {
-			buf = ['Waiting for opponent...', <br />];
-		} else if (choices.isDone() && choices.choices.length <= 1 && !overlayVersion) {
+		if (choices.isDone() && (
+			choices.noCancel || this.props.room.battle.hardcoreMode ||
+			(choices.choices.length <= 1 && !overlayVersion)
+		)) {
 			buf = [];
 		}
 
+		if (choices.serializedChoice) {
+			if (choices.serializedChoice === 'default') {
+				return [`Automatic choice`, <br />];
+			}
+			return [`Unrecognized choice from server: `, <code>{choices.serializedChoice}</code>, <br />];
+		}
+
 		const battle = this.props.room.battle;
+		let teamList = false;
 		for (let i = 0; i < choices.choices.length; i++) {
 			const choiceString = choices.choices[i];
 			if (choiceString === "testfight") {
@@ -966,14 +1012,22 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 				buf.push(`.`);
 			} else if (choice.choiceType === 'switch') {
 				const target = request.side.pokemon[choice.targetPokemon - 1];
-				buf.push(`${pokemon.name} will switch to `, <strong>{target.name}</strong>, `.`);
+				if (choices.isReviving(i)) {
+					buf.push(`${pokemon.name} will revive `, <strong>{target.name}</strong>, `.`);
+				} else {
+					buf.push(`${pokemon.name} will switch to `, <strong>{target.name}</strong>, `.`);
+				}
 			} else if (choice.choiceType === 'shift') {
 				buf.push(`${pokemon.name} will `, <strong>shift</strong>, ` to the center.`);
 			} else if (choice.choiceType === 'team') {
 				const target = request.side.pokemon[choice.targetPokemon - 1];
-				buf.push(`You picked `, <strong>{target.name}</strong>, `.`);
+				buf.push(teamList ? `, ` : `You picked `, <strong>{target.name}</strong>);
+				teamList = true;
 			}
-			buf.push(<br />);
+			if (!teamList) buf.push(<br />);
+		}
+		if (teamList) {
+			buf.push('.', <br />);
 		}
 		return buf;
 	}
@@ -1078,6 +1132,9 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 	}
 	renderPlayerSwitchControls(request: BattleSwitchRequest, choices: BattleChoiceBuilder, overlayVersion = false) {
 		const pokemon = request.side.pokemon[choices.index()];
+		const prompt = choices.isReviving() ?
+			<>Who will <strong>{pokemon.name}</strong> revive?</> :
+			<>Who will replace <strong>{pokemon.name}</strong>?</>;
 		if (overlayVersion) {
 			return <>
 				<div class="overlay-controls-list">
@@ -1086,7 +1143,7 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 				<div class="switchcontrols">
 					<p class="overlay-message">
 						{this.renderOldChoices(request, choices, true)}
-						Who will replace <strong>{pokemon.name}</strong>?
+						{prompt}
 					</p>
 					{this.renderSwitchMenu(request, choices, true)}
 				</div>
@@ -1095,7 +1152,7 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 		return <div class="inline-controls">
 			<div class="whatdo">
 				{this.renderOldChoices(request, choices)}
-				Who will replace <strong>{pokemon.name}</strong>?
+				{prompt}
 			</div>
 			<div class="switchcontrols">
 				<h3 class="switchselect">Switch</h3>
@@ -1105,13 +1162,14 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 	}
 	renderPlayerTeamPreviewControls(request: BattleTeamRequest, choices: BattleChoiceBuilder, overlayVersion = false) {
 		const prompt = choices.alreadySwitchingIn.length > 0 ? (
-			[<button data-cmd="/cancel" class="button"><i class="fa fa-chevron-left" aria-hidden></i> Back</button>,
+			[<button data-cmd="/cancelone" class="button"><i class="fa fa-chevron-left" aria-hidden></i> Back</button>,
 				" What about the rest of your team? "]
 		) : (
 			"How will you start the battle? "
 		);
+		const chosenTeamSizeLabel = (request.chosenTeamSize || 0) > 1 ? ` / ${request.chosenTeamSize!}` : '';
 		const chooseLabel = choices.alreadySwitchingIn.length <= 0 ?
-			`lead` : `slot ${choices.alreadySwitchingIn.length + 1}`;
+			`lead${chosenTeamSizeLabel}` : `slot ${choices.alreadySwitchingIn.length + 1}${chosenTeamSizeLabel}`;
 		if (overlayVersion) {
 			return <>
 				<div class="overlay-controls-list">
