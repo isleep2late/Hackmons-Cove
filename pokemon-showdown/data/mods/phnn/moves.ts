@@ -681,7 +681,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 			onTryHit(target, source, move) {
 				if (!move.flags['protect']) {
 					if (['gmaxoneblow', 'gmaxrapidflow'].includes(move.id)) return;
-					if (move.isZ || move.isMax) target.getMoveHitData(move).bypassProtect = true;
+					if (move.isZ || move.isMax || move.isZOrMaxPowered) target.getMoveHitData(move).bypassProtect = true;
 					return;
 				}
 				if (move.smartTarget) {
