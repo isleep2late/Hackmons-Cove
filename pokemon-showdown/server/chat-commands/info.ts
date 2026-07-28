@@ -3255,14 +3255,13 @@ export const pages: Chat.PageTable = {
 			<h2><span>Owner</span></h2>
 
 			<ul>
-				<li><p><a href="https://hackmons.com/" target="_blank" class="subtle"><strong>isleep2late</strong></a> <small>&ndash; Development, Sysadmin</small></p></li>
+				<li><p><a href="https://hackmons.com/" target="_blank" class="subtle"><strong>isleep2late</strong></a> <small>&ndash; Development, Sysadmin, Formats</small></p></li>
 			</ul>
 
 			<h2><span>Staff</span></h2>
 
 			<ul>
-				<li><p><a href="https://github.com/iforgetwhyimhere" target="_blank" class="subtle"><strong>iforgetwhyimhere</strong></a> <small>&ndash; Development, Sysadmin, Staff</small></p></li>
-				<li><p><strong>Electra102</strong> <small>&ndash; Development</small></p></li>
+				<li><p><a href="https://github.com/iforgetwhyimhere" target="_blank" class="subtle"><strong>iforgetwhyimhere</strong></a> <small>&ndash; Development, Sysadmin, Formats</small></p></li>
 				<li><p><strong>CottonCandyReal</strong><small>&ndash; Development</small></p></li></ul>
 
 			<h2><span>Contributors</span></h2>
