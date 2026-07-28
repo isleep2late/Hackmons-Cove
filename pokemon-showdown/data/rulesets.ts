@@ -3355,12 +3355,18 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 			}
 			for (const moveid of set.moves) {
 				const move = this.dex.moves.get(moveid);
-				if (move.isNonstandard && move.isNonstandard !== 'Unobtainable' && !this.ruleTable.has(`+move:${move.id}`)) {
+				if (
+					move.isNonstandard && move.isNonstandard !== 'Unobtainable' && !this.ruleTable.has(`+move:${move.id}`) &&
+					!this.ruleTable.has(`+tag:${this.toID(move.isNonstandard)}`)
+				) {
 					return [`${move.name} is illegal.`];
 				}
 			}
 			const item = this.dex.items.get(set.item);
-			if (item.isNonstandard && item.isNonstandard !== 'Unobtainable' && !this.ruleTable.has(`+item:${item.id}`)) {
+			if (
+				item.isNonstandard && item.isNonstandard !== 'Unobtainable' && !this.ruleTable.has(`+item:${item.id}`) &&
+				!this.ruleTable.has(`+tag:${this.toID(item.isNonstandard)}`)
+			) {
 				return [`${item.name} is illegal.`];
 			}
 			if (species.baseSpecies === 'Xerneas' && this.toID(set.ability) !== 'fairyaura') {
