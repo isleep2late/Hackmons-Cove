@@ -151,6 +151,42 @@ export const FormatsData: import('../../../sim/dex-species').ModdedSpeciesFormat
 		isNonstandard: null,
 		tier: "OU",
 	},
+	tsubomitto: {
+		isNonstandard: null,
+		tier: "OU",
+	},
+	madaamu: {
+		isNonstandard: null,
+		tier: "OU",
+	},
+	norowara: {
+		isNonstandard: null,
+		tier: "OU",
+	},
+	tsuinzu: {
+		isNonstandard: null,
+		tier: "OU",
+	},
+	purakkusu: {
+		isNonstandard: null,
+		tier: "OU",
+	},
+	pending03: {
+		isNonstandard: null,
+		tier: "OU",
+	},
+	pending05: {
+		isNonstandard: null,
+		tier: "OU",
+	},
+	pending06: {
+		isNonstandard: null,
+		tier: "OU",
+	},
+	pending10: {
+		isNonstandard: null,
+		tier: "OU",
+	},
 	happa: {
 		isNonstandard: null,
 		tier: "OU",

@@ -4065,18 +4065,18 @@
 				val = (id in BattlePokedex ? this.curTeam.dex.species.get(e.currentTarget.value).name : '');
 				break;
 			case 'ability':
-				if (id in BattleItems && format && (format.endsWith("dualwielding") || format.endsWith("biomechmons"))) {
+				if (id in BattleItems && format && (format.endsWith("dualwielding") || format.includes("biomechmons"))) {
 					val = BattleItems[id].name;
-				} else if (id in BattleMovedex && format && (format.endsWith("trademarked") || format.endsWith("biomechmons"))) {
+				} else if (id in BattleMovedex && format && (format.endsWith("trademarked") || format.includes("biomechmons"))) {
 					val = BattleMovedex[id].name;
 				} else {
 					val = (id in BattleAbilities ? BattleAbilities[id].name : '');
 				}
 				break;
 			case 'item':
-				if (id in BattleMovedex && format && (format.endsWith("fortemons") || format.endsWith("biomechmons"))) {
+				if (id in BattleMovedex && format && (format.endsWith("fortemons") || format.includes("biomechmons"))) {
 					val = BattleMovedex[id].name;
-				} else if (id in BattleAbilities && format && (format.endsWith("multibility") || format.endsWith("biomechmons"))) {
+				} else if (id in BattleAbilities && format && (format.endsWith("multibility") || format.includes("biomechmons"))) {
 					val = BattleAbilities[id].name;
 				} else {
 					val = (id in BattleItems ? BattleItems[id].name : '');
@@ -4085,9 +4085,9 @@
 			case 'move1': case 'move2': case 'move3': case 'move4':
 				if (id in BattlePokedex && format && format.endsWith("pokemoves")) {
 					val = BattlePokedex[id].name;
-				} else if (id in BattleAbilities && format && format.endsWith("biomechmons")) {
+				} else if (id in BattleAbilities && format && format.includes("biomechmons")) {
 					val = BattleAbilities[id].name;
-				} else if (id in BattleItems && format && format.endsWith("biomechmons")) {
+				} else if (id in BattleItems && format && format.includes("biomechmons")) {
 					val = BattleItems[id].name;
 				} else {
 					val = (id in BattleMovedex ? BattleMovedex[id].name : '');

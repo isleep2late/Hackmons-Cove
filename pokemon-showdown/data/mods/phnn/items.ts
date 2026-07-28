@@ -1,4 +1,4 @@
-const SW_EVIOLITE: string[] = ['ballerine', 'ditto', 'farfetchd', 'farfetchdsw', 'golppy', 'minicorn', 'para', 'pinsir', 'pinsirmega', 'pinsirsw', 'slowbro', 'slowbromega', 'slowbrosw', 'tangel'];
+const SW_EVIOLITE: string[] = ['ballerine', 'ditto', 'farfetchd', 'farfetchdsw', 'golppy', 'minicorn', 'para', 'pinsir', 'pinsirmega', 'pinsirsw', 'shuckle', 'slowbro', 'slowbromega', 'slowbrosw', 'tangel'];
 
 export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 
@@ -157,8 +157,8 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 				return this.chainModify(1.5);
 			}
 		},
-		shortDesc: "If holder's species can evolve, or could evolve in Space World '97, its Def and Sp. Def are 1.5x.",
-		desc: "If the holder's species can evolve, its Defense and Special Defense are multiplied by 1.5. This also applies to species that could evolve in the Space World '97 demo: Ballerine, Ditto, Farfetch'd, Golppy, Minicorn, Para, Pinsir, Slowbro, and Tangel, including their SW formes and even after Mega Evolution.",
+		shortDesc: "If holder's species can evolve, or could in the SpaceWorld demo or GS prototypes, its Def and Sp. Def are 1.5x.",
+		desc: "If the holder's species can evolve, its Defense and Special Defense are multiplied by 1.5. This also applies to species that could evolve in the Space World '97 demo or the leaked Gold/Silver prototypes: Ballerine, Ditto, Farfetch'd, Golppy, Minicorn, Para, Pinsir, Shuckle, Slowbro, and Tangel, including their SW formes and even after Mega Evolution. Shuckle qualifies because the prototypes contain a cut Shuckle evolution (Pending 06).",
 	},
 
 	blankplate: {

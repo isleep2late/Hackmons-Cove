@@ -214,6 +214,8 @@ export interface TeambuilderSpriteData {
 }
 
 const SW97_SPRITE_SIZES: {[id: string]: number} = {
+	tsubomitto: 112, madaamu: 112, norowara: 96, tsuinzu: 96, purakkusu: 112,
+	pending03: 112, pending05: 112, pending06: 112, pending10: 112,
 	abrasw: 80, aerodactylsw: 112, alakazamsw: 112, ampharossw: 112, anchorage: 96, animon: 96,
 	aqua: 96, aquaria: 112, arboksw: 112, arcaninesw: 112, articunosw: 112, ballerine: 80,
 	beedrillsw: 112, bellboyant: 96, bellossomsw: 112, bellsproutsw: 80, belmitt: 112, blastoisesw: 112,

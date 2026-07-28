@@ -821,6 +821,9 @@ abstract class BattleTypedSearch<T extends SearchType> {
 			if (!format) format = 'ou' as ID;
 			this.isDoubles = format.includes('doubles');
 		}
+		if (format.includes('biomechmons')) {
+			this.formatType = 'natdex';
+		}
 		if (format.includes('doubles') && this.dex.gen > 4 && !this.formatType) {
 			this.formatType = 'doubles';
 			this.isDoubles = true;
