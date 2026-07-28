@@ -6407,6 +6407,42 @@ export const FormatsData: import('../sim/dex-species').SpeciesFormatsDataTable =
         isNonstandard: "Demo",
         tier: "Illegal",
     },
+    tsubomitto: {
+        isNonstandard: "Demo",
+        tier: "Illegal",
+    },
+    madaamu: {
+        isNonstandard: "Demo",
+        tier: "Illegal",
+    },
+    norowara: {
+        isNonstandard: "Demo",
+        tier: "Illegal",
+    },
+    tsuinzu: {
+        isNonstandard: "Demo",
+        tier: "Illegal",
+    },
+    purakkusu: {
+        isNonstandard: "Demo",
+        tier: "Illegal",
+    },
+    pending03: {
+        isNonstandard: "Demo",
+        tier: "Illegal",
+    },
+    pending05: {
+        isNonstandard: "Demo",
+        tier: "Illegal",
+    },
+    pending06: {
+        isNonstandard: "Demo",
+        tier: "Illegal",
+    },
+    pending10: {
+        isNonstandard: "Demo",
+        tier: "Illegal",
+    },
 	// Spaceworld Formes
 	charmandersw: {
 		isNonstandard: "Demo",

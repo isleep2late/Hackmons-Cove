@@ -103133,6 +103133,92 @@ export const Learnsets: import('../sim/dex-species').LearnsetDataTable = {
         },
     },
 	//Unpacking this later.
+    tsubomitto: {
+        learnset: {
+            vinewhip: ["3L1"],
+            growth: ["3L1"],
+            lovelykiss: ["3L1"],
+            razorleaf: ["3L1"],
+            solarbeam: ["3L54"],
+        },
+    },
+    madaamu: {
+        learnset: {
+            peck: ["3L1"],
+            sandattack: ["3L7"],
+            leer: ["3L13"],
+            furyattack: ["3L19"],
+            swordsdance: ["3L25"],
+            agility: ["3L31"],
+            slash: ["3L37"],
+            falseswipe: ["3L44"],
+            furycutter: ["3L55"],
+        },
+    },
+    norowara: {
+        learnset: {
+            leechlife: ["3L1"],
+            disable: ["3L8"],
+            destinybond: ["3L16"],
+            spite: ["3L25"],
+            confusion: ["3L35"],
+            nightshade: ["3L46"],
+            substitute: ["3L58"],
+            psychic: ["3L71"],
+            painsplit: ["3L85"],
+            curse: ["3L100"],
+        },
+    },
+    tsuinzu: {
+        learnset: {
+            tackle: ["3L1"],
+            growl: ["3L1"],
+            confusion: ["3L7"],
+            sandattack: ["3L11"],
+            agility: ["3L20"],
+            batonpass: ["3L27"],
+            psybeam: ["3L35"],
+            crunch: ["3L43"],
+        },
+    },
+    purakkusu: {
+        learnset: {
+            vicegrip: ["3L1"],
+            focusenergy: ["3L7"],
+            bind: ["3L13"],
+            seismictoss: ["3L19"],
+            protect: ["3L25"],
+            guillotine: ["3L31"],
+            slash: ["3L37"],
+            swordsdance: ["3L43"],
+        },
+    },
+    pending03: {
+        learnset: {
+            tackle: ["3L1"],
+        },
+    },
+    pending05: {
+        learnset: {
+            tackle: ["3L1"],
+        },
+    },
+    pending06: {
+        learnset: {
+            tackle: ["3L1"],
+        },
+    },
+    pending10: {
+        learnset: {
+            hornattack: ["3L1"],
+            powdersnow: ["3L1"],
+            furyattack: ["3L15"],
+            endure: ["3L22"],
+            takedown: ["3L29"],
+            mist: ["3L40"],
+            blizzard: ["3L51"],
+        },
+    },
 	charmandersw: {
 		learnset: { scratch: ["2L1"], growl: ["2L3"], leer: ["2L6"], ember: ["2L10"], rage: ["2L15"], firespin: ["2L21"], slash: ["2L28"], scaryface: ["2L36"], agility: ["2L45"], flamethrower: ["2L55"], sketch: ["2M"], snore: ["2M"], conversion2: ["2M"], cottonspore: ["2M"], spite: ["2M"], powdersnow: ["2M"], machpunch: ["2M"], zapcannon: ["2M"], destinybond: ["2M"], bonelock: ["2M"], lockon: ["2M"], charm: ["2M"], sleeptalk: ["2M"], painsplit: ["2M"], sacredfire: ["2M"], dynamicpunch: ["2M"], megaphone: ["2M"], crosscutter: ["2M"], twister: ["2M"], triplekick: ["2M"], flamewheel: ["2M"], magnitude: ["2M"], uproot: ["2M"], strongarm: ["2M"] },
 	},
