@@ -1564,6 +1564,7 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 						role="complementary" aria-label="Battle Controls"
 					>
 						{this.renderControls(false, overlayVersion)}
+						{this.renderConnectError()}
 					</div>
 				</ChatLog>
 				{(room.battle && !room.battle.ended && room.request && room.battle.mySide.id === PS.user.userid) &&
@@ -1593,6 +1594,7 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 						role="complementary" aria-label="Battle Controls"
 					>
 						{this.renderControls(false, overlayVersion)}
+						{this.renderConnectError()}
 					</div>
 				</ChatLog>
 				<ChatTextEntry room={room} onMessage={this.send} onKey={this.onKey} left={0} tinyLayout={room.width < 400} />
@@ -1623,6 +1625,7 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 						{(room.battle && !room.battle.ended && room.request && room.battle.mySide.id === PS.user.userid) &&
 							<TimerButton room={room} top={0} />}
 						{this.renderControls(false, overlayVersion)}
+						{this.renderConnectError()}
 					</div>
 				</div>
 			</div>
