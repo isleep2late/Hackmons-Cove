@@ -3132,7 +3132,7 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 		},
 		num: -6300,
 		gen: 6,
-		isNonstandard: "Custom",
+		isNonstandard: "Beta",
 		desc: "If held by a Jynx, this item allows it to Mega Evolve in battle.",
 	},
 	kasibberry: {
