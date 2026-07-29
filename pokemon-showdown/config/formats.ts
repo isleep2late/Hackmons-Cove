@@ -90,7 +90,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		name: "[Gen 5] Pure Hackmons",
 		desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
 		mod: 'gen5',
-		searchShow: false,
+		//searchShow: false,
 		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
 	},
 	{
