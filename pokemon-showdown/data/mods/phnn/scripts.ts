@@ -6,31 +6,28 @@ export const Scripts: ModdedBattleScriptsData = {
 
 		for (const id in this.data.Items) {
 			const item = this.data.Items[id];
-			if (item.megaStone) {
-				item.isNonstandard = null;
-			}
-			if (item.zMove || item.zMoveType) {
-				item.isNonstandard = null;
+			if (item.megaStone || item.zMove || item.zMoveType) {
+				this.modData('Items', id).isNonstandard = null;
 			}
 		}
 
 		for (const id in this.data.Moves) {
 			const move = this.data.Moves[id];
 			if (id.startsWith('gmax') || move.isMax) {
-				move.isNonstandard = null;
+				this.modData('Moves', id).isNonstandard = null;
 			}
 			if (id.startsWith('gmax')) {
-				move.isMax = false;
+				this.modData('Moves', id).isMax = false;
 			}
 			if ((move.type === 'Shadow' || move.type === '???') && !move.isZ && !move.isMax) {
 				if (move.category === 'Status') {
-					if (!move.zMove) move.zMove = { boost: { spe: 1 } };
+					if (!move.zMove) this.modData('Moves', id).zMove = { boost: { spe: 1 } };
 				} else if (move.basePower) {
 					const bp = move.basePower;
 					const zbp = bp <= 55 ? 100 : bp <= 65 ? 120 : bp <= 75 ? 140 : bp <= 85 ? 160 :
 						bp <= 95 ? 175 : bp <= 100 ? 180 : bp <= 110 ? 185 : bp <= 125 ? 190 :
 						bp <= 130 ? 195 : 200;
-					move.zMove = { basePower: zbp };
+					this.modData('Moves', id).zMove = { basePower: zbp };
 				}
 			}
 		}

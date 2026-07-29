@@ -5,11 +5,8 @@ export const Scripts: ModdedBattleScriptsData = {
 	init() {
 		for (const id in this.data.Items) {
 			const item = this.data.Items[id];
-			if (item.megaStone) {
-				item.isNonstandard = null;
-			}
-			if (item.zMove || item.zMoveType) {
-				item.isNonstandard = null;
+			if (item.megaStone || item.zMove || item.zMoveType) {
+				this.modData('Items', id).isNonstandard = null;
 			}
 		}
 	},
