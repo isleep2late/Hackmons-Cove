@@ -968,7 +968,7 @@ export const Dex = new class implements ModdedDex {
 			id = toID(pokemon.volatiles.formechange[1]);
 		}
 		const phnnIconIds: {[id: string]: number} = {
-			arceusshadow: 1, arceusquestion: 1, lugiashadow: 1, mewtwoshadow: 1, mewtwoshadowmegax: 1, mewtwoarmored: 1, jynxmega: 1,
+			arceusshadow: 2, arceusquestion: 2, lugiashadow: 2, mewtwoshadow: 2, mewtwoshadowmegax: 2, mewtwoarmored: 1, jynxmega: 1,
 			pokestarspirit: 1,
 		};
 		if (SW97_SPRITE_SIZES[id]) {
@@ -984,6 +984,9 @@ export const Dex = new class implements ModdedDex {
 		if (phnnIconIds[id]) {
 			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
 			const host = window.Config ? Config.routes.client : 'beta.hackmons.com';
+			if (phnnIconIds[id] === 2) {
+				return `background:transparent url(${protocol}//${host}/sprites/phnn/${id}-icon.png) no-repeat scroll center`;
+			}
 			return `background:transparent url(${protocol}//${host}/sprites/phnn/${id}-icon.png) no-repeat scroll center/contain;image-rendering:pixelated`;
 		}
 		let num = this.getPokemonIconNum(id, pokemon?.gender === 'F', facingLeft);
