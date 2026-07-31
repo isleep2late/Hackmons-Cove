@@ -70,8 +70,8 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 		gen: 9,
 		shortDesc: "If holder has a ??? move, this item allows it to use a typeless Z-Move.",
 	},
-	shadowscarf: {
-		name: "Shadow Scarf",
+	shadowcloak: {
+		name: "Shadow Cloak",
 		spritenum: 444,
 		fling: {
 			basePower: 10,
@@ -86,8 +86,8 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 		gen: 9,
 		shortDesc: "Holder's Shadow-type moves have 1.2x power.",
 	},
-	questionscarf: {
-		name: "Question Scarf",
+	brokendisk: {
+		name: "Broken Disk",
 		spritenum: 444,
 		fling: {
 			basePower: 10,

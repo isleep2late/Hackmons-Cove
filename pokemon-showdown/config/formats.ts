@@ -698,7 +698,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		banlist: [
 			'Mewtwo-Shadow', 'Mewtwo-Shadow-Mega-X', 'Lugia-Shadow', 'Arceus-Shadow', 'Mewtwo-Armored',
 			'Shadow Plate', 'Shadow Synergy Stone', 'Blank Plate', 'Legend Plate',
-			'Shadowinium Z', 'Questinium Z', 'Shadow Scarf', 'Question Scarf',
+			'Shadowinium Z', 'Questinium Z', 'Shadow Cloak', 'Broken Disk',
 			'Shadow Rift', 'Glitch Cascade',
 			'Shadow Rush', 'Shadow Blast', 'Shadow Blitz', 'Shadow Break', 'Shadow End',
 			'Shadow Bolt', 'Shadow Chill', 'Shadow Fire', 'Shadow Storm', 'Shadow Wave', 'Shadow Rave',

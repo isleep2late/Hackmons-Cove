@@ -103,6 +103,8 @@ export const Aliases: import('../sim/dex').AliasesTable = {
 	ommspotlight: "[Gen 9] National Dex AAA",
 	pmotm: "[Gen 9] Mix and Mega: Limited Supply Random Battle",
 	mnmls: "[Gen 9] Mix and Mega: Limited Supply Random Battle",
+	shadowscarf: "Shadow Cloak",
+	questionscarf: "Broken Disk",
 	ccapm: "[Gen 9] CCAPM2025 Random Battle",
 
 	// mega evos --- 1st ordered alphabetically by species, 2nd by alias
