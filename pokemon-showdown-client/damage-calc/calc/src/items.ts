@@ -44,10 +44,10 @@ export function getItemBoostType(item: string | undefined) {
     return 'Psychic';
   case 'Fairy Feather':
   case 'Shadow Plate':
-  case 'Shadow Scarf':
+  case 'Shadow Cloak':
     return 'Shadow';
   case 'Question Mark Plate':
-  case 'Question Scarf':
+  case 'Broken Disk':
     return '???';
   case 'Pixie Plate':
     return 'Fairy';

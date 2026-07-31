@@ -1134,7 +1134,7 @@ export const Dex = new class implements ModdedDex {
 	getItemIcon(item: any) {
 		let num = 0;
 		if (typeof item === 'string' && window.BattleItems) item = window.BattleItems[toID(item)];
-		const phnnPlateIcons: {[id: string]: string} = { shadowplate: 'shadowplate-icon', questionmarkplate: 'questionmarkplate-icon', blankplate: 'blankplate-icon', legendplate: 'legendplate-icon', shadowiniumz: 'shadowiniumz', questiniumz: 'questiniumz', shadowscarf: 'shadowscarf', questionscarf: 'questionscarf' };
+		const phnnPlateIcons: {[id: string]: string} = { shadowplate: 'shadowplate-icon', questionmarkplate: 'questionmarkplate-icon', blankplate: 'blankplate-icon', legendplate: 'legendplate-icon', shadowiniumz: 'shadowiniumz', questiniumz: 'questiniumz', shadowcloak: 'shadowcloak', brokendisk: 'brokendisk' };
 		const phnnPlateId = phnnPlateIcons[toID(item?.name)];
 		if (phnnPlateId) {
 			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';

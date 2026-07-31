@@ -4,6 +4,56 @@
 /* eslint-disable */
 
 export const SW_SPECIES: any = {
+  Bulbasaur: {
+    types: [
+      "Grass",
+      "Poison"
+    ],
+    bs: {
+      hp: 45,
+      at: 49,
+      df: 49,
+      sa: 65,
+      sd: 65,
+      sp: 45
+    },
+    weightkg: 6.9,
+    nfe: true
+  },
+  Ivysaur: {
+    types: [
+      "Grass",
+      "Poison"
+    ],
+    bs: {
+      hp: 60,
+      at: 62,
+      df: 63,
+      sa: 80,
+      sd: 80,
+      sp: 60
+    },
+    weightkg: 13,
+    nfe: true
+  },
+  Venusaur: {
+    types: [
+      "Grass",
+      "Poison"
+    ],
+    bs: {
+      hp: 80,
+      at: 82,
+      df: 83,
+      sa: 100,
+      sd: 100,
+      sp: 80
+    },
+    weightkg: 100,
+    otherFormes: [
+      "Venusaur-Mega"
+    ]
+  },
   Charmander: {
     types: [
       "Fire"
@@ -100,6 +150,218 @@ export const SW_SPECIES: any = {
       "Blastoise-Mega"
     ]
   },
+  Caterpie: {
+    types: [
+      "Bug"
+    ],
+    bs: {
+      hp: 45,
+      at: 30,
+      df: 35,
+      sa: 20,
+      sd: 20,
+      sp: 45
+    },
+    weightkg: 2.9,
+    nfe: true
+  },
+  Metapod: {
+    types: [
+      "Bug"
+    ],
+    bs: {
+      hp: 50,
+      at: 20,
+      df: 55,
+      sa: 25,
+      sd: 25,
+      sp: 30
+    },
+    weightkg: 9.9,
+    nfe: true
+  },
+  Butterfree: {
+    types: [
+      "Bug",
+      "Flying"
+    ],
+    bs: {
+      hp: 60,
+      at: 45,
+      df: 50,
+      sa: 80,
+      sd: 80,
+      sp: 70
+    },
+    weightkg: 32
+  },
+  Weedle: {
+    types: [
+      "Bug",
+      "Poison"
+    ],
+    bs: {
+      hp: 40,
+      at: 35,
+      df: 30,
+      sa: 20,
+      sd: 20,
+      sp: 50
+    },
+    weightkg: 3.2,
+    nfe: true
+  },
+  Kakuna: {
+    types: [
+      "Bug",
+      "Poison"
+    ],
+    bs: {
+      hp: 45,
+      at: 25,
+      df: 50,
+      sa: 25,
+      sd: 25,
+      sp: 35
+    },
+    weightkg: 10,
+    nfe: true
+  },
+  Beedrill: {
+    types: [
+      "Bug",
+      "Poison"
+    ],
+    bs: {
+      hp: 65,
+      at: 80,
+      df: 40,
+      sa: 45,
+      sd: 80,
+      sp: 75
+    },
+    weightkg: 29.5,
+    otherFormes: [
+      "Beedrill-Mega"
+    ]
+  },
+  Pidgey: {
+    types: [
+      "Normal",
+      "Flying"
+    ],
+    bs: {
+      hp: 40,
+      at: 45,
+      df: 40,
+      sa: 35,
+      sd: 35,
+      sp: 56
+    },
+    weightkg: 1.8,
+    nfe: true
+  },
+  Pidgeotto: {
+    types: [
+      "Normal",
+      "Flying"
+    ],
+    bs: {
+      hp: 63,
+      at: 60,
+      df: 55,
+      sa: 50,
+      sd: 50,
+      sp: 71
+    },
+    weightkg: 30,
+    nfe: true
+  },
+  Pidgeot: {
+    types: [
+      "Normal",
+      "Flying"
+    ],
+    bs: {
+      hp: 83,
+      at: 80,
+      df: 75,
+      sa: 70,
+      sd: 70,
+      sp: 91
+    },
+    weightkg: 39.5,
+    otherFormes: [
+      "Pidgeot-Mega"
+    ]
+  },
+  Rattata: {
+    types: [
+      "Normal"
+    ],
+    bs: {
+      hp: 30,
+      at: 56,
+      df: 35,
+      sa: 25,
+      sd: 35,
+      sp: 72
+    },
+    weightkg: 3.5,
+    nfe: true,
+    otherFormes: [
+      "Rattata-Alola"
+    ]
+  },
+  Raticate: {
+    types: [
+      "Normal"
+    ],
+    bs: {
+      hp: 55,
+      at: 81,
+      df: 60,
+      sa: 50,
+      sd: 70,
+      sp: 97
+    },
+    weightkg: 18.5,
+    otherFormes: [
+      "Raticate-Alola",
+      "Raticate-Alola-Totem"
+    ]
+  },
+  Spearow: {
+    types: [
+      "Normal",
+      "Flying"
+    ],
+    bs: {
+      hp: 40,
+      at: 60,
+      df: 30,
+      sa: 31,
+      sd: 31,
+      sp: 70
+    },
+    weightkg: 2,
+    nfe: true
+  },
+  Fearow: {
+    types: [
+      "Normal",
+      "Flying"
+    ],
+    bs: {
+      hp: 65,
+      at: 90,
+      df: 65,
+      sa: 61,
+      sd: 61,
+      sp: 100
+    },
+    weightkg: 38
+  },
   Ekans: {
     types: [
       "Poison"
@@ -128,6 +390,57 @@ export const SW_SPECIES: any = {
       sp: 80
     },
     weightkg: 65
+  },
+  Pikachu: {
+    types: [
+      "Electric"
+    ],
+    bs: {
+      hp: 35,
+      at: 55,
+      df: 30,
+      sa: 50,
+      sd: 40,
+      sp: 90
+    },
+    weightkg: 6,
+    nfe: true,
+    otherFormes: [
+      "Pikachu-Cosplay",
+      "Pikachu-Rock-Star",
+      "Pikachu-Belle",
+      "Pikachu-Pop-Star",
+      "Pikachu-PhD",
+      "Pikachu-Libre",
+      "Pikachu-Original",
+      "Pikachu-Hoenn",
+      "Pikachu-Sinnoh",
+      "Pikachu-Unova",
+      "Pikachu-Kalos",
+      "Pikachu-Alola",
+      "Pikachu-Partner",
+      "Pikachu-Starter",
+      "Pikachu-World"
+    ]
+  },
+  Raichu: {
+    types: [
+      "Electric"
+    ],
+    bs: {
+      hp: 60,
+      at: 90,
+      df: 55,
+      sa: 90,
+      sd: 80,
+      sp: 100
+    },
+    weightkg: 30,
+    otherFormes: [
+      "Raichu-Alola",
+      "Raichu-Mega-X",
+      "Raichu-Mega-Y"
+    ]
   },
   Sandshrew: {
     types: [
@@ -164,6 +477,21 @@ export const SW_SPECIES: any = {
       "Sandslash-Alola"
     ]
   },
+  "Nidoran-F": {
+    types: [
+      "Poison"
+    ],
+    bs: {
+      hp: 55,
+      at: 47,
+      df: 52,
+      sa: 40,
+      sd: 40,
+      sp: 41
+    },
+    weightkg: 7,
+    nfe: true
+  },
   Nidorina: {
     types: [
       "Poison"
@@ -194,6 +522,21 @@ export const SW_SPECIES: any = {
     },
     weightkg: 60
   },
+  "Nidoran-M": {
+    types: [
+      "Poison"
+    ],
+    bs: {
+      hp: 46,
+      at: 57,
+      df: 40,
+      sa: 40,
+      sd: 40,
+      sp: 50
+    },
+    weightkg: 9,
+    nfe: true
+  },
   Nidorino: {
     types: [
       "Poison"
@@ -223,6 +566,21 @@ export const SW_SPECIES: any = {
       sp: 85
     },
     weightkg: 62
+  },
+  Clefairy: {
+    types: [
+      "Normal"
+    ],
+    bs: {
+      hp: 70,
+      at: 45,
+      df: 48,
+      sa: 60,
+      sd: 65,
+      sp: 35
+    },
+    weightkg: 7.5,
+    nfe: true
   },
   Clefable: {
     types: [
@@ -305,6 +663,22 @@ export const SW_SPECIES: any = {
     },
     weightkg: 12
   },
+  Zubat: {
+    types: [
+      "Poison",
+      "Flying"
+    ],
+    bs: {
+      hp: 40,
+      at: 45,
+      df: 35,
+      sa: 30,
+      sd: 40,
+      sp: 55
+    },
+    weightkg: 7.5,
+    nfe: true
+  },
   Golbat: {
     types: [
       "Poison",
@@ -318,7 +692,8 @@ export const SW_SPECIES: any = {
       sd: 75,
       sp: 90
     },
-    weightkg: 55
+    weightkg: 55,
+    nfe: true
   },
   Oddish: {
     types: [
@@ -366,6 +741,37 @@ export const SW_SPECIES: any = {
       sp: 50
     },
     weightkg: 18.6
+  },
+  Paras: {
+    types: [
+      "Bug",
+      "Grass"
+    ],
+    bs: {
+      hp: 35,
+      at: 70,
+      df: 55,
+      sa: 45,
+      sd: 55,
+      sp: 25
+    },
+    weightkg: 5.4,
+    nfe: true
+  },
+  Parasect: {
+    types: [
+      "Bug",
+      "Grass"
+    ],
+    bs: {
+      hp: 60,
+      at: 95,
+      df: 80,
+      sa: 60,
+      sd: 80,
+      sp: 30
+    },
+    weightkg: 29.5
   },
   Venonat: {
     types: [
@@ -497,6 +903,21 @@ export const SW_SPECIES: any = {
       sp: 85
     },
     weightkg: 76.6
+  },
+  Mankey: {
+    types: [
+      "Fighting"
+    ],
+    bs: {
+      hp: 40,
+      at: 80,
+      df: 35,
+      sa: 35,
+      sd: 45,
+      sp: 70
+    },
+    weightkg: 28,
+    nfe: true
   },
   Primeape: {
     types: [
@@ -654,6 +1075,21 @@ export const SW_SPECIES: any = {
     weightkg: 19.5,
     nfe: true
   },
+  Machoke: {
+    types: [
+      "Fighting"
+    ],
+    bs: {
+      hp: 80,
+      at: 100,
+      df: 70,
+      sa: 50,
+      sd: 60,
+      sp: 45
+    },
+    weightkg: 70.5,
+    nfe: true
+  },
   Machamp: {
     types: [
       "Fighting"
@@ -733,6 +1169,21 @@ export const SW_SPECIES: any = {
     },
     weightkg: 45.5,
     nfe: true
+  },
+  Tentacruel: {
+    types: [
+      "Water",
+      "Poison"
+    ],
+    bs: {
+      hp: 80,
+      at: 70,
+      df: 65,
+      sa: 80,
+      sd: 120,
+      sp: 100
+    },
+    weightkg: 55
   },
   Geodude: {
     types: [
@@ -858,6 +1309,7 @@ export const SW_SPECIES: any = {
       sp: 30
     },
     weightkg: 78.5,
+    nfe: true,
     otherFormes: [
       "Slowbro-Mega",
       "Slowbro-Galar"
@@ -908,9 +1360,26 @@ export const SW_SPECIES: any = {
       sp: 60
     },
     weightkg: 15,
+    nfe: true,
     otherFormes: [
       "Farfetch’d-Galar"
     ]
+  },
+  Doduo: {
+    types: [
+      "Normal",
+      "Flying"
+    ],
+    bs: {
+      hp: 35,
+      at: 85,
+      df: 45,
+      sa: 35,
+      sd: 35,
+      sp: 75
+    },
+    weightkg: 39.2,
+    nfe: true
   },
   Dodrio: {
     types: [
@@ -1054,6 +1523,24 @@ export const SW_SPECIES: any = {
     weightkg: 0.1,
     nfe: true
   },
+  Gengar: {
+    types: [
+      "Ghost",
+      "Poison"
+    ],
+    bs: {
+      hp: 60,
+      at: 65,
+      df: 60,
+      sa: 130,
+      sd: 75,
+      sp: 110
+    },
+    weightkg: 40.5,
+    otherFormes: [
+      "Gengar-Mega"
+    ]
+  },
   Onix: {
     types: [
       "Rock",
@@ -1127,6 +1614,24 @@ export const SW_SPECIES: any = {
       sp: 75
     },
     weightkg: 60
+  },
+  Electrode: {
+    types: [
+      "Electric"
+    ],
+    bs: {
+      hp: 60,
+      at: 50,
+      df: 70,
+      sa: 80,
+      sd: 80,
+      sp: 140
+    },
+    weightkg: 66.6,
+    gender: "N",
+    otherFormes: [
+      "Electrode-Hisui"
+    ]
   },
   Exeggcute: {
     types: [
@@ -1235,7 +1740,8 @@ export const SW_SPECIES: any = {
       sd: 90,
       sp: 30
     },
-    weightkg: 65.5
+    weightkg: 65.5,
+    nfe: true
   },
   Koffing: {
     types: [
@@ -1300,6 +1806,21 @@ export const SW_SPECIES: any = {
     },
     weightkg: 120
   },
+  Chansey: {
+    types: [
+      "Normal"
+    ],
+    bs: {
+      hp: 250,
+      at: 5,
+      df: 5,
+      sa: 35,
+      sd: 105,
+      sp: 50
+    },
+    weightkg: 34.6,
+    nfe: true
+  },
   Tangela: {
     types: [
       "Grass"
@@ -1312,7 +1833,25 @@ export const SW_SPECIES: any = {
       sd: 100,
       sp: 60
     },
-    weightkg: 35
+    weightkg: 35,
+    nfe: true
+  },
+  Kangaskhan: {
+    types: [
+      "Normal"
+    ],
+    bs: {
+      hp: 105,
+      at: 95,
+      df: 80,
+      sa: 40,
+      sd: 80,
+      sp: 90
+    },
+    weightkg: 80,
+    otherFormes: [
+      "Kangaskhan-Mega"
+    ]
   },
   Horsea: {
     types: [
@@ -1359,6 +1898,72 @@ export const SW_SPECIES: any = {
     weightkg: 15,
     nfe: true
   },
+  Seaking: {
+    types: [
+      "Water"
+    ],
+    bs: {
+      hp: 80,
+      at: 92,
+      df: 65,
+      sa: 65,
+      sd: 80,
+      sp: 68
+    },
+    weightkg: 39
+  },
+  Staryu: {
+    types: [
+      "Water"
+    ],
+    bs: {
+      hp: 30,
+      at: 45,
+      df: 55,
+      sa: 70,
+      sd: 55,
+      sp: 85
+    },
+    weightkg: 34.5,
+    nfe: true,
+    gender: "N"
+  },
+  Starmie: {
+    types: [
+      "Water",
+      "Psychic"
+    ],
+    bs: {
+      hp: 60,
+      at: 75,
+      df: 85,
+      sa: 100,
+      sd: 85,
+      sp: 115
+    },
+    weightkg: 80,
+    gender: "N",
+    otherFormes: [
+      "Starmie-Mega"
+    ]
+  },
+  "Mr. Mime": {
+    types: [
+      "Psychic"
+    ],
+    bs: {
+      hp: 40,
+      at: 45,
+      df: 65,
+      sa: 100,
+      sd: 120,
+      sp: 90
+    },
+    weightkg: 54.5,
+    otherFormes: [
+      "Mr. Mime-Galar"
+    ]
+  },
   Scyther: {
     types: [
       "Bug",
@@ -1388,7 +1993,10 @@ export const SW_SPECIES: any = {
       sd: 80,
       sp: 95
     },
-    weightkg: 40.6
+    weightkg: 40.6,
+    otherFormes: [
+      "Jynx-Mega"
+    ]
   },
   Electabuzz: {
     types: [
@@ -1454,6 +2062,21 @@ export const SW_SPECIES: any = {
       "Tauros-Paldea-Aqua"
     ]
   },
+  Magikarp: {
+    types: [
+      "Water"
+    ],
+    bs: {
+      hp: 20,
+      at: 10,
+      df: 55,
+      sa: 15,
+      sd: 20,
+      sp: 80
+    },
+    weightkg: 10,
+    nfe: true
+  },
   Gyarados: {
     types: [
       "Water",
@@ -1486,6 +2109,40 @@ export const SW_SPECIES: any = {
       sp: 60
     },
     weightkg: 220
+  },
+  Ditto: {
+    types: [
+      "Normal"
+    ],
+    bs: {
+      hp: 48,
+      at: 48,
+      df: 48,
+      sa: 48,
+      sd: 48,
+      sp: 48
+    },
+    weightkg: 4,
+    nfe: true,
+    gender: "N"
+  },
+  Eevee: {
+    types: [
+      "Normal"
+    ],
+    bs: {
+      hp: 55,
+      at: 55,
+      df: 50,
+      sa: 45,
+      sd: 65,
+      sp: 55
+    },
+    weightkg: 6.5,
+    nfe: true,
+    otherFormes: [
+      "Eevee-Starter"
+    ]
   },
   Vaporeon: {
     types: [
@@ -1544,1449 +2201,6 @@ export const SW_SPECIES: any = {
     weightkg: 36.5,
     nfe: true,
     gender: "N"
-  },
-  Aerodactyl: {
-    types: [
-      "Rock",
-      "Flying"
-    ],
-    bs: {
-      hp: 80,
-      at: 105,
-      df: 65,
-      sa: 60,
-      sd: 85,
-      sp: 130
-    },
-    weightkg: 59,
-    otherFormes: [
-      "Aerodactyl-Mega"
-    ]
-  },
-  Snorlax: {
-    types: [
-      "Normal"
-    ],
-    bs: {
-      hp: 160,
-      at: 110,
-      df: 65,
-      sa: 65,
-      sd: 100,
-      sp: 30
-    },
-    weightkg: 460
-  },
-  Hoothoot: {
-    types: [
-      "Flying"
-    ],
-    bs: {
-      hp: 65,
-      at: 55,
-      df: 40,
-      sa: 55,
-      sd: 50,
-      sp: 65
-    },
-    weightkg: 21.2
-  },
-  Flaaffy: {
-    types: [
-      "Electric"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 13.3,
-    nfe: true
-  },
-  Ampharos: {
-    types: [
-      "Electric"
-    ],
-    bs: {
-      hp: 55,
-      at: 45,
-      df: 45,
-      sa: 70,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 61.5,
-    otherFormes: [
-      "Ampharos-Mega"
-    ]
-  },
-  Mantine: {
-    types: [
-      "Water",
-      "Flying"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 220
-  },
-  Pichu: {
-    types: [
-      "Electric"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 2,
-    nfe: true,
-    otherFormes: [
-      "Pichu-Spiky-eared"
-    ]
-  },
-  Cleffa: {
-    types: [
-      "Normal"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 3,
-    nfe: true
-  },
-  Igglybuff: {
-    types: [
-      "Normal"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 1,
-    nfe: true
-  },
-  Natu: {
-    types: [
-      "Flying",
-      "Psychic"
-    ],
-    bs: {
-      hp: 45,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 60
-    },
-    weightkg: 2,
-    nfe: true
-  },
-  Xatu: {
-    types: [
-      "Flying",
-      "Psychic"
-    ],
-    bs: {
-      hp: 55,
-      at: 50,
-      df: 50,
-      sa: 70,
-      sd: 50,
-      sp: 80
-    },
-    weightkg: 15
-  },
-  Marill: {
-    types: [
-      "Water"
-    ],
-    bs: {
-      hp: 45,
-      at: 50,
-      df: 55,
-      sa: 55,
-      sd: 50,
-      sp: 40
-    },
-    weightkg: 8.5
-  },
-  Spinarak: {
-    types: [
-      "Bug",
-      "Poison"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 8.5
-  },
-  Skarmory: {
-    types: [
-      "Flying",
-      "Steel"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 50.5,
-    otherFormes: [
-      "Skarmory-Mega"
-    ]
-  },
-  Donphan: {
-    types: [
-      "Ground"
-    ],
-    bs: {
-      hp: 70,
-      at: 70,
-      df: 70,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 120
-  },
-  Girafarig: {
-    types: [
-      "Dark",
-      "Normal"
-    ],
-    bs: {
-      hp: 70,
-      at: 50,
-      df: 50,
-      sa: 45,
-      sd: 50,
-      sp: 45
-    },
-    weightkg: 41.5
-  },
-  Politoed: {
-    types: [
-      "Water"
-    ],
-    bs: {
-      hp: 90,
-      at: 85,
-      df: 95,
-      sa: 70,
-      sd: 50,
-      sp: 70
-    },
-    weightkg: 33.9
-  },
-  Slowking: {
-    types: [
-      "Water",
-      "Psychic"
-    ],
-    bs: {
-      hp: 95,
-      at: 75,
-      df: 110,
-      sa: 80,
-      sd: 50,
-      sp: 30
-    },
-    weightkg: 79.5,
-    otherFormes: [
-      "Slowking-Galar"
-    ]
-  },
-  Unown: {
-    types: [
-      "Normal"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 5,
-    gender: "N"
-  },
-  Ledyba: {
-    types: [
-      "Bug",
-      "Flying"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 10.8
-  },
-  Espeon: {
-    types: [
-      "Psychic"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 26.5
-  },
-  Umbreon: {
-    types: [
-      "Poison"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 27
-  },
-  Remoraid: {
-    types: [
-      "Water"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 12,
-    nfe: true
-  },
-  Octillery: {
-    types: [
-      "Water"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 28.5
-  },
-  Hitmontop: {
-    types: [
-      "Fighting"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 48
-  },
-  Hoppip: {
-    types: [
-      "Grass",
-      "Flying"
-    ],
-    bs: {
-      hp: 40,
-      at: 50,
-      df: 35,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 0.5,
-    nfe: true
-  },
-  Skiploom: {
-    types: [
-      "Grass",
-      "Flying"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 45,
-      sa: 60,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 1,
-    nfe: true
-  },
-  Jumpluff: {
-    types: [
-      "Grass",
-      "Flying"
-    ],
-    bs: {
-      hp: 60,
-      at: 50,
-      df: 55,
-      sa: 70,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 3
-  },
-  Smoochum: {
-    types: [
-      "Ice"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 6,
-    nfe: true
-  },
-  Elekid: {
-    types: [
-      "Electric"
-    ],
-    bs: {
-      hp: 30,
-      at: 55,
-      df: 45,
-      sa: 50,
-      sd: 50,
-      sp: 65
-    },
-    weightkg: 23.5,
-    nfe: true
-  },
-  Bellossom: {
-    types: [
-      "Grass",
-      "Poison"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 5.8
-  },
-  Miltank: {
-    types: [
-      "Normal"
-    ],
-    bs: {
-      hp: 110,
-      at: 50,
-      df: 60,
-      sa: 50,
-      sd: 50,
-      sp: 40
-    },
-    weightkg: 75.5
-  },
-  Murkrow: {
-    types: [
-      "Dark",
-      "Flying"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 2.1
-  },
-  Blissey: {
-    types: [
-      "Normal"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 46.8
-  },
-  Scizor: {
-    types: [
-      "Bug",
-      "Flying"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 118,
-    otherFormes: [
-      "Scizor-Mega"
-    ]
-  },
-  Houndour: {
-    types: [
-      "Fire"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 10.8,
-    nfe: true
-  },
-  Houndoom: {
-    types: [
-      "Fire"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 35,
-    otherFormes: [
-      "Houndoom-Mega"
-    ]
-  },
-  Porygon2: {
-    types: [
-      "Normal"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 32.5,
-    gender: "N"
-  },
-  Steelix: {
-    types: [
-      "Steel",
-      "Ground"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 400,
-    otherFormes: [
-      "Steelix-Mega"
-    ]
-  },
-  Kingdra: {
-    types: [
-      "Dragon",
-      "Water"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 152
-  },
-  Raikou: {
-    types: [
-      "Electric"
-    ],
-    bs: {
-      hp: 90,
-      at: 90,
-      df: 85,
-      sa: 125,
-      sd: 98,
-      sp: 100
-    },
-    weightkg: 178,
-    gender: "N"
-  },
-  Entei: {
-    types: [
-      "Fire"
-    ],
-    bs: {
-      hp: 90,
-      at: 100,
-      df: 90,
-      sa: 125,
-      sd: 99,
-      sp: 90
-    },
-    weightkg: 198,
-    gender: "N"
-  },
-  Suicune: {
-    types: [
-      "Water"
-    ],
-    bs: {
-      hp: 90,
-      at: 85,
-      df: 100,
-      sa: 125,
-      sd: 97,
-      sp: 85
-    },
-    weightkg: 187,
-    gender: "N"
-  },
-  Sneasel: {
-    types: [
-      "Dark"
-    ],
-    bs: {
-      hp: 45,
-      at: 65,
-      df: 50,
-      sa: 40,
-      sd: 50,
-      sp: 85
-    },
-    weightkg: 28,
-    otherFormes: [
-      "Sneasel-Hisui"
-    ]
-  },
-  "Ho-Oh": {
-    types: [
-      "Flying"
-    ],
-    bs: {
-      hp: 100,
-      at: 100,
-      df: 100,
-      sa: 100,
-      sd: 50,
-      sp: 100
-    },
-    weightkg: 199,
-    gender: "N"
-  },
-  Togepi: {
-    types: [
-      "Normal"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 1.5
-  },
-  Snubbull: {
-    types: [
-      "Psychic"
-    ],
-    bs: {
-      hp: 65,
-      at: 70,
-      df: 60,
-      sa: 70,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 7.8
-  },
-  Bulbasaur: {
-    types: [
-      "Grass",
-      "Poison"
-    ],
-    bs: {
-      hp: 45,
-      at: 49,
-      df: 49,
-      sa: 65,
-      sd: 65,
-      sp: 45
-    },
-    weightkg: 6.9,
-    nfe: true
-  },
-  Ivysaur: {
-    types: [
-      "Grass",
-      "Poison"
-    ],
-    bs: {
-      hp: 60,
-      at: 62,
-      df: 63,
-      sa: 80,
-      sd: 80,
-      sp: 60
-    },
-    weightkg: 13,
-    nfe: true
-  },
-  Venusaur: {
-    types: [
-      "Grass",
-      "Poison"
-    ],
-    bs: {
-      hp: 80,
-      at: 82,
-      df: 83,
-      sa: 100,
-      sd: 100,
-      sp: 80
-    },
-    weightkg: 100,
-    otherFormes: [
-      "Venusaur-Mega"
-    ]
-  },
-  Butterfree: {
-    types: [
-      "Bug",
-      "Flying"
-    ],
-    bs: {
-      hp: 60,
-      at: 45,
-      df: 50,
-      sa: 80,
-      sd: 80,
-      sp: 70
-    },
-    weightkg: 32
-  },
-  Beedrill: {
-    types: [
-      "Bug",
-      "Poison"
-    ],
-    bs: {
-      hp: 65,
-      at: 80,
-      df: 40,
-      sa: 45,
-      sd: 80,
-      sp: 75
-    },
-    weightkg: 29.5,
-    otherFormes: [
-      "Beedrill-Mega"
-    ]
-  },
-  Pidgeot: {
-    types: [
-      "Normal",
-      "Flying"
-    ],
-    bs: {
-      hp: 83,
-      at: 80,
-      df: 75,
-      sa: 70,
-      sd: 70,
-      sp: 91
-    },
-    weightkg: 39.5,
-    otherFormes: [
-      "Pidgeot-Mega"
-    ]
-  },
-  Pikachu: {
-    types: [
-      "Electric"
-    ],
-    bs: {
-      hp: 35,
-      at: 55,
-      df: 30,
-      sa: 50,
-      sd: 40,
-      sp: 90
-    },
-    weightkg: 6,
-    nfe: true,
-    otherFormes: [
-      "Pikachu-Cosplay",
-      "Pikachu-Rock-Star",
-      "Pikachu-Belle",
-      "Pikachu-Pop-Star",
-      "Pikachu-PhD",
-      "Pikachu-Libre",
-      "Pikachu-Original",
-      "Pikachu-Hoenn",
-      "Pikachu-Sinnoh",
-      "Pikachu-Unova",
-      "Pikachu-Kalos",
-      "Pikachu-Alola",
-      "Pikachu-Partner",
-      "Pikachu-Starter",
-      "Pikachu-World"
-    ]
-  },
-  Raichu: {
-    types: [
-      "Electric"
-    ],
-    bs: {
-      hp: 60,
-      at: 90,
-      df: 55,
-      sa: 90,
-      sd: 80,
-      sp: 100
-    },
-    weightkg: 30,
-    otherFormes: [
-      "Raichu-Alola",
-      "Raichu-Mega-X",
-      "Raichu-Mega-Y"
-    ]
-  },
-  Clefairy: {
-    types: [
-      "Normal"
-    ],
-    bs: {
-      hp: 70,
-      at: 45,
-      df: 48,
-      sa: 60,
-      sd: 65,
-      sp: 35
-    },
-    weightkg: 7.5,
-    nfe: true
-  },
-  "Mr. Mime": {
-    types: [
-      "Psychic"
-    ],
-    bs: {
-      hp: 40,
-      at: 45,
-      df: 65,
-      sa: 100,
-      sd: 120,
-      sp: 90
-    },
-    weightkg: 54.5,
-    otherFormes: [
-      "Mr. Mime-Galar"
-    ]
-  },
-  Articuno: {
-    types: [
-      "Ice",
-      "Flying"
-    ],
-    bs: {
-      hp: 90,
-      at: 85,
-      df: 100,
-      sa: 95,
-      sd: 125,
-      sp: 85
-    },
-    weightkg: 55.4,
-    gender: "N",
-    otherFormes: [
-      "Articuno-Galar"
-    ]
-  },
-  Zapdos: {
-    types: [
-      "Electric",
-      "Flying"
-    ],
-    bs: {
-      hp: 90,
-      at: 90,
-      df: 85,
-      sa: 125,
-      sd: 90,
-      sp: 100
-    },
-    weightkg: 52.6,
-    gender: "N",
-    otherFormes: [
-      "Zapdos-Galar"
-    ]
-  },
-  Moltres: {
-    types: [
-      "Fire",
-      "Flying"
-    ],
-    bs: {
-      hp: 90,
-      at: 100,
-      df: 90,
-      sa: 125,
-      sd: 85,
-      sp: 90
-    },
-    weightkg: 60,
-    gender: "N",
-    otherFormes: [
-      "Moltres-Galar"
-    ]
-  },
-  Gengar: {
-    types: [
-      "Ghost",
-      "Poison"
-    ],
-    bs: {
-      hp: 60,
-      at: 65,
-      df: 60,
-      sa: 130,
-      sd: 75,
-      sp: 110
-    },
-    weightkg: 40.5,
-    otherFormes: [
-      "Gengar-Mega"
-    ]
-  },
-  Electrode: {
-    types: [
-      "Electric"
-    ],
-    bs: {
-      hp: 60,
-      at: 50,
-      df: 70,
-      sa: 80,
-      sd: 80,
-      sp: 140
-    },
-    weightkg: 66.6,
-    gender: "N",
-    otherFormes: [
-      "Electrode-Hisui"
-    ]
-  },
-  Caterpie: {
-    types: [
-      "Bug"
-    ],
-    bs: {
-      hp: 45,
-      at: 30,
-      df: 35,
-      sa: 20,
-      sd: 20,
-      sp: 45
-    },
-    weightkg: 2.9,
-    nfe: true
-  },
-  Metapod: {
-    types: [
-      "Bug"
-    ],
-    bs: {
-      hp: 50,
-      at: 20,
-      df: 55,
-      sa: 25,
-      sd: 25,
-      sp: 30
-    },
-    weightkg: 9.9,
-    nfe: true
-  },
-  Weedle: {
-    types: [
-      "Bug",
-      "Poison"
-    ],
-    bs: {
-      hp: 40,
-      at: 35,
-      df: 30,
-      sa: 20,
-      sd: 20,
-      sp: 50
-    },
-    weightkg: 3.2,
-    nfe: true
-  },
-  Kakuna: {
-    types: [
-      "Bug",
-      "Poison"
-    ],
-    bs: {
-      hp: 45,
-      at: 25,
-      df: 50,
-      sa: 25,
-      sd: 25,
-      sp: 35
-    },
-    weightkg: 10,
-    nfe: true
-  },
-  Pidgey: {
-    types: [
-      "Normal",
-      "Flying"
-    ],
-    bs: {
-      hp: 40,
-      at: 45,
-      df: 40,
-      sa: 35,
-      sd: 35,
-      sp: 56
-    },
-    weightkg: 1.8,
-    nfe: true
-  },
-  Pidgeotto: {
-    types: [
-      "Normal",
-      "Flying"
-    ],
-    bs: {
-      hp: 63,
-      at: 60,
-      df: 55,
-      sa: 50,
-      sd: 50,
-      sp: 71
-    },
-    weightkg: 30,
-    nfe: true
-  },
-  Rattata: {
-    types: [
-      "Normal"
-    ],
-    bs: {
-      hp: 30,
-      at: 56,
-      df: 35,
-      sa: 25,
-      sd: 35,
-      sp: 72
-    },
-    weightkg: 3.5,
-    nfe: true,
-    otherFormes: [
-      "Rattata-Alola"
-    ]
-  },
-  Raticate: {
-    types: [
-      "Normal"
-    ],
-    bs: {
-      hp: 55,
-      at: 81,
-      df: 60,
-      sa: 50,
-      sd: 70,
-      sp: 97
-    },
-    weightkg: 18.5,
-    otherFormes: [
-      "Raticate-Alola",
-      "Raticate-Alola-Totem"
-    ]
-  },
-  Spearow: {
-    types: [
-      "Normal",
-      "Flying"
-    ],
-    bs: {
-      hp: 40,
-      at: 60,
-      df: 30,
-      sa: 31,
-      sd: 31,
-      sp: 70
-    },
-    weightkg: 2,
-    nfe: true
-  },
-  Fearow: {
-    types: [
-      "Normal",
-      "Flying"
-    ],
-    bs: {
-      hp: 65,
-      at: 90,
-      df: 65,
-      sa: 61,
-      sd: 61,
-      sp: 100
-    },
-    weightkg: 38
-  },
-  "Nidoran-F": {
-    types: [
-      "Poison"
-    ],
-    bs: {
-      hp: 55,
-      at: 47,
-      df: 52,
-      sa: 40,
-      sd: 40,
-      sp: 41
-    },
-    weightkg: 7,
-    nfe: true
-  },
-  "Nidoran-M": {
-    types: [
-      "Poison"
-    ],
-    bs: {
-      hp: 46,
-      at: 57,
-      df: 40,
-      sa: 40,
-      sd: 40,
-      sp: 50
-    },
-    weightkg: 9,
-    nfe: true
-  },
-  Zubat: {
-    types: [
-      "Poison",
-      "Flying"
-    ],
-    bs: {
-      hp: 40,
-      at: 45,
-      df: 35,
-      sa: 30,
-      sd: 40,
-      sp: 55
-    },
-    weightkg: 7.5,
-    nfe: true
-  },
-  Paras: {
-    types: [
-      "Bug",
-      "Grass"
-    ],
-    bs: {
-      hp: 35,
-      at: 70,
-      df: 55,
-      sa: 45,
-      sd: 55,
-      sp: 25
-    },
-    weightkg: 5.4,
-    nfe: true
-  },
-  Parasect: {
-    types: [
-      "Bug",
-      "Grass"
-    ],
-    bs: {
-      hp: 60,
-      at: 95,
-      df: 80,
-      sa: 60,
-      sd: 80,
-      sp: 30
-    },
-    weightkg: 29.5
-  },
-  Mankey: {
-    types: [
-      "Fighting"
-    ],
-    bs: {
-      hp: 40,
-      at: 80,
-      df: 35,
-      sa: 35,
-      sd: 45,
-      sp: 70
-    },
-    weightkg: 28,
-    nfe: true
-  },
-  Machoke: {
-    types: [
-      "Fighting"
-    ],
-    bs: {
-      hp: 80,
-      at: 100,
-      df: 70,
-      sa: 50,
-      sd: 60,
-      sp: 45
-    },
-    weightkg: 70.5,
-    nfe: true
-  },
-  Tentacruel: {
-    types: [
-      "Water",
-      "Poison"
-    ],
-    bs: {
-      hp: 80,
-      at: 70,
-      df: 65,
-      sa: 80,
-      sd: 120,
-      sp: 100
-    },
-    weightkg: 55
-  },
-  Doduo: {
-    types: [
-      "Normal",
-      "Flying"
-    ],
-    bs: {
-      hp: 35,
-      at: 85,
-      df: 45,
-      sa: 35,
-      sd: 35,
-      sp: 75
-    },
-    weightkg: 39.2,
-    nfe: true
-  },
-  Voltorb: {
-    types: [
-      "Electric"
-    ],
-    bs: {
-      hp: 40,
-      at: 30,
-      df: 50,
-      sa: 55,
-      sd: 55,
-      sp: 100
-    },
-    weightkg: 10.4,
-    nfe: true,
-    gender: "N",
-    otherFormes: [
-      "Voltorb-Hisui"
-    ]
-  },
-  Chansey: {
-    types: [
-      "Normal"
-    ],
-    bs: {
-      hp: 250,
-      at: 5,
-      df: 5,
-      sa: 35,
-      sd: 105,
-      sp: 50
-    },
-    weightkg: 34.6,
-    nfe: true
-  },
-  Kangaskhan: {
-    types: [
-      "Normal"
-    ],
-    bs: {
-      hp: 105,
-      at: 95,
-      df: 80,
-      sa: 40,
-      sd: 80,
-      sp: 90
-    },
-    weightkg: 80,
-    otherFormes: [
-      "Kangaskhan-Mega"
-    ]
-  },
-  Seaking: {
-    types: [
-      "Water"
-    ],
-    bs: {
-      hp: 80,
-      at: 92,
-      df: 65,
-      sa: 65,
-      sd: 80,
-      sp: 68
-    },
-    weightkg: 39
-  },
-  Staryu: {
-    types: [
-      "Water"
-    ],
-    bs: {
-      hp: 30,
-      at: 45,
-      df: 55,
-      sa: 70,
-      sd: 55,
-      sp: 85
-    },
-    weightkg: 34.5,
-    nfe: true,
-    gender: "N"
-  },
-  Starmie: {
-    types: [
-      "Water",
-      "Psychic"
-    ],
-    bs: {
-      hp: 60,
-      at: 75,
-      df: 85,
-      sa: 100,
-      sd: 85,
-      sp: 115
-    },
-    weightkg: 80,
-    gender: "N",
-    otherFormes: [
-      "Starmie-Mega"
-    ]
-  },
-  Magikarp: {
-    types: [
-      "Water"
-    ],
-    bs: {
-      hp: 20,
-      at: 10,
-      df: 55,
-      sa: 15,
-      sd: 20,
-      sp: 80
-    },
-    weightkg: 10,
-    nfe: true
-  },
-  Ditto: {
-    types: [
-      "Normal"
-    ],
-    bs: {
-      hp: 48,
-      at: 48,
-      df: 48,
-      sa: 48,
-      sd: 48,
-      sp: 48
-    },
-    weightkg: 4,
-    gender: "N"
-  },
-  Eevee: {
-    types: [
-      "Normal"
-    ],
-    bs: {
-      hp: 55,
-      at: 55,
-      df: 50,
-      sa: 45,
-      sd: 65,
-      sp: 55
-    },
-    weightkg: 6.5,
-    nfe: true,
-    otherFormes: [
-      "Eevee-Starter"
-    ]
   },
   Omanyte: {
     types: [
@@ -3050,6 +2264,38 @@ export const SW_SPECIES: any = {
     },
     weightkg: 40.5
   },
+  Aerodactyl: {
+    types: [
+      "Rock",
+      "Flying"
+    ],
+    bs: {
+      hp: 80,
+      at: 105,
+      df: 65,
+      sa: 60,
+      sd: 85,
+      sp: 130
+    },
+    weightkg: 59,
+    otherFormes: [
+      "Aerodactyl-Mega"
+    ]
+  },
+  Snorlax: {
+    types: [
+      "Normal"
+    ],
+    bs: {
+      hp: 160,
+      at: 110,
+      df: 65,
+      sa: 65,
+      sd: 100,
+      sp: 30
+    },
+    weightkg: 460
+  },
   Dratini: {
     types: [
       "Dragon"
@@ -3096,6 +2342,1259 @@ export const SW_SPECIES: any = {
     weightkg: 210,
     otherFormes: [
       "Dragonite-Mega"
+    ]
+  },
+  Chikorita: {
+    types: [
+      "Grass"
+    ],
+    bs: {
+      hp: 55,
+      at: 40,
+      df: 45,
+      sa: 75,
+      sd: 50,
+      sp: 40
+    },
+    weightkg: 6.4,
+    nfe: true
+  },
+  Bayleef: {
+    types: [
+      "Grass"
+    ],
+    bs: {
+      hp: 50,
+      at: 45,
+      df: 50,
+      sa: 45,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 15.8,
+    nfe: true
+  },
+  Meganium: {
+    types: [
+      "Grass"
+    ],
+    bs: {
+      hp: 70,
+      at: 65,
+      df: 60,
+      sa: 55,
+      sd: 50,
+      sp: 60
+    },
+    weightkg: 100.5,
+    otherFormes: [
+      "Meganium-Mega"
+    ]
+  },
+  Hoothoot: {
+    types: [
+      "Flying"
+    ],
+    bs: {
+      hp: 65,
+      at: 55,
+      df: 40,
+      sa: 55,
+      sd: 50,
+      sp: 65
+    },
+    weightkg: 21.2
+  },
+  Noctowl: {
+    types: [
+      "Flying"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 40.8
+  },
+  Mareep: {
+    types: [
+      "Electric"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 7.8,
+    nfe: true
+  },
+  Flaaffy: {
+    types: [
+      "Electric"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 13.3,
+    nfe: true
+  },
+  Ampharos: {
+    types: [
+      "Electric"
+    ],
+    bs: {
+      hp: 55,
+      at: 45,
+      df: 45,
+      sa: 70,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 61.5,
+    otherFormes: [
+      "Ampharos-Mega"
+    ]
+  },
+  Trifox: {
+    types: [
+      "Water"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 0,
+    nfe: true
+  },
+  Tangel: {
+    types: [
+      "Grass"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 0,
+    nfe: true
+  },
+  Gelania: {
+    types: [
+      "Grass"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 0
+  },
+  Mantine: {
+    types: [
+      "Water",
+      "Flying"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 220
+  },
+  Qwilfish: {
+    types: [
+      "Water"
+    ],
+    bs: {
+      hp: 55,
+      at: 80,
+      df: 50,
+      sa: 60,
+      sd: 50,
+      sp: 45
+    },
+    weightkg: 3.9,
+    nfe: true,
+    otherFormes: [
+      "Qwilfish-Hisui"
+    ]
+  },
+  Numpuff: {
+    types: [
+      "Water"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 0
+  },
+  Pichu: {
+    types: [
+      "Electric"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 2,
+    nfe: true,
+    otherFormes: [
+      "Pichu-Spiky-eared"
+    ]
+  },
+  Cleffa: {
+    types: [
+      "Normal"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 3,
+    nfe: true
+  },
+  Igglybuff: {
+    types: [
+      "Normal"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 1,
+    nfe: true
+  },
+  Quagsire: {
+    types: [
+      "Water"
+    ],
+    bs: {
+      hp: 50,
+      at: 45,
+      df: 50,
+      sa: 75,
+      sd: 50,
+      sp: 55
+    },
+    weightkg: 75
+  },
+  Natu: {
+    types: [
+      "Flying",
+      "Psychic"
+    ],
+    bs: {
+      hp: 45,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 60
+    },
+    weightkg: 2,
+    nfe: true
+  },
+  Xatu: {
+    types: [
+      "Flying",
+      "Psychic"
+    ],
+    bs: {
+      hp: 55,
+      at: 50,
+      df: 50,
+      sa: 70,
+      sd: 50,
+      sp: 80
+    },
+    weightkg: 15
+  },
+  Golppy: {
+    types: [
+      "Water"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 0,
+    nfe: true
+  },
+  Marill: {
+    types: [
+      "Water"
+    ],
+    bs: {
+      hp: 45,
+      at: 50,
+      df: 55,
+      sa: 55,
+      sd: 50,
+      sp: 40
+    },
+    weightkg: 8.5
+  },
+  Crobat: {
+    types: [
+      "Poison",
+      "Flying"
+    ],
+    bs: {
+      hp: 60,
+      at: 65,
+      df: 50,
+      sa: 45,
+      sd: 50,
+      sp: 85
+    },
+    weightkg: 75
+  },
+  Para: {
+    types: [
+      "Bug",
+      "Grass"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 0,
+    nfe: true
+  },
+  Spinarak: {
+    types: [
+      "Bug",
+      "Poison"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 8.5,
+    nfe: true
+  },
+  Ariados: {
+    types: [
+      "Bug",
+      "Poison"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 33.5
+  },
+  Skarmory: {
+    types: [
+      "Flying",
+      "Steel"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 50.5,
+    otherFormes: [
+      "Skarmory-Mega"
+    ]
+  },
+  Animon: {
+    types: [
+      "Normal"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 0
+  },
+  Chiks: {
+    types: [
+      "Normal",
+      "Flying"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 0,
+    nfe: true
+  },
+  Sunflora: {
+    types: [
+      "Grass",
+      "Psychic"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 8.5
+  },
+  Phanpy: {
+    types: [
+      "Ground"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 33.5,
+    nfe: true
+  },
+  Donphan: {
+    types: [
+      "Ground"
+    ],
+    bs: {
+      hp: 70,
+      at: 70,
+      df: 70,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 120
+  },
+  Twinz: {
+    types: [
+      "Dark",
+      "Normal"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 0,
+    nfe: true
+  },
+  Girafarig: {
+    types: [
+      "Dark",
+      "Normal"
+    ],
+    bs: {
+      hp: 70,
+      at: 50,
+      df: 50,
+      sa: 45,
+      sd: 50,
+      sp: 45
+    },
+    weightkg: 41.5
+  },
+  Smeargle: {
+    types: [
+      "Normal"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 58
+  },
+  Meowsy: {
+    types: [
+      "Normal"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 0,
+    nfe: true
+  },
+  Politoed: {
+    types: [
+      "Water"
+    ],
+    bs: {
+      hp: 90,
+      at: 85,
+      df: 95,
+      sa: 70,
+      sd: 50,
+      sp: 70
+    },
+    weightkg: 33.9
+  },
+  Slowking: {
+    types: [
+      "Water",
+      "Psychic"
+    ],
+    bs: {
+      hp: 95,
+      at: 75,
+      df: 110,
+      sa: 80,
+      sd: 50,
+      sp: 30
+    },
+    weightkg: 79.5,
+    otherFormes: [
+      "Slowking-Galar"
+    ]
+  },
+  Unown: {
+    types: [
+      "Normal"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 5
+  },
+  Ledyba: {
+    types: [
+      "Bug",
+      "Flying"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 10.8
+  },
+  Ledian: {
+    types: [
+      "Bug",
+      "Flying"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 35.6
+  },
+  Minicorn: {
+    types: [
+      "Normal"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 0,
+    nfe: true
+  },
+  Espeon: {
+    types: [
+      "Psychic"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 26.5
+  },
+  Umbreon: {
+    types: [
+      "Poison"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 27
+  },
+  Grimey: {
+    types: [
+      "Poison"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 0,
+    nfe: true
+  },
+  Remoraid: {
+    types: [
+      "Water"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 12,
+    nfe: true
+  },
+  Octillery: {
+    types: [
+      "Water"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 28.5
+  },
+  Tyrogue: {
+    types: [
+      "Fighting"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 21,
+    nfe: true
+  },
+  Hitmontop: {
+    types: [
+      "Fighting"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 48
+  },
+  Puddi: {
+    types: [
+      "Fire"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 0,
+    nfe: true
+  },
+  Hoppip: {
+    types: [
+      "Grass",
+      "Flying"
+    ],
+    bs: {
+      hp: 40,
+      at: 50,
+      df: 35,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 0.5
+  },
+  Skiploom: {
+    types: [
+      "Grass",
+      "Flying"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 45,
+      sa: 60,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 1,
+    nfe: true
+  },
+  Jumpluff: {
+    types: [
+      "Grass",
+      "Flying"
+    ],
+    bs: {
+      hp: 60,
+      at: 50,
+      df: 55,
+      sa: 70,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 3
+  },
+  Ballerine: {
+    types: [
+      "Normal"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 0,
+    nfe: true
+  },
+  Smoochum: {
+    types: [
+      "Ice"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 6,
+    nfe: true
+  },
+  Elekid: {
+    types: [
+      "Electric"
+    ],
+    bs: {
+      hp: 30,
+      at: 55,
+      df: 45,
+      sa: 50,
+      sd: 50,
+      sp: 65
+    },
+    weightkg: 23.5,
+    nfe: true
+  },
+  Magby: {
+    types: [
+      "Fire"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 21.4,
+    nfe: true
+  },
+  Bellossom: {
+    types: [
+      "Grass",
+      "Poison"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 5.8
+  },
+  Belmitt: {
+    types: [
+      "Grass",
+      "Poison"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 0
+  },
+  Miltank: {
+    types: [
+      "Normal"
+    ],
+    bs: {
+      hp: 110,
+      at: 50,
+      df: 60,
+      sa: 50,
+      sd: 50,
+      sp: 40
+    },
+    weightkg: 75.5
+  },
+  Delibird: {
+    types: [
+      "Water",
+      "Ice"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 16
+  },
+  Madame: {
+    types: [
+      "Normal",
+      "Flying"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 0
+  },
+  Murkrow: {
+    types: [
+      "Dark",
+      "Flying"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 2.1
+  },
+  Blissey: {
+    types: [
+      "Normal"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 46.8
+  },
+  Scizor: {
+    types: [
+      "Bug",
+      "Flying"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 118,
+    otherFormes: [
+      "Scizor-Mega"
+    ]
+  },
+  Plux: {
+    types: [
+      "Bug"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 0
+  },
+  Houndour: {
+    types: [
+      "Fire"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 10.8,
+    nfe: true
+  },
+  Houndoom: {
+    types: [
+      "Fire"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 35,
+    otherFormes: [
+      "Houndoom-Mega"
+    ]
+  },
+  Porygon2: {
+    types: [
+      "Normal"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 32.5
+  },
+  Likk: {
+    types: [
+      "Normal"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 0
+  },
+  Steelix: {
+    types: [
+      "Steel",
+      "Ground"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 400,
+    otherFormes: [
+      "Steelix-Mega"
+    ]
+  },
+  Kingdra: {
+    types: [
+      "Dragon",
+      "Water"
+    ],
+    bs: {
+      hp: 50,
+      at: 50,
+      df: 50,
+      sa: 50,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 152
+  },
+  Raikou: {
+    types: [
+      "Electric"
+    ],
+    bs: {
+      hp: 90,
+      at: 90,
+      df: 85,
+      sa: 125,
+      sd: 98,
+      sp: 100
+    },
+    weightkg: 178
+  },
+  Entei: {
+    types: [
+      "Fire"
+    ],
+    bs: {
+      hp: 90,
+      at: 100,
+      df: 90,
+      sa: 125,
+      sd: 99,
+      sp: 90
+    },
+    weightkg: 198
+  },
+  Suicune: {
+    types: [
+      "Water"
+    ],
+    bs: {
+      hp: 90,
+      at: 85,
+      df: 100,
+      sa: 125,
+      sd: 97,
+      sp: 85
+    },
+    weightkg: 187
+  },
+  Sneasel: {
+    types: [
+      "Dark"
+    ],
+    bs: {
+      hp: 45,
+      at: 65,
+      df: 50,
+      sa: 40,
+      sd: 50,
+      sp: 85
+    },
+    weightkg: 28,
+    otherFormes: [
+      "Sneasel-Hisui"
+    ]
+  },
+  "Ho-Oh": {
+    types: [
+      "Flying"
+    ],
+    bs: {
+      hp: 100,
+      at: 100,
+      df: 100,
+      sa: 100,
+      sd: 50,
+      sp: 100
+    },
+    weightkg: 199
+  },
+  Snubbull: {
+    types: [
+      "Normal"
+    ],
+    bs: {
+      hp: 65,
+      at: 70,
+      df: 60,
+      sa: 70,
+      sd: 50,
+      sp: 50
+    },
+    weightkg: 7.8
+  },
+  Articuno: {
+    types: [
+      "Ice",
+      "Flying"
+    ],
+    bs: {
+      hp: 90,
+      at: 85,
+      df: 100,
+      sa: 95,
+      sd: 125,
+      sp: 85
+    },
+    weightkg: 55.4,
+    gender: "N",
+    otherFormes: [
+      "Articuno-Galar"
+    ]
+  },
+  Zapdos: {
+    types: [
+      "Electric",
+      "Flying"
+    ],
+    bs: {
+      hp: 90,
+      at: 90,
+      df: 85,
+      sa: 125,
+      sd: 90,
+      sp: 100
+    },
+    weightkg: 52.6,
+    gender: "N",
+    otherFormes: [
+      "Zapdos-Galar"
+    ]
+  },
+  Moltres: {
+    types: [
+      "Fire",
+      "Flying"
+    ],
+    bs: {
+      hp: 90,
+      at: 100,
+      df: 90,
+      sa: 125,
+      sd: 85,
+      sp: 90
+    },
+    weightkg: 60,
+    gender: "N",
+    otherFormes: [
+      "Moltres-Galar"
+    ]
+  },
+  Voltorb: {
+    types: [
+      "Electric"
+    ],
+    bs: {
+      hp: 40,
+      at: 30,
+      df: 50,
+      sa: 55,
+      sd: 55,
+      sp: 100
+    },
+    weightkg: 10.4,
+    nfe: true,
+    gender: "N",
+    otherFormes: [
+      "Voltorb-Hisui"
     ]
   },
   Mewtwo: {
@@ -3145,7 +3644,10 @@ export const SW_SPECIES: any = {
       sd: 6,
       sp: 29
     },
-    weightkg: 1590.8
+    weightkg: 1590.8,
+    otherFormes: [
+      "MissingNo.-Yellow"
+    ]
   },
   Flambear: {
     types: [
@@ -3159,8 +3661,7 @@ export const SW_SPECIES: any = {
       sd: 50,
       sp: 40
     },
-    weightkg: 0,
-    nfe: true
+    weightkg: 0
   },
   Volbear: {
     types: [
@@ -3203,8 +3704,7 @@ export const SW_SPECIES: any = {
       sd: 50,
       sp: 45
     },
-    weightkg: 0,
-    nfe: true
+    weightkg: 0
   },
   Aqua: {
     types: [
@@ -3234,79 +3734,6 @@ export const SW_SPECIES: any = {
       sp: 65
     },
     weightkg: 0
-  },
-  Trifox: {
-    types: [
-      "Water"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 0,
-    nfe: true
-  },
-  Tangel: {
-    types: [
-      "Grass"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 0,
-    nfe: true
-  },
-  Gelania: {
-    types: [
-      "Grass"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 0
-  },
-  Numpuff: {
-    types: [
-      "Water"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 0
-  },
-  Golppy: {
-    types: [
-      "Water"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 0,
-    nfe: true
   },
   Sunmola1: {
     types: [
@@ -3354,83 +3781,6 @@ export const SW_SPECIES: any = {
     },
     weightkg: 0
   },
-  Para: {
-    types: [
-      "Bug",
-      "Grass"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 0,
-    nfe: true
-  },
-  Animon: {
-    types: [
-      "Normal"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 0
-  },
-  Chiks: {
-    types: [
-      "Normal",
-      "Flying"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 0,
-    nfe: true
-  },
-  Twinz: {
-    types: [
-      "Dark",
-      "Normal"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 0,
-    nfe: true
-  },
-  Meowsy: {
-    types: [
-      "Normal"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 0,
-    nfe: true
-  },
   Rinring: {
     types: [
       "Dark"
@@ -3460,84 +3810,9 @@ export const SW_SPECIES: any = {
     },
     weightkg: 0
   },
-  Minicorn: {
-    types: [
-      "Normal"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 0,
-    nfe: true
-  },
   Turbann: {
     types: [
       "Water"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 0
-  },
-  Grimey: {
-    types: [
-      "Poison"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 0,
-    nfe: true
-  },
-  Puddi: {
-    types: [
-      "Fire"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 0,
-    nfe: true
-  },
-  Ballerine: {
-    types: [
-      "Normal"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 0,
-    nfe: true
-  },
-  Belmitt: {
-    types: [
-      "Grass",
-      "Poison"
     ],
     bs: {
       hp: 50,
@@ -3593,21 +3868,6 @@ export const SW_SPECIES: any = {
     },
     weightkg: 0
   },
-  Madame: {
-    types: [
-      "Normal",
-      "Flying"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 0
-  },
   Kurstraw: {
     types: [
       "Ghost"
@@ -3634,20 +3894,6 @@ export const SW_SPECIES: any = {
       sa: 70,
       sd: 50,
       sp: 55
-    },
-    weightkg: 0
-  },
-  Plux: {
-    types: [
-      "Bug"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
     },
     weightkg: 0
   },
@@ -3680,281 +3926,139 @@ export const SW_SPECIES: any = {
     },
     weightkg: 0
   },
-  Likk: {
+  Tsubomitto: {
     types: [
-      "Normal"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 0
-  },
-  Leafeo: {
-    types: [
-      "Grass"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 0
-  },
-  Happa: {
-    types: [
-      "Grass"
-    ],
-    bs: {
-      hp: 55,
-      at: 40,
-      df: 45,
-      sa: 75,
-      sd: 50,
-      sp: 40
-    },
-    weightkg: 0,
-    nfe: true
-  },
-  Hanamogura: {
-    types: [
-      "Grass"
-    ],
-    bs: {
-      hp: 50,
-      at: 45,
-      df: 50,
-      sa: 45,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 0,
-    nfe: true
-  },
-  Hanaryu: {
-    types: [
-      "Grass"
-    ],
-    bs: {
-      hp: 70,
-      at: 65,
-      df: 60,
-      sa: 55,
-      sd: 50,
-      sp: 60
-    },
-    weightkg: 0
-  },
-  Bobo: {
-    types: [
-      "Flying"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 0
-  },
-  Pachimee: {
-    types: [
-      "Electric"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 0,
-    nfe: true
-  },
-  Puku: {
-    types: [
-      "Water"
-    ],
-    bs: {
-      hp: 55,
-      at: 80,
-      df: 50,
-      sa: 60,
-      sd: 50,
-      sp: 45
-    },
-    weightkg: 0,
-    nfe: true
-  },
-  Mizuuo: {
-    types: [
-      "Water"
-    ],
-    bs: {
-      hp: 50,
-      at: 45,
-      df: 50,
-      sa: 75,
-      sd: 50,
-      sp: 55
-    },
-    weightkg: 0
-  },
-  Eksing: {
-    types: [
-      "Poison",
-      "Flying"
-    ],
-    bs: {
-      hp: 60,
-      at: 65,
-      df: 50,
-      sa: 45,
-      sd: 50,
-      sp: 85
-    },
-    weightkg: 0
-  },
-  Twohead: {
-    types: [
-      "Bug",
+      "Grass",
       "Poison"
     ],
     bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
+      hp: 80,
+      at: 120,
+      df: 65,
+      sa: 85,
+      sd: 60,
+      sp: 70
     },
-    weightkg: 0
+    weightkg: 7.1
   },
-  Sunny: {
+  Madaamu: {
     types: [
-      "Grass",
-      "Psychic"
+      "Normal",
+      "Flying"
     ],
     bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
+      hp: 72,
+      at: 105,
+      df: 75,
+      sa: 63,
+      sd: 72,
+      sp: 70
     },
-    weightkg: 0
+    weightkg: 27
   },
-  Paon: {
+  Norowara: {
     types: [
-      "Ground"
+      "Ghost",
+      "Dark"
     ],
     bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
+      hp: 30,
+      at: 120,
+      df: 60,
+      sa: 120,
+      sd: 60,
+      sp: 10
     },
-    weightkg: 0,
+    weightkg: 1
+  },
+  Tsuinzu: {
+    types: [
+      "Ghost"
+    ],
+    bs: {
+      hp: 20,
+      at: 20,
+      df: 20,
+      sa: 65,
+      sd: 85,
+      sp: 45
+    },
+    weightkg: 0.2,
     nfe: true
   },
-  Painter: {
+  Purakkusu: {
     types: [
-      "Normal"
+      "Bug",
+      "Steel"
     ],
     bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
+      hp: 65,
+      at: 125,
+      df: 140,
+      sa: 55,
+      sd: 70,
+      sp: 45
     },
-    weightkg: 0
+    weightkg: 115.5
   },
-  Mitsuboshi: {
+  "Pending 03": {
     types: [
       "Bug",
       "Flying"
     ],
     bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
+      hp: 10,
+      at: 10,
+      df: 10,
+      sa: 10,
+      sd: 10,
+      sp: 10
     },
     weightkg: 0
   },
-  Gongu: {
+  "Pending 05": {
     types: [
-      "Fighting"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 0,
-    nfe: true
-  },
-  Booby: {
-    types: [
-      "Fire"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 0,
-    nfe: true
-  },
-  Gift: {
-    types: [
-      "Water",
-      "Ice"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 0
-  },
-  Tail: {
-    types: [
+      "Ghost",
       "Normal"
     ],
     bs: {
-      hp: 55,
-      at: 55,
-      df: 50,
-      sa: 60,
-      sd: 50,
+      hp: 65,
+      at: 45,
+      df: 45,
+      sa: 100,
+      sd: 120,
       sp: 60
+    },
+    weightkg: 0
+  },
+  "Pending 06": {
+    types: [
+      "Rock",
+      "Ground"
+    ],
+    bs: {
+      hp: 70,
+      at: 50,
+      df: 120,
+      sa: 30,
+      sd: 120,
+      sp: 30
+    },
+    weightkg: 0,
+    gender: "N"
+  },
+  "Pending 10": {
+    types: [
+      "Ice",
+      "Ground"
+    ],
+    bs: {
+      hp: 100,
+      at: 80,
+      df: 120,
+      sa: 60,
+      sd: 120,
+      sp: 20
     },
     weightkg: 0
   },
@@ -6709,9 +6813,7 @@ export const SW_MOVES: any = {
   Bounce: {
     bp: 0,
     type: "Water",
-    category: "Special",
-    secondaries: true,
-    makesContact: true
+    category: "Special"
   },
   Clamp: {
     bp: 35,
@@ -6867,6 +6969,12 @@ export const SW_MOVES: any = {
     type: "Ground",
     category: "Physical",
     makesContact: true
+  },
+  Earthquake: {
+    bp: 100,
+    type: "Ground",
+    category: "Physical",
+    target: "allAdjacent"
   },
   "Nail Down": {
     bp: 0,
@@ -7403,12 +7511,6 @@ export const SW_MOVES: any = {
     type: "Flying",
     category: "Physical",
     makesContact: true
-  },
-  Earthquake: {
-    bp: 100,
-    type: "Ground",
-    category: "Physical",
-    target: "allAdjacent"
   },
   Ember: {
     bp: 40,

@@ -1750,6 +1750,75 @@ export const NN_SPECIES_PATCH: any = {
 };
 
 export const NN_SPECIES_NEW: any = {
+  "9": {
+    types: [
+      "???"
+    ],
+    bs: {
+      hp: 4,
+      at: 40,
+      df: 6,
+      sa: 78,
+      sd: 78,
+      sp: 62
+    },
+    weightkg: 0.3,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "94": {
+    types: [
+      "???"
+    ],
+    bs: {
+      hp: 142,
+      at: 142,
+      df: 139,
+      sa: 145,
+      sd: 145,
+      sp: 147
+    },
+    weightkg: 399.4,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "ゥ$ 6ゥ": {
+    types: [
+      "Electric"
+    ],
+    bs: {
+      hp: 65,
+      at: 65,
+      df: 60,
+      sa: 110,
+      sd: 110,
+      sp: 130
+    },
+    weightkg: 399.43,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "4 89 4": {
+    types: [
+      "Ghost",
+      "Normal"
+    ],
+    bs: {
+      hp: 130,
+      at: 136,
+      df: 132,
+      sa: 147,
+      sd: 147,
+      sp: 141
+    },
+    weightkg: 467.9,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
   "Mewtwo-Armored": {
     types: [
       "Psychic",
@@ -6095,6 +6164,25 @@ export const NN_SPECIES_NEW: any = {
     },
     baseSpecies: "Marowak"
   },
+  "Jynx-Mega": {
+    types: [
+      "Ice",
+      "Psychic"
+    ],
+    bs: {
+      hp: 65,
+      at: 50,
+      df: 55,
+      sa: 145,
+      sd: 135,
+      sp: 105
+    },
+    weightkg: 40.6,
+    abilities: {
+      "0": "Magic Guard"
+    },
+    baseSpecies: "Jynx"
+  },
   "Eevee-Starter": {
     types: [
       "Normal"
@@ -7101,7 +7189,13 @@ export const NN_SPECIES_NEW: any = {
       sd: 6,
       sp: 29
     },
-    weightkg: 1590.8
+    weightkg: 1590.8,
+    abilities: {
+      "0": "No Ability"
+    },
+    otherFormes: [
+      "MissingNo.-Yellow"
+    ]
   },
   Flox: {
     types: [
@@ -7444,7 +7538,6 @@ export const NN_SPECIES_NEW: any = {
       sp: 40
     },
     weightkg: 0,
-    nfe: true,
     abilities: {
       "0": "No Ability"
     }
@@ -7497,7 +7590,6 @@ export const NN_SPECIES_NEW: any = {
       sp: 45
     },
     weightkg: 0,
-    nfe: true,
     abilities: {
       "0": "No Ability"
     }
@@ -7550,7 +7642,6 @@ export const NN_SPECIES_NEW: any = {
       sp: 50
     },
     weightkg: 0,
-    nfe: true,
     abilities: {
       "0": "No Ability"
     }
@@ -7727,7 +7818,6 @@ export const NN_SPECIES_NEW: any = {
       sp: 50
     },
     weightkg: 0,
-    nfe: true,
     abilities: {
       "0": "No Ability"
     }
@@ -7746,7 +7836,6 @@ export const NN_SPECIES_NEW: any = {
       sp: 50
     },
     weightkg: 0,
-    nfe: true,
     abilities: {
       "0": "No Ability"
     }
@@ -7764,7 +7853,6 @@ export const NN_SPECIES_NEW: any = {
       sp: 50
     },
     weightkg: 0,
-    nfe: true,
     abilities: {
       "0": "No Ability"
     }
@@ -7851,7 +7939,6 @@ export const NN_SPECIES_NEW: any = {
       sp: 50
     },
     weightkg: 0,
-    nfe: true,
     abilities: {
       "0": "No Ability"
     }
@@ -7869,7 +7956,6 @@ export const NN_SPECIES_NEW: any = {
       sp: 50
     },
     weightkg: 0,
-    nfe: true,
     abilities: {
       "0": "No Ability"
     }
@@ -8101,301 +8187,163 @@ export const NN_SPECIES_NEW: any = {
       "0": "No Ability"
     }
   },
-  Happa: {
+  Tsubomitto: {
     types: [
-      "Grass"
-    ],
-    bs: {
-      hp: 55,
-      at: 40,
-      df: 45,
-      sa: 75,
-      sd: 50,
-      sp: 40
-    },
-    weightkg: 0,
-    nfe: true,
-    abilities: {
-      "0": "No Ability"
-    }
-  },
-  Hanamogura: {
-    types: [
-      "Grass"
-    ],
-    bs: {
-      hp: 50,
-      at: 45,
-      df: 50,
-      sa: 45,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 0,
-    nfe: true,
-    abilities: {
-      "0": "No Ability"
-    }
-  },
-  Hanaryu: {
-    types: [
-      "Grass"
-    ],
-    bs: {
-      hp: 70,
-      at: 65,
-      df: 60,
-      sa: 55,
-      sd: 50,
-      sp: 60
-    },
-    weightkg: 0,
-    abilities: {
-      "0": "No Ability"
-    }
-  },
-  Bobo: {
-    types: [
-      "Flying"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 0,
-    abilities: {
-      "0": "No Ability"
-    }
-  },
-  Pachimee: {
-    types: [
-      "Electric"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 0,
-    nfe: true,
-    abilities: {
-      "0": "No Ability"
-    }
-  },
-  Puku: {
-    types: [
-      "Water"
-    ],
-    bs: {
-      hp: 55,
-      at: 80,
-      df: 50,
-      sa: 60,
-      sd: 50,
-      sp: 45
-    },
-    weightkg: 0,
-    nfe: true,
-    abilities: {
-      "0": "No Ability"
-    }
-  },
-  Mizuuo: {
-    types: [
-      "Water"
-    ],
-    bs: {
-      hp: 50,
-      at: 45,
-      df: 50,
-      sa: 75,
-      sd: 50,
-      sp: 55
-    },
-    weightkg: 0,
-    abilities: {
-      "0": "No Ability"
-    }
-  },
-  Eksing: {
-    types: [
-      "Poison",
-      "Flying"
-    ],
-    bs: {
-      hp: 60,
-      at: 65,
-      df: 50,
-      sa: 45,
-      sd: 50,
-      sp: 85
-    },
-    weightkg: 0,
-    abilities: {
-      "0": "No Ability"
-    }
-  },
-  Twohead: {
-    types: [
-      "Bug",
+      "Grass",
       "Poison"
     ],
     bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
+      hp: 80,
+      at: 120,
+      df: 65,
+      sa: 85,
+      sd: 60,
+      sp: 70
     },
-    weightkg: 0,
+    weightkg: 7.1,
     abilities: {
       "0": "No Ability"
     }
   },
-  Sunny: {
+  Madaamu: {
     types: [
-      "Grass",
-      "Psychic"
+      "Normal",
+      "Flying"
     ],
     bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
+      hp: 72,
+      at: 105,
+      df: 75,
+      sa: 63,
+      sd: 72,
+      sp: 70
     },
-    weightkg: 0,
+    weightkg: 27,
     abilities: {
       "0": "No Ability"
     }
   },
-  Paon: {
+  Norowara: {
     types: [
-      "Ground"
+      "Ghost",
+      "Dark"
     ],
     bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
+      hp: 30,
+      at: 120,
+      df: 60,
+      sa: 120,
+      sd: 60,
+      sp: 10
     },
-    weightkg: 0,
+    weightkg: 1,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  Tsuinzu: {
+    types: [
+      "Ghost"
+    ],
+    bs: {
+      hp: 20,
+      at: 20,
+      df: 20,
+      sa: 65,
+      sd: 85,
+      sp: 45
+    },
+    weightkg: 0.2,
     nfe: true,
     abilities: {
       "0": "No Ability"
     }
   },
-  Painter: {
+  Purakkusu: {
     types: [
-      "Normal"
+      "Bug",
+      "Steel"
     ],
     bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
+      hp: 65,
+      at: 125,
+      df: 140,
+      sa: 55,
+      sd: 70,
+      sp: 45
     },
-    weightkg: 0,
+    weightkg: 115.5,
     abilities: {
       "0": "No Ability"
     }
   },
-  Mitsuboshi: {
+  "Pending 03": {
     types: [
       "Bug",
       "Flying"
     ],
     bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
+      hp: 10,
+      at: 10,
+      df: 10,
+      sa: 10,
+      sd: 10,
+      sp: 10
     },
     weightkg: 0,
     abilities: {
       "0": "No Ability"
     }
   },
-  Gongu: {
+  "Pending 05": {
     types: [
-      "Fighting"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 0,
-    nfe: true,
-    abilities: {
-      "0": "No Ability"
-    }
-  },
-  Booby: {
-    types: [
-      "Fire"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 0,
-    nfe: true,
-    abilities: {
-      "0": "No Ability"
-    }
-  },
-  Gift: {
-    types: [
-      "Water",
-      "Ice"
-    ],
-    bs: {
-      hp: 50,
-      at: 50,
-      df: 50,
-      sa: 50,
-      sd: 50,
-      sp: 50
-    },
-    weightkg: 0,
-    abilities: {
-      "0": "No Ability"
-    }
-  },
-  Tail: {
-    types: [
+      "Ghost",
       "Normal"
     ],
     bs: {
-      hp: 55,
-      at: 55,
-      df: 50,
-      sa: 60,
-      sd: 50,
+      hp: 65,
+      at: 45,
+      df: 45,
+      sa: 100,
+      sd: 120,
       sp: 60
+    },
+    weightkg: 0,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "Pending 06": {
+    types: [
+      "Rock",
+      "Ground"
+    ],
+    bs: {
+      hp: 70,
+      at: 50,
+      df: 120,
+      sa: 30,
+      sd: 120,
+      sp: 30
+    },
+    weightkg: 0,
+    gender: "N",
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "Pending 10": {
+    types: [
+      "Ice",
+      "Ground"
+    ],
+    bs: {
+      hp: 100,
+      at: 80,
+      df: 120,
+      sa: 60,
+      sd: 120,
+      sp: 20
     },
     weightkg: 0,
     abilities: {
@@ -11047,6 +10995,2450 @@ export const NN_SPECIES_NEW: any = {
       "0": "No Ability"
     },
     baseSpecies: "Snubbull"
+  },
+  "$ (Y F9)": {
+    types: [
+      "???"
+    ],
+    bs: {
+      hp: 178,
+      at: 19,
+      df: 11,
+      sa: 23,
+      sd: 23,
+      sp: 0
+    },
+    weightkg: 467.9,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "$ Pゥ. 4( (Y EB)": {
+    types: [
+      "Normal"
+    ],
+    bs: {
+      hp: 0,
+      at: 48,
+      df: 0,
+      sa: 98,
+      sd: 98,
+      sp: 88
+    },
+    weightkg: 467.9,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "' B' ゥ (Y F1)": {
+    types: [
+      "Poison"
+    ],
+    bs: {
+      hp: 61,
+      at: 72,
+      df: 57,
+      sa: 55,
+      sd: 55,
+      sp: 65
+    },
+    weightkg: 131.36,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "'M 'N g": {
+    types: [
+      "Rock",
+      "Ground"
+    ],
+    bs: {
+      hp: 35,
+      at: 45,
+      df: 160,
+      sa: 30,
+      sd: 30,
+      sp: 70
+    },
+    weightkg: 399.43,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "'M (00)": {
+    types: [
+      "Bird",
+      "Normal"
+    ],
+    bs: {
+      hp: 33,
+      at: 137,
+      df: 0,
+      sa: 29,
+      sd: 29,
+      sp: 6
+    },
+    weightkg: 399.4,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "'M (FE)": {
+    types: [
+      "Water",
+      "Psychic"
+    ],
+    bs: {
+      hp: 90,
+      at: 65,
+      df: 65,
+      sa: 40,
+      sd: 40,
+      sp: 15
+    },
+    weightkg: 399.43,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "'M (FF)": {
+    types: [
+      "Fire",
+      "Flying"
+    ],
+    bs: {
+      hp: 78,
+      at: 84,
+      df: 78,
+      sa: 85,
+      sd: 85,
+      sp: 100
+    },
+    weightkg: 399.4,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "'Ng ゥ$": {
+    types: [
+      "Normal"
+    ],
+    bs: {
+      hp: 30,
+      at: 56,
+      df: 36,
+      sa: 25,
+      sd: 25,
+      sp: 72
+    },
+    weightkg: 399.4,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "'Ng'Mp": {
+    types: [
+      "Normal",
+      "Flying"
+    ],
+    bs: {
+      hp: 83,
+      at: 80,
+      df: 75,
+      sa: 70,
+      sd: 70,
+      sp: 91
+    },
+    weightkg: 1191.8,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "'r 'r 4": {
+    types: [
+      "Water"
+    ],
+    bs: {
+      hp: 2,
+      at: 94,
+      df: 0,
+      sa: 1,
+      sd: 1,
+      sp: 47
+    },
+    weightkg: 467.9,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "'r ゥ": {
+    types: [
+      "Normal"
+    ],
+    bs: {
+      hp: 160,
+      at: 110,
+      df: 65,
+      sa: 65,
+      sd: 65,
+      sp: 30
+    },
+    weightkg: 16.33,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "'v": {
+    types: [
+      "???"
+    ],
+    bs: {
+      hp: 58,
+      at: 80,
+      df: 47,
+      sa: 82,
+      sd: 82,
+      sp: 42
+    },
+    weightkg: 400.3,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "'ゥ. (Y D5)": {
+    types: [
+      "Grass",
+      "Poison"
+    ],
+    bs: {
+      hp: 45,
+      at: 49,
+      df: 49,
+      sa: 65,
+      sd: 65,
+      sp: 45
+    },
+    weightkg: 467.9,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "(h4to89": {
+    types: [
+      "Normal",
+      "???"
+    ],
+    bs: {
+      hp: 148,
+      at: 145,
+      df: 134,
+      sa: 128,
+      sd: 128,
+      sp: 139
+    },
+    weightkg: 467.9,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  ") (Y DA)": {
+    types: [
+      "Normal",
+      "Flying"
+    ],
+    bs: {
+      hp: 40,
+      at: 60,
+      df: 30,
+      sa: 31,
+      sd: 31,
+      sp: 70
+    },
+    weightkg: 1,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "- (019C)": {
+    types: [
+      "???"
+    ],
+    bs: {
+      hp: 33,
+      at: 2,
+      df: 45,
+      sa: 73,
+      sd: 14,
+      sp: 8
+    },
+    weightkg: 1,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "- - (E6)": {
+    types: [
+      "???"
+    ],
+    bs: {
+      hp: 19,
+      at: 114,
+      df: 114,
+      sa: 20,
+      sd: 20,
+      sp: 0
+    },
+    weightkg: 399.4,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "-PkMn (DE)": {
+    types: [
+      "Electric"
+    ],
+    bs: {
+      hp: 25,
+      at: 35,
+      df: 70,
+      sa: 95,
+      sd: 95,
+      sp: 45
+    },
+    weightkg: 2449.7,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  ". pゥ (Y CB)": {
+    types: [
+      "Electric"
+    ],
+    bs: {
+      hp: 25,
+      at: 35,
+      df: 70,
+      sa: 95,
+      sd: 95,
+      sp: 45
+    },
+    weightkg: 729.2,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  ". ゥ ( .I' .": {
+    types: [
+      "Fire",
+      "Flying"
+    ],
+    bs: {
+      hp: 78,
+      at: 84,
+      df: 78,
+      sa: 85,
+      sd: 85,
+      sp: 100
+    },
+    weightkg: 2766.45,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  ".8 (Y CC)": {
+    types: [
+      "Water"
+    ],
+    bs: {
+      hp: 79,
+      at: 83,
+      df: 100,
+      sa: 85,
+      sd: 85,
+      sp: 78
+    },
+    weightkg: 16.3,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  ".PkMn (DF)": {
+    types: [
+      "???",
+      "Normal"
+    ],
+    bs: {
+      hp: 37,
+      at: 0,
+      df: 40,
+      sa: 19,
+      sd: 19,
+      sp: 178
+    },
+    weightkg: 1189.32,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  ".g": {
+    types: [
+      "Bug",
+      "???"
+    ],
+    bs: {
+      hp: 14,
+      at: 0,
+      df: 12,
+      sa: 254,
+      sd: 254,
+      sp: 121
+    },
+    weightkg: 399.4,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "/PkMn ▼PkMn": {
+    types: [
+      "Normal",
+      "Flying"
+    ],
+    bs: {
+      hp: 60,
+      at: 110,
+      df: 70,
+      sa: 60,
+      sd: 60,
+      sp: 100
+    },
+    weightkg: 399.4,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "3TrainerPoké $": {
+    types: [
+      "???",
+      "Normal"
+    ],
+    bs: {
+      hp: 33,
+      at: 233,
+      df: 206,
+      sa: 236,
+      sd: 236,
+      sp: 17
+    },
+    weightkg: 467.9,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "4 4 (Y BF)": {
+    types: [
+      "???",
+      "Normal"
+    ],
+    bs: {
+      hp: 14,
+      at: 116,
+      df: 108,
+      sa: 18,
+      sd: 18,
+      sp: 0
+    },
+    weightkg: 467.9,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "4 4Hy": {
+    types: [
+      "Water",
+      "Psychic"
+    ],
+    bs: {
+      hp: 95,
+      at: 75,
+      df: 110,
+      sa: 100,
+      sd: 100,
+      sp: 30
+    },
+    weightkg: 467.9,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "4(h4?": {
+    types: [
+      "Normal"
+    ],
+    bs: {
+      hp: 192,
+      at: 0,
+      df: 123,
+      sa: 0,
+      sd: 0,
+      sp: 16
+    },
+    weightkg: 467.9,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "4(h4hi?$": {
+    types: [
+      "Water"
+    ],
+    bs: {
+      hp: 80,
+      at: 92,
+      df: 65,
+      sa: 65,
+      sd: 65,
+      sp: 68
+    },
+    weightkg: 467.9,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "4 ゥァ (CF)": {
+    types: [
+      "Water"
+    ],
+    bs: {
+      hp: 79,
+      at: 83,
+      df: 100,
+      sa: 85,
+      sd: 85,
+      sp: 78
+    },
+    weightkg: 467.9,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "4 ゥァ (DD)": {
+    types: [
+      "Ghost",
+      "Normal"
+    ],
+    bs: {
+      hp: 130,
+      at: 136,
+      df: 132,
+      sa: 147,
+      sd: 147,
+      sp: 141
+    },
+    weightkg: 467.925889,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "4. . (Y C5)": {
+    types: [
+      "Water"
+    ],
+    bs: {
+      hp: 80,
+      at: 82,
+      df: 78,
+      sa: 95,
+      sd: 95,
+      sp: 85
+    },
+    weightkg: 16.33,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "4B 8 4 8": {
+    types: [
+      "Water",
+      "Fighting"
+    ],
+    bs: {
+      hp: 90,
+      at: 85,
+      df: 95,
+      sa: 70,
+      sd: 70,
+      sp: 70
+    },
+    weightkg: 399.4,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "4HI?": {
+    types: [
+      "Poison"
+    ],
+    bs: {
+      hp: 61,
+      at: 72,
+      df: 57,
+      sa: 55,
+      sd: 55,
+      sp: 65
+    },
+    weightkg: 467.9,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "4 h": {
+    types: [
+      "???",
+      "Normal"
+    ],
+    bs: {
+      hp: 37,
+      at: 0,
+      df: 40,
+      sa: 19,
+      sd: 19,
+      sp: 178
+    },
+    weightkg: 399.4,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "7PkMn 'v": {
+    types: [
+      "Water",
+      "Poison"
+    ],
+    bs: {
+      hp: 80,
+      at: 70,
+      df: 65,
+      sa: 120,
+      sd: 120,
+      sp: 100
+    },
+    weightkg: 399.4,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "8 (DE)": {
+    types: [
+      "Fire",
+      "???"
+    ],
+    bs: {
+      hp: 16,
+      at: 112,
+      df: 123,
+      sa: 0,
+      sd: 0,
+      sp: 112
+    },
+    weightkg: 348.1,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "8 P ァ": {
+    types: [
+      "Normal"
+    ],
+    bs: {
+      hp: 24,
+      at: 92,
+      df: 58,
+      sa: 20,
+      sd: 20,
+      sp: 0
+    },
+    weightkg: 467.9,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "8B 4 8": {
+    types: [
+      "???",
+      "Normal"
+    ],
+    bs: {
+      hp: 14,
+      at: 116,
+      df: 108,
+      sa: 18,
+      sd: 18,
+      sp: 0
+    },
+    weightkg: 467.93,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "94 h": {
+    types: [
+      "Normal",
+      "Ghost"
+    ],
+    bs: {
+      hp: 142,
+      at: 142,
+      df: 139,
+      sa: 145,
+      sd: 145,
+      sp: 147
+    },
+    weightkg: 399.4,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "? (00FC)": {
+    types: [
+      "Normal"
+    ],
+    bs: {
+      hp: 50,
+      at: 150,
+      df: 50,
+      sa: 150,
+      sd: 50,
+      sp: 150
+    },
+    weightkg: 225.9,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "?/ (Y EC)": {
+    types: [
+      "Normal",
+      "Flying"
+    ],
+    bs: {
+      hp: 63,
+      at: 60,
+      df: 55,
+      sa: 50,
+      sd: 50,
+      sp: 71
+    },
+    weightkg: 1,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "????? (Crystal 00)": {
+    types: [
+      "Normal",
+      "???"
+    ],
+    bs: {
+      hp: 80,
+      at: 138,
+      df: 128,
+      sa: 148,
+      sd: 141,
+      sp: 138
+    },
+    weightkg: 1,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "????? (Crystal FC)": {
+    types: [
+      "Fire",
+      "Normal"
+    ],
+    bs: {
+      hp: 148,
+      at: 139,
+      df: 129,
+      sa: 146,
+      sd: 128,
+      sp: 128
+    },
+    weightkg: 1,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "????? (Crystal FE)": {
+    types: [
+      "???"
+    ],
+    bs: {
+      hp: 147,
+      at: 139,
+      df: 132,
+      sa: 80,
+      sd: 150,
+      sp: 80
+    },
+    weightkg: 1655.48,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "????? (Crystal FF)": {
+    types: [
+      "Normal"
+    ],
+    bs: {
+      hp: 132,
+      at: 80,
+      df: 80,
+      sa: 132,
+      sd: 147,
+      sp: 140
+    },
+    weightkg: 1486.24,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "????? (GS 00)": {
+    types: [
+      "Steel",
+      "???"
+    ],
+    bs: {
+      hp: 224,
+      at: 1,
+      df: 188,
+      sa: 163,
+      sd: 213,
+      sp: 67
+    },
+    weightkg: 220.58,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "????? (GS FC)": {
+    types: [
+      "Psychic",
+      "???"
+    ],
+    bs: {
+      hp: 21,
+      at: 51,
+      df: 22,
+      sa: 23,
+      sd: 98,
+      sp: 75
+    },
+    weightkg: 220.58,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "????? (GS FE)": {
+    types: [
+      "???"
+    ],
+    bs: {
+      hp: 244,
+      at: 0,
+      df: 234,
+      sa: 245,
+      sd: 0,
+      sp: 0
+    },
+    weightkg: 220.58,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "????? (GS FF)": {
+    types: [
+      "???",
+      "Normal"
+    ],
+    bs: {
+      hp: 127,
+      at: 21,
+      df: 192,
+      sa: 240,
+      sd: 48,
+      sp: 192
+    },
+    weightkg: 2344.21,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "A (C0)": {
+    types: [
+      "Water"
+    ],
+    bs: {
+      hp: 65,
+      at: 65,
+      df: 65,
+      sa: 50,
+      sd: 50,
+      sp: 90
+    },
+    weightkg: 399.4,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "A (EA)": {
+    types: [
+      "???"
+    ],
+    bs: {
+      hp: 179,
+      at: 96,
+      df: 209,
+      sa: 21,
+      sd: 21,
+      sp: 96
+    },
+    weightkg: 400.3,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "Aゥ G (D4)": {
+    types: [
+      "Ghost",
+      "Poison"
+    ],
+    bs: {
+      hp: 60,
+      at: 65,
+      df: 60,
+      sa: 130,
+      sd: 130,
+      sp: 110
+    },
+    weightkg: 0.3,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "B (D7)": {
+    types: [
+      "Normal",
+      "Flying"
+    ],
+    bs: {
+      hp: 40,
+      at: 45,
+      df: 40,
+      sa: 35,
+      sd: 35,
+      sp: 56
+    },
+    weightkg: 2766.46,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "B (DA)": {
+    types: [
+      "Rock",
+      "Ground"
+    ],
+    bs: {
+      hp: 35,
+      at: 45,
+      df: 160,
+      sa: 30,
+      sd: 30,
+      sp: 70
+    },
+    weightkg: 399.4,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "B ァ h (Y D1)": {
+    types: [
+      "Normal",
+      "Flying"
+    ],
+    bs: {
+      hp: 35,
+      at: 85,
+      df: 45,
+      sa: 35,
+      sd: 35,
+      sp: 75
+    },
+    weightkg: 467.9,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "C (lowercase)": {
+    types: [
+      "Bug"
+    ],
+    bs: {
+      hp: 14,
+      at: 0,
+      df: 12,
+      sa: 254,
+      sd: 254,
+      sp: 121
+    },
+    weightkg: 399.4,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "C (uppercase)": {
+    types: [
+      "???"
+    ],
+    bs: {
+      hp: 21,
+      at: 33,
+      df: 176,
+      sa: 19,
+      sd: 19,
+      sp: 0
+    },
+    weightkg: 399.4,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "F q": {
+    types: [
+      "Normal",
+      "Flying"
+    ],
+    bs: {
+      hp: 83,
+      at: 80,
+      df: 75,
+      sa: 70,
+      sd: 70,
+      sp: 91
+    },
+    weightkg: 2766.5,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "g g (Y C8)": {
+    types: [
+      "Normal"
+    ],
+    bs: {
+      hp: 178,
+      at: 19,
+      df: 11,
+      sa: 23,
+      sd: 23,
+      sp: 0
+    },
+    weightkg: 2766.5,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "G'Mp": {
+    types: [
+      "Normal"
+    ],
+    bs: {
+      hp: 140,
+      at: 70,
+      df: 45,
+      sa: 75,
+      sd: 75,
+      sp: 45
+    },
+    weightkg: 399.4,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "Glitch (CA)": {
+    types: [
+      "Poison"
+    ],
+    bs: {
+      hp: 53,
+      at: 3,
+      df: 2,
+      sa: 3,
+      sd: 3,
+      sp: 126
+    },
+    weightkg: 467.9,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "Glitch (D7)": {
+    types: [
+      "Water"
+    ],
+    bs: {
+      hp: 65,
+      at: 65,
+      df: 65,
+      sa: 50,
+      sd: 50,
+      sp: 90
+    },
+    weightkg: 399.4,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "Glitch (DB)": {
+    types: [
+      "???"
+    ],
+    bs: {
+      hp: 232,
+      at: 147,
+      df: 145,
+      sa: 136,
+      sd: 136,
+      sp: 128
+    },
+    weightkg: 399.43,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "Glitch (DC)": {
+    types: [
+      "Normal",
+      "Flying"
+    ],
+    bs: {
+      hp: 63,
+      at: 60,
+      df: 55,
+      sa: 50,
+      sd: 50,
+      sp: 71
+    },
+    weightkg: 2766.5,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "Glitch (E4)": {
+    types: [
+      "Bug"
+    ],
+    bs: {
+      hp: 14,
+      at: 0,
+      df: 12,
+      sa: 254,
+      sd: 254,
+      sp: 121
+    },
+    weightkg: 399.4,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "Glitch (EB)": {
+    types: [
+      "Normal",
+      "Flying"
+    ],
+    bs: {
+      hp: 60,
+      at: 110,
+      df: 70,
+      sa: 60,
+      sd: 60,
+      sp: 100
+    },
+    weightkg: 400.3,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "Glitch (EC)": {
+    types: [
+      "???",
+      "Normal"
+    ],
+    bs: {
+      hp: 80,
+      at: 143,
+      df: 145,
+      sa: 133,
+      sd: 133,
+      sp: 142
+    },
+    weightkg: 0.3,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "Glitch (FA)": {
+    types: [
+      "Poison"
+    ],
+    bs: {
+      hp: 61,
+      at: 72,
+      df: 57,
+      sa: 55,
+      sd: 55,
+      sp: 65
+    },
+    weightkg: 400.3,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "H 4Pゥ ゥ...": {
+    types: [
+      "Normal"
+    ],
+    bs: {
+      hp: 140,
+      at: 70,
+      df: 45,
+      sa: 50,
+      sd: 50,
+      sp: 45
+    },
+    weightkg: 467.9,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "H POKé": {
+    types: [
+      "Ghost",
+      "Poison"
+    ],
+    bs: {
+      hp: 60,
+      at: 65,
+      df: 60,
+      sa: 130,
+      sd: 130,
+      sp: 110
+    },
+    weightkg: 2766.5,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "Hゥ": {
+    types: [
+      "???"
+    ],
+    bs: {
+      hp: 33,
+      at: 129,
+      df: 218,
+      sa: 3,
+      sd: 3,
+      sp: 24
+    },
+    weightkg: 399.4,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "M p'u ゥ": {
+    types: [
+      "???"
+    ],
+    bs: {
+      hp: 187,
+      at: 105,
+      df: 217,
+      sa: 29,
+      sd: 29,
+      sp: 104
+    },
+    weightkg: 399.4,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "MissingNo.-Yellow": {
+    types: [
+      "Normal",
+      "???"
+    ],
+    bs: {
+      hp: 178,
+      at: 19,
+      df: 11,
+      sa: 23,
+      sd: 23,
+      sp: 0
+    },
+    weightkg: 1590.8,
+    abilities: {
+      "0": "No Ability"
+    },
+    baseSpecies: "MissingNo."
+  },
+  O: {
+    types: [
+      "Electric"
+    ],
+    bs: {
+      hp: 25,
+      at: 35,
+      df: 70,
+      sa: 95,
+      sd: 95,
+      sp: 45
+    },
+    weightkg: 1,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  OPkMn4X: {
+    types: [
+      "Bug",
+      "Poison"
+    ],
+    bs: {
+      hp: 65,
+      at: 80,
+      df: 40,
+      sa: 45,
+      sd: 45,
+      sp: 75
+    },
+    weightkg: 399.4,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "P (CB)": {
+    types: [
+      "Normal",
+      "Flying"
+    ],
+    bs: {
+      hp: 63,
+      at: 60,
+      df: 55,
+      sa: 50,
+      sd: 50,
+      sp: 71
+    },
+    weightkg: 2766.5,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "P ID": {
+    types: [
+      "Water",
+      "Fighting"
+    ],
+    bs: {
+      hp: 90,
+      at: 85,
+      df: 95,
+      sa: 70,
+      sd: 70,
+      sp: 70
+    },
+    weightkg: 467.9,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  PC4SH: {
+    types: [
+      "???"
+    ],
+    bs: {
+      hp: 232,
+      at: 147,
+      df: 145,
+      sa: 136,
+      sd: 136,
+      sp: 128
+    },
+    weightkg: 975.3,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "PPkMnp' '": {
+    types: [
+      "???",
+      "Poison"
+    ],
+    bs: {
+      hp: 2,
+      at: 2,
+      df: 104,
+      sa: 1,
+      sd: 1,
+      sp: 3
+    },
+    weightkg: 467.9,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "PkMn (C5)": {
+    types: [
+      "???",
+      "Normal"
+    ],
+    bs: {
+      hp: 37,
+      at: 0,
+      df: 40,
+      sa: 19,
+      sd: 19,
+      sp: 178
+    },
+    weightkg: 399.4,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "PkMn (D8)": {
+    types: [
+      "???"
+    ],
+    bs: {
+      hp: 134,
+      at: 139,
+      df: 132,
+      sa: 80,
+      sd: 80,
+      sp: 145
+    },
+    weightkg: 467.9,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "PkMn (DC)": {
+    types: [
+      "Normal",
+      "???"
+    ],
+    bs: {
+      hp: 148,
+      at: 145,
+      df: 134,
+      sa: 128,
+      sd: 128,
+      sp: 139
+    },
+    weightkg: 467.9,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "PkMn (F7)": {
+    types: [
+      "Grass",
+      "Poison"
+    ],
+    bs: {
+      hp: 45,
+      at: 49,
+      df: 49,
+      sa: 65,
+      sd: 65,
+      sp: 45
+    },
+    weightkg: 467.9,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "PkMn ? A": {
+    types: [
+      "Poison"
+    ],
+    bs: {
+      hp: 61,
+      at: 72,
+      df: 57,
+      sa: 55,
+      sd: 55,
+      sp: 65
+    },
+    weightkg: 467.9,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "PkMn PkMn T": {
+    types: [
+      "???",
+      "Normal"
+    ],
+    bs: {
+      hp: 37,
+      at: 0,
+      df: 40,
+      sa: 19,
+      sd: 19,
+      sp: 178
+    },
+    weightkg: 399.4,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "PkMn pゥぁ ゥぇ (CE)": {
+    types: [
+      "Water"
+    ],
+    bs: {
+      hp: 79,
+      at: 83,
+      df: 100,
+      sa: 85,
+      sd: 85,
+      sp: 78
+    },
+    weightkg: 467.9,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "PkMn pゥぁ ゥぇ (D6)": {
+    types: [
+      "Fire"
+    ],
+    bs: {
+      hp: 39,
+      at: 52,
+      df: 43,
+      sa: 60,
+      sd: 60,
+      sp: 65
+    },
+    weightkg: 467.9,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "PkMn ◣ n": {
+    types: [
+      "Fighting"
+    ],
+    bs: {
+      hp: 40,
+      at: 80,
+      df: 35,
+      sa: 35,
+      sd: 35,
+      sp: 70
+    },
+    weightkg: 399.4,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "PkMnRPkMn \"": {
+    types: [
+      "???"
+    ],
+    bs: {
+      hp: 179,
+      at: 96,
+      df: 209,
+      sa: 21,
+      sd: 21,
+      sp: 96
+    },
+    weightkg: 399.4,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "PkMnaPkMnゥ ♂ fPkMnk": {
+    types: [
+      "???"
+    ],
+    bs: {
+      hp: 232,
+      at: 147,
+      df: 145,
+      sa: 136,
+      sd: 136,
+      sp: 128
+    },
+    weightkg: 399.8,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "PokéWTrainer": {
+    types: [
+      "???"
+    ],
+    bs: {
+      hp: 232,
+      at: 147,
+      df: 145,
+      sa: 136,
+      sd: 136,
+      sp: 128
+    },
+    weightkg: 399.4,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "Pゥ 4$ (E7)": {
+    types: [
+      "Fighting",
+      "???"
+    ],
+    bs: {
+      hp: 30,
+      at: 182,
+      df: 32,
+      sa: 54,
+      sd: 54,
+      sp: 2
+    },
+    weightkg: 399.4,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "Pゥ ゥ ゥ (D5)": {
+    types: [
+      "???"
+    ],
+    bs: {
+      hp: 232,
+      at: 147,
+      df: 145,
+      sa: 136,
+      sd: 136,
+      sp: 128
+    },
+    weightkg: 399.4,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "Q ◣": {
+    types: [
+      "Water",
+      "Psychic"
+    ],
+    bs: {
+      hp: 60,
+      at: 75,
+      df: 85,
+      sa: 100,
+      sd: 100,
+      sp: 115
+    },
+    weightkg: 467.9,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  Decamark: {
+    types: [
+      "Normal"
+    ],
+    bs: {
+      hp: 0,
+      at: 0,
+      df: 0,
+      sa: 0,
+      sd: 0,
+      sp: 0
+    },
+    weightkg: 1,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  Trainer: {
+    types: [
+      "Electric"
+    ],
+    bs: {
+      hp: 25,
+      at: 35,
+      df: 70,
+      sa: 95,
+      sd: 95,
+      sp: 45
+    },
+    weightkg: 399.4,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "U (Y C7)": {
+    types: [
+      "Fire",
+      "Flying"
+    ],
+    bs: {
+      hp: 78,
+      at: 84,
+      df: 78,
+      sa: 85,
+      sd: 85,
+      sp: 100
+    },
+    weightkg: 467.9,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "X C": {
+    types: [
+      "???"
+    ],
+    bs: {
+      hp: 21,
+      at: 33,
+      df: 176,
+      sa: 19,
+      sd: 19,
+      sp: 0
+    },
+    weightkg: 400.3,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "X ゥ- xゥ": {
+    types: [
+      "???",
+      "Normal"
+    ],
+    bs: {
+      hp: 132,
+      at: 145,
+      df: 140,
+      sa: 141,
+      sd: 141,
+      sp: 128
+    },
+    weightkg: 467.9,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "Z ゥ": {
+    types: [
+      "Normal"
+    ],
+    bs: {
+      hp: 65,
+      at: 70,
+      df: 60,
+      sa: 65,
+      sd: 65,
+      sp: 115
+    },
+    weightkg: 467.9,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "× 'rゥ. 4-": {
+    types: [
+      "Ground"
+    ],
+    bs: {
+      hp: 50,
+      at: 75,
+      df: 85,
+      sa: 30,
+      sd: 30,
+      sp: 40
+    },
+    weightkg: 467.93,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "…… (E2)": {
+    types: [
+      "???"
+    ],
+    bs: {
+      hp: 21,
+      at: 33,
+      df: 176,
+      sa: 19,
+      sd: 19,
+      sp: 0
+    },
+    weightkg: 399.43,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "▶ A": {
+    types: [
+      "???",
+      "Normal"
+    ],
+    bs: {
+      hp: 37,
+      at: 0,
+      df: 40,
+      sa: 19,
+      sd: 19,
+      sp: 178
+    },
+    weightkg: 399.4,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "▼ W G d": {
+    types: [
+      "Poison"
+    ],
+    bs: {
+      hp: 60,
+      at: 85,
+      df: 69,
+      sa: 65,
+      sd: 65,
+      sp: 80
+    },
+    weightkg: 399.4,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "▼ pゥ (Y F5)": {
+    types: [
+      "Normal"
+    ],
+    bs: {
+      hp: 160,
+      at: 110,
+      df: 65,
+      sa: 65,
+      sd: 65,
+      sp: 30
+    },
+    weightkg: 467.9,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "◣ゥ 8 (C9)": {
+    types: [
+      "Rock",
+      "Ground"
+    ],
+    bs: {
+      hp: 35,
+      at: 45,
+      df: 160,
+      sa: 30,
+      sd: 30,
+      sp: 70
+    },
+    weightkg: 399.4,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "♀ . (Y C1)": {
+    types: [
+      "Normal"
+    ],
+    bs: {
+      hp: 134,
+      at: 139,
+      df: 132,
+      sa: 80,
+      sd: 80,
+      sp: 145
+    },
+    weightkg: 2772.3,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "♀Pゥ ゥゥT": {
+    types: [
+      "???"
+    ],
+    bs: {
+      hp: 232,
+      at: 147,
+      df: 145,
+      sa: 136,
+      sd: 136,
+      sp: 128
+    },
+    weightkg: 399.4,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "♂ p ゥ (Y F4)": {
+    types: [
+      "Normal",
+      "Flying"
+    ],
+    bs: {
+      hp: 63,
+      at: 60,
+      df: 55,
+      sa: 50,
+      sd: 50,
+      sp: 71
+    },
+    weightkg: 1,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "ァ / g J 1": {
+    types: [
+      "Poison"
+    ],
+    bs: {
+      hp: 61,
+      at: 72,
+      df: 57,
+      sa: 55,
+      sd: 55,
+      sp: 65
+    },
+    weightkg: 467.9,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "ァ7g": {
+    types: [
+      "Water",
+      "Psychic"
+    ],
+    bs: {
+      hp: 90,
+      at: 65,
+      df: 65,
+      sa: 40,
+      sd: 40,
+      sp: 15
+    },
+    weightkg: 467.9,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "ゥ $ A (F3)": {
+    types: [
+      "Normal",
+      "???"
+    ],
+    bs: {
+      hp: 0,
+      at: 48,
+      df: 0,
+      sa: 98,
+      sd: 98,
+      sp: 88
+    },
+    weightkg: 467.9,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "ゥ $ A (F6)": {
+    types: [
+      "Normal"
+    ],
+    bs: {
+      hp: 0,
+      at: 48,
+      df: 0,
+      sa: 98,
+      sd: 98,
+      sp: 88
+    },
+    weightkg: 467.9,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "ゥ ' (D2)": {
+    types: [
+      "???"
+    ],
+    bs: {
+      hp: 232,
+      at: 147,
+      df: 145,
+      sa: 136,
+      sd: 136,
+      sp: 128
+    },
+    weightkg: 399.4,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "ゥ ( Z4": {
+    types: [
+      "Bug",
+      "Poison"
+    ],
+    bs: {
+      hp: 65,
+      at: 80,
+      df: 40,
+      sa: 45,
+      sd: 45,
+      sp: 75
+    },
+    weightkg: 467.9,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "ゥ (C1)": {
+    types: [
+      "???"
+    ],
+    bs: {
+      hp: 232,
+      at: 147,
+      df: 145,
+      sa: 128,
+      sd: 128,
+      sp: 136
+    },
+    weightkg: 399.4,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "ゥ (D4)": {
+    types: [
+      "Normal"
+    ],
+    bs: {
+      hp: 160,
+      at: 110,
+      df: 65,
+      sa: 65,
+      sd: 65,
+      sp: 30
+    },
+    weightkg: 467.9,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "ゥ (D9)": {
+    types: [
+      "???"
+    ],
+    bs: {
+      hp: 77,
+      at: 185,
+      df: 38,
+      sa: 19,
+      sd: 19,
+      sp: 0
+    },
+    weightkg: 467.9,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "ゥ (E3)": {
+    types: [
+      "???"
+    ],
+    bs: {
+      hp: 19,
+      at: 114,
+      df: 114,
+      sa: 20,
+      sd: 20,
+      sp: 0
+    },
+    weightkg: 399.4,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "ゥ (F5)": {
+    types: [
+      "???"
+    ],
+    bs: {
+      hp: 55,
+      at: 143,
+      df: 55,
+      sa: 0,
+      sd: 0,
+      sp: 13
+    },
+    weightkg: 399.43,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "ゥ .4 (C2)": {
+    types: [
+      "???"
+    ],
+    bs: {
+      hp: 179,
+      at: 96,
+      df: 209,
+      sa: 21,
+      sd: 21,
+      sp: 96
+    },
+    weightkg: 975.3,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "ゥ 4- 4 (Y F8)": {
+    types: [
+      "Ice",
+      "Flying"
+    ],
+    bs: {
+      hp: 90,
+      at: 85,
+      df: 100,
+      sa: 125,
+      sd: 125,
+      sp: 85
+    },
+    weightkg: 2766.4,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "ゥ l (F2)": {
+    types: [
+      "???"
+    ],
+    bs: {
+      hp: 146,
+      at: 152,
+      df: 130,
+      sa: 136,
+      sd: 136,
+      sp: 135
+    },
+    weightkg: 399.4,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "ゥ l (F3)": {
+    types: [
+      "Electric"
+    ],
+    bs: {
+      hp: 60,
+      at: 90,
+      df: 55,
+      sa: 90,
+      sd: 90,
+      sp: 100
+    },
+    weightkg: 2609,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "ゥ ゥェ ゥ ▷ (Y F2)": {
+    types: [
+      "Bug",
+      "???"
+    ],
+    bs: {
+      hp: 65,
+      at: 125,
+      df: 100,
+      sa: 55,
+      sd: 55,
+      sp: 85
+    },
+    weightkg: 467.9,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "ゥ$ (F0)": {
+    types: [
+      "Fighting"
+    ],
+    bs: {
+      hp: 30,
+      at: 182,
+      df: 32,
+      sa: 54,
+      sd: 54,
+      sp: 2
+    },
+    weightkg: 400.3,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "ゥ$ (F4)": {
+    types: [
+      "???"
+    ],
+    bs: {
+      hp: 34,
+      at: 0,
+      df: 19,
+      sa: 106,
+      sd: 106,
+      sp: 169
+    },
+    weightkg: 400.3,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "ゥ$ 4MN ゥ": {
+    types: [
+      "Grass",
+      "Poison"
+    ],
+    bs: {
+      hp: 45,
+      at: 50,
+      df: 55,
+      sa: 75,
+      sd: 75,
+      sp: 30
+    },
+    weightkg: 16.3,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "ゥ$'M": {
+    types: [
+      "???"
+    ],
+    bs: {
+      hp: 33,
+      at: 129,
+      df: 218,
+      sa: 3,
+      sd: 3,
+      sp: 24
+    },
+    weightkg: 399.4,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "ゥ' (Y D0)": {
+    types: [
+      "Poison",
+      "Ghost"
+    ],
+    bs: {
+      hp: 45,
+      at: 50,
+      df: 45,
+      sa: 115,
+      sd: 115,
+      sp: 95
+    },
+    weightkg: 467.9,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "ゥ' B (Y DB)": {
+    types: [
+      "???",
+      "Normal"
+    ],
+    bs: {
+      hp: 14,
+      at: 116,
+      df: 108,
+      sa: 18,
+      sd: 18,
+      sp: 0
+    },
+    weightkg: 16.33,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "ゥ. B (Y CD)": {
+    types: [
+      "Water"
+    ],
+    bs: {
+      hp: 79,
+      at: 83,
+      df: 100,
+      sa: 85,
+      sd: 85,
+      sp: 78
+    },
+    weightkg: 467.93,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "ゥ/ 4ァ 4 (Y FE)": {
+    types: [
+      "Bug"
+    ],
+    bs: {
+      hp: 50,
+      at: 25,
+      df: 55,
+      sa: 25,
+      sd: 25,
+      sp: 30
+    },
+    weightkg: 467.9,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "ゥHIゥ.": {
+    types: [
+      "???",
+      "Normal"
+    ],
+    bs: {
+      hp: 132,
+      at: 145,
+      df: 140,
+      sa: 141,
+      sd: 141,
+      sp: 121
+    },
+    weightkg: 979.03,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "ゥL ゥM 4": {
+    types: [
+      "Water",
+      "Fighting"
+    ],
+    bs: {
+      hp: 90,
+      at: 85,
+      df: 95,
+      sa: 70,
+      sd: 70,
+      sp: 70
+    },
+    weightkg: 399.4,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "ゥU? (C8)": {
+    types: [
+      "???"
+    ],
+    bs: {
+      hp: 179,
+      at: 96,
+      df: 209,
+      sa: 21,
+      sd: 21,
+      sp: 96
+    },
+    weightkg: 399.4,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "ゥ► ゥ▼ ゥ (Y EE)": {
+    types: [
+      "Normal"
+    ],
+    bs: {
+      hp: 0,
+      at: 48,
+      df: 0,
+      sa: 98,
+      sd: 98,
+      sp: 88
+    },
+    weightkg: 467.9,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "ゥ▾ ゥ♂ (Y FA)": {
+    types: [
+      "Fire"
+    ],
+    bs: {
+      hp: 65,
+      at: 95,
+      df: 57,
+      sa: 100,
+      sd: 100,
+      sp: 93
+    },
+    weightkg: 467.93,
+    abilities: {
+      "0": "No Ability"
+    }
+  },
+  "ゥゥ) (Y D3)": {
+    types: [
+      "Normal"
+    ],
+    bs: {
+      hp: 75,
+      at: 100,
+      df: 95,
+      sa: 40,
+      sd: 40,
+      sp: 110
+    },
+    weightkg: 16.3,
+    abilities: {
+      "0": "No Ability"
+    }
   }
 };
 
@@ -12130,6 +14522,402 @@ export const NN_MOVES_NEW: any = {
     bp: 0,
     type: "Grass",
     category: "Status"
+  },
+  HM01: {
+    bp: 81,
+    type: "???",
+    category: "Special",
+    zp: 160,
+    maxPower: 130
+  },
+  HM02: {
+    bp: 177,
+    type: "???",
+    category: "Special",
+    drain: [
+      1,
+      2
+    ],
+    zp: 200,
+    maxPower: 150
+  },
+  HM03: {
+    bp: 50,
+    type: "Normal",
+    category: "Physical",
+    drain: [
+      1,
+      2
+    ],
+    zp: 100,
+    maxPower: 100
+  },
+  HM04: {
+    bp: 58,
+    type: "???",
+    category: "Special",
+    zp: 120,
+    maxPower: 110
+  },
+  HM05: {
+    bp: 102,
+    type: "???",
+    category: "Special",
+    zp: 185,
+    maxPower: 130
+  },
+  TM01: {
+    bp: 37,
+    type: "Normal",
+    category: "Physical",
+    secondaries: true,
+    zp: 100,
+    maxPower: 90
+  },
+  TM02: {
+    bp: 0,
+    type: "???",
+    category: "Status"
+  },
+  TM03: {
+    bp: 9,
+    type: "???",
+    category: "Special",
+    zp: 100,
+    maxPower: 90
+  },
+  TM04: {
+    bp: 0,
+    type: "Water",
+    category: "Status"
+  },
+  TM05: {
+    bp: 0,
+    type: "???",
+    category: "Status"
+  },
+  TM06: {
+    bp: 55,
+    type: "Poison",
+    category: "Physical",
+    zp: 100,
+    maxPower: 80
+  },
+  TM08: {
+    bp: 30,
+    type: "???",
+    category: "Special",
+    hasCrashDamage: true,
+    zp: 100,
+    maxPower: 90,
+    makesContact: true
+  },
+  TM09: {
+    bp: 255,
+    type: "???",
+    category: "Special",
+    zp: 200,
+    maxPower: 150
+  },
+  TM10: {
+    bp: 74,
+    type: "Normal",
+    category: "Physical",
+    zp: 140,
+    maxPower: 120
+  },
+  TM11: {
+    bp: 0,
+    type: "Normal",
+    category: "Status"
+  },
+  TM12: {
+    bp: 0,
+    type: "Normal",
+    category: "Status"
+  },
+  TM13: {
+    bp: 0,
+    type: "Ice",
+    category: "Status"
+  },
+  TM14: {
+    bp: 85,
+    type: "???",
+    category: "Special",
+    zp: 160,
+    maxPower: 130
+  },
+  TM16: {
+    bp: 0,
+    type: "Normal",
+    category: "Status"
+  },
+  TM17: {
+    bp: 13,
+    type: "???",
+    category: "Special",
+    zp: 100,
+    maxPower: 90
+  },
+  TM18: {
+    bp: 7,
+    type: "Flying",
+    category: "Physical",
+    zp: 100,
+    maxPower: 90
+  },
+  TM19: {
+    bp: 0,
+    type: "Normal",
+    category: "Status"
+  },
+  TM20: {
+    bp: 0,
+    type: "Normal",
+    category: "Status"
+  },
+  TM21: {
+    bp: 67,
+    type: "???",
+    category: "Special",
+    zp: 140,
+    maxPower: 120
+  },
+  TM22: {
+    bp: 35,
+    type: "???",
+    category: "Special",
+    zp: 100,
+    maxPower: 90
+  },
+  TM23: {
+    bp: 255,
+    type: "???",
+    category: "Special",
+    drain: [
+      1,
+      2
+    ],
+    zp: 200,
+    maxPower: 150
+  },
+  TM24: {
+    bp: 118,
+    type: "???",
+    category: "Special",
+    secondaries: true,
+    zp: 190,
+    maxPower: 140
+  },
+  TM25: {
+    bp: 0,
+    type: "Normal",
+    category: "Status"
+  },
+  TM26: {
+    bp: 0,
+    type: "???",
+    category: "Status"
+  },
+  TM27: {
+    bp: 0,
+    type: "Ice",
+    category: "Status"
+  },
+  TM28: {
+    bp: 85,
+    type: "???",
+    category: "Special",
+    secondaries: true,
+    zp: 160,
+    maxPower: 130
+  },
+  TM30: {
+    bp: 0,
+    type: "Normal",
+    category: "Status"
+  },
+  TM31: {
+    bp: 15,
+    type: "Poison",
+    category: "Physical",
+    zp: 100,
+    maxPower: 70
+  },
+  TM32: {
+    bp: 7,
+    type: "Poison",
+    category: "Physical",
+    hasCrashDamage: true,
+    zp: 100,
+    maxPower: 70,
+    makesContact: true
+  },
+  TM33: {
+    bp: 119,
+    type: "Normal",
+    category: "Physical",
+    drain: [
+      1,
+      2
+    ],
+    zp: 185,
+    maxPower: 140
+  },
+  TM34: {
+    bp: 0,
+    type: "Normal",
+    category: "Status"
+  },
+  TM35: {
+    bp: 0,
+    type: "Ghost",
+    category: "Status"
+  },
+  TM36: {
+    bp: 45,
+    type: "???",
+    category: "Special",
+    zp: 100,
+    maxPower: 100
+  },
+  TM37: {
+    bp: 255,
+    type: "???",
+    category: "Special",
+    secondaries: true,
+    zp: 200,
+    maxPower: 150
+  },
+  TM38: {
+    bp: 91,
+    type: "???",
+    category: "Special",
+    zp: 175,
+    maxPower: 130
+  },
+  TM39: {
+    bp: 42,
+    type: "Poison",
+    category: "Physical",
+    drain: [
+      1,
+      2
+    ],
+    zp: 100,
+    maxPower: 70
+  },
+  TM40: {
+    bp: 0,
+    type: "Normal",
+    category: "Status"
+  },
+  TM41: {
+    bp: 0,
+    type: "???",
+    category: "Status"
+  },
+  TM42: {
+    bp: 102,
+    type: "Normal",
+    category: "Physical",
+    zp: 180,
+    maxPower: 130
+  },
+  TM43: {
+    bp: 28,
+    type: "Normal",
+    category: "Physical",
+    zp: 100,
+    maxPower: 90
+  },
+  TM44: {
+    bp: 8,
+    type: "???",
+    category: "Special",
+    drain: [
+      1,
+      2
+    ],
+    zp: 100,
+    maxPower: 90
+  },
+  TM45: {
+    bp: 18,
+    type: "???",
+    category: "Special",
+    zp: 100,
+    maxPower: 90
+  },
+  TM46: {
+    bp: 0,
+    type: "Flying",
+    category: "Physical",
+    secondaries: true,
+    zp: 100,
+    maxPower: 100
+  },
+  TM47: {
+    bp: 121,
+    type: "???",
+    category: "Special",
+    secondaries: true,
+    zp: 190,
+    maxPower: 140
+  },
+  TM49: {
+    bp: 0,
+    type: "Normal",
+    category: "Status"
+  },
+  TM50: {
+    bp: 56,
+    type: "???",
+    category: "Special",
+    multihit: [
+      2,
+      5
+    ],
+    zp: 120,
+    maxPower: 110
+  },
+  TM51: {
+    bp: 255,
+    type: "???",
+    category: "Special",
+    zp: 200,
+    maxPower: 150
+  },
+  TM52: {
+    bp: 0,
+    type: "???",
+    category: "Status"
+  },
+  TM53: {
+    bp: 160,
+    type: "???",
+    category: "Special",
+    zp: 200,
+    maxPower: 150
+  },
+  TM54: {
+    bp: 2,
+    type: "Normal",
+    category: "Physical",
+    drain: [
+      1,
+      2
+    ],
+    zp: 100,
+    maxPower: 90
+  },
+  TM55: {
+    bp: 97,
+    type: "???",
+    category: "Special",
+    zp: 180,
+    maxPower: 130
   }
 };
 
@@ -12139,6 +14927,7 @@ export const NN_ITEMS_EXTRA: string[] = [
   "Big Leaf",
   "Black Feather",
   "Blank Plate",
+  "Broken Disk",
   "Calm Berry",
   "Champion Belt",
   "Confuse Claw",
@@ -12163,6 +14952,7 @@ export const NN_ITEMS_EXTRA: string[] = [
   "Ice Wing",
   "Invisible Wall",
   "Jiggling Balloon",
+  "Jynxite",
   "Legend Plate",
   "Life Tag",
   "Long Tongue",
@@ -12176,10 +14966,9 @@ export const NN_ITEMS_EXTRA: string[] = [
   "Pretty Tail",
   "Questinium Z",
   "Question Mark Plate",
-  "Question Scarf",
   "Quick Needle",
+  "Shadow Cloak",
   "Shadow Plate",
-  "Shadow Scarf",
   "Shadow Synergy Stone",
   "Shadowinium Z",
   "Sharp Fang",
@@ -12334,7 +15123,7 @@ export const NN_TYPECHART_PATCH: any = {
     Steel: 1,
     Fairy: 1,
     Stellar: 1,
-    Shadow: 1,
+    Shadow: 0.5,
     Bird: 1
   },
   Bird: {
