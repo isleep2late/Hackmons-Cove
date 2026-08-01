@@ -452,6 +452,23 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	darkvoid: {
 		inherit: true,
 		accuracy: 80,
+		onTry: undefined,
+		shortDesc: "Puts the foe(s) to sleep. Usable by any Pokemon.",
+		desc: "Causes the target to fall asleep. This move can be used successfully by any Pokemon, as in Generations 4-6.",
+	},
+	allyswitch: {
+		inherit: true,
+		onPrepareHit: undefined,
+	},
+	mirrorcoat: {
+		inherit: true,
+		priority: -1,
+		shortDesc: "If hit by special attack, returns double damage. Priority -1.",
+		desc: "Deals damage to the last opposing Pokemon to hit the user with a special attack this turn equal to twice the HP lost by the user from that attack. Has -1 priority as in Generation 2 instead of -5.",
+	},
+	leechlife: {
+		inherit: true,
+		pp: 15,
 	},
 	swagger: {
 		inherit: true,
@@ -489,6 +506,20 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	growth: {
 		inherit: true,
 		pp: 40,
+		boosts: {
+			atk: 1,
+			spa: 1,
+			spd: 1,
+		},
+		onModifyMove(move, pokemon) {
+			if (pokemon.hasAbility('megasol') && !this.field.isWeather('sunnyday')) {
+				delete move.boosts;
+			} else if (['sunnyday', 'desolateland'].includes(pokemon.effectiveWeather())) {
+				move.boosts = { atk: 2, spa: 2, spd: 2 };
+			}
+		},
+		shortDesc: "Raises the user's Attack, Sp. Atk, Sp. Def by 1; 2 in Sun.",
+		desc: "Raises the user's Attack, Special Attack, and Special Defense by 1 stage, or 2 stages in Sun. The Special Defense raise reflects Generation 1 Growth raising the unified Special stat.",
 	},
 	barrier: {
 		inherit: true,
@@ -840,7 +871,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		pp: 10,
 		condition: {
 			durationCallback() {
-				return this.random(3, 7);
+				return this.random(4, 9);
 			},
 			noCopy: true,
 			onStart(target) {
@@ -872,8 +903,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 				this.add('-end', target, 'Encore');
 			},
 		},
-		shortDesc: "Target repeats its last move for 3-6 turns.",
-		desc: "The target is forced to repeat its last used move for 3 to 6 turns, chosen at random (SpaceWorld '97 duration; other generations lock exactly 3 turns).",
+		shortDesc: "Target repeats its last move for 4-8 turns.",
+		desc: "The target is forced to repeat its last used move for 4 to 8 turns, chosen at random (Generation 4 duration, the longest of any generation).",
 	},
 	perishsong: {
 		inherit: true,
@@ -891,7 +922,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 			switch (pokemon.effectiveWeather(undefined, true)) {
 			case 'sunnyday':
 			case 'desolateland':
-				factor = 0.667;
+				factor = 1;
 				break;
 			}
 			const success = !!this.heal(this.modify(pokemon.maxhp, factor));
@@ -901,8 +932,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 			}
 			return success;
 		},
-		shortDesc: "Heals 50% max HP; 66% in sun. Never reduced by weather.",
-		desc: "The user restores 1/2 of its maximum HP, or 2/3 in Sun. Unlike other generations, this move is never weakened by other weather.",
+		shortDesc: "Heals 50% max HP; fully heals in sun. Never reduced by weather.",
+		desc: "The user restores 1/2 of its maximum HP, or all of it in Sun as in Generation 2. Unlike other generations, this move is never weakened by other weather.",
 	},
 	morningsun: {
 		inherit: true,
@@ -912,7 +943,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 			switch (pokemon.effectiveWeather(undefined, true)) {
 			case 'sunnyday':
 			case 'desolateland':
-				factor = 0.667;
+				factor = 1;
 				break;
 			}
 			const success = !!this.heal(this.modify(pokemon.maxhp, factor));
@@ -922,8 +953,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 			}
 			return success;
 		},
-		shortDesc: "Heals 50% max HP; 66% in sun. Never reduced by weather.",
-		desc: "The user restores 1/2 of its maximum HP, or 2/3 in Sun. Unlike other generations, this move is never weakened by other weather.",
+		shortDesc: "Heals 50% max HP; fully heals in sun. Never reduced by weather.",
+		desc: "The user restores 1/2 of its maximum HP, or all of it in Sun as in Generation 2. Unlike other generations, this move is never weakened by other weather.",
 	},
 	synthesis: {
 		inherit: true,
@@ -933,7 +964,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 			switch (pokemon.effectiveWeather(undefined, true)) {
 			case 'sunnyday':
 			case 'desolateland':
-				factor = 0.667;
+				factor = 1;
 				break;
 			}
 			const success = !!this.heal(this.modify(pokemon.maxhp, factor));
@@ -943,8 +974,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 			}
 			return success;
 		},
-		shortDesc: "Heals 50% max HP; 66% in sun. Never reduced by weather.",
-		desc: "The user restores 1/2 of its maximum HP, or 2/3 in Sun. Unlike other generations, this move is never weakened by other weather.",
+		shortDesc: "Heals 50% max HP; fully heals in sun. Never reduced by weather.",
+		desc: "The user restores 1/2 of its maximum HP, or all of it in Sun as in Generation 2. Unlike other generations, this move is never weakened by other weather.",
 	},
 
 	dynamicpunch: {
@@ -1359,25 +1390,37 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	glitzyglow: {
 		inherit: true,
 		basePower: 90,
+		accuracy: 100,
 	},
 	baddybad: {
 		inherit: true,
 		basePower: 90,
+		accuracy: 100,
 	},
 	sappyseed: {
 		inherit: true,
 		basePower: 100,
 		accuracy: 100,
+		pp: 15,
 	},
 	freezyfrost: {
 		inherit: true,
 		basePower: 100,
 		accuracy: 100,
+		pp: 15,
 	},
 	sparklyswirl: {
 		inherit: true,
 		basePower: 120,
 		accuracy: 100,
+		pp: 15,
+	},
+	zippyzap: {
+		inherit: true,
+		pp: 15,
+		willCrit: true,
+		shortDesc: "Always crits; raises the user's evasion by 1.",
+		desc: "This move is always a critical hit unless the target is under the effect of Lucky Chant or has the Battle Armor or Shell Armor Abilities. Raises the user's evasion by 1 stage.",
 	},
 	weatherball: {
 		inherit: true,

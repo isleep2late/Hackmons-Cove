@@ -10,7 +10,7 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	},
 	articuno: {
 		inherit: true,
-		baseStats: {hp: 90, atk: 85, def: 100, spa: 95, spd: 125, spe: 85},
+		baseStats: {hp: 90, atk: 85, def: 100, spa: 125, spd: 125, spe: 85},
 	},
 	bellsprout: {
 		inherit: true,
@@ -103,10 +103,6 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	kadabra: {
 		inherit: true,
 		baseStats: {hp: 40, atk: 35, def: 30, spa: 120, spd: 120, spe: 105},
-	},
-	kangaskhan: {
-		inherit: true,
-		baseStats: {hp: 105, atk: 95, def: 80, spa: 80, spd: 80, spe: 90},
 	},
 	koffing: {
 		inherit: true,
@@ -228,11 +224,11 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	},
 	tentacool: {
 		inherit: true,
-		baseStats: {hp: 40, atk: 40, def: 35, spa: 50, spd: 100, spe: 70},
+		baseStats: {hp: 40, atk: 40, def: 35, spa: 100, spd: 100, spe: 70},
 	},
 	tentacruel: {
 		inherit: true,
-		baseStats: {hp: 80, atk: 70, def: 65, spa: 80, spd: 120, spe: 100},
+		baseStats: {hp: 80, atk: 70, def: 65, spa: 120, spd: 120, spe: 100},
 	},
 	vaporeon: {
 		inherit: true,

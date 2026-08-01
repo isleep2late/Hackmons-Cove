@@ -241,4 +241,15 @@ export const Conditions: import('../../../sim/dex-conditions').ModdedConditionDa
 			return false;
 		},
 	},
+	stall: {
+		inherit: true,
+		counterMax: 8,
+	},
+	gem: {
+		inherit: true,
+		onBasePower(basePower, user, target, move) {
+			this.debug('Gem Boost');
+			return this.chainModify(1.5);
+		},
+	},
 };

@@ -15,7 +15,7 @@ export const Abilities: import('../../../sim/dex-abilities').ModdedAbilityDataTa
 	effectspore: {
 		inherit: true,
 		onDamagingHit(damage, target, source, move) {
-			if (this.checkMoveMakesContact(move, source, target) && !source.status && source.runStatusImmunity('powder')) {
+			if (this.checkMoveMakesContact(move, source, target) && !source.status) {
 				const r = this.random(300);
 				if (r < 99) {
 					source.setStatus('slp', target);
@@ -27,7 +27,7 @@ export const Abilities: import('../../../sim/dex-abilities').ModdedAbilityDataTa
 			}
 		},
 		shortDesc: "99% chance to cause sleep, paralysis, or poison (33% each) on Pokemon making contact.",
-		desc: "There is a 33% chance each that a Pokemon making contact with this Pokemon will be put to sleep, paralyzed, or poisoned, for a 99% total chance of receiving one of the three. Pokemon that already have a non-volatile status condition, Grass-type Pokemon, Pokemon with the Overcoat Ability, and holders of Safety Goggles are unaffected.",
+		desc: "There is a 33% chance each that a Pokemon making contact with this Pokemon will be put to sleep, paralyzed, or poisoned, for a 99% total chance of receiving one of the three. As in Generation 4, Grass-type Pokemon, Overcoat, and Safety Goggles do not prevent this. Pokemon that already have a non-volatile status condition are unaffected.",
 	},
 	flamebody: {
 		inherit: true,
@@ -364,6 +364,63 @@ export const Abilities: import('../../../sim/dex-abilities').ModdedAbilityDataTa
 		},
 		shortDesc: "Prevents adjacent foes from switching, including Ghosts and Shadow Tag users.",
 		desc: "Prevents adjacent foes from choosing to switch out, unless they are holding a Shed Shell. Unlike in standard play, Ghost-type Pokemon and Pokemon with Shadow Tag are also trapped.",
+	},
+	magnetpull: {
+		inherit: true,
+		onFoeTrapPokemon(pokemon) {
+			if (pokemon.hasType('Steel') && pokemon.isAdjacent(this.effectState.target)) {
+				pokemon.trapped = true;
+			}
+		},
+		onFoeMaybeTrapPokemon(pokemon, source) {
+			if (!source) source = this.effectState.target;
+			if (!source || !pokemon.isAdjacent(source)) return;
+			if (!pokemon.knownType || pokemon.hasType('Steel')) {
+				pokemon.maybeTrapped = true;
+			}
+		},
+		shortDesc: "Prevents adjacent Steel-type foes from switching, including Ghost/Steels.",
+		desc: "Prevents adjacent Steel-type foes from choosing to switch out, unless they are holding a Shed Shell. Unlike in standard play, Ghost-type Steel Pokemon are also trapped.",
+	},
+	flowergift: {
+		inherit: true,
+		onAllyModifyAtk(atk, pokemon) {
+			if (['sunnyday', 'desolateland'].includes(pokemon.effectiveWeather())) {
+				return this.chainModify(1.5);
+			}
+		},
+		onAllyModifySpD(spd, pokemon) {
+			if (['sunnyday', 'desolateland'].includes(pokemon.effectiveWeather())) {
+				return this.chainModify(1.5);
+			}
+		},
+		shortDesc: "In sun: this Pokemon and allies have 1.5x Attack and Sp. Def.",
+		desc: "While this Pokemon is in Sun, it and its allies have their Attack and Special Defense raised by 50% regardless of species, as in Generation 4.",
+	},
+	leafguard: {
+		inherit: true,
+		onSetStatus(status, target, source, effect) {
+			if (effect?.id === 'rest') return;
+			if (['sunnyday', 'desolateland'].includes(target.effectiveWeather())) {
+				if ((effect as any)?.status) {
+					this.add('-immune', target, '[from] ability: Leaf Guard');
+				}
+				return false;
+			}
+		},
+		shortDesc: "In sun: this Pokemon cannot be statused, but its own Rest works.",
+		desc: "While this Pokemon is in Sun, it cannot gain a non-volatile status condition or become affected by Yawn, but its own use of Rest still works, as in Generation 4.",
+	},
+	angerpoint: {
+		inherit: true,
+		onAfterSubDamage(damage, target, source, move) {
+			if (!target.hp) return;
+			if (move?.effectType === 'Move' && target.getMoveHitData(move).crit) {
+				this.boost({ atk: 12 }, target, target);
+			}
+		},
+		shortDesc: "If this Pokemon or its Substitute takes a crit, its Attack is raised 12 stages.",
+		desc: "If this Pokemon or its Substitute is struck by a critical hit, its Attack is raised to stage 6, as in Generation 4 where hits on a Substitute also triggered the boost.",
 	},
 	battlebond: {
 		inherit: true,

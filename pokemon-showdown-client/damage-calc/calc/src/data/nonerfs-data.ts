@@ -29,7 +29,7 @@ export const NN_SPECIES_PATCH: any = {
       hp: 90,
       at: 85,
       df: 100,
-      sa: 95,
+      sa: 125,
       sd: 125,
       sp: 85
     }
@@ -262,16 +262,6 @@ export const NN_SPECIES_PATCH: any = {
       sa: 120,
       sd: 120,
       sp: 105
-    }
-  },
-  Kangaskhan: {
-    bs: {
-      hp: 105,
-      at: 95,
-      df: 80,
-      sa: 80,
-      sd: 80,
-      sp: 90
     }
   },
   Koffing: {
@@ -529,7 +519,7 @@ export const NN_SPECIES_PATCH: any = {
       hp: 40,
       at: 40,
       df: 35,
-      sa: 50,
+      sa: 100,
       sd: 100,
       sp: 70
     }
@@ -539,7 +529,7 @@ export const NN_SPECIES_PATCH: any = {
       hp: 80,
       at: 70,
       df: 65,
-      sa: 80,
+      sa: 120,
       sd: 120,
       sp: 100
     }
@@ -1579,6 +1569,16 @@ export const NN_SPECIES_PATCH: any = {
       sa: 45,
       sd: 45,
       sp: 40
+    }
+  },
+  Kangaskhan: {
+    bs: {
+      hp: 105,
+      at: 95,
+      df: 80,
+      sa: 40,
+      sd: 80,
+      sp: 90
     }
   },
   "Mr. Mime": {
@@ -13578,6 +13578,12 @@ export const NN_MOVES_PATCH: any = {
   "Dark Void": {
     category: "Status"
   },
+  "Ally Switch": {
+    category: "Status"
+  },
+  "Mirror Coat": {
+    priority: -1
+  },
   Tailwind: {
     category: "Status"
   },
@@ -13739,9 +13745,6 @@ export const NN_MOVES_PATCH: any = {
     category: "Status"
   },
   "After You": {
-    category: "Status"
-  },
-  "Ally Switch": {
     category: "Status"
   },
   "Aqua Ring": {
@@ -14044,9 +14047,6 @@ export const NN_MOVES_PATCH: any = {
   "Miracle Eye": {
     category: "Status"
   },
-  "Mirror Coat": {
-    priority: -5
-  },
   "Misty Terrain": {
     category: "Status"
   },
@@ -14258,6 +14258,17 @@ export const NN_MOVES_NEW: any = {
     zp: 190,
     maxPower: 140
   },
+  "Zippy Zap": {
+    bp: 80,
+    type: "Electric",
+    category: "Physical",
+    secondaries: true,
+    willCrit: true,
+    priority: 2,
+    zp: 160,
+    maxPower: 130,
+    makesContact: true
+  },
   "Shadow Rush": {
     bp: 90,
     type: "Shadow",
@@ -14423,16 +14434,6 @@ export const NN_MOVES_NEW: any = {
     category: "Physical",
     zp: 100,
     maxPower: 100,
-    makesContact: true
-  },
-  "Zippy Zap": {
-    bp: 80,
-    type: "Electric",
-    category: "Physical",
-    secondaries: true,
-    priority: 2,
-    zp: 160,
-    maxPower: 130,
     makesContact: true
   },
   "Nail Down": {
