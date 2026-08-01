@@ -328,6 +328,9 @@ export default {
 			"Alakazam": {
 				"spd": 135
 			},
+			"Articuno": {
+				"spa": 125
+			},
 			"Bellsprout": {
 				"spd": 70
 			},
@@ -396,9 +399,6 @@ export default {
 			},
 			"Kadabra": {
 				"spd": 120
-			},
-			"Kangaskhan": {
-				"spa": 80
 			},
 			"Koffing": {
 				"spd": 60
@@ -471,6 +471,12 @@ export default {
 			},
 			"Tauros": {
 				"spa": 70
+			},
+			"Tentacool": {
+				"spa": 100
+			},
+			"Tentacruel": {
+				"spa": 120
 			},
 			"Vaporeon": {
 				"spd": 110
