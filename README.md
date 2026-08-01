@@ -60,7 +60,7 @@ The server and client are both included as regular folders rather than submodule
 - **Othienka** - Creation of Armored Mewtwo sprites for fangames: https://www.deviantart.com/othienka/art/Armored-Mewtwo-Battle-Sprite-and-Back-Sprite-v2-460897939 & https://www.deviantart.com/othienka/art/Armored-Mewtwo-V3-594576816
 
 **Special Thanks:**
-- **TsengGames** for creating preview sprites for Shadow Lugia/Mewtwo/Mega X/Arceus, Arceus-???, and Majin, custom Arceus plates for ???/Shadow/Legend/Blank, item sprites for custom Z-stones/power-boosting items while also drawing many of the custom avatars on our server
+- **TsengGames** for creating preview sprites for Shadow Lugia/Mewtwo/Mega X/Arceus, Arceus-???, and Majin, custom Arceus plates for ???/Shadow/Legend/Blank, item sprites for custom Z-stones/power-boosting items, Spaceworld items, while also drawing many of the custom avatars on our server
 - **Siphonaptera** for leading the [Gen 8] Unified project
 - **Penultimate Toast** for Hackmons.com database management as site admin
 - **Wyrd & Viola Lunala** for promoting the server and leadership (And Wyrd for making the SHADOW type badge)
