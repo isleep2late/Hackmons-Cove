@@ -207,4 +207,188 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 		shortDesc: "If holder is a Ditto: 2x Defense, 1.5x Sp. Def, even while transformed.",
 		desc: "If held by a Ditto, its Defense is doubled and its Special Defense is raised by 50%. This works even while the holder is transformed, and for Pokemon that have transformed into a Ditto.",
 	},
+	kingsrock: {
+		inherit: true,
+		onModifyMove(move) {
+			if (move.category !== 'Status') {
+				if (!move.secondaries) move.secondaries = [];
+				for (const secondary of move.secondaries) {
+					if (secondary.volatileStatus === 'flinch') return;
+				}
+				move.secondaries.push({
+					chance: 12,
+					volatileStatus: 'flinch',
+				});
+			}
+		},
+		shortDesc: "Holder's attacks without a flinch chance gain a 12% chance to flinch.",
+		desc: "Holder's attacks without a chance to make the target flinch gain a 12% chance to make the target flinch, the Generation 2 rate of 30/256.",
+	},
+	quickclaw: {
+		inherit: true,
+		onFractionalPriority(priority, pokemon, target, move) {
+			if (move.category === 'Status' && pokemon.hasAbility('myceliummight')) return;
+			if (priority <= 0 && this.randomChance(60, 256)) {
+				this.add('-activate', pokemon, 'item: Quick Claw');
+				return 0.1;
+			}
+		},
+		shortDesc: "Each turn, holder has a 23.4% chance to move first in its priority bracket.",
+		desc: "Each turn, this item has a 23.4% chance, the Generation 2 rate of 60/256, to allow the holder to move first in its priority bracket.",
+	},
+	focusband: {
+		inherit: true,
+		onDamage(damage, target, source, effect) {
+			if (this.randomChance(30, 256) && damage >= target.hp && effect && effect.effectType === 'Move') {
+				this.add('-activate', target, 'item: Focus Band');
+				return target.hp - 1;
+			}
+		},
+		shortDesc: "Holder has a 11.7% chance to survive an attack that would KO it with 1 HP.",
+		desc: "If the holder is about to be knocked out by an attack, it has a 11.7% chance, the Generation 2 rate of 30/256, to survive with 1 HP.",
+	},
+	brightpowder: {
+		inherit: true,
+		onModifyAccuracy(accuracy) {
+			if (typeof accuracy !== 'number') return;
+			return accuracy - 20;
+		},
+		shortDesc: "The accuracy of attacks against the holder is decreased by a flat 20%.",
+		desc: "The accuracy of attacks against the holder is decreased by a flat 20 percentage points, as in Generation 2, instead of the modern 0.9x multiplier.",
+	},
+	focussash: {
+		inherit: true,
+		onDamage: undefined,
+		onTryHit(target, source, move) {
+			if (target !== source && target.hp === target.maxhp) {
+				target.addVolatile('focussash');
+			}
+		},
+		condition: {
+			duration: 1,
+			onDamage(damage, target, source, effect) {
+				if (effect && effect.effectType === 'Move' && damage >= target.hp) {
+					this.effectState.activated = true;
+					return target.hp - 1;
+				}
+			},
+			onAfterMoveSecondary(target) {
+				if (this.effectState.activated) target.useItem();
+				target.removeVolatile('focussash');
+			},
+		},
+		shortDesc: "If holder is at full HP, it survives all hits this turn with at least 1 HP. Single use.",
+		desc: "If the holder is at full HP, every attack that would knock it out this turn instead leaves it with 1 HP, as in Generation 4. This protects against every hit of multi-hit moves. Single use.",
+	},
+	griseousorb: {
+		inherit: true,
+		onTakeItem: false,
+		shortDesc: "If holder is a Giratina, its Ghost/Dragon moves are 1.2x. Cannot be removed.",
+		desc: "If held by a Giratina, its Ghost- and Dragon-type moves have 1.2x power. This item cannot be removed from any holder or knocked off, as in Generation 4.",
+	},
+	dragonscale: {
+		inherit: true,
+		onBasePower(basePower, user, target, move) {
+			if (move.type === 'Dragon') {
+				return this.chainModify([4915, 4096]);
+			}
+		},
+		shortDesc: "Holder's Dragon-type attacks have 1.2x power.",
+		desc: "Holder's Dragon-type attacks have 1.2x power, restoring its Generation 2 role as a held Dragon booster.",
+	},
+	figyberry: {
+		inherit: true,
+		onUpdate(pokemon) {
+			if (pokemon.hp <= pokemon.maxhp / 2) {
+				pokemon.eatItem();
+			}
+		},
+		onTryEatItem(item, pokemon) {
+			if (!this.runEvent('TryHeal', pokemon, null, this.effect, pokemon.baseMaxhp / 2)) return false;
+		},
+		onEat(pokemon) {
+			this.heal(pokemon.baseMaxhp / 2);
+			if (pokemon.getNature().minus === 'atk') {
+				pokemon.addVolatile('confusion');
+			}
+		},
+		shortDesc: "Restores 1/2 max HP at 1/2 max HP or less; confuses if -Atk Nature. Single use.",
+		desc: "Restores 1/2 of the holder's maximum HP when it falls to 1/2 of its maximum HP or less, combining the Generation 3 trigger point with the Generation 7 heal amount. Confuses the holder if its Nature lowers Attack. Single use.",
+	},
+	wikiberry: {
+		inherit: true,
+		onUpdate(pokemon) {
+			if (pokemon.hp <= pokemon.maxhp / 2) {
+				pokemon.eatItem();
+			}
+		},
+		onTryEatItem(item, pokemon) {
+			if (!this.runEvent('TryHeal', pokemon, null, this.effect, pokemon.baseMaxhp / 2)) return false;
+		},
+		onEat(pokemon) {
+			this.heal(pokemon.baseMaxhp / 2);
+			if (pokemon.getNature().minus === 'spa') {
+				pokemon.addVolatile('confusion');
+			}
+		},
+		shortDesc: "Restores 1/2 max HP at 1/2 max HP or less; confuses if -SpA Nature. Single use.",
+		desc: "Restores 1/2 of the holder's maximum HP when it falls to 1/2 of its maximum HP or less, combining the Generation 3 trigger point with the Generation 7 heal amount. Confuses the holder if its Nature lowers Special Attack. Single use.",
+	},
+	magoberry: {
+		inherit: true,
+		onUpdate(pokemon) {
+			if (pokemon.hp <= pokemon.maxhp / 2) {
+				pokemon.eatItem();
+			}
+		},
+		onTryEatItem(item, pokemon) {
+			if (!this.runEvent('TryHeal', pokemon, null, this.effect, pokemon.baseMaxhp / 2)) return false;
+		},
+		onEat(pokemon) {
+			this.heal(pokemon.baseMaxhp / 2);
+			if (pokemon.getNature().minus === 'spe') {
+				pokemon.addVolatile('confusion');
+			}
+		},
+		shortDesc: "Restores 1/2 max HP at 1/2 max HP or less; confuses if -Spe Nature. Single use.",
+		desc: "Restores 1/2 of the holder's maximum HP when it falls to 1/2 of its maximum HP or less, combining the Generation 3 trigger point with the Generation 7 heal amount. Confuses the holder if its Nature lowers Speed. Single use.",
+	},
+	aguavberry: {
+		inherit: true,
+		onUpdate(pokemon) {
+			if (pokemon.hp <= pokemon.maxhp / 2) {
+				pokemon.eatItem();
+			}
+		},
+		onTryEatItem(item, pokemon) {
+			if (!this.runEvent('TryHeal', pokemon, null, this.effect, pokemon.baseMaxhp / 2)) return false;
+		},
+		onEat(pokemon) {
+			this.heal(pokemon.baseMaxhp / 2);
+			if (pokemon.getNature().minus === 'spd') {
+				pokemon.addVolatile('confusion');
+			}
+		},
+		shortDesc: "Restores 1/2 max HP at 1/2 max HP or less; confuses if -SpD Nature. Single use.",
+		desc: "Restores 1/2 of the holder's maximum HP when it falls to 1/2 of its maximum HP or less, combining the Generation 3 trigger point with the Generation 7 heal amount. Confuses the holder if its Nature lowers Special Defense. Single use.",
+	},
+	iapapaberry: {
+		inherit: true,
+		onUpdate(pokemon) {
+			if (pokemon.hp <= pokemon.maxhp / 2) {
+				pokemon.eatItem();
+			}
+		},
+		onTryEatItem(item, pokemon) {
+			if (!this.runEvent('TryHeal', pokemon, null, this.effect, pokemon.baseMaxhp / 2)) return false;
+		},
+		onEat(pokemon) {
+			this.heal(pokemon.baseMaxhp / 2);
+			if (pokemon.getNature().minus === 'def') {
+				pokemon.addVolatile('confusion');
+			}
+		},
+		shortDesc: "Restores 1/2 max HP at 1/2 max HP or less; confuses if -Def Nature. Single use.",
+		desc: "Restores 1/2 of the holder's maximum HP when it falls to 1/2 of its maximum HP or less, combining the Generation 3 trigger point with the Generation 7 heal amount. Confuses the holder if its Nature lowers Defense. Single use.",
+	},
 };

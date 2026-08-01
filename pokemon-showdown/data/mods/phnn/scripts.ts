@@ -336,19 +336,21 @@ export const Scripts: ModdedBattleScriptsData = {
 					const maxDamage = Math.floor(source.level * 1.5);
 					return this.battle.random(minDamage, maxDamage + 1);
 				}
+				if (move.category !== 'Status') move.critModifier = 2;
 				if (move.category !== 'Status' && !move.ohko && move.willCrit === undefined) {
 					let critChance = Math.floor(source.species.baseStats.spe / 2);
 					critChance = this.battle.clampIntRange(critChance * 2, 1, 255);
-					if (source.volatiles['focusenergy']) {
-						critChance = this.battle.clampIntRange(critChance * 2, 1, 255);
+					const critRatio = this.battle.runEvent('ModifyCritRatio', source, target, move, move.critRatio || 1);
+					if (critRatio >= 5) {
+						move.willCrit = true;
+					} else {
+						if (critRatio === 1) {
+							critChance = Math.floor(critChance / 2);
+						} else if (critRatio >= 2) {
+							critChance = this.battle.clampIntRange(critChance * 4, 1, 255);
+						}
+						move.willCrit = critChance > 0 ? this.battle.randomChance(critChance, 256) : false;
 					}
-					const critRatio = move.critRatio || 1;
-					if (critRatio === 1) {
-						critChance = Math.floor(critChance / 2);
-					} else if (critRatio >= 2) {
-						critChance = this.battle.clampIntRange(critChance * 4, 1, 255);
-					}
-					move.willCrit = critChance > 0 ? this.battle.randomChance(critChance, 256) : false;
 				}
 			}
 
