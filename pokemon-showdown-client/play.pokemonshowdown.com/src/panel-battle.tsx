@@ -537,6 +537,7 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 		if (request.side) {
 			const wasPlayer = !!room.side;
 			room.battle.myPokemon = request.side.pokemon;
+			Dex.phnnPrewarmDisguises(room.battle);
 			room.battle.setViewpoint(request.side.id);
 			room.side = request.side;
 			if (!wasPlayer) this.fastForwardIfRejoining();
@@ -1450,6 +1451,7 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 		}
 		if (request.side) {
 			room.battle.myPokemon = request.side.pokemon;
+			Dex.phnnPrewarmDisguises(room.battle);
 			this.team = request.side.pokemon;
 		}
 		switch (request.requestType) {

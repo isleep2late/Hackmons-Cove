@@ -1322,6 +1322,7 @@
 		updateSide: function () {
 			var sideData = this.request.side;
 			this.battle.myPokemon = sideData.pokemon;
+			if (window.Dex && Dex.phnnPrewarmDisguises) Dex.phnnPrewarmDisguises(this.battle);
 			this.battle.setViewpoint(sideData.id);
 			for (var i = 0; i < sideData.pokemon.length; i++) {
 				var pokemonData = sideData.pokemon[i];
