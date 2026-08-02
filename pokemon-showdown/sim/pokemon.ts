@@ -1236,6 +1236,9 @@ export class Pokemon {
 			entry.teraType = this.teraType;
 			entry.terastallized = this.terastallized || '';
 		}
+		if (this.set.disguise && (this.battle.ruleTable.has('disguisemod') || this.battle.ruleTable.has('spaceworlddisguisemod'))) {
+			(entry as any).disguise = this.set.disguise;
+		}
 		return entry;
 	}
 

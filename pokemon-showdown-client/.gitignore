@@ -11,6 +11,7 @@ npm-debug.log
 
 /play.pokemonshowdown.com/sprites/*
 !/play.pokemonshowdown.com/sprites/phnn/
+!/play.pokemonshowdown.com/sprites/gen1-back/
 !/play.pokemonshowdown.com/sprites/sw97/
 !/play.pokemonshowdown.com/sprites/glitch/
 !/play.pokemonshowdown.com/sprites/types/

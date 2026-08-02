@@ -4778,7 +4778,7 @@ export const FormatsData: import('../sim/dex-species').SpeciesFormatsDataTable =
 	blacephalon: {
 		isNonstandard: "Past",
 		tier: "Illegal",
-		natDexTier: "UU",
+		natDexTier: "UUBL",
 	},
 	zeraora: {
 		isNonstandard: "Past",
