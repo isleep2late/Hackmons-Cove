@@ -86,7 +86,7 @@ export const Conditions: import('../../../sim/dex-conditions').ModdedConditionDa
 			}
 		},
 		onHit(target, source, move) {
-			if (move.type === 'Fire' && move.category !== 'Status') {
+			if (move.type === 'Fire' && move.category !== 'Status' && move.id !== 'polarflare') {
 				target.cureStatus();
 			}
 		},
