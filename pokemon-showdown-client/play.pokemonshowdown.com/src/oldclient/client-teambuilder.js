@@ -3360,6 +3360,7 @@
 				}
 				for (var i = 0; i < types.length; i++) {
 					if (types[i].id === 'shadow' && !isPHNN9) continue;
+					if (!types[i].name || types[i].name === 'Bird' || types[i].name === '???') continue;
 					buf += '<option value="' + types[i].name + '"' + (teraType === types[i].name ? ' selected="selected"' : '') + '>' + types[i].name + '</option>';
 				}
 				buf += '</select></div></div>';
@@ -3568,8 +3569,9 @@
 		},
 		phnnMultiselectLabel: function (selected, emptyLabel) {
 			if (!selected.length) return emptyLabel;
-			if (selected.length <= 2) return selected.join(' / ');
-			return 'Multi (' + selected.length + ')';
+			var shown = selected.map(function (v) { return v === '???' ? 'Question' : v; });
+			if (shown.length <= 2) return shown.join(' / ');
+			return 'Multi (' + shown.length + ')';
 		},
 		renderPhnnMultiselect: function (name, options, selected, emptyLabel, withFilter) {
 			var buf = '<details class="phnn-multiselect" data-name="' + name + '" data-empty="' + BattleLog.escapeHTML(emptyLabel) + '" style="display:inline-block;position:relative;">';
@@ -3584,7 +3586,8 @@
 			}
 			for (var i = 0; i < options.length; i++) {
 				var checked = selected.indexOf(options[i]) >= 0 ? ' checked="checked"' : '';
-				buf += '<label class="checkbox phnn-ms-option" style="display:block;white-space:nowrap;"><input type="checkbox" name="' + name + '" value="' + BattleLog.escapeHTML(options[i]) + '"' + checked + ' /> ' + BattleLog.escapeHTML(options[i]) + '</label>';
+				var optionLabel = options[i] === '???' ? 'Question' : options[i];
+				buf += '<label class="checkbox phnn-ms-option" style="display:block;white-space:nowrap;"><input type="checkbox" name="' + name + '" value="' + BattleLog.escapeHTML(options[i]) + '"' + checked + ' /> ' + BattleLog.escapeHTML(optionLabel) + '</label>';
 			}
 			buf += '</div></details>';
 			return buf;

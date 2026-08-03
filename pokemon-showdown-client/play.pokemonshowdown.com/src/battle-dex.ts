@@ -603,8 +603,9 @@ export const Dex = new class implements ModdedDex {
 		namesCache: null as Dex.TypeName[] | null,
 		get: (type: any): Type => {
 			if (!type || typeof type === 'string') {
-				const id = toID(type) as string;
-				const name = id.substr(0, 1).toUpperCase() + id.substr(1);
+				let id = toID(type) as string;
+				if (!id && typeof type === 'string' && type.includes('?')) id = '???' as ID;
+				const name = id === '???' ? '???' : id.substr(0, 1).toUpperCase() + id.substr(1);
 				type = window.BattleTypeChart?.[id] || {};
 				if (type.damageTaken) type.exists = true;
 				if (!type.id) type.id = id;

@@ -3959,7 +3959,7 @@ class DetailsForm extends preact.Component<{
 								value={set.teraType || species.requiredTeraType || species.types[0]}
 							>
 								<button><selectedcontent></selectedcontent></button>
-								{Dex.types.all().map(type => (
+								{Dex.types.all().filter(type => type.name && type.name !== 'Bird' && type.name !== '???').map(type => (
 									<option value={type.name}><PSIcon type={type.name} new tera /></option>
 								))}
 							</select>
