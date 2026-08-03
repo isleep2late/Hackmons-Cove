@@ -79,6 +79,12 @@
 
 			// teambuilder events
 			'click .utilichart a': 'chartClick',
+			'mouseover .utilichart a[data-entry]': 'chartEntryOver',
+			'mouseout .utilichart a[data-entry]': 'chartEntryOut',
+			'touchstart .utilichart a[data-entry]': 'chartEntryTouchStart',
+			'touchend .utilichart a[data-entry]': 'chartEntryTouchEnd',
+			'touchmove .utilichart a[data-entry]': 'chartEntryTouchMove',
+			'touchcancel .utilichart a[data-entry]': 'chartEntryTouchMove',
 			'keydown .chartinput': 'chartKeydown',
 			'keyup .chartinput': 'chartKeyup',
 			'focus .chartinput': 'chartFocus',
@@ -3919,7 +3925,106 @@
 			stats: 'stats',
 			details: 'details'
 		},
+		chartTooltipHTML: function (entry) {
+			var parts = ('' + entry).split('|');
+			var type = parts[0];
+			var name = parts[1];
+			if (!name) return '';
+			var dex = (this.curTeam && this.curTeam.dex) || Dex;
+			var buf = '';
+			if (type === 'move') {
+				var move = dex.moves.get(name);
+				if (!move.exists) return '';
+				var statParts = [];
+				if (move.category !== 'Status') statParts.push('Power: ' + (move.basePower || '\u2014'));
+				statParts.push('Accuracy: ' + (move.accuracy && move.accuracy !== true ? move.accuracy + '%' : '\u2014'));
+				statParts.push('PP: ' + move.pp);
+				statParts.push(move.type + ' / ' + move.category);
+				buf = '<h2>' + BattleLog.escapeHTML(move.name) + '</h2>';
+				buf += '<p><small>' + BattleLog.escapeHTML(statParts.join(' | ')) + '</small></p>';
+				buf += '<p>' + BattleLog.escapeHTML(move.desc || move.shortDesc || '') + '</p>';
+			} else if (type === 'item') {
+				var item = dex.items.get(name);
+				if (!item.exists) return '';
+				buf = '<h2>' + BattleLog.escapeHTML(item.name) + '</h2>';
+				buf += '<p>' + BattleLog.escapeHTML(item.desc || item.shortDesc || '') + '</p>';
+			} else if (type === 'ability') {
+				var ability = dex.abilities.get(name);
+				if (!ability.exists) return '';
+				buf = '<h2>' + BattleLog.escapeHTML(ability.name) + '</h2>';
+				buf += '<p>' + BattleLog.escapeHTML(ability.desc || ability.shortDesc || '') + '</p>';
+			}
+			return buf;
+		},
+		showChartTooltip: function (el) {
+			var entry = $(el).data('entry');
+			if (!entry) return;
+			var html = this.chartTooltipHTML(entry);
+			if (!html) return;
+			var $tip = $('#phnn-chart-tooltip');
+			if (!$tip.length) $tip = $('<div id="phnn-chart-tooltip"></div>').appendTo('body');
+			$tip.html(html).show();
+			var rect = el.getBoundingClientRect();
+			var tipHeight = $tip.outerHeight();
+			var tipWidth = $tip.outerWidth();
+			var left = Math.max(4, Math.min(rect.left, $(window).width() - tipWidth - 4));
+			var top = rect.top - tipHeight - 6;
+			if (top < 4) top = rect.bottom + 6;
+			$tip.css({left: left + 'px', top: top + 'px'});
+		},
+		hideChartTooltip: function () {
+			$('#phnn-chart-tooltip').hide();
+			if (this.chartTooltipTimer) {
+				clearTimeout(this.chartTooltipTimer);
+				this.chartTooltipTimer = null;
+			}
+		},
+		chartEntryOver: function (e) {
+			if (this.chartTouchActive) return;
+			this.showChartTooltip(e.currentTarget);
+		},
+		chartEntryOut: function (e) {
+			if (this.chartTouchActive) return;
+			this.hideChartTooltip();
+		},
+		chartEntryTouchStart: function (e) {
+			var self = this;
+			var el = e.currentTarget;
+			this.chartTouchActive = true;
+			this.chartTooltipHeld = false;
+			if (this.chartTooltipTimer) clearTimeout(this.chartTooltipTimer);
+			this.chartTooltipTimer = setTimeout(function () {
+				self.chartTooltipHeld = true;
+				self.showChartTooltip(el);
+			}, 400);
+		},
+		chartEntryTouchMove: function (e) {
+			if (this.chartTooltipTimer) {
+				clearTimeout(this.chartTooltipTimer);
+				this.chartTooltipTimer = null;
+			}
+		},
+		chartEntryTouchEnd: function (e) {
+			var self = this;
+			if (this.chartTooltipTimer) {
+				clearTimeout(this.chartTooltipTimer);
+				this.chartTooltipTimer = null;
+			}
+			setTimeout(function () { self.chartTouchActive = false; }, 500);
+			if (this.chartTooltipHeld) {
+				e.preventDefault();
+				setTimeout(function () { self.hideChartTooltip(); }, 60);
+			}
+		},
 		chartClick: function (e) {
+			if (this.chartTooltipHeld) {
+				this.chartTooltipHeld = false;
+				this.hideChartTooltip();
+				e.preventDefault();
+				e.stopPropagation();
+				return;
+			}
+			this.hideChartTooltip();
 			if (this.search.addFilter(e.currentTarget)) {
 				var curChart = this.$('input[name=' + this.curChartName + ']');
 				// if we were searching for the filter, remove it
