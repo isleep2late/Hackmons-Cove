@@ -231,7 +231,7 @@ export class YoutubeInterface {
 	}
 	async generateVideoDisplay(link: string, fullInfo = false) {
 		if (!Config.youtubeKey) {
-			throw new Chat.ErrorMessage(`We do note support YouTube commands. Sorry!`);
+			throw new Chat.ErrorMessage(`We do not support YouTube commands. Sorry!`);
 		}
 		const id = this.getId(link);
 		const info = await this.getVideoData(id);
