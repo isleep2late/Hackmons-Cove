@@ -2220,6 +2220,39 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 			}
 		},
 	},
+	rageglitchmovelegality: {
+		effectType: 'ValidatorRule',
+		name: 'Rage Glitch Move Legality',
+		desc: "Pok&eacute;mon whose species can reach the English Rage/Mimic glitch or the Japanese D/P Transform faint glitch (canLearnMovesViaRage) can run any moves except Chatter and Struggle; all other Pok&eacute;mon need fully legal movesets.",
+		checkCanLearn(move, species, setSources, set) {
+			const baseSpecies = this.dex.species.get(species.baseSpecies);
+			if (baseSpecies.canLearnMovesViaRage && move.id !== 'chatter' && move.id !== 'struggle') {
+				return null;
+			}
+			return this.checkCanLearn(move, species, setSources, set);
+		},
+		onValidateSet(set) {
+			const species = this.dex.species.get(set.species);
+			const moves = set.moves || [];
+			if (!moves.length) return;
+			const baseSpecies = this.dex.species.get(species.baseSpecies);
+			if (baseSpecies.canLearnMovesViaRage) {
+				for (const moveName of moves) {
+					const move = this.dex.moves.get(moveName);
+					if (move.id === 'chatter' || move.id === 'struggle') {
+						return [`${set.name || species.name} can't obtain ${move.name} through the Transform glitch.`];
+					}
+				}
+				return;
+			}
+			for (const moveName of moves) {
+				const move = this.dex.moves.get(moveName);
+				if (this.checkCanLearn(move, species)) {
+					return [`${set.name || species.name} can't learn ${move.name}, and it can't perform the Rage or Transform glitches (it learns none of Transform, Mimic, Copycat, Assist, Metronome, or Rage).`];
+				}
+			}
+		},
+	},
 	stabmonsmovelegality: {
 		effectType: 'ValidatorRule',
 		name: 'STABmons Move Legality',

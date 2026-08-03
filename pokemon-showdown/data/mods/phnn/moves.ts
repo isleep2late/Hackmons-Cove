@@ -1002,7 +1002,18 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	sacredfire: {
 		inherit: true,
 		accuracy: 100,
-		pp: 10,
+		pp: 15,
+	},
+	bellydrum: {
+		inherit: true,
+		shortDesc: "User loses 50% of its current HP; maximizes Attack.",
+		desc: "Raises the user's Attack to +6 stages in exchange for half of its current HP, rounded down (the Gold/Silver development-build cost; the released games take half of maximum HP and fail below 50%). This move only fails if the user's Attack is already at +6.",
+		onHit(target) {
+			if (target.boosts.atk >= 6) return false;
+			const damage = Math.floor(target.hp / 2);
+			if (damage) this.directDamage(damage);
+			this.boost({ atk: 12 }, target);
+		},
 	},
 	present: {
 		inherit: true,

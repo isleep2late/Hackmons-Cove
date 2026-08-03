@@ -1810,8 +1810,12 @@ process.stdout.write("Building `data/moves,items,abilities,typechart,learnsets.j
 {
 	const TypeChart = requireNoCache('../caches/pokemon-showdown/dist/data/typechart.js').TypeChart;
 	const phnnTypeChart = requireNoCache('../caches/pokemon-showdown/dist/data/mods/phnn/typechart.js').TypeChart;
-	delete TypeChart['???'];
-	delete TypeChart.bird;
+	if (TypeChart['???']) {
+		TypeChart['???'] = { damageTaken: TypeChart['???'].damageTaken || {}, HPivs: {}, HPdvs: {} };
+	}
+	if (TypeChart.bird) {
+		TypeChart.bird = { damageTaken: TypeChart.bird.damageTaken || {}, HPivs: {}, HPdvs: {} };
+	}
 	if (phnnTypeChart.shadow) {
 		TypeChart.shadow = { damageTaken: phnnTypeChart.shadow.damageTaken, HPivs: {}, HPdvs: {} };
 	}

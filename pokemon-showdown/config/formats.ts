@@ -17,38 +17,6 @@ New sections will be added to the bottom of the specified column.
 The column value will be ignored for repeat sections.
 */
 
-const gen4RageGlitchEligible = [
-	'abra','absol','aerodactyl','aggron','aipom','alakazam','altaria','ambipom','ampharos','anorith','arbok','arcanine',
-	'ariados','armaldo','aron','articuno','azumarill','azurill','bagon','baltoy','banette','barboach','bayleef','beautifly','beedrill','beldum','bellossom',
-	'bellsprout','blastoise','blaziken','blissey','bonsly','breloom','bulbasaur','butterfree','cacnea','cacturne','camerupt','carvanha','cascoon','castform',
-	'caterpie','celebi','chansey','charizard','charmander','charmeleon','chatot','chikorita','chimchar','chimecho','chinchou','clamperl','claydol','clefable',
-	'clefairy','cleffa','cloyster','combusken','corphish','corsola','cradily','crawdaunt','crobat','croconaw','cubone','cyndaquil','delcatty','delibird',
-	'deoxys','dewgong','diglett','ditto','dodrio','doduo','donphan','dragonair','dragonite','dratini','drowzee','dugtrio','dunsparce','dusclops','dusknoir',
-	'duskull','dustox','eevee','ekans','electabuzz','electivire','electrike','electrode','elekid','entei','espeon','exeggcute','exeggutor','exploud','farfetchd',
-	'fearow','feebas','feraligatr','flaaffy','flareon','flygon','forretress','froslass','furret','gallade','gardevoir','gastly','gengar','geodude','girafarig',
-	'glaceon','glalie','glameow','gligar','gliscor','gloom','golbat','goldeen','golduck','golem','gorebyss','granbull','graveler','grimer','groudon','grovyle',
-	'growlithe','grumpig','gulpin','gyarados','happiny','hariyama','haunter','heracross','hitmonchan','hitmonlee','hitmontop','honchkrow','hooh','hoothoot',
-	'hoppip','horsea','houndoom','houndour','huntail','hypno','igglybuff','illumise','infernape','ivysaur','jigglypuff','jirachi','jolteon','jumpluff','jynx',
-	'kabuto','kabutops','kadabra','kakuna','kangaskhan','kecleon','kingdra','kingler','kirlia','koffing','krabby','kyogre','lairon','lanturn','lapras','larvitar',
-	'latias','latios','leafeon','ledian','ledyba','lickilicky','lickitung','lileep','linoone','lombre','lotad','loudred','lucario','ludicolo','lugia','lunatone',
-	'luvdisc','machamp','machoke','machop','magby','magcargo','magikarp','magmar','magmortar','magnemite','magneton','magnezone','makuhita','mamoswine','manectric',
-	'mankey','mantine','mareep','marill','marowak','marshtomp','masquerain','mawile','medicham','meditite','meganium','meowth','mesprit','metagross','metang',
-	'metapod','mew','mewtwo','mightyena','milotic','miltank','mimejr','minun','misdreavus','mismagius','moltres','monferno','mrmime','mudkip','muk','munchlax',
-	'murkrow','natu','nidoking','nidoqueen','nidoranf','nidoranm','nidorina','nidorino','nincada','ninetales','ninjask','noctowl','nosepass','numel','nuzleaf',
-	'octillery','oddish','omanyte','omastar','onix','paras','parasect','pelipper','persian','phanpy','pichu','pidgeot','pidgeotto','pidgey','pikachu','piloswine',
-	'pineco','pinsir','plusle','politoed','poliwag','poliwhirl','poliwrath','ponyta','poochyena','porygon','porygon2','porygonz','primeape','probopass','psyduck',
-	'pupitar','purugly','quagsire','quilava','qwilfish','raichu','raikou','ralts','rapidash','raticate','rattata','rayquaza','regice','regirock','registeel',
-	'relicanth','remoraid','rhydon','rhyhorn','rhyperior','riolu','roselia','roserade','sableye','salamence','sandshrew','sandslash','sceptile','scizor','scyther',
-	'seadra','seaking','sealeo','seedot','seel','sentret','seviper','sharpedo','shedinja','shelgon','shellder','shiftry','shroomish','shuckle','shuppet','silcoon',
-	'skarmory','skiploom','skitty','slaking','slakoth','slowbro','slowking','slowpoke','slugma','smeargle','smoochum','sneasel','snorlax','snorunt','snubbull',
-	'solrock','spearow','spheal','spinarak','spinda','spoink','squirtle','stantler','starmie','staryu','steelix','sudowoodo','suicune','sunflora','sunkern',
-	'surskit','swablu','swalot','swampert','swellow','swinub','taillow','tangela','tangrowth','tauros','teddiursa','tentacool','tentacruel','togekiss','togepi',
-	'togetic','torchic','torkoal','totodile','trapinch','treecko','tropius','typhlosion','tyranitar','tyrogue','umbreon','unown','ursaring','vaporeon','venomoth',
-	'venonat','venusaur','vibrava','victreebel','vigoroth','vileplume','volbeat','voltorb','vulpix','wailmer','wailord','walrein','wartortle','weavile','weedle',
-	'weepinbell','weezing','whiscash','whismur','wigglytuff','wingull','wobbuffet','wooper','wurmple','wynaut','xatu','yanma','yanmega','zangoose','zapdos',
-	'zigzagoon','zubat'
-];
-
 export const Formats: import('../sim/dex-formats').FormatList = [
 		
 	//////////////////////////////////
@@ -529,33 +497,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		desc: "Gen 4 Anything Goes with real cartridge glitches: any Pokemon that can reach the English Rage/Mimic glitch (Smeargle breeding web) or the Japanese D/P Transform faint glitch (learns Transform, Mimic, Copycat, Assist, Metronome, or Rage) can run any four moves except Chatter and Struggle. Pokemon that can reach neither glitch need fully legal movesets.",
 		mod: 'gen4',
 		searchShow: false,
-		ruleset: ['-Nonexistent', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100'],
-		checkCanLearn(move, species, setSources, set) {
-			if (gen4RageGlitchEligible.includes(this.toID(species.baseSpecies)) && move.id !== 'chatter' && move.id !== 'struggle') {
-				return null;
-			}
-			return this.checkCanLearn(move, species, setSources, set);
-		},
-		onValidateSet(set) {
-			const species = this.dex.species.get(set.species);
-			const moves = set.moves || [];
-			if (!moves.length) return;
-			if (gen4RageGlitchEligible.includes(this.toID(species.baseSpecies))) {
-				for (const moveName of moves) {
-					const move = this.dex.moves.get(moveName);
-					if (move.id === 'chatter' || move.id === 'struggle') {
-						return [`${set.name || species.name} can't obtain ${move.name} through the Transform glitch.`];
-					}
-				}
-				return;
-			}
-			for (const moveName of moves) {
-				const move = this.dex.moves.get(moveName);
-				if (this.checkCanLearn(move, species)) {
-					return [`${set.name || species.name} can't learn ${move.name}, and it can't perform the Rage or Transform glitches (it learns none of Transform, Mimic, Copycat, Assist, Metronome, or Rage).`];
-				}
-			}
-		},
+		ruleset: ['-Nonexistent', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100', 'Rage Glitch Move Legality'],
 	},
 	{
 		name: "[Gen 3] BH AAA",

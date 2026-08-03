@@ -234,6 +234,7 @@ export class Species extends BasicEffect implements Readonly<BasicEffect & Speci
 	readonly gmaxUnreleased?: boolean;
 	/** True if a Pokemon species is incapable of dynamaxing */
 	readonly cannotDynamax?: boolean;
+	readonly canLearnMovesViaRage?: boolean | null;
 	/** The Tera Type this Pokemon is forced to use */
 	readonly requiredTeraType?: string;
 	/** What it transforms from, if a pokemon is a forme that is only accessible in battle. */
@@ -332,6 +333,7 @@ export class Species extends BasicEffect implements Readonly<BasicEffect & Speci
 		this.canGigantamax = data.canGigantamax || undefined;
 		this.gmaxUnreleased = !!data.gmaxUnreleased;
 		this.cannotDynamax = !!data.cannotDynamax;
+		this.canLearnMovesViaRage = data.canLearnMovesViaRage ?? undefined;
 		this.battleOnly = data.battleOnly || (this.isMega || this.isPrimal ? this.baseSpecies : undefined);
 		this.changesFrom = data.changesFrom ||
 			(this.battleOnly !== this.baseSpecies ? this.battleOnly : this.baseSpecies);

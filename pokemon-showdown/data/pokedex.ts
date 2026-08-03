@@ -2,6 +2,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	bulbasaur: {
 		num: 1,
 		name: "Bulbasaur",
+		canLearnMovesViaRage: true,
 		types: ["Grass", "Poison"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 45, atk: 49, def: 49, spa: 65, spd: 65, spe: 45 },
@@ -15,6 +16,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	ivysaur: {
 		num: 2,
 		name: "Ivysaur",
+		canLearnMovesViaRage: true,
 		types: ["Grass", "Poison"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 60, atk: 62, def: 63, spa: 80, spd: 80, spe: 60 },
@@ -30,6 +32,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	venusaur: {
 		num: 3,
 		name: "Venusaur",
+		canLearnMovesViaRage: true,
 		types: ["Grass", "Poison"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 80, atk: 82, def: 83, spa: 100, spd: 100, spe: 80 },
@@ -78,6 +81,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	charmander: {
 		num: 4,
 		name: "Charmander",
+		canLearnMovesViaRage: true,
 		types: ["Fire"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 39, atk: 52, def: 43, spa: 60, spd: 50, spe: 65 },
@@ -91,6 +95,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	charmeleon: {
 		num: 5,
 		name: "Charmeleon",
+		canLearnMovesViaRage: true,
 		types: ["Fire"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 58, atk: 64, def: 58, spa: 80, spd: 65, spe: 80 },
@@ -106,6 +111,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	charizard: {
 		num: 6,
 		name: "Charizard",
+		canLearnMovesViaRage: true,
 		types: ["Fire", "Flying"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 78, atk: 84, def: 78, spa: 109, spd: 85, spe: 100 },
@@ -169,6 +175,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	squirtle: {
 		num: 7,
 		name: "Squirtle",
+		canLearnMovesViaRage: true,
 		types: ["Water"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 44, atk: 48, def: 65, spa: 50, spd: 64, spe: 43 },
@@ -182,6 +189,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	wartortle: {
 		num: 8,
 		name: "Wartortle",
+		canLearnMovesViaRage: true,
 		types: ["Water"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 59, atk: 63, def: 80, spa: 65, spd: 80, spe: 58 },
@@ -197,6 +205,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	blastoise: {
 		num: 9,
 		name: "Blastoise",
+		canLearnMovesViaRage: true,
 		types: ["Water"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 79, atk: 83, def: 100, spa: 85, spd: 105, spe: 78 },
@@ -245,6 +254,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	caterpie: {
 		num: 10,
 		name: "Caterpie",
+		canLearnMovesViaRage: true,
 		types: ["Bug"],
 		baseStats: { hp: 45, atk: 30, def: 35, spa: 20, spd: 20, spe: 45 },
 		abilities: { 0: "Shield Dust", H: "Run Away" },
@@ -257,6 +267,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	metapod: {
 		num: 11,
 		name: "Metapod",
+		canLearnMovesViaRage: true,
 		types: ["Bug"],
 		baseStats: { hp: 50, atk: 20, def: 55, spa: 25, spd: 25, spe: 30 },
 		abilities: { 0: "Shed Skin" },
@@ -271,6 +282,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	butterfree: {
 		num: 12,
 		name: "Butterfree",
+		canLearnMovesViaRage: true,
 		types: ["Bug", "Flying"],
 		baseStats: { hp: 60, atk: 45, def: 50, spa: 90, spd: 80, spe: 70 },
 		abilities: { 0: "Compound Eyes", H: "Tinted Lens" },
@@ -300,6 +312,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	weedle: {
 		num: 13,
 		name: "Weedle",
+		canLearnMovesViaRage: true,
 		types: ["Bug", "Poison"],
 		baseStats: { hp: 40, atk: 35, def: 30, spa: 20, spd: 20, spe: 50 },
 		abilities: { 0: "Shield Dust", H: "Run Away" },
@@ -312,6 +325,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	kakuna: {
 		num: 14,
 		name: "Kakuna",
+		canLearnMovesViaRage: true,
 		types: ["Bug", "Poison"],
 		baseStats: { hp: 45, atk: 25, def: 50, spa: 25, spd: 25, spe: 35 },
 		abilities: { 0: "Shed Skin" },
@@ -326,6 +340,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	beedrill: {
 		num: 15,
 		name: "Beedrill",
+		canLearnMovesViaRage: true,
 		types: ["Bug", "Poison"],
 		baseStats: { hp: 65, atk: 90, def: 40, spa: 45, spd: 80, spe: 75 },
 		abilities: { 0: "Swarm", H: "Sniper" },
@@ -355,6 +370,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	pidgey: {
 		num: 16,
 		name: "Pidgey",
+		canLearnMovesViaRage: true,
 		types: ["Normal", "Flying"],
 		baseStats: { hp: 40, atk: 45, def: 40, spa: 35, spd: 35, spe: 56 },
 		abilities: { 0: "Keen Eye", 1: "Tangled Feet", H: "Big Pecks" },
@@ -367,6 +383,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	pidgeotto: {
 		num: 17,
 		name: "Pidgeotto",
+		canLearnMovesViaRage: true,
 		types: ["Normal", "Flying"],
 		baseStats: { hp: 63, atk: 60, def: 55, spa: 50, spd: 50, spe: 71 },
 		abilities: { 0: "Keen Eye", 1: "Tangled Feet", H: "Big Pecks" },
@@ -381,6 +398,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	pidgeot: {
 		num: 18,
 		name: "Pidgeot",
+		canLearnMovesViaRage: true,
 		types: ["Normal", "Flying"],
 		baseStats: { hp: 83, atk: 80, def: 75, spa: 70, spd: 70, spe: 101 },
 		abilities: { 0: "Keen Eye", 1: "Tangled Feet", H: "Big Pecks" },
@@ -410,6 +428,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	rattata: {
 		num: 19,
 		name: "Rattata",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		baseStats: { hp: 30, atk: 56, def: 35, spa: 25, spd: 35, spe: 72 },
 		abilities: { 0: "Run Away", 1: "Guts", H: "Hustle" },
@@ -438,6 +457,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	raticate: {
 		num: 20,
 		name: "Raticate",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		baseStats: { hp: 55, atk: 81, def: 60, spa: 50, spd: 70, spe: 97 },
 		abilities: { 0: "Run Away", 1: "Guts", H: "Hustle" },
@@ -482,6 +502,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	spearow: {
 		num: 21,
 		name: "Spearow",
+		canLearnMovesViaRage: true,
 		types: ["Normal", "Flying"],
 		baseStats: { hp: 40, atk: 60, def: 30, spa: 31, spd: 31, spe: 70 },
 		abilities: { 0: "Keen Eye", H: "Sniper" },
@@ -494,6 +515,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	fearow: {
 		num: 22,
 		name: "Fearow",
+		canLearnMovesViaRage: true,
 		types: ["Normal", "Flying"],
 		baseStats: { hp: 65, atk: 90, def: 65, spa: 61, spd: 61, spe: 100 },
 		abilities: { 0: "Keen Eye", H: "Sniper" },
@@ -507,6 +529,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	ekans: {
 		num: 23,
 		name: "Ekans",
+		canLearnMovesViaRage: true,
 		types: ["Poison"],
 		baseStats: { hp: 35, atk: 60, def: 44, spa: 40, spd: 54, spe: 55 },
 		abilities: { 0: "Intimidate", 1: "Shed Skin", H: "Unnerve" },
@@ -519,6 +542,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	arbok: {
 		num: 24,
 		name: "Arbok",
+		canLearnMovesViaRage: true,
 		types: ["Poison"],
 		baseStats: { hp: 60, atk: 95, def: 69, spa: 65, spd: 79, spe: 80 },
 		abilities: { 0: "Intimidate", 1: "Shed Skin", H: "Unnerve" },
@@ -532,6 +556,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	pikachu: {
 		num: 25,
 		name: "Pikachu",
+		canLearnMovesViaRage: true,
 		types: ["Electric"],
 		baseStats: { hp: 35, atk: 55, def: 40, spa: 50, spd: 50, spe: 90 },
 		abilities: { 0: "Static", H: "Lightning Rod" },
@@ -804,6 +829,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	raichu: {
 		num: 26,
 		name: "Raichu",
+		canLearnMovesViaRage: true,
 		types: ["Electric"],
 		baseStats: { hp: 60, atk: 90, def: 55, spa: 90, spd: 80, spe: 110 },
 		abilities: { 0: "Static", H: "Lightning Rod" },
@@ -867,6 +893,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	sandshrew: {
 		num: 27,
 		name: "Sandshrew",
+		canLearnMovesViaRage: true,
 		types: ["Ground"],
 		baseStats: { hp: 50, atk: 75, def: 85, spa: 20, spd: 30, spe: 40 },
 		abilities: { 0: "Sand Veil", H: "Sand Rush" },
@@ -895,6 +922,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	sandslash: {
 		num: 28,
 		name: "Sandslash",
+		canLearnMovesViaRage: true,
 		types: ["Ground"],
 		baseStats: { hp: 75, atk: 100, def: 110, spa: 45, spd: 55, spe: 65 },
 		abilities: { 0: "Sand Veil", H: "Sand Rush" },
@@ -926,6 +954,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	nidoranf: {
 		num: 29,
 		name: "Nidoran-F",
+		canLearnMovesViaRage: true,
 		types: ["Poison"],
 		gender: "F",
 		baseStats: { hp: 55, atk: 47, def: 52, spa: 40, spd: 40, spe: 41 },
@@ -939,6 +968,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	nidorina: {
 		num: 30,
 		name: "Nidorina",
+		canLearnMovesViaRage: true,
 		types: ["Poison"],
 		gender: "F",
 		baseStats: { hp: 70, atk: 62, def: 67, spa: 55, spd: 55, spe: 56 },
@@ -954,6 +984,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	nidoqueen: {
 		num: 31,
 		name: "Nidoqueen",
+		canLearnMovesViaRage: true,
 		types: ["Poison", "Ground"],
 		gender: "F",
 		baseStats: { hp: 90, atk: 92, def: 87, spa: 75, spd: 85, spe: 76 },
@@ -969,6 +1000,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	nidoranm: {
 		num: 32,
 		name: "Nidoran-M",
+		canLearnMovesViaRage: true,
 		types: ["Poison"],
 		gender: "M",
 		baseStats: { hp: 46, atk: 57, def: 40, spa: 40, spd: 40, spe: 50 },
@@ -983,6 +1015,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	nidorino: {
 		num: 33,
 		name: "Nidorino",
+		canLearnMovesViaRage: true,
 		types: ["Poison"],
 		gender: "M",
 		baseStats: { hp: 61, atk: 72, def: 57, spa: 55, spd: 55, spe: 65 },
@@ -998,6 +1031,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	nidoking: {
 		num: 34,
 		name: "Nidoking",
+		canLearnMovesViaRage: true,
 		types: ["Poison", "Ground"],
 		gender: "M",
 		baseStats: { hp: 81, atk: 102, def: 77, spa: 85, spd: 75, spe: 85 },
@@ -1013,6 +1047,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	clefairy: {
 		num: 35,
 		name: "Clefairy",
+		canLearnMovesViaRage: true,
 		types: ["Fairy"],
 		genderRatio: { M: 0.25, F: 0.75 },
 		baseStats: { hp: 70, atk: 45, def: 48, spa: 60, spd: 65, spe: 35 },
@@ -1028,6 +1063,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	clefable: {
 		num: 36,
 		name: "Clefable",
+		canLearnMovesViaRage: true,
 		types: ["Fairy"],
 		genderRatio: { M: 0.25, F: 0.75 },
 		baseStats: { hp: 95, atk: 70, def: 73, spa: 95, spd: 90, spe: 60 },
@@ -1061,6 +1097,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	vulpix: {
 		num: 37,
 		name: "Vulpix",
+		canLearnMovesViaRage: true,
 		types: ["Fire"],
 		genderRatio: { M: 0.25, F: 0.75 },
 		baseStats: { hp: 38, atk: 41, def: 40, spa: 50, spd: 65, spe: 65 },
@@ -1091,6 +1128,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	ninetales: {
 		num: 38,
 		name: "Ninetales",
+		canLearnMovesViaRage: true,
 		types: ["Fire"],
 		genderRatio: { M: 0.25, F: 0.75 },
 		baseStats: { hp: 73, atk: 76, def: 75, spa: 81, spd: 100, spe: 100 },
@@ -1125,6 +1163,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	jigglypuff: {
 		num: 39,
 		name: "Jigglypuff",
+		canLearnMovesViaRage: true,
 		types: ["Normal", "Fairy"],
 		genderRatio: { M: 0.25, F: 0.75 },
 		baseStats: { hp: 115, atk: 45, def: 20, spa: 45, spd: 25, spe: 20 },
@@ -1140,6 +1179,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	wigglytuff: {
 		num: 40,
 		name: "Wigglytuff",
+		canLearnMovesViaRage: true,
 		types: ["Normal", "Fairy"],
 		genderRatio: { M: 0.25, F: 0.75 },
 		baseStats: { hp: 140, atk: 70, def: 45, spa: 85, spd: 50, spe: 45 },
@@ -1155,6 +1195,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	zubat: {
 		num: 41,
 		name: "Zubat",
+		canLearnMovesViaRage: true,
 		types: ["Poison", "Flying"],
 		baseStats: { hp: 40, atk: 45, def: 35, spa: 30, spd: 40, spe: 55 },
 		abilities: { 0: "Inner Focus", H: "Infiltrator" },
@@ -1167,6 +1208,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	golbat: {
 		num: 42,
 		name: "Golbat",
+		canLearnMovesViaRage: true,
 		types: ["Poison", "Flying"],
 		baseStats: { hp: 75, atk: 80, def: 70, spa: 65, spd: 75, spe: 90 },
 		abilities: { 0: "Inner Focus", H: "Infiltrator" },
@@ -1181,6 +1223,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	oddish: {
 		num: 43,
 		name: "Oddish",
+		canLearnMovesViaRage: true,
 		types: ["Grass", "Poison"],
 		baseStats: { hp: 45, atk: 50, def: 55, spa: 75, spd: 65, spe: 30 },
 		abilities: { 0: "Chlorophyll", H: "Run Away" },
@@ -1193,6 +1236,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	gloom: {
 		num: 44,
 		name: "Gloom",
+		canLearnMovesViaRage: true,
 		types: ["Grass", "Poison"],
 		baseStats: { hp: 60, atk: 65, def: 70, spa: 85, spd: 75, spe: 40 },
 		abilities: { 0: "Chlorophyll", H: "Stench" },
@@ -1207,6 +1251,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	vileplume: {
 		num: 45,
 		name: "Vileplume",
+		canLearnMovesViaRage: true,
 		types: ["Grass", "Poison"],
 		baseStats: { hp: 75, atk: 80, def: 85, spa: 110, spd: 90, spe: 50 },
 		abilities: { 0: "Chlorophyll", H: "Effect Spore" },
@@ -1221,6 +1266,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	paras: {
 		num: 46,
 		name: "Paras",
+		canLearnMovesViaRage: true,
 		types: ["Bug", "Grass"],
 		baseStats: { hp: 35, atk: 70, def: 55, spa: 45, spd: 55, spe: 25 },
 		abilities: { 0: "Effect Spore", 1: "Dry Skin", H: "Damp" },
@@ -1233,6 +1279,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	parasect: {
 		num: 47,
 		name: "Parasect",
+		canLearnMovesViaRage: true,
 		types: ["Bug", "Grass"],
 		baseStats: { hp: 60, atk: 95, def: 80, spa: 60, spd: 80, spe: 30 },
 		abilities: { 0: "Effect Spore", 1: "Dry Skin", H: "Damp" },
@@ -1246,6 +1293,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	venonat: {
 		num: 48,
 		name: "Venonat",
+		canLearnMovesViaRage: true,
 		types: ["Bug", "Poison"],
 		baseStats: { hp: 60, atk: 55, def: 50, spa: 40, spd: 55, spe: 45 },
 		abilities: { 0: "Compound Eyes", 1: "Tinted Lens", H: "Run Away" },
@@ -1258,6 +1306,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	venomoth: {
 		num: 49,
 		name: "Venomoth",
+		canLearnMovesViaRage: true,
 		types: ["Bug", "Poison"],
 		baseStats: { hp: 70, atk: 65, def: 60, spa: 90, spd: 75, spe: 90 },
 		abilities: { 0: "Shield Dust", 1: "Tinted Lens", H: "Wonder Skin" },
@@ -1271,6 +1320,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	diglett: {
 		num: 50,
 		name: "Diglett",
+		canLearnMovesViaRage: true,
 		types: ["Ground"],
 		baseStats: { hp: 10, atk: 55, def: 25, spa: 35, spd: 45, spe: 95 },
 		abilities: { 0: "Sand Veil", 1: "Arena Trap", H: "Sand Force" },
@@ -1299,6 +1349,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	dugtrio: {
 		num: 51,
 		name: "Dugtrio",
+		canLearnMovesViaRage: true,
 		types: ["Ground"],
 		baseStats: { hp: 35, atk: 100, def: 50, spa: 50, spd: 70, spe: 120 },
 		abilities: { 0: "Sand Veil", 1: "Arena Trap", H: "Sand Force" },
@@ -1329,6 +1380,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	meowth: {
 		num: 52,
 		name: "Meowth",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		baseStats: { hp: 40, atk: 45, def: 35, spa: 40, spd: 40, spe: 90 },
 		abilities: { 0: "Pickup", 1: "Technician", H: "Unnerve" },
@@ -1387,6 +1439,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	persian: {
 		num: 53,
 		name: "Persian",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		baseStats: { hp: 65, atk: 70, def: 60, spa: 65, spd: 65, spe: 115 },
 		abilities: { 0: "Limber", 1: "Technician", H: "Unnerve" },
@@ -1417,6 +1470,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	psyduck: {
 		num: 54,
 		name: "Psyduck",
+		canLearnMovesViaRage: true,
 		types: ["Water"],
 		baseStats: { hp: 50, atk: 52, def: 48, spa: 65, spd: 50, spe: 55 },
 		abilities: { 0: "Damp", 1: "Cloud Nine", H: "Swift Swim" },
@@ -1429,6 +1483,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	golduck: {
 		num: 55,
 		name: "Golduck",
+		canLearnMovesViaRage: true,
 		types: ["Water"],
 		baseStats: { hp: 80, atk: 82, def: 78, spa: 95, spd: 80, spe: 85 },
 		abilities: { 0: "Damp", 1: "Cloud Nine", H: "Swift Swim" },
@@ -1442,6 +1497,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	mankey: {
 		num: 56,
 		name: "Mankey",
+		canLearnMovesViaRage: true,
 		types: ["Fighting"],
 		baseStats: { hp: 40, atk: 80, def: 35, spa: 35, spd: 45, spe: 70 },
 		abilities: { 0: "Vital Spirit", 1: "Anger Point", H: "Defiant" },
@@ -1454,6 +1510,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	primeape: {
 		num: 57,
 		name: "Primeape",
+		canLearnMovesViaRage: true,
 		types: ["Fighting"],
 		baseStats: { hp: 65, atk: 105, def: 60, spa: 60, spd: 70, spe: 95 },
 		abilities: { 0: "Vital Spirit", 1: "Anger Point", H: "Defiant" },
@@ -1468,6 +1525,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	growlithe: {
 		num: 58,
 		name: "Growlithe",
+		canLearnMovesViaRage: true,
 		types: ["Fire"],
 		genderRatio: { M: 0.75, F: 0.25 },
 		baseStats: { hp: 55, atk: 70, def: 45, spa: 70, spd: 50, spe: 60 },
@@ -1498,6 +1556,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	arcanine: {
 		num: 59,
 		name: "Arcanine",
+		canLearnMovesViaRage: true,
 		types: ["Fire"],
 		genderRatio: { M: 0.75, F: 0.25 },
 		baseStats: { hp: 90, atk: 110, def: 80, spa: 100, spd: 80, spe: 95 },
@@ -1532,6 +1591,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	poliwag: {
 		num: 60,
 		name: "Poliwag",
+		canLearnMovesViaRage: true,
 		types: ["Water"],
 		baseStats: { hp: 40, atk: 50, def: 40, spa: 40, spd: 40, spe: 90 },
 		abilities: { 0: "Water Absorb", 1: "Damp", H: "Swift Swim" },
@@ -1544,6 +1604,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	poliwhirl: {
 		num: 61,
 		name: "Poliwhirl",
+		canLearnMovesViaRage: true,
 		types: ["Water"],
 		baseStats: { hp: 65, atk: 65, def: 65, spa: 50, spd: 50, spe: 90 },
 		abilities: { 0: "Water Absorb", 1: "Damp", H: "Swift Swim" },
@@ -1558,6 +1619,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	poliwrath: {
 		num: 62,
 		name: "Poliwrath",
+		canLearnMovesViaRage: true,
 		types: ["Water", "Fighting"],
 		baseStats: { hp: 90, atk: 95, def: 95, spa: 70, spd: 90, spe: 70 },
 		abilities: { 0: "Water Absorb", 1: "Damp", H: "Swift Swim" },
@@ -1572,6 +1634,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	abra: {
 		num: 63,
 		name: "Abra",
+		canLearnMovesViaRage: true,
 		types: ["Psychic"],
 		genderRatio: { M: 0.75, F: 0.25 },
 		baseStats: { hp: 25, atk: 20, def: 15, spa: 105, spd: 55, spe: 90 },
@@ -1585,6 +1648,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	kadabra: {
 		num: 64,
 		name: "Kadabra",
+		canLearnMovesViaRage: true,
 		types: ["Psychic"],
 		genderRatio: { M: 0.75, F: 0.25 },
 		baseStats: { hp: 40, atk: 35, def: 30, spa: 120, spd: 70, spe: 105 },
@@ -1600,6 +1664,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	alakazam: {
 		num: 65,
 		name: "Alakazam",
+		canLearnMovesViaRage: true,
 		types: ["Psychic"],
 		genderRatio: { M: 0.75, F: 0.25 },
 		baseStats: { hp: 55, atk: 50, def: 45, spa: 135, spd: 95, spe: 120 },
@@ -1631,6 +1696,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	machop: {
 		num: 66,
 		name: "Machop",
+		canLearnMovesViaRage: true,
 		types: ["Fighting"],
 		genderRatio: { M: 0.75, F: 0.25 },
 		baseStats: { hp: 70, atk: 80, def: 50, spa: 35, spd: 35, spe: 35 },
@@ -1644,6 +1710,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	machoke: {
 		num: 67,
 		name: "Machoke",
+		canLearnMovesViaRage: true,
 		types: ["Fighting"],
 		genderRatio: { M: 0.75, F: 0.25 },
 		baseStats: { hp: 80, atk: 100, def: 70, spa: 50, spd: 60, spe: 45 },
@@ -1659,6 +1726,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	machamp: {
 		num: 68,
 		name: "Machamp",
+		canLearnMovesViaRage: true,
 		types: ["Fighting"],
 		genderRatio: { M: 0.75, F: 0.25 },
 		baseStats: { hp: 90, atk: 130, def: 80, spa: 65, spd: 85, spe: 55 },
@@ -1690,6 +1758,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	bellsprout: {
 		num: 69,
 		name: "Bellsprout",
+		canLearnMovesViaRage: true,
 		types: ["Grass", "Poison"],
 		baseStats: { hp: 50, atk: 75, def: 35, spa: 70, spd: 30, spe: 40 },
 		abilities: { 0: "Chlorophyll", H: "Gluttony" },
@@ -1702,6 +1771,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	weepinbell: {
 		num: 70,
 		name: "Weepinbell",
+		canLearnMovesViaRage: true,
 		types: ["Grass", "Poison"],
 		baseStats: { hp: 65, atk: 90, def: 50, spa: 85, spd: 45, spe: 55 },
 		abilities: { 0: "Chlorophyll", H: "Gluttony" },
@@ -1716,6 +1786,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	victreebel: {
 		num: 71,
 		name: "Victreebel",
+		canLearnMovesViaRage: true,
 		types: ["Grass", "Poison"],
 		baseStats: { hp: 80, atk: 105, def: 65, spa: 100, spd: 70, spe: 70 },
 		abilities: { 0: "Chlorophyll", H: "Gluttony" },
@@ -1747,6 +1818,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	tentacool: {
 		num: 72,
 		name: "Tentacool",
+		canLearnMovesViaRage: true,
 		types: ["Water", "Poison"],
 		baseStats: { hp: 40, atk: 40, def: 35, spa: 50, spd: 100, spe: 70 },
 		abilities: { 0: "Clear Body", 1: "Liquid Ooze", H: "Rain Dish" },
@@ -1759,6 +1831,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	tentacruel: {
 		num: 73,
 		name: "Tentacruel",
+		canLearnMovesViaRage: true,
 		types: ["Water", "Poison"],
 		baseStats: { hp: 80, atk: 70, def: 65, spa: 80, spd: 120, spe: 100 },
 		abilities: { 0: "Clear Body", 1: "Liquid Ooze", H: "Rain Dish" },
@@ -1772,6 +1845,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	geodude: {
 		num: 74,
 		name: "Geodude",
+		canLearnMovesViaRage: true,
 		types: ["Rock", "Ground"],
 		baseStats: { hp: 40, atk: 80, def: 100, spa: 30, spd: 30, spe: 20 },
 		abilities: { 0: "Rock Head", 1: "Sturdy", H: "Sand Veil" },
@@ -1800,6 +1874,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	graveler: {
 		num: 75,
 		name: "Graveler",
+		canLearnMovesViaRage: true,
 		types: ["Rock", "Ground"],
 		baseStats: { hp: 55, atk: 95, def: 115, spa: 45, spd: 45, spe: 35 },
 		abilities: { 0: "Rock Head", 1: "Sturdy", H: "Sand Veil" },
@@ -1832,6 +1907,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	golem: {
 		num: 76,
 		name: "Golem",
+		canLearnMovesViaRage: true,
 		types: ["Rock", "Ground"],
 		baseStats: { hp: 80, atk: 120, def: 130, spa: 55, spd: 65, spe: 45 },
 		abilities: { 0: "Rock Head", 1: "Sturdy", H: "Sand Veil" },
@@ -1862,6 +1938,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	ponyta: {
 		num: 77,
 		name: "Ponyta",
+		canLearnMovesViaRage: true,
 		types: ["Fire"],
 		baseStats: { hp: 50, atk: 85, def: 55, spa: 65, spd: 65, spe: 90 },
 		abilities: { 0: "Run Away", 1: "Flash Fire", H: "Flame Body" },
@@ -1890,6 +1967,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	rapidash: {
 		num: 78,
 		name: "Rapidash",
+		canLearnMovesViaRage: true,
 		types: ["Fire"],
 		baseStats: { hp: 65, atk: 100, def: 70, spa: 80, spd: 80, spe: 105 },
 		abilities: { 0: "Run Away", 1: "Flash Fire", H: "Flame Body" },
@@ -1920,6 +1998,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	slowpoke: {
 		num: 79,
 		name: "Slowpoke",
+		canLearnMovesViaRage: true,
 		types: ["Water", "Psychic"],
 		baseStats: { hp: 90, atk: 65, def: 65, spa: 40, spd: 40, spe: 15 },
 		abilities: { 0: "Oblivious", 1: "Own Tempo", H: "Regenerator" },
@@ -1948,6 +2027,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	slowbro: {
 		num: 80,
 		name: "Slowbro",
+		canLearnMovesViaRage: true,
 		types: ["Water", "Psychic"],
 		baseStats: { hp: 95, atk: 75, def: 110, spa: 100, spd: 80, spe: 30 },
 		abilities: { 0: "Oblivious", 1: "Own Tempo", H: "Regenerator" },
@@ -1993,6 +2073,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	magnemite: {
 		num: 81,
 		name: "Magnemite",
+		canLearnMovesViaRage: true,
 		types: ["Electric", "Steel"],
 		gender: "N",
 		baseStats: { hp: 25, atk: 35, def: 70, spa: 95, spd: 55, spe: 45 },
@@ -2006,6 +2087,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	magneton: {
 		num: 82,
 		name: "Magneton",
+		canLearnMovesViaRage: true,
 		types: ["Electric", "Steel"],
 		gender: "N",
 		baseStats: { hp: 50, atk: 60, def: 95, spa: 120, spd: 70, spe: 70 },
@@ -2021,6 +2103,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	farfetchd: {
 		num: 83,
 		name: "Farfetch\u2019d",
+		canLearnMovesViaRage: true,
 		types: ["Normal", "Flying"],
 		baseStats: { hp: 52, atk: 90, def: 55, spa: 58, spd: 62, spe: 60 },
 		abilities: { 0: "Keen Eye", 1: "Inner Focus", H: "Defiant" },
@@ -2048,6 +2131,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	doduo: {
 		num: 84,
 		name: "Doduo",
+		canLearnMovesViaRage: true,
 		types: ["Normal", "Flying"],
 		baseStats: { hp: 35, atk: 85, def: 45, spa: 35, spd: 35, spe: 75 },
 		abilities: { 0: "Run Away", 1: "Early Bird", H: "Tangled Feet" },
@@ -2060,6 +2144,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	dodrio: {
 		num: 85,
 		name: "Dodrio",
+		canLearnMovesViaRage: true,
 		types: ["Normal", "Flying"],
 		baseStats: { hp: 60, atk: 110, def: 70, spa: 60, spd: 60, spe: 110 },
 		abilities: { 0: "Run Away", 1: "Early Bird", H: "Tangled Feet" },
@@ -2073,6 +2158,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	seel: {
 		num: 86,
 		name: "Seel",
+		canLearnMovesViaRage: true,
 		types: ["Water"],
 		baseStats: { hp: 65, atk: 45, def: 55, spa: 45, spd: 70, spe: 45 },
 		abilities: { 0: "Thick Fat", 1: "Hydration", H: "Ice Body" },
@@ -2085,6 +2171,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	dewgong: {
 		num: 87,
 		name: "Dewgong",
+		canLearnMovesViaRage: true,
 		types: ["Water", "Ice"],
 		baseStats: { hp: 90, atk: 70, def: 80, spa: 70, spd: 95, spe: 70 },
 		abilities: { 0: "Thick Fat", 1: "Hydration", H: "Ice Body" },
@@ -2098,6 +2185,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	grimer: {
 		num: 88,
 		name: "Grimer",
+		canLearnMovesViaRage: true,
 		types: ["Poison"],
 		baseStats: { hp: 80, atk: 80, def: 50, spa: 40, spd: 50, spe: 25 },
 		abilities: { 0: "Stench", 1: "Sticky Hold", H: "Poison Touch" },
@@ -2126,6 +2214,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	muk: {
 		num: 89,
 		name: "Muk",
+		canLearnMovesViaRage: true,
 		types: ["Poison"],
 		baseStats: { hp: 105, atk: 105, def: 75, spa: 65, spd: 100, spe: 50 },
 		abilities: { 0: "Stench", 1: "Sticky Hold", H: "Poison Touch" },
@@ -2156,6 +2245,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	shellder: {
 		num: 90,
 		name: "Shellder",
+		canLearnMovesViaRage: true,
 		types: ["Water"],
 		baseStats: { hp: 30, atk: 65, def: 100, spa: 45, spd: 25, spe: 40 },
 		abilities: { 0: "Shell Armor", 1: "Skill Link", H: "Overcoat" },
@@ -2168,6 +2258,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	cloyster: {
 		num: 91,
 		name: "Cloyster",
+		canLearnMovesViaRage: true,
 		types: ["Water", "Ice"],
 		baseStats: { hp: 50, atk: 95, def: 180, spa: 85, spd: 45, spe: 70 },
 		abilities: { 0: "Shell Armor", 1: "Skill Link", H: "Overcoat" },
@@ -2182,6 +2273,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	gastly: {
 		num: 92,
 		name: "Gastly",
+		canLearnMovesViaRage: true,
 		types: ["Ghost", "Poison"],
 		baseStats: { hp: 30, atk: 35, def: 30, spa: 100, spd: 35, spe: 80 },
 		abilities: { 0: "Levitate" },
@@ -2194,6 +2286,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	haunter: {
 		num: 93,
 		name: "Haunter",
+		canLearnMovesViaRage: true,
 		types: ["Ghost", "Poison"],
 		baseStats: { hp: 45, atk: 50, def: 45, spa: 115, spd: 55, spe: 95 },
 		abilities: { 0: "Levitate" },
@@ -2208,6 +2301,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	gengar: {
 		num: 94,
 		name: "Gengar",
+		canLearnMovesViaRage: true,
 		types: ["Ghost", "Poison"],
 		baseStats: { hp: 60, atk: 65, def: 60, spa: 130, spd: 75, spe: 110 },
 		abilities: { 0: "Cursed Body" },
@@ -2253,6 +2347,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	onix: {
 		num: 95,
 		name: "Onix",
+		canLearnMovesViaRage: true,
 		types: ["Rock", "Ground"],
 		baseStats: { hp: 35, atk: 45, def: 160, spa: 30, spd: 45, spe: 70 },
 		abilities: { 0: "Rock Head", 1: "Sturdy", H: "Weak Armor" },
@@ -2265,6 +2360,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	drowzee: {
 		num: 96,
 		name: "Drowzee",
+		canLearnMovesViaRage: true,
 		types: ["Psychic"],
 		baseStats: { hp: 60, atk: 48, def: 45, spa: 43, spd: 90, spe: 42 },
 		abilities: { 0: "Insomnia", 1: "Forewarn", H: "Inner Focus" },
@@ -2277,6 +2373,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	hypno: {
 		num: 97,
 		name: "Hypno",
+		canLearnMovesViaRage: true,
 		types: ["Psychic"],
 		baseStats: { hp: 85, atk: 73, def: 70, spa: 73, spd: 115, spe: 67 },
 		abilities: { 0: "Insomnia", 1: "Forewarn", H: "Inner Focus" },
@@ -2290,6 +2387,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	krabby: {
 		num: 98,
 		name: "Krabby",
+		canLearnMovesViaRage: true,
 		types: ["Water"],
 		baseStats: { hp: 30, atk: 105, def: 90, spa: 25, spd: 25, spe: 50 },
 		abilities: { 0: "Hyper Cutter", 1: "Shell Armor", H: "Sheer Force" },
@@ -2302,6 +2400,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	kingler: {
 		num: 99,
 		name: "Kingler",
+		canLearnMovesViaRage: true,
 		types: ["Water"],
 		baseStats: { hp: 55, atk: 130, def: 115, spa: 50, spd: 50, spe: 75 },
 		abilities: { 0: "Hyper Cutter", 1: "Shell Armor", H: "Sheer Force" },
@@ -2331,6 +2430,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	voltorb: {
 		num: 100,
 		name: "Voltorb",
+		canLearnMovesViaRage: true,
 		types: ["Electric"],
 		gender: "N",
 		baseStats: { hp: 40, atk: 30, def: 50, spa: 55, spd: 55, spe: 100 },
@@ -2361,6 +2461,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	electrode: {
 		num: 101,
 		name: "Electrode",
+		canLearnMovesViaRage: true,
 		types: ["Electric"],
 		gender: "N",
 		baseStats: { hp: 60, atk: 50, def: 70, spa: 80, spd: 80, spe: 150 },
@@ -2394,6 +2495,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	exeggcute: {
 		num: 102,
 		name: "Exeggcute",
+		canLearnMovesViaRage: true,
 		types: ["Grass", "Psychic"],
 		baseStats: { hp: 60, atk: 40, def: 80, spa: 60, spd: 45, spe: 40 },
 		abilities: { 0: "Chlorophyll", H: "Harvest" },
@@ -2406,6 +2508,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	exeggutor: {
 		num: 103,
 		name: "Exeggutor",
+		canLearnMovesViaRage: true,
 		types: ["Grass", "Psychic"],
 		baseStats: { hp: 95, atk: 95, def: 85, spa: 125, spd: 75, spe: 55 },
 		abilities: { 0: "Chlorophyll", H: "Harvest" },
@@ -2439,6 +2542,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	cubone: {
 		num: 104,
 		name: "Cubone",
+		canLearnMovesViaRage: true,
 		types: ["Ground"],
 		baseStats: { hp: 50, atk: 50, def: 95, spa: 40, spd: 50, spe: 35 },
 		abilities: { 0: "Rock Head", 1: "Lightning Rod", H: "Battle Armor" },
@@ -2451,6 +2555,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	marowak: {
 		num: 105,
 		name: "Marowak",
+		canLearnMovesViaRage: true,
 		types: ["Ground"],
 		baseStats: { hp: 60, atk: 80, def: 110, spa: 50, spd: 80, spe: 45 },
 		abilities: { 0: "Rock Head", 1: "Lightning Rod", H: "Battle Armor" },
@@ -2496,6 +2601,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	hitmonlee: {
 		num: 106,
 		name: "Hitmonlee",
+		canLearnMovesViaRage: true,
 		types: ["Fighting"],
 		gender: "M",
 		baseStats: { hp: 50, atk: 120, def: 53, spa: 35, spd: 110, spe: 87 },
@@ -2511,6 +2617,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	hitmonchan: {
 		num: 107,
 		name: "Hitmonchan",
+		canLearnMovesViaRage: true,
 		types: ["Fighting"],
 		gender: "M",
 		baseStats: { hp: 50, atk: 105, def: 79, spa: 35, spd: 110, spe: 76 },
@@ -2526,6 +2633,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	lickitung: {
 		num: 108,
 		name: "Lickitung",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		baseStats: { hp: 90, atk: 55, def: 75, spa: 60, spd: 75, spe: 30 },
 		abilities: { 0: "Own Tempo", 1: "Oblivious", H: "Cloud Nine" },
@@ -2538,6 +2646,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	koffing: {
 		num: 109,
 		name: "Koffing",
+		canLearnMovesViaRage: true,
 		types: ["Poison"],
 		baseStats: { hp: 40, atk: 65, def: 95, spa: 60, spd: 45, spe: 35 },
 		abilities: { 0: "Levitate", 1: "Neutralizing Gas", H: "Stench" },
@@ -2550,6 +2659,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	weezing: {
 		num: 110,
 		name: "Weezing",
+		canLearnMovesViaRage: true,
 		types: ["Poison"],
 		baseStats: { hp: 65, atk: 90, def: 120, spa: 85, spd: 70, spe: 60 },
 		abilities: { 0: "Levitate", 1: "Neutralizing Gas", H: "Stench" },
@@ -2581,6 +2691,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	rhyhorn: {
 		num: 111,
 		name: "Rhyhorn",
+		canLearnMovesViaRage: true,
 		types: ["Ground", "Rock"],
 		baseStats: { hp: 80, atk: 85, def: 95, spa: 30, spd: 30, spe: 25 },
 		abilities: { 0: "Lightning Rod", 1: "Rock Head", H: "Reckless" },
@@ -2593,6 +2704,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	rhydon: {
 		num: 112,
 		name: "Rhydon",
+		canLearnMovesViaRage: true,
 		types: ["Ground", "Rock"],
 		baseStats: { hp: 105, atk: 130, def: 120, spa: 45, spd: 45, spe: 40 },
 		abilities: { 0: "Lightning Rod", 1: "Rock Head", H: "Reckless" },
@@ -2607,6 +2719,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	chansey: {
 		num: 113,
 		name: "Chansey",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		gender: "F",
 		baseStats: { hp: 250, atk: 5, def: 5, spa: 35, spd: 105, spe: 50 },
@@ -2625,6 +2738,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	tangela: {
 		num: 114,
 		name: "Tangela",
+		canLearnMovesViaRage: true,
 		types: ["Grass"],
 		baseStats: { hp: 65, atk: 55, def: 115, spa: 100, spd: 40, spe: 60 },
 		abilities: { 0: "Chlorophyll", 1: "Leaf Guard", H: "Regenerator" },
@@ -2637,6 +2751,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	kangaskhan: {
 		num: 115,
 		name: "Kangaskhan",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		gender: "F",
 		baseStats: { hp: 105, atk: 95, def: 80, spa: 40, spd: 80, spe: 90 },
@@ -2666,6 +2781,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	horsea: {
 		num: 116,
 		name: "Horsea",
+		canLearnMovesViaRage: true,
 		types: ["Water"],
 		baseStats: { hp: 30, atk: 40, def: 70, spa: 70, spd: 25, spe: 60 },
 		abilities: { 0: "Swift Swim", 1: "Sniper", H: "Damp" },
@@ -2678,6 +2794,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	seadra: {
 		num: 117,
 		name: "Seadra",
+		canLearnMovesViaRage: true,
 		types: ["Water"],
 		baseStats: { hp: 55, atk: 65, def: 95, spa: 95, spd: 45, spe: 85 },
 		abilities: { 0: "Poison Point", 1: "Sniper", H: "Damp" },
@@ -2692,6 +2809,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	goldeen: {
 		num: 118,
 		name: "Goldeen",
+		canLearnMovesViaRage: true,
 		types: ["Water"],
 		baseStats: { hp: 45, atk: 67, def: 60, spa: 35, spd: 50, spe: 63 },
 		abilities: { 0: "Swift Swim", 1: "Water Veil", H: "Lightning Rod" },
@@ -2704,6 +2822,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	seaking: {
 		num: 119,
 		name: "Seaking",
+		canLearnMovesViaRage: true,
 		types: ["Water"],
 		baseStats: { hp: 80, atk: 92, def: 65, spa: 65, spd: 80, spe: 68 },
 		abilities: { 0: "Swift Swim", 1: "Water Veil", H: "Lightning Rod" },
@@ -2717,6 +2836,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	staryu: {
 		num: 120,
 		name: "Staryu",
+		canLearnMovesViaRage: true,
 		types: ["Water"],
 		gender: "N",
 		baseStats: { hp: 30, atk: 45, def: 55, spa: 70, spd: 55, spe: 85 },
@@ -2730,6 +2850,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	starmie: {
 		num: 121,
 		name: "Starmie",
+		canLearnMovesViaRage: true,
 		types: ["Water", "Psychic"],
 		gender: "N",
 		baseStats: { hp: 60, atk: 75, def: 85, spa: 100, spd: 85, spe: 115 },
@@ -2763,6 +2884,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	mrmime: {
 		num: 122,
 		name: "Mr. Mime",
+		canLearnMovesViaRage: true,
 		types: ["Psychic", "Fairy"],
 		baseStats: { hp: 40, atk: 45, def: 65, spa: 100, spd: 120, spe: 90 },
 		abilities: { 0: "Soundproof", 1: "Filter", H: "Technician" },
@@ -2799,6 +2921,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	scyther: {
 		num: 123,
 		name: "Scyther",
+		canLearnMovesViaRage: true,
 		types: ["Bug", "Flying"],
 		baseStats: { hp: 70, atk: 110, def: 80, spa: 55, spd: 80, spe: 105 },
 		abilities: { 0: "Swarm", 1: "Technician", H: "Steadfast" },
@@ -2811,6 +2934,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	jynx: {
 		num: 124,
 		name: "Jynx",
+		canLearnMovesViaRage: true,
 		types: ["Ice", "Psychic"],
 		gender: "F",
 		baseStats: { hp: 65, atk: 50, def: 35, spa: 115, spd: 95, spe: 95 },
@@ -2842,6 +2966,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	electabuzz: {
 		num: 125,
 		name: "Electabuzz",
+		canLearnMovesViaRage: true,
 		types: ["Electric"],
 		genderRatio: { M: 0.75, F: 0.25 },
 		baseStats: { hp: 65, atk: 83, def: 57, spa: 95, spd: 85, spe: 105 },
@@ -2857,6 +2982,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	magmar: {
 		num: 126,
 		name: "Magmar",
+		canLearnMovesViaRage: true,
 		types: ["Fire"],
 		genderRatio: { M: 0.75, F: 0.25 },
 		baseStats: { hp: 65, atk: 95, def: 57, spa: 100, spd: 85, spe: 93 },
@@ -2872,6 +2998,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	pinsir: {
 		num: 127,
 		name: "Pinsir",
+		canLearnMovesViaRage: true,
 		types: ["Bug"],
 		baseStats: { hp: 65, atk: 125, def: 100, spa: 55, spd: 70, spe: 85 },
 		abilities: { 0: "Hyper Cutter", 1: "Mold Breaker", H: "Moxie" },
@@ -2899,6 +3026,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	tauros: {
 		num: 128,
 		name: "Tauros",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		gender: "M",
 		baseStats: { hp: 75, atk: 100, def: 95, spa: 40, spd: 70, spe: 110 },
@@ -2955,6 +3083,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	magikarp: {
 		num: 129,
 		name: "Magikarp",
+		canLearnMovesViaRage: true,
 		types: ["Water"],
 		baseStats: { hp: 20, atk: 10, def: 55, spa: 15, spd: 20, spe: 80 },
 		abilities: { 0: "Swift Swim", H: "Rattled" },
@@ -2967,6 +3096,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	gyarados: {
 		num: 130,
 		name: "Gyarados",
+		canLearnMovesViaRage: true,
 		types: ["Water", "Flying"],
 		baseStats: { hp: 95, atk: 125, def: 79, spa: 60, spd: 100, spe: 81 },
 		abilities: { 0: "Intimidate", H: "Moxie" },
@@ -2996,6 +3126,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	lapras: {
 		num: 131,
 		name: "Lapras",
+		canLearnMovesViaRage: true,
 		types: ["Water", "Ice"],
 		baseStats: { hp: 130, atk: 85, def: 80, spa: 85, spd: 95, spe: 60 },
 		abilities: { 0: "Water Absorb", 1: "Shell Armor", H: "Hydration" },
@@ -3023,6 +3154,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	ditto: {
 		num: 132,
 		name: "Ditto",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		gender: "N",
 		baseStats: { hp: 48, atk: 48, def: 48, spa: 48, spd: 48, spe: 48 },
@@ -3035,6 +3167,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	eevee: {
 		num: 133,
 		name: "Eevee",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 55, atk: 55, def: 50, spa: 45, spd: 65, spe: 55 },
@@ -3081,6 +3214,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	vaporeon: {
 		num: 134,
 		name: "Vaporeon",
+		canLearnMovesViaRage: true,
 		types: ["Water"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 130, atk: 65, def: 60, spa: 110, spd: 95, spe: 65 },
@@ -3096,6 +3230,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	jolteon: {
 		num: 135,
 		name: "Jolteon",
+		canLearnMovesViaRage: true,
 		types: ["Electric"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 65, atk: 65, def: 60, spa: 110, spd: 95, spe: 130 },
@@ -3111,6 +3246,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	flareon: {
 		num: 136,
 		name: "Flareon",
+		canLearnMovesViaRage: true,
 		types: ["Fire"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 65, atk: 130, def: 60, spa: 95, spd: 110, spe: 65 },
@@ -3126,6 +3262,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	porygon: {
 		num: 137,
 		name: "Porygon",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		gender: "N",
 		baseStats: { hp: 65, atk: 60, def: 70, spa: 85, spd: 75, spe: 40 },
@@ -3139,6 +3276,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	omanyte: {
 		num: 138,
 		name: "Omanyte",
+		canLearnMovesViaRage: true,
 		types: ["Rock", "Water"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 35, atk: 40, def: 100, spa: 90, spd: 55, spe: 35 },
@@ -3152,6 +3290,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	omastar: {
 		num: 139,
 		name: "Omastar",
+		canLearnMovesViaRage: true,
 		types: ["Rock", "Water"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 70, atk: 60, def: 125, spa: 115, spd: 70, spe: 55 },
@@ -3166,6 +3305,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	kabuto: {
 		num: 140,
 		name: "Kabuto",
+		canLearnMovesViaRage: true,
 		types: ["Rock", "Water"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 30, atk: 80, def: 90, spa: 55, spd: 45, spe: 55 },
@@ -3179,6 +3319,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	kabutops: {
 		num: 141,
 		name: "Kabutops",
+		canLearnMovesViaRage: true,
 		types: ["Rock", "Water"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 60, atk: 115, def: 105, spa: 65, spd: 70, spe: 80 },
@@ -3193,6 +3334,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	aerodactyl: {
 		num: 142,
 		name: "Aerodactyl",
+		canLearnMovesViaRage: true,
 		types: ["Rock", "Flying"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 80, atk: 105, def: 65, spa: 60, spd: 75, spe: 130 },
@@ -3222,6 +3364,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	snorlax: {
 		num: 143,
 		name: "Snorlax",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 160, atk: 110, def: 65, spa: 65, spd: 110, spe: 30 },
@@ -3254,6 +3397,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	articuno: {
 		num: 144,
 		name: "Articuno",
+		canLearnMovesViaRage: true,
 		types: ["Ice", "Flying"],
 		gender: "N",
 		baseStats: { hp: 90, atk: 85, def: 100, spa: 95, spd: 125, spe: 85 },
@@ -3283,6 +3427,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	zapdos: {
 		num: 145,
 		name: "Zapdos",
+		canLearnMovesViaRage: true,
 		types: ["Electric", "Flying"],
 		gender: "N",
 		baseStats: { hp: 90, atk: 90, def: 85, spa: 125, spd: 90, spe: 100 },
@@ -3312,6 +3457,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	moltres: {
 		num: 146,
 		name: "Moltres",
+		canLearnMovesViaRage: true,
 		types: ["Fire", "Flying"],
 		gender: "N",
 		baseStats: { hp: 90, atk: 100, def: 90, spa: 125, spd: 85, spe: 90 },
@@ -3341,6 +3487,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	dratini: {
 		num: 147,
 		name: "Dratini",
+		canLearnMovesViaRage: true,
 		types: ["Dragon"],
 		baseStats: { hp: 41, atk: 64, def: 45, spa: 50, spd: 50, spe: 50 },
 		abilities: { 0: "Shed Skin", H: "Marvel Scale" },
@@ -3353,6 +3500,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	dragonair: {
 		num: 148,
 		name: "Dragonair",
+		canLearnMovesViaRage: true,
 		types: ["Dragon"],
 		baseStats: { hp: 61, atk: 84, def: 65, spa: 70, spd: 70, spe: 70 },
 		abilities: { 0: "Shed Skin", H: "Marvel Scale" },
@@ -3367,6 +3515,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	dragonite: {
 		num: 149,
 		name: "Dragonite",
+		canLearnMovesViaRage: true,
 		types: ["Dragon", "Flying"],
 		baseStats: { hp: 91, atk: 134, def: 95, spa: 100, spd: 100, spe: 80 },
 		abilities: { 0: "Inner Focus", H: "Multiscale" },
@@ -3397,6 +3546,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	mewtwo: {
 		num: 150,
 		name: "Mewtwo",
+		canLearnMovesViaRage: true,
 		types: ["Psychic"],
 		gender: "N",
 		baseStats: { hp: 106, atk: 110, def: 90, spa: 154, spd: 90, spe: 130 },
@@ -3442,6 +3592,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	mew: {
 		num: 151,
 		name: "Mew",
+		canLearnMovesViaRage: true,
 		types: ["Psychic"],
 		gender: "N",
 		baseStats: { hp: 100, atk: 100, def: 100, spa: 100, spd: 100, spe: 100 },
@@ -3455,6 +3606,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	chikorita: {
 		num: 152,
 		name: "Chikorita",
+		canLearnMovesViaRage: true,
 		types: ["Grass"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 45, atk: 49, def: 65, spa: 49, spd: 65, spe: 45 },
@@ -3468,6 +3620,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	bayleef: {
 		num: 153,
 		name: "Bayleef",
+		canLearnMovesViaRage: true,
 		types: ["Grass"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 60, atk: 62, def: 80, spa: 63, spd: 80, spe: 60 },
@@ -3483,6 +3636,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	meganium: {
 		num: 154,
 		name: "Meganium",
+		canLearnMovesViaRage: true,
 		types: ["Grass"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 80, atk: 82, def: 100, spa: 83, spd: 100, spe: 80 },
@@ -3515,6 +3669,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	cyndaquil: {
 		num: 155,
 		name: "Cyndaquil",
+		canLearnMovesViaRage: true,
 		types: ["Fire"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 39, atk: 52, def: 43, spa: 60, spd: 50, spe: 65 },
@@ -3528,6 +3683,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	quilava: {
 		num: 156,
 		name: "Quilava",
+		canLearnMovesViaRage: true,
 		types: ["Fire"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 58, atk: 64, def: 58, spa: 80, spd: 65, spe: 80 },
@@ -3543,6 +3699,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	typhlosion: {
 		num: 157,
 		name: "Typhlosion",
+		canLearnMovesViaRage: true,
 		types: ["Fire"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 78, atk: 84, def: 78, spa: 109, spd: 85, spe: 100 },
@@ -3575,6 +3732,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	totodile: {
 		num: 158,
 		name: "Totodile",
+		canLearnMovesViaRage: true,
 		types: ["Water"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 50, atk: 65, def: 64, spa: 44, spd: 48, spe: 43 },
@@ -3588,6 +3746,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	croconaw: {
 		num: 159,
 		name: "Croconaw",
+		canLearnMovesViaRage: true,
 		types: ["Water"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 65, atk: 80, def: 80, spa: 59, spd: 63, spe: 58 },
@@ -3603,6 +3762,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	feraligatr: {
 		num: 160,
 		name: "Feraligatr",
+		canLearnMovesViaRage: true,
 		types: ["Water"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 85, atk: 105, def: 100, spa: 79, spd: 83, spe: 78 },
@@ -3635,6 +3795,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	sentret: {
 		num: 161,
 		name: "Sentret",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		baseStats: { hp: 35, atk: 46, def: 34, spa: 35, spd: 45, spe: 20 },
 		abilities: { 0: "Run Away", 1: "Keen Eye", H: "Frisk" },
@@ -3647,6 +3808,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	furret: {
 		num: 162,
 		name: "Furret",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		baseStats: { hp: 85, atk: 76, def: 64, spa: 45, spd: 55, spe: 90 },
 		abilities: { 0: "Run Away", 1: "Keen Eye", H: "Frisk" },
@@ -3660,6 +3822,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	hoothoot: {
 		num: 163,
 		name: "Hoothoot",
+		canLearnMovesViaRage: true,
 		types: ["Normal", "Flying"],
 		baseStats: { hp: 60, atk: 30, def: 30, spa: 36, spd: 56, spe: 50 },
 		abilities: { 0: "Insomnia", 1: "Keen Eye", H: "Tinted Lens" },
@@ -3672,6 +3835,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	noctowl: {
 		num: 164,
 		name: "Noctowl",
+		canLearnMovesViaRage: true,
 		types: ["Normal", "Flying"],
 		baseStats: { hp: 100, atk: 50, def: 50, spa: 86, spd: 96, spe: 70 },
 		abilities: { 0: "Insomnia", 1: "Keen Eye", H: "Tinted Lens" },
@@ -3685,6 +3849,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	ledyba: {
 		num: 165,
 		name: "Ledyba",
+		canLearnMovesViaRage: true,
 		types: ["Bug", "Flying"],
 		baseStats: { hp: 40, atk: 20, def: 30, spa: 40, spd: 80, spe: 55 },
 		abilities: { 0: "Swarm", 1: "Early Bird", H: "Rattled" },
@@ -3697,6 +3862,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	ledian: {
 		num: 166,
 		name: "Ledian",
+		canLearnMovesViaRage: true,
 		types: ["Bug", "Flying"],
 		baseStats: { hp: 55, atk: 35, def: 50, spa: 55, spd: 110, spe: 85 },
 		abilities: { 0: "Swarm", 1: "Early Bird", H: "Iron Fist" },
@@ -3710,6 +3876,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	spinarak: {
 		num: 167,
 		name: "Spinarak",
+		canLearnMovesViaRage: true,
 		types: ["Bug", "Poison"],
 		baseStats: { hp: 40, atk: 60, def: 40, spa: 40, spd: 40, spe: 30 },
 		abilities: { 0: "Swarm", 1: "Insomnia", H: "Sniper" },
@@ -3722,6 +3889,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	ariados: {
 		num: 168,
 		name: "Ariados",
+		canLearnMovesViaRage: true,
 		types: ["Bug", "Poison"],
 		baseStats: { hp: 70, atk: 90, def: 70, spa: 60, spd: 70, spe: 40 },
 		abilities: { 0: "Swarm", 1: "Insomnia", H: "Sniper" },
@@ -3735,6 +3903,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	crobat: {
 		num: 169,
 		name: "Crobat",
+		canLearnMovesViaRage: true,
 		types: ["Poison", "Flying"],
 		baseStats: { hp: 85, atk: 90, def: 80, spa: 70, spd: 80, spe: 130 },
 		abilities: { 0: "Inner Focus", H: "Infiltrator" },
@@ -3748,6 +3917,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	chinchou: {
 		num: 170,
 		name: "Chinchou",
+		canLearnMovesViaRage: true,
 		types: ["Water", "Electric"],
 		baseStats: { hp: 75, atk: 38, def: 38, spa: 56, spd: 56, spe: 67 },
 		abilities: { 0: "Volt Absorb", 1: "Illuminate", H: "Water Absorb" },
@@ -3760,6 +3930,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	lanturn: {
 		num: 171,
 		name: "Lanturn",
+		canLearnMovesViaRage: true,
 		types: ["Water", "Electric"],
 		baseStats: { hp: 125, atk: 58, def: 58, spa: 76, spd: 76, spe: 67 },
 		abilities: { 0: "Volt Absorb", 1: "Illuminate", H: "Water Absorb" },
@@ -3773,6 +3944,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	pichu: {
 		num: 172,
 		name: "Pichu",
+		canLearnMovesViaRage: true,
 		types: ["Electric"],
 		baseStats: { hp: 20, atk: 40, def: 15, spa: 35, spd: 35, spe: 60 },
 		abilities: { 0: "Static", H: "Lightning Rod" },
@@ -3803,6 +3975,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	cleffa: {
 		num: 173,
 		name: "Cleffa",
+		canLearnMovesViaRage: true,
 		types: ["Fairy"],
 		genderRatio: { M: 0.25, F: 0.75 },
 		baseStats: { hp: 50, atk: 25, def: 28, spa: 45, spd: 55, spe: 15 },
@@ -3817,6 +3990,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	igglybuff: {
 		num: 174,
 		name: "Igglybuff",
+		canLearnMovesViaRage: true,
 		types: ["Normal", "Fairy"],
 		genderRatio: { M: 0.25, F: 0.75 },
 		baseStats: { hp: 90, atk: 30, def: 15, spa: 40, spd: 20, spe: 15 },
@@ -3831,6 +4005,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	togepi: {
 		num: 175,
 		name: "Togepi",
+		canLearnMovesViaRage: true,
 		types: ["Fairy"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 35, atk: 20, def: 65, spa: 40, spd: 65, spe: 20 },
@@ -3845,6 +4020,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	togetic: {
 		num: 176,
 		name: "Togetic",
+		canLearnMovesViaRage: true,
 		types: ["Fairy", "Flying"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 55, atk: 40, def: 85, spa: 80, spd: 105, spe: 40 },
@@ -3860,6 +4036,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	natu: {
 		num: 177,
 		name: "Natu",
+		canLearnMovesViaRage: true,
 		types: ["Psychic", "Flying"],
 		baseStats: { hp: 40, atk: 50, def: 45, spa: 70, spd: 45, spe: 70 },
 		abilities: { 0: "Synchronize", 1: "Early Bird", H: "Magic Bounce" },
@@ -3872,6 +4049,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	xatu: {
 		num: 178,
 		name: "Xatu",
+		canLearnMovesViaRage: true,
 		types: ["Psychic", "Flying"],
 		baseStats: { hp: 65, atk: 75, def: 70, spa: 95, spd: 70, spe: 95 },
 		abilities: { 0: "Synchronize", 1: "Early Bird", H: "Magic Bounce" },
@@ -3885,6 +4063,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	mareep: {
 		num: 179,
 		name: "Mareep",
+		canLearnMovesViaRage: true,
 		types: ["Electric"],
 		baseStats: { hp: 55, atk: 40, def: 40, spa: 65, spd: 45, spe: 35 },
 		abilities: { 0: "Static", H: "Plus" },
@@ -3897,6 +4076,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	flaaffy: {
 		num: 180,
 		name: "Flaaffy",
+		canLearnMovesViaRage: true,
 		types: ["Electric"],
 		baseStats: { hp: 70, atk: 55, def: 55, spa: 80, spd: 60, spe: 45 },
 		abilities: { 0: "Static", H: "Plus" },
@@ -3911,6 +4091,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	ampharos: {
 		num: 181,
 		name: "Ampharos",
+		canLearnMovesViaRage: true,
 		types: ["Electric"],
 		baseStats: { hp: 90, atk: 75, def: 85, spa: 115, spd: 90, spe: 55 },
 		abilities: { 0: "Static", H: "Plus" },
@@ -3940,6 +4121,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	bellossom: {
 		num: 182,
 		name: "Bellossom",
+		canLearnMovesViaRage: true,
 		types: ["Grass"],
 		baseStats: { hp: 75, atk: 80, def: 95, spa: 90, spd: 100, spe: 50 },
 		abilities: { 0: "Chlorophyll", H: "Healer" },
@@ -3954,6 +4136,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	marill: {
 		num: 183,
 		name: "Marill",
+		canLearnMovesViaRage: true,
 		types: ["Water", "Fairy"],
 		baseStats: { hp: 70, atk: 20, def: 50, spa: 20, spd: 50, spe: 40 },
 		abilities: { 0: "Thick Fat", 1: "Huge Power", H: "Sap Sipper" },
@@ -3969,6 +4152,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	azumarill: {
 		num: 184,
 		name: "Azumarill",
+		canLearnMovesViaRage: true,
 		types: ["Water", "Fairy"],
 		baseStats: { hp: 100, atk: 50, def: 80, spa: 60, spd: 80, spe: 50 },
 		abilities: { 0: "Thick Fat", 1: "Huge Power", H: "Sap Sipper" },
@@ -3982,6 +4166,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	sudowoodo: {
 		num: 185,
 		name: "Sudowoodo",
+		canLearnMovesViaRage: true,
 		types: ["Rock"],
 		baseStats: { hp: 70, atk: 100, def: 115, spa: 30, spd: 65, spe: 30 },
 		abilities: { 0: "Sturdy", 1: "Rock Head", H: "Rattled" },
@@ -3997,6 +4182,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	politoed: {
 		num: 186,
 		name: "Politoed",
+		canLearnMovesViaRage: true,
 		types: ["Water"],
 		baseStats: { hp: 90, atk: 75, def: 75, spa: 90, spd: 100, spe: 70 },
 		abilities: { 0: "Water Absorb", 1: "Damp", H: "Drizzle" },
@@ -4011,6 +4197,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	hoppip: {
 		num: 187,
 		name: "Hoppip",
+		canLearnMovesViaRage: true,
 		types: ["Grass", "Flying"],
 		baseStats: { hp: 35, atk: 35, def: 40, spa: 35, spd: 55, spe: 50 },
 		abilities: { 0: "Chlorophyll", 1: "Leaf Guard", H: "Infiltrator" },
@@ -4023,6 +4210,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	skiploom: {
 		num: 188,
 		name: "Skiploom",
+		canLearnMovesViaRage: true,
 		types: ["Grass", "Flying"],
 		baseStats: { hp: 55, atk: 45, def: 50, spa: 45, spd: 65, spe: 80 },
 		abilities: { 0: "Chlorophyll", 1: "Leaf Guard", H: "Infiltrator" },
@@ -4037,6 +4225,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	jumpluff: {
 		num: 189,
 		name: "Jumpluff",
+		canLearnMovesViaRage: true,
 		types: ["Grass", "Flying"],
 		baseStats: { hp: 75, atk: 55, def: 70, spa: 55, spd: 95, spe: 110 },
 		abilities: { 0: "Chlorophyll", 1: "Leaf Guard", H: "Infiltrator" },
@@ -4050,6 +4239,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	aipom: {
 		num: 190,
 		name: "Aipom",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		baseStats: { hp: 55, atk: 70, def: 55, spa: 40, spd: 55, spe: 85 },
 		abilities: { 0: "Run Away", 1: "Pickup", H: "Skill Link" },
@@ -4062,6 +4252,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	sunkern: {
 		num: 191,
 		name: "Sunkern",
+		canLearnMovesViaRage: true,
 		types: ["Grass"],
 		baseStats: { hp: 30, atk: 30, def: 30, spa: 30, spd: 30, spe: 30 },
 		abilities: { 0: "Chlorophyll", 1: "Solar Power", H: "Early Bird" },
@@ -4074,6 +4265,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	sunflora: {
 		num: 192,
 		name: "Sunflora",
+		canLearnMovesViaRage: true,
 		types: ["Grass"],
 		baseStats: { hp: 75, atk: 75, def: 55, spa: 105, spd: 85, spe: 30 },
 		abilities: { 0: "Chlorophyll", 1: "Solar Power", H: "Early Bird" },
@@ -4088,6 +4280,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	yanma: {
 		num: 193,
 		name: "Yanma",
+		canLearnMovesViaRage: true,
 		types: ["Bug", "Flying"],
 		baseStats: { hp: 65, atk: 65, def: 45, spa: 75, spd: 45, spe: 95 },
 		abilities: { 0: "Speed Boost", 1: "Compound Eyes", H: "Frisk" },
@@ -4100,6 +4293,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	wooper: {
 		num: 194,
 		name: "Wooper",
+		canLearnMovesViaRage: true,
 		types: ["Water", "Ground"],
 		baseStats: { hp: 55, atk: 45, def: 45, spa: 25, spd: 25, spe: 15 },
 		abilities: { 0: "Damp", 1: "Water Absorb", H: "Unaware" },
@@ -4128,6 +4322,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	quagsire: {
 		num: 195,
 		name: "Quagsire",
+		canLearnMovesViaRage: true,
 		types: ["Water", "Ground"],
 		baseStats: { hp: 95, atk: 85, def: 85, spa: 65, spd: 65, spe: 35 },
 		abilities: { 0: "Damp", 1: "Water Absorb", H: "Unaware" },
@@ -4141,6 +4336,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	espeon: {
 		num: 196,
 		name: "Espeon",
+		canLearnMovesViaRage: true,
 		types: ["Psychic"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 65, atk: 65, def: 60, spa: 130, spd: 95, spe: 110 },
@@ -4156,6 +4352,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	umbreon: {
 		num: 197,
 		name: "Umbreon",
+		canLearnMovesViaRage: true,
 		types: ["Dark"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 95, atk: 65, def: 110, spa: 60, spd: 130, spe: 65 },
@@ -4171,6 +4368,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	murkrow: {
 		num: 198,
 		name: "Murkrow",
+		canLearnMovesViaRage: true,
 		types: ["Dark", "Flying"],
 		baseStats: { hp: 60, atk: 85, def: 42, spa: 85, spd: 42, spe: 91 },
 		abilities: { 0: "Insomnia", 1: "Super Luck", H: "Prankster" },
@@ -4183,6 +4381,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	slowking: {
 		num: 199,
 		name: "Slowking",
+		canLearnMovesViaRage: true,
 		types: ["Water", "Psychic"],
 		baseStats: { hp: 95, atk: 75, def: 80, spa: 100, spd: 110, spe: 30 },
 		abilities: { 0: "Oblivious", 1: "Own Tempo", H: "Regenerator" },
@@ -4215,6 +4414,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	misdreavus: {
 		num: 200,
 		name: "Misdreavus",
+		canLearnMovesViaRage: true,
 		types: ["Ghost"],
 		baseStats: { hp: 60, atk: 60, def: 60, spa: 85, spd: 85, spe: 85 },
 		abilities: { 0: "Levitate" },
@@ -4227,6 +4427,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	unown: {
 		num: 201,
 		name: "Unown",
+		canLearnMovesViaRage: true,
 		baseForme: "A",
 		types: ["Psychic"],
 		gender: "N",
@@ -4242,6 +4443,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	wobbuffet: {
 		num: 202,
 		name: "Wobbuffet",
+		canLearnMovesViaRage: true,
 		types: ["Psychic"],
 		baseStats: { hp: 190, atk: 33, def: 58, spa: 33, spd: 58, spe: 33 },
 		abilities: { 0: "Shadow Tag", H: "Telepathy" },
@@ -4256,6 +4458,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	girafarig: {
 		num: 203,
 		name: "Girafarig",
+		canLearnMovesViaRage: true,
 		types: ["Normal", "Psychic"],
 		baseStats: { hp: 70, atk: 80, def: 65, spa: 90, spd: 65, spe: 85 },
 		abilities: { 0: "Inner Focus", 1: "Early Bird", H: "Sap Sipper" },
@@ -4268,6 +4471,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	pineco: {
 		num: 204,
 		name: "Pineco",
+		canLearnMovesViaRage: true,
 		types: ["Bug"],
 		baseStats: { hp: 50, atk: 65, def: 90, spa: 35, spd: 35, spe: 15 },
 		abilities: { 0: "Sturdy", H: "Overcoat" },
@@ -4280,6 +4484,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	forretress: {
 		num: 205,
 		name: "Forretress",
+		canLearnMovesViaRage: true,
 		types: ["Bug", "Steel"],
 		baseStats: { hp: 75, atk: 90, def: 140, spa: 60, spd: 60, spe: 40 },
 		abilities: { 0: "Sturdy", H: "Overcoat" },
@@ -4293,6 +4498,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	dunsparce: {
 		num: 206,
 		name: "Dunsparce",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		baseStats: { hp: 100, atk: 70, def: 70, spa: 65, spd: 65, spe: 45 },
 		abilities: { 0: "Serene Grace", 1: "Run Away", H: "Rattled" },
@@ -4305,6 +4511,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	gligar: {
 		num: 207,
 		name: "Gligar",
+		canLearnMovesViaRage: true,
 		types: ["Ground", "Flying"],
 		baseStats: { hp: 65, atk: 75, def: 105, spa: 35, spd: 65, spe: 85 },
 		abilities: { 0: "Hyper Cutter", 1: "Sand Veil", H: "Immunity" },
@@ -4317,6 +4524,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	steelix: {
 		num: 208,
 		name: "Steelix",
+		canLearnMovesViaRage: true,
 		types: ["Steel", "Ground"],
 		baseStats: { hp: 75, atk: 85, def: 200, spa: 55, spd: 65, spe: 30 },
 		abilities: { 0: "Rock Head", 1: "Sturdy", H: "Sheer Force" },
@@ -4347,6 +4555,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	snubbull: {
 		num: 209,
 		name: "Snubbull",
+		canLearnMovesViaRage: true,
 		types: ["Fairy"],
 		genderRatio: { M: 0.25, F: 0.75 },
 		baseStats: { hp: 60, atk: 80, def: 50, spa: 40, spd: 40, spe: 30 },
@@ -4360,6 +4569,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	granbull: {
 		num: 210,
 		name: "Granbull",
+		canLearnMovesViaRage: true,
 		types: ["Fairy"],
 		genderRatio: { M: 0.25, F: 0.75 },
 		baseStats: { hp: 90, atk: 120, def: 75, spa: 60, spd: 60, spe: 45 },
@@ -4374,6 +4584,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	qwilfish: {
 		num: 211,
 		name: "Qwilfish",
+		canLearnMovesViaRage: true,
 		types: ["Water", "Poison"],
 		baseStats: { hp: 65, atk: 95, def: 85, spa: 55, spd: 55, spe: 85 },
 		abilities: { 0: "Poison Point", 1: "Swift Swim", H: "Intimidate" },
@@ -4401,6 +4612,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	scizor: {
 		num: 212,
 		name: "Scizor",
+		canLearnMovesViaRage: true,
 		types: ["Bug", "Steel"],
 		baseStats: { hp: 70, atk: 130, def: 100, spa: 55, spd: 80, spe: 65 },
 		abilities: { 0: "Swarm", 1: "Technician", H: "Light Metal" },
@@ -4431,6 +4643,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	shuckle: {
 		num: 213,
 		name: "Shuckle",
+		canLearnMovesViaRage: true,
 		types: ["Bug", "Rock"],
 		baseStats: { hp: 20, atk: 10, def: 230, spa: 10, spd: 230, spe: 5 },
 		abilities: { 0: "Sturdy", 1: "Gluttony", H: "Contrary" },
@@ -4442,6 +4655,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	heracross: {
 		num: 214,
 		name: "Heracross",
+		canLearnMovesViaRage: true,
 		types: ["Bug", "Fighting"],
 		baseStats: { hp: 80, atk: 125, def: 75, spa: 40, spd: 95, spe: 85 },
 		abilities: { 0: "Swarm", 1: "Guts", H: "Moxie" },
@@ -4469,6 +4683,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	sneasel: {
 		num: 215,
 		name: "Sneasel",
+		canLearnMovesViaRage: true,
 		types: ["Dark", "Ice"],
 		baseStats: { hp: 55, atk: 95, def: 55, spa: 35, spd: 75, spe: 115 },
 		abilities: { 0: "Inner Focus", 1: "Keen Eye", H: "Pickpocket" },
@@ -4497,6 +4712,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	teddiursa: {
 		num: 216,
 		name: "Teddiursa",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		baseStats: { hp: 60, atk: 80, def: 50, spa: 50, spd: 50, spe: 40 },
 		abilities: { 0: "Pickup", 1: "Quick Feet", H: "Honey Gather" },
@@ -4509,6 +4725,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	ursaring: {
 		num: 217,
 		name: "Ursaring",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		baseStats: { hp: 90, atk: 130, def: 75, spa: 75, spd: 75, spe: 55 },
 		abilities: { 0: "Guts", 1: "Quick Feet", H: "Unnerve" },
@@ -4523,6 +4740,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	slugma: {
 		num: 218,
 		name: "Slugma",
+		canLearnMovesViaRage: true,
 		types: ["Fire"],
 		baseStats: { hp: 40, atk: 40, def: 40, spa: 70, spd: 40, spe: 20 },
 		abilities: { 0: "Magma Armor", 1: "Flame Body", H: "Weak Armor" },
@@ -4535,6 +4753,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	magcargo: {
 		num: 219,
 		name: "Magcargo",
+		canLearnMovesViaRage: true,
 		types: ["Fire", "Rock"],
 		baseStats: { hp: 60, atk: 50, def: 120, spa: 90, spd: 80, spe: 30 },
 		abilities: { 0: "Magma Armor", 1: "Flame Body", H: "Weak Armor" },
@@ -4548,6 +4767,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	swinub: {
 		num: 220,
 		name: "Swinub",
+		canLearnMovesViaRage: true,
 		types: ["Ice", "Ground"],
 		baseStats: { hp: 50, atk: 50, def: 40, spa: 30, spd: 30, spe: 50 },
 		abilities: { 0: "Oblivious", 1: "Snow Cloak", H: "Thick Fat" },
@@ -4560,6 +4780,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	piloswine: {
 		num: 221,
 		name: "Piloswine",
+		canLearnMovesViaRage: true,
 		types: ["Ice", "Ground"],
 		baseStats: { hp: 100, atk: 100, def: 80, spa: 60, spd: 60, spe: 50 },
 		abilities: { 0: "Oblivious", 1: "Snow Cloak", H: "Thick Fat" },
@@ -4574,6 +4795,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	corsola: {
 		num: 222,
 		name: "Corsola",
+		canLearnMovesViaRage: true,
 		types: ["Water", "Rock"],
 		genderRatio: { M: 0.25, F: 0.75 },
 		baseStats: { hp: 65, atk: 55, def: 95, spa: 65, spd: 95, spe: 35 },
@@ -4603,6 +4825,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	remoraid: {
 		num: 223,
 		name: "Remoraid",
+		canLearnMovesViaRage: true,
 		types: ["Water"],
 		baseStats: { hp: 35, atk: 65, def: 35, spa: 65, spd: 35, spe: 65 },
 		abilities: { 0: "Hustle", 1: "Sniper", H: "Moody" },
@@ -4615,6 +4838,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	octillery: {
 		num: 224,
 		name: "Octillery",
+		canLearnMovesViaRage: true,
 		types: ["Water"],
 		baseStats: { hp: 75, atk: 105, def: 75, spa: 105, spd: 75, spe: 45 },
 		abilities: { 0: "Suction Cups", 1: "Sniper", H: "Moody" },
@@ -4628,6 +4852,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	delibird: {
 		num: 225,
 		name: "Delibird",
+		canLearnMovesViaRage: true,
 		types: ["Ice", "Flying"],
 		baseStats: { hp: 45, atk: 55, def: 45, spa: 65, spd: 45, spe: 75 },
 		abilities: { 0: "Vital Spirit", 1: "Hustle", H: "Insomnia" },
@@ -4639,6 +4864,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	mantine: {
 		num: 226,
 		name: "Mantine",
+		canLearnMovesViaRage: true,
 		types: ["Water", "Flying"],
 		baseStats: { hp: 85, atk: 40, def: 70, spa: 80, spd: 140, spe: 70 },
 		abilities: { 0: "Swift Swim", 1: "Water Absorb", H: "Water Veil" },
@@ -4654,6 +4880,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	skarmory: {
 		num: 227,
 		name: "Skarmory",
+		canLearnMovesViaRage: true,
 		types: ["Steel", "Flying"],
 		baseStats: { hp: 65, atk: 80, def: 140, spa: 40, spd: 70, spe: 70 },
 		abilities: { 0: "Keen Eye", 1: "Sturdy", H: "Weak Armor" },
@@ -4682,6 +4909,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	houndour: {
 		num: 228,
 		name: "Houndour",
+		canLearnMovesViaRage: true,
 		types: ["Dark", "Fire"],
 		baseStats: { hp: 45, atk: 60, def: 30, spa: 80, spd: 50, spe: 65 },
 		abilities: { 0: "Early Bird", 1: "Flash Fire", H: "Unnerve" },
@@ -4694,6 +4922,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	houndoom: {
 		num: 229,
 		name: "Houndoom",
+		canLearnMovesViaRage: true,
 		types: ["Dark", "Fire"],
 		baseStats: { hp: 75, atk: 90, def: 50, spa: 110, spd: 80, spe: 95 },
 		abilities: { 0: "Early Bird", 1: "Flash Fire", H: "Unnerve" },
@@ -4723,6 +4952,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	kingdra: {
 		num: 230,
 		name: "Kingdra",
+		canLearnMovesViaRage: true,
 		types: ["Water", "Dragon"],
 		baseStats: { hp: 75, atk: 95, def: 95, spa: 95, spd: 95, spe: 85 },
 		abilities: { 0: "Swift Swim", 1: "Sniper", H: "Damp" },
@@ -4737,6 +4967,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	phanpy: {
 		num: 231,
 		name: "Phanpy",
+		canLearnMovesViaRage: true,
 		types: ["Ground"],
 		baseStats: { hp: 90, atk: 60, def: 60, spa: 40, spd: 40, spe: 40 },
 		abilities: { 0: "Pickup", H: "Sand Veil" },
@@ -4749,6 +4980,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	donphan: {
 		num: 232,
 		name: "Donphan",
+		canLearnMovesViaRage: true,
 		types: ["Ground"],
 		baseStats: { hp: 90, atk: 120, def: 120, spa: 60, spd: 60, spe: 50 },
 		abilities: { 0: "Sturdy", H: "Sand Veil" },
@@ -4762,6 +4994,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	porygon2: {
 		num: 233,
 		name: "Porygon2",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		gender: "N",
 		baseStats: { hp: 85, atk: 80, def: 90, spa: 105, spd: 95, spe: 60 },
@@ -4778,6 +5011,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	stantler: {
 		num: 234,
 		name: "Stantler",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		baseStats: { hp: 73, atk: 95, def: 62, spa: 85, spd: 65, spe: 85 },
 		abilities: { 0: "Intimidate", 1: "Frisk", H: "Sap Sipper" },
@@ -4790,6 +5024,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	smeargle: {
 		num: 235,
 		name: "Smeargle",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		baseStats: { hp: 55, atk: 20, def: 35, spa: 20, spd: 45, spe: 75 },
 		abilities: { 0: "Own Tempo", 1: "Technician", H: "Moody" },
@@ -4801,6 +5036,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	tyrogue: {
 		num: 236,
 		name: "Tyrogue",
+		canLearnMovesViaRage: true,
 		types: ["Fighting"],
 		gender: "M",
 		baseStats: { hp: 35, atk: 35, def: 35, spa: 35, spd: 35, spe: 35 },
@@ -4815,6 +5051,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	hitmontop: {
 		num: 237,
 		name: "Hitmontop",
+		canLearnMovesViaRage: true,
 		types: ["Fighting"],
 		gender: "M",
 		baseStats: { hp: 50, atk: 95, def: 95, spa: 35, spd: 110, spe: 70 },
@@ -4830,6 +5067,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	smoochum: {
 		num: 238,
 		name: "Smoochum",
+		canLearnMovesViaRage: true,
 		types: ["Ice", "Psychic"],
 		gender: "F",
 		baseStats: { hp: 45, atk: 30, def: 15, spa: 85, spd: 65, spe: 65 },
@@ -4844,6 +5082,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	elekid: {
 		num: 239,
 		name: "Elekid",
+		canLearnMovesViaRage: true,
 		types: ["Electric"],
 		genderRatio: { M: 0.75, F: 0.25 },
 		baseStats: { hp: 45, atk: 63, def: 37, spa: 65, spd: 55, spe: 95 },
@@ -4858,6 +5097,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	magby: {
 		num: 240,
 		name: "Magby",
+		canLearnMovesViaRage: true,
 		types: ["Fire"],
 		genderRatio: { M: 0.75, F: 0.25 },
 		baseStats: { hp: 45, atk: 75, def: 37, spa: 70, spd: 55, spe: 83 },
@@ -4872,6 +5112,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	miltank: {
 		num: 241,
 		name: "Miltank",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		gender: "F",
 		baseStats: { hp: 95, atk: 80, def: 105, spa: 40, spd: 70, spe: 100 },
@@ -4884,6 +5125,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	blissey: {
 		num: 242,
 		name: "Blissey",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		gender: "F",
 		baseStats: { hp: 255, atk: 10, def: 10, spa: 75, spd: 135, spe: 55 },
@@ -4898,6 +5140,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	raikou: {
 		num: 243,
 		name: "Raikou",
+		canLearnMovesViaRage: true,
 		types: ["Electric"],
 		gender: "N",
 		baseStats: { hp: 90, atk: 85, def: 75, spa: 115, spd: 100, spe: 115 },
@@ -4911,6 +5154,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	entei: {
 		num: 244,
 		name: "Entei",
+		canLearnMovesViaRage: true,
 		types: ["Fire"],
 		gender: "N",
 		baseStats: { hp: 115, atk: 115, def: 85, spa: 90, spd: 75, spe: 100 },
@@ -4924,6 +5168,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	suicune: {
 		num: 245,
 		name: "Suicune",
+		canLearnMovesViaRage: true,
 		types: ["Water"],
 		gender: "N",
 		baseStats: { hp: 100, atk: 75, def: 115, spa: 90, spd: 115, spe: 85 },
@@ -4937,6 +5182,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	larvitar: {
 		num: 246,
 		name: "Larvitar",
+		canLearnMovesViaRage: true,
 		types: ["Rock", "Ground"],
 		baseStats: { hp: 50, atk: 64, def: 50, spa: 45, spd: 50, spe: 41 },
 		abilities: { 0: "Guts", H: "Sand Veil" },
@@ -4949,6 +5195,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	pupitar: {
 		num: 247,
 		name: "Pupitar",
+		canLearnMovesViaRage: true,
 		types: ["Rock", "Ground"],
 		baseStats: { hp: 70, atk: 84, def: 70, spa: 65, spd: 70, spe: 51 },
 		abilities: { 0: "Shed Skin" },
@@ -4963,6 +5210,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	tyranitar: {
 		num: 248,
 		name: "Tyranitar",
+		canLearnMovesViaRage: true,
 		types: ["Rock", "Dark"],
 		baseStats: { hp: 100, atk: 134, def: 110, spa: 95, spd: 100, spe: 61 },
 		abilities: { 0: "Sand Stream", H: "Unnerve" },
@@ -4992,6 +5240,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	lugia: {
 		num: 249,
 		name: "Lugia",
+		canLearnMovesViaRage: true,
 		types: ["Psychic", "Flying"],
 		gender: "N",
 		baseStats: { hp: 106, atk: 90, def: 130, spa: 90, spd: 154, spe: 110 },
@@ -5005,6 +5254,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	hooh: {
 		num: 250,
 		name: "Ho-Oh",
+		canLearnMovesViaRage: true,
 		types: ["Fire", "Flying"],
 		gender: "N",
 		baseStats: { hp: 106, atk: 130, def: 90, spa: 110, spd: 154, spe: 90 },
@@ -5018,6 +5268,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	celebi: {
 		num: 251,
 		name: "Celebi",
+		canLearnMovesViaRage: true,
 		types: ["Psychic", "Grass"],
 		gender: "N",
 		baseStats: { hp: 100, atk: 100, def: 100, spa: 100, spd: 100, spe: 100 },
@@ -5031,6 +5282,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	treecko: {
 		num: 252,
 		name: "Treecko",
+		canLearnMovesViaRage: true,
 		types: ["Grass"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 40, atk: 45, def: 35, spa: 65, spd: 55, spe: 70 },
@@ -5044,6 +5296,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	grovyle: {
 		num: 253,
 		name: "Grovyle",
+		canLearnMovesViaRage: true,
 		types: ["Grass"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 50, atk: 65, def: 45, spa: 85, spd: 65, spe: 95 },
@@ -5059,6 +5312,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	sceptile: {
 		num: 254,
 		name: "Sceptile",
+		canLearnMovesViaRage: true,
 		types: ["Grass"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 70, atk: 85, def: 65, spa: 105, spd: 85, spe: 120 },
@@ -5090,6 +5344,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	torchic: {
 		num: 255,
 		name: "Torchic",
+		canLearnMovesViaRage: true,
 		types: ["Fire"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 45, atk: 60, def: 40, spa: 70, spd: 50, spe: 45 },
@@ -5103,6 +5358,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	combusken: {
 		num: 256,
 		name: "Combusken",
+		canLearnMovesViaRage: true,
 		types: ["Fire", "Fighting"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 60, atk: 85, def: 60, spa: 85, spd: 60, spe: 55 },
@@ -5118,6 +5374,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	blaziken: {
 		num: 257,
 		name: "Blaziken",
+		canLearnMovesViaRage: true,
 		types: ["Fire", "Fighting"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 80, atk: 120, def: 70, spa: 110, spd: 70, spe: 80 },
@@ -5149,6 +5406,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	mudkip: {
 		num: 258,
 		name: "Mudkip",
+		canLearnMovesViaRage: true,
 		types: ["Water"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 50, atk: 70, def: 50, spa: 50, spd: 50, spe: 40 },
@@ -5162,6 +5420,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	marshtomp: {
 		num: 259,
 		name: "Marshtomp",
+		canLearnMovesViaRage: true,
 		types: ["Water", "Ground"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 70, atk: 85, def: 70, spa: 60, spd: 70, spe: 50 },
@@ -5177,6 +5436,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	swampert: {
 		num: 260,
 		name: "Swampert",
+		canLearnMovesViaRage: true,
 		types: ["Water", "Ground"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 100, atk: 110, def: 90, spa: 85, spd: 90, spe: 60 },
@@ -5208,6 +5468,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	poochyena: {
 		num: 261,
 		name: "Poochyena",
+		canLearnMovesViaRage: true,
 		types: ["Dark"],
 		baseStats: { hp: 35, atk: 55, def: 35, spa: 30, spd: 30, spe: 35 },
 		abilities: { 0: "Run Away", 1: "Quick Feet", H: "Rattled" },
@@ -5220,6 +5481,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	mightyena: {
 		num: 262,
 		name: "Mightyena",
+		canLearnMovesViaRage: true,
 		types: ["Dark"],
 		baseStats: { hp: 70, atk: 90, def: 70, spa: 60, spd: 60, spe: 70 },
 		abilities: { 0: "Intimidate", 1: "Quick Feet", H: "Moxie" },
@@ -5233,6 +5495,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	zigzagoon: {
 		num: 263,
 		name: "Zigzagoon",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		baseStats: { hp: 38, atk: 30, def: 41, spa: 30, spd: 41, spe: 60 },
 		abilities: { 0: "Pickup", 1: "Gluttony", H: "Quick Feet" },
@@ -5261,6 +5524,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	linoone: {
 		num: 264,
 		name: "Linoone",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		baseStats: { hp: 78, atk: 70, def: 61, spa: 50, spd: 61, spe: 100 },
 		abilities: { 0: "Pickup", 1: "Gluttony", H: "Quick Feet" },
@@ -5292,6 +5556,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	wurmple: {
 		num: 265,
 		name: "Wurmple",
+		canLearnMovesViaRage: true,
 		types: ["Bug"],
 		baseStats: { hp: 45, atk: 45, def: 35, spa: 20, spd: 30, spe: 20 },
 		abilities: { 0: "Shield Dust", H: "Run Away" },
@@ -5304,6 +5569,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	silcoon: {
 		num: 266,
 		name: "Silcoon",
+		canLearnMovesViaRage: true,
 		types: ["Bug"],
 		baseStats: { hp: 50, atk: 35, def: 55, spa: 25, spd: 25, spe: 15 },
 		abilities: { 0: "Shed Skin" },
@@ -5318,6 +5584,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	beautifly: {
 		num: 267,
 		name: "Beautifly",
+		canLearnMovesViaRage: true,
 		types: ["Bug", "Flying"],
 		baseStats: { hp: 60, atk: 70, def: 50, spa: 100, spd: 50, spe: 65 },
 		abilities: { 0: "Swarm", H: "Rivalry" },
@@ -5331,6 +5598,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	cascoon: {
 		num: 268,
 		name: "Cascoon",
+		canLearnMovesViaRage: true,
 		types: ["Bug"],
 		baseStats: { hp: 50, atk: 35, def: 55, spa: 25, spd: 25, spe: 15 },
 		abilities: { 0: "Shed Skin" },
@@ -5345,6 +5613,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	dustox: {
 		num: 269,
 		name: "Dustox",
+		canLearnMovesViaRage: true,
 		types: ["Bug", "Poison"],
 		baseStats: { hp: 60, atk: 50, def: 70, spa: 50, spd: 90, spe: 65 },
 		abilities: { 0: "Shield Dust", H: "Compound Eyes" },
@@ -5358,6 +5627,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	lotad: {
 		num: 270,
 		name: "Lotad",
+		canLearnMovesViaRage: true,
 		types: ["Water", "Grass"],
 		baseStats: { hp: 40, atk: 30, def: 30, spa: 40, spd: 50, spe: 30 },
 		abilities: { 0: "Swift Swim", 1: "Rain Dish", H: "Own Tempo" },
@@ -5370,6 +5640,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	lombre: {
 		num: 271,
 		name: "Lombre",
+		canLearnMovesViaRage: true,
 		types: ["Water", "Grass"],
 		baseStats: { hp: 60, atk: 50, def: 50, spa: 60, spd: 70, spe: 50 },
 		abilities: { 0: "Swift Swim", 1: "Rain Dish", H: "Own Tempo" },
@@ -5384,6 +5655,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	ludicolo: {
 		num: 272,
 		name: "Ludicolo",
+		canLearnMovesViaRage: true,
 		types: ["Water", "Grass"],
 		baseStats: { hp: 80, atk: 70, def: 70, spa: 90, spd: 100, spe: 70 },
 		abilities: { 0: "Swift Swim", 1: "Rain Dish", H: "Own Tempo" },
@@ -5398,6 +5670,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	seedot: {
 		num: 273,
 		name: "Seedot",
+		canLearnMovesViaRage: true,
 		types: ["Grass"],
 		baseStats: { hp: 40, atk: 40, def: 50, spa: 30, spd: 30, spe: 30 },
 		abilities: { 0: "Chlorophyll", 1: "Early Bird", H: "Pickpocket" },
@@ -5410,6 +5683,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	nuzleaf: {
 		num: 274,
 		name: "Nuzleaf",
+		canLearnMovesViaRage: true,
 		types: ["Grass", "Dark"],
 		baseStats: { hp: 70, atk: 70, def: 40, spa: 60, spd: 40, spe: 60 },
 		abilities: { 0: "Chlorophyll", 1: "Early Bird", H: "Pickpocket" },
@@ -5424,6 +5698,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	shiftry: {
 		num: 275,
 		name: "Shiftry",
+		canLearnMovesViaRage: true,
 		types: ["Grass", "Dark"],
 		baseStats: { hp: 90, atk: 100, def: 60, spa: 90, spd: 60, spe: 80 },
 		abilities: { 0: "Chlorophyll", 1: "Wind Rider", H: "Pickpocket" },
@@ -5438,6 +5713,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	taillow: {
 		num: 276,
 		name: "Taillow",
+		canLearnMovesViaRage: true,
 		types: ["Normal", "Flying"],
 		baseStats: { hp: 40, atk: 55, def: 30, spa: 30, spd: 30, spe: 85 },
 		abilities: { 0: "Guts", H: "Scrappy" },
@@ -5450,6 +5726,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	swellow: {
 		num: 277,
 		name: "Swellow",
+		canLearnMovesViaRage: true,
 		types: ["Normal", "Flying"],
 		baseStats: { hp: 60, atk: 85, def: 60, spa: 75, spd: 50, spe: 125 },
 		abilities: { 0: "Guts", H: "Scrappy" },
@@ -5463,6 +5740,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	wingull: {
 		num: 278,
 		name: "Wingull",
+		canLearnMovesViaRage: true,
 		types: ["Water", "Flying"],
 		baseStats: { hp: 40, atk: 30, def: 30, spa: 55, spd: 30, spe: 85 },
 		abilities: { 0: "Keen Eye", 1: "Hydration", H: "Rain Dish" },
@@ -5475,6 +5753,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	pelipper: {
 		num: 279,
 		name: "Pelipper",
+		canLearnMovesViaRage: true,
 		types: ["Water", "Flying"],
 		baseStats: { hp: 60, atk: 50, def: 100, spa: 95, spd: 70, spe: 65 },
 		abilities: { 0: "Keen Eye", 1: "Drizzle", H: "Rain Dish" },
@@ -5488,6 +5767,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	ralts: {
 		num: 280,
 		name: "Ralts",
+		canLearnMovesViaRage: true,
 		types: ["Psychic", "Fairy"],
 		baseStats: { hp: 28, atk: 25, def: 25, spa: 45, spd: 35, spe: 40 },
 		abilities: { 0: "Synchronize", 1: "Trace", H: "Telepathy" },
@@ -5500,6 +5780,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	kirlia: {
 		num: 281,
 		name: "Kirlia",
+		canLearnMovesViaRage: true,
 		types: ["Psychic", "Fairy"],
 		baseStats: { hp: 38, atk: 35, def: 35, spa: 65, spd: 55, spe: 50 },
 		abilities: { 0: "Synchronize", 1: "Trace", H: "Telepathy" },
@@ -5514,6 +5795,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	gardevoir: {
 		num: 282,
 		name: "Gardevoir",
+		canLearnMovesViaRage: true,
 		types: ["Psychic", "Fairy"],
 		baseStats: { hp: 68, atk: 65, def: 65, spa: 125, spd: 115, spe: 80 },
 		abilities: { 0: "Synchronize", 1: "Trace", H: "Telepathy" },
@@ -5543,6 +5825,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	surskit: {
 		num: 283,
 		name: "Surskit",
+		canLearnMovesViaRage: true,
 		types: ["Bug", "Water"],
 		baseStats: { hp: 40, atk: 30, def: 32, spa: 50, spd: 52, spe: 65 },
 		abilities: { 0: "Swift Swim", H: "Rain Dish" },
@@ -5555,6 +5838,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	masquerain: {
 		num: 284,
 		name: "Masquerain",
+		canLearnMovesViaRage: true,
 		types: ["Bug", "Flying"],
 		baseStats: { hp: 70, atk: 60, def: 62, spa: 100, spd: 82, spe: 80 },
 		abilities: { 0: "Intimidate", H: "Unnerve" },
@@ -5568,6 +5852,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	shroomish: {
 		num: 285,
 		name: "Shroomish",
+		canLearnMovesViaRage: true,
 		types: ["Grass"],
 		baseStats: { hp: 60, atk: 40, def: 60, spa: 40, spd: 60, spe: 35 },
 		abilities: { 0: "Effect Spore", 1: "Poison Heal", H: "Quick Feet" },
@@ -5580,6 +5865,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	breloom: {
 		num: 286,
 		name: "Breloom",
+		canLearnMovesViaRage: true,
 		types: ["Grass", "Fighting"],
 		baseStats: { hp: 60, atk: 130, def: 80, spa: 60, spd: 60, spe: 70 },
 		abilities: { 0: "Effect Spore", 1: "Poison Heal", H: "Technician" },
@@ -5593,6 +5879,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	slakoth: {
 		num: 287,
 		name: "Slakoth",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		baseStats: { hp: 60, atk: 60, def: 60, spa: 35, spd: 35, spe: 30 },
 		abilities: { 0: "Truant" },
@@ -5605,6 +5892,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	vigoroth: {
 		num: 288,
 		name: "Vigoroth",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		baseStats: { hp: 80, atk: 80, def: 80, spa: 55, spd: 55, spe: 90 },
 		abilities: { 0: "Vital Spirit" },
@@ -5619,6 +5907,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	slaking: {
 		num: 289,
 		name: "Slaking",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		baseStats: { hp: 150, atk: 160, def: 100, spa: 95, spd: 65, spe: 100 },
 		abilities: { 0: "Truant" },
@@ -5632,6 +5921,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	nincada: {
 		num: 290,
 		name: "Nincada",
+		canLearnMovesViaRage: true,
 		types: ["Bug", "Ground"],
 		baseStats: { hp: 31, atk: 45, def: 90, spa: 30, spd: 30, spe: 40 },
 		abilities: { 0: "Compound Eyes", H: "Run Away" },
@@ -5644,6 +5934,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	ninjask: {
 		num: 291,
 		name: "Ninjask",
+		canLearnMovesViaRage: true,
 		types: ["Bug", "Flying"],
 		baseStats: { hp: 61, atk: 90, def: 45, spa: 50, spd: 50, spe: 160 },
 		abilities: { 0: "Speed Boost", H: "Infiltrator" },
@@ -5657,6 +5948,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	shedinja: {
 		num: 292,
 		name: "Shedinja",
+		canLearnMovesViaRage: true,
 		types: ["Bug", "Ghost"],
 		gender: "N",
 		baseStats: { hp: 1, atk: 90, def: 45, spa: 30, spd: 30, spe: 40 },
@@ -5672,6 +5964,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	whismur: {
 		num: 293,
 		name: "Whismur",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		baseStats: { hp: 64, atk: 51, def: 23, spa: 51, spd: 23, spe: 28 },
 		abilities: { 0: "Soundproof", H: "Rattled" },
@@ -5684,6 +5977,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	loudred: {
 		num: 294,
 		name: "Loudred",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		baseStats: { hp: 84, atk: 71, def: 43, spa: 71, spd: 43, spe: 48 },
 		abilities: { 0: "Soundproof", H: "Scrappy" },
@@ -5698,6 +5992,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	exploud: {
 		num: 295,
 		name: "Exploud",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		baseStats: { hp: 104, atk: 91, def: 63, spa: 91, spd: 73, spe: 68 },
 		abilities: { 0: "Soundproof", H: "Scrappy" },
@@ -5711,6 +6006,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	makuhita: {
 		num: 296,
 		name: "Makuhita",
+		canLearnMovesViaRage: true,
 		types: ["Fighting"],
 		genderRatio: { M: 0.75, F: 0.25 },
 		baseStats: { hp: 72, atk: 60, def: 30, spa: 20, spd: 30, spe: 25 },
@@ -5724,6 +6020,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	hariyama: {
 		num: 297,
 		name: "Hariyama",
+		canLearnMovesViaRage: true,
 		types: ["Fighting"],
 		genderRatio: { M: 0.75, F: 0.25 },
 		baseStats: { hp: 144, atk: 120, def: 60, spa: 40, spd: 60, spe: 50 },
@@ -5738,6 +6035,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	azurill: {
 		num: 298,
 		name: "Azurill",
+		canLearnMovesViaRage: true,
 		types: ["Normal", "Fairy"],
 		genderRatio: { M: 0.25, F: 0.75 },
 		baseStats: { hp: 50, atk: 20, def: 40, spa: 20, spd: 40, spe: 20 },
@@ -5752,6 +6050,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	nosepass: {
 		num: 299,
 		name: "Nosepass",
+		canLearnMovesViaRage: true,
 		types: ["Rock"],
 		baseStats: { hp: 30, atk: 45, def: 135, spa: 45, spd: 90, spe: 30 },
 		abilities: { 0: "Sturdy", 1: "Magnet Pull", H: "Sand Force" },
@@ -5764,6 +6063,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	skitty: {
 		num: 300,
 		name: "Skitty",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		genderRatio: { M: 0.25, F: 0.75 },
 		baseStats: { hp: 50, atk: 45, def: 45, spa: 35, spd: 35, spe: 50 },
@@ -5777,6 +6077,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	delcatty: {
 		num: 301,
 		name: "Delcatty",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		genderRatio: { M: 0.25, F: 0.75 },
 		baseStats: { hp: 70, atk: 65, def: 65, spa: 55, spd: 55, spe: 90 },
@@ -5792,6 +6093,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	sableye: {
 		num: 302,
 		name: "Sableye",
+		canLearnMovesViaRage: true,
 		types: ["Dark", "Ghost"],
 		baseStats: { hp: 50, atk: 75, def: 75, spa: 65, spd: 65, spe: 50 },
 		abilities: { 0: "Keen Eye", 1: "Stall", H: "Prankster" },
@@ -5819,6 +6121,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	mawile: {
 		num: 303,
 		name: "Mawile",
+		canLearnMovesViaRage: true,
 		types: ["Steel", "Fairy"],
 		baseStats: { hp: 50, atk: 85, def: 85, spa: 55, spd: 55, spe: 50 },
 		abilities: { 0: "Hyper Cutter", 1: "Intimidate", H: "Sheer Force" },
@@ -5846,6 +6149,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	aron: {
 		num: 304,
 		name: "Aron",
+		canLearnMovesViaRage: true,
 		types: ["Steel", "Rock"],
 		baseStats: { hp: 50, atk: 70, def: 100, spa: 40, spd: 40, spe: 30 },
 		abilities: { 0: "Sturdy", 1: "Rock Head", H: "Heavy Metal" },
@@ -5858,6 +6162,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	lairon: {
 		num: 305,
 		name: "Lairon",
+		canLearnMovesViaRage: true,
 		types: ["Steel", "Rock"],
 		baseStats: { hp: 60, atk: 90, def: 140, spa: 50, spd: 50, spe: 40 },
 		abilities: { 0: "Sturdy", 1: "Rock Head", H: "Heavy Metal" },
@@ -5872,6 +6177,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	aggron: {
 		num: 306,
 		name: "Aggron",
+		canLearnMovesViaRage: true,
 		types: ["Steel", "Rock"],
 		baseStats: { hp: 70, atk: 110, def: 180, spa: 60, spd: 60, spe: 50 },
 		abilities: { 0: "Sturdy", 1: "Rock Head", H: "Heavy Metal" },
@@ -5901,6 +6207,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	meditite: {
 		num: 307,
 		name: "Meditite",
+		canLearnMovesViaRage: true,
 		types: ["Fighting", "Psychic"],
 		baseStats: { hp: 30, atk: 40, def: 55, spa: 40, spd: 55, spe: 60 },
 		abilities: { 0: "Pure Power", H: "Telepathy" },
@@ -5913,6 +6220,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	medicham: {
 		num: 308,
 		name: "Medicham",
+		canLearnMovesViaRage: true,
 		types: ["Fighting", "Psychic"],
 		baseStats: { hp: 60, atk: 60, def: 75, spa: 60, spd: 75, spe: 80 },
 		abilities: { 0: "Pure Power", H: "Telepathy" },
@@ -5942,6 +6250,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	electrike: {
 		num: 309,
 		name: "Electrike",
+		canLearnMovesViaRage: true,
 		types: ["Electric"],
 		baseStats: { hp: 40, atk: 45, def: 40, spa: 65, spd: 40, spe: 65 },
 		abilities: { 0: "Static", 1: "Lightning Rod", H: "Minus" },
@@ -5954,6 +6263,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	manectric: {
 		num: 310,
 		name: "Manectric",
+		canLearnMovesViaRage: true,
 		types: ["Electric"],
 		baseStats: { hp: 70, atk: 75, def: 60, spa: 105, spd: 60, spe: 105 },
 		abilities: { 0: "Static", 1: "Lightning Rod", H: "Minus" },
@@ -5983,6 +6293,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	plusle: {
 		num: 311,
 		name: "Plusle",
+		canLearnMovesViaRage: true,
 		types: ["Electric"],
 		baseStats: { hp: 60, atk: 50, def: 40, spa: 85, spd: 75, spe: 95 },
 		abilities: { 0: "Plus", H: "Lightning Rod" },
@@ -5994,6 +6305,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	minun: {
 		num: 312,
 		name: "Minun",
+		canLearnMovesViaRage: true,
 		types: ["Electric"],
 		baseStats: { hp: 60, atk: 40, def: 50, spa: 75, spd: 85, spe: 95 },
 		abilities: { 0: "Minus", H: "Volt Absorb" },
@@ -6005,6 +6317,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	volbeat: {
 		num: 313,
 		name: "Volbeat",
+		canLearnMovesViaRage: true,
 		types: ["Bug"],
 		gender: "M",
 		baseStats: { hp: 65, atk: 73, def: 75, spa: 47, spd: 85, spe: 85 },
@@ -6018,6 +6331,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	illumise: {
 		num: 314,
 		name: "Illumise",
+		canLearnMovesViaRage: true,
 		types: ["Bug"],
 		gender: "F",
 		baseStats: { hp: 65, atk: 47, def: 75, spa: 73, spd: 85, spe: 85 },
@@ -6030,6 +6344,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	roselia: {
 		num: 315,
 		name: "Roselia",
+		canLearnMovesViaRage: true,
 		types: ["Grass", "Poison"],
 		baseStats: { hp: 50, atk: 60, def: 45, spa: 100, spd: 80, spe: 65 },
 		abilities: { 0: "Natural Cure", 1: "Poison Point", H: "Leaf Guard" },
@@ -6046,6 +6361,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	gulpin: {
 		num: 316,
 		name: "Gulpin",
+		canLearnMovesViaRage: true,
 		types: ["Poison"],
 		baseStats: { hp: 70, atk: 43, def: 53, spa: 43, spd: 53, spe: 40 },
 		abilities: { 0: "Liquid Ooze", 1: "Sticky Hold", H: "Gluttony" },
@@ -6058,6 +6374,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	swalot: {
 		num: 317,
 		name: "Swalot",
+		canLearnMovesViaRage: true,
 		types: ["Poison"],
 		baseStats: { hp: 100, atk: 73, def: 83, spa: 73, spd: 83, spe: 55 },
 		abilities: { 0: "Liquid Ooze", 1: "Sticky Hold", H: "Gluttony" },
@@ -6071,6 +6388,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	carvanha: {
 		num: 318,
 		name: "Carvanha",
+		canLearnMovesViaRage: true,
 		types: ["Water", "Dark"],
 		baseStats: { hp: 45, atk: 90, def: 20, spa: 65, spd: 20, spe: 65 },
 		abilities: { 0: "Rough Skin", H: "Speed Boost" },
@@ -6083,6 +6401,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	sharpedo: {
 		num: 319,
 		name: "Sharpedo",
+		canLearnMovesViaRage: true,
 		types: ["Water", "Dark"],
 		baseStats: { hp: 70, atk: 120, def: 40, spa: 95, spd: 40, spe: 95 },
 		abilities: { 0: "Rough Skin", H: "Speed Boost" },
@@ -6112,6 +6431,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	wailmer: {
 		num: 320,
 		name: "Wailmer",
+		canLearnMovesViaRage: true,
 		types: ["Water"],
 		baseStats: { hp: 130, atk: 70, def: 35, spa: 70, spd: 35, spe: 60 },
 		abilities: { 0: "Water Veil", 1: "Oblivious", H: "Pressure" },
@@ -6124,6 +6444,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	wailord: {
 		num: 321,
 		name: "Wailord",
+		canLearnMovesViaRage: true,
 		types: ["Water"],
 		baseStats: { hp: 170, atk: 90, def: 45, spa: 90, spd: 45, spe: 60 },
 		abilities: { 0: "Water Veil", 1: "Oblivious", H: "Pressure" },
@@ -6137,6 +6458,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	numel: {
 		num: 322,
 		name: "Numel",
+		canLearnMovesViaRage: true,
 		types: ["Fire", "Ground"],
 		baseStats: { hp: 60, atk: 60, def: 40, spa: 65, spd: 45, spe: 35 },
 		abilities: { 0: "Oblivious", 1: "Simple", H: "Own Tempo" },
@@ -6149,6 +6471,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	camerupt: {
 		num: 323,
 		name: "Camerupt",
+		canLearnMovesViaRage: true,
 		types: ["Fire", "Ground"],
 		baseStats: { hp: 70, atk: 100, def: 70, spa: 105, spd: 75, spe: 40 },
 		abilities: { 0: "Magma Armor", 1: "Solid Rock", H: "Anger Point" },
@@ -6178,6 +6501,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	torkoal: {
 		num: 324,
 		name: "Torkoal",
+		canLearnMovesViaRage: true,
 		types: ["Fire"],
 		baseStats: { hp: 70, atk: 85, def: 140, spa: 85, spd: 70, spe: 20 },
 		abilities: { 0: "White Smoke", 1: "Drought", H: "Shell Armor" },
@@ -6189,6 +6513,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	spoink: {
 		num: 325,
 		name: "Spoink",
+		canLearnMovesViaRage: true,
 		types: ["Psychic"],
 		baseStats: { hp: 60, atk: 25, def: 35, spa: 70, spd: 80, spe: 60 },
 		abilities: { 0: "Thick Fat", 1: "Own Tempo", H: "Gluttony" },
@@ -6201,6 +6526,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	grumpig: {
 		num: 326,
 		name: "Grumpig",
+		canLearnMovesViaRage: true,
 		types: ["Psychic"],
 		baseStats: { hp: 80, atk: 45, def: 65, spa: 90, spd: 110, spe: 80 },
 		abilities: { 0: "Thick Fat", 1: "Own Tempo", H: "Gluttony" },
@@ -6214,6 +6540,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	spinda: {
 		num: 327,
 		name: "Spinda",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		baseStats: { hp: 60, atk: 60, def: 60, spa: 60, spd: 60, spe: 60 },
 		abilities: { 0: "Own Tempo", 1: "Tangled Feet", H: "Contrary" },
@@ -6225,6 +6552,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	trapinch: {
 		num: 328,
 		name: "Trapinch",
+		canLearnMovesViaRage: true,
 		types: ["Ground"],
 		baseStats: { hp: 45, atk: 100, def: 45, spa: 45, spd: 45, spe: 10 },
 		abilities: { 0: "Hyper Cutter", 1: "Arena Trap", H: "Sheer Force" },
@@ -6237,6 +6565,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	vibrava: {
 		num: 329,
 		name: "Vibrava",
+		canLearnMovesViaRage: true,
 		types: ["Ground", "Dragon"],
 		baseStats: { hp: 50, atk: 70, def: 50, spa: 50, spd: 50, spe: 70 },
 		abilities: { 0: "Levitate" },
@@ -6251,6 +6580,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	flygon: {
 		num: 330,
 		name: "Flygon",
+		canLearnMovesViaRage: true,
 		types: ["Ground", "Dragon"],
 		baseStats: { hp: 80, atk: 100, def: 80, spa: 80, spd: 80, spe: 100 },
 		abilities: { 0: "Levitate" },
@@ -6264,6 +6594,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	cacnea: {
 		num: 331,
 		name: "Cacnea",
+		canLearnMovesViaRage: true,
 		types: ["Grass"],
 		baseStats: { hp: 50, atk: 85, def: 40, spa: 85, spd: 40, spe: 35 },
 		abilities: { 0: "Sand Veil", H: "Water Absorb" },
@@ -6276,6 +6607,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	cacturne: {
 		num: 332,
 		name: "Cacturne",
+		canLearnMovesViaRage: true,
 		types: ["Grass", "Dark"],
 		baseStats: { hp: 70, atk: 115, def: 60, spa: 115, spd: 60, spe: 55 },
 		abilities: { 0: "Sand Veil", H: "Water Absorb" },
@@ -6289,6 +6621,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	swablu: {
 		num: 333,
 		name: "Swablu",
+		canLearnMovesViaRage: true,
 		types: ["Normal", "Flying"],
 		baseStats: { hp: 45, atk: 40, def: 60, spa: 40, spd: 75, spe: 50 },
 		abilities: { 0: "Natural Cure", H: "Cloud Nine" },
@@ -6301,6 +6634,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	altaria: {
 		num: 334,
 		name: "Altaria",
+		canLearnMovesViaRage: true,
 		types: ["Dragon", "Flying"],
 		baseStats: { hp: 75, atk: 70, def: 90, spa: 70, spd: 105, spe: 80 },
 		abilities: { 0: "Natural Cure", H: "Cloud Nine" },
@@ -6330,6 +6664,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	zangoose: {
 		num: 335,
 		name: "Zangoose",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		baseStats: { hp: 73, atk: 115, def: 60, spa: 60, spd: 60, spe: 90 },
 		abilities: { 0: "Immunity", H: "Toxic Boost" },
@@ -6341,6 +6676,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	seviper: {
 		num: 336,
 		name: "Seviper",
+		canLearnMovesViaRage: true,
 		types: ["Poison"],
 		baseStats: { hp: 73, atk: 100, def: 60, spa: 100, spd: 60, spe: 65 },
 		abilities: { 0: "Shed Skin", H: "Infiltrator" },
@@ -6352,6 +6688,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	lunatone: {
 		num: 337,
 		name: "Lunatone",
+		canLearnMovesViaRage: true,
 		types: ["Rock", "Psychic"],
 		gender: "N",
 		baseStats: { hp: 90, atk: 55, def: 65, spa: 95, spd: 85, spe: 70 },
@@ -6364,6 +6701,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	solrock: {
 		num: 338,
 		name: "Solrock",
+		canLearnMovesViaRage: true,
 		types: ["Rock", "Psychic"],
 		gender: "N",
 		baseStats: { hp: 90, atk: 95, def: 85, spa: 55, spd: 65, spe: 70 },
@@ -6376,6 +6714,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	barboach: {
 		num: 339,
 		name: "Barboach",
+		canLearnMovesViaRage: true,
 		types: ["Water", "Ground"],
 		baseStats: { hp: 50, atk: 48, def: 43, spa: 46, spd: 41, spe: 60 },
 		abilities: { 0: "Oblivious", 1: "Anticipation", H: "Hydration" },
@@ -6388,6 +6727,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	whiscash: {
 		num: 340,
 		name: "Whiscash",
+		canLearnMovesViaRage: true,
 		types: ["Water", "Ground"],
 		baseStats: { hp: 110, atk: 78, def: 73, spa: 76, spd: 71, spe: 60 },
 		abilities: { 0: "Oblivious", 1: "Anticipation", H: "Hydration" },
@@ -6401,6 +6741,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	corphish: {
 		num: 341,
 		name: "Corphish",
+		canLearnMovesViaRage: true,
 		types: ["Water"],
 		baseStats: { hp: 43, atk: 80, def: 65, spa: 50, spd: 35, spe: 35 },
 		abilities: { 0: "Hyper Cutter", 1: "Shell Armor", H: "Adaptability" },
@@ -6413,6 +6754,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	crawdaunt: {
 		num: 342,
 		name: "Crawdaunt",
+		canLearnMovesViaRage: true,
 		types: ["Water", "Dark"],
 		baseStats: { hp: 63, atk: 120, def: 85, spa: 90, spd: 55, spe: 55 },
 		abilities: { 0: "Hyper Cutter", 1: "Shell Armor", H: "Adaptability" },
@@ -6426,6 +6768,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	baltoy: {
 		num: 343,
 		name: "Baltoy",
+		canLearnMovesViaRage: true,
 		types: ["Ground", "Psychic"],
 		gender: "N",
 		baseStats: { hp: 40, atk: 40, def: 55, spa: 40, spd: 70, spe: 55 },
@@ -6439,6 +6782,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	claydol: {
 		num: 344,
 		name: "Claydol",
+		canLearnMovesViaRage: true,
 		types: ["Ground", "Psychic"],
 		gender: "N",
 		baseStats: { hp: 60, atk: 70, def: 105, spa: 70, spd: 120, spe: 75 },
@@ -6453,6 +6797,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	lileep: {
 		num: 345,
 		name: "Lileep",
+		canLearnMovesViaRage: true,
 		types: ["Rock", "Grass"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 66, atk: 41, def: 77, spa: 61, spd: 87, spe: 23 },
@@ -6466,6 +6811,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	cradily: {
 		num: 346,
 		name: "Cradily",
+		canLearnMovesViaRage: true,
 		types: ["Rock", "Grass"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 86, atk: 81, def: 97, spa: 81, spd: 107, spe: 43 },
@@ -6480,6 +6826,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	anorith: {
 		num: 347,
 		name: "Anorith",
+		canLearnMovesViaRage: true,
 		types: ["Rock", "Bug"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 45, atk: 95, def: 50, spa: 40, spd: 50, spe: 75 },
@@ -6493,6 +6840,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	armaldo: {
 		num: 348,
 		name: "Armaldo",
+		canLearnMovesViaRage: true,
 		types: ["Rock", "Bug"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 75, atk: 125, def: 100, spa: 70, spd: 80, spe: 45 },
@@ -6507,6 +6855,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	feebas: {
 		num: 349,
 		name: "Feebas",
+		canLearnMovesViaRage: true,
 		types: ["Water"],
 		baseStats: { hp: 20, atk: 15, def: 20, spa: 10, spd: 55, spe: 80 },
 		abilities: { 0: "Swift Swim", 1: "Oblivious", H: "Adaptability" },
@@ -6519,6 +6868,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	milotic: {
 		num: 350,
 		name: "Milotic",
+		canLearnMovesViaRage: true,
 		types: ["Water"],
 		baseStats: { hp: 95, atk: 60, def: 79, spa: 100, spd: 125, spe: 81 },
 		abilities: { 0: "Marvel Scale", 1: "Competitive", H: "Cute Charm" },
@@ -6533,6 +6883,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	castform: {
 		num: 351,
 		name: "Castform",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		baseStats: { hp: 70, atk: 70, def: 70, spa: 70, spd: 70, spe: 70 },
 		abilities: { 0: "Forecast" },
@@ -6591,6 +6942,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	kecleon: {
 		num: 352,
 		name: "Kecleon",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		baseStats: { hp: 60, atk: 90, def: 70, spa: 60, spd: 120, spe: 40 },
 		abilities: { 0: "Color Change", H: "Protean" },
@@ -6602,6 +6954,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	shuppet: {
 		num: 353,
 		name: "Shuppet",
+		canLearnMovesViaRage: true,
 		types: ["Ghost"],
 		baseStats: { hp: 44, atk: 75, def: 35, spa: 63, spd: 33, spe: 45 },
 		abilities: { 0: "Insomnia", 1: "Frisk", H: "Cursed Body" },
@@ -6614,6 +6967,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	banette: {
 		num: 354,
 		name: "Banette",
+		canLearnMovesViaRage: true,
 		types: ["Ghost"],
 		baseStats: { hp: 64, atk: 115, def: 65, spa: 83, spd: 63, spe: 65 },
 		abilities: { 0: "Insomnia", 1: "Frisk", H: "Cursed Body" },
@@ -6643,6 +6997,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	duskull: {
 		num: 355,
 		name: "Duskull",
+		canLearnMovesViaRage: true,
 		types: ["Ghost"],
 		baseStats: { hp: 20, atk: 40, def: 90, spa: 30, spd: 90, spe: 25 },
 		abilities: { 0: "Levitate", H: "Frisk" },
@@ -6655,6 +7010,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	dusclops: {
 		num: 356,
 		name: "Dusclops",
+		canLearnMovesViaRage: true,
 		types: ["Ghost"],
 		baseStats: { hp: 40, atk: 70, def: 130, spa: 60, spd: 130, spe: 25 },
 		abilities: { 0: "Pressure", H: "Frisk" },
@@ -6669,6 +7025,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	tropius: {
 		num: 357,
 		name: "Tropius",
+		canLearnMovesViaRage: true,
 		types: ["Grass", "Flying"],
 		baseStats: { hp: 99, atk: 68, def: 83, spa: 72, spd: 87, spe: 51 },
 		abilities: { 0: "Chlorophyll", 1: "Solar Power", H: "Harvest" },
@@ -6680,6 +7037,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	chimecho: {
 		num: 358,
 		name: "Chimecho",
+		canLearnMovesViaRage: true,
 		types: ["Psychic"],
 		baseStats: { hp: 75, atk: 50, def: 80, spa: 95, spd: 90, spe: 65 },
 		abilities: { 0: "Levitate" },
@@ -6712,6 +7070,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	absol: {
 		num: 359,
 		name: "Absol",
+		canLearnMovesViaRage: true,
 		types: ["Dark"],
 		baseStats: { hp: 65, atk: 130, def: 60, spa: 75, spd: 60, spe: 75 },
 		abilities: { 0: "Pressure", 1: "Super Luck", H: "Justified" },
@@ -6754,6 +7113,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	wynaut: {
 		num: 360,
 		name: "Wynaut",
+		canLearnMovesViaRage: true,
 		types: ["Psychic"],
 		baseStats: { hp: 95, atk: 23, def: 48, spa: 23, spd: 48, spe: 23 },
 		abilities: { 0: "Shadow Tag", H: "Telepathy" },
@@ -6767,6 +7127,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	snorunt: {
 		num: 361,
 		name: "Snorunt",
+		canLearnMovesViaRage: true,
 		types: ["Ice"],
 		baseStats: { hp: 50, atk: 50, def: 50, spa: 50, spd: 50, spe: 50 },
 		abilities: { 0: "Inner Focus", 1: "Ice Body", H: "Moody" },
@@ -6779,6 +7140,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	glalie: {
 		num: 362,
 		name: "Glalie",
+		canLearnMovesViaRage: true,
 		types: ["Ice"],
 		baseStats: { hp: 80, atk: 80, def: 80, spa: 80, spd: 80, spe: 80 },
 		abilities: { 0: "Inner Focus", 1: "Ice Body", H: "Moody" },
@@ -6808,6 +7170,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	spheal: {
 		num: 363,
 		name: "Spheal",
+		canLearnMovesViaRage: true,
 		types: ["Ice", "Water"],
 		baseStats: { hp: 70, atk: 40, def: 50, spa: 55, spd: 50, spe: 25 },
 		abilities: { 0: "Thick Fat", 1: "Ice Body", H: "Oblivious" },
@@ -6820,6 +7183,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	sealeo: {
 		num: 364,
 		name: "Sealeo",
+		canLearnMovesViaRage: true,
 		types: ["Ice", "Water"],
 		baseStats: { hp: 90, atk: 60, def: 70, spa: 75, spd: 70, spe: 45 },
 		abilities: { 0: "Thick Fat", 1: "Ice Body", H: "Oblivious" },
@@ -6834,6 +7198,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	walrein: {
 		num: 365,
 		name: "Walrein",
+		canLearnMovesViaRage: true,
 		types: ["Ice", "Water"],
 		baseStats: { hp: 110, atk: 80, def: 90, spa: 95, spd: 90, spe: 65 },
 		abilities: { 0: "Thick Fat", 1: "Ice Body", H: "Oblivious" },
@@ -6847,6 +7212,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	clamperl: {
 		num: 366,
 		name: "Clamperl",
+		canLearnMovesViaRage: true,
 		types: ["Water"],
 		baseStats: { hp: 35, atk: 64, def: 85, spa: 74, spd: 55, spe: 32 },
 		abilities: { 0: "Shell Armor", H: "Rattled" },
@@ -6859,6 +7225,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	huntail: {
 		num: 367,
 		name: "Huntail",
+		canLearnMovesViaRage: true,
 		types: ["Water"],
 		baseStats: { hp: 55, atk: 104, def: 105, spa: 94, spd: 75, spe: 52 },
 		abilities: { 0: "Swift Swim", H: "Water Veil" },
@@ -6873,6 +7240,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	gorebyss: {
 		num: 368,
 		name: "Gorebyss",
+		canLearnMovesViaRage: true,
 		types: ["Water"],
 		baseStats: { hp: 55, atk: 84, def: 105, spa: 114, spd: 75, spe: 52 },
 		abilities: { 0: "Swift Swim", H: "Hydration" },
@@ -6887,6 +7255,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	relicanth: {
 		num: 369,
 		name: "Relicanth",
+		canLearnMovesViaRage: true,
 		types: ["Water", "Rock"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 100, atk: 90, def: 130, spa: 45, spd: 65, spe: 55 },
@@ -6899,6 +7268,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	luvdisc: {
 		num: 370,
 		name: "Luvdisc",
+		canLearnMovesViaRage: true,
 		types: ["Water"],
 		genderRatio: { M: 0.25, F: 0.75 },
 		baseStats: { hp: 43, atk: 30, def: 55, spa: 40, spd: 65, spe: 97 },
@@ -6911,6 +7281,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	bagon: {
 		num: 371,
 		name: "Bagon",
+		canLearnMovesViaRage: true,
 		types: ["Dragon"],
 		baseStats: { hp: 45, atk: 75, def: 60, spa: 40, spd: 30, spe: 50 },
 		abilities: { 0: "Rock Head", H: "Sheer Force" },
@@ -6923,6 +7294,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	shelgon: {
 		num: 372,
 		name: "Shelgon",
+		canLearnMovesViaRage: true,
 		types: ["Dragon"],
 		baseStats: { hp: 65, atk: 95, def: 100, spa: 60, spd: 50, spe: 50 },
 		abilities: { 0: "Rock Head", H: "Overcoat" },
@@ -6937,6 +7309,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	salamence: {
 		num: 373,
 		name: "Salamence",
+		canLearnMovesViaRage: true,
 		types: ["Dragon", "Flying"],
 		baseStats: { hp: 95, atk: 135, def: 80, spa: 110, spd: 80, spe: 100 },
 		abilities: { 0: "Intimidate", H: "Moxie" },
@@ -6966,6 +7339,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	beldum: {
 		num: 374,
 		name: "Beldum",
+		canLearnMovesViaRage: true,
 		types: ["Steel", "Psychic"],
 		gender: "N",
 		baseStats: { hp: 40, atk: 55, def: 80, spa: 35, spd: 60, spe: 30 },
@@ -6979,6 +7353,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	metang: {
 		num: 375,
 		name: "Metang",
+		canLearnMovesViaRage: true,
 		types: ["Steel", "Psychic"],
 		gender: "N",
 		baseStats: { hp: 60, atk: 75, def: 100, spa: 55, spd: 80, spe: 50 },
@@ -6994,6 +7369,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	metagross: {
 		num: 376,
 		name: "Metagross",
+		canLearnMovesViaRage: true,
 		types: ["Steel", "Psychic"],
 		gender: "N",
 		baseStats: { hp: 80, atk: 135, def: 130, spa: 95, spd: 90, spe: 70 },
@@ -7025,6 +7401,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	regirock: {
 		num: 377,
 		name: "Regirock",
+		canLearnMovesViaRage: true,
 		types: ["Rock"],
 		gender: "N",
 		baseStats: { hp: 80, atk: 100, def: 200, spa: 50, spd: 100, spe: 50 },
@@ -7038,6 +7415,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	regice: {
 		num: 378,
 		name: "Regice",
+		canLearnMovesViaRage: true,
 		types: ["Ice"],
 		gender: "N",
 		baseStats: { hp: 80, atk: 50, def: 100, spa: 100, spd: 200, spe: 50 },
@@ -7051,6 +7429,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	registeel: {
 		num: 379,
 		name: "Registeel",
+		canLearnMovesViaRage: true,
 		types: ["Steel"],
 		gender: "N",
 		baseStats: { hp: 80, atk: 75, def: 150, spa: 75, spd: 150, spe: 50 },
@@ -7064,6 +7443,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	latias: {
 		num: 380,
 		name: "Latias",
+		canLearnMovesViaRage: true,
 		types: ["Dragon", "Psychic"],
 		gender: "F",
 		baseStats: { hp: 80, atk: 80, def: 90, spa: 110, spd: 130, spe: 110 },
@@ -7094,6 +7474,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	latios: {
 		num: 381,
 		name: "Latios",
+		canLearnMovesViaRage: true,
 		types: ["Dragon", "Psychic"],
 		gender: "M",
 		baseStats: { hp: 80, atk: 90, def: 80, spa: 130, spd: 110, spe: 110 },
@@ -7124,6 +7505,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	kyogre: {
 		num: 382,
 		name: "Kyogre",
+		canLearnMovesViaRage: true,
 		types: ["Water"],
 		gender: "N",
 		baseStats: { hp: 100, atk: 100, def: 90, spa: 150, spd: 140, spe: 90 },
@@ -7154,6 +7536,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	groudon: {
 		num: 383,
 		name: "Groudon",
+		canLearnMovesViaRage: true,
 		types: ["Ground"],
 		gender: "N",
 		baseStats: { hp: 100, atk: 150, def: 140, spa: 100, spd: 90, spe: 90 },
@@ -7184,6 +7567,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	rayquaza: {
 		num: 384,
 		name: "Rayquaza",
+		canLearnMovesViaRage: true,
 		types: ["Dragon", "Flying"],
 		gender: "N",
 		baseStats: { hp: 105, atk: 150, def: 90, spa: 150, spd: 90, spe: 95 },
@@ -7214,6 +7598,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	jirachi: {
 		num: 385,
 		name: "Jirachi",
+		canLearnMovesViaRage: true,
 		types: ["Steel", "Psychic"],
 		gender: "N",
 		baseStats: { hp: 100, atk: 100, def: 100, spa: 100, spd: 100, spe: 100 },
@@ -7227,6 +7612,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	deoxys: {
 		num: 386,
 		name: "Deoxys",
+		canLearnMovesViaRage: true,
 		baseForme: "Normal",
 		types: ["Psychic"],
 		gender: "N",
@@ -7330,6 +7716,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	chimchar: {
 		num: 390,
 		name: "Chimchar",
+		canLearnMovesViaRage: true,
 		types: ["Fire"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 44, atk: 58, def: 44, spa: 58, spd: 44, spe: 61 },
@@ -7343,6 +7730,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	monferno: {
 		num: 391,
 		name: "Monferno",
+		canLearnMovesViaRage: true,
 		types: ["Fire", "Fighting"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 64, atk: 78, def: 52, spa: 78, spd: 52, spe: 81 },
@@ -7358,6 +7746,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	infernape: {
 		num: 392,
 		name: "Infernape",
+		canLearnMovesViaRage: true,
 		types: ["Fire", "Fighting"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 76, atk: 104, def: 71, spa: 104, spd: 71, spe: 108 },
@@ -7572,6 +7961,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	roserade: {
 		num: 407,
 		name: "Roserade",
+		canLearnMovesViaRage: true,
 		types: ["Grass", "Poison"],
 		baseStats: { hp: 60, atk: 70, def: 65, spa: 125, spd: 105, spe: 90 },
 		abilities: { 0: "Natural Cure", 1: "Poison Point", H: "Technician" },
@@ -7883,6 +8273,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	ambipom: {
 		num: 424,
 		name: "Ambipom",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		baseStats: { hp: 75, atk: 100, def: 66, spa: 60, spd: 66, spe: 115 },
 		abilities: { 0: "Technician", 1: "Pickup", H: "Skill Link" },
@@ -7963,6 +8354,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	mismagius: {
 		num: 429,
 		name: "Mismagius",
+		canLearnMovesViaRage: true,
 		types: ["Ghost"],
 		baseStats: { hp: 60, atk: 60, def: 60, spa: 105, spd: 105, spe: 105 },
 		abilities: { 0: "Levitate" },
@@ -7977,6 +8369,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	honchkrow: {
 		num: 430,
 		name: "Honchkrow",
+		canLearnMovesViaRage: true,
 		types: ["Dark", "Flying"],
 		baseStats: { hp: 100, atk: 125, def: 52, spa: 105, spd: 52, spe: 71 },
 		abilities: { 0: "Insomnia", 1: "Super Luck", H: "Moxie" },
@@ -7991,6 +8384,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	glameow: {
 		num: 431,
 		name: "Glameow",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		genderRatio: { M: 0.25, F: 0.75 },
 		baseStats: { hp: 49, atk: 55, def: 42, spa: 42, spd: 37, spe: 85 },
@@ -8004,6 +8398,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	purugly: {
 		num: 432,
 		name: "Purugly",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		genderRatio: { M: 0.25, F: 0.75 },
 		baseStats: { hp: 71, atk: 82, def: 64, spa: 64, spd: 59, spe: 112 },
@@ -8083,6 +8478,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	bonsly: {
 		num: 438,
 		name: "Bonsly",
+		canLearnMovesViaRage: true,
 		types: ["Rock"],
 		baseStats: { hp: 50, atk: 80, def: 95, spa: 10, spd: 45, spe: 10 },
 		abilities: { 0: "Sturdy", 1: "Rock Head", H: "Rattled" },
@@ -8096,6 +8492,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	mimejr: {
 		num: 439,
 		name: "Mime Jr.",
+		canLearnMovesViaRage: true,
 		types: ["Psychic", "Fairy"],
 		baseStats: { hp: 20, atk: 25, def: 45, spa: 70, spd: 90, spe: 60 },
 		abilities: { 0: "Soundproof", 1: "Filter", H: "Technician" },
@@ -8109,6 +8506,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	happiny: {
 		num: 440,
 		name: "Happiny",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		gender: "F",
 		baseStats: { hp: 100, atk: 5, def: 5, spa: 15, spd: 65, spe: 30 },
@@ -8123,6 +8521,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	chatot: {
 		num: 441,
 		name: "Chatot",
+		canLearnMovesViaRage: true,
 		types: ["Normal", "Flying"],
 		baseStats: { hp: 76, atk: 65, def: 45, spa: 92, spd: 42, spe: 91 },
 		abilities: { 0: "Keen Eye", 1: "Tangled Feet", H: "Big Pecks" },
@@ -8215,6 +8614,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	munchlax: {
 		num: 446,
 		name: "Munchlax",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 135, atk: 85, def: 40, spa: 40, spd: 85, spe: 5 },
@@ -8229,6 +8629,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	riolu: {
 		num: 447,
 		name: "Riolu",
+		canLearnMovesViaRage: true,
 		types: ["Fighting"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 40, atk: 70, def: 40, spa: 35, spd: 40, spe: 60 },
@@ -8243,6 +8644,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	lucario: {
 		num: 448,
 		name: "Lucario",
+		canLearnMovesViaRage: true,
 		types: ["Fighting", "Steel"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 70, atk: 110, def: 70, spa: 115, spd: 70, spe: 90 },
@@ -8456,6 +8858,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	weavile: {
 		num: 461,
 		name: "Weavile",
+		canLearnMovesViaRage: true,
 		types: ["Dark", "Ice"],
 		baseStats: { hp: 70, atk: 120, def: 65, spa: 45, spd: 85, spe: 125 },
 		abilities: { 0: "Pressure", H: "Pickpocket" },
@@ -8471,6 +8874,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	magnezone: {
 		num: 462,
 		name: "Magnezone",
+		canLearnMovesViaRage: true,
 		types: ["Electric", "Steel"],
 		gender: "N",
 		baseStats: { hp: 70, atk: 70, def: 115, spa: 130, spd: 90, spe: 60 },
@@ -8486,6 +8890,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	lickilicky: {
 		num: 463,
 		name: "Lickilicky",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		baseStats: { hp: 110, atk: 85, def: 95, spa: 80, spd: 95, spe: 50 },
 		abilities: { 0: "Own Tempo", 1: "Oblivious", H: "Cloud Nine" },
@@ -8500,6 +8905,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	rhyperior: {
 		num: 464,
 		name: "Rhyperior",
+		canLearnMovesViaRage: true,
 		types: ["Ground", "Rock"],
 		baseStats: { hp: 115, atk: 140, def: 130, spa: 55, spd: 55, spe: 40 },
 		abilities: { 0: "Lightning Rod", 1: "Solid Rock", H: "Reckless" },
@@ -8514,6 +8920,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	tangrowth: {
 		num: 465,
 		name: "Tangrowth",
+		canLearnMovesViaRage: true,
 		types: ["Grass"],
 		baseStats: { hp: 100, atk: 100, def: 125, spa: 110, spd: 50, spe: 50 },
 		abilities: { 0: "Chlorophyll", 1: "Leaf Guard", H: "Regenerator" },
@@ -8528,6 +8935,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	electivire: {
 		num: 466,
 		name: "Electivire",
+		canLearnMovesViaRage: true,
 		types: ["Electric"],
 		genderRatio: { M: 0.75, F: 0.25 },
 		baseStats: { hp: 75, atk: 123, def: 67, spa: 95, spd: 85, spe: 95 },
@@ -8543,6 +8951,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	magmortar: {
 		num: 467,
 		name: "Magmortar",
+		canLearnMovesViaRage: true,
 		types: ["Fire"],
 		genderRatio: { M: 0.75, F: 0.25 },
 		baseStats: { hp: 75, atk: 95, def: 67, spa: 125, spd: 95, spe: 83 },
@@ -8558,6 +8967,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	togekiss: {
 		num: 468,
 		name: "Togekiss",
+		canLearnMovesViaRage: true,
 		types: ["Fairy", "Flying"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 85, atk: 50, def: 95, spa: 120, spd: 115, spe: 80 },
@@ -8573,6 +8983,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	yanmega: {
 		num: 469,
 		name: "Yanmega",
+		canLearnMovesViaRage: true,
 		types: ["Bug", "Flying"],
 		baseStats: { hp: 86, atk: 76, def: 86, spa: 116, spd: 56, spe: 95 },
 		abilities: { 0: "Speed Boost", 1: "Tinted Lens", H: "Frisk" },
@@ -8587,6 +8998,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	leafeon: {
 		num: 470,
 		name: "Leafeon",
+		canLearnMovesViaRage: true,
 		types: ["Grass"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 65, atk: 110, def: 130, spa: 60, spd: 65, spe: 95 },
@@ -8602,6 +9014,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	glaceon: {
 		num: 471,
 		name: "Glaceon",
+		canLearnMovesViaRage: true,
 		types: ["Ice"],
 		genderRatio: { M: 0.875, F: 0.125 },
 		baseStats: { hp: 65, atk: 60, def: 110, spa: 130, spd: 95, spe: 65 },
@@ -8617,6 +9030,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	gliscor: {
 		num: 472,
 		name: "Gliscor",
+		canLearnMovesViaRage: true,
 		types: ["Ground", "Flying"],
 		baseStats: { hp: 75, atk: 95, def: 125, spa: 45, spd: 75, spe: 95 },
 		abilities: { 0: "Hyper Cutter", 1: "Sand Veil", H: "Poison Heal" },
@@ -8632,6 +9046,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	mamoswine: {
 		num: 473,
 		name: "Mamoswine",
+		canLearnMovesViaRage: true,
 		types: ["Ice", "Ground"],
 		baseStats: { hp: 110, atk: 130, def: 80, spa: 70, spd: 60, spe: 80 },
 		abilities: { 0: "Oblivious", 1: "Snow Cloak", H: "Thick Fat" },
@@ -8646,6 +9061,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	porygonz: {
 		num: 474,
 		name: "Porygon-Z",
+		canLearnMovesViaRage: true,
 		types: ["Normal"],
 		gender: "N",
 		baseStats: { hp: 85, atk: 80, def: 70, spa: 135, spd: 75, spe: 90 },
@@ -8661,6 +9077,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	gallade: {
 		num: 475,
 		name: "Gallade",
+		canLearnMovesViaRage: true,
 		types: ["Psychic", "Fighting"],
 		gender: "M",
 		baseStats: { hp: 68, atk: 125, def: 65, spa: 65, spd: 115, spe: 80 },
@@ -8693,6 +9110,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	probopass: {
 		num: 476,
 		name: "Probopass",
+		canLearnMovesViaRage: true,
 		types: ["Rock", "Steel"],
 		baseStats: { hp: 60, atk: 55, def: 145, spa: 75, spd: 150, spe: 40 },
 		abilities: { 0: "Sturdy", 1: "Magnet Pull", H: "Sand Force" },
@@ -8707,6 +9125,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	dusknoir: {
 		num: 477,
 		name: "Dusknoir",
+		canLearnMovesViaRage: true,
 		types: ["Ghost"],
 		baseStats: { hp: 45, atk: 100, def: 135, spa: 65, spd: 135, spe: 45 },
 		abilities: { 0: "Pressure", H: "Frisk" },
@@ -8721,6 +9140,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	froslass: {
 		num: 478,
 		name: "Froslass",
+		canLearnMovesViaRage: true,
 		types: ["Ice", "Ghost"],
 		gender: "F",
 		baseStats: { hp: 70, atk: 80, def: 70, spa: 80, spd: 70, spe: 110 },
@@ -8856,6 +9276,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 	mesprit: {
 		num: 481,
 		name: "Mesprit",
+		canLearnMovesViaRage: true,
 		types: ["Psychic"],
 		gender: "N",
 		baseStats: { hp: 80, atk: 105, def: 105, spa: 105, spd: 105, spe: 80 },

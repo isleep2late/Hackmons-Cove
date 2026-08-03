@@ -1882,7 +1882,8 @@ function NN_OF(n: number) {
 
 const NN_EVIOLITE = [
   'ballerine', 'ditto', 'farfetchd', 'farfetchdsw', 'golppy', 'minicorn', 'para',
-  'pinsir', 'pinsirmega', 'pinsirsw', 'slowbro', 'slowbromega', 'slowbrosw', 'tangel',
+  'pinsir', 'pinsirmega', 'pinsirsw', 'shuckle', 'slowbro', 'slowbromega', 'slowbrosw',
+  'tangel', 'trifox', 'twinz',
 ];
 
 function getBestJudgmentType(gen: Generation, defender: Pokemon): TypeName {
