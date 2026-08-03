@@ -212,7 +212,7 @@ export class LastFMInterface {
 	}
 	checkHasKey() {
 		if (!Config.lastfmkey) {
-			throw new Chat.ErrorMessage(`This server does not support last.fm commands. If you're the owner, you can enable them by setting up Config.lastfmkey.`);
+			throw new Chat.ErrorMessage(`We do not support last.fm commands. Sorry!`);
 		}
 	}
 	getScrobbleBadge() {

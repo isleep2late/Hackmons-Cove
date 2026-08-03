@@ -94,7 +94,7 @@ export class YoutubeInterface {
 	}
 	async getChannelData(link: string, username?: string) {
 		if (!Config.youtubeKey) {
-			throw new Chat.ErrorMessage(`This server does not support YouTube commands. If you're the owner, you can enable them by setting up Config.youtubekey.`);
+			throw new Chat.ErrorMessage(`We do not support YouTube commands. Sorry!`);
 		}
 		const id = this.getId(link);
 		const raw = await Net(`${ROOT}channels`).get({
@@ -231,7 +231,7 @@ export class YoutubeInterface {
 	}
 	async generateVideoDisplay(link: string, fullInfo = false) {
 		if (!Config.youtubeKey) {
-			throw new Chat.ErrorMessage(`This server does not support YouTube commands. If you're the owner, you can enable them by setting up Config.youtubekey.`);
+			throw new Chat.ErrorMessage(`We do note support YouTube commands. Sorry!`);
 		}
 		const id = this.getId(link);
 		const info = await this.getVideoData(id);
