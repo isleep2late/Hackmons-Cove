@@ -655,6 +655,131 @@ export const Dex = new class implements ModdedDex {
 		el.src = path + 'data/pokedex-mini-bw.js' + qs;
 		document.getElementsByTagName('body')[0].appendChild(el);
 	}
+
+	phnnDisguisePalette(realSpecies: Species, mode: 'gen1' | 'sw', shiny?: boolean): string[] | null {
+		if (mode === 'gen1') {
+			const num = realSpecies.num >= 1 && realSpecies.num <= 151 ? realSpecies.num : 0;
+			return PHNN_GEN1_PALETTES[PHNN_GEN1_PAL_IDS[num]] || null;
+		}
+		let swNum = PHNN_SW_DEXNUMS[realSpecies.id];
+		if (swNum === undefined) swNum = PHNN_SW_DEXNUMS[realSpecies.id.replace(/sw$/, '')];
+		if (swNum === undefined && realSpecies.num >= 1 && realSpecies.num <= 151) swNum = realSpecies.num;
+		if (swNum === undefined) swNum = 0;
+		let palId = PHNN_SW_PAL_IDS[swNum] || 15;
+		if (shiny && PHNN_SW_PALETTES[palId + 10]) palId += 10;
+		return PHNN_SW_PALETTES[palId] || null;
+	}
+
+	phnnRecolorSprite(url: string, palette: string[], onReady?: () => void): string | null {
+		const key = url + '|' + palette.join('');
+		const cached = phnnDisguiseRecolorCache[key];
+		if (cached) return cached === 'FAIL' ? null : cached;
+		phnnDisguiseRecolorCache[key] = 'PENDING';
+		const img = new Image();
+		img.crossOrigin = 'anonymous';
+		img.onload = () => {
+			try {
+				const canvas = document.createElement('canvas');
+				canvas.width = img.width;
+				canvas.height = img.height;
+				const ctx = canvas.getContext('2d')!;
+				ctx.drawImage(img, 0, 0);
+				const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+				const px = data.data;
+				const pal = palette.map(hex => [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)]);
+				let min = 255;
+				let max = 0;
+				for (let i = 0; i < px.length; i += 4) {
+					if (px[i + 3] < 128) continue;
+					const lum = 0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2];
+					if (lum < min) min = lum;
+					if (lum > max) max = lum;
+				}
+				const range = Math.max(1, max - min);
+				for (let i = 0; i < px.length; i += 4) {
+					if (px[i + 3] < 128) continue;
+					const lum = 0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2];
+					const tt = (lum - min) / range;
+					const c = pal[tt >= 0.78 ? 0 : tt >= 0.45 ? 1 : tt >= 0.12 ? 2 : 3];
+					px[i] = c[0];
+					px[i + 1] = c[1];
+					px[i + 2] = c[2];
+				}
+				ctx.putImageData(data, 0, 0);
+				phnnDisguiseRecolorCache[key] = canvas.toDataURL();
+			} catch {
+				phnnDisguiseRecolorCache[key] = 'FAIL';
+			}
+			if (onReady) onReady();
+		};
+		img.onerror = () => {
+			phnnDisguiseRecolorCache[key] = 'FAIL';
+			if (onReady) onReady();
+		};
+		img.src = url;
+		return null;
+	}
+
+	phnnDisguiseModeForBattle(battle: any): 'gen1' | 'sw' | null {
+		if (!battle) return null;
+		const tier: string = battle.tier || '';
+		if (!tier.includes('Disguises')) return null;
+		if (tier.includes('SpaceWorld')) return 'sw';
+		if (battle.gen === 1) return 'gen1';
+		return null;
+	}
+
+	phnnBuildDisguiseSprite(realName: string, disguiseName: string, mode: 'gen1' | 'sw', shiny: boolean, isFront: boolean, options: AnyObject) {
+		const realSpecies = this.species.get(realName);
+		const disguiseSpecies = this.species.get(disguiseName);
+		if (!disguiseSpecies.exists || disguiseSpecies.id === realSpecies.id) return null;
+		const sd = this.getSpriteData(disguiseName, isFront, options);
+		if (!sd || !sd.url) return null;
+		if (mode === 'gen1' && sd.gen && sd.gen > 2) return null;
+		let artUrl = sd.url;
+		if (mode === 'gen1') {
+			const m = /sprites\/(gen1-back)\/([^/]+\.png)$/.exec(artUrl);
+			if (m) {
+				const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
+				const host = window.Config ? Config.routes.client : 'beta.hackmons.com';
+				artUrl = `${protocol}//${host}/sprites/${m[1]}/${m[2]}`;
+			}
+		}
+		const palette = this.phnnDisguisePalette(realSpecies, mode, shiny);
+		if (palette) {
+			const tinted = this.phnnRecolorSprite(artUrl, palette);
+			sd.url = tinted || artUrl;
+		} else {
+			sd.url = artUrl;
+		}
+		return sd;
+	}
+
+	phnnDisguiseSpriteData(mon: Pokemon, isFront: boolean, options: AnyObject) {
+		const side: any = (mon as any).side;
+		const battle = side?.battle;
+		if (!battle || side.isFar) return null;
+		const mode = this.phnnDisguiseModeForBattle(battle);
+		if (!mode) return null;
+		const my: any[] = battle.myPokemon || [];
+		const monAny: any = mon;
+		const entry = my.find(p => p?.disguise && p.ident === monAny.ident && p.details === monAny.details) ||
+			my.find(p => p?.disguise && p.ident === monAny.ident);
+		if (!entry) return null;
+		return this.phnnBuildDisguiseSprite(mon.getSpeciesForme(), entry.disguise, mode, !!monAny.shiny, isFront, options);
+	}
+
+	phnnPrewarmDisguises(battle: any) {
+		const mode = this.phnnDisguiseModeForBattle(battle);
+		if (!mode) return;
+		for (const entry of battle.myPokemon || []) {
+			if (!entry?.disguise || !entry.details) continue;
+			const realName = entry.details.split(',')[0];
+			const shiny = entry.details.includes(', shiny');
+			this.phnnBuildDisguiseSprite(realName, entry.disguise, mode, shiny, false, { gen: battle.gen });
+		}
+	}
+
 	getSpriteData(pokemon: Pokemon | Species | string, isFront: boolean, options: {
 		gen?: number,
 		shiny?: boolean,
@@ -664,6 +789,10 @@ export const Dex = new class implements ModdedDex {
 		mod?: string,
 		dynamax?: boolean,
 	} = { gen: 6 }) {
+		if (pokemon instanceof Pokemon && !isFront) {
+			const phnnDisguised = this.phnnDisguiseSpriteData(pokemon, isFront, options);
+			if (phnnDisguised) return phnnDisguised;
+		}
 		const mechanicsGen = options.gen || 6;
 		let isDynamax = !!options.dynamax;
 		if (pokemon instanceof Pokemon) {
@@ -1190,7 +1319,47 @@ export const Dex = new class implements ModdedDex {
 	}
 };
 
-export class ModdedDex {
+export 
+const PHNN_GEN1_PAL_IDS = ['MEW', 'GREEN', 'GREEN', 'GREEN', 'RED', 'RED', 'RED', 'CYAN', 'CYAN', 'CYAN', 'GREEN', 'GREEN', 'CYAN', 'YELLOW', 'YELLOW', 'YELLOW', 'BROWN', 'BROWN', 'BROWN', 'GRAY', 'GRAY', 'BROWN', 'BROWN', 'PURPLE', 'PURPLE', 'YELLOW', 'YELLOW', 'BROWN', 'BROWN', 'BLUE', 'BLUE', 'BLUE', 'PURPLE', 'PURPLE', 'PURPLE', 'PINK', 'PINK', 'RED', 'YELLOW', 'PINK', 'PINK', 'BLUE', 'BLUE', 'GREEN', 'RED', 'RED', 'RED', 'RED', 'PURPLE', 'PURPLE', 'BROWN', 'BROWN', 'YELLOW', 'YELLOW', 'YELLOW', 'CYAN', 'BROWN', 'BROWN', 'BROWN', 'RED', 'BLUE', 'BLUE', 'BLUE', 'YELLOW', 'YELLOW', 'YELLOW', 'GRAY', 'GRAY', 'GRAY', 'GREEN', 'GREEN', 'GREEN', 'CYAN', 'CYAN', 'GRAY', 'GRAY', 'GRAY', 'RED', 'RED', 'PINK', 'PINK', 'GRAY', 'GRAY', 'BROWN', 'BROWN', 'BROWN', 'BLUE', 'BLUE', 'PURPLE', 'PURPLE', 'GRAY', 'GRAY', 'PURPLE', 'PURPLE', 'PURPLE', 'GRAY', 'YELLOW', 'YELLOW', 'RED', 'RED', 'YELLOW', 'YELLOW', 'PINK', 'GREEN', 'GRAY', 'GRAY', 'BROWN', 'BROWN', 'PINK', 'PURPLE', 'PURPLE', 'GRAY', 'GRAY', 'PINK', 'BLUE', 'BROWN', 'CYAN', 'CYAN', 'RED', 'RED', 'RED', 'GRAY', 'PINK', 'GREEN', 'MEW', 'YELLOW', 'RED', 'BROWN', 'GRAY', 'RED', 'BLUE', 'CYAN', 'GRAY', 'GRAY', 'CYAN', 'YELLOW', 'RED', 'GRAY', 'BLUE', 'BLUE', 'BROWN', 'BROWN', 'GRAY', 'PINK', 'BLUE', 'YELLOW', 'RED', 'GRAY', 'BLUE', 'BROWN', 'MEW', 'MEW'];
+const PHNN_GEN1_PALETTES: {[k: string]: string[]} = {
+	MEW: ['#FFFFFF', '#FFFF00', '#FF0808', '#191919'],
+	BLUE: ['#FFFFFF', '#8494FF', '#0008CE', '#191919'],
+	RED: ['#FFFFFF', '#FF8C00', '#FF0000', '#191919'],
+	CYAN: ['#FFFFFF', '#84D6FF', '#008CFF', '#191919'],
+	PURPLE: ['#FFFFFF', '#CE7BFF', '#9C00B5', '#191919'],
+	BROWN: ['#FFFFFF', '#EF9452', '#8C4A29', '#191919'],
+	GREEN: ['#FFFFFF', '#8CFF5A', '#08B531', '#191919'],
+	PINK: ['#FFFFFF', '#FF7B94', '#FF0031', '#191919'],
+	YELLOW: ['#FFFFFF', '#FFFF00', '#E67300', '#191919'],
+	GRAY: ['#FFFFFF', '#A5BD52', '#5A5A29', '#191919'],
+};
+const PHNN_SW_PAL_IDS = [15, 21, 21, 21, 17, 17, 17, 18, 18, 18, 21, 21, 18, 23, 23, 23, 20, 20, 20, 24, 24, 20, 20, 19, 19, 23, 23, 20, 20, 16, 16, 16, 19, 19, 19, 22, 22, 17, 23, 22, 22, 16, 16, 21, 17, 17, 17, 17, 19, 19, 20, 20, 23, 23, 23, 18, 20, 20, 20, 17, 16, 16, 16, 23, 23, 23, 24, 24, 24, 21, 21, 21, 18, 18, 24, 24, 24, 17, 17, 22, 22, 24, 24, 20, 20, 20, 16, 16, 19, 19, 24, 24, 19, 19, 19, 24, 23, 23, 17, 17, 23, 23, 22, 21, 24, 24, 20, 20, 22, 19, 19, 24, 24, 22, 16, 20, 18, 18, 17, 17, 17, 24, 22, 21, 15, 23, 17, 20, 24, 17, 16, 18, 24, 24, 18, 23, 17, 24, 16, 16, 20, 20, 24, 22, 16, 23, 17, 24, 16, 20, 15, 15, 21, 21, 21, 17, 17, 17, 18, 18, 18, 20, 20, 22, 22, 23, 17, 21, 21, 18, 16, 16, 23, 22, 22, 18, 20, 20, 17, 22, 18, 18, 16, 19, 17, 19, 19, 24, 24, 20, 23, 18, 20, 19, 23, 20, 23, 20, 20, 21, 22, 15, 21, 17, 17, 23, 24, 24, 24, 16, 17, 20, 20, 20, 21, 23, 22, 22, 15, 23, 17, 19, 21, 20, 17, 17, 23, 23, 20, 20, 19, 16, 22, 21, 20, 17, 17, 20, 20, 24, 22, 24, 16, 23, 17, 18, 20, 17, 23, 20, 20, 21, 15, 15, 15, 15];
+const PHNN_SW_PALETTES: {[k: number]: string[]} = {
+	15: ['#E6E6E6', '#F7B58C', '#84739C', '#212121'],
+	16: ['#E6E6E6', '#94A5DE', '#5A7BBD', '#212121'],
+	17: ['#E6E6E6', '#FFA552', '#D65231', '#212121'],
+	18: ['#E6E6E6', '#ADCEEF', '#739CCE', '#212121'],
+	19: ['#E6E6E6', '#DEB5C5', '#AD7BBD', '#212121'],
+	20: ['#E6E6E6', '#E6A57B', '#AD734A', '#212121'],
+	21: ['#E6E6E6', '#A5D684', '#4AA55A', '#212121'],
+	22: ['#E6E6E6', '#F7B5C5', '#E67BAD', '#212121'],
+	23: ['#E6E6E6', '#FFE673', '#D6A500', '#212121'],
+	24: ['#E6E6E6', '#D6ADB5', '#7B7B94', '#212121'],
+	25: ['#E6E6E6', '#BD9C6B', '#73638C', '#212121'],
+	26: ['#E6E6E6', '#8494AD', '#526394', '#212121'],
+	27: ['#E6E6E6', '#B57B84', '#8C1029', '#212121'],
+	28: ['#E6E6E6', '#7BA5A5', '#298484', '#212121'],
+	29: ['#E6E6E6', '#BD7B9C', '#732163', '#212121'],
+	30: ['#E6E6E6', '#A58C94', '#946B5A', '#212121'],
+	31: ['#E6E6E6', '#BDAD84', '#636352', '#212121'],
+	32: ['#E6E6E6', '#ADCEEF', '#F7B5C5', '#212121'],
+	33: ['#E6E6E6', '#D6BD84', '#EF734A', '#212121'],
+	34: ['#E6E6E6', '#949494', '#525252', '#212121'],
+};
+const PHNN_SW_DEXNUMS: {[k: string]: number} = { chikorita: 152, bayleef: 153, meganium: 154, flambear: 155, volbear: 156, dynabear: 157, cruz: 158, aqua: 159, aquaria: 160, hoothoot: 161, noctowl: 162, mareep: 163, flaaffy: 164, ampharos: 165, trifox: 166, tangel: 167, gelania: 168, mantine: 169, qwilfish: 170, numpuff: 171, pichu: 172, cleffa: 173, igglybuff: 174, quagsire: 175, natu: 176, xatu: 177, golppy: 178, marill: 179, sunmola1: 180, anchorage: 181, grotess: 182, crobat: 183, para: 184, spinarak: 185, ariados: 186, skarmory: 187, animon: 188, chiks: 189, sunflora: 190, phanpy: 191, donphan: 192, twinz: 193, girafarig: 194, smeargle: 195, meowsy: 196, rinring: 197, bellboyant: 198, politoed: 199, slowking: 200, unown: 201, ledyba: 202, ledian: 203, minicorn: 204, espeon: 205, umbreon: 206, turbann: 207, grimey: 208, remoraid: 209, octillery: 210, tyrogue: 211, hitmontop: 212, puddi: 213, hoppip: 214, skiploom: 215, jumpluff: 216, ballerine: 217, smoochum: 218, elekid: 219, magby: 220, bellossom: 221, belmitt: 222, miltank: 223, bomseel: 224, delibird: 225, tigrette: 226, electiger: 227, madame: 228, kurstraw: 229, pangshi: 230, murkrow: 231, blissey: 232, scizor: 233, plux: 234, houndour: 235, houndoom: 236, wolfman: 237, warwolf: 238, porygon2: 239, likk: 240, steelix: 241, kingdra: 242, raikou: 243, entei: 244, suicune: 245, sneasel: 246, hooh: 247, togepi: 248, snubbull: 249, aipom: 250, leafeo: 251 };
+const phnnDisguiseRecolorCache: {[k: string]: string} = {};
+
+class ModdedDex {
 	readonly gen: number;
 	readonly modid: ID;
 	readonly cache = {
