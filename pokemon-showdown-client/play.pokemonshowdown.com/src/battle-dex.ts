@@ -443,7 +443,9 @@ export const Dex = new class implements ModdedDex {
 				return nameOrMove;
 			}
 			let name = nameOrMove || '';
-			let id = toID(nameOrMove);
+			const ppMatch = /(.*)\s+\((\d+|inf)(?:\/(\d+))?\)$/i.exec(name);
+			if (ppMatch) name = ppMatch[1];
+			let id = toID(name);
 			if (window.BattleAliases && id in BattleAliases) {
 				name = BattleAliases[id];
 				id = toID(name);
@@ -1379,6 +1381,8 @@ class ModdedDex {
 	}
 	moves = {
 		get: (name: string): Move => {
+			const ppMatch = /(.*)\s+\((\d+|inf)(?:\/(\d+))?\)$/i.exec(name);
+			if (ppMatch) name = ppMatch[1];
 			let id = toID(name);
 			if (window.BattleAliases && id in BattleAliases) {
 				name = BattleAliases[id];
