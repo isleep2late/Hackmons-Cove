@@ -14419,6 +14419,14 @@ export const NN_MOVES_NEW: any = {
     zp: 100,
     maxPower: 100
   },
+  "Rock Slash": {
+    bp: 140,
+    type: "Rock",
+    category: "Physical",
+    zp: 200,
+    maxPower: 140,
+    makesContact: true
+  },
   "Splishy Splash": {
     bp: 90,
     type: "Water",

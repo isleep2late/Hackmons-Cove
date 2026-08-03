@@ -7638,6 +7638,12 @@ export const SW_MOVES: any = {
     priority: 1,
     makesContact: true
   },
+  "Rock Slash": {
+    bp: 140,
+    type: "Rock",
+    category: "Physical",
+    makesContact: true
+  },
   "Rock Slide": {
     bp: 75,
     type: "Rock",
