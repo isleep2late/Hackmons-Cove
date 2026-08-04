@@ -84,7 +84,8 @@
 			'touchstart .utilichart a[data-entry]': 'chartEntryTouchStart',
 			'touchend .utilichart a[data-entry]': 'chartEntryTouchEnd',
 			'touchmove .utilichart a[data-entry]': 'chartEntryTouchMove',
-			'touchcancel .utilichart a[data-entry]': 'chartEntryTouchMove',
+			'touchcancel .utilichart a[data-entry]': 'chartEntryTouchCancel',
+			'contextmenu .utilichart a[data-entry]': 'chartEntryContextMenu',
 			'keydown .chartinput': 'chartKeydown',
 			'keyup .chartinput': 'chartKeyup',
 			'focus .chartinput': 'chartFocus',
@@ -3990,18 +3991,50 @@
 		chartEntryTouchStart: function (e) {
 			var self = this;
 			var el = e.currentTarget;
+			var touch = e.originalEvent && e.originalEvent.touches && e.originalEvent.touches[0];
 			this.chartTouchActive = true;
 			this.chartTooltipHeld = false;
+			this.chartTouchX = touch ? touch.clientX : 0;
+			this.chartTouchY = touch ? touch.clientY : 0;
 			if (this.chartTooltipTimer) clearTimeout(this.chartTooltipTimer);
 			this.chartTooltipTimer = setTimeout(function () {
+				self.chartTooltipTimer = null;
 				self.chartTooltipHeld = true;
 				self.showChartTooltip(el);
 			}, 400);
 		},
 		chartEntryTouchMove: function (e) {
+			var touch = e.originalEvent && e.originalEvent.touches && e.originalEvent.touches[0];
+			if (!touch) return;
+			var dx = touch.clientX - (this.chartTouchX || 0);
+			var dy = touch.clientY - (this.chartTouchY || 0);
+			if (dx * dx + dy * dy <= 144) {
+				if (this.chartTooltipHeld) e.preventDefault();
+				return;
+			}
 			if (this.chartTooltipTimer) {
 				clearTimeout(this.chartTooltipTimer);
 				this.chartTooltipTimer = null;
+			}
+			if (this.chartTooltipHeld) {
+				this.chartTooltipHeld = false;
+				this.hideChartTooltip();
+			}
+		},
+		chartEntryTouchCancel: function (e) {
+			var self = this;
+			if (this.chartTooltipTimer) {
+				clearTimeout(this.chartTooltipTimer);
+				this.chartTooltipTimer = null;
+			}
+			this.chartTooltipHeld = false;
+			this.hideChartTooltip();
+			setTimeout(function () { self.chartTouchActive = false; }, 500);
+		},
+		chartEntryContextMenu: function (e) {
+			if (this.chartTouchActive || this.chartTooltipHeld) {
+				e.preventDefault();
+				e.stopPropagation();
 			}
 		},
 		chartEntryTouchEnd: function (e) {
