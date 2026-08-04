@@ -665,6 +665,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Team Preview', 'Data Preview', 'Species Clause', 'Evasion Clause', 'Freeze Clause Mod', 'Sleep Moves Clause', 'Shadow Tera Clause', 'No Alphas', 'Standard Roster Clause'],
 		banlist: [
+			'CAP',
 			'Mewtwo-Shadow', 'Mewtwo-Shadow-Mega-X', 'Lugia-Shadow', 'Arceus-Shadow', 'Mewtwo-Armored',
 			'Shadow Plate', 'Shadow Synergy Stone', 'Blank Plate', 'Legend Plate',
 			'Shadowinium Z', 'Questinium Z', 'Shadow Cloak', 'Broken Disk',
@@ -703,7 +704,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: false,
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Team Preview', 'Data Preview', 'Max Level = 5', 'Prestatus', 'Totem Aura'],
-		banlist: ['Glitch', 'Jynx-Mega', 'Jynxite'],
+		banlist: ['Glitch', 'CAP', 'Jynx-Mega', 'Jynxite'],
 		unbanlist: ['Past', 'Future', 'Unobtainable', 'Demo'],
 	},
 	{
@@ -712,7 +713,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: false,
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Team Preview', 'Data Preview', 'Max Level = 50', 'Prestatus', 'Totem Aura'],
-		banlist: ['Glitch', 'Jynx-Mega', 'Jynxite'],
+		banlist: ['Glitch', 'CAP', 'Jynx-Mega', 'Jynxite'],
 		unbanlist: ['Past', 'Future', 'Unobtainable', 'Demo'],
 	},
 	{
@@ -791,7 +792,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 			'Contrary', 'Gorilla Tactics', 'Hadron Engine', 'Huge Power', 'Illusion', 'Innards Out', 'Magnet Pull', 'Moody', 'Neutralizing Gas', 'Orichalcum Pulse', 'Parental Bond', 'Pure Power',
 			'Shadow Tag', 'Stakeout', 'Water Bubble', 'Wonder Guard', 'Gengarite', 'Berserk Gene', 'Belly Drum', 'Bolt Beak', 'Ceaseless Edge', 'Chatter', 'Double Iron Bash', 'Electrify', 'Imprison',
 			'Last Respects', 'Octolock', 'Rage Fist', 'Revival Blessing', 'Shed Tail', 'Shell Smash', 'Sleep Talk',
-			'Glitch', 'Jynx-Mega', 'Jynxite',
+			'Glitch', 'Demo', 'Custom', 'Jynx-Mega', 'Jynxite',
 		],
 		restricted: ['Arceus'],
 		onValidateTeam(team, format) {
@@ -890,7 +891,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 			'OHKO Clause', 'Dynamax Clause', 'Evasion Moves Clause', 'Sleep Moves Clause', 'Forme Clause',
 		],
 		banlist: [
-			'Future', 'Past', 'LGPE', 'CAP', 'Custom', 'Glitch', 'Comatose + Sleep Talk',
+			'Future', 'Past', 'LGPE', 'CAP', 'Custom', 'Glitch', 'Demo', 'Jynx-Mega', 'Jynxite', 'Comatose + Sleep Talk',
 			'Rusted Sword', 'Calyrex-Shadow', 'Cramorant-Gorging', 'Darmanitan-Galar-Zen', 'Eternatus-Eternamax', 'Shedinja', 'Zacian-Crowned',
 			'Double Iron Bash', 'Octolock', 'Shell Smash', 'Bolt Beak', 'Court Change', 'Belly Drum', 'Transform',
 			'Wonder Guard', 'Pure Power', 'Huge Power', 'Parental Bond', 'Protean', 'Libero', 'Shadow Tag', 'Arena Trap', 'Moody', 'Water Bubble',
