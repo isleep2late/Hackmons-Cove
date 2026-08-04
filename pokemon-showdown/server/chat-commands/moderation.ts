@@ -342,7 +342,7 @@ export const commands: Chat.ChatCommands = {
 			([symbol]) => -Users.Auth.getGroup(symbol).rank
 		).map(([symbol, names]) => {
 			let group = Config.groups[symbol] ? `${Config.groups[symbol].name}s (${symbol})` : symbol;
-			if (symbol === ' ') group = 'Whitelisted (this list is only visible to staff)';
+			if (symbol === ' ') group = 'Autojoin (users that join the room when they log in, only staff can see this)';
 			return `${group}:\n` +
 				Utils.sortBy(names).map(userid => {
 					const isOnline = Users.get(userid)?.statusType === 'online';
