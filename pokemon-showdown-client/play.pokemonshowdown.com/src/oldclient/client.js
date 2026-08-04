@@ -2733,18 +2733,18 @@ function toId() {
 	});
 
 	Config.groups = {
-		'#': {
-			name: "Room Owner (#)",
-			type: 'leadership',
-			order: 10001
-		},
 		'~': {
 			name: "Administrator (~)",
+			type: 'staff',
+			order: 10001
+		},
+		'#': {
+			name: "Room Owner (#)",
 			type: 'leadership',
 			order: 10002
 		},
 		'&': {
-			name: "Administrator (&amp;)",
+			name: "Leader (&amp;)",
 			type: 'leadership',
 			order: 10003
 		},
