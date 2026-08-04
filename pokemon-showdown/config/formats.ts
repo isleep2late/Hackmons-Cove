@@ -16,7 +16,6 @@ If you specify a section that already exists, your format will be added to the b
 New sections will be added to the bottom of the specified column.
 The column value will be ignored for repeat sections.
 */
-
 export const Formats: import('../sim/dex-formats').FormatList = [
 		
 	//////////////////////////////////
@@ -120,6 +119,34 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 			'Max Level = 50', 'EV Limit = 192', 'EV Limits = Atk 0-32 / Def 0-32 / SpA 0-32 / SpD 0-32 / Spe 0-32 / HP 0-32',
 			'-Nonexistent', '-Past'
 		],
+		onValidateSet(set) {
+			let allowedAbilitiesCache: Set<string> | null = null;
+
+			// Build a list of valid Abilities, since we don't mark them nonstandard.
+			function getAllowedAbilities(dex: ModdedDex): Set<string> {
+				if (allowedAbilitiesCache) return allowedAbilitiesCache;
+				const abilities = new Set<string>();
+				for (const species of dex.species.all()) {
+					// Skip mons not in Champions from adding to the Abilities.
+					if (species.isNonstandard) continue;
+					for (const abilityName of Object.values(species.abilities)) {
+						if (abilityName) abilities.add(abilityName);
+						}
+					}
+					allowedAbilitiesCache = abilities;
+					return abilities;
+			};
+
+			const allowedAbilities = getAllowedAbilities(this.dex);
+			const ability = this.dex.abilities.get(set.ability);
+
+			if (!ability.exists) {
+				return [`${set.name}'s ability "${ability.name}" doesn't exist.`];
+			};
+			if (!allowedAbilities.has(ability.name)) {
+				return [`${set.name}'s ability ${ability.name} isn't reachable in Champions.`];
+			};
+		},
 	},
 	//////////////////////////////////
 	////////// OM Hackmons ///////////
