@@ -17,7 +17,7 @@ import { BattleMoveAnims } from './battle-animations-moves';
 import { BattleLog } from './battle-log';
 import { type BattleBGM, BattleSound } from './battle-sound';
 import { Dex, toID, type ID, type SpriteData } from './battle-dex';
-import { BattleNatures } from './battle-dex-data';
+import { BattleNatures, type StatName } from './battle-dex-data';
 import { BattleTooltips } from './battle-tooltips';
 import { BattleTextParser, type Args, type KWArgs } from './battle-text-parser';
 
@@ -2909,13 +2909,30 @@ export class PokemonSprite extends Sprite {
 		statusbar.html(status);
 	}
 
+
 	private static getEffectTag(id: string) {
 		let effect = PokemonSprite.statusTable[id];
 		if (typeof effect === 'string') return effect;
 		if (effect === null) return (PokemonSprite.statusTable[id] = '');
 		if (effect === undefined) {
 			let label = `[[${id}]]`;
-			if (Dex.species.get(id).exists) {
+
+			const STAT_LABELS: Record<StatName | 'spc', string> = {
+				hp: 'HP',
+				atk: 'Atk',
+				def: 'Def',
+				spa: 'SpA',
+				spd: 'SpD',
+				spe: 'Spe',
+				spc: 'Spc',
+			};
+
+			const statMatch = /^(hp|atk|def|spa|spd|spe|spc)(\d+)$/.exec(id);
+			if (statMatch) {
+				const value = statMatch[1];
+				const statId = statMatch[2] as keyof typeof STAT_LABELS;
+				label = `${STAT_LABELS[statId]}: ${value}`;
+			} else if (Dex.species.get(id).exists) {
 				label = Dex.species.get(id).name;
 			} else if (Dex.items.get(id).exists) {
 				label = Dex.items.get(id).name;
