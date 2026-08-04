@@ -185,7 +185,14 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	rest: {
 		inherit: true,
-		secondary: null,
+		onTry: undefined, // no inherit
+		onHit(target, source, move) {
+			const result = target.setStatus('slp', source, move);
+			if (!result) return result;
+			target.statusState.time = 2;
+			target.statusState.startTime = 2;
+			this.heal(target.maxhp); // Aesthetic only as the healing happens after you fall asleep in-game
+		},
 	},
 	reversal: {
 		inherit: true,
