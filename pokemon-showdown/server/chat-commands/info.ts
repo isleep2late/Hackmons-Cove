@@ -1720,6 +1720,7 @@ export const commands: Chat.ChatCommands = {
 		const roomRanks = [
 			`<strong>Room ranks</strong>`,
 			`★ <strong>Prize Winner</strong> - They don't have any powers beyond a symbol.`,
+			`+ <strong>Voice</strong> - They can use ! commands like !groups`,
 			`% <strong>Driver</strong> - They can use ! commands, and mute and warn`,
 			`@ <strong>Moderator</strong> - The above, and they can roomban users`,
 			`# <strong>Room Owner</strong> - They are the leaders of the room and can almost totally control it`,
@@ -1728,9 +1729,10 @@ export const commands: Chat.ChatCommands = {
 		const globalRanks = [
 			`<strong>Global ranks</strong>`,
 			`+ <strong>Global Voice</strong> - They can use ! commands like !groups`,
+			`* <strong>Global Bot</strong> - An automated account that can battle when challenged`,
 			`% <strong>Global Driver</strong> - Like Voice, and they can lock users and check for alts`,
 			`@ <strong>Global Moderator</strong> - The above, and they can globally ban users`,
-			`* <strong>Global Bot</strong> - An automated account that can battle when challenged`,
+			`& <strong>Global Leader</strong> - The above, and they make important decisions about the server`,
 			`~ <strong>Global Administrator</strong> - They can do anything, like change what this message says and promote users globally`,
 		];
 
