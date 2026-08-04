@@ -1285,11 +1285,9 @@ export const Dex = new class implements ModdedDex {
 		if (!type) type = '???';
 		let sanitizedType = type.replace(/\?/g, '%3f');
 		let prefix = Dex.resourcePrefix;
-		if (type === 'Shadow' || type === '???' || type === 'Bird') {
-			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
-			const host = window.Config ? Config.routes.client : 'beta.hackmons.com';
-			prefix = `${protocol}//${host}/`;
-			if (type === '???') sanitizedType = 'Question';
+		if (type === 'Shadow') {
+			return `<img src="https://play.hackmons.com/sprites/types/${sanitizedType}.png"` +
+			`alt="${type}" height="14" width="32" class="pixelated${b ? ' b' : ''}" />`;
 		}
 		return `<img src="${prefix}sprites/types/${sanitizedType}.png" alt="${type}" height="14" width="32" class="pixelated${b ? ' b' : ''}" />`;
 	}
