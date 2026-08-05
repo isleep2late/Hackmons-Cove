@@ -143,6 +143,10 @@ console.log(
  *********************************************************/
 
 process.stdout.write("Copying old client files... ");
+fs.rmSync('play.pokemonshowdown.com/js/oldclient', {
+	recursive: true,
+	force: true,
+});
 fs.cpSync('play.pokemonshowdown.com/src/oldclient', 'play.pokemonshowdown.com/js/oldclient', {
 	recursive: true,
 	force: true,
