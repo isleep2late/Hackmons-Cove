@@ -5,6 +5,37 @@ if (!require('assert').strict) {
 	process.exit(1);
 }
 
+if (parseInt(process.version.slice(1)) < 20) {
+	var nvmDirs = [
+		require('path').join(__dirname, '.node'),
+		require('path').join(process.env.HOME || '/root', '.nvm/versions/node'),
+		'/home/gyarados/.nvm/versions/node',
+	];
+	var newerNode = '';
+	for (var d = 0; d < nvmDirs.length && !newerNode; d++) {
+		try {
+			var versions = require('fs').readdirSync(nvmDirs[d])
+				.map(function (v) { return v.replace(/^v/, '').split('.').map(Number); })
+				.filter(function (v) { return v[0] >= 20; })
+				.sort(function (a, b) { return (a[0] - b[0]) || (a[1] - b[1]) || (a[2] - b[2]); });
+			if (versions.length) {
+				var preferred = versions.filter(function (v) { return v[0] === 22; });
+				var chosen = preferred.length ? preferred[preferred.length - 1] : versions[versions.length - 1];
+				newerNode = nvmDirs[d] + '/v' + chosen.join('.') + '/bin/node';
+			}
+		} catch (e) {}
+	}
+	if (newerNode) {
+		console.log("Node " + process.version + " can't run the client build; re-running with " + newerNode);
+		var env = Object.assign({}, process.env);
+		env.PATH = require('path').dirname(newerNode) + ':' + (env.PATH || '');
+		var reexec = require('child_process').spawnSync(newerNode, process.argv.slice(1), {stdio: 'inherit', env: env});
+		process.exit(reexec.status === null ? 1 : reexec.status);
+	}
+	console.error("The client build needs Node.js 20 or later (build-tools/update loads compiler.mjs, which " + process.version + " cannot require). Install Node 20+ or use nvm.");
+	process.exit(1);
+}
+
 var execSync = require('child_process').execSync;
 var fs = require('fs');
 
