@@ -10,7 +10,9 @@ const copyOverDataJSON = (file = 'data') => {
 		if (fs.statSync(`${file}/${f}`).isDirectory()) {
 			copyOverDataJSON(`${file}/${f}`);
 		} else if (f.endsWith('.json')) {
-			fs.copyFileSync(`${file}/${f}`, require('path').resolve('dist', `${file}/${f}`));
+			const dest = require('path').resolve('dist', `${file}/${f}`);
+			fs.rmSync(dest, { force: true });
+			fs.copyFileSync(`${file}/${f}`, dest);
 		}
 	}
 };
@@ -50,6 +52,7 @@ exports.transpile = decl => {
 		tsconfig: './tsconfig.json',
 		sourcemap: true,
 	});
+	fs.rmSync('./dist/config/config-example.js', { force: true });
 	fs.copyFileSync('./config/config-example.js', './dist/config/config-example.js');
 	copyOverDataJSON();
 
