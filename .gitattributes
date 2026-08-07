@@ -60,6 +60,7 @@ pokemon-showdown/sim/pokemon.ts merge=ours
 pokemon-showdown/sim/side.ts merge=ours
 pokemon-showdown/sim/team-validator.ts merge=ours
 pokemon-showdown/sim/teams.ts merge=ours
+pokemon-showdown/tools/build-utils.js merge=ours
 pokemon-showdown/test/server/modlog.js merge=ours
 pokemon-showdown/test/server/users.js merge=ours
 pokemon-showdown/test/sim/misc/statuses.js merge=ours
