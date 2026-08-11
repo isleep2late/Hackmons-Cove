@@ -2121,33 +2121,19 @@
 		initialize: function () {
 			this.$el.addClass('ps-room-light').addClass('scrollable');
 			var buf = '<div class="pad">';
-			buf += '<h2>PS! Informational Resources</h2><hr />';
+			buf += '<h2>Hackmons PS! Informational Resources</h2><hr />';
 			buf += 'PS! is a wide and varied site, with more facets than can be covered here easily.<br />';
 			buf += 'While this page chiefly documents the ever-shifting set of commands available to PS! users, here are some useful resources for newcomers:<br />';
 			buf += '- <a href="https://www.smogon.com/forums/threads/3676132/">Beginner\'s Guide to Pok&eacute;mon Showdown</a><br />';
 			buf += '- <a href="https://www.smogon.com/dp/articles/intro_comp_pokemon">An introduction to competitive Pok&eacute;mon</a><br />';
-			buf += '- <a href="https://www.smogon.com/sm/articles/sm_tiers">What do \'OU\', \'UU\', etc mean?</a><br />';
-			buf += '- <a href="https://www.smogon.com/dex/ss/formats/">What are the rules for each format?</a><br />';
-			buf += '- <a href="https://www.smogon.com/ss/articles/clauses">What is \'Sleep Clause\' and other clauses?</a><br />';
+			buf += '- <a href="https://www.smogon.com/sv/articles/clauses">What is \'Sleep Clause\' and other clauses?</a><br />';
 			buf += '- <a href="https://www.smogon.com/articles/getting-started">Next Steps for Competitive Battling</a><br />';
-			buf += '- <button class="button" name="send" value="/report">Report a user</button><br />';
-			buf += '- <button class="button" name="send" value="/join help">Join the Help room for live help</button>';
 			buf += '<hr /><strong>Commands:</strong><br />';
 			buf += 'Within any of the chats, and in private messages, it is possible to type in commands (messages beginning with <code>/</code>) in order to perform a particular action. ';
 			buf += 'A great number of these commands exist, with some only available to certain users. ';
 			buf += 'For instance, you can broadcast commands to others with the <code>!</code> command prefix, but only when you\'re a player in a battle or a Voice (+) user. ';
 			buf += 'For more information on ranks, type <code>/groups</code> in any chat. You can also use the "chat self" button on your username in the top right if you need a place to send these commands ';
 			buf += 'without joining a room.<br /><br />';
-
-			buf += '<details class="readmore"><summary>Here\'s a list of the most useful commands for the average Pokemon Showdown experience:</summary>';
-			buf += '<p>COMMANDS: /report, /msg, /reply, /logout, /challenge, /search, /rating, /whois, /user, /join, /leave, /userauth, /roomauth</p>';
-			buf += '<p>BATTLE ROOM COMMANDS: /savereplay, /hideroom, /inviteonly, /invite, /timer, /forfeit</p>';
-			buf += '<p>OPTION COMMANDS: /nick, /avatar, /ignore, /status, /away, /busy, /back, /timestamps, /highlight, /showjoins, /hidejoins, /blockchallenges, /blockpms</p>';
-			buf += '<p>INFORMATIONAL/RESOURCE COMMANDS: /groups, /faq, /rules, /intro, /formatshelp, /othermetas, /analysis, /punishments, /calc, /git, /cap, /roomhelp, /roomfaq (replace / with ! to broadcast. Broadcasting requires: + % @ # ~)</p>';
-			buf += '<p>DATA COMMANDS: /data, /dexsearch, /movesearch, /itemsearch, /learn, /statcalc, /effectiveness, /weakness, /coverage, /randommove, /randompokemon (replace / with ! to broadcast. Broadcasting requires: + % @ # ~)</p>';
-			buf += '<p>For an overview of room commands, use /roomhelp</p>';
-			buf += '<p>For details of a specific command, you can use the command <code>/help [command]</code>, for example <code>/help data</code>.</p>';
-			buf += '</details><br />';
 
 			buf += 'A complete list of commands available to regular users is provided below. Use <code>/help [commandname]</code> for more in-depth information on how to use them.';
 			buf += '<hr />';

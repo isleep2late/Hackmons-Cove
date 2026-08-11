@@ -50,7 +50,7 @@ class ResourcePanel extends PSRoomPanel {
 
 		return <PSPanelWrapper room={room}>
 			<div className="pad">
-				<h2>PS! Informational Resources</h2>
+				<h2>Hackmons PS! Informational Resources</h2>
 				<hr />
 				<p>
 					PS! is a wide and varied site, with more facets than can be covered here easily.
@@ -66,22 +66,10 @@ class ResourcePanel extends PSRoomPanel {
 						<a href="https://www.smogon.com/dp/articles/intro_comp_pokemon">An introduction to competitive Pokémon</a>
 					</li>
 					<li>
-						<a href="https://www.smogon.com/sm/articles/sm_tiers">What do 'OU', 'UU', etc mean?</a>
-					</li>
-					<li>
-						<a href="https://www.smogon.com/dex/sv/formats/">What are the rules for each format?</a>
-					</li>
-					<li>
 						<a href="https://www.smogon.com/sv/articles/clauses">What is 'Sleep Clause' and other clauses?</a>
 					</li>
 					<li>
 						<a href="https://www.smogon.com/articles/getting-started">Next Steps for Competitive Battling</a>
-					</li>
-					<li>
-						<button className="button" data-cmd="/report">Report a user</button>
-					</li>
-					<li>
-						<button className="button" data-cmd="/join help">Join the Help room for live help</button>
 					</li>
 				</ul>
 				<hr />
@@ -97,32 +85,6 @@ class ResourcePanel extends PSRoomPanel {
 					You can also use the "chat self" button on your username in the top right  {}
 					if you need a place to send these commands without joining a room.
 				</p>
-
-				<details class="readmore">
-					<summary>Here's a list of the most useful commands for the average Pokémon Showdown experience:</summary>
-					<p>
-						COMMANDS: /report, /msg, /reply, /logout, {}
-						/challenge, /search, /rating, /whois, /user, /join, /leave, /userauth, /roomauth
-					</p>
-					<p>
-						BATTLE ROOM COMMANDS: /savereplay, /hideroom, /inviteonly, /invite, {}
-						/timer, /forfeit
-					</p>
-					<p>
-						OPTION COMMANDS: /nick, /avatar, /ignore, /status, /away, /busy, /back, /timestamps, {}
-						/highlight, /showjoins, /hidejoins, /blockchallenges, /blockpms
-					</p>
-					<p>
-						INFORMATIONAL/RESOURCE COMMANDS: /groups, /faq, /rules, /intro, /formatshelp, {}
-						/othermetas, /analysis, /punishments, /calc, /git, /cap, /roomhelp, /roomfaq {}
-						(replace / with ! to broadcast. Broadcasting requires: + % @ # ~)
-					</p>
-					<p>
-						DATA COMMANDS: /data, /dexsearch, /movesearch, /itemsearch, /learn, {}
-						/statcalc, /effectiveness, /weakness, /coverage, /randommove, /randompokemon</p>
-					<p>For an overview of room commands, use <code>/roomhelp</code></p>
-					<p>For details of a specific command, you can use <code>/help [command]</code>, for example <code>/help data</code>.</p>
-				</details>
 
 				<br />
 				<p>
