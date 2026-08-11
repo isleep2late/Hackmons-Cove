@@ -55,12 +55,10 @@
 			buf += '<div class="menugroup">';
 			buf += '<p><button class="button mainmenu2" name="joinRoom" value="teambuilder">Teambuilder</button></p>';
 			buf += '<p><button class="button mainmenu3" name="joinRoom" value="ladder">Ladder</button></p>';
-			buf += '<p><button class="button mainmenu4" name="send" value="/smogtours">Tournaments</button></p>';
 			buf += '</div>';
 
 			buf += '<div class="menugroup"><p><button class="button mainmenu4 onlineonly disabled" name="joinRoom" value="battles">Watch a battle</button></p>';
 			buf += '<p><button class="button mainmenu5 onlineonly disabled" name="finduser">Find a user</button></p>';
-			buf += '<p><button class="button mainmenu6 onlineonly disabled" name="send" value="/friends">Friends</button></p>';
 			buf += '<p><button class="button mainmenu7" name="joinRoom" value="resources">Info & Resources</button></p></div>';
 
 			this.$('.mainmenu').html(buf);
@@ -947,10 +945,10 @@
 					{ id: 'gen2spaceworldubers', name: 'SpaceWorld Ubers' },
 					{ id: 'gen2spaceworldbricks', name: 'SpaceWorld Bricks' },
 				] },
-				{ label: 'Generation', members: [
-					{ id: 'gen8255', name: 'Unified' },
-					{ id: 'gen8255swsh', name: 'SwSh' },
-					{ id: 'gen8255bdsp', name: 'BDSP' },
+				{ label: 'Version', members: [
+					{ id: 'gen8255purehackmonsunified', name: 'Unified' },
+					{ id: 'gen8255purehackmons', name: 'SwSh' },
+					{ id: 'gen8bdsp255purehackmons', name: 'BDSP' },
 				] },
 			];
 			for (var i = 0; i < families.length; i++) {
@@ -1093,6 +1091,7 @@
 			var itemClauseDefault = format && BattleFormats[format] ? BattleFormats[format].itemClauseDefault : false;
 			buf += '<p' + (!itemClauseDefault ? ' class="hidden">' : '>');
 			buf += '<label class="checkbox"><input type="checkbox" name="itemclause" /> <abbr title="Start a battle with Item Clause">Item Clause</abbr></label></p>';
+			buf += '<p><label class="checkbox"><input type="checkbox" name="private"' + (Storage.prefs('disallowspectators') ? ' checked' : '') + ' /> <abbr title="Only you and your opponent can watch this battle">Disallow spectators (private)</abbr></label></p>';
 			buf += '<p class="buttonbar"><button name="makeChallenge" class="button"><strong>Challenge</strong></button> <button type="button" name="dismissChallenge" class="button">Cancel</button></p></form>';
 			$challenge.html(buf);
 		},
@@ -1619,7 +1618,7 @@
 		shouldDisplayFormat: function (format) {
 			if (/customdisguises/.test(format.id) && format.id !== 'gen9nonerfscustomdisguises') return false;
 			if (/customgame/.test(format.id) && format.id !== 'gen9customgame') return false;
-			if (/^(gen1ou|gen1ubers|gen2ou|gen2ubers|gen2spaceworldou|gen2spaceworldubers|gen2spaceworldbricks|gen2spaceworlddisguises)$/.test(format.id)) return false;
+			if (/^(gen1ou|gen1ubers|gen2ou|gen2ubers|gen2spaceworldou|gen2spaceworldubers|gen2spaceworldbricks|gen2spaceworlddisguises|gen8255purehackmons|gen8bdsp255purehackmons)$/.test(format.id)) return false;
 			if (this.selectType === 'teambuilder') {
 				if (!format.isTeambuilderFormat) return false;
 			} else {
