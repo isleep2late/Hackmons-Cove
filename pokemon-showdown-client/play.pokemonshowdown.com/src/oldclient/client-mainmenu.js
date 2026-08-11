@@ -1080,6 +1080,7 @@
 			buf += '<p><label class="label">Team:</label>' + this.renderTeams(format) + '</p>';
 			buf += this.renderCdModeChallenge(format);
 			buf += this.renderVersionChallenge(format);
+			buf += '<p><label class="checkbox"><input type="checkbox" name="private"' + (Storage.prefs('disallowspectators') ? ' checked' : '') + ' /> <abbr title="Only you and your opponent can watch this battle">Hide Battle</abbr></label></p>';
 			buf += '<p><label class="label">Custom rules:</label> <input type="text" name="customRules" class="textbox" placeholder="See /battlerules for your options!" style="width: 230px; box-sizing: border-box;" maxlength="9000" autocomplete="off" /></p>';
 
 			var bestOfDefault = format && BattleFormats[format] ? BattleFormats[format].bestOfDefault : false;
@@ -1091,7 +1092,6 @@
 			var itemClauseDefault = format && BattleFormats[format] ? BattleFormats[format].itemClauseDefault : false;
 			buf += '<p' + (!itemClauseDefault ? ' class="hidden">' : '>');
 			buf += '<label class="checkbox"><input type="checkbox" name="itemclause" /> <abbr title="Start a battle with Item Clause">Item Clause</abbr></label></p>';
-			buf += '<p><label class="checkbox"><input type="checkbox" name="private"' + (Storage.prefs('disallowspectators') ? ' checked' : '') + ' /> <abbr title="Only you and your opponent can watch this battle">Disallow spectators (private)</abbr></label></p>';
 			buf += '<p class="buttonbar"><button name="makeChallenge" class="button"><strong>Challenge</strong></button> <button type="button" name="dismissChallenge" class="button">Cancel</button></p></form>';
 			$challenge.html(buf);
 		},
