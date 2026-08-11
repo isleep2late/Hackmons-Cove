@@ -1886,9 +1886,9 @@
 					{ id: 'gen2spaceworldbricks', name: 'SpaceWorld Bricks' },
 				] },
 				{ label: 'Version', members: [
-					{ id: 'gen8255', name: 'Unified' },
-					{ id: 'gen8255swsh', name: 'SwSh' },
-					{ id: 'gen8255bdsp', name: 'BDSP' },
+					{ id: 'gen8255purehackmonsunified', name: 'Unified' },
+					{ id: 'gen8255purehackmons', name: 'SwSh' },
+					{ id: 'gen8bdsp255purehackmons', name: 'BDSP' },
 				] },
 			];
 			for (var i = 0; i < families.length; i++) {
@@ -3540,8 +3540,8 @@
 			if (gen === undefined) gen = this.curTeam.gen;
 			if (format.includes('customdisguises') || format.includes('customgame')) return 9999;
 			if (gen === 9 && format.includes('nonerfsstandard')) return 100;
-			if ((gen === 1 && format.includes('disguises')) ||
-				(gen === 2 && (format.includes('noclerics') || format.includes('statuses'))) ||
+			if (format.includes('disguises') ||
+				format.includes('noclerics') || format.includes('statuses') ||
 				((gen === 9 || gen === 5) && (format.includes('nonerfs') || format.includes('phnn')) && !format.includes('cup')) ||
 				(gen === 3 && format.includes('anyability')) ||
 				(gen === 4 && format.includes('rage')) ||
