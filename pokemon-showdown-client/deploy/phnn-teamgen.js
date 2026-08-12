@@ -4,13 +4,32 @@ const path = require('path');
 
 const PS_DIR = process.env.PHNN_PS_DIR || path.resolve(__dirname, '..', '..', 'pokemon-showdown');
 
-const CD_EXTRA_ABILITIES = ['Magic Guard', 'Unaware', 'Multiscale', 'Regenerator', 'Speed Boost', 'Adaptability', 'Huge Power', 'Levitate'];
-const CD_EXTRA_ITEMS = ['Leftovers', 'Life Orb', 'Choice Band', 'Choice Specs', 'Heavy-Duty Boots'];
+const CD_UNIVERSAL_ABILITIES = [
+	'Magic Guard', 'Unaware', 'Multiscale', 'Regenerator', 'Speed Boost', 'Magic Bounce', 'Levitate',
+	'Good as Gold', 'Comatose', 'Wonder Guard', 'Flash Fire', 'Prankster',
+];
+const CD_OFFENSE_ABILITIES = {
+	physical: ['Huge Power', 'Pure Power', 'Parental Bond', 'Adaptability', 'No Guard', 'Scrappy', 'Mold Breaker', 'Libero', 'Tough Claws'],
+	special: ['Hadron Engine', 'Parental Bond', 'Adaptability', 'Beads of Ruin', 'No Guard', 'Libero', 'Tinted Lens'],
+	defensive: ['Fur Coat', 'Ice Scales', 'Poison Heal', 'Arena Trap', 'Shadow Tag'],
+};
+const CD_ITEM_STACKS = {
+	physical: { main: 'Choice Band', extras: ['Life Orb', 'Expert Belt', 'Muscle Band', 'Focus Sash', 'Heavy-Duty Boots', 'Leftovers'] },
+	special: { main: 'Choice Specs', extras: ['Life Orb', 'Expert Belt', 'Wise Glasses', 'Focus Sash', 'Heavy-Duty Boots', 'Leftovers'] },
+	defensive: { main: 'Leftovers', extras: ['Rocky Helmet', 'Heavy-Duty Boots', 'Covert Cloak', 'Safety Goggles', 'Focus Sash'] },
+};
 const FILLER_ITEMS = [
 	'Leftovers', 'Life Orb', 'Choice Band', 'Choice Specs', 'Choice Scarf', 'Heavy-Duty Boots',
 	'Assault Vest', 'Rocky Helmet', 'Sitrus Berry', 'Focus Sash', 'Expert Belt', 'Muscle Band',
 	'Wise Glasses', 'Lum Berry', 'Light Clay', 'Mental Herb', 'Safety Goggles', 'Covert Cloak',
 ];
+const META_ABILITIES = {
+	physical: ['Huge Power', 'Pure Power', 'Parental Bond', 'No Guard', 'Scrappy', 'Mold Breaker', 'Libero'],
+	special: ['Hadron Engine', 'Parental Bond', 'No Guard', 'Beads of Ruin', 'Libero', 'Drought', 'Drizzle'],
+	ate: ['Pixilate', 'Refrigerate'],
+	defensive: ['Magic Guard', 'Magic Bounce', 'Wonder Guard', 'Good as Gold', 'Comatose', 'Ice Face', 'Flash Fire', 'Innards Out'],
+	utility: ['Speed Boost', 'Neutralizing Gas', 'Shadow Tag', 'Arena Trap', 'Sand Stream', 'Psychic Surge', 'Misty Surge'],
+};
 const HACKMONS_HINTS = [
 	'hackmons', 'customgame', 'customdisguise', 'disguises', 'statuses', 'nonerfs',
 	'metronome', 'infinite', 'brokencup', '350cup', 'anyability', 'nolimit', 'bh',
@@ -79,8 +98,102 @@ function sourceFor(baseid, format) {
 	return cands.find(hasGenerator) || null;
 }
 
+function setRole(set) {
+	const { Dex } = loadSim();
+	let phys = 0;
+	let spec = 0;
+	for (const m of set.moves || []) {
+		const move = Dex.moves.get(('' + m).split(' (')[0]);
+		if (move.category === 'Physical') phys++;
+		else if (move.category === 'Special') spec++;
+	}
+	if (!phys && !spec) return 'defensive';
+	const species = Dex.species.get(set.species);
+	const bulk = species.exists ? species.baseStats.hp + species.baseStats.def + species.baseStats.spd : 0;
+	if (phys + spec <= 1 && bulk >= 280) return 'defensive';
+	return phys >= spec ? 'physical' : 'special';
+}
+
+function abilityAllowed(name, gen, ruleTable) {
+	const { Dex } = loadSim();
+	const ability = Dex.forGen(gen).abilities.get(name);
+	if (!ability.exists || ability.gen > gen || ability.isNonstandard) return false;
+	if (ruleTable.check('ability:' + toId(name)) === 'banned') return false;
+	return true;
+}
+
+function upgradeHackmonsSet(set, gen, ruleTable, usedAbilities) {
+	const { Dex } = loadSim();
+	const role = setRole(set);
+	let pool = (META_ABILITIES[role] || []).slice();
+	if (role !== 'defensive') {
+		const hasNormalAttack = (set.moves || []).some(m => {
+			const move = Dex.moves.get(('' + m).split(' (')[0]);
+			return move.type === 'Normal' && move.category !== 'Status';
+		});
+		if (hasNormalAttack) pool = META_ABILITIES.ate.concat(pool);
+	}
+	pool = pool.concat(META_ABILITIES.utility, META_ABILITIES.defensive);
+	for (const name of pool) {
+		if ((usedAbilities.get(toId(name)) || 0) >= 1) continue;
+		if (!abilityAllowed(name, gen, ruleTable)) continue;
+		set.ability = name;
+		usedAbilities.set(toId(name), (usedAbilities.get(toId(name)) || 0) + 1);
+		break;
+	}
+	if (role === 'physical') {
+		set.evs = { hp: 4, atk: 252, def: 0, spa: 0, spd: 0, spe: 252 };
+		set.nature = 'Jolly';
+	} else if (role === 'special') {
+		set.evs = { hp: 4, atk: 0, def: 0, spa: 252, spd: 0, spe: 252 };
+		set.nature = 'Timid';
+	} else {
+		set.evs = { hp: 252, atk: 0, def: 128, spa: 0, spd: 124, spe: 0 };
+		set.nature = 'Bold';
+	}
+	if (!set.item && gen >= 2) set.item = 'Leftovers';
+}
+
+function itemAllowed(name, gen, ruleTable) {
+	const { Dex } = loadSim();
+	const item = Dex.forGen(gen).items.get(name);
+	if (!item.exists || item.gen > gen || item.isNonstandard) return false;
+	if (ruleTable.check('item:' + toId(name)) === 'banned') return false;
+	return true;
+}
+
+function upgradeCdSet(set, gen, ruleTable) {
+	const role = setRole(set);
+	const abilityPool = (CD_OFFENSE_ABILITIES[role] || []).concat(
+		role === 'defensive' ? [] : CD_OFFENSE_ABILITIES.defensive.slice(0, 2),
+		CD_UNIVERSAL_ABILITIES
+	);
+	const mainAbility = toId(set.ability || '');
+	const extras = [];
+	for (const name of abilityPool) {
+		if (toId(name) === mainAbility) continue;
+		if (extras.some(e => toId(e) === toId(name))) continue;
+		if (!abilityAllowed(name, gen, ruleTable)) continue;
+		extras.push(name);
+	}
+	if (extras.length) set.phAbilities = extras.join('/');
+	const stack = CD_ITEM_STACKS[role] || CD_ITEM_STACKS.defensive;
+	if (!set.item || !itemAllowed(set.item, gen, ruleTable)) {
+		set.item = itemAllowed(stack.main, gen, ruleTable) ? stack.main : 'Leftovers';
+	}
+	const itemExtras = [];
+	for (const name of stack.extras) {
+		if (toId(name) === toId(set.item)) continue;
+		if (!itemAllowed(name, gen, ruleTable)) continue;
+		itemExtras.push(name);
+	}
+	if (itemExtras.length) set.phItems = itemExtras.join('/');
+}
+
 function reshape(team, baseid, gen, rulesText, ruleTable) {
 	const isCD = baseid.includes('customdisguise') && /^gen[89]/.test(baseid) && !toId(rulesText).includes('standardcustom');
+	const isHackmons = isHackmonsTarget(baseid) && gen >= 3 && !baseid.includes('metronome');
+	const usedAbilities = new Map();
 	const isLetsGo = baseid.includes('letsgo');
 	const usedItems = new Set();
 	let fillerIdx = 0;
@@ -89,6 +202,7 @@ function reshape(team, baseid, gen, rulesText, ruleTable) {
 		if (gen < 9) delete set.teraType;
 		if (gen === 1 || isLetsGo) delete set.item;
 		if (isLetsGo) delete set.evs;
+		if (isHackmons && !baseid.includes('letsgo')) upgradeHackmonsSet(set, gen, ruleTable, usedAbilities);
 		if (ruleTable.has('itemclause') && set.item) {
 			if (usedItems.has(toId(set.item))) {
 				while (fillerIdx < FILLER_ITEMS.length && usedItems.has(toId(FILLER_ITEMS[fillerIdx]))) fillerIdx++;
@@ -96,11 +210,7 @@ function reshape(team, baseid, gen, rulesText, ruleTable) {
 			}
 			if (set.item) usedItems.add(toId(set.item));
 		}
-		if (isCD) {
-			set.phAbilities = CD_EXTRA_ABILITIES.filter(a => toId(a) !== toId(set.ability || '')).join('/');
-			if (!set.item) set.item = CD_EXTRA_ITEMS[0];
-			set.phItems = CD_EXTRA_ITEMS.filter(a => toId(a) !== toId(set.item)).join('/');
-		}
+		if (isCD) upgradeCdSet(set, gen, ruleTable);
 	}
 	return team;
 }
