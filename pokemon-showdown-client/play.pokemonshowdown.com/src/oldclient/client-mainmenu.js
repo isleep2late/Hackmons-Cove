@@ -108,7 +108,7 @@
 				buf += 'Partner:<br />';
 				buf += '<input class="partnerselect" /><button name="partnersubmit">Invite</button></label></p>';
 
-				buf += '<p><button class="button mainmenu1 big" name="search"><strong>Battle!</strong><br /><small>Find a random opponent</small></button></p></form></div>';
+				buf += '<p><button class="button mainmenu1 big" name="search"><strong>Battle!</strong><br /><small>Find a random opponent</small></button> <button type="button" class="button" name="phnnGenerateTeam"><i class="fa fa-magic"></i> Generate Team</button></p></form></div>';
 			}
 
 			buf += '<div class="menugroup">';
@@ -338,7 +338,7 @@
 				buf += '<p><label class="label">Team:</label>' + this.renderTeams(teamFormat) + '</p>';
 
 			}
-			buf += '<p class="buttonbar"><button name="acceptChallenge" class="button"><strong>' + BattleLog.escapeHTML(acceptButtonLabel) + '</strong></button> <button type="button" name="rejectChallenge" class="button">' + BattleLog.escapeHTML(rejectButtonLabel) + '</button></p></form>';
+			buf += '<p class="buttonbar"><button name="acceptChallenge" class="button"><strong>' + BattleLog.escapeHTML(acceptButtonLabel) + '</strong></button> <button type="button" name="rejectChallenge" class="button">' + BattleLog.escapeHTML(rejectButtonLabel) + '</button> <button type="button" name="phnnGenerateTeam" class="button"><i class="fa fa-magic"></i> Generate Team</button></p></form>';
 			$challenge.html(buf);
 		},
 
@@ -875,7 +875,7 @@
 						buf += '<p><label class="label">Format:</label>' + self.renderFormats(format, true) + '</p>';
 						buf += '<p><label class="label">Team:</label>' + self.renderTeams(format) + '</p>';
 
-						buf += '<p class="buttonbar"><button name="acceptChallenge" class="button"><strong>Accept</strong></button> <button type="button" name="rejectChallenge" class="button">Reject</button></p></form>';
+						buf += '<p class="buttonbar"><button name="acceptChallenge" class="button"><strong>Accept</strong></button> <button type="button" name="rejectChallenge" class="button">Reject</button> <button type="button" name="phnnGenerateTeam" class="button"><i class="fa fa-magic"></i> Generate Team</button></p></form>';
 						$challenge.html(buf);
 						if (format.substr(0, 4) === 'gen5') atLeastOneGen5 = true;
 					}
@@ -1129,7 +1129,7 @@
 			var itemClauseDefault = format && BattleFormats[format] ? BattleFormats[format].itemClauseDefault : false;
 			buf += '<p' + (!itemClauseDefault ? ' class="hidden">' : '>');
 			buf += '<label class="checkbox"><input type="checkbox" name="itemclause" /> <abbr title="Start a battle with Item Clause">Item Clause</abbr></label></p>';
-			buf += '<p class="buttonbar"><button name="makeChallenge" class="button"><strong>Challenge</strong></button> <button type="button" name="dismissChallenge" class="button">Cancel</button></p></form>';
+			buf += '<p class="buttonbar"><button name="makeChallenge" class="button"><strong>Challenge</strong></button> <button type="button" name="dismissChallenge" class="button">Cancel</button> <button type="button" name="phnnGenerateTeam" class="button"><i class="fa fa-magic"></i> Generate Team</button></p></form>';
 			$challenge.html(buf);
 		},
 		acceptChallenge: function (i, target) {
@@ -1162,6 +1162,54 @@
 			var userid = $(target).closest('.pm-window').data('userid');
 			$(target).closest('.challenge').remove();
 			app.send('/reject ' + userid);
+		},
+		phnnGenerateTeam: function (i, button) {
+			var $form = $(button).closest('form');
+			var format = $form.find('button[name=format]').val() || '';
+			if (!format || /random|factory|hackmonscup|challengecup|metronome/.test(format)) {
+				app.addPopupMessage('Pick a non-random format first, then I\'ll build you a team.');
+				return;
+			}
+			var self = this;
+			var $btn = $(button);
+			$btn.attr('disabled', true).addClass('disabled').html('<i class="fa fa-magic"></i> Building...');
+			$.ajax({
+				type: 'GET',
+				url: '/teamgen',
+				data: { format: format },
+				dataType: 'json',
+				timeout: 30000,
+				success: function (data) {
+					$btn.attr('disabled', null).removeClass('disabled').html('<i class="fa fa-magic"></i> Generate Team');
+					if (!data || data.error || !data.team) {
+						app.addPopupMessage('Couldn\'t build a team: ' + ((data && data.error) || 'server error'));
+						return;
+					}
+					var now = new Date();
+					var pad = function (n) { return (n < 10 ? '0' : '') + n; };
+					var stamp = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate()) + ' ' + pad(now.getHours()) + '.' + pad(now.getMinutes()) + '.' + pad(now.getSeconds());
+					var team = {
+						name: 'Generated ' + BattleLog.escapeFormat(format.split('@@@')[0]).replace(/[\[\]]/g, '') + ' ' + stamp,
+						format: format.split('@@@')[0],
+						gen: parseInt(format.charAt(3), 10) || 9,
+						team: data.team,
+						capacity: 6,
+						folder: '',
+						iconCache: ''
+					};
+					Storage.teams.push(team);
+					Storage.saveTeams();
+					var idx = Storage.teams.length - 1;
+					self.curTeamIndex = idx;
+					var $teamButton = $form.find('button[name=team]');
+					if ($teamButton.length) $teamButton.replaceWith(self.renderTeams(format, idx));
+					if (app.rooms.teambuilder) app.rooms.teambuilder.update();
+				},
+				error: function () {
+					$btn.attr('disabled', null).removeClass('disabled').html('<i class="fa fa-magic"></i> Generate Team');
+					app.addPopupMessage('Couldn\'t reach the team generator.');
+				}
+			});
 		},
 		makeChallenge: function (i, target) {
 			this.requestNotifications();
@@ -1519,6 +1567,114 @@
 		}
 	});
 
+	function classifySmogonFormats() {
+		var buckets = { OU: [], Ubers: [], UU: [], VGC: [], RU: [], NU: [], PU: [], LC: [], Monotype: [], CAP: [], BSS: [], Other: [] };
+		if (!window.BattleFormats) return buckets;
+		for (var id in BattleFormats) {
+			var f = BattleFormats[id];
+			if (f.section !== 'Smogon Formats') continue;
+			var name = BattleLog.escapeFormat(id);
+			var m = /^\[Gen ([^\]]+)\]\s*(.*)$/.exec(name);
+			var genLabel = m ? 'Gen ' + m[1] : name;
+			var rest = m ? m[2] : name;
+			var entry = { id: id, name: name, genLabel: genLabel, rest: rest };
+			if (/^Doubles OU$/.test(rest)) { entry.doubles = true; buckets.OU.push(entry); }
+			else if (/^OU( \(Blitz\))?$/.test(rest)) buckets.OU.push(entry);
+			else if (/^Doubles Ubers$/.test(rest)) { entry.doubles = true; buckets.Ubers.push(entry); }
+			else if (/^Ubers$/.test(rest)) buckets.Ubers.push(entry);
+			else if (/^Doubles UU$/.test(rest)) { entry.doubles = true; buckets.UU.push(entry); }
+			else if (/^UU$/.test(rest)) buckets.UU.push(entry);
+			else if (/^VGC/.test(rest)) buckets.VGC.push(entry);
+			else if (/^(BSS|Battle Stadium|Battle Spot)/.test(rest)) buckets.BSS.push(entry);
+			else if (/^RU$/.test(rest)) buckets.RU.push(entry);
+			else if (/^NU$/.test(rest)) buckets.NU.push(entry);
+			else if (/^PU$/.test(rest)) buckets.PU.push(entry);
+			else if (/^(LC|Little Cup)/.test(rest)) buckets.LC.push(entry);
+			else if (/^Monotype$/.test(rest)) buckets.Monotype.push(entry);
+			else if (/^CAP/.test(rest)) buckets.CAP.push(entry);
+			else buckets.Other.push(entry);
+		}
+		return buckets;
+	}
+
+	var SmogonFormatsPopup = this.SmogonFormatsPopup = this.Popup.extend({
+		initialize: function (data) {
+			this.data = data;
+			this.doubles = false;
+			this.stage = 'root';
+			this.tier = '';
+			this.render();
+		},
+		events: {
+			'change input[name=doublescheck]': 'toggleDoubles'
+		},
+		render: function () {
+			var buf = '<p><ul class="popupmenu">';
+			if (this.stage === 'root') {
+				buf += '<li><strong style="color:#579">Smogon Formats</strong></li>';
+				var tiers = ['OU', 'Ubers', 'UU', 'VGC', 'Other'];
+				for (var i = 0; i < tiers.length; i++) {
+					buf += '<li><button name="pickTier" value="' + tiers[i] + '" class="option">' + tiers[i] + '</button></li>';
+				}
+				buf += '<li><label><input type="checkbox" name="doublescheck"' + (this.doubles ? ' checked' : '') + ' /> Build for Doubles (where available; VGC is always Doubles)</label></li>';
+			} else if (this.stage === 'other') {
+				buf += '<li><strong style="color:#579">Other tiers</strong></li>';
+				var others = ['RU', 'NU', 'PU', 'LC', 'Monotype', 'CAP', 'BSS', 'Other Metagames'];
+				for (var j = 0; j < others.length; j++) {
+					buf += '<li><button name="pickTier" value="' + others[j] + '" class="option">' + others[j] + '</button></li>';
+				}
+				buf += '<li><button name="goBack" value="root" class="option"><i class="fa fa-chevron-left"></i> Back</button></li>';
+			} else if (this.stage === 'list') {
+				var buckets = classifySmogonFormats();
+				var entries;
+				var wantDoubles = this.doubles;
+				if (this.tier === 'Other Metagames') {
+					entries = buckets.Other;
+				} else {
+					entries = buckets[this.tier] || [];
+					if (this.tier === 'OU' || this.tier === 'Ubers' || this.tier === 'UU') {
+						var filtered = entries.filter(function (e) { return wantDoubles ? e.doubles : !e.doubles; });
+						if (filtered.length) entries = filtered;
+					}
+				}
+				buf += '<li><strong style="color:#579">' + BattleLog.escapeHTML(this.tier) + (wantDoubles && ['OU', 'Ubers', 'UU'].indexOf(this.tier) >= 0 ? ' (Doubles)' : '') + '</strong></li>';
+				if (!entries.length) {
+					buf += '<li><em>Nothing here for this selection.</em></li>';
+				}
+				var useShortLabel = ['OU', 'Ubers', 'UU', 'RU', 'NU', 'PU', 'LC', 'Monotype'].indexOf(this.tier) >= 0 && !(this.tier === 'Other Metagames');
+				for (var k = 0; k < entries.length; k++) {
+					var label = useShortLabel ? entries[k].genLabel + (entries[k].doubles ? ' (Doubles)' : '') : entries[k].name;
+					buf += '<li><button name="pickFormat" value="' + entries[k].id + '" class="option">' + BattleLog.escapeHTML(label) + '</button></li>';
+				}
+				buf += '<li><button name="goBack" value="' + (['RU', 'NU', 'PU', 'LC', 'Monotype', 'CAP', 'BSS', 'Other Metagames'].indexOf(this.tier) >= 0 ? 'other' : 'root') + '" class="option"><i class="fa fa-chevron-left"></i> Back</button></li>';
+			}
+			buf += '</ul></p>';
+			this.$el.html('<div style="max-height:70vh;overflow-y:auto;min-width:260px">' + buf + '</div>');
+		},
+		toggleDoubles: function (e) {
+			this.doubles = !!e.currentTarget.checked;
+		},
+		pickTier: function (tier) {
+			if (tier === 'Other') {
+				this.stage = 'other';
+			} else {
+				this.tier = tier;
+				this.stage = 'list';
+			}
+			this.render();
+		},
+		goBack: function (stage) {
+			this.stage = stage;
+			this.tier = '';
+			this.render();
+		},
+		pickFormat: function (id) {
+			var onselect = this.data.onselect;
+			this.close();
+			if (onselect) onselect(id);
+		}
+	});
+
 	var FormatPopup = this.FormatPopup = this.Popup.extend({
 		events: {
 			'keyup input[name=search]': 'updateSearch',
@@ -1543,7 +1699,11 @@
 			if (!this.selectType) this.selectType = (this.$form.data('search') ? 'search' : 'challenge');
 
 			var html = '<p><ul class="popupmenu"><li><input name="search" placeholder="Search formats" value="' + this.search + '" class="textbox autofocus" autocomplete="off" />';
-			html += '</li></ul></p><span name="formats">';
+			html += '</li>';
+			if (this.selectType === 'teambuilder') {
+				html += '<li><button name="smogonFormats" class="option"><strong>Smogon Formats</strong> <small>(every main-server tier)</small></button></li>';
+			}
+			html += '</ul></p><span name="formats">';
 			html += this.renderFormats();
 			html += '</span><div style="clear:left"></div><p></p>';
 			this.$el.html(html);
@@ -1653,6 +1813,7 @@
 			this.update();
 		},
 		shouldDisplayFormat: function (format) {
+			if (format.section === 'Smogon Formats') return false;
 			if (/customdisguises/.test(format.id) && format.id !== 'gen9nonerfscustomdisguises') return false;
 			if (/customgame/.test(format.id) && format.id !== 'gen9customgame') return false;
 			for (var fi = 0; fi < PHNN_FAMILIES.length; fi++) {
@@ -1668,6 +1829,11 @@
 				if (this.selectType !== 'watch' && !format[this.selectType + 'Show']) return false;
 			}
 			return true;
+		},
+		smogonFormats: function () {
+			var onselect = this.data.onselect;
+			this.close();
+			app.addPopup(SmogonFormatsPopup, { onselect: onselect });
 		},
 		selectFormat: function (format) {
 			var $form = this.$form.length ? this.$form : this.sourceEl.closest('form');

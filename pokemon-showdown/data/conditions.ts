@@ -764,6 +764,9 @@ export const Conditions: import('../sim/dex-conditions').ConditionDataTable = {
 			if (['cramorantgulping', 'cramorantgorging'].includes(pokemon.species.id) && !pokemon.transformed) {
 				pokemon.formeChange('cramorant');
 			}
+			if (this.ruleTable.has('infinitedyna') && pokemon.species.id === 'eternatus' && !pokemon.transformed) {
+				pokemon.formeChange('Eternatus-Eternamax');
+			}
 			this.add('-start', pokemon, 'Dynamax', pokemon.gigantamax ? 'Gmax' : '');
 			if (pokemon.baseSpecies.name === 'Shedinja') return;
 
@@ -797,6 +800,9 @@ export const Conditions: import('../sim/dex-conditions').ConditionDataTable = {
 		},
 		onEnd(pokemon) {
 			this.add('-end', pokemon, 'Dynamax');
+			if (pokemon.species.id === 'eternatuseternamax' && pokemon.baseSpecies.id === 'eternatus' && !pokemon.transformed) {
+				pokemon.formeChange('Eternatus');
+			}
 			if (pokemon.baseSpecies.name === 'Shedinja') return;
 			pokemon.hp = pokemon.getUndynamaxedHP();
 			pokemon.maxhp = pokemon.baseMaxhp;
