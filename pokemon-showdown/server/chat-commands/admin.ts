@@ -1449,31 +1449,14 @@ export const commands: Chat.ChatCommands = {
 	async updateclient(target, room, user) {
 		this.canUseConsole();
 		this.sendReply('Restarting...');
-		const [result, err] = await LoginServer.request('rebuildclient', {
-			full: toID(target) === 'full',
-		});
-		if (err) {
-			Rooms.global.notifyRooms(
-				['staff', 'adminlog'],
-				`|c|${user.getIdentity()}|/log ${user.name} used /updateclient - but something failed while updating.`
-			);
-			throw new Chat.ErrorMessage([err.message, err.stack || '']);
-		}
-		if (!result) throw new Chat.ErrorMessage('No result received.');
-		this.stafflog(`[o] ${result.success || ""} [e] ${result.actionerror || ""}`);
-		if (result.actionerror) {
-			throw new Chat.ErrorMessage(result.actionerror);
-		}
-		let message = `${user.name} used /updateclient`;
-		if (result.updated) {
-			this.sendReply(`DONE. Client updated.`);
-		} else {
-			message += ` - but something failed while updating.`;
-			this.errorReply(`FAILED. Conflicts were found while updating.`);
-		}
+		const full = this.fullCmd.includes('full');
+		const clientDir = require('path').resolve(process.cwd(), '..', 'pokemon-showdown-client');
+		const cmd = `/bash cd ${clientDir} && node build ${full ? `full` : ``}`;
+		const message = `${user.name} used /updateclient`;
 		Rooms.global.notifyRooms(
 			['staff', 'adminlog'], `|c|${user.getIdentity()}|/log ${message}`
 		);
+		this.parse(cmd);
 	},
 	updateclienthelp: [
 		`/updateclient [full] - Update the client source code. Provide the argument 'full' to make it a full rebuild.`,
