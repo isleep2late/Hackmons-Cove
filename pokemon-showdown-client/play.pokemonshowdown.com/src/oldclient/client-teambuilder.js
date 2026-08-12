@@ -1869,26 +1869,61 @@
 			var atIdx = f.indexOf('@@@');
 			var baseFormat = atIdx >= 0 ? f.slice(0, atIdx) : f;
 			var families = [
-				{ label: 'Version', members: [
-					{ id: 'gen1disguises', name: 'JP' },
-					{ id: 'gen1disguisesenglish', name: 'English' },
-					{ id: 'gen1ou', name: 'OU' },
-					{ id: 'gen1ubers', name: 'Ubers' },
+				{ label: 'Generation', members: [
+					{ id: 'gen1disguises', name: 'Gen 1 (JP)' },
+					{ id: 'gen1disguisesenglish', name: 'Gen 1 (English)' },
+					{ id: 'gen2disguises', name: 'Gen 2' },
 					{ id: 'gen2spaceworlddisguises', name: 'SpaceWorld' },
+					{ id: 'gen3disguises', name: 'Gen 3' },
+					{ id: 'gen4disguises', name: 'Gen 4' },
+					{ id: 'gen5disguises', name: 'Gen 5' },
+					{ id: 'gen6disguises', name: 'Gen 6' },
+					{ id: 'gen7disguises', name: 'Gen 7' },
+					{ id: 'gen7letsgodisguises', name: 'Let\'s Go' },
+					{ id: 'gen8disguises', name: 'Gen 8' },
+					{ id: 'gen8bdspdisguises', name: 'BDSP' },
+					{ id: 'gen9disguises', name: 'Gen 9' },
+					{ id: 'gen9championsdisguises', name: 'Champions' },
+					{ id: 'gen9nonerfsdisguises', name: 'No Nerfs' },
+					{ id: 'gen1ou', name: 'Gen 1 OU' },
+					{ id: 'gen1ubers', name: 'Gen 1 Ubers' },
 				] },
-				{ label: 'Version', members: [
-					{ id: 'gen2statuses', name: 'Crystal' },
-					{ id: 'gen2statusesgoldsilver', name: 'Gold/Silver' },
-					{ id: 'gen2ou', name: 'OU' },
-					{ id: 'gen2ubers', name: 'Ubers' },
+				{ label: 'Generation', members: [
+					{ id: 'gen2statuses', name: 'Gen 2 (Crystal)' },
+					{ id: 'gen2statusesgoldsilver', name: 'Gen 2 (Gold/Silver)' },
+					{ id: 'gen1statuses', name: 'Gen 1' },
+					{ id: 'gen3statuses', name: 'Gen 3' },
+					{ id: 'gen4statuses', name: 'Gen 4' },
+					{ id: 'gen5statuses', name: 'Gen 5' },
+					{ id: 'gen6statuses', name: 'Gen 6' },
+					{ id: 'gen7statuses', name: 'Gen 7' },
+					{ id: 'gen7letsgostatuses', name: 'Let\'s Go' },
+					{ id: 'gen8statuses', name: 'Gen 8' },
+					{ id: 'gen8bdspstatuses', name: 'BDSP' },
+					{ id: 'gen9statuses', name: 'Gen 9' },
+					{ id: 'gen9championsstatuses', name: 'Champions' },
+					{ id: 'gen9nonerfsstatuses', name: 'No Nerfs' },
+					{ id: 'gen2ou', name: 'Gen 2 OU' },
+					{ id: 'gen2ubers', name: 'Gen 2 Ubers' },
 					{ id: 'gen2spaceworldou', name: 'SpaceWorld OU' },
 					{ id: 'gen2spaceworldubers', name: 'SpaceWorld Ubers' },
 					{ id: 'gen2spaceworldbricks', name: 'SpaceWorld Bricks' },
 				] },
-				{ label: 'Version', members: [
-					{ id: 'gen8255purehackmonsunified', name: 'Unified' },
-					{ id: 'gen8255purehackmons', name: 'SwSh' },
+				{ label: 'Generation', members: [
+					{ id: 'gen8255purehackmonsunified', name: 'Gen 8 Unified' },
+					{ id: 'gen8255purehackmons', name: 'Gen 8 (SwSh)' },
 					{ id: 'gen8bdsp255purehackmons', name: 'BDSP' },
+					{ id: 'gen1255purehackmons', name: 'Gen 1' },
+					{ id: 'gen2255purehackmons', name: 'Gen 2' },
+					{ id: 'gen3255purehackmons', name: 'Gen 3' },
+					{ id: 'gen4255purehackmons', name: 'Gen 4' },
+					{ id: 'gen5255purehackmons', name: 'Gen 5' },
+					{ id: 'gen6255purehackmons', name: 'Gen 6' },
+					{ id: 'gen7255purehackmons', name: 'Gen 7' },
+					{ id: 'gen7letsgo255purehackmons', name: 'Let\'s Go' },
+					{ id: 'gen9255purehackmons', name: 'Gen 9' },
+					{ id: 'gen9champions255purehackmons', name: 'Champions' },
+					{ id: 'gen9nonerfs255purehackmons', name: 'No Nerfs' },
 				] },
 			];
 			for (var i = 0; i < families.length; i++) {
@@ -3540,7 +3575,7 @@
 			if (gen === undefined) gen = this.curTeam.gen;
 			if (format.includes('customdisguises') || format.includes('customgame')) return 9999;
 			if (gen === 9 && format.includes('nonerfsstandard')) return 100;
-			if (format.includes('disguises') ||
+			if (format.includes('disguises') || format.includes('255') ||
 				format.includes('noclerics') || format.includes('statuses') ||
 				((gen === 9 || gen === 5) && (format.includes('nonerfs') || format.includes('phnn')) && !format.includes('cup')) ||
 				(gen === 3 && format.includes('anyability')) ||

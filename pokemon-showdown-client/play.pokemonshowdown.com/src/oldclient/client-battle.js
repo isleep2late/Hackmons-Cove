@@ -745,6 +745,7 @@
 					var move = this.battle.dex.moves.get(moveData.move);
 					var name = move.name;
 					var pp = moveData.pp + '/' + moveData.maxpp;
+					if (this.battle && this.battle.rules['Infinite PP'] && moveData.maxpp) pp = '\u221E';
 					if (!moveData.maxpp) pp = '&ndash;';
 					if (move.id === 'Struggle' || move.id === 'Recharge') pp = '&ndash;';
 					if (move.id === 'Recharge') move.type = '&ndash;';
@@ -788,6 +789,7 @@
 								var isDisabled = specialMoves[i].disabled ? 'disabled="disabled"' : '';
 								movebuttons += '<button ' + isDisabled + ' class="movebutton type-' + moveType + ' has-tooltip" name="chooseMove" value="' + (i + 1) + '" data-move="' + BattleLog.escapeHTML(specialMoves[i].move) + '" data-target="' + BattleLog.escapeHTML(specialMoves[i].target) + '" data-tooltip="' + BattleLog.escapeHTML(tooltipArgs) + '">';
 								var pp = curActive.moves[i].pp + '/' + curActive.moves[i].maxpp;
+								if (this.battle && this.battle.rules['Infinite PP'] && curActive.moves[i].maxpp) pp = '\u221E';
 								if (canZMove) {
 									pp = '1/1';
 								} else if (!curActive.moves[i].maxpp) {
@@ -907,6 +909,7 @@
 					var moveData = ((this.battle && this.battle.dex) || Dex).moves.get(move.id || move.move);
 					var dis = move.disabled ? ' disabled' : '';
 					var pp = (move.pp !== undefined) ? (move.pp + '/' + move.maxpp) : '';
+					if (this.battle && this.battle.rules['Infinite PP'] && move.maxpp) pp = '\u221E';
 					var rotBpAcc = (moveData.basePower ? moveData.basePower : '&mdash;') + ' / ' + (moveData.accuracy === true || !moveData.accuracy ? '&mdash;' : moveData.accuracy + '%');
 					panel += '<button class="movebutton type-' + moveData.type + ' rotmove-base-' + i + '"' + dis + ' name="chooseRotationMove" value="' + i + ',' + (j + 1) + '" style="display:block;width:100%;margin-bottom:2px;text-align:left;">' + BattleLog.escapeHTML(move.move) + ' <small class="type">' + moveData.type + '</small> <small class="bpacc">' + rotBpAcc + '</small> <small class="pp">' + pp + '</small></button>';
 				}

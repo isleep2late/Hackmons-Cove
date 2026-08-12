@@ -30,6 +30,9 @@ const net = require('net');
 
 const PORT = Number(process.env.PHNN_CLIENT_PORT || process.argv[2] || 8099);
 const STATIC_DIR = path.resolve(__dirname, process.env.PHNN_STATIC_DIR || '../play.pokemonshowdown.com');
+// Upstream's replay front-end (built by ./build) lives in its own tree; its js/ is
+// served alongside the play client's so the viewer can be loaded from our origin.
+const REPLAY_STATIC_DIR = path.resolve(__dirname, process.env.PHNN_REPLAY_STATIC_DIR || '../replay.pokemonshowdown.com');
 const LOGIN_ORIGIN = process.env.PHNN_LOGIN_ORIGIN || 'https://play.pokemonshowdown.com';
 // PHNN custom avatars live in the server repo's config/avatars dir and are
 // served at /avatars/ (see resolveAvatar in battle-dex.ts).
@@ -91,6 +94,9 @@ function proxyLogin(req, res, reqUrl) {
 			'content-type': req.headers['content-type'] || 'application/x-www-form-urlencoded',
 			'user-agent': req.headers['user-agent'] || 'phnn-client',
 		};
+		// Forward the browser's session cookie so the login server's `upkeep` can
+		// recognise a returning user; without this every reload demands a re-login.
+		if (req.headers.cookie) headers['cookie'] = req.headers.cookie;
 		if (body.length) headers['content-length'] = body.length;
 		const upstream = https.request({
 			hostname: target.hostname,
@@ -101,7 +107,22 @@ function proxyLogin(req, res, reqUrl) {
 			method: req.method,
 			headers,
 		}, up => {
-			res.writeHead(up.statusCode || 502, { 'content-type': up.headers['content-type'] || 'text/plain' });
+			const outHeaders = { 'content-type': up.headers['content-type'] || 'text/plain' };
+			// Relay the login server's session cookie back to the browser, re-scoped to
+			// our own origin: the upstream Domain=.pokemonshowdown.com would be rejected
+			// for our host, so strip it and let the cookie be host-only.
+			const setCookie = up.headers['set-cookie'];
+			if (setCookie) {
+				outHeaders['set-cookie'] = setCookie.map(cookie => {
+					const parts = cookie.split(';').filter(part => !/^\s*domain=/i.test(part));
+					const attrs = parts.slice(1).map(part => part.trim().toLowerCase());
+					if (!attrs.some(a => a === 'secure')) parts.push(' Secure');
+					if (!attrs.some(a => a.startsWith('samesite='))) parts.push(' SameSite=Lax');
+					if (!attrs.some(a => a === 'httponly')) parts.push(' HttpOnly');
+					return parts.join(';');
+				});
+			}
+			res.writeHead(up.statusCode || 502, outHeaders);
 			up.pipe(res);
 		});
 		upstream.on('error', err => {
@@ -142,9 +163,12 @@ function serveStatic(req, res, pathname) {
 	const isIndex = (rel === '/' || rel === '/index.html');
 	if (isIndex) rel = '/caches/index-old.html';
 	else if (rel.endsWith('/')) rel += 'index.html';
-	const filePath = path.join(STATIC_DIR, rel);
+	let baseDir = STATIC_DIR;
+	// The replay viewer's own bundles live in the replay tree, not the play client's.
+	if (/^\/js\/(replays(-battle|-index)?|utils)\.js(\.map)?$/.test(rel)) baseDir = REPLAY_STATIC_DIR;
+	const filePath = path.join(baseDir, rel);
 	// prevent path traversal outside STATIC_DIR
-	if (!filePath.startsWith(STATIC_DIR)) {
+	if (!filePath.startsWith(baseDir)) {
 		res.writeHead(403); res.end('forbidden'); return;
 	}
 	fs.stat(filePath, (err, stat) => {
@@ -443,6 +467,64 @@ function replaySearchPage(base, reqUrl) {
 
 const EMBED_SRC = process.env.PHNN_REPLAY_EMBED || 'https://play.hackmons.com/js/replay-embed.js';
 
+// Client origin that serves the shared battle engine + data files.
+const CLIENT_ORIGIN = process.env.PHNN_CLIENT_ORIGIN || 'https://play.hackmons.com';
+const UPSTREAM_REPLAY_SCRIPTS = [
+	'/js/lib/preact.min.js',
+	'/config/config.js',
+	'/js/lib/jquery-1.11.0.min.js',
+	'/js/lib/html-sanitizer-minified.js',
+	'/js/battle-sound.js',
+	'/js/battledata.js',
+	'/data/pokedex-mini.js',
+	'/data/pokedex-mini-bw.js',
+	'/data/graphics.js',
+	'/data/pokedex.js',
+	'/data/moves.js',
+	'/data/abilities.js',
+	'/data/items.js',
+	'/data/teambuilder-tables.js',
+	'/js/battle-tooltips.js',
+	'/js/battle.js',
+];
+
+// The upstream replay viewer (replay.pokemonshowdown.com/src/replays*.tsx, built to js/).
+// Upstream's index.php embeds the log inline in a text/plain script tag and the viewer
+// reads it from there, so a replay opens without waiting on a second request.
+function upstreamReplayHtml(id, log, meta) {
+	const title = meta && meta.players && meta.players.length ?
+		escapeHtml(meta.players.join(' vs. ')) + ' - Hackmons Cove Replay' : 'Hackmons Cove Replay';
+	let out = '<!DOCTYPE html>\n<html><head>\n';
+	out += '<meta charset="utf-8" />\n';
+	out += '<meta name="viewport" content="width=device-width, initial-scale=1" />\n';
+	out += '<title>' + title + '</title>\n';
+	for (const href of ['/style/font-awesome.css', '/style/battle.css', '/style/utilichart.css', '/style/replay.css']) {
+		out += '<link rel="stylesheet" href="' + CLIENT_ORIGIN + href + '" />\n';
+	}
+	out += '</head><body>\n';
+	out += '<div id="main" class="main"></div>\n';
+	// The viewer only takes the inline path when replaydata-<id> exists; it reads the JSON from
+	// there and the log from replaylog-<id>, unescaping '<\\/' back to '</'.
+	const inlineData = {
+		id, players: meta.players, format: meta.format, formatid: meta.formatid,
+		rating: meta.rating, uploadtime: meta.uploadtime, private: meta.private ? 1 : 0,
+	};
+	out += '<script type="text/plain" class="data" id="replaydata-' + escapeHtml(id) + '">\n';
+	out += JSON.stringify(inlineData).replace(/<\//g, '<\\/') + '\n';
+	out += '<\/script>\n';
+	out += '<script type="text/plain" class="log" id="replaylog-' + escapeHtml(id) + '">\n';
+	out += log.replace(/<\//g, '<\\/') + '\n';
+	out += '<\/script>\n';
+	for (const src of UPSTREAM_REPLAY_SCRIPTS) {
+		out += '<script defer src="' + CLIENT_ORIGIN + src + '"><\/script>\n';
+	}
+	out += '<script defer src="/js/utils.js"><\/script>\n';
+	out += '<script defer src="/js/replays-battle.js"><\/script>\n';
+	out += '<script defer src="/js/replays.js"><\/script>\n';
+	out += '</body></html>\n';
+	return out;
+}
+
 function replayViewerHtml(id, log, downloadBar) {
 	const safeLog = log.replace(/<\//g, '<\\/');
 	const bar = downloadBar
@@ -496,7 +578,23 @@ function serveReplay(req, res, reqUrl, root) {
 		}
 		if (ext === 'json') {
 			res.writeHead(200, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' });
-			res.end(JSON.stringify({ id, log }));
+			refreshReplayIndex();
+			const meta = replayIndex.get(id) || parseReplayMeta(id, log, Date.now());
+			const password = id.endsWith('pw') ? (id.match(/-([a-z0-9]+)pw$/) || [])[1] || '' : '';
+			// Our stored id already carries the -<password>pw suffix, but the viewer
+			// rebuilds the share id from bare id + password, so hand it the bare id.
+			const bareId = password ? id.slice(0, -(password.length + 3)) : id;
+			res.end(JSON.stringify({
+				id: bareId,
+				log,
+				players: meta.players,
+				format: meta.format,
+				formatid: meta.formatid,
+				rating: meta.rating,
+				uploadtime: meta.uploadtime,
+				private: meta.private ? 1 : 0,
+				password,
+			}));
 			return;
 		}
 		if (ext === 'html') {
@@ -504,8 +602,10 @@ function serveReplay(req, res, reqUrl, root) {
 			res.end(replayViewerHtml(id, log, false));
 			return;
 		}
+		refreshReplayIndex();
+		const meta = replayIndex.get(id) || parseReplayMeta(id, log, Date.now());
 		res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' });
-		res.end(replayViewerHtml(id, log, true));
+		res.end(upstreamReplayHtml(id, log, meta));
 	});
 }
 

@@ -285,7 +285,10 @@ export class BattleStream extends Streams.ObjectReadWriteStream<string> {
 			const [player, pokemon, status] = targets.map(toID);
 			const pl = getPlayer(player);
 			const p = getPokemon(player, pokemon);
+			const wasActive = p.isActive;
+			p.isActive = true;
 			p.setStatus(toID(status));
+			p.isActive = wasActive;
 			if (!p.isActive) {
 				battle.add('', 'please ignore the above');
 				battle.add('-status', pl.active[0], pl.active[0].status, '[silent]');
