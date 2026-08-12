@@ -1680,10 +1680,15 @@ export class GlobalRoomState {
 
 			// Send reports
 			const reportPlayers = players.map(player => player.getIdentity()).join('|');
+			const startedAt = Chat.toTimestamp(new Date(), { human: true });
 			for (const roomid of reportRooms) {
 				const reportRoom = Rooms.get(roomid);
 					if (!reportRoom) continue;
-				reportRoom.add(`|b|${room.roomid}|${reportPlayers}`).update();
+				reportRoom.add(`|b|${room.roomid}|${reportPlayers}`);
+				if (roomid === 'battlelog') {
+					reportRoom.add(`|html|<small class="battlelog-meta">[${startedAt}] ${Utils.escapeHTML(room.roomid)}</small>`);
+				}
+				reportRoom.update();
 			}
 		}
 		if (Config.logladderip && options.rated) {

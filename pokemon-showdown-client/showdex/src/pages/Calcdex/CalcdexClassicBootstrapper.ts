@@ -137,7 +137,10 @@ export class CalcdexClassicBootstrapper extends MixinCalcdexBootstrappable(Bootd
       return null;
     }
 
-    return window.app.rooms[this.battleId] as Showdown.ClientBattleRoom;
+    return (
+      window.app.rooms[this.battleId]
+        || Object.values(window.app.rooms).find((room) => (room as Showdown.ClientBattleRoom)?.battle?.id === this.battleId)
+    ) as Showdown.ClientBattleRoom;
   }
 
   protected get battle() {

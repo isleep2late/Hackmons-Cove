@@ -609,10 +609,18 @@ export class Pokemon implements PokemonDetails, PokemonHealth {
 			let ratio = (range[0] + range[1]) / 2;
 			return Math.round(maxWidth * ratio) || 1;
 		}
+		if (this.side.battle.hpPercentageMod) {
+			let percentage = Math.ceil(100 * this.hp / this.maxhp);
+			if ((percentage === 100) && (this.hp < this.maxhp)) {
+				percentage = 99;
+			}
+			return percentage * maxWidth / 100;
+		}
 		const width = Math.round(this.hp / this.maxhp * maxWidth) || 1;
 		return this.hp < this.maxhp && width === maxWidth ? maxWidth - 1 : width;
 	}
 	getHPText(precision = 1) {
+		if (this.hp > 0 && this.side?.battle?.rules['Infinite HP']) return '\u221E';
 		return Pokemon.getHPText(this, this.side.battle.reportExactHP, precision);
 	}
 	static getHPText(pokemon: PokemonHealth, exactHP: boolean, precision = 1) {
@@ -1167,6 +1175,7 @@ export class Battle {
 	rules: { [ruleName: string]: 1 | undefined } = {};
 	isBlitz = false;
 	reportExactHP = false;
+	hpPercentageMod = false;
 	endLastTurnPending = false;
 	totalTimeLeft = 0;
 	graceTimeLeft = 0;
@@ -3603,6 +3612,7 @@ export class Battle {
 				this.isBlitz = true;
 			}
 			if (ruleName === 'Exact HP Mod') this.reportExactHP = true;
+			if (ruleName === 'HP Percentage Mod') this.hpPercentageMod = true;
 			this.rules[ruleName] = 1;
 			this.log(args);
 			break;
