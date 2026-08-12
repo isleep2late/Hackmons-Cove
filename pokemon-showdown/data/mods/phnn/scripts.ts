@@ -153,7 +153,7 @@ export const Scripts: ModdedBattleScriptsData = {
 	side: {
 		canDynamaxNow(this: Side) {
 			if (this.battle.gameType === 'multi' && this.battle.turn % 2 !== [1, 1, 0, 0][this.n]) return false;
-			return !this.dynamaxUsed;
+			return !this.dynamaxUsed || this.battle.ruleTable.has('infinitedyna');
 		},
 
 		chooseMove(

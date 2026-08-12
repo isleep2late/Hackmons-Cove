@@ -602,11 +602,13 @@ export class TeamValidator {
 		set.nature = nature.name;
 		if (!Array.isArray(set.moves)) set.moves = [];
 
-		const isCustomHpAllowed = (ruleTable.has('disguisemod') || dex.currentMod.includes('phnn')) && !format.id.includes('nonerfsstandard');
+		const isCustomHpAllowed = (
+			ruleTable.has('disguisemod') || dex.currentMod.includes('phnn') || format.id.includes('statuses')
+		) && !format.id.includes('nonerfsstandard');
 		const isCustomDisguises = ruleTable.has('disguisemod') && format.id.includes('customdisguise');
 		const isArbitraryPPAllowed = isCustomDisguises ||
 			(dex.currentMod.includes('phnn') && dex.gen !== 3) ||
-			(dex.gen <= 2 && (format.id.includes('disguises') || format.id.includes('statuses'))) ||
+			format.id.includes('disguises') || format.id.includes('statuses') ||
 			(ruleTable.has('statmod') && dex.gen !== 3);
 		const isBigPPAllowed = isCustomDisguises || dex.currentMod.includes('phnn') || dex.gen <= 2 ||
 			format.id.includes('nonerfs');
@@ -615,7 +617,7 @@ export class TeamValidator {
 			format.id.includes('nolimit') || format.id.includes('unified') || format.id.includes('255') ||
 			format.id.includes('statuses') || format.id.includes('disguises') || format.id.includes('nonerfs');
 		if (!isCustomHpAllowed && set.startHp !== undefined) {
-			problems.push(`${set.name || set.species} has a custom starting HP, which is only allowed in Pure Hackmons No Nerfs or Custom Disguises formats.`);
+			problems.push(`${set.name || set.species} has a custom starting HP, which is only allowed in No Nerfs, Disguises, Statuses, or Custom Disguises formats.`);
 		}
 		for (const move of set.moves) {
 			const ppMatch = /(.*)\s+\((\d+|inf)(?:\/(\d+))?\)$/i.exec(move);
@@ -627,7 +629,7 @@ export class TeamValidator {
 			if (dex.gen <= 2 && ppMove.pp === 40) naturalPP -= ppUps;
 			const isArbitrary = isInf || parseInt(ppMatch[2]) !== naturalPP;
 			if (isArbitrary && !isArbitraryPPAllowed) {
-				problems.push(`${set.name || set.species} has a custom move PP for ${move}, which is only allowed in Custom Disguises or in Gen 1/Gen 2/No Nerfs formats.`);
+				problems.push(`${set.name || set.species} has a custom move PP for ${move}, which is only allowed in Disguises, Statuses, No Nerfs, or Custom Disguises formats.`);
 			} else if (isArbitrary && !isInf && dex.gen === 1 && parseInt(ppMatch[2]) > 63) {
 				problems.push(`${set.name || set.species}'s PP for ${move} exceeds the Gen 1 maximum of 63.`);
 			} else if (isArbitrary && !isBigPPAllowed && (isInf || parseInt(ppMatch[2]) > 255)) {

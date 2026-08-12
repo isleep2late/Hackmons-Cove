@@ -27,6 +27,7 @@ const path = require('path');
 const fs = require('fs');
 const { URL } = require('url');
 const net = require('net');
+const phnnTeamgen = require('./phnn-teamgen');
 
 const PORT = Number(process.env.PHNN_CLIENT_PORT || process.argv[2] || 8099);
 const STATIC_DIR = path.resolve(__dirname, process.env.PHNN_STATIC_DIR || '../play.pokemonshowdown.com');
@@ -609,6 +610,47 @@ function serveReplay(req, res, reqUrl, root) {
 	});
 }
 
+const TEAMGEN_RATE = new Map();
+let teamgenActive = 0;
+function teamgenRateOk(ip) {
+	const now = Date.now();
+	const windowMs = 10 * 60 * 1000;
+	const max = 60;
+	const rec = TEAMGEN_RATE.get(ip);
+	if (!rec || now - rec.start > windowMs) {
+		TEAMGEN_RATE.set(ip, { start: now, count: 1 });
+		if (TEAMGEN_RATE.size > 5000) {
+			for (const [k, v] of TEAMGEN_RATE) if (now - v.start > windowMs) TEAMGEN_RATE.delete(k);
+		}
+		return true;
+	}
+	rec.count++;
+	return rec.count <= max;
+}
+
+function serveTeamgen(req, res, reqUrl) {
+	const ip = req.headers['cf-connecting-ip'] || req.socket.remoteAddress || '';
+	const sendJson = (code, obj) => {
+		res.writeHead(code, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' });
+		res.end(JSON.stringify(obj));
+	};
+	if (!teamgenRateOk(ip)) return sendJson(429, { error: 'Too many team requests; try again in a few minutes.' });
+	if (teamgenActive >= 4) return sendJson(429, { error: 'The team generator is busy; try again in a moment.' });
+	const format = (reqUrl.searchParams.get('format') || '').slice(0, 300);
+	if (!format) return sendJson(400, { error: 'No format given.' });
+	teamgenActive++;
+	setImmediate(() => {
+		let out;
+		try {
+			out = phnnTeamgen.generateTeam(format);
+		} catch (e) {
+			out = { error: 'Internal team generator error.' };
+		}
+		teamgenActive--;
+		sendJson(200, out);
+	});
+}
+
 const server = http.createServer((req, res) => {
 	const reqUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
 	const host = (req.headers.host || '').toLowerCase().split(':')[0];
@@ -637,6 +679,8 @@ const server = http.createServer((req, res) => {
 		}
 	} else if (reqUrl.pathname === '/replays' || reqUrl.pathname.startsWith('/replays/')) {
 		serveReplay(req, res, reqUrl, false);
+	} else if (reqUrl.pathname === '/teamgen') {
+		serveTeamgen(req, res, reqUrl);
 	} else {
 		serveStatic(req, res, reqUrl.pathname);
 	}
