@@ -1565,7 +1565,12 @@
 						var bDate = new Date();
 						bStamp = '<small>[' + [bDate.getHours(), bDate.getMinutes(), bDate.getSeconds()].map(function (x) { return x < 10 ? '0' + x : x; }).join(':') + '] </small>';
 					}
-					this.$chat.append('<div class="notice">' + bStamp + '<a href="' + app.root + id + '" class="ilink">' + battletype + ' started between <strong style="' + BattleLog.hashColor(toUserid(name)) + '">' + BattleLog.escapeHTML(name) + '</strong> and <strong style="' + BattleLog.hashColor(toUserid(name2)) + '">' + BattleLog.escapeHTML(name2) + '</strong>.</a></div>');
+					var bMeta = '';
+					if (this.id === 'battlelog') {
+						var bPw = /-([a-z0-9]+)pw$/.exec(id);
+						bMeta = ' <small class="battlelog-meta">' + BattleLog.escapeHTML(id) + (bPw ? ' (password: ' + BattleLog.escapeHTML(bPw[1]) + ')' : '') + '</small>';
+					}
+					this.$chat.append('<div class="notice">' + bStamp + '<a href="' + app.root + id + '" class="ilink">' + battletype + ' started between <strong style="' + BattleLog.hashColor(toUserid(name)) + '">' + BattleLog.escapeHTML(name) + '</strong> and <strong style="' + BattleLog.hashColor(toUserid(name2)) + '">' + BattleLog.escapeHTML(name2) + '</strong>.</a>' + bMeta + '</div>');
 					break;
 
 				case 'j':
@@ -1948,7 +1953,7 @@
 		},
 		parseBattleID: function (id) {
 			if (id.lastIndexOf('-') > 6) {
-				return id.match(/^battle\-([a-z0-9]*)\-?[0-9]*$/);
+				return id.match(/^battle\-([a-z0-9]*)\-?[0-9]*(?:\-[a-z0-9]+pw)?$/);
 			}
 			return id.match(/^battle\-([a-z0-9]*[a-z])[0-9]*$/);
 		}

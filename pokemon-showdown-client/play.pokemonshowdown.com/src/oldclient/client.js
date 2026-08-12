@@ -2748,8 +2748,8 @@ function toId() {
 			type: 'leadership',
 			order: 10003
 		},
-		'\u2605': {
-			name: "Host (\u2605)",
+		'🜲': {
+			name: "Host (🜲)",
 			type: 'staff',
 			order: 10004
 		},
@@ -2762,6 +2762,11 @@ function toId() {
 			name: "Driver (%)",
 			type: 'staff',
 			order: 10006
+		},
+		'\u2605': {
+			name: "Prize Winner (\u2605)",
+			type: 'staff',
+			order: 10007
 		},
 		'*': {
 			name: "Bot (*)",
