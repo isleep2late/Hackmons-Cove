@@ -847,7 +847,13 @@ export abstract class BasicRoom {
 				let password = '';
 				for (let i = 0; i < 31; i++) password += ALPHABET[crypto.randomInt(0, ALPHABET.length - 1)];
 
+				const oldRoomid = this.roomid;
 				this.rename(this.title, `${this.roomid}-${password}pw` as RoomID, true);
+				const battlelogRoom = Rooms.get('battlelog');
+				if (battlelogRoom) {
+					const renamedAt = Chat.toTimestamp(new Date(), { human: true });
+					battlelogRoom.add(`|html|<small class="battlelog-meta">[${renamedAt}] ${Utils.escapeHTML(oldRoomid)} went private as ${Utils.escapeHTML(this.roomid)} (password: ${Utils.escapeHTML(password)})</small>`).update();
+				}
 			} else {
 				if (!this.roomid.endsWith('pw')) return true;
 
@@ -1686,7 +1692,8 @@ export class GlobalRoomState {
 					if (!reportRoom) continue;
 				reportRoom.add(`|b|${room.roomid}|${reportPlayers}`);
 				if (roomid === 'battlelog') {
-					reportRoom.add(`|html|<small class="battlelog-meta">[${startedAt}] ${Utils.escapeHTML(room.roomid)}</small>`);
+					const pwMatch = /-([a-z0-9]+)pw$/.exec(room.roomid);
+					reportRoom.add(`|html|<small class="battlelog-meta">[${startedAt}] ${Utils.escapeHTML(room.roomid)}${pwMatch ? ` (password: ${Utils.escapeHTML(pwMatch[1])})` : ``}</small>`);
 				}
 				reportRoom.update();
 			}
