@@ -1528,7 +1528,7 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 		name: 'Accuracy Moves Clause',
 		desc: "Bans moves that have a chance to lower the target's accuracy when used",
 		banlist: [
-			'Flash', 'Kinesis', 'Leaf Tornado', 'Mirror Shot', 'Mud Bomb', 'Mud-Slap', 'Muddy Water', 'Night Daze', 'Octazooka', 'Sand Attack', 'Smokescreen',
+			'Flash', 'Kinesis', 'Leaf Tornado', 'Mirror Shot', 'Mud Bomb', 'Mud-Slap', 'Muddy Water', 'Night Daze', 'Octazooka', 'Sand Attack', 'move: Smokescreen',
 		],
 		onBegin() {
 			this.add('rule', 'Accuracy Moves Clause: Accuracy-lowering moves are banned');
@@ -2583,6 +2583,14 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 					break;
 				}
 			}
+		},
+	},
+	infinitedyna: {
+		effectType: 'Rule',
+		name: 'Infinite Dyna',
+		desc: "The once-per-battle Dynamax limit is lifted, Pok&eacute;mon that normally cannot Dynamax (Zacian, Zamazenta, Eternatus) may do so, and Eternatus becomes Eternamax while Dynamaxed.",
+		onBegin() {
+			this.add('rule', 'Infinite Dyna: Dynamax has no limits');
 		},
 	},
 	overflowstatmod: {

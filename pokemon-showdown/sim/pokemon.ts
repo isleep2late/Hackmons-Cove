@@ -1109,7 +1109,12 @@ export class Pokemon {
 				return;
 			}
 			// Some pokemon species are unable to dynamax
-			if (this.species.cannotDynamax || this.illusion?.species.cannotDynamax) return;
+			if (
+				(this.species.cannotDynamax || this.illusion?.species.cannotDynamax) &&
+				!this.battle.ruleTable.has('infinitedyna')
+			) {
+				return;
+			}
 		}
 		const result: DynamaxOptions = { maxMoves: [] };
 		let atLeastOne = false;
@@ -1192,7 +1197,7 @@ export class Pokemon {
 			const canZMove = this.battle.actions.canZMove(this);
 			if (canZMove) data.canZMove = canZMove;
 
-			if (this.getDynamaxRequest()) data.canDynamax = true;
+			if (!this.volatiles['dynamax'] && this.getDynamaxRequest()) data.canDynamax = true;
 			if (data.canDynamax || this.volatiles['dynamax']) data.maxMoves = this.getDynamaxRequest(true);
 			if (this.canTerastallize) data.canTerastallize = this.canTerastallize;
 		}

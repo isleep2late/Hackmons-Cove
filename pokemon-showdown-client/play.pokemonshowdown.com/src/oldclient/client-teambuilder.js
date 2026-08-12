@@ -51,6 +51,7 @@
 		events: {
 			// team changes
 			'change input.teamnameedit': 'teamNameChange',
+			'change input[name=phnncustomrules]': 'phnnCustomRulesChanged',
 			'click button.formatselect': 'selectFormat',
 			'click button.statmodtoggle': 'toggleStatMod',
 			'change input[name=nickname]': 'nicknameChange',
@@ -1337,7 +1338,12 @@
 					buf += this.renderVersionSelect();
 					buf += this.renderStatModToggle();
 					var btnClass = 'button' + (!this.curSetList.length || app.isDisconnected ? ' disabled' : '');
-					buf += ' <button name="validate" class="' + btnClass + '"><i class="fa fa-check"></i> Validate</button></li>';
+					buf += ' <button name="validate" class="' + btnClass + '"><i class="fa fa-check"></i> Validate</button>';
+					var fmtParts = this.curTeam.format.split('@@@');
+					if (/customgame|customdisguises/.test(fmtParts[0])) {
+						buf += '<div style="padding-top:4px"><label class="label">Extra rules: <input type="text" name="phnncustomrules" class="textbox" style="width:280px" placeholder="e.g. Infinite HP, OHKO, Infinite Dyna" value="' + BattleLog.escapeHTML(fmtParts[1] || '') + '" /></label></div>';
+					}
+					buf += '</li>';
 				}
 				if (!this.curSetList.length) {
 					buf += '<li><em>you have no pokemon lol</em></li>';
@@ -1354,6 +1360,7 @@
 				if (i === 0) {
 					buf += '<li><button name="import" class="button big"><i class="fa fa-upload"></i> Import from text or URL</button></li>';
 				}
+				buf += '<li><button name="generateTeam" class="button big"><i class="fa fa-magic"></i> I\'m lazy, build me a team.</button></li>';
 				if (i < this.curTeam.capacity) {
 					buf += '<li><button name="addPokemon" class="button big"><i class="fa fa-plus"></i> Add Pok&eacute;mon</button></li>';
 				}
@@ -1437,7 +1444,7 @@
 				'F': 'Female',
 				'N': '&mdash;'
 			};
-			buf += '<span class="detailcell detailcell-first"><label>Level</label>' + (set.level || 100) + '</span>';
+			buf += '<span class="detailcell detailcell-first"><label>Level</label>' + (set.level || this.phnnDefaultLevel()) + '</span>';
 			if (this.curTeam.gen > 1) {
 				buf += '<span class="detailcell"><label>Gender</label>' + GenderChart[set.gender || species.gender || 'N'] + '</span>';
 				if (isLetsGo) {
@@ -1775,6 +1782,44 @@
 			this.curTeam.name = name;
 			e.currentTarget.value = name;
 			this.save();
+		},
+		phnnCustomRulesChanged: function (e) {
+			var val = ($(e.currentTarget).val() || '').replace(/@/g, '').trim();
+			var base = this.curTeam.format.split('@@@')[0];
+			this.changeFormat(val ? base + '@@@' + val : base);
+		},
+		generateTeam: function (value, button) {
+			if (!this.curTeam) return;
+			var format = this.curTeam.format;
+			if (!format || /^gen\d+$/.test(format)) {
+				app.addPopupMessage('Pick a format first, then I\'ll build you a team.');
+				return;
+			}
+			var self = this;
+			var $btn = $(button);
+			$btn.attr('disabled', true).addClass('disabled');
+			$.ajax({
+				type: 'GET',
+				url: '/teamgen',
+				data: { format: format },
+				dataType: 'json',
+				timeout: 30000,
+				success: function (data) {
+					$btn.attr('disabled', null).removeClass('disabled');
+					if (!data || data.error || !data.team) {
+						app.addPopupMessage('Couldn\'t build a team: ' + ((data && data.error) || 'server error'));
+						return;
+					}
+					Storage.activeSetList = self.curSetList = Storage.importTeam(data.team);
+					self.curTeam.iconCache = '!';
+					self.save();
+					self.update();
+				},
+				error: function () {
+					$btn.attr('disabled', null).removeClass('disabled');
+					app.addPopupMessage('Couldn\'t reach the team generator.');
+				}
+			});
 		},
 		format: function (format, button) {
 			if (!window.BattleFormats) {
@@ -3307,7 +3352,7 @@
 
 			buf += '<div class="formrow"><label class="formlabel">Level:</label><div>' +
 				'<input type="number" min="1" max="' + (this.phnnLevelCap()) + '" step="1" name="level" value="' +
-				(typeof set.level === 'number' ? set.level : this.phnnLevelCap()) +
+				(typeof set.level === 'number' ? set.level : this.phnnDefaultLevel()) +
 				'" class="textbox inputform numform"' +
 				(isChampions ? ' disabled' : '') +
 				' /></div></div>';
@@ -3536,7 +3581,7 @@
 			var ppFmt = this.curTeam.format;
 			var ppStatMod = this.curTeam.gen !== 3 && this.phnnStatModAllowed(ppFmt);
 			var isOMForPP = isDisguise || ppFmt.includes('status') || ppFmt.includes('nonerfs') || ppFmt.includes('anyability') || ppFmt.includes('nolimit') || ppFmt.includes('unified') || ppFmt.includes('255') || ppFmt.includes('rage') || ppStatMod;
-			var allowBasePP = isCustomDisguise || ppFmt.includes('nonerfs') || (this.curTeam.gen <= 2 && isOMForPP) || ppStatMod;
+			var allowBasePP = isCustomDisguise || ppFmt.includes('nonerfs') || (this.curTeam.gen <= 2 && isOMForPP) || ppStatMod || isDisguise || ppFmt.includes('status');
 			if (isOMForPP) {
 				if (!set.moves) set.moves = [];
 				for (var m = 0; m < 4; m++) {
@@ -3569,6 +3614,12 @@
 			}
 
 			this.$chart.html(buf);
+		},
+		phnnDefaultLevel: function (format) {
+			if (format === undefined) format = this.curTeam.format;
+			if (format.includes('customdisguises')) return 9999;
+			if (format.includes('disguises') || format.includes('statuses') || format.includes('255')) return 255;
+			return 100;
 		},
 		phnnLevelCap: function (format, gen) {
 			if (format === undefined) format = this.curTeam.format;
@@ -3690,9 +3741,10 @@
 			// level
 			var level = parseInt(this.$chart.find('input[name=level]').val(), 10);
 			var maxLevel = this.phnnLevelCap();
-			if (!level || level < 1) level = 100;
+			var defaultLevel = this.phnnDefaultLevel();
+			if (!level || level < 1) level = defaultLevel;
 			if (level > maxLevel) level = maxLevel;
-			if (level !== 100 || set.level) set.level = level;
+			if (level !== defaultLevel || set.level) set.level = level;
 
 			// happiness
 			var happiness = parseInt(this.$chart.find('input[name=happiness]').val(), 10);
@@ -4541,7 +4593,7 @@
 			var species = this.curTeam.dex.species.get(set.species);
 			if (!species.exists || !species.baseStats) return 0;
 
-			if (!set.level) set.level = 100;
+			if (!set.level) set.level = this.phnnDefaultLevel();
 			if (typeof set.ivs[stat] === 'undefined') set.ivs[stat] = 31;
 
 			var baseStat = species.baseStats[stat];
