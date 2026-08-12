@@ -23,6 +23,41 @@ const FILLER_ITEMS = [
 	'Assault Vest', 'Rocky Helmet', 'Sitrus Berry', 'Focus Sash', 'Expert Belt', 'Muscle Band',
 	'Wise Glasses', 'Lum Berry', 'Light Clay', 'Mental Herb', 'Safety Goggles', 'Covert Cloak',
 ];
+const HM_STAB = {
+	Normal: { physical: ['Extreme Speed', 'Double-Edge', 'Return'], special: ['Boomburst', 'Hyper Voice'] },
+	Fire: { physical: ['V-create', 'Sacred Fire', 'Flare Blitz'], special: ['Blue Flare', 'Fusion Flare', 'Fire Blast'] },
+	Water: { physical: ['Surging Strikes', 'Crabhammer', 'Liquidation', 'Waterfall'], special: ['Steam Eruption', 'Origin Pulse', 'Hydro Pump'] },
+	Electric: { physical: ['Bolt Strike', 'Fusion Bolt', 'Wild Charge'], special: ['Electro Drift', 'Thunderbolt'] },
+	Grass: { physical: ['Wood Hammer', 'Power Whip', 'Seed Bomb'], special: ['Seed Flare', 'Leaf Storm', 'Giga Drain'] },
+	Ice: { physical: ['Glacial Lance', 'Icicle Crash', 'Ice Punch'], special: ['Ice Beam', 'Freeze-Dry', 'Blizzard'] },
+	Fighting: { physical: ['Close Combat', 'Sacred Sword', 'Drain Punch', 'Superpower'], special: ['Secret Sword', 'Aura Sphere', 'Focus Blast'] },
+	Poison: { physical: ['Gunk Shot', 'Poison Jab'], special: ['Malignant Chain', 'Sludge Bomb'] },
+	Ground: { physical: ['Thousand Arrows', 'Precipice Blades', 'Headlong Rush', 'Earthquake'], special: ['Earth Power'] },
+	Flying: { physical: ['Dragon Ascent', 'Brave Bird', 'Drill Peck'], special: ['Oblivion Wing', 'Aeroblast', 'Hurricane', 'Air Slash'] },
+	Psychic: { physical: ['Photon Geyser', 'Psychic Fangs', 'Zen Headbutt'], special: ['Photon Geyser', 'Psystrike', 'Psycho Boost', 'Psychic'] },
+	Bug: { physical: ['Megahorn', 'First Impression', 'Leech Life'], special: ['Bug Buzz'] },
+	Rock: { physical: ['Diamond Storm', 'Mighty Cleave', 'Stone Edge', 'Rock Slide'], special: ['Power Gem', 'Ancient Power'] },
+	Ghost: { physical: ['Spectral Thief', 'Poltergeist', 'Shadow Claw'], special: ['Astral Barrage', 'Moongeist Beam', 'Shadow Ball'] },
+	Dragon: { physical: ['Glaive Rush', 'Dragon Darts', 'Outrage', 'Dragon Claw'], special: ['Core Enforcer', 'Draco Meteor', 'Dragon Energy', 'Dragon Pulse'] },
+	Dark: { physical: ['Wicked Blow', 'Knock Off', 'Sucker Punch', 'Crunch'], special: ['Fiery Wrath', 'Dark Pulse'] },
+	Steel: { physical: ['Sunsteel Strike', 'Behemoth Blade', 'Gigaton Hammer', 'Iron Head', 'Meteor Mash'], special: ['Make It Rain', 'Steel Beam', 'Flash Cannon'] },
+	Fairy: { physical: ['Play Rough'], special: ['Moonblast', 'Fleur Cannon', 'Dazzling Gleam'] },
+};
+const HM_COVERAGE = {
+	physical: ['Thousand Arrows', 'V-create', 'Wicked Blow', 'Glacial Lance', 'Close Combat', 'Earthquake'],
+	special: ['Astral Barrage', 'Blue Flare', 'Moongeist Beam', 'Earth Power', 'Moonblast', 'Ice Beam'],
+};
+const HM_SETUP = {
+	physical: ['Shell Smash', 'Victory Dance', 'Swords Dance', 'Dragon Dance'],
+	special: ['Quiver Dance', 'Tail Glow', 'Nasty Plot', 'Calm Mind'],
+};
+const HM_UTILITY = ['Spore', 'Strength Sap', 'Recover', 'Extreme Speed'];
+const HM_WALL_MOVES = [
+	['Strength Sap', 'Recover', 'Roost', 'Soft-Boiled', 'Slack Off', 'Moonlight'],
+	['Spore', 'Nuzzle', 'Will-O-Wisp', 'Toxic', 'Thunder Wave'],
+	['Stealth Rock', 'Spikes', 'Toxic Spikes'],
+	['Core Enforcer', 'U-turn', 'Whirlwind', 'Haze', 'Knock Off', 'Seismic Toss'],
+];
 const META_ABILITIES = {
 	physical: ['Huge Power', 'Pure Power', 'Parental Bond', 'No Guard', 'Scrappy', 'Mold Breaker', 'Libero'],
 	special: ['Hadron Engine', 'Parental Bond', 'No Guard', 'Beads of Ruin', 'Libero', 'Drought', 'Drizzle'],
@@ -100,35 +135,106 @@ function sourceFor(baseid, format) {
 
 function setRole(set) {
 	const { Dex } = loadSim();
-	let phys = 0;
-	let spec = 0;
-	for (const m of set.moves || []) {
-		const move = Dex.moves.get(('' + m).split(' (')[0]);
-		if (move.category === 'Physical') phys++;
-		else if (move.category === 'Special') spec++;
-	}
-	if (!phys && !spec) return 'defensive';
 	const species = Dex.species.get(set.species);
-	const bulk = species.exists ? species.baseStats.hp + species.baseStats.def + species.baseStats.spd : 0;
-	if (phys + spec <= 1 && bulk >= 280) return 'defensive';
-	return phys >= spec ? 'physical' : 'special';
+	if (!species.exists) return 'physical';
+	const bs = species.baseStats;
+	const bulk = bs.hp + bs.def + bs.spd;
+	const off = Math.max(bs.atk, bs.spa);
+	if (bulk >= 340 && off < 115) return 'defensive';
+	return bs.atk >= bs.spa ? 'physical' : 'special';
 }
 
-function abilityAllowed(name, gen, ruleTable) {
-	const { Dex } = loadSim();
-	const ability = Dex.forGen(gen).abilities.get(name);
-	if (!ability.exists || ability.gen > gen || ability.isNonstandard) return false;
+function moveAllowed(name, fdex, ruleTable) {
+	const move = fdex.moves.get(name);
+	if (!move.exists || move.gen > fdex.gen || move.isNonstandard) return false;
+	if (move.status === 'slp' && (ruleTable.has('sleepmovesclause') || ruleTable.has('sleepclause'))) return false;
+	if (ruleTable.check('move:' + toId(name)) === 'banned') return false;
+	return true;
+}
+
+function pickMove(cands, fdex, ruleTable, used) {
+	for (const name of cands) {
+		if (used.has(toId(name))) continue;
+		if (!moveAllowed(name, fdex, ruleTable)) continue;
+		return name;
+	}
+	return null;
+}
+
+function buildHackmonsMoves(set, role, fdex, ruleTable) {
+	const species = fdex.species.get(set.species);
+	const types = species.exists ? species.types : [];
+	const used = new Set();
+	const moves = [];
+	const add = name => {
+		if (name) {
+			moves.push(name);
+			used.add(toId(name));
+		}
+	};
+	if (role === 'defensive') {
+		for (const group of HM_WALL_MOVES) add(pickMove(group, fdex, ruleTable, used));
+	} else {
+		add(pickMove(((HM_STAB[types[0]] || {})[role]) || [], fdex, ruleTable, used));
+		const secondary = types[1] ? ((HM_STAB[types[1]] || {})[role] || []) : [];
+		add(pickMove(secondary.concat(HM_COVERAGE[role]), fdex, ruleTable, used));
+		add(pickMove(HM_SETUP[role], fdex, ruleTable, used));
+		add(pickMove(HM_UTILITY, fdex, ruleTable, used));
+	}
+	for (const m of set.moves || []) {
+		if (moves.length >= 4) break;
+		const id = toId(('' + m).split(' (')[0]);
+		if (!used.has(id)) {
+			moves.push(m);
+			used.add(id);
+		}
+	}
+	if (moves.length) set.moves = moves.slice(0, 4);
+}
+
+function applyHackmonsEvs(set, role, ruleTable) {
+	const unlimited = ruleTable.evLimit === null;
+	set.ivs = { hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31 };
+	if (unlimited) {
+		if (role === 'special') {
+			set.evs = { hp: 252, atk: 0, def: 252, spa: 252, spd: 252, spe: 252 };
+			set.nature = 'Timid';
+			set.ivs = Object.assign({}, set.ivs, { atk: 0 });
+		} else if (role === 'physical') {
+			set.evs = { hp: 252, atk: 252, def: 252, spa: 252, spd: 252, spe: 252 };
+			set.nature = 'Jolly';
+		} else {
+			set.evs = { hp: 252, atk: 0, def: 252, spa: 252, spd: 252, spe: 252 };
+			set.nature = 'Bold';
+			set.ivs = Object.assign({}, set.ivs, { atk: 0 });
+		}
+	} else if (role === 'physical') {
+		set.evs = { hp: 4, atk: 252, def: 0, spa: 0, spd: 0, spe: 252 };
+		set.nature = 'Jolly';
+	} else if (role === 'special') {
+		set.evs = { hp: 4, atk: 0, def: 0, spa: 252, spd: 0, spe: 252 };
+		set.nature = 'Timid';
+		set.ivs = Object.assign({}, set.ivs, { atk: 0 });
+	} else {
+		set.evs = { hp: 252, atk: 0, def: 128, spa: 0, spd: 124, spe: 0 };
+		set.nature = 'Bold';
+	}
+}
+
+function abilityAllowed(name, fdex, ruleTable) {
+	const ability = fdex.abilities.get(name);
+	if (!ability.exists || ability.gen > fdex.gen || ability.isNonstandard) return false;
 	if (ruleTable.check('ability:' + toId(name)) === 'banned') return false;
 	return true;
 }
 
-function upgradeHackmonsSet(set, gen, ruleTable, usedAbilities) {
-	const { Dex } = loadSim();
+function upgradeHackmonsSet(set, fdex, ruleTable, usedAbilities) {
 	const role = setRole(set);
+	buildHackmonsMoves(set, role, fdex, ruleTable);
 	let pool = (META_ABILITIES[role] || []).slice();
 	if (role !== 'defensive') {
 		const hasNormalAttack = (set.moves || []).some(m => {
-			const move = Dex.moves.get(('' + m).split(' (')[0]);
+			const move = fdex.moves.get(('' + m).split(' (')[0]);
 			return move.type === 'Normal' && move.category !== 'Status';
 		});
 		if (hasNormalAttack) pool = META_ABILITIES.ate.concat(pool);
@@ -136,33 +242,23 @@ function upgradeHackmonsSet(set, gen, ruleTable, usedAbilities) {
 	pool = pool.concat(META_ABILITIES.utility, META_ABILITIES.defensive);
 	for (const name of pool) {
 		if ((usedAbilities.get(toId(name)) || 0) >= 1) continue;
-		if (!abilityAllowed(name, gen, ruleTable)) continue;
+		if (!abilityAllowed(name, fdex, ruleTable)) continue;
 		set.ability = name;
 		usedAbilities.set(toId(name), (usedAbilities.get(toId(name)) || 0) + 1);
 		break;
 	}
-	if (role === 'physical') {
-		set.evs = { hp: 4, atk: 252, def: 0, spa: 0, spd: 0, spe: 252 };
-		set.nature = 'Jolly';
-	} else if (role === 'special') {
-		set.evs = { hp: 4, atk: 0, def: 0, spa: 252, spd: 0, spe: 252 };
-		set.nature = 'Timid';
-	} else {
-		set.evs = { hp: 252, atk: 0, def: 128, spa: 0, spd: 124, spe: 0 };
-		set.nature = 'Bold';
-	}
-	if (!set.item && gen >= 2) set.item = 'Leftovers';
+	applyHackmonsEvs(set, role, ruleTable);
+	if (!set.item && fdex.gen >= 2) set.item = 'Leftovers';
 }
 
-function itemAllowed(name, gen, ruleTable) {
-	const { Dex } = loadSim();
-	const item = Dex.forGen(gen).items.get(name);
-	if (!item.exists || item.gen > gen || item.isNonstandard) return false;
+function itemAllowed(name, fdex, ruleTable) {
+	const item = fdex.items.get(name);
+	if (!item.exists || item.gen > fdex.gen || item.isNonstandard) return false;
 	if (ruleTable.check('item:' + toId(name)) === 'banned') return false;
 	return true;
 }
 
-function upgradeCdSet(set, gen, ruleTable) {
+function upgradeCdSet(set, fdex, ruleTable) {
 	const role = setRole(set);
 	const abilityPool = (CD_OFFENSE_ABILITIES[role] || []).concat(
 		role === 'defensive' ? [] : CD_OFFENSE_ABILITIES.defensive.slice(0, 2),
@@ -173,24 +269,24 @@ function upgradeCdSet(set, gen, ruleTable) {
 	for (const name of abilityPool) {
 		if (toId(name) === mainAbility) continue;
 		if (extras.some(e => toId(e) === toId(name))) continue;
-		if (!abilityAllowed(name, gen, ruleTable)) continue;
+		if (!abilityAllowed(name, fdex, ruleTable)) continue;
 		extras.push(name);
 	}
 	if (extras.length) set.phAbilities = extras.join('/');
 	const stack = CD_ITEM_STACKS[role] || CD_ITEM_STACKS.defensive;
-	if (!set.item || !itemAllowed(set.item, gen, ruleTable)) {
-		set.item = itemAllowed(stack.main, gen, ruleTable) ? stack.main : 'Leftovers';
+	if (!set.item || !itemAllowed(set.item, fdex, ruleTable)) {
+		set.item = itemAllowed(stack.main, fdex, ruleTable) ? stack.main : 'Leftovers';
 	}
 	const itemExtras = [];
 	for (const name of stack.extras) {
 		if (toId(name) === toId(set.item)) continue;
-		if (!itemAllowed(name, gen, ruleTable)) continue;
+		if (!itemAllowed(name, fdex, ruleTable)) continue;
 		itemExtras.push(name);
 	}
 	if (itemExtras.length) set.phItems = itemExtras.join('/');
 }
 
-function reshape(team, baseid, gen, rulesText, ruleTable) {
+function reshape(team, baseid, gen, rulesText, ruleTable, fdex) {
 	const isCD = baseid.includes('customdisguise') && /^gen[89]/.test(baseid) && !toId(rulesText).includes('standardcustom');
 	const isHackmons = isHackmonsTarget(baseid) && gen >= 3 && !baseid.includes('metronome');
 	const usedAbilities = new Map();
@@ -202,7 +298,7 @@ function reshape(team, baseid, gen, rulesText, ruleTable) {
 		if (gen < 9) delete set.teraType;
 		if (gen === 1 || isLetsGo) delete set.item;
 		if (isLetsGo) delete set.evs;
-		if (isHackmons && !baseid.includes('letsgo')) upgradeHackmonsSet(set, gen, ruleTable, usedAbilities);
+		if (isHackmons && !baseid.includes('letsgo')) upgradeHackmonsSet(set, fdex, ruleTable, usedAbilities);
 		if (ruleTable.has('itemclause') && set.item) {
 			if (usedItems.has(toId(set.item))) {
 				while (fillerIdx < FILLER_ITEMS.length && usedItems.has(toId(FILLER_ITEMS[fillerIdx]))) fillerIdx++;
@@ -210,7 +306,7 @@ function reshape(team, baseid, gen, rulesText, ruleTable) {
 			}
 			if (set.item) usedItems.add(toId(set.item));
 		}
-		if (isCD) upgradeCdSet(set, gen, ruleTable);
+		if (isCD) upgradeCdSet(set, fdex, ruleTable);
 	}
 	return team;
 }
@@ -263,6 +359,7 @@ function generateTeam(formatid) {
 	}
 
 	const gen = genOf(baseid, format);
+	const fdex = Dex.forFormat(validator.format);
 	if (ruleTable.has('littlecup') && !hasGenerator(baseid)) {
 		return { error: 'Little Cup formats have no team generator yet. Try another format.' };
 	}
@@ -315,7 +412,7 @@ function generateTeam(formatid) {
 			seen.add(baseSpeciesId(extra));
 			team.push(extra);
 		}
-		reshape(team, baseid, gen, rulesText, ruleTable);
+		reshape(team, baseid, gen, rulesText, ruleTable, fdex);
 		try {
 			problems = validator.validateTeam(JSON.parse(JSON.stringify(team))) || [];
 		} catch (e) {

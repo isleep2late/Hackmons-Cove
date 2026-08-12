@@ -1560,7 +1560,12 @@
 						battletype = format + ' battle';
 						if (format === 'Random Battle') battletype = 'Random Battle';
 					}
-					this.$chat.append('<div class="notice"><a href="' + app.root + id + '" class="ilink">' + battletype + ' started between <strong style="' + BattleLog.hashColor(toUserid(name)) + '">' + BattleLog.escapeHTML(name) + '</strong> and <strong style="' + BattleLog.hashColor(toUserid(name2)) + '">' + BattleLog.escapeHTML(name2) + '</strong>.</a></div>');
+					var bStamp = ChatRoom.getTimestamp('chat');
+					if (!bStamp && this.id === 'battlelog') {
+						var bDate = new Date();
+						bStamp = '<small>[' + [bDate.getHours(), bDate.getMinutes(), bDate.getSeconds()].map(function (x) { return x < 10 ? '0' + x : x; }).join(':') + '] </small>';
+					}
+					this.$chat.append('<div class="notice">' + bStamp + '<a href="' + app.root + id + '" class="ilink">' + battletype + ' started between <strong style="' + BattleLog.hashColor(toUserid(name)) + '">' + BattleLog.escapeHTML(name) + '</strong> and <strong style="' + BattleLog.hashColor(toUserid(name2)) + '">' + BattleLog.escapeHTML(name2) + '</strong>.</a></div>');
 					break;
 
 				case 'j':
