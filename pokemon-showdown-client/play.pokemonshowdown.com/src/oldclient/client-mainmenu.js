@@ -108,7 +108,7 @@
 				buf += 'Partner:<br />';
 				buf += '<input class="partnerselect" /><button name="partnersubmit">Invite</button></label></p>';
 
-				buf += '<p><button class="button mainmenu1 big" name="search"><strong>Battle!</strong><br /><small>Find a random opponent</small></button> <button type="button" class="button" name="phnnGenerateTeam"><i class="fa fa-magic"></i> Generate Team</button></p></form></div>';
+				buf += '<p><button class="button mainmenu1 big" name="search"><strong>Battle!</strong><br /><small>Find a random opponent</small></button> <button type="button" class="button' + (this.phnnFormatNeedsTeam(this.curFormat) ? '' : ' disabled') + '" name="phnnGenerateTeam"' + (this.phnnFormatNeedsTeam(this.curFormat) ? '' : ' disabled') + '><i class="fa fa-magic"></i> Generate Team</button></p></form></div>';
 			}
 
 			buf += '<div class="menugroup">';
@@ -338,7 +338,7 @@
 				buf += '<p><label class="label">Team:</label>' + this.renderTeams(teamFormat) + '</p>';
 
 			}
-			buf += '<p class="buttonbar"><button name="acceptChallenge" class="button"><strong>' + BattleLog.escapeHTML(acceptButtonLabel) + '</strong></button> <button type="button" name="rejectChallenge" class="button">' + BattleLog.escapeHTML(rejectButtonLabel) + '</button> <button type="button" name="phnnGenerateTeam" class="button"><i class="fa fa-magic"></i> Generate Team</button></p></form>';
+			buf += '<p class="buttonbar"><button name="acceptChallenge" class="button"><strong>' + BattleLog.escapeHTML(acceptButtonLabel) + '</strong></button> <button type="button" name="rejectChallenge" class="button">' + BattleLog.escapeHTML(rejectButtonLabel) + '</button> <button type="button" name="phnnGenerateTeam" class="button' + (this.phnnFormatNeedsTeam(teamFormat) ? '' : ' disabled') + '"' + (this.phnnFormatNeedsTeam(teamFormat) ? '' : ' disabled') + '><i class="fa fa-magic"></i> Generate Team</button></p></form>';
 			$challenge.html(buf);
 		},
 
@@ -875,7 +875,7 @@
 						buf += '<p><label class="label">Format:</label>' + self.renderFormats(format, true) + '</p>';
 						buf += '<p><label class="label">Team:</label>' + self.renderTeams(format) + '</p>';
 
-						buf += '<p class="buttonbar"><button name="acceptChallenge" class="button"><strong>Accept</strong></button> <button type="button" name="rejectChallenge" class="button">Reject</button> <button type="button" name="phnnGenerateTeam" class="button"><i class="fa fa-magic"></i> Generate Team</button></p></form>';
+						buf += '<p class="buttonbar"><button name="acceptChallenge" class="button"><strong>Accept</strong></button> <button type="button" name="rejectChallenge" class="button">Reject</button> <button type="button" name="phnnGenerateTeam" class="button' + (self.phnnFormatNeedsTeam(format) ? '' : ' disabled') + '"' + (self.phnnFormatNeedsTeam(format) ? '' : ' disabled') + '><i class="fa fa-magic"></i> Generate Team</button></p></form>';
 						$challenge.html(buf);
 						if (format.substr(0, 4) === 'gen5') atLeastOneGen5 = true;
 					}
@@ -929,9 +929,15 @@
 			var self = this;
 			this.$('button[name=format]').each(function (i, el) {
 				var val = el.value;
-				var $teamButton = $(el).closest('form').find('button[name=team]');
+				var $formEl = $(el).closest('form');
+				var $teamButton = $formEl.find('button[name=team]');
 				$(el).replaceWith(self.renderFormats(val));
 				$teamButton.replaceWith(self.renderTeams(val));
+				var $genBtn = $formEl.find('button[name=phnnGenerateTeam]');
+				if ($genBtn.length) {
+					var genNeedsTeam = self.phnnFormatNeedsTeam(val);
+					$genBtn.toggleClass('disabled', !genNeedsTeam).prop('disabled', !genNeedsTeam);
+				}
 			});
 		},
 		reconnect: function () {
@@ -945,6 +951,11 @@
 				if (el.value === 'random') return;
 				var format = $(el).closest('form').find('button[name=format]').val();
 				$(el).replaceWith(self.renderTeams(format));
+			});
+			this.$('button[name=phnnGenerateTeam]').each(function (i, el) {
+				var format = $(el).closest('form').find('button[name=format]').val();
+				var genNeedsTeam = self.phnnFormatNeedsTeam(format);
+				$(el).toggleClass('disabled', !genNeedsTeam).prop('disabled', !genNeedsTeam);
 			});
 		},
 		updateRightMenu: function () {
@@ -1129,7 +1140,7 @@
 			var itemClauseDefault = format && BattleFormats[format] ? BattleFormats[format].itemClauseDefault : false;
 			buf += '<p' + (!itemClauseDefault ? ' class="hidden">' : '>');
 			buf += '<label class="checkbox"><input type="checkbox" name="itemclause" /> <abbr title="Start a battle with Item Clause">Item Clause</abbr></label></p>';
-			buf += '<p class="buttonbar"><button name="makeChallenge" class="button"><strong>Challenge</strong></button> <button type="button" name="dismissChallenge" class="button">Cancel</button> <button type="button" name="phnnGenerateTeam" class="button"><i class="fa fa-magic"></i> Generate Team</button></p></form>';
+			buf += '<p class="buttonbar"><button name="makeChallenge" class="button"><strong>Challenge</strong></button> <button type="button" name="dismissChallenge" class="button">Cancel</button> <button type="button" name="phnnGenerateTeam" class="button' + (this.phnnFormatNeedsTeam(format) ? '' : ' disabled') + '"' + (this.phnnFormatNeedsTeam(format) ? '' : ' disabled') + '><i class="fa fa-magic"></i> Generate Team</button></p></form>';
 			$challenge.html(buf);
 		},
 		acceptChallenge: function (i, target) {
@@ -1163,11 +1174,14 @@
 			$(target).closest('.challenge').remove();
 			app.send('/reject ' + userid);
 		},
+		phnnFormatNeedsTeam: function (format) {
+			return !!format && !/random|factory|hackmonscup|challengecup|metronome|staffbros/i.test(format);
+		},
 		phnnGenerateTeam: function (i, button) {
 			var $form = $(button).closest('form');
 			var format = $form.find('button[name=format]').val() || '';
-			if (!format || /random|factory|hackmonscup|challengecup|metronome/.test(format)) {
-				app.addPopupMessage('Pick a non-random format first, then I\'ll build you a team.');
+			if (!this.phnnFormatNeedsTeam(format)) {
+				app.addPopupMessage('Random formats build their own teams - pick a non-random format first.');
 				return;
 			}
 			var self = this;
@@ -1334,6 +1348,14 @@
 
 		curFormat: '',
 		renderFormats: function (formatid, noChoice) {
+			var self = this;
+			setTimeout(function () {
+				self.$('button[name=phnnGenerateTeam]').each(function (i, el) {
+					var fmt = $(el).closest('form').find('button[name=format]').val();
+					var needsTeam = self.phnnFormatNeedsTeam(fmt);
+					$(el).toggleClass('disabled', !needsTeam).prop('disabled', !needsTeam);
+				});
+			}, 0);
 			if (!window.BattleFormats) {
 				return '<button class="select formatselect" name="format" disabled value="' + BattleLog.escapeHTML(formatid) + '"><em>Loading...</em></button>';
 			}
@@ -1851,6 +1873,11 @@
 				if ($cdwrap.length) $cdwrap.replaceWith(app.rooms[''].renderCdModeChallenge(format));
 				var $vwrap = $form.find('.versionwrap');
 				if ($vwrap.length) $vwrap.replaceWith(app.rooms[''].renderVersionChallenge(format));
+				var $genBtn = $form.find('button[name=phnnGenerateTeam]');
+				if ($genBtn.length) {
+					var genNeedsTeam = app.rooms[''].phnnFormatNeedsTeam(format);
+					$genBtn.toggleClass('disabled', !genNeedsTeam).prop('disabled', !genNeedsTeam);
+				}
 				if (infiniteWasChecked) $form.find('input[name=infiniteMode]').prop('checked', true);
 				if (prevGametypeFmt) $form.find('select[name=gameTypeSelect]').val(prevGametypeFmt);
 
