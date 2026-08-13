@@ -1315,6 +1315,7 @@
 				buf = '<div class="pad"><button name="back" class="button"><i class="fa fa-chevron-left"></i> List</button> ';
 				buf += '<input class="textbox teamnameedit" type="text" class="teamnameedit" size="30" value="' + BattleLog.escapeHTML(this.curTeam.name) + '" /> ';
 				buf += '<button name="import" class="button"><i class="fa fa-upload"></i> Import/Export</button> ';
+				buf += '<button name="generateTeam" class="button" style="margin-left:8px"><i class="fa fa-magic"></i> Build me a team</button>';
 				buf += '<div class="teamchartbox">';
 				buf += '<ol class="teamchart">';
 				buf += '<li>' + this.clipboardHTML() + '</li>';
@@ -1360,7 +1361,6 @@
 				if (i === 0) {
 					buf += '<li><button name="import" class="button big"><i class="fa fa-upload"></i> Import from text or URL</button></li>';
 				}
-				buf += '<li><button name="generateTeam" class="button big"><i class="fa fa-magic"></i> I\'m lazy, build me a team.</button></li>';
 				if (i < this.curTeam.capacity) {
 					buf += '<li><button name="addPokemon" class="button big"><i class="fa fa-plus"></i> Add Pok&eacute;mon</button></li>';
 				}
@@ -1790,6 +1790,8 @@
 		},
 		generateTeam: function (value, button) {
 			if (!this.curTeam) return;
+			var filled = (this.curSetList || []).filter(function (s) { return s && s.species; }).length;
+			if (filled && !confirm('Replace all ' + filled + ' Pokemon on this team with a generated one?')) return;
 			var format = this.curTeam.format;
 			if (!format || /^gen\d+$/.test(format)) {
 				app.addPopupMessage('Pick a format first, then I\'ll build you a team.');
