@@ -1339,6 +1339,7 @@
 					buf += this.renderStatModToggle();
 					var btnClass = 'button' + (!this.curSetList.length || app.isDisconnected ? ' disabled' : '');
 					buf += ' <button name="validate" class="' + btnClass + '"><i class="fa fa-check"></i> Validate</button>';
+					buf += ' <button name="generateTeam" class="button"><i class="fa fa-magic"></i> Build me a team</button>';
 					var fmtParts = this.curTeam.format.split('@@@');
 					if (/customgame|customdisguises/.test(fmtParts[0])) {
 						buf += '<div style="padding-top:4px"><label class="label">Extra rules: <input type="text" name="phnncustomrules" class="textbox" style="width:280px" placeholder="e.g. Infinite HP, OHKO, Infinite Dyna" value="' + BattleLog.escapeHTML(fmtParts[1] || '') + '" /></label></div>';
@@ -1360,7 +1361,6 @@
 				if (i === 0) {
 					buf += '<li><button name="import" class="button big"><i class="fa fa-upload"></i> Import from text or URL</button></li>';
 				}
-				buf += '<li><button name="generateTeam" class="button big"><i class="fa fa-magic"></i> I\'m lazy, build me a team.</button></li>';
 				if (i < this.curTeam.capacity) {
 					buf += '<li><button name="addPokemon" class="button big"><i class="fa fa-plus"></i> Add Pok&eacute;mon</button></li>';
 				}
@@ -1790,6 +1790,8 @@
 		},
 		generateTeam: function (value, button) {
 			if (!this.curTeam) return;
+			var filled = (this.curSetList || []).filter(function (s) { return s && s.species; }).length;
+			if (filled && !confirm('Replace all ' + filled + ' Pokemon on this team with a generated one?')) return;
 			var format = this.curTeam.format;
 			if (!format || /^gen\d+$/.test(format)) {
 				app.addPopupMessage('Pick a format first, then I\'ll build you a team.');

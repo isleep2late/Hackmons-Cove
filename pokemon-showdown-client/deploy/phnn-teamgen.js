@@ -29,7 +29,7 @@ const HM_STAB = {
 	Water: { physical: ['Surging Strikes', 'Crabhammer', 'Liquidation', 'Waterfall'], special: ['Steam Eruption', 'Origin Pulse', 'Hydro Pump'] },
 	Electric: { physical: ['Bolt Strike', 'Fusion Bolt', 'Wild Charge'], special: ['Electro Drift', 'Thunderbolt'] },
 	Grass: { physical: ['Wood Hammer', 'Power Whip', 'Seed Bomb'], special: ['Seed Flare', 'Leaf Storm', 'Giga Drain'] },
-	Ice: { physical: ['Glacial Lance', 'Icicle Crash', 'Ice Punch'], special: ['Ice Beam', 'Freeze-Dry', 'Blizzard'] },
+	Ice: { physical: ['Glacial Lance', 'Icicle Crash', 'Ice Punch'], special: ['Blizzard', 'Ice Beam', 'Freeze-Dry'] },
 	Fighting: { physical: ['Close Combat', 'Sacred Sword', 'Drain Punch', 'Superpower'], special: ['Secret Sword', 'Aura Sphere', 'Focus Blast'] },
 	Poison: { physical: ['Gunk Shot', 'Poison Jab'], special: ['Malignant Chain', 'Sludge Bomb'] },
 	Ground: { physical: ['Thousand Arrows', 'Precipice Blades', 'Headlong Rush', 'Earthquake'], special: ['Earth Power'] },
@@ -45,20 +45,93 @@ const HM_STAB = {
 };
 const HM_COVERAGE = {
 	physical: ['Thousand Arrows', 'V-create', 'Wicked Blow', 'Glacial Lance', 'Close Combat', 'Earthquake'],
-	special: ['Astral Barrage', 'Blue Flare', 'Moongeist Beam', 'Earth Power', 'Moonblast', 'Ice Beam'],
+	special: ['Blizzard', 'Astral Barrage', 'Blue Flare', 'Moongeist Beam', 'Earth Power', 'Moonblast'],
 };
 const HM_SETUP = {
 	physical: ['Shell Smash', 'Victory Dance', 'Swords Dance', 'Dragon Dance'],
 	special: ['Quiver Dance', 'Tail Glow', 'Nasty Plot', 'Calm Mind'],
 };
-const HM_UTILITY = ['Spore', 'Strength Sap', 'Recover', 'Extreme Speed', 'Sucker Punch', 'Knock Off', 'U-turn', 'Substitute', 'Taunt'];
+const HM_UTILITY = ['Sucker Punch', 'Extreme Speed', 'Knock Off', 'Substitute', 'Taunt', 'U-turn', 'Spore', 'Recover'];
+// recovery on an offensive set is a niche choice, not the default it used to be
+const HM_UTILITY_RECOVERY = ['Strength Sap', 'Recover', 'Roost', 'Slack Off'];
+const HM_PRANKSTER_MOVES = ['Will-O-Wisp', 'Thunder Wave', 'Taunt', 'Encore', 'Destiny Bond', 'Recover', 'Spore', 'Substitute'];
+const HM_SPECIES_ITEMS = {
+	latios: 'Soul Dew', latias: 'Soul Dew', latiosmega: 'Soul Dew', latiasmega: 'Soul Dew',
+	pikachu: 'Light Ball', cubone: 'Thick Club', marowak: 'Thick Club', marowakalola: 'Thick Club',
+	dialga: 'Adamant Orb', dialgaorigin: 'Adamant Crystal', palkia: 'Lustrous Orb', palkiaorigin: 'Lustrous Globe',
+	giratina: 'Griseous Orb', giratinaorigin: 'Griseous Core', zacian: 'Rusted Sword', zaciancrowned: 'Rusted Sword',
+	zamazenta: 'Rusted Shield', zamazentacrowned: 'Rusted Shield', ditto: 'Metal Powder',
+	clamperl: 'Deep Sea Tooth', farfetchd: 'Leek', sirfetchd: 'Leek', chansey: 'Eviolite',
+	togepi: 'Eviolite', wobbuffet: 'Custap Berry', regieleki: 'Light Clay',
+};
+const HM_ABILITY_ITEMS = {
+	magicguard: 'Life Orb', sheerforce: 'Life Orb', unburden: 'Sitrus Berry',
+	poisonheal: 'Toxic Orb', guts: 'Flame Orb', quickfeet: 'Toxic Orb',
+	hadronengine: 'Life Orb', wonderguard: 'Leftovers', neutralizinggas: 'Leftovers',
+};
 const HM_OHKO = ['Sheer Cold', 'Fissure', 'Horn Drill', 'Guillotine'];
+// content the fork un-dexits: strictly better than the vanilla staples once legal
+const HM_ELITE_MOVES = {
+	physical: [
+		'Searing Sunraze Smash', 'Catastropika', 'Soul-Stealing 7-Star Strike', 'Malicious Moonsault',
+		'Zippy Zap', 'G-Max Chi Strike', 'Sunsteel Strike', 'Behemoth Blade',
+	],
+	special: [
+		'Menacing Moonraze Maelstrom', 'Light That Burns the Sky', 'Clangorous Soulblaze',
+		'Genesis Supernova', '10,000,000 Volt Thunderbolt', 'Oceanic Operetta',
+		'Nihil Light', 'G-Max Fireball', 'G-Max Drum Solo', 'G-Max Hydrosnipe', 'Photon Geyser',
+	],
+};
+// a one-time nuke is still worth a slot; Blizzard's freeze is effectively a second win condition
+const HM_NUKE_MOVES = ['Explosion', 'Self-Destruct', 'Misty Explosion'];
+// permanent G-Max moves: elemental nukes that ignore abilities and break protection
+// only the elemental G-Max moves carry real power (160 BP, ignores abilities, breaks protection).
+// every other G-Max is a 10 BP placeholder that derives power from a base move it will not have,
+// and the generic Z-moves are 1 BP for the same reason -- both are traps, so they stay out.
+const HM_GMAX_MOVES = ['G-Max Fireball', 'G-Max Hydrosnipe', 'G-Max Drum Solo'];
+// the worthwhile Z-moves are the permanent CFZ ones (200 BP, already in HM_ELITE_MOVES); the
+// crystal-and-base-move packages below only pay off where the signature Z-move keeps its power
+const HM_ZMOVE_PACKAGES = [
+	{ item: 'Ultranecrozium Z', move: 'Light That Burns the Sky', base: 'Photon Geyser' },
+	{ item: 'Solganium Z', move: 'Searing Sunraze Smash', base: 'Sunsteel Strike' },
+	{ item: 'Lunalium Z', move: 'Menacing Moonraze Maelstrom', base: 'Moongeist Beam' },
+	{ item: 'Mewnium Z', move: 'Genesis Supernova', base: 'Psychic' },
+	{ item: 'Pikanium Z', move: 'Catastropika', base: 'Volt Tackle' },
+	{ item: 'Marshadium Z', move: 'Soul-Stealing 7-Star Strike', base: 'Spectral Thief' },
+];
+// Protect is the weakest option in this family whenever the others are available
+const HM_PROTECT_TIER = ['Spiky Shield', "King's Shield", 'Max Guard', 'Silk Trap', 'Burning Bulwark', 'Baneful Bunker', 'Protect'];
 const HM_WALL_MOVES = [
 	['Strength Sap', 'Recover', 'Roost', 'Soft-Boiled', 'Slack Off', 'Moonlight'],
 	['Spore', 'Nuzzle', 'Will-O-Wisp', 'Toxic', 'Thunder Wave'],
 	['Stealth Rock', 'Spikes', 'Toxic Spikes'],
 	['Core Enforcer', 'U-turn', 'Whirlwind', 'Haze', 'Knock Off', 'Seismic Toss'],
 ];
+// team-level strategy packages, drawn from how these actually get played
+const HM_ARCHETYPES = [
+	{
+		name: 'revival',
+		slots: [
+			{ ability: null, moves: ['Revival Blessing'], role: 'defensive' },
+			{ ability: null, moves: [], role: 'physical' },
+		],
+	},
+	{
+		name: 'prankster-phaze',
+		slots: [
+			{ ability: 'Prankster', moves: ['Stealth Rock', 'Circle Throw', 'Copycat', 'Recover'], role: 'defensive' },
+			{ ability: null, moves: ['Spikes', 'Toxic Spikes'], role: 'defensive' },
+		],
+	},
+	{
+		name: 'trap-pass',
+		slots: [
+			{ ability: 'Shadow Tag', moves: ['Shell Smash', 'Baton Pass', 'Substitute'], role: 'physical' },
+			{ ability: null, moves: ['Baton Pass'], role: 'special' },
+		],
+	},
+];
+
 const HM_PREMIUM_ABILITIES = ['Wonder Guard', 'Neutralizing Gas', 'Magic Guard', 'Huge Power', 'Pure Power', 'Parental Bond', 'Shadow Tag', 'Prankster', 'Unaware', 'Fur Coat', 'Ice Scales', 'Good as Gold'];
 const META_ABILITIES = {
 	physical: ['Huge Power', 'Pure Power', 'Parental Bond', 'No Guard', 'Scrappy', 'Mold Breaker', 'Libero'],
@@ -72,6 +145,18 @@ const HACKMONS_HINTS = [
 	'metronome', 'infinite', 'brokencup', '350cup', 'anyability', 'nolimit', 'bh',
 ];
 const MAX_ATTEMPTS = 20;
+
+let smogonSets = null;
+function loadSmogonSets() {
+	if (smogonSets === null) {
+		try {
+			smogonSets = require('./phnn-smogon-sets.json');
+		} catch (e) {
+			smogonSets = {};
+		}
+	}
+	return smogonSets;
+}
 
 let sim = null;
 function loadSim() {
@@ -146,19 +231,58 @@ function setRole(set) {
 	return bs.atk >= bs.spa ? 'physical' : 'special';
 }
 
-function moveAllowed(name, fdex, ruleTable) {
+// hackmons formats un-dexit content at the VALIDATOR, not in the dex, so isNonstandard is the wrong
+// gate there -- ask the validator itself (cached) or entire classes of moves stay invisible
+const permissiveCache = new Map();
+function movePermittedByValidator(name, validator, fullid) {
+	const key = fullid + '|' + toId(name);
+	if (permissiveCache.has(key)) return permissiveCache.get(key);
+	let ok = false;
+	try {
+		const probe = {
+			species: 'Mewtwo', ability: 'Pressure', moves: [name],
+			evs: {}, ivs: {}, nature: 'Serious', level: 100,
+		};
+		const problems = validator.validateSet(probe, {}) || [];
+		ok = !problems.some(p => /is banned|does not exist|isn't obtainable|not allowed|illegal/i.test(p));
+	} catch (e) {
+		ok = false;
+	}
+	permissiveCache.set(key, ok);
+	return ok;
+}
+
+function moveAllowed(name, fdex, ruleTable, ctx) {
 	const move = fdex.moves.get(name);
-	if (!move.exists || move.gen > fdex.gen || move.isNonstandard) return false;
+	if (!move.exists || move.gen > fdex.gen) return false;
 	if (move.status === 'slp' && (ruleTable.has('sleepmovesclause') || ruleTable.has('sleepclause'))) return false;
 	if (ruleTable.check('move:' + toId(name)) === 'banned') return false;
+	if (move.isNonstandard) {
+		if (ctx && ctx.permissive) return movePermittedByValidator(name, ctx.validator, ctx.fullid);
+		return false;
+	}
 	return true;
 }
 
-function pickMove(cands, fdex, ruleTable, used, variety) {
+function shuffled(list) {
+	const out = list.slice();
+	for (let i = out.length - 1; i > 0; i--) {
+		const j = Math.floor(Math.random() * (i + 1));
+		const t = out[i];
+		out[i] = out[j];
+		out[j] = t;
+	}
+	return out;
+}
+
+function pickMove(cands, fdex, ruleTable, used, variety, ctx) {
 	const legal = [];
 	for (const name of cands) {
 		if (used.has(toId(name))) continue;
-		if (!moveAllowed(name, fdex, ruleTable)) continue;
+		if (!moveAllowed(name, fdex, ruleTable, ctx)) continue;
+		const move = fdex.moves.get(name);
+		// a damaging move that derives its power from a base move it will not have is a dead slot
+		if (move.category !== 'Status' && move.basePower > 0 && move.basePower < 40) continue;
 		legal.push(name);
 		if (legal.length >= (variety || 1) + 1) break;
 	}
@@ -218,6 +342,13 @@ function sampleSpecies(pools, validator, teamSize, allowDupes) {
 		chosen.push(cand.species);
 		return true;
 	};
+	// a ???-typed body with Wonder Guard has no weaknesses to exploit -- a genuine meta pillar
+	const kingpins = pool.filter(e => /^(Arceus-Question|Terapagos-Stellar|Eternatus-Eternamax)$/.test(e.species.name));
+	if (kingpins.length && Math.random() < 0.5) {
+		for (let g = 0; g < 6 && !chosen.length; g++) {
+			take(kingpins[Math.floor(Math.random() * kingpins.length)]);
+		}
+	}
 	if (spice.length) {
 		const spiceWindow = Math.min(spice.length, 30);
 		const spiceWanted = Math.random() < 0.85 ? (Math.random() < 0.4 ? 2 : 1) : 0;
@@ -247,30 +378,56 @@ function sampleSpecies(pools, validator, teamSize, allowDupes) {
 }
 
 function buildHackmonsMoves(set, role, fdex, ruleTable, opts) {
+	const ctx = opts && opts.ctx;
+	const ability = toId((opts && opts.ability) || set.ability || '');
+	const forced = (set.phnnForcedMoves || []).slice();
+	const zPackage = opts && opts.zPackage;
+	if (zPackage) {
+		forced.unshift(zPackage.move);
+		if (moveAllowed(zPackage.base, fdex, ruleTable, ctx)) forced.push(zPackage.base);
+	}
 	const species = fdex.species.get(set.species);
 	const types = species && species.exists ? species.types : [];
 	const used = new Set();
 	const moves = [];
 	const add = name => {
-		if (name) {
+		if (name && !used.has(toId(name)) && moves.length < 4) {
 			moves.push(name);
 			used.add(toId(name));
 		}
 	};
+	forced.forEach(add);
 	if (role === 'defensive') {
-		for (const group of HM_WALL_MOVES) add(pickMove(group, fdex, ruleTable, used, 3));
+		add(pickMove(HM_PROTECT_TIER, fdex, ruleTable, used, 2, ctx));
+		for (const group of HM_WALL_MOVES) add(pickMove(group, fdex, ruleTable, used, 3, ctx));
 	} else {
-		add(pickMove(((HM_STAB[types[0]] || {})[role]) || [], fdex, ruleTable, used, 2));
+		add(pickMove(((HM_STAB[types[0]] || {})[role]) || [], fdex, ruleTable, used, 2, ctx));
 		const secondary = types[1] ? ((HM_STAB[types[1]] || {})[role] || []) : [];
-		add(pickMove(secondary.concat(HM_COVERAGE[role]), fdex, ruleTable, used, 3));
-		if (opts && opts.noGuardOhko) {
-			add(pickMove(HM_OHKO, fdex, ruleTable, used, 1));
-		} else if (Math.random() < 0.75) {
-			add(pickMove(HM_SETUP[role], fdex, ruleTable, used, 2));
-		} else {
-			add(pickMove(HM_COVERAGE[role].concat(HM_SETUP[role]), fdex, ruleTable, used, 4));
+		const eliteRoll = Math.random();
+		if (eliteRoll < 0.3) {
+			add(pickMove(shuffled(HM_GMAX_MOVES), fdex, ruleTable, used, 3, ctx));
+		} else if (eliteRoll < 0.6 && HM_ELITE_MOVES[role]) {
+			add(pickMove(shuffled(HM_ELITE_MOVES[role]), fdex, ruleTable, used, 3, ctx));
 		}
-		add(pickMove(HM_UTILITY, fdex, ruleTable, used, 3));
+		add(pickMove(secondary.concat(HM_COVERAGE[role]), fdex, ruleTable, used, 3, ctx));
+		if (opts && opts.noGuardOhko) {
+			add(pickMove(HM_OHKO, fdex, ruleTable, used, 1, ctx));
+		} else if (ability === 'prankster') {
+			add(pickMove(HM_PRANKSTER_MOVES, fdex, ruleTable, used, 3, ctx));
+		} else if (Math.random() < 0.75) {
+			add(pickMove(HM_SETUP[role], fdex, ruleTable, used, 2, ctx));
+		} else {
+			add(pickMove(HM_COVERAGE[role].concat(HM_SETUP[role]), fdex, ruleTable, used, 4, ctx));
+		}
+		if (ability === 'prankster') {
+			add(pickMove(HM_PRANKSTER_MOVES, fdex, ruleTable, used, 4, ctx));
+		} else if (Math.random() < 0.15) {
+			add(pickMove(HM_NUKE_MOVES, fdex, ruleTable, used, 2, ctx));
+		} else if (Math.random() < 0.2) {
+			add(pickMove(HM_UTILITY_RECOVERY, fdex, ruleTable, used, 3, ctx));
+		} else {
+			add(pickMove(HM_UTILITY, fdex, ruleTable, used, 4, ctx));
+		}
 	}
 	for (const m of set.moves || []) {
 		if (moves.length >= 4) break;
@@ -319,13 +476,28 @@ function abilityAllowed(name, fdex, ruleTable) {
 	return true;
 }
 
-function upgradeHackmonsSet(set, fdex, ruleTable, usedAbilities) {
-	const role = setRole(set);
+function bestSpeciesItem(set, fdex, ruleTable) {
+	const ids = [toId(set.species), toId(fdex.species.get(set.species).baseSpecies || '')];
+	for (const id of ids) {
+		const item = HM_SPECIES_ITEMS[id];
+		if (item && itemAllowed(item, fdex, ruleTable)) return item;
+	}
+	return null;
+}
+
+function upgradeHackmonsSet(set, fdex, ruleTable, usedAbilities, ctx) {
+	const role = set.phnnForcedRole || setRole(set);
 	const ohkoLegal = !ruleTable.has('ohkoclause') && moveAllowed('Sheer Cold', fdex, ruleTable);
-	const wantsNoGuard = role !== 'defensive' && ohkoLegal && !usedAbilities.has('noguard') &&
+	const noWeakness = /Arceus-Question|Terapagos-Stellar/.test(set.species || '');
+	if (noWeakness && !usedAbilities.get('wonderguard') && abilityAllowed('Wonder Guard', fdex, ruleTable)) {
+		set.ability = 'Wonder Guard';
+		usedAbilities.set('wonderguard', 1);
+	}
+	const wantsNoGuard = !set.ability && role !== 'defensive' && ohkoLegal && !usedAbilities.has('noguard') &&
 		abilityAllowed('No Guard', fdex, ruleTable) && Math.random() < 0.3;
-	buildHackmonsMoves(set, role, fdex, ruleTable, { noGuardOhko: wantsNoGuard });
-	if (wantsNoGuard) {
+	if (set.ability === 'Wonder Guard') {
+		// already decided
+	} else if (wantsNoGuard) {
 		set.ability = 'No Guard';
 		usedAbilities.set('noguard', 1);
 	} else {
@@ -342,7 +514,10 @@ function upgradeHackmonsSet(set, fdex, ruleTable, usedAbilities) {
 		let picked = null;
 		if (Math.random() < 0.4) {
 			const premium = HM_PREMIUM_ABILITIES.filter(isLegal);
-			if (premium.length) picked = premium[Math.floor(Math.random() * premium.length)];
+			// a no-weakness body wants Wonder Guard above all else
+			if (/Question|Stellar/.test(set.species || '') && isLegal('Wonder Guard')) {
+				picked = 'Wonder Guard';
+			} else if (premium.length) picked = premium[Math.floor(Math.random() * premium.length)];
 		}
 		if (!picked) {
 			const legal = pool.filter(isLegal);
@@ -353,8 +528,29 @@ function upgradeHackmonsSet(set, fdex, ruleTable, usedAbilities) {
 			usedAbilities.set(toId(picked), 1);
 		}
 	}
+	const zPackage = !wantsNoGuard && Math.random() < 0.25
+		? shuffled(HM_ZMOVE_PACKAGES).find(z => (
+			itemAllowed(z.item, fdex, ruleTable) && moveAllowed(z.move, fdex, ruleTable, ctx)
+		))
+		: null;
+	buildHackmonsMoves(set, role, fdex, ruleTable, {
+		noGuardOhko: wantsNoGuard, ability: set.ability, ctx, zPackage,
+	});
 	applyHackmonsEvs(set, role, ruleTable);
-	if (!set.item && fdex.gen >= 2) set.item = 'Leftovers';
+	if (zPackage) set.phnnZItem = zPackage.item;
+	if (set.phnnZItem) {
+		set.item = set.phnnZItem;
+	} else if (fdex.gen >= 2) {
+		const signature = bestSpeciesItem(set, fdex, ruleTable);
+		const abilityItem = HM_ABILITY_ITEMS[toId(set.ability || '')];
+		if (signature) {
+			set.item = signature;
+		} else if (abilityItem && itemAllowed(abilityItem, fdex, ruleTable)) {
+			set.item = abilityItem;
+		} else if (!set.item) {
+			set.item = 'Leftovers';
+		}
+	}
 }
 
 function itemAllowed(name, fdex, ruleTable) {
@@ -392,10 +588,91 @@ function upgradeCdSet(set, fdex, ruleTable) {
 	if (itemExtras.length) set.phItems = itemExtras.join('/');
 }
 
-function reshape(team, baseid, gen, rulesText, ruleTable, fdex) {
+// anything Smogon has no set for still deserves a real spread, never the 85-across-the-board default
+function applyCompetitiveSpreads(team, gen, fdex, ruleTable) {
+	const evLimited = ruleTable.evLimit !== null;
+	if (!evLimited) return;
+	for (const set of team) {
+		if (set.phnnSmogonSpread) continue;
+		const role = setRole(set);
+		if (role === 'physical') {
+			set.evs = { hp: 4, atk: 252, def: 0, spa: 0, spd: 0, spe: 252 };
+			set.nature = set.nature && set.nature !== 'Serious' ? set.nature : 'Jolly';
+			set.ivs = { hp: 31, atk: 31, def: 31, spa: 0, spd: 31, spe: 31 };
+		} else if (role === 'special') {
+			set.evs = { hp: 4, atk: 0, def: 0, spa: 252, spd: 0, spe: 252 };
+			set.nature = set.nature && set.nature !== 'Serious' ? set.nature : 'Timid';
+			set.ivs = { hp: 31, atk: 0, def: 31, spa: 31, spd: 31, spe: 31 };
+		} else {
+			// walls want the split that maximises total damage absorbed
+			const species = fdex.species.get(set.species);
+			const bs = species.baseStats;
+			const physSide = bs.def <= bs.spd ? 'def' : 'spd';
+			set.evs = { hp: 252, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
+			set.evs[physSide] = 252;
+			set.evs[physSide === 'def' ? 'spd' : 'def'] = 4;
+			set.nature = physSide === 'def' ? 'Bold' : 'Calm';
+			set.ivs = { hp: 31, atk: 0, def: 31, spa: 31, spd: 31, spe: 31 };
+		}
+	}
+}
+
+function applySmogonSets(team, gen, fdex, ruleTable) {
+	const lib = loadSmogonSets()['gen' + gen];
+	if (!lib) return;
+	for (const set of team) {
+		const id = toId(set.species || set.name);
+		const entries = lib[id] || lib[toId(fdex.species.get(set.species).baseSpecies || '')];
+		if (!entries || !entries.length) continue;
+		const legal = entries.filter(e => (
+			e.m.every(m => moveAllowed(m, fdex, ruleTable)) &&
+			(!e.a || abilityAllowed(e.a, fdex, ruleTable)) &&
+			(!e.i || itemAllowed(e.i, fdex, ruleTable))
+		));
+		if (!legal.length) continue;
+		const pick = legal[Math.floor(Math.random() * legal.length)];
+		set.moves = pick.m.slice(0, 4);
+		if (pick.a) set.ability = pick.a;
+		if (pick.i) set.item = pick.i;
+		if (pick.na) set.nature = pick.na;
+		if (pick.e) set.evs = { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0, ...pick.e };
+		if (pick.v) set.ivs = { hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31, ...pick.v };
+		set.phnnSmogonSpread = !!pick.e;
+	}
+}
+
+function applyArchetype(team, fdex, ruleTable, usedAbilities) {
+	const usable = HM_ARCHETYPES.filter(a => a.slots.every(slot => (
+		(!slot.ability || abilityAllowed(slot.ability, fdex, ruleTable)) &&
+		slot.moves.every(m => moveAllowed(m, fdex, ruleTable) || slot.moves.length > 1)
+	)));
+	if (!usable.length || team.length < 2) return null;
+	const plan = usable[Math.floor(Math.random() * usable.length)];
+	plan.slots.forEach((slot, i) => {
+		const set = team[i];
+		if (!set) return;
+		if (slot.ability && !usedAbilities.get(toId(slot.ability))) {
+			set.ability = slot.ability;
+			usedAbilities.set(toId(slot.ability), 1);
+		}
+		const forced = slot.moves.filter(m => moveAllowed(m, fdex, ruleTable));
+		if (forced.length) set.phnnForcedMoves = forced.slice(0, 4);
+		if (slot.role) set.phnnForcedRole = slot.role;
+	});
+	return plan.name;
+}
+
+function reshape(team, baseid, gen, rulesText, ruleTable, fdex, ctx) {
 	const isCD = baseid.includes('customdisguise') && /^gen[89]/.test(baseid) && !toId(rulesText).includes('standardcustom');
 	const isHackmons = isHackmonsTarget(baseid) && gen >= 3 && !baseid.includes('metronome');
 	const usedAbilities = new Map();
+	if (isHackmons && !baseid.includes('letsgo') && Math.random() < 0.45) {
+		applyArchetype(team, fdex, ruleTable, usedAbilities);
+	}
+	if (!isHackmons) {
+		applySmogonSets(team, gen, fdex, ruleTable);
+		applyCompetitiveSpreads(team, gen, fdex, ruleTable);
+	}
 	const isLetsGo = baseid.includes('letsgo');
 	const usedItems = new Set();
 	let fillerIdx = 0;
@@ -404,7 +681,7 @@ function reshape(team, baseid, gen, rulesText, ruleTable, fdex) {
 		if (gen < 9) delete set.teraType;
 		if (gen === 1 || isLetsGo) delete set.item;
 		if (isLetsGo) delete set.evs;
-		if (isHackmons && !baseid.includes('letsgo')) upgradeHackmonsSet(set, fdex, ruleTable, usedAbilities);
+		if (isHackmons && !baseid.includes('letsgo')) upgradeHackmonsSet(set, fdex, ruleTable, usedAbilities, ctx);
 		if (ruleTable.has('itemclause') && set.item) {
 			if (usedItems.has(toId(set.item))) {
 				while (fillerIdx < FILLER_ITEMS.length && usedItems.has(toId(FILLER_ITEMS[fillerIdx]))) fillerIdx++;
@@ -490,6 +767,7 @@ function generateTeam(formatid) {
 					pool = picked.map(sp => ({
 						name: sp.name, species: sp.name, ability: '', item: '',
 						moves: [], nature: 'Serious', gender: '', evs: {}, ivs: {},
+						teraType: gen >= 9 ? (sp.types && sp.types[0]) || 'Normal' : undefined,
 					}));
 				} else {
 					pool = Teams.generate(source);
@@ -536,13 +814,19 @@ function generateTeam(formatid) {
 				team.push(extra);
 			}
 		}
-		reshape(team, baseid, gen, rulesText, ruleTable, fdex);
+		reshape(team, baseid, gen, rulesText, ruleTable, fdex, { permissive: isHackmonsTarget(baseid), validator, fullid });
 		try {
 			problems = validator.validateTeam(JSON.parse(JSON.stringify(team))) || [];
 		} catch (e) {
 			return { error: `Validator error: ${('' + e.message).slice(0, 200)}` };
 		}
 		if (!problems.length) {
+			for (const set of team) {
+				delete set.phnnForcedMoves;
+				delete set.phnnForcedRole;
+				delete set.phnnSmogonSpread;
+				delete set.phnnZItem;
+			}
 			return { team: Teams.pack(team), export: Teams.export(team), source, attempts: attempt + 1 };
 		}
 	}

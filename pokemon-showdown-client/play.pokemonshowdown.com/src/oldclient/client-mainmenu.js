@@ -108,7 +108,8 @@
 				buf += 'Partner:<br />';
 				buf += '<input class="partnerselect" /><button name="partnersubmit">Invite</button></label></p>';
 
-				buf += '<p><button class="button mainmenu1 big" name="search"><strong>Battle!</strong><br /><small>Find a random opponent</small></button> <button type="button" class="button' + (this.phnnFormatNeedsTeam(this.curFormat) ? '' : ' disabled') + '" name="phnnGenerateTeam"' + (this.phnnFormatNeedsTeam(this.curFormat) ? '' : ' disabled') + '><i class="fa fa-magic"></i> Generate Team</button></p></form></div>';
+				buf += '<p><button class="button mainmenu1 big" name="search"><strong>Battle!</strong><br /><small>Find a random opponent</small></button></p>';
+				buf += '<p style="margin-top:-4px"><button type="button" class="button' + (this.phnnFormatNeedsTeam(this.curFormat) ? '' : ' disabled') + '" name="phnnGenerateTeam" style="width:100%"' + (this.phnnFormatNeedsTeam(this.curFormat) ? '' : ' disabled') + '><i class="fa fa-magic"></i> Generate a team for this format</button></p></form></div>';
 			}
 
 			buf += '<div class="menugroup">';
