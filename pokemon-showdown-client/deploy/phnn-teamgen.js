@@ -59,6 +59,7 @@ const HM_WALL_MOVES = [
 	['Stealth Rock', 'Spikes', 'Toxic Spikes'],
 	['Core Enforcer', 'U-turn', 'Whirlwind', 'Haze', 'Knock Off', 'Seismic Toss'],
 ];
+const HM_PREMIUM_ABILITIES = ['Wonder Guard', 'Neutralizing Gas', 'Magic Guard', 'Huge Power', 'Pure Power', 'Parental Bond', 'Shadow Tag', 'Prankster', 'Unaware', 'Fur Coat', 'Ice Scales', 'Good as Gold'];
 const META_ABILITIES = {
 	physical: ['Huge Power', 'Pure Power', 'Parental Bond', 'No Guard', 'Scrappy', 'Mold Breaker', 'Libero'],
 	special: ['Hadron Engine', 'Parental Bond', 'No Guard', 'Beads of Ruin', 'Libero', 'Drought', 'Drizzle'],
@@ -337,8 +338,16 @@ function upgradeHackmonsSet(set, fdex, ruleTable, usedAbilities) {
 			if (hasNormalAttack) pool = META_ABILITIES.ate.concat(pool);
 		}
 		pool = pool.concat(META_ABILITIES.utility, META_ABILITIES.defensive);
-		const legal = pool.filter(name => !usedAbilities.get(toId(name)) && abilityAllowed(name, fdex, ruleTable));
-		const picked = legal.length ? legal[Math.floor(Math.random() * Math.min(legal.length, 3))] : null;
+		const isLegal = name => !usedAbilities.get(toId(name)) && abilityAllowed(name, fdex, ruleTable);
+		let picked = null;
+		if (Math.random() < 0.4) {
+			const premium = HM_PREMIUM_ABILITIES.filter(isLegal);
+			if (premium.length) picked = premium[Math.floor(Math.random() * premium.length)];
+		}
+		if (!picked) {
+			const legal = pool.filter(isLegal);
+			if (legal.length) picked = legal[Math.floor(Math.random() * Math.min(legal.length, 4))];
+		}
 		if (picked) {
 			set.ability = picked;
 			usedAbilities.set(toId(picked), 1);

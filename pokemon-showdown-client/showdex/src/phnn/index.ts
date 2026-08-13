@@ -39,20 +39,43 @@ export const detectPhnnKey = (format: string): PhnnKey | null => {
     return ('gen2spaceworld' in phnnData ? 'gen2spaceworld' : null) as PhnnKey | null;
   }
 
-  if (!(f.includes('phnn') || f.includes('nonerfs') || f.includes('unified'))) {
-    return null;
-  }
-
   const genMatch = f.match(/gen(\d+)/);
   const gen = genMatch ? Number(genMatch[1]) : 9;
+
+  // fork mods first, most specific wins
+  if (f.includes('spaceworld')) {
+    return ('spaceworld' in phnnData ? 'spaceworld' : null) as PhnnKey | null;
+  }
+
+  if (f.includes('customdisguises')) {
+    return ('gen9customdisguises' in phnnData ? 'gen9customdisguises' : null) as PhnnKey | null;
+  }
+
+  if (f.includes('champions')) {
+    return ('champions' in phnnData ? 'champions' : null) as PhnnKey | null;
+  }
+
+  if (gen === 2 && (f.includes('gs') || f.includes('goldsilver'))) {
+    return ('gen2gs' in phnnData ? 'gen2gs' : null) as PhnnKey | null;
+  }
 
   if (gen === 8 && f.includes('unified')) {
     return ('gen8unified' in phnnData ? 'gen8unified' : null) as PhnnKey | null;
   }
 
-  const key = `gen${gen}phnn` as PhnnKey;
+  if (f.includes('phnn') || f.includes('nonerfs') || f.includes('unified')) {
+    const key = `gen${gen}phnn` as PhnnKey;
 
-  return (key in phnnData ? key : null);
+    if (key in phnnData) {
+      return key;
+    }
+  }
+
+  // every other format still needs its generation's own chart, which is where the
+  // fork's Shadow / ??? / Bird rows live that @smogon/calc has no data for
+  const genKey = `gen${gen}` as PhnnKey;
+
+  return (genKey in phnnData ? genKey : null);
 };
 
 export const detectMaxEvsFormat = (format: string): boolean => {
@@ -261,7 +284,8 @@ export const getPhnnArceusTypes = (
 };
 
 const PHNN_SW_EVIOLITE_IDS = [
-  'ballerine', 'ditto', 'farfetchd', 'golppy', 'minicorn', 'para', 'pinsir', 'slowbro', 'tangel',
+  'ballerine', 'ditto', 'farfetchd', 'farfetchdsw', 'golppy', 'minicorn', 'para', 'pinsir',
+  'pinsirmega', 'pinsirsw', 'shuckle', 'slowbro', 'slowbromega', 'slowbrosw', 'tangel', 'trifox', 'twinz',
 ];
 
 export const isPhnnSwEvioliteNfe = (format: string, speciesId: string): boolean => (
@@ -283,6 +307,23 @@ export const isPhnnShadowDamagingMove = (moveName: string): boolean => (
   PHNN_SHADOW_DAMAGING_MOVE_IDS.includes(toPhnnId(moveName))
 );
 
+export const isPhnnTypingKnown = (pokemon: {
+  speciesForme?: string;
+  types?: string[];
+  dirtyTypes?: string[];
+}): boolean => {
+  if (!pokemon?.speciesForme) {
+    return false;
+  }
+
+  // a Shadow forme announces itself; otherwise we need typing we have actually seen
+  if (pokemon.speciesForme.toLowerCase().includes('shadow')) {
+    return true;
+  }
+
+  return !!(pokemon.dirtyTypes?.length || pokemon.types?.length);
+};
+
 export const isPhnnKamehamehaMove = (moveName: string): boolean => (
   toPhnnId(moveName) === 'kamehameha'
 );
@@ -291,6 +332,11 @@ export const setPhnnCalcContext = (format: string): void => {
   const key = detectPhnnKey(format);
 
   (globalThis as Record<string, unknown>).__phnnCalc = key
-    ? { typeChart: getPhnnTypeChart(format) || {}, parentalBond: true, shadowMoves: PHNN_SHADOW_MOVE_IDS }
+    ? {
+      typeChart: getPhnnTypeChart(format) || {},
+      parentalBond: true,
+      shadowMoves: PHNN_SHADOW_MOVE_IDS,
+      critModifier: 2,
+    }
     : null;
 };

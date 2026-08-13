@@ -22,6 +22,7 @@ export const TypeChart: import('../../../sim/dex-data').ModdedTypeDataTable = {
 			Steel: 0,
 			Stellar: 0,
 			Water: 1,
+			Shadow: 1,
 		},
 		HPivs: { spa: 30, spd: 30 },
 		HPdvs: { atk: 12 },
@@ -49,6 +50,7 @@ export const TypeChart: import('../../../sim/dex-data').ModdedTypeDataTable = {
 			Steel: 1,
 			Stellar: 0,
 			Water: 1,
+			Shadow: 1,
 		},
 		HPivs: { def: 30, spd: 30, spe: 30 },
 		HPdvs: { atk: 13, def: 12 },
@@ -76,6 +78,7 @@ export const TypeChart: import('../../../sim/dex-data').ModdedTypeDataTable = {
 			Steel: 0,
 			Stellar: 0,
 			Water: 0,
+			Shadow: 1,
 		},
 	},
 	bug: {
@@ -99,6 +102,7 @@ export const TypeChart: import('../../../sim/dex-data').ModdedTypeDataTable = {
 			Steel: 0,
 			Stellar: 0,
 			Water: 0,
+			Shadow: 1,
 		},
 	},
 	poison: {
@@ -124,6 +128,7 @@ export const TypeChart: import('../../../sim/dex-data').ModdedTypeDataTable = {
 			Steel: 0,
 			Stellar: 0,
 			Water: 0,
+			Shadow: 1,
 		},
 	},
 	electric: {
@@ -148,6 +153,7 @@ export const TypeChart: import('../../../sim/dex-data').ModdedTypeDataTable = {
 			Steel: 2,
 			Stellar: 0,
 			Water: 0,
+			Shadow: 1,
 		},
 	},
 	steel: {
@@ -174,6 +180,7 @@ export const TypeChart: import('../../../sim/dex-data').ModdedTypeDataTable = {
 			Steel: 2,
 			Stellar: 0,
 			Water: 1,
+			Shadow: 1,
 		},
 	},
 	dark: {
@@ -199,6 +206,7 @@ export const TypeChart: import('../../../sim/dex-data').ModdedTypeDataTable = {
 			Steel: 0,
 			Stellar: 0,
 			Water: 0,
+			Shadow: 1,
 		},
 	},
 	shadow: {

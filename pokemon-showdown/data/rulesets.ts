@@ -184,6 +184,7 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 		name: 'Disguise Mod',
 		desc: "Pok&eacute;mon may disguise as another species' sprite, take on any typing (in Custom Disguises: any number of types, Tera types, and abilities), and start the battle pre-statused; opponents only ever see the disguise sprite and status.",
 		onBegin() {
+			this.add('rule', 'Disguise Mod: Pokemon may disguise as another species and change typing');
 			for (const side of this.sides) {
 				for (const pokemon of side.pokemon) {
 					if (!pokemon.set.disguise) continue;
@@ -377,6 +378,9 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 		effectType: 'Rule',
 		name: 'Prestatus',
 		desc: "Pok&eacute;mon may start the battle with a status condition set in the teambuilder.",
+		onBegin() {
+			this.add('rule', 'Prestatus: Pokemon may start the battle already statused');
+		},
 		onSwitchIn(pokemon) {
 			this.applyStartStatus(pokemon);
 		},

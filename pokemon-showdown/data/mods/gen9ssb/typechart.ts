@@ -23,6 +23,7 @@ export const TypeChart: import('../../../sim/dex-data').ModdedTypeDataTable = {
 			Steel: 0,
 			Stellar: 0,
 			Water: 1,
+			Shadow: 1,
 		},
 	},
 	rock: {
@@ -49,6 +50,7 @@ export const TypeChart: import('../../../sim/dex-data').ModdedTypeDataTable = {
 			Steel: 1,
 			Stellar: 0,
 			Water: 1,
+			Shadow: 1,
 		},
 	},
 	steel: {
@@ -77,6 +79,7 @@ export const TypeChart: import('../../../sim/dex-data').ModdedTypeDataTable = {
 			Steel: 2,
 			Stellar: 0,
 			Water: 0,
+			Shadow: 1,
 		},
 	},
 };
