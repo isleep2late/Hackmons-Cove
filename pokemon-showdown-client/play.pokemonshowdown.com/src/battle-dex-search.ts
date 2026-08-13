@@ -1429,18 +1429,43 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 		}
 		return true;
 	}
+	phnnEffectiveStats(species: Dex.Species): Dex.StatsTable {
+		const id = species.id;
+		const stats = species.baseStats;
+		if (id.endsWith('gmax')) return { ...stats, hp: stats.hp * 2 };
+		if (id.endsWith('alpha')) {
+			return { hp: stats.hp, atk: stats.atk * 2, def: stats.def * 2, spa: stats.spa * 2, spd: stats.spd * 2, spe: stats.spe };
+		}
+		const ALL1: { [stat: string]: 1 | 2 } = { atk: 1, def: 1, spa: 1, spd: 1, spe: 1 };
+		const ALL2: { [stat: string]: 1 | 2 } = { atk: 2, def: 2, spa: 2, spd: 2, spe: 2 };
+		const boosts: { [id: string]: { [stat: string]: 1 | 2 } } = {
+			araquanidtotem: { spe: 1 }, marowakalolatotem: { spe: 2 }, lurantistotem: { spe: 2 },
+			togedemarutotem: { def: 2 }, wishiwashitotem: { def: 1 }, salazzletotem: { spd: 1 },
+			mimikyutotem: ALL1, mimikyubustedtotem: ALL1, kommoototem: ALL1, vikavolttotem: ALL1, hakamoototem: ALL1,
+			ribombeetotem: ALL2, gumshoostotem: ALL2, raticatealolatotem: ALL2,
+			okidogititan: { def: 2 }, munkidorititan: { spd: 2 }, fezandipitititan: { spe: 2 },
+		};
+		const boost = boosts[id];
+		if (!boost) return stats;
+		const mult: { [stage: number]: number } = { 1: 1.5, 2: 2 };
+		const out = { ...stats };
+		for (const stat in boost) {
+			(out as any)[stat] = Math.floor((stats as any)[stat] * mult[boost[stat]]);
+		}
+		return out;
+	}
 	sort(results: SearchRow[], sortCol: string, reverseSort?: boolean) {
 		const sortOrder = reverseSort ? -1 : 1;
 		if (['hp', 'atk', 'def', 'spa', 'spd', 'spe'].includes(sortCol)) {
 			return results.sort(([rowType1, id1], [rowType2, id2]) => {
-				const stat1 = this.dex.species.get(id1).baseStats[sortCol as Dex.StatName];
-				const stat2 = this.dex.species.get(id2).baseStats[sortCol as Dex.StatName];
+				const stat1 = this.phnnEffectiveStats(this.dex.species.get(id1))[sortCol as Dex.StatName];
+				const stat2 = this.phnnEffectiveStats(this.dex.species.get(id2))[sortCol as Dex.StatName];
 				return (stat2 - stat1) * sortOrder;
 			});
 		} else if (sortCol === 'bst') {
 			return results.sort(([rowType1, id1], [rowType2, id2]) => {
-				const base1 = this.dex.species.get(id1).baseStats;
-				const base2 = this.dex.species.get(id2).baseStats;
+				const base1 = this.phnnEffectiveStats(this.dex.species.get(id1));
+				const base2 = this.phnnEffectiveStats(this.dex.species.get(id2));
 				let bst1 = base1.hp + base1.atk + base1.def + base1.spa + base1.spd + base1.spe;
 				let bst2 = base2.hp + base2.atk + base2.def + base2.spa + base2.spd + base2.spe;
 				if (this.dex.gen === 1) {
