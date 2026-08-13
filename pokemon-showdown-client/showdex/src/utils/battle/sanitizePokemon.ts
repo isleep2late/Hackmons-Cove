@@ -9,6 +9,7 @@ import {
   nonEmptyObject,
   similarArrays,
 } from '@showdex/utils/core';
+import { getPhnnBaseStats } from '@showdex/phnn';
 import { detectGenFromFormat, detectLegacyGen, getDexForFormat } from '@showdex/utils/dex';
 import { detectMaxEvsFormat } from '@showdex/phnn';
 import { flattenAlts } from '@showdex/utils/presets';
@@ -245,7 +246,10 @@ export const sanitizePokemon = <
   const species = dex.species.get(sanitizedPokemon.speciesForme);
 
   // don't really care if species is falsy here
-  sanitizedPokemon.baseStats = { ...species?.baseStats };
+  sanitizedPokemon.baseStats = {
+    ...species?.baseStats,
+    ...(typeof format === 'string' ? getPhnnBaseStats(format, sanitizedPokemon.speciesForme) : null),
+  };
   sanitizedPokemon.dmaxable = !species?.cannotDynamax;
 
   // grab the base species forme to obtain its other formes

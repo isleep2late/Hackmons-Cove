@@ -19,6 +19,7 @@ export const TypeChart: import('../../../sim/dex-data').ModdedTypeDataTable = {
 			Dragon: 0,
 			Dark: 2,
 			Steel: 0,
+			Shadow: 1,
 		},
 	},
 	fire: {
@@ -41,6 +42,7 @@ export const TypeChart: import('../../../sim/dex-data').ModdedTypeDataTable = {
 			Dragon: 0,
 			Dark: 0,
 			Steel: 0,
+			Shadow: 1,
 		},
 	},
 	water: {
@@ -63,6 +65,7 @@ export const TypeChart: import('../../../sim/dex-data').ModdedTypeDataTable = {
 			Dragon: 0,
 			Dark: 0,
 			Steel: 2,
+			Shadow: 1,
 		},
 	},
 	electric: {
@@ -85,6 +88,7 @@ export const TypeChart: import('../../../sim/dex-data').ModdedTypeDataTable = {
 			Dragon: 0,
 			Dark: 0,
 			Steel: 2,
+			Shadow: 1,
 		},
 	},
 	grass: {
@@ -107,6 +111,7 @@ export const TypeChart: import('../../../sim/dex-data').ModdedTypeDataTable = {
 			Dragon: 0,
 			Dark: 0,
 			Steel: 0,
+			Shadow: 1,
 		},
 	},
 	ice: {
@@ -129,6 +134,7 @@ export const TypeChart: import('../../../sim/dex-data').ModdedTypeDataTable = {
 			Dragon: 0,
 			Dark: 0,
 			Steel: 0,
+			Shadow: 1,
 		},
 	},
 	fighting: {
@@ -151,6 +157,7 @@ export const TypeChart: import('../../../sim/dex-data').ModdedTypeDataTable = {
 			Dragon: 0,
 			Dark: 0,
 			Steel: 0,
+			Shadow: 1,
 		},
 	},
 	poison: {
@@ -173,6 +180,7 @@ export const TypeChart: import('../../../sim/dex-data').ModdedTypeDataTable = {
 			Dragon: 0,
 			Dark: 0,
 			Steel: 0,
+			Shadow: 1,
 		},
 	},
 	ground: {
@@ -195,6 +203,7 @@ export const TypeChart: import('../../../sim/dex-data').ModdedTypeDataTable = {
 			Dragon: 0,
 			Dark: 0,
 			Steel: 0,
+			Shadow: 1,
 		},
 	},
 	flying: {
@@ -217,6 +226,7 @@ export const TypeChart: import('../../../sim/dex-data').ModdedTypeDataTable = {
 			Dragon: 0,
 			Dark: 0,
 			Steel: 0,
+			Shadow: 1,
 		},
 	},
 	psychic: {
@@ -239,6 +249,7 @@ export const TypeChart: import('../../../sim/dex-data').ModdedTypeDataTable = {
 			Dragon: 0,
 			Dark: 1,
 			Steel: 0,
+			Shadow: 1,
 		},
 	},
 	bug: {
@@ -261,6 +272,7 @@ export const TypeChart: import('../../../sim/dex-data').ModdedTypeDataTable = {
 			Dragon: 0,
 			Dark: 0,
 			Steel: 0,
+			Shadow: 1,
 		},
 	},
 	rock: {
@@ -283,6 +295,7 @@ export const TypeChart: import('../../../sim/dex-data').ModdedTypeDataTable = {
 			Dragon: 0,
 			Dark: 0,
 			Steel: 1,
+			Shadow: 1,
 		},
 	},
 	ghost: {
@@ -305,6 +318,7 @@ export const TypeChart: import('../../../sim/dex-data').ModdedTypeDataTable = {
 			Dragon: 0,
 			Dark: 1,
 			Steel: 0,
+			Shadow: 1,
 		},
 	},
 	dragon: {
@@ -327,6 +341,7 @@ export const TypeChart: import('../../../sim/dex-data').ModdedTypeDataTable = {
 			Dragon: 1,
 			Dark: 0,
 			Steel: 0,
+			Shadow: 1,
 		},
 	},
 	dark: {
@@ -349,6 +364,7 @@ export const TypeChart: import('../../../sim/dex-data').ModdedTypeDataTable = {
 			Dragon: 0,
 			Dark: 1,
 			Steel: 0,
+			Shadow: 1,
 		},
 	},
 	steel: {
@@ -371,6 +387,7 @@ export const TypeChart: import('../../../sim/dex-data').ModdedTypeDataTable = {
 			Dragon: 0,
 			Dark: 0,
 			Steel: 3,
+			Shadow: 1,
 		},
 	},
 };

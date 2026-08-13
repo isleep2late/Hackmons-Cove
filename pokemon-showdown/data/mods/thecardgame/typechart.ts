@@ -23,6 +23,7 @@ export const TypeChart: import('../../../sim/dex-data').ModdedTypeDataTable = {
 			Rock: 0,
 			Steel: 0,
 			Water: 0,
+			Shadow: 1,
 		},
 	},
 	fighting: {
@@ -47,6 +48,7 @@ export const TypeChart: import('../../../sim/dex-data').ModdedTypeDataTable = {
 			Rock: 2,
 			Steel: 0,
 			Water: 0,
+			Shadow: 1,
 		},
 	},
 	psychic: {
@@ -71,6 +73,7 @@ export const TypeChart: import('../../../sim/dex-data').ModdedTypeDataTable = {
 			Rock: 0,
 			Steel: 0,
 			Water: 0,
+			Shadow: 1,
 		},
 	},
 	water: {
@@ -96,6 +99,7 @@ export const TypeChart: import('../../../sim/dex-data').ModdedTypeDataTable = {
 			Rock: 0,
 			Steel: 2,
 			Water: 2,
+			Shadow: 1,
 		},
 	},
 };

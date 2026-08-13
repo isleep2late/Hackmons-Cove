@@ -5,6 +5,17 @@ const DIST = path.resolve(__dirname, '../node_modules/@smogon/calc/dist/mechanic
 
 const PATCHES = [
 	{
+		file: 'gen789.js',
+		find: '        baseDamage = Math.floor((0, util_2.OF32)(baseDamage * 1.5));',
+		replace: "        baseDamage = Math.floor((0, util_2.OF32)(baseDamage * (((typeof globalThis !== 'undefined') && globalThis.__phnnCalc && globalThis.__phnnCalc.critModifier) || 1.5)));",
+	},
+	{
+		file: 'gen789.js',
+		find: "    else if ((defender.hasItem('Metal Powder') && defender.named('Ditto') && hitsPhysical) ||",
+		replace: "    else if (((typeof globalThis !== 'undefined') && globalThis.__phnnCalc && defender.hasItem('Metal Powder') && defender.named('Ditto')) ||\n        (defender.hasItem('Metal Powder') && defender.named('Ditto') && hitsPhysical) ||",
+	},
+
+	{
 		file: 'util.js',
 		find: '        if (effectiveness === 0 && isRingTarget) {',
 		replace: '        var __pc = (typeof globalThis !== \'undefined\') && globalThis.__phnnCalc && globalThis.__phnnCalc.typeChart;\n        if (__pc && __pc[move.type] && Object.prototype.hasOwnProperty.call(__pc[move.type], type)) {\n            effectiveness = __pc[move.type][type];\n        }\n        if (effectiveness === 0 && isRingTarget) {',

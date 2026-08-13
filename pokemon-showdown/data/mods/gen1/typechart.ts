@@ -24,6 +24,7 @@ export const TypeChart: import('../../../sim/dex-data').ModdedTypeDataTable = {
 			Psychic: 0,
 			Rock: 1,
 			Water: 0,
+			Shadow: 1,
 		},
 	},
 	fire: {
@@ -43,6 +44,7 @@ export const TypeChart: import('../../../sim/dex-data').ModdedTypeDataTable = {
 			Psychic: 0,
 			Rock: 1,
 			Water: 1,
+			Shadow: 1,
 		},
 	},
 	ghost: {
@@ -62,6 +64,7 @@ export const TypeChart: import('../../../sim/dex-data').ModdedTypeDataTable = {
 			Psychic: 0,
 			Rock: 0,
 			Water: 0,
+			Shadow: 1,
 		},
 	},
 	ice: {
@@ -84,6 +87,7 @@ export const TypeChart: import('../../../sim/dex-data').ModdedTypeDataTable = {
 			Rock: 1,
 			Steel: 1,
 			Water: 0,
+			Shadow: 1,
 		},
 	},
 	poison: {
@@ -105,6 +109,7 @@ export const TypeChart: import('../../../sim/dex-data').ModdedTypeDataTable = {
 			Psychic: 1,
 			Rock: 0,
 			Water: 0,
+			Shadow: 1,
 		},
 	},
 	psychic: {
@@ -124,6 +129,7 @@ export const TypeChart: import('../../../sim/dex-data').ModdedTypeDataTable = {
 			Psychic: 2,
 			Rock: 0,
 			Water: 0,
+			Shadow: 1,
 		},
 	},
 	dark: {

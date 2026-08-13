@@ -292,6 +292,8 @@ export class DexTypes {
 
 	get(name: string | TypeInfo): TypeInfo {
 		if (name && typeof name !== 'string') return name;
+		// '???' survives as a literal key in the type chart, but toID() strips it to ''
+		if (name === '???') return this.getByID('???' as ID);
 		return this.getByID(toID(name));
 	}
 
@@ -300,7 +302,7 @@ export class DexTypes {
 		let type = this.typeCache.get(id);
 		if (type) return type;
 
-		const typeName = id.charAt(0).toUpperCase() + id.substr(1);
+		const typeName = id === '???' ? '???' : id.charAt(0).toUpperCase() + id.substr(1);
 		if (typeName && this.dex.data.TypeChart.hasOwnProperty(id)) {
 			type = new TypeInfo({ name: typeName, id, ...this.dex.data.TypeChart[id] });
 		} else {
