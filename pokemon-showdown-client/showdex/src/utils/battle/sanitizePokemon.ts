@@ -9,7 +9,7 @@ import {
   nonEmptyObject,
   similarArrays,
 } from '@showdex/utils/core';
-import { getPhnnBaseStats, isPhnnAnyAbilityFormat } from '@showdex/phnn';
+import { getPhnnBaseStats } from '@showdex/phnn';
 import { detectGenFromFormat, detectLegacyGen, getDexForFormat } from '@showdex/utils/dex';
 import { detectMaxEvsFormat } from '@showdex/phnn';
 import { flattenAlts } from '@showdex/utils/presets';
@@ -404,8 +404,6 @@ export const sanitizePokemon = <
   const updateDirtyAbility = (
     (!sanitizedPokemon.ability || !!sanitizedPokemon.transformedForme)
       && (!sanitizedPokemon.dirtyAbility || !abilitiesSource.includes(sanitizedPokemon.dirtyAbility))
-      // never invent an ability in formats where any Pokemon can legally have any of them
-      && !(typeof format === 'string' && isPhnnAnyAbilityFormat(format) && !sanitizedPokemon.transformedForme)
   );
 
   if (updateDirtyAbility) {
