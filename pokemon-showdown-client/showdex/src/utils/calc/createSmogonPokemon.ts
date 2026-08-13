@@ -36,7 +36,7 @@ const l = logger('@showdex/utils/calc/createSmogonPokemon()');
  *
  * @since 0.1.0
  */
-import { getPhnnArceusTypes, getPhnnBaseStats } from '@showdex/phnn';
+import { getPhnnArceusTypes, getPhnnBaseStats, isPhnnAnyAbilityFormat } from '@showdex/phnn';
 
 export const createSmogonPokemon = (
   format: string,
@@ -82,7 +82,12 @@ export const createSmogonPokemon = (
       ? null
       : pokemon.status;
 
-  const ability = (!legacy && (pokemon.dirtyAbility || pokemon.ability)) || null;
+  // in hackmons formats any Pokemon can carry any ability, so the dex's default is a guess with no
+  // evidence -- assuming it (e.g. Delta Stream on a Rayquaza-Mega that actually ran Fur Coat) skewed
+  // damage by up to 2x. Only trust an ability we were actually told about, or one the user set.
+  const guessedAbility = !pokemon.ability && !!pokemon.dirtyAbility
+    && isPhnnAnyAbilityFormat(format) && !pokemon.transformedForme;
+  const ability = (!legacy && !guessedAbility && (pokemon.dirtyAbility || pokemon.ability)) || null;
   const abilityId = formatId(ability);
 
   // note: these are in the PokemonToggleAbilities list, but isn't technically toggleable, per se.

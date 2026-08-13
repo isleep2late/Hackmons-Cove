@@ -9,7 +9,7 @@ const CD_UNIVERSAL_ABILITIES = [
 	'Good as Gold', 'Comatose', 'Wonder Guard', 'Flash Fire', 'Prankster',
 ];
 const CD_OFFENSE_ABILITIES = {
-	physical: ['Huge Power', 'Pure Power', 'Parental Bond', 'Adaptability', 'No Guard', 'Scrappy', 'Mold Breaker', 'Libero', 'Tough Claws'],
+	physical: ['Huge Power', 'Pure Power', 'Parental Bond', 'Adaptability', 'No Guard', 'Mold Breaker', 'Libero', 'Tough Claws'],
 	special: ['Hadron Engine', 'Parental Bond', 'Adaptability', 'Beads of Ruin', 'No Guard', 'Libero', 'Tinted Lens'],
 	defensive: ['Fur Coat', 'Ice Scales', 'Poison Heal', 'Arena Trap', 'Shadow Tag'],
 };
@@ -58,9 +58,7 @@ const HM_PRANKSTER_MOVES = ['Will-O-Wisp', 'Thunder Wave', 'Taunt', 'Encore', 'D
 const HM_SPECIES_ITEMS = {
 	latios: 'Soul Dew', latias: 'Soul Dew', latiosmega: 'Soul Dew', latiasmega: 'Soul Dew',
 	pikachu: 'Light Ball', cubone: 'Thick Club', marowak: 'Thick Club', marowakalola: 'Thick Club',
-	dialga: 'Adamant Orb', dialgaorigin: 'Adamant Crystal', palkia: 'Lustrous Orb', palkiaorigin: 'Lustrous Globe',
-	giratina: 'Griseous Orb', giratinaorigin: 'Griseous Core', zacian: 'Rusted Sword', zaciancrowned: 'Rusted Sword',
-	zamazenta: 'Rusted Shield', zamazentacrowned: 'Rusted Shield', ditto: 'Metal Powder',
+	dialga: 'Adamant Orb', palkia: 'Lustrous Orb', giratina: 'Griseous Orb', ditto: 'Metal Powder',
 	clamperl: 'Deep Sea Tooth', farfetchd: 'Leek', sirfetchd: 'Leek', chansey: 'Eviolite',
 	togepi: 'Eviolite', wobbuffet: 'Custap Berry', regieleki: 'Light Clay',
 };
@@ -89,16 +87,10 @@ const HM_NUKE_MOVES = ['Explosion', 'Self-Destruct', 'Misty Explosion'];
 // every other G-Max is a 10 BP placeholder that derives power from a base move it will not have,
 // and the generic Z-moves are 1 BP for the same reason -- both are traps, so they stay out.
 const HM_GMAX_MOVES = ['G-Max Fireball', 'G-Max Hydrosnipe', 'G-Max Drum Solo'];
-// the worthwhile Z-moves are the permanent CFZ ones (200 BP, already in HM_ELITE_MOVES); the
-// crystal-and-base-move packages below only pay off where the signature Z-move keeps its power
-const HM_ZMOVE_PACKAGES = [
-	{ item: 'Ultranecrozium Z', move: 'Light That Burns the Sky', base: 'Photon Geyser' },
-	{ item: 'Solganium Z', move: 'Searing Sunraze Smash', base: 'Sunsteel Strike' },
-	{ item: 'Lunalium Z', move: 'Menacing Moonraze Maelstrom', base: 'Moongeist Beam' },
-	{ item: 'Mewnium Z', move: 'Genesis Supernova', base: 'Psychic' },
-	{ item: 'Pikanium Z', move: 'Catastropika', base: 'Volt Tackle' },
-	{ item: 'Marshadium Z', move: 'Soul-Stealing 7-Star Strike', base: 'Spectral Thief' },
-];
+// CFZ moves work WITHOUT their crystal here, so handing one over just burns the item slot.
+// A crystal is only worth it when the plan is an in-battle transformation, which the generator
+// does not build, so no set gets one.
+const HM_ZMOVE_PACKAGES = [];
 // Protect is the weakest option in this family whenever the others are available
 const HM_PROTECT_TIER = ['Spiky Shield', "King's Shield", 'Max Guard', 'Silk Trap', 'Burning Bulwark', 'Baneful Bunker', 'Protect'];
 const HM_WALL_MOVES = [
@@ -107,6 +99,9 @@ const HM_WALL_MOVES = [
 	['Stealth Rock', 'Spikes', 'Toxic Spikes'],
 	['Core Enforcer', 'U-turn', 'Whirlwind', 'Haze', 'Knock Off', 'Seismic Toss'],
 ];
+// Imposter copies the foe outright; it wants maximum bulk and a way to break the copy stalemate
+const HM_IMPOSTER_BODIES = ['Snorlax-Gmax', 'Blissey', 'Chansey', 'Pikachu-Gmax', 'Snorlax', 'Ting-Lu', 'Guzzlord'];
+const HM_IMPOSTER_ITEMS = { chansey: 'Eviolite', pikachu: 'Light Ball', pikachugmax: 'Light Ball' };
 // team-level strategy packages, drawn from how these actually get played
 const HM_ARCHETYPES = [
 	{
@@ -124,6 +119,12 @@ const HM_ARCHETYPES = [
 		],
 	},
 	{
+		name: 'imposter',
+		slots: [
+			{ ability: 'Imposter', moves: [], role: 'defensive', bodies: HM_IMPOSTER_BODIES },
+		],
+	},
+	{
 		name: 'trap-pass',
 		slots: [
 			{ ability: 'Shadow Tag', moves: ['Shell Smash', 'Baton Pass', 'Substitute'], role: 'physical' },
@@ -134,7 +135,7 @@ const HM_ARCHETYPES = [
 
 const HM_PREMIUM_ABILITIES = ['Wonder Guard', 'Neutralizing Gas', 'Magic Guard', 'Huge Power', 'Pure Power', 'Parental Bond', 'Shadow Tag', 'Prankster', 'Unaware', 'Fur Coat', 'Ice Scales', 'Good as Gold'];
 const META_ABILITIES = {
-	physical: ['Huge Power', 'Pure Power', 'Parental Bond', 'No Guard', 'Scrappy', 'Mold Breaker', 'Libero'],
+	physical: ['Huge Power', 'Pure Power', 'Parental Bond', 'No Guard', 'Mold Breaker', 'Libero'],
 	special: ['Hadron Engine', 'Parental Bond', 'No Guard', 'Beads of Ruin', 'Libero', 'Drought', 'Drizzle'],
 	ate: ['Pixilate', 'Refrigerate'],
 	defensive: ['Magic Guard', 'Magic Bounce', 'Wonder Guard', 'Good as Gold', 'Comatose', 'Ice Face', 'Flash Fire', 'Innards Out'],
@@ -291,24 +292,38 @@ function pickMove(cands, fdex, ruleTable, used, variety, ctx) {
 	return legal[Math.floor(Math.random() * Math.min(legal.length, variety))];
 }
 
-function bstOf(species) {
+// Alpha/Totem/Titan/Gmax formes only receive their signature boosts in Extended, which is the sole
+// format carrying the Totem Aura rule. Anywhere else they are plain stat clones, so ranking them
+// above real threats on a boost they will never get is what let them crowd out the pool.
+function bstOf(species, boosted) {
 	const bs = species.baseStats;
-	return bs.hp + bs.atk + bs.def + bs.spa + bs.spd + bs.spe;
+	const raw = bs.hp + bs.atk + bs.def + bs.spa + bs.spd + bs.spe;
+	if (!boosted) return raw;
+	const name = species.name || '';
+	if (/-Alpha$/.test(name)) return bs.hp + bs.spe + 2 * (bs.atk + bs.def + bs.spa + bs.spd);
+	if (/-Titan$/.test(name)) return raw + Math.floor((raw - bs.hp) * 0.4);
+	if (/-Totem$/.test(name)) return raw + Math.floor((raw - bs.hp) * 0.5);
+	if (/-Gmax$/.test(name)) return raw + bs.hp;
+	return raw;
 }
 
 const speciesPoolCache = new Map();
 function speciesPool(fdex, ruleTable, fullid) {
 	if (speciesPoolCache.has(fullid)) return speciesPoolCache.get(fullid);
 	const pool = [];
+	const boosted = ruleTable.has('totemaura');
 	for (const species of fdex.species.all()) {
 		if (!species.exists || !species.baseStats) continue;
 		if (species.isNonstandard && species.isNonstandard !== 'Past' && species.isNonstandard !== 'Unobtainable') continue;
 		if (ruleTable.check('pokemon:' + species.id) === 'banned') continue;
 		if (ruleTable.check('basepokemon:' + toId(species.baseSpecies)) === 'banned') continue;
-		pool.push({ species, bst: bstOf(species) });
+		pool.push({ species, bst: bstOf(species, boosted) });
 	}
 	pool.sort((a, b) => b.bst - a.bst);
-	const spice = pool.filter(e => /(-Shadow\b|Shadow-|-Totem\b|-Gmax\b|-Alpha\b|-Titan\b)/.test(e.species.name) || /Shadow$/.test(e.species.name));
+	const altRe = boosted ?
+		/(-Shadow\b|Shadow-|-Totem\b|-Gmax\b|-Alpha\b|-Titan\b)/ :
+		/(-Shadow\b|Shadow-)/;
+	const spice = pool.filter(e => altRe.test(e.species.name) || /Shadow$/.test(e.species.name));
 	const result = { pool, spice };
 	speciesPoolCache.set(fullid, result);
 	return result;
@@ -493,10 +508,10 @@ function upgradeHackmonsSet(set, fdex, ruleTable, usedAbilities, ctx) {
 		set.ability = 'Wonder Guard';
 		usedAbilities.set('wonderguard', 1);
 	}
-	const wantsNoGuard = !set.ability && role !== 'defensive' && ohkoLegal && !usedAbilities.has('noguard') &&
+	const wantsNoGuard = !set.ability && !set.phnnForcedAbility && role !== 'defensive' && ohkoLegal && !usedAbilities.has('noguard') &&
 		abilityAllowed('No Guard', fdex, ruleTable) && Math.random() < 0.3;
-	if (set.ability === 'Wonder Guard') {
-		// already decided
+	if (set.phnnForcedAbility || set.ability === 'Wonder Guard') {
+		// an archetype (or a no-weakness body) already decided this one
 	} else if (wantsNoGuard) {
 		set.ability = 'No Guard';
 		usedAbilities.set('noguard', 1);
@@ -538,8 +553,8 @@ function upgradeHackmonsSet(set, fdex, ruleTable, usedAbilities, ctx) {
 	});
 	applyHackmonsEvs(set, role, ruleTable);
 	if (zPackage) set.phnnZItem = zPackage.item;
-	if (set.phnnZItem) {
-		set.item = set.phnnZItem;
+	if (set.phnnForcedItem) {
+		set.item = set.phnnForcedItem;
 	} else if (fdex.gen >= 2) {
 		const signature = bestSpeciesItem(set, fdex, ruleTable);
 		const abilityItem = HM_ABILITY_ITEMS[toId(set.ability || '')];
@@ -651,8 +666,33 @@ function applyArchetype(team, fdex, ruleTable, usedAbilities) {
 	plan.slots.forEach((slot, i) => {
 		const set = team[i];
 		if (!set) return;
-		if (slot.ability && !usedAbilities.get(toId(slot.ability))) {
+		if (slot.bodies) {
+			// Imposter copies the target's stats but keeps its OWN HP, so the best body is simply the
+			// bulkiest legal one in THIS format -- which differs per generation (and Gmax only helps
+			// where Dynamax exists)
+			const dynamaxHere = ruleTable.has('totemaura');
+			const ranked = slot.bodies
+				.map(n => fdex.species.get(n))
+				.filter(sp => sp.exists && ruleTable.check('pokemon:' + sp.id) !== 'banned')
+				.map(sp => ({
+					sp,
+					// a Gmax forme only gets its HP boost in Extended; everywhere else it is a stat
+					// clone of the base species and must not outrank a real wall.
+					hp: sp.baseStats.hp + (dynamaxHere && /-Gmax$/.test(sp.name) ? sp.baseStats.hp : 0),
+				}))
+				.sort((a, b) => b.hp - a.hp);
+			const body = ranked.length ? ranked[0].sp.name : null;
+			if (body) {
+				set.species = fdex.species.get(body).name;
+				set.name = set.species;
+				const itemKey = toId(set.species);
+				const item = HM_IMPOSTER_ITEMS[itemKey] || HM_IMPOSTER_ITEMS[toId(fdex.species.get(body).baseSpecies || '')];
+				if (item && itemAllowed(item, fdex, ruleTable)) set.phnnForcedItem = item;
+			}
+		}
+		if (slot.ability && !usedAbilities.get(toId(slot.ability)) && abilityAllowed(slot.ability, fdex, ruleTable)) {
 			set.ability = slot.ability;
+			set.phnnForcedAbility = slot.ability;
 			usedAbilities.set(toId(slot.ability), 1);
 		}
 		const forced = slot.moves.filter(m => moveAllowed(m, fdex, ruleTable));
@@ -826,6 +866,8 @@ function generateTeam(formatid) {
 				delete set.phnnForcedRole;
 				delete set.phnnSmogonSpread;
 				delete set.phnnZItem;
+				delete set.phnnForcedItem;
+				delete set.phnnForcedAbility;
 			}
 			return { team: Teams.pack(team), export: Teams.export(team), source, attempts: attempt + 1 };
 		}
