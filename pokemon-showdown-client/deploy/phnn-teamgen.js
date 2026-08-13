@@ -51,7 +51,8 @@ const HM_SETUP = {
 	physical: ['Shell Smash', 'Victory Dance', 'Swords Dance', 'Dragon Dance'],
 	special: ['Quiver Dance', 'Tail Glow', 'Nasty Plot', 'Calm Mind'],
 };
-const HM_UTILITY = ['Spore', 'Strength Sap', 'Recover', 'Extreme Speed'];
+const HM_UTILITY = ['Spore', 'Strength Sap', 'Recover', 'Extreme Speed', 'Sucker Punch', 'Knock Off', 'U-turn', 'Substitute', 'Taunt'];
+const HM_OHKO = ['Sheer Cold', 'Fissure', 'Horn Drill', 'Guillotine'];
 const HM_WALL_MOVES = [
 	['Strength Sap', 'Recover', 'Roost', 'Soft-Boiled', 'Slack Off', 'Moonlight'],
 	['Spore', 'Nuzzle', 'Will-O-Wisp', 'Toxic', 'Thunder Wave'],
@@ -152,18 +153,101 @@ function moveAllowed(name, fdex, ruleTable) {
 	return true;
 }
 
-function pickMove(cands, fdex, ruleTable, used) {
+function pickMove(cands, fdex, ruleTable, used, variety) {
+	const legal = [];
 	for (const name of cands) {
 		if (used.has(toId(name))) continue;
 		if (!moveAllowed(name, fdex, ruleTable)) continue;
-		return name;
+		legal.push(name);
+		if (legal.length >= (variety || 1) + 1) break;
 	}
-	return null;
+	if (!legal.length) return null;
+	if (!variety || legal.length === 1) return legal[0];
+	return legal[Math.floor(Math.random() * Math.min(legal.length, variety))];
 }
 
-function buildHackmonsMoves(set, role, fdex, ruleTable) {
+function bstOf(species) {
+	const bs = species.baseStats;
+	return bs.hp + bs.atk + bs.def + bs.spa + bs.spd + bs.spe;
+}
+
+const speciesPoolCache = new Map();
+function speciesPool(fdex, ruleTable, fullid) {
+	if (speciesPoolCache.has(fullid)) return speciesPoolCache.get(fullid);
+	const pool = [];
+	for (const species of fdex.species.all()) {
+		if (!species.exists || !species.baseStats) continue;
+		if (species.isNonstandard && species.isNonstandard !== 'Past' && species.isNonstandard !== 'Unobtainable') continue;
+		if (ruleTable.check('pokemon:' + species.id) === 'banned') continue;
+		if (ruleTable.check('basepokemon:' + toId(species.baseSpecies)) === 'banned') continue;
+		pool.push({ species, bst: bstOf(species) });
+	}
+	pool.sort((a, b) => b.bst - a.bst);
+	const spice = pool.filter(e => /(-Shadow\b|Shadow-|-Totem\b|-Gmax\b|-Alpha\b|-Titan\b)/.test(e.species.name) || /Shadow$/.test(e.species.name));
+	const result = { pool, spice };
+	speciesPoolCache.set(fullid, result);
+	return result;
+}
+
+function probeSpecies(cand, validator) {
+	const probe = {
+		species: cand.species.name, ability: cand.species.abilities['0'] || 'No Ability',
+		moves: ['Tackle'], evs: {}, ivs: {}, level: undefined, nature: 'Serious',
+	};
+	let problems = null;
+	try {
+		problems = validator.validateSet(JSON.parse(JSON.stringify(probe)), {});
+	} catch (e) {
+		return false;
+	}
+	if (problems && problems.length && problems.some(p => /does not exist|isn't obtainable|is banned|only allowed|must be|not allowed|roster/i.test(p))) return false;
+	return true;
+}
+
+function sampleSpecies(pools, validator, teamSize, allowDupes) {
+	const { pool, spice } = pools;
+	const chosen = [];
+	const baseCounts = new Map();
+	const take = (cand) => {
+		const baseId = toId(cand.species.baseSpecies || cand.species.name);
+		const count = baseCounts.get(baseId) || 0;
+		if (count >= 1 && (!allowDupes || count >= 3 || Math.random() >= 0.3)) return false;
+		if (!count && !probeSpecies(cand, validator)) return false;
+		baseCounts.set(baseId, count + 1);
+		chosen.push(cand.species);
+		return true;
+	};
+	if (spice.length) {
+		const spiceWindow = Math.min(spice.length, 30);
+		const spiceWanted = Math.random() < 0.85 ? (Math.random() < 0.4 ? 2 : 1) : 0;
+		let guard = 0;
+		while (chosen.length < spiceWanted && guard++ < 40) {
+			take(spice[Math.floor(Math.pow(Math.random(), 1.6) * spiceWindow)]);
+		}
+	}
+	const dupeCount = allowDupes && Math.random() < 0.45 ? (Math.random() < 0.3 ? 2 : 1) : 0;
+	const uniqueTarget = Math.max(1, teamSize - dupeCount);
+	const window = Math.min(pool.length, Math.max(40, teamSize * 10));
+	let guard = 0;
+	while (chosen.length < uniqueTarget && guard++ < 300) {
+		const cand = pool[Math.floor(Math.pow(Math.random(), 2.2) * window)];
+		if (!cand) continue;
+		take(cand);
+	}
+	while (chosen.length < teamSize && chosen.length > 0 && dupeCount > 0) {
+		chosen.push(chosen[Math.floor(Math.random() * Math.min(2, chosen.length))]);
+	}
+	while (chosen.length < teamSize && guard++ < 300) {
+		const cand = pool[Math.floor(Math.pow(Math.random(), 2.2) * window)];
+		if (!cand) continue;
+		take(cand);
+	}
+	return chosen;
+}
+
+function buildHackmonsMoves(set, role, fdex, ruleTable, opts) {
 	const species = fdex.species.get(set.species);
-	const types = species.exists ? species.types : [];
+	const types = species && species.exists ? species.types : [];
 	const used = new Set();
 	const moves = [];
 	const add = name => {
@@ -173,13 +257,19 @@ function buildHackmonsMoves(set, role, fdex, ruleTable) {
 		}
 	};
 	if (role === 'defensive') {
-		for (const group of HM_WALL_MOVES) add(pickMove(group, fdex, ruleTable, used));
+		for (const group of HM_WALL_MOVES) add(pickMove(group, fdex, ruleTable, used, 3));
 	} else {
-		add(pickMove(((HM_STAB[types[0]] || {})[role]) || [], fdex, ruleTable, used));
+		add(pickMove(((HM_STAB[types[0]] || {})[role]) || [], fdex, ruleTable, used, 2));
 		const secondary = types[1] ? ((HM_STAB[types[1]] || {})[role] || []) : [];
-		add(pickMove(secondary.concat(HM_COVERAGE[role]), fdex, ruleTable, used));
-		add(pickMove(HM_SETUP[role], fdex, ruleTable, used));
-		add(pickMove(HM_UTILITY, fdex, ruleTable, used));
+		add(pickMove(secondary.concat(HM_COVERAGE[role]), fdex, ruleTable, used, 3));
+		if (opts && opts.noGuardOhko) {
+			add(pickMove(HM_OHKO, fdex, ruleTable, used, 1));
+		} else if (Math.random() < 0.75) {
+			add(pickMove(HM_SETUP[role], fdex, ruleTable, used, 2));
+		} else {
+			add(pickMove(HM_COVERAGE[role].concat(HM_SETUP[role]), fdex, ruleTable, used, 4));
+		}
+		add(pickMove(HM_UTILITY, fdex, ruleTable, used, 3));
 	}
 	for (const m of set.moves || []) {
 		if (moves.length >= 4) break;
@@ -230,22 +320,29 @@ function abilityAllowed(name, fdex, ruleTable) {
 
 function upgradeHackmonsSet(set, fdex, ruleTable, usedAbilities) {
 	const role = setRole(set);
-	buildHackmonsMoves(set, role, fdex, ruleTable);
-	let pool = (META_ABILITIES[role] || []).slice();
-	if (role !== 'defensive') {
-		const hasNormalAttack = (set.moves || []).some(m => {
-			const move = fdex.moves.get(('' + m).split(' (')[0]);
-			return move.type === 'Normal' && move.category !== 'Status';
-		});
-		if (hasNormalAttack) pool = META_ABILITIES.ate.concat(pool);
-	}
-	pool = pool.concat(META_ABILITIES.utility, META_ABILITIES.defensive);
-	for (const name of pool) {
-		if ((usedAbilities.get(toId(name)) || 0) >= 1) continue;
-		if (!abilityAllowed(name, fdex, ruleTable)) continue;
-		set.ability = name;
-		usedAbilities.set(toId(name), (usedAbilities.get(toId(name)) || 0) + 1);
-		break;
+	const ohkoLegal = !ruleTable.has('ohkoclause') && moveAllowed('Sheer Cold', fdex, ruleTable);
+	const wantsNoGuard = role !== 'defensive' && ohkoLegal && !usedAbilities.has('noguard') &&
+		abilityAllowed('No Guard', fdex, ruleTable) && Math.random() < 0.3;
+	buildHackmonsMoves(set, role, fdex, ruleTable, { noGuardOhko: wantsNoGuard });
+	if (wantsNoGuard) {
+		set.ability = 'No Guard';
+		usedAbilities.set('noguard', 1);
+	} else {
+		let pool = (META_ABILITIES[role] || []).filter(a => toId(a) !== 'noguard');
+		if (role !== 'defensive') {
+			const hasNormalAttack = (set.moves || []).some(m => {
+				const move = fdex.moves.get(('' + m).split(' (')[0]);
+				return move.type === 'Normal' && move.category !== 'Status';
+			});
+			if (hasNormalAttack) pool = META_ABILITIES.ate.concat(pool);
+		}
+		pool = pool.concat(META_ABILITIES.utility, META_ABILITIES.defensive);
+		const legal = pool.filter(name => !usedAbilities.get(toId(name)) && abilityAllowed(name, fdex, ruleTable));
+		const picked = legal.length ? legal[Math.floor(Math.random() * Math.min(legal.length, 3))] : null;
+		if (picked) {
+			set.ability = picked;
+			usedAbilities.set(toId(picked), 1);
+		}
 	}
 	applyHackmonsEvs(set, role, ruleTable);
 	if (!set.item && fdex.gen >= 2) set.item = 'Leftovers';
@@ -368,18 +465,34 @@ function generateTeam(formatid) {
 
 	const teamSize = Math.max(1, Math.min(6, ruleTable.maxTeamSize || 6));
 	const isMono = ruleTable.has('sametypeclause');
+	const synthesize = isHackmonsTarget(baseid) && gen >= 3 && !isMono &&
+		!baseid.includes('metronome') && !baseid.includes('letsgo');
 	let team = null;
 	let problems = null;
 
 	for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
 		let pool;
 		try {
-			pool = isMono ? drawMonoTypePool(source, teamSize) : Teams.generate(source);
+			if (synthesize) {
+				const sPool = speciesPool(fdex, ruleTable, fullid);
+				const allowDupes = !ruleTable.has('speciesclause') && !ruleTable.has('formeclause');
+				const picked = sampleSpecies(sPool, validator, teamSize, allowDupes);
+				if (picked.length >= teamSize) {
+					pool = picked.map(sp => ({
+						name: sp.name, species: sp.name, ability: '', item: '',
+						moves: [], nature: 'Serious', gender: '', evs: {}, ivs: {},
+					}));
+				} else {
+					pool = Teams.generate(source);
+				}
+			} else {
+				pool = isMono ? drawMonoTypePool(source, teamSize) : Teams.generate(source);
+			}
 		} catch (e) {
 			return { error: `Generator failed: ${('' + e.message).slice(0, 200)}` };
 		}
 		if (!pool || !pool.length) return { error: 'The team generator produced nothing for this format.' };
-		if (!team || isMono) {
+		if (!team || isMono || synthesize) {
 			team = pool.slice(0, teamSize);
 		} else {
 			const badIdx = new Set();
@@ -399,18 +512,20 @@ function generateTeam(formatid) {
 				}
 			}
 		}
-		const seen = new Set();
-		team = team.filter(set => {
-			const sid = baseSpeciesId(set);
-			if (seen.has(sid)) return false;
-			seen.add(sid);
-			return true;
-		});
-		while (team.length < teamSize) {
-			const extra = (isMono ? [] : Teams.generate(source)).find(set => !seen.has(baseSpeciesId(set)));
-			if (!extra) break;
-			seen.add(baseSpeciesId(extra));
-			team.push(extra);
+		if (!synthesize || ruleTable.has('speciesclause') || ruleTable.has('formeclause')) {
+			const seen = new Set();
+			team = team.filter(set => {
+				const sid = baseSpeciesId(set);
+				if (seen.has(sid)) return false;
+				seen.add(sid);
+				return true;
+			});
+			while (team.length < teamSize) {
+				const extra = (isMono ? [] : Teams.generate(source)).find(set => !seen.has(baseSpeciesId(set)));
+				if (!extra) break;
+				seen.add(baseSpeciesId(extra));
+				team.push(extra);
+			}
 		}
 		reshape(team, baseid, gen, rulesText, ruleTable, fdex);
 		try {
