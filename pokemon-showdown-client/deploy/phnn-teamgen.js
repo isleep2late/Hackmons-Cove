@@ -51,7 +51,24 @@ const HM_SETUP = {
 	physical: ['Shell Smash', 'Victory Dance', 'Swords Dance', 'Dragon Dance'],
 	special: ['Quiver Dance', 'Tail Glow', 'Nasty Plot', 'Calm Mind'],
 };
-const HM_UTILITY = ['Spore', 'Strength Sap', 'Recover', 'Extreme Speed', 'Sucker Punch', 'Knock Off', 'U-turn', 'Substitute', 'Taunt'];
+const HM_UTILITY = ['Sucker Punch', 'Extreme Speed', 'Knock Off', 'Substitute', 'Taunt', 'U-turn', 'Spore', 'Recover'];
+// recovery on an offensive set is a niche choice, not the default it used to be
+const HM_UTILITY_RECOVERY = ['Strength Sap', 'Recover', 'Roost', 'Slack Off'];
+const HM_PRANKSTER_MOVES = ['Will-O-Wisp', 'Thunder Wave', 'Taunt', 'Encore', 'Destiny Bond', 'Recover', 'Spore', 'Substitute'];
+const HM_SPECIES_ITEMS = {
+	latios: 'Soul Dew', latias: 'Soul Dew', latiosmega: 'Soul Dew', latiasmega: 'Soul Dew',
+	pikachu: 'Light Ball', cubone: 'Thick Club', marowak: 'Thick Club', marowakalola: 'Thick Club',
+	dialga: 'Adamant Orb', dialgaorigin: 'Adamant Crystal', palkia: 'Lustrous Orb', palkiaorigin: 'Lustrous Globe',
+	giratina: 'Griseous Orb', giratinaorigin: 'Griseous Core', zacian: 'Rusted Sword', zaciancrowned: 'Rusted Sword',
+	zamazenta: 'Rusted Shield', zamazentacrowned: 'Rusted Shield', ditto: 'Metal Powder',
+	clamperl: 'Deep Sea Tooth', farfetchd: 'Leek', sirfetchd: 'Leek', chansey: 'Eviolite',
+	togepi: 'Eviolite', wobbuffet: 'Custap Berry', regieleki: 'Light Clay',
+};
+const HM_ABILITY_ITEMS = {
+	magicguard: 'Life Orb', sheerforce: 'Life Orb', unburden: 'Sitrus Berry',
+	poisonheal: 'Toxic Orb', guts: 'Flame Orb', quickfeet: 'Toxic Orb',
+	hadronengine: 'Life Orb', wonderguard: 'Leftovers', neutralizinggas: 'Leftovers',
+};
 const HM_OHKO = ['Sheer Cold', 'Fissure', 'Horn Drill', 'Guillotine'];
 const HM_WALL_MOVES = [
 	['Strength Sap', 'Recover', 'Roost', 'Soft-Boiled', 'Slack Off', 'Moonlight'],
@@ -59,6 +76,7 @@ const HM_WALL_MOVES = [
 	['Stealth Rock', 'Spikes', 'Toxic Spikes'],
 	['Core Enforcer', 'U-turn', 'Whirlwind', 'Haze', 'Knock Off', 'Seismic Toss'],
 ];
+const HM_PREMIUM_ABILITIES = ['Wonder Guard', 'Neutralizing Gas', 'Magic Guard', 'Huge Power', 'Pure Power', 'Parental Bond', 'Shadow Tag', 'Prankster', 'Unaware', 'Fur Coat', 'Ice Scales', 'Good as Gold'];
 const META_ABILITIES = {
 	physical: ['Huge Power', 'Pure Power', 'Parental Bond', 'No Guard', 'Scrappy', 'Mold Breaker', 'Libero'],
 	special: ['Hadron Engine', 'Parental Bond', 'No Guard', 'Beads of Ruin', 'Libero', 'Drought', 'Drizzle'],
@@ -246,6 +264,7 @@ function sampleSpecies(pools, validator, teamSize, allowDupes) {
 }
 
 function buildHackmonsMoves(set, role, fdex, ruleTable, opts) {
+	const ability = toId((opts && opts.ability) || set.ability || '');
 	const species = fdex.species.get(set.species);
 	const types = species && species.exists ? species.types : [];
 	const used = new Set();
@@ -264,12 +283,20 @@ function buildHackmonsMoves(set, role, fdex, ruleTable, opts) {
 		add(pickMove(secondary.concat(HM_COVERAGE[role]), fdex, ruleTable, used, 3));
 		if (opts && opts.noGuardOhko) {
 			add(pickMove(HM_OHKO, fdex, ruleTable, used, 1));
+		} else if (ability === 'prankster') {
+			add(pickMove(HM_PRANKSTER_MOVES, fdex, ruleTable, used, 3));
 		} else if (Math.random() < 0.75) {
 			add(pickMove(HM_SETUP[role], fdex, ruleTable, used, 2));
 		} else {
 			add(pickMove(HM_COVERAGE[role].concat(HM_SETUP[role]), fdex, ruleTable, used, 4));
 		}
-		add(pickMove(HM_UTILITY, fdex, ruleTable, used, 3));
+		if (ability === 'prankster') {
+			add(pickMove(HM_PRANKSTER_MOVES, fdex, ruleTable, used, 4));
+		} else if (Math.random() < 0.2) {
+			add(pickMove(HM_UTILITY_RECOVERY, fdex, ruleTable, used, 3));
+		} else {
+			add(pickMove(HM_UTILITY, fdex, ruleTable, used, 4));
+		}
 	}
 	for (const m of set.moves || []) {
 		if (moves.length >= 4) break;
@@ -318,12 +345,20 @@ function abilityAllowed(name, fdex, ruleTable) {
 	return true;
 }
 
+function bestSpeciesItem(set, fdex, ruleTable) {
+	const ids = [toId(set.species), toId(fdex.species.get(set.species).baseSpecies || '')];
+	for (const id of ids) {
+		const item = HM_SPECIES_ITEMS[id];
+		if (item && itemAllowed(item, fdex, ruleTable)) return item;
+	}
+	return null;
+}
+
 function upgradeHackmonsSet(set, fdex, ruleTable, usedAbilities) {
 	const role = setRole(set);
 	const ohkoLegal = !ruleTable.has('ohkoclause') && moveAllowed('Sheer Cold', fdex, ruleTable);
 	const wantsNoGuard = role !== 'defensive' && ohkoLegal && !usedAbilities.has('noguard') &&
 		abilityAllowed('No Guard', fdex, ruleTable) && Math.random() < 0.3;
-	buildHackmonsMoves(set, role, fdex, ruleTable, { noGuardOhko: wantsNoGuard });
 	if (wantsNoGuard) {
 		set.ability = 'No Guard';
 		usedAbilities.set('noguard', 1);
@@ -337,15 +372,34 @@ function upgradeHackmonsSet(set, fdex, ruleTable, usedAbilities) {
 			if (hasNormalAttack) pool = META_ABILITIES.ate.concat(pool);
 		}
 		pool = pool.concat(META_ABILITIES.utility, META_ABILITIES.defensive);
-		const legal = pool.filter(name => !usedAbilities.get(toId(name)) && abilityAllowed(name, fdex, ruleTable));
-		const picked = legal.length ? legal[Math.floor(Math.random() * Math.min(legal.length, 3))] : null;
+		const isLegal = name => !usedAbilities.get(toId(name)) && abilityAllowed(name, fdex, ruleTable);
+		let picked = null;
+		if (Math.random() < 0.4) {
+			const premium = HM_PREMIUM_ABILITIES.filter(isLegal);
+			if (premium.length) picked = premium[Math.floor(Math.random() * premium.length)];
+		}
+		if (!picked) {
+			const legal = pool.filter(isLegal);
+			if (legal.length) picked = legal[Math.floor(Math.random() * Math.min(legal.length, 4))];
+		}
 		if (picked) {
 			set.ability = picked;
 			usedAbilities.set(toId(picked), 1);
 		}
 	}
+	buildHackmonsMoves(set, role, fdex, ruleTable, { noGuardOhko: wantsNoGuard, ability: set.ability });
 	applyHackmonsEvs(set, role, ruleTable);
-	if (!set.item && fdex.gen >= 2) set.item = 'Leftovers';
+	if (fdex.gen >= 2) {
+		const signature = bestSpeciesItem(set, fdex, ruleTable);
+		const abilityItem = HM_ABILITY_ITEMS[toId(set.ability || '')];
+		if (signature) {
+			set.item = signature;
+		} else if (abilityItem && itemAllowed(abilityItem, fdex, ruleTable)) {
+			set.item = abilityItem;
+		} else if (!set.item) {
+			set.item = 'Leftovers';
+		}
+	}
 }
 
 function itemAllowed(name, fdex, ruleTable) {
@@ -481,6 +535,7 @@ function generateTeam(formatid) {
 					pool = picked.map(sp => ({
 						name: sp.name, species: sp.name, ability: '', item: '',
 						moves: [], nature: 'Serious', gender: '', evs: {}, ivs: {},
+						teraType: gen >= 9 ? (sp.types && sp.types[0]) || 'Normal' : undefined,
 					}));
 				} else {
 					pool = Teams.generate(source);

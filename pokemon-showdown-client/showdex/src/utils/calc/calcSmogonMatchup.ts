@@ -14,7 +14,7 @@ import {
 import { type ShowdexSettings } from '@showdex/interfaces/app';
 import { type CalcdexBattleState, type CalcdexPlayerKey, CalcdexPlayerKeys as AllPlayerKeys } from '@showdex/interfaces/calc';
 import { logger } from '@showdex/utils/debug';
-import { detectDisguiseFormat, isPhnnKamehamehaMove, isPhnnShadowDamagingMove, setPhnnCalcContext } from '@showdex/phnn';
+import { detectDisguiseFormat, isPhnnKamehamehaMove, isPhnnShadowDamagingMove, isPhnnTypingKnown, setPhnnCalcContext } from '@showdex/phnn';
 import { getGenDexForFormat } from '@showdex/utils/dex';
 import { createSmogonField } from './createSmogonField';
 import { createSmogonMove } from './createSmogonMove';
@@ -211,7 +211,9 @@ export const calcSmogonMatchup = (
     return matchup;
   }
 
-  if (isPhnnShadowDamagingMove(playerMove)) {
+  // Shadow hits everything the same except other Shadow types, so the number is only unknowable
+  // while the target's typing is still hidden
+  if (isPhnnShadowDamagingMove(playerMove) && !isPhnnTypingKnown(opponentPokemon)) {
     matchup.damageRange = '???';
     return matchup;
   }
@@ -268,6 +270,19 @@ export const calcSmogonMatchup = (
       smogonField,
       showdexMods,
     );
+
+    // a known immunity (Wonder Guard, Levitate, a type immunity...) zeroes the roll, and result.desc()
+    // throws on that -- report it plainly instead of letting the catch swallow the whole matchup
+    const rolls = Array.isArray(result.damage)
+      ? (result.damage as (number | number[])[]).flat(Infinity as 1) as number[]
+      : [result.damage as number];
+
+    if (rolls.length && !rolls.some((n) => Number(n) > 0)) {
+      matchup.damageRange = '0%';
+      matchup.koChance = 'immune';
+
+      return matchup;
+    }
 
     matchup.description = parseMatchupDescription(result);
     matchup.damageRange = getMatchupRange(result);

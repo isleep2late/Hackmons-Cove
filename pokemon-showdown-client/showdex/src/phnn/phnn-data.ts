@@ -298,27 +298,217 @@ export default {
 		},
 		"typeChart": {
 			"Normal": {
-				"Dark": 2
+				"Dark": 2,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fighting": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Flying": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
 			},
 			"Poison": {
-				"Bug": 2
+				"Bug": 2,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ground": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Rock": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
 			},
 			"Bug": {
-				"Poison": 2
+				"Poison": 2,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
 			},
 			"Ghost": {
 				"Steel": 0.5,
-				"Psychic": 0
+				"Psychic": 0,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Steel": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fire": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
 			},
 			"Water": {
-				"Steel": 2
+				"Steel": 2,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Grass": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
 			},
 			"Electric": {
-				"Steel": 2
+				"Steel": 2,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Psychic": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ice": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Dragon": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
 			},
 			"Dark": {
 				"Steel": 0.5,
-				"Dark": 2
+				"Dark": 2,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fairy": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"???": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Shadow": {
+				"Normal": 2,
+				"Fighting": 2,
+				"Flying": 2,
+				"Poison": 2,
+				"Ground": 2,
+				"Rock": 2,
+				"Bug": 2,
+				"Ghost": 2,
+				"Steel": 2,
+				"Fire": 2,
+				"Water": 2,
+				"Grass": 2,
+				"Electric": 2,
+				"Psychic": 2,
+				"Ice": 2,
+				"Dragon": 2,
+				"Dark": 2,
+				"Fairy": 2,
+				"???": 2,
+				"Shadow": 0.5,
+				"Stellar": 2,
+				"Bird": 2
+			},
+			"Stellar": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Bird": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
 			}
 		},
 		"baseStats": {
@@ -561,19 +751,462 @@ export default {
 				"def": 120,
 				"spd": 130
 			}
+		},
+		"abilities": {
+			"Aerilate": {
+				"onBasePower": "modified"
+			},
+			"Disguise": {
+				"onDamage": "modified"
+			},
+			"Pixilate": {
+				"onBasePower": "modified",
+				"onModifyType": "modified"
+			},
+			"Refrigerate": {
+				"onBasePower": "modified",
+				"onModifyType": "modified"
+			},
+			"Transistor": {
+				"onModifyAtk": null,
+				"onModifySpA": null,
+				"onBasePower": "modified"
+			},
+			"Wonder Guard": {
+				"onTryHit": "modified"
+			}
 		}
 	},
 	"gen5phnn": {
 		"gen": 5,
 		"moves": {},
-		"typeChart": {},
-		"baseStats": {}
+		"typeChart": {
+			"Normal": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fighting": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Flying": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Poison": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ground": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Rock": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Bug": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ghost": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Steel": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fire": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Water": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Grass": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Electric": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Psychic": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ice": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Dragon": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Dark": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fairy": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"???": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Shadow": {
+				"Normal": 2,
+				"Fighting": 2,
+				"Flying": 2,
+				"Poison": 2,
+				"Ground": 2,
+				"Rock": 2,
+				"Bug": 2,
+				"Ghost": 2,
+				"Steel": 2,
+				"Fire": 2,
+				"Water": 2,
+				"Grass": 2,
+				"Electric": 2,
+				"Psychic": 2,
+				"Ice": 2,
+				"Dragon": 2,
+				"Dark": 2,
+				"Fairy": 2,
+				"???": 2,
+				"Shadow": 0.5,
+				"Stellar": 2,
+				"Bird": 2
+			},
+			"Stellar": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Bird": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			}
+		},
+		"baseStats": {},
+		"abilities": {
+			"Magic Guard": {
+				"onDamage": "modified"
+			},
+			"Wonder Guard": {
+				"onTryHit": "modified"
+			}
+		}
 	},
 	"gen7phnn": {
 		"gen": 7,
 		"moves": {},
-		"typeChart": {},
-		"baseStats": {}
+		"typeChart": {
+			"Normal": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fighting": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Flying": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Poison": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ground": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Rock": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Bug": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ghost": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Steel": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fire": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Water": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Grass": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Electric": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Psychic": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ice": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Dragon": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Dark": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fairy": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"???": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Shadow": {
+				"Normal": 2,
+				"Fighting": 2,
+				"Flying": 2,
+				"Poison": 2,
+				"Ground": 2,
+				"Rock": 2,
+				"Bug": 2,
+				"Ghost": 2,
+				"Steel": 2,
+				"Fire": 2,
+				"Water": 2,
+				"Grass": 2,
+				"Electric": 2,
+				"Psychic": 2,
+				"Ice": 2,
+				"Dragon": 2,
+				"Dark": 2,
+				"Fairy": 2,
+				"???": 2,
+				"Shadow": 0.5,
+				"Stellar": 2,
+				"Bird": 2
+			},
+			"Stellar": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Bird": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			}
+		},
+		"baseStats": {},
+		"abilities": {}
 	},
 	"gen3phnn": {
 		"gen": 3,
@@ -676,13 +1309,4403 @@ export default {
 				"ignoreImmunity": true
 			}
 		},
-		"typeChart": {},
-		"baseStats": {}
+		"typeChart": {
+			"Normal": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fighting": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Flying": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Poison": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ground": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Rock": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Bug": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ghost": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Steel": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fire": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Water": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Grass": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Electric": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Psychic": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ice": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Dragon": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Dark": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fairy": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"???": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Shadow": {
+				"Normal": 2,
+				"Fighting": 2,
+				"Flying": 2,
+				"Poison": 2,
+				"Ground": 2,
+				"Rock": 2,
+				"Bug": 2,
+				"Ghost": 2,
+				"Steel": 2,
+				"Fire": 2,
+				"Water": 2,
+				"Grass": 2,
+				"Electric": 2,
+				"Psychic": 2,
+				"Ice": 2,
+				"Dragon": 2,
+				"Dark": 2,
+				"Fairy": 2,
+				"???": 2,
+				"Shadow": 0.5,
+				"Stellar": 2,
+				"Bird": 2
+			},
+			"Stellar": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Bird": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			}
+		},
+		"baseStats": {},
+		"abilities": {}
 	},
 	"gen8unified": {
 		"gen": 8,
 		"moves": {},
-		"typeChart": {},
-		"baseStats": {}
+		"typeChart": {
+			"Normal": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fighting": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Flying": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Poison": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ground": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Rock": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Bug": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ghost": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Steel": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fire": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Water": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Grass": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Electric": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Psychic": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ice": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Dragon": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Dark": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fairy": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"???": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Shadow": {
+				"Normal": 2,
+				"Fighting": 2,
+				"Flying": 2,
+				"Poison": 2,
+				"Ground": 2,
+				"Rock": 2,
+				"Bug": 2,
+				"Ghost": 2,
+				"Steel": 2,
+				"Fire": 2,
+				"Water": 2,
+				"Grass": 2,
+				"Electric": 2,
+				"Psychic": 2,
+				"Ice": 2,
+				"Dragon": 2,
+				"Dark": 2,
+				"Fairy": 2,
+				"???": 2,
+				"Shadow": 0.5,
+				"Stellar": 2,
+				"Bird": 2
+			},
+			"Stellar": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Bird": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			}
+		},
+		"baseStats": {},
+		"abilities": {}
+	},
+	"gen9customdisguises": {
+		"gen": 9,
+		"moves": {},
+		"typeChart": {
+			"Normal": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fighting": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Flying": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Poison": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ground": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Rock": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Bug": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ghost": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Steel": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fire": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Water": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Grass": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Electric": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Psychic": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ice": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Dragon": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Dark": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fairy": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"???": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Shadow": {
+				"Normal": 2,
+				"Fighting": 2,
+				"Flying": 2,
+				"Poison": 2,
+				"Ground": 2,
+				"Rock": 2,
+				"Bug": 2,
+				"Ghost": 2,
+				"Steel": 2,
+				"Fire": 2,
+				"Water": 2,
+				"Grass": 2,
+				"Electric": 2,
+				"Psychic": 2,
+				"Ice": 2,
+				"Dragon": 2,
+				"Dark": 2,
+				"Fairy": 2,
+				"???": 2,
+				"Shadow": 0.5,
+				"Stellar": 2,
+				"Bird": 2
+			},
+			"Stellar": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Bird": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			}
+		},
+		"baseStats": {},
+		"abilities": {}
+	},
+	"champions": {
+		"gen": 9,
+		"moves": {
+			"anchorshot": {
+				"basePower": 90
+			},
+			"appleacid": {
+				"basePower": 90
+			},
+			"astralbarrage": {
+				"basePower": 110
+			},
+			"beakblast": {
+				"basePower": 120
+			},
+			"bloodmoon": {
+				"basePower": 130
+			},
+			"boltbeak": {
+				"basePower": 80
+			},
+			"bonerush": {
+				"basePower": 30
+			},
+			"dragonhammer": {
+				"basePower": 100
+			},
+			"firelash": {
+				"basePower": 90
+			},
+			"firstimpression": {
+				"basePower": 100
+			},
+			"fishiousrend": {
+				"basePower": 80
+			},
+			"geargrind": {
+				"basePower": 60
+			},
+			"gravapple": {
+				"basePower": 90
+			},
+			"growth": {
+				"type": "Grass"
+			},
+			"hyperdrill": {
+				"basePower": 120
+			},
+			"infernalparade": {
+				"basePower": 65
+			},
+			"mountaingale": {
+				"basePower": 120
+			},
+			"nightdaze": {
+				"basePower": 90
+			},
+			"psyshieldbash": {
+				"basePower": 90
+			},
+			"revelationdance": {
+				"basePower": 100
+			},
+			"snaptrap": {
+				"type": "Steel"
+			},
+			"snipeshot": {
+				"basePower": 85
+			},
+			"spiritshackle": {
+				"basePower": 90
+			},
+			"tripledive": {
+				"basePower": 35
+			},
+			"tropkick": {
+				"basePower": 85
+			}
+		},
+		"typeChart": {
+			"Normal": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fighting": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Flying": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Poison": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ground": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Rock": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Bug": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ghost": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Steel": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fire": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Water": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Grass": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Electric": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Psychic": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ice": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Dragon": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Dark": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fairy": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"???": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Shadow": {
+				"Normal": 2,
+				"Fighting": 2,
+				"Flying": 2,
+				"Poison": 2,
+				"Ground": 2,
+				"Rock": 2,
+				"Bug": 2,
+				"Ghost": 2,
+				"Steel": 2,
+				"Fire": 2,
+				"Water": 2,
+				"Grass": 2,
+				"Electric": 2,
+				"Psychic": 2,
+				"Ice": 2,
+				"Dragon": 2,
+				"Dark": 2,
+				"Fairy": 2,
+				"???": 2,
+				"Shadow": 0.5,
+				"Stellar": 2,
+				"Bird": 2
+			},
+			"Stellar": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Bird": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			}
+		},
+		"baseStats": {},
+		"abilities": {
+			"Anger Shell": {
+				"onDamage": "modified"
+			},
+			"Berserk": {
+				"onDamage": "modified"
+			},
+			"Disguise": {
+				"onEffectiveness": "modified"
+			},
+			"Unseen Fist": {
+				"onModifyMove": null
+			}
+		}
+	},
+	"spaceworld": {
+		"gen": 2,
+		"moves": {
+			"counter": {
+				"ignoreImmunity": true
+			},
+			"doubleedge": {
+				"basePower": 100
+			},
+			"karatechop": {
+				"type": "Normal"
+			},
+			"present": {
+				"basePower": 50
+			},
+			"pursuit": {
+				"basePower": 0,
+				"type": "Normal",
+				"category": "Status",
+				"ignoreImmunity": true
+			},
+			"raindance": {
+				"type": "Normal"
+			},
+			"spikes": {
+				"type": "Normal"
+			},
+			"sunnyday": {
+				"type": "Normal"
+			},
+			"triplekick": {
+				"basePower": 60
+			},
+			"twister": {
+				"basePower": 60
+			},
+			"hiddenpower": {
+				"type": "???"
+			},
+			"bite": {
+				"type": "Normal",
+				"category": "Physical"
+			},
+			"sandattack": {
+				"type": "Normal"
+			},
+			"mudslap": {
+				"basePower": 0,
+				"type": "Normal",
+				"category": "Status",
+				"ignoreImmunity": true
+			},
+			"dragonbreath": {
+				"basePower": 40
+			},
+			"furycutter": {
+				"basePower": 25
+			},
+			"detect": {
+				"type": "Normal"
+			},
+			"sacredfire": {
+				"basePower": 80
+			},
+			"irontail": {
+				"basePower": 60
+			},
+			"vitalthrow": {
+				"basePower": 50
+			},
+			"watersport": {
+				"basePower": 30,
+				"category": "Special"
+			},
+			"whirlpool": {
+				"basePower": 30
+			},
+			"bounce": {
+				"basePower": 0,
+				"type": "Water",
+				"category": "Special"
+			},
+			"wrap": {
+				"ignoreImmunity": true
+			},
+			"bind": {
+				"ignoreImmunity": true
+			}
+		},
+		"typeChart": {
+			"Normal": {
+				"Steel": 1,
+				"Dark": 2,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fighting": {
+				"Steel": 0.5,
+				"Dark": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Flying": {
+				"Steel": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Poison": {
+				"Bug": 2,
+				"Steel": 0.5,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ground": {
+				"Steel": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Rock": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Bug": {
+				"Poison": 2,
+				"Steel": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ghost": {
+				"Ghost": 1,
+				"Steel": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Steel": {
+				"Steel": 0,
+				"Fire": 1,
+				"Ice": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fire": {
+				"Steel": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Water": {
+				"Steel": 2,
+				"Electric": 0.5,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Grass": {
+				"Steel": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Electric": {
+				"Steel": 2,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Psychic": {
+				"Steel": 1,
+				"Dark": 0.5,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ice": {
+				"Steel": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Dragon": {
+				"Steel": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Dark": {
+				"Normal": 0.5,
+				"Fighting": 1,
+				"Steel": 1,
+				"Dark": 2,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fairy": {
+				"Fighting": 1,
+				"Poison": 1,
+				"Steel": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"???": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Shadow": {
+				"Normal": 2,
+				"Fighting": 2,
+				"Flying": 2,
+				"Poison": 2,
+				"Ground": 2,
+				"Rock": 2,
+				"Bug": 2,
+				"Ghost": 2,
+				"Steel": 2,
+				"Fire": 2,
+				"Water": 2,
+				"Grass": 2,
+				"Electric": 2,
+				"Psychic": 2,
+				"Ice": 2,
+				"Dragon": 2,
+				"Dark": 2,
+				"Fairy": 2,
+				"???": 2,
+				"Shadow": 0.5,
+				"Stellar": 2,
+				"Bird": 2
+			},
+			"Stellar": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Bird": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			}
+		},
+		"baseStats": {
+			"Charmander": {
+				"spa": 55
+			},
+			"Charmeleon": {
+				"spa": 75
+			},
+			"Charizard": {
+				"spa": 100
+			},
+			"Squirtle": {
+				"spd": 55
+			},
+			"Wartortle": {
+				"spd": 75
+			},
+			"Blastoise": {
+				"spd": 100
+			},
+			"Ekans": {
+				"spa": 50,
+				"spd": 40
+			},
+			"Arbok": {
+				"spa": 85,
+				"spd": 65
+			},
+			"Sandshrew": {
+				"spa": 30,
+				"spd": 40
+			},
+			"Sandslash": {
+				"spa": 55,
+				"spd": 75
+			},
+			"Nidorina": {
+				"spa": 45
+			},
+			"Nidoqueen": {
+				"spa": 55,
+				"spd": 75
+			},
+			"Nidorino": {
+				"spa": 45
+			},
+			"Nidoking": {
+				"spa": 55
+			},
+			"Clefable": {
+				"spd": 95
+			},
+			"Vulpix": {
+				"spa": 65,
+				"spd": 45
+			},
+			"Ninetales": {
+				"spa": 100,
+				"spd": 80
+			},
+			"Jigglypuff": {
+				"spa": 25,
+				"spd": 40
+			},
+			"Wigglytuff": {
+				"spa": 50,
+				"spd": 80
+			},
+			"Golbat": {
+				"spa": 55
+			},
+			"Oddish": {
+				"spd": 70
+			},
+			"Gloom": {
+				"spd": 80
+			},
+			"Vileplume": {
+				"spd": 95
+			},
+			"Venonat": {
+				"spd": 50
+			},
+			"Venomoth": {
+				"spd": 100
+			},
+			"Diglett": {
+				"spa": 50
+			},
+			"Dugtrio": {
+				"spa": 60
+			},
+			"Meowth": {
+				"spd": 50
+			},
+			"Persian": {
+				"spd": 85
+			},
+			"Psyduck": {
+				"spa": 50
+			},
+			"Golduck": {
+				"spa": 80
+			},
+			"Primeape": {
+				"spd": 80
+			},
+			"Growlithe": {
+				"spa": 50,
+				"spd": 70
+			},
+			"Arcanine": {
+				"spa": 80,
+				"spd": 100
+			},
+			"Poliwag": {
+				"spd": 45
+			},
+			"Poliwhirl": {
+				"spd": 65
+			},
+			"Poliwrath": {
+				"spd": 95
+			},
+			"Abra": {
+				"spd": 65
+			},
+			"Kadabra": {
+				"spd": 75
+			},
+			"Alakazam": {
+				"spd": 95
+			},
+			"Machop": {
+				"spd": 40
+			},
+			"Machamp": {
+				"spd": 80
+			},
+			"Bellsprout": {
+				"spa": 55,
+				"spd": 70
+			},
+			"Weepinbell": {
+				"spa": 55,
+				"spd": 85
+			},
+			"Victreebel": {
+				"spa": 65,
+				"spd": 100
+			},
+			"Tentacool": {
+				"spa": 60
+			},
+			"Geodude": {
+				"spd": 45
+			},
+			"Graveler": {
+				"spd": 65
+			},
+			"Golem": {
+				"spd": 80
+			},
+			"Ponyta": {
+				"spd": 55
+			},
+			"Rapidash": {
+				"spd": 75
+			},
+			"Slowpoke": {
+				"spd": 35
+			},
+			"Slowbro": {
+				"spa": 80,
+				"spd": 65
+			},
+			"Magnemite": {
+				"spa": 60,
+				"spd": 95
+			},
+			"Magneton": {
+				"spa": 75,
+				"spd": 120
+			},
+			"Farfetch’d": {
+				"spd": 58
+			},
+			"Dodrio": {
+				"spd": 65
+			},
+			"Seel": {
+				"spa": 55
+			},
+			"Dewgong": {
+				"spa": 80
+			},
+			"Grimer": {
+				"spa": 55,
+				"spd": 40
+			},
+			"Muk": {
+				"spa": 80,
+				"spd": 65
+			},
+			"Shellder": {
+				"spd": 30
+			},
+			"Cloyster": {
+				"spd": 70
+			},
+			"Gastly": {
+				"spd": 25
+			},
+			"Haunter": {
+				"spd": 40
+			},
+			"Onix": {
+				"spd": 60
+			},
+			"Drowzee": {
+				"spa": 45
+			},
+			"Hypno": {
+				"spa": 70
+			},
+			"Krabby": {
+				"spa": 35
+			},
+			"Kingler": {
+				"spa": 65
+			},
+			"Exeggcute": {
+				"spd": 55
+			},
+			"Exeggutor": {
+				"spd": 75
+			},
+			"Cubone": {
+				"spd": 40
+			},
+			"Marowak": {
+				"spd": 70
+			},
+			"Hitmonlee": {
+				"spd": 85
+			},
+			"Hitmonchan": {
+				"spd": 85
+			},
+			"Lickitung": {
+				"spd": 90
+			},
+			"Koffing": {
+				"spd": 40
+			},
+			"Weezing": {
+				"spd": 55
+			},
+			"Rhyhorn": {
+				"spd": 55
+			},
+			"Rhydon": {
+				"spd": 70
+			},
+			"Tangela": {
+				"spa": 55,
+				"spd": 100
+			},
+			"Horsea": {
+				"spd": 45
+			},
+			"Seadra": {
+				"spd": 70
+			},
+			"Goldeen": {
+				"spa": 50
+			},
+			"Scyther": {
+				"spd": 85
+			},
+			"Jynx": {
+				"spa": 95,
+				"spd": 80
+			},
+			"Electabuzz": {
+				"spa": 85,
+				"spd": 75
+			},
+			"Magmar": {
+				"spa": 85,
+				"spd": 70
+			},
+			"Pinsir": {
+				"spd": 75
+			},
+			"Tauros": {
+				"spa": 55
+			},
+			"Gyarados": {
+				"spa": 85
+			},
+			"Lapras": {
+				"spa": 95,
+				"spd": 105
+			},
+			"Vaporeon": {
+				"spa": 70,
+				"spd": 110
+			},
+			"Jolteon": {
+				"spa": 70,
+				"spd": 110
+			},
+			"Flareon": {
+				"spa": 70
+			},
+			"Porygon": {
+				"spa": 90
+			},
+			"Aerodactyl": {
+				"spd": 85
+			},
+			"Snorlax": {
+				"spd": 100
+			},
+			"Chikorita": {
+				"hp": 55,
+				"atk": 40,
+				"def": 45,
+				"spa": 75,
+				"spd": 50,
+				"spe": 40
+			},
+			"Bayleef": {
+				"hp": 50,
+				"atk": 45,
+				"def": 50,
+				"spa": 45,
+				"spd": 50,
+				"spe": 50
+			},
+			"Meganium": {
+				"hp": 70,
+				"atk": 65,
+				"def": 60,
+				"spa": 55,
+				"spd": 50,
+				"spe": 60
+			},
+			"Hoothoot": {
+				"hp": 65,
+				"atk": 55,
+				"def": 40,
+				"spa": 55,
+				"spd": 50,
+				"spe": 65
+			},
+			"Noctowl": {
+				"hp": 50,
+				"spa": 50,
+				"spd": 50,
+				"spe": 50
+			},
+			"Mareep": {
+				"hp": 50,
+				"atk": 50,
+				"def": 50,
+				"spa": 50,
+				"spd": 50,
+				"spe": 50
+			},
+			"Flaaffy": {
+				"hp": 50,
+				"atk": 50,
+				"def": 50,
+				"spa": 50,
+				"spd": 50,
+				"spe": 50
+			},
+			"Ampharos": {
+				"hp": 55,
+				"atk": 45,
+				"def": 45,
+				"spa": 70,
+				"spd": 50,
+				"spe": 50
+			},
+			"Mantine": {
+				"hp": 50,
+				"atk": 50,
+				"def": 50,
+				"spa": 50,
+				"spd": 50,
+				"spe": 50
+			},
+			"Qwilfish": {
+				"hp": 55,
+				"atk": 80,
+				"def": 50,
+				"spa": 60,
+				"spd": 50,
+				"spe": 45
+			},
+			"Pichu": {
+				"hp": 50,
+				"atk": 50,
+				"def": 50,
+				"spa": 50,
+				"spd": 50,
+				"spe": 50
+			},
+			"Cleffa": {
+				"atk": 50,
+				"def": 50,
+				"spa": 50,
+				"spd": 50,
+				"spe": 50
+			},
+			"Igglybuff": {
+				"hp": 50,
+				"atk": 50,
+				"def": 50,
+				"spa": 50,
+				"spd": 50,
+				"spe": 50
+			},
+			"Quagsire": {
+				"hp": 50,
+				"atk": 45,
+				"def": 50,
+				"spa": 75,
+				"spd": 50,
+				"spe": 55
+			},
+			"Natu": {
+				"hp": 45,
+				"def": 50,
+				"spa": 50,
+				"spd": 50,
+				"spe": 60
+			},
+			"Xatu": {
+				"hp": 55,
+				"atk": 50,
+				"def": 50,
+				"spa": 70,
+				"spd": 50,
+				"spe": 80
+			},
+			"Marill": {
+				"hp": 45,
+				"atk": 50,
+				"def": 55,
+				"spa": 55
+			},
+			"Crobat": {
+				"hp": 60,
+				"atk": 65,
+				"def": 50,
+				"spa": 45,
+				"spd": 50,
+				"spe": 85
+			},
+			"Spinarak": {
+				"hp": 50,
+				"atk": 50,
+				"def": 50,
+				"spa": 50,
+				"spd": 50,
+				"spe": 50
+			},
+			"Ariados": {
+				"hp": 50,
+				"atk": 50,
+				"def": 50,
+				"spa": 50,
+				"spd": 50,
+				"spe": 50
+			},
+			"Skarmory": {
+				"hp": 50,
+				"atk": 50,
+				"def": 50,
+				"spa": 50,
+				"spd": 50,
+				"spe": 50
+			},
+			"Sunflora": {
+				"hp": 50,
+				"atk": 50,
+				"def": 50,
+				"spa": 50,
+				"spd": 50,
+				"spe": 50
+			},
+			"Phanpy": {
+				"hp": 50,
+				"atk": 50,
+				"def": 50,
+				"spa": 50,
+				"spd": 50,
+				"spe": 50
+			},
+			"Donphan": {
+				"hp": 70,
+				"atk": 70,
+				"def": 70,
+				"spa": 50,
+				"spd": 50
+			},
+			"Girafarig": {
+				"atk": 50,
+				"def": 50,
+				"spa": 45,
+				"spd": 50,
+				"spe": 45
+			},
+			"Smeargle": {
+				"hp": 50,
+				"atk": 50,
+				"def": 50,
+				"spa": 50,
+				"spd": 50,
+				"spe": 50
+			},
+			"Politoed": {
+				"atk": 85,
+				"def": 95,
+				"spa": 70,
+				"spd": 50
+			},
+			"Slowking": {
+				"def": 110,
+				"spa": 80,
+				"spd": 50
+			},
+			"Unown": {
+				"hp": 50,
+				"atk": 50,
+				"def": 50,
+				"spa": 50,
+				"spd": 50,
+				"spe": 50
+			},
+			"Ledyba": {
+				"hp": 50,
+				"atk": 50,
+				"def": 50,
+				"spa": 50,
+				"spd": 50,
+				"spe": 50
+			},
+			"Ledian": {
+				"hp": 50,
+				"atk": 50,
+				"spa": 50,
+				"spd": 50,
+				"spe": 50
+			},
+			"Espeon": {
+				"hp": 50,
+				"atk": 50,
+				"def": 50,
+				"spa": 50,
+				"spd": 50,
+				"spe": 50
+			},
+			"Umbreon": {
+				"hp": 50,
+				"atk": 50,
+				"def": 50,
+				"spa": 50,
+				"spd": 50,
+				"spe": 50
+			},
+			"Remoraid": {
+				"hp": 50,
+				"atk": 50,
+				"def": 50,
+				"spa": 50,
+				"spd": 50,
+				"spe": 50
+			},
+			"Octillery": {
+				"hp": 50,
+				"atk": 50,
+				"def": 50,
+				"spa": 50,
+				"spd": 50,
+				"spe": 50
+			},
+			"Tyrogue": {
+				"hp": 50,
+				"atk": 50,
+				"def": 50,
+				"spa": 50,
+				"spd": 50,
+				"spe": 50
+			},
+			"Hitmontop": {
+				"atk": 50,
+				"def": 50,
+				"spa": 50,
+				"spd": 50,
+				"spe": 50
+			},
+			"Hoppip": {
+				"hp": 40,
+				"atk": 50,
+				"def": 35,
+				"spa": 50,
+				"spd": 50
+			},
+			"Skiploom": {
+				"hp": 50,
+				"atk": 50,
+				"def": 45,
+				"spa": 60,
+				"spd": 50,
+				"spe": 50
+			},
+			"Jumpluff": {
+				"hp": 60,
+				"atk": 50,
+				"def": 55,
+				"spa": 70,
+				"spd": 50,
+				"spe": 50
+			},
+			"Smoochum": {
+				"hp": 50,
+				"atk": 50,
+				"def": 50,
+				"spa": 50,
+				"spd": 50,
+				"spe": 50
+			},
+			"Elekid": {
+				"hp": 30,
+				"atk": 55,
+				"def": 45,
+				"spa": 50,
+				"spd": 50,
+				"spe": 65
+			},
+			"Magby": {
+				"hp": 50,
+				"atk": 50,
+				"def": 50,
+				"spa": 50,
+				"spd": 50,
+				"spe": 50
+			},
+			"Bellossom": {
+				"hp": 50,
+				"atk": 50,
+				"def": 50,
+				"spa": 50,
+				"spd": 50
+			},
+			"Miltank": {
+				"hp": 110,
+				"atk": 50,
+				"def": 60,
+				"spa": 50,
+				"spd": 50,
+				"spe": 40
+			},
+			"Delibird": {
+				"hp": 50,
+				"atk": 50,
+				"def": 50,
+				"spa": 50,
+				"spd": 50,
+				"spe": 50
+			},
+			"Murkrow": {
+				"hp": 50,
+				"atk": 50,
+				"def": 50,
+				"spa": 50,
+				"spd": 50,
+				"spe": 50
+			},
+			"Blissey": {
+				"hp": 50,
+				"atk": 50,
+				"def": 50,
+				"spa": 50,
+				"spd": 50,
+				"spe": 50
+			},
+			"Scizor": {
+				"hp": 50,
+				"atk": 50,
+				"def": 50,
+				"spa": 50,
+				"spd": 50,
+				"spe": 50
+			},
+			"Houndour": {
+				"hp": 50,
+				"atk": 50,
+				"def": 50,
+				"spa": 50,
+				"spe": 50
+			},
+			"Houndoom": {
+				"hp": 50,
+				"atk": 50,
+				"spa": 50,
+				"spd": 50,
+				"spe": 50
+			},
+			"Porygon2": {
+				"hp": 50,
+				"atk": 50,
+				"def": 50,
+				"spa": 50,
+				"spd": 50,
+				"spe": 50
+			},
+			"Steelix": {
+				"hp": 50,
+				"atk": 50,
+				"def": 50,
+				"spa": 50,
+				"spd": 50,
+				"spe": 50
+			},
+			"Kingdra": {
+				"hp": 50,
+				"atk": 50,
+				"def": 50,
+				"spa": 50,
+				"spd": 50,
+				"spe": 50
+			},
+			"Raikou": {
+				"atk": 90,
+				"def": 85,
+				"spa": 125,
+				"spd": 98,
+				"spe": 100
+			},
+			"Entei": {
+				"hp": 90,
+				"atk": 100,
+				"def": 90,
+				"spa": 125,
+				"spd": 99,
+				"spe": 90
+			},
+			"Suicune": {
+				"hp": 90,
+				"atk": 85,
+				"def": 100,
+				"spa": 125,
+				"spd": 97
+			},
+			"Sneasel": {
+				"hp": 45,
+				"atk": 65,
+				"def": 50,
+				"spa": 40,
+				"spd": 50,
+				"spe": 85
+			},
+			"Ho-Oh": {
+				"hp": 100,
+				"atk": 100,
+				"def": 100,
+				"spa": 100,
+				"spd": 50,
+				"spe": 100
+			},
+			"Togepi": {
+				"hp": 50,
+				"atk": 50,
+				"def": 50,
+				"spa": 50,
+				"spd": 50,
+				"spe": 50
+			},
+			"Snubbull": {
+				"hp": 65,
+				"atk": 70,
+				"def": 60,
+				"spa": 70,
+				"spd": 50,
+				"spe": 50
+			},
+			"Aipom": {
+				"atk": 55,
+				"def": 50,
+				"spa": 60,
+				"spd": 50,
+				"spe": 60
+			}
+		},
+		"abilities": {}
+	},
+	"gen2gs": {
+		"gen": 2,
+		"moves": {
+			"nomove2": {
+				"basePower": 5
+			}
+		},
+		"typeChart": {
+			"Normal": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fighting": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Flying": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Poison": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ground": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Rock": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Bug": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ghost": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Steel": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fire": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Water": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Grass": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Electric": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Psychic": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ice": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Dragon": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Dark": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fairy": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"???": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Shadow": {
+				"Normal": 2,
+				"Fighting": 2,
+				"Flying": 2,
+				"Poison": 2,
+				"Ground": 2,
+				"Rock": 2,
+				"Bug": 2,
+				"Ghost": 2,
+				"Steel": 2,
+				"Fire": 2,
+				"Water": 2,
+				"Grass": 2,
+				"Electric": 2,
+				"Psychic": 2,
+				"Ice": 2,
+				"Dragon": 2,
+				"Dark": 2,
+				"Fairy": 2,
+				"???": 2,
+				"Shadow": 0.5,
+				"Stellar": 2,
+				"Bird": 2
+			},
+			"Stellar": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Bird": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			}
+		},
+		"baseStats": {},
+		"abilities": {}
+	},
+	"gen1phnn": {
+		"gen": 1,
+		"moves": {},
+		"typeChart": {
+			"Normal": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fighting": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Flying": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Poison": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ground": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Rock": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Bug": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ghost": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Steel": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fire": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Water": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Grass": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Electric": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Psychic": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ice": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Dragon": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Dark": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fairy": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"???": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Shadow": {
+				"Normal": 2,
+				"Fighting": 2,
+				"Flying": 2,
+				"Poison": 2,
+				"Ground": 2,
+				"Rock": 2,
+				"Bug": 2,
+				"Ghost": 2,
+				"Steel": 2,
+				"Fire": 2,
+				"Water": 2,
+				"Grass": 2,
+				"Electric": 2,
+				"Psychic": 2,
+				"Ice": 2,
+				"Dragon": 2,
+				"Dark": 2,
+				"Fairy": 2,
+				"???": 2,
+				"Shadow": 0.5,
+				"Stellar": 2,
+				"Bird": 2
+			},
+			"Stellar": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Bird": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			}
+		},
+		"baseStats": {},
+		"abilities": {}
+	},
+	"gen1phnneng": {
+		"gen": 1,
+		"moves": {},
+		"typeChart": {
+			"Normal": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fighting": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Flying": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Poison": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ground": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Rock": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Bug": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ghost": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Steel": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fire": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Water": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Grass": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Electric": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Psychic": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ice": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Dragon": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Dark": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fairy": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"???": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Shadow": {
+				"Normal": 2,
+				"Fighting": 2,
+				"Flying": 2,
+				"Poison": 2,
+				"Ground": 2,
+				"Rock": 2,
+				"Bug": 2,
+				"Ghost": 2,
+				"Steel": 2,
+				"Fire": 2,
+				"Water": 2,
+				"Grass": 2,
+				"Electric": 2,
+				"Psychic": 2,
+				"Ice": 2,
+				"Dragon": 2,
+				"Dark": 2,
+				"Fairy": 2,
+				"???": 2,
+				"Shadow": 0.5,
+				"Stellar": 2,
+				"Bird": 2
+			},
+			"Stellar": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Bird": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			}
+		},
+		"baseStats": {},
+		"abilities": {}
+	},
+	"gen1": {
+		"gen": 1,
+		"moves": {},
+		"typeChart": {
+			"Normal": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fighting": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Flying": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Poison": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ground": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Rock": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Bug": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ghost": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Steel": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fire": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Water": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Grass": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Electric": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Psychic": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ice": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Dragon": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Dark": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fairy": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"???": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Shadow": {
+				"Normal": 2,
+				"Fighting": 2,
+				"Flying": 2,
+				"Poison": 2,
+				"Ground": 2,
+				"Rock": 2,
+				"Bug": 2,
+				"Ghost": 2,
+				"Steel": 2,
+				"Fire": 2,
+				"Water": 2,
+				"Grass": 2,
+				"Electric": 2,
+				"Psychic": 2,
+				"Ice": 2,
+				"Dragon": 2,
+				"Dark": 2,
+				"Fairy": 2,
+				"???": 2,
+				"Shadow": 0.5,
+				"Stellar": 2,
+				"Bird": 2
+			},
+			"Stellar": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Bird": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			}
+		},
+		"baseStats": {},
+		"abilities": {}
+	},
+	"gen2": {
+		"gen": 2,
+		"moves": {},
+		"typeChart": {
+			"Normal": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fighting": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Flying": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Poison": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ground": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Rock": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Bug": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ghost": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Steel": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fire": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Water": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Grass": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Electric": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Psychic": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ice": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Dragon": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Dark": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fairy": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"???": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Shadow": {
+				"Normal": 2,
+				"Fighting": 2,
+				"Flying": 2,
+				"Poison": 2,
+				"Ground": 2,
+				"Rock": 2,
+				"Bug": 2,
+				"Ghost": 2,
+				"Steel": 2,
+				"Fire": 2,
+				"Water": 2,
+				"Grass": 2,
+				"Electric": 2,
+				"Psychic": 2,
+				"Ice": 2,
+				"Dragon": 2,
+				"Dark": 2,
+				"Fairy": 2,
+				"???": 2,
+				"Shadow": 0.5,
+				"Stellar": 2,
+				"Bird": 2
+			},
+			"Stellar": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Bird": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			}
+		},
+		"baseStats": {},
+		"abilities": {}
+	},
+	"gen3": {
+		"gen": 3,
+		"moves": {},
+		"typeChart": {
+			"Normal": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fighting": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Flying": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Poison": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ground": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Rock": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Bug": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ghost": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Steel": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fire": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Water": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Grass": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Electric": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Psychic": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ice": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Dragon": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Dark": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fairy": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"???": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Shadow": {
+				"Normal": 2,
+				"Fighting": 2,
+				"Flying": 2,
+				"Poison": 2,
+				"Ground": 2,
+				"Rock": 2,
+				"Bug": 2,
+				"Ghost": 2,
+				"Steel": 2,
+				"Fire": 2,
+				"Water": 2,
+				"Grass": 2,
+				"Electric": 2,
+				"Psychic": 2,
+				"Ice": 2,
+				"Dragon": 2,
+				"Dark": 2,
+				"Fairy": 2,
+				"???": 2,
+				"Shadow": 0.5,
+				"Stellar": 2,
+				"Bird": 2
+			},
+			"Stellar": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Bird": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			}
+		},
+		"baseStats": {},
+		"abilities": {}
+	},
+	"gen4": {
+		"gen": 4,
+		"moves": {},
+		"typeChart": {
+			"Normal": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fighting": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Flying": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Poison": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ground": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Rock": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Bug": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ghost": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Steel": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fire": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Water": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Grass": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Electric": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Psychic": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ice": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Dragon": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Dark": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fairy": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"???": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Shadow": {
+				"Normal": 2,
+				"Fighting": 2,
+				"Flying": 2,
+				"Poison": 2,
+				"Ground": 2,
+				"Rock": 2,
+				"Bug": 2,
+				"Ghost": 2,
+				"Steel": 2,
+				"Fire": 2,
+				"Water": 2,
+				"Grass": 2,
+				"Electric": 2,
+				"Psychic": 2,
+				"Ice": 2,
+				"Dragon": 2,
+				"Dark": 2,
+				"Fairy": 2,
+				"???": 2,
+				"Shadow": 0.5,
+				"Stellar": 2,
+				"Bird": 2
+			},
+			"Stellar": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Bird": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			}
+		},
+		"baseStats": {},
+		"abilities": {}
+	},
+	"gen5": {
+		"gen": 5,
+		"moves": {},
+		"typeChart": {
+			"Normal": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fighting": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Flying": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Poison": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ground": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Rock": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Bug": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ghost": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Steel": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fire": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Water": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Grass": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Electric": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Psychic": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ice": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Dragon": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Dark": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fairy": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"???": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Shadow": {
+				"Normal": 2,
+				"Fighting": 2,
+				"Flying": 2,
+				"Poison": 2,
+				"Ground": 2,
+				"Rock": 2,
+				"Bug": 2,
+				"Ghost": 2,
+				"Steel": 2,
+				"Fire": 2,
+				"Water": 2,
+				"Grass": 2,
+				"Electric": 2,
+				"Psychic": 2,
+				"Ice": 2,
+				"Dragon": 2,
+				"Dark": 2,
+				"Fairy": 2,
+				"???": 2,
+				"Shadow": 0.5,
+				"Stellar": 2,
+				"Bird": 2
+			},
+			"Stellar": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Bird": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			}
+		},
+		"baseStats": {},
+		"abilities": {}
+	},
+	"gen6": {
+		"gen": 6,
+		"moves": {},
+		"typeChart": {
+			"Normal": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fighting": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Flying": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Poison": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ground": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Rock": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Bug": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ghost": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Steel": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fire": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Water": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Grass": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Electric": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Psychic": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ice": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Dragon": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Dark": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fairy": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"???": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Shadow": {
+				"Normal": 2,
+				"Fighting": 2,
+				"Flying": 2,
+				"Poison": 2,
+				"Ground": 2,
+				"Rock": 2,
+				"Bug": 2,
+				"Ghost": 2,
+				"Steel": 2,
+				"Fire": 2,
+				"Water": 2,
+				"Grass": 2,
+				"Electric": 2,
+				"Psychic": 2,
+				"Ice": 2,
+				"Dragon": 2,
+				"Dark": 2,
+				"Fairy": 2,
+				"???": 2,
+				"Shadow": 0.5,
+				"Stellar": 2,
+				"Bird": 2
+			},
+			"Stellar": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Bird": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			}
+		},
+		"baseStats": {},
+		"abilities": {}
+	},
+	"gen7": {
+		"gen": 7,
+		"moves": {},
+		"typeChart": {
+			"Normal": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fighting": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Flying": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Poison": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ground": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Rock": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Bug": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ghost": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Steel": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fire": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Water": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Grass": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Electric": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Psychic": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ice": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Dragon": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Dark": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fairy": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"???": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Shadow": {
+				"Normal": 2,
+				"Fighting": 2,
+				"Flying": 2,
+				"Poison": 2,
+				"Ground": 2,
+				"Rock": 2,
+				"Bug": 2,
+				"Ghost": 2,
+				"Steel": 2,
+				"Fire": 2,
+				"Water": 2,
+				"Grass": 2,
+				"Electric": 2,
+				"Psychic": 2,
+				"Ice": 2,
+				"Dragon": 2,
+				"Dark": 2,
+				"Fairy": 2,
+				"???": 2,
+				"Shadow": 0.5,
+				"Stellar": 2,
+				"Bird": 2
+			},
+			"Stellar": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Bird": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			}
+		},
+		"baseStats": {},
+		"abilities": {}
+	},
+	"gen8": {
+		"gen": 8,
+		"moves": {},
+		"typeChart": {
+			"Normal": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fighting": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Flying": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Poison": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ground": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Rock": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Bug": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ghost": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Steel": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fire": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Water": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Grass": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Electric": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Psychic": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Ice": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Dragon": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Dark": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Fairy": {
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"???": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Shadow": {
+				"Normal": 2,
+				"Fighting": 2,
+				"Flying": 2,
+				"Poison": 2,
+				"Ground": 2,
+				"Rock": 2,
+				"Bug": 2,
+				"Ghost": 2,
+				"Steel": 2,
+				"Fire": 2,
+				"Water": 2,
+				"Grass": 2,
+				"Electric": 2,
+				"Psychic": 2,
+				"Ice": 2,
+				"Dragon": 2,
+				"Dark": 2,
+				"Fairy": 2,
+				"???": 2,
+				"Shadow": 0.5,
+				"Stellar": 2,
+				"Bird": 2
+			},
+			"Stellar": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			},
+			"Bird": {
+				"Normal": 1,
+				"Fighting": 1,
+				"Flying": 1,
+				"Poison": 1,
+				"Ground": 1,
+				"Rock": 1,
+				"Bug": 1,
+				"Ghost": 1,
+				"Steel": 1,
+				"Fire": 1,
+				"Water": 1,
+				"Grass": 1,
+				"Electric": 1,
+				"Psychic": 1,
+				"Ice": 1,
+				"Dragon": 1,
+				"Dark": 1,
+				"Fairy": 1,
+				"???": 1,
+				"Shadow": 1,
+				"Stellar": 1,
+				"Bird": 1
+			}
+		},
+		"baseStats": {},
+		"abilities": {}
 	}
 } as const;

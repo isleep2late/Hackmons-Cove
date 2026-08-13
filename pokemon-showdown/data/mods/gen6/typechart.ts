@@ -20,6 +20,7 @@ export const TypeChart: import('../../../sim/dex-data').ModdedTypeDataTable = {
 			Rock: 0,
 			Steel: 0,
 			Water: 0,
+			Shadow: 1,
 		},
 	},
 };
