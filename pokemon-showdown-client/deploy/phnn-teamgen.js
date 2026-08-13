@@ -145,6 +145,26 @@ const HACKMONS_HINTS = [
 	'hackmons', 'customgame', 'customdisguise', 'disguises', 'statuses', 'nonerfs',
 	'metronome', 'infinite', 'brokencup', '350cup', 'anyability', 'nolimit', 'bh',
 ];
+const TIER_BAND = {
+	ag: 0,
+	uber: 1, '(uber)': 1, duber: 1, '(duber)': 1,
+	ou: 2, '(ou)': 2, uubl: 2, cap: 2, dou: 2, '(dou)': 2, dbl: 2,
+	uu: 3, '(uu)': 3, rubl: 3, duu: 3,
+	ru: 4, '(ru)': 4, nubl: 4,
+	nu: 5, '(nu)': 5, publ: 5,
+	pu: 6, '(pu)': 6, zubl: 6,
+	zu: 7, '(zu)': 7, '(duu)': 7,
+	nfe: 8, capnfe: 8,
+	lc: 9, caplc: 9, lcuber: 9,
+};
+const TIER_TOKENS = { ubers: 1, ag: 1, anythinggoes: 1, ubersuu: 1, ou: 2, uubl: 2, cap: 2, uu: 3, ru: 4, nu: 5, pu: 6, zu: 7 };
+const TIER_NEUTRAL = ['bdsp', 'letsgo', 'platinum', 'frlg', 'bw1', 'dlc1', 'stadium', 'japanese', 'tradebacks'];
+const TIER_NEVER = ['champions', 'spaceworld', 'glitch', 'draft', '1v1', '2v2', 'triples', 'freeforall', 'rental', 'roulette', 'ccapm', 'thecardgame'];
+const TIER_SET_LABELS = {
+	1: ['ubers', 'anythinggoes', 'ag'], 2: ['ou'], 3: ['uu'], 4: ['ru'], 5: ['nu'], 6: ['pu'], 7: ['zu'],
+};
+const MIN_TIER_POOL = 18;
+const MIN_PRIME_POOL = 8;
 const MAX_ATTEMPTS = 20;
 
 let smogonSets = null;
@@ -200,6 +220,83 @@ function isHackmonsTarget(baseid) {
 	return HACKMONS_HINTS.some(h => baseid.includes(h));
 }
 
+function bandOfTier(tier) {
+	const raw = '' + (tier || '');
+	const key = /^\(/.test(raw) ? '(' + toId(raw) + ')' : toId(raw);
+	return Object.prototype.hasOwnProperty.call(TIER_BAND, key) ? TIER_BAND[key] : null;
+}
+
+function tierPolicyFor(baseid) {
+	if (isHackmonsTarget(baseid)) return null;
+	if (TIER_NEVER.some(n => baseid.includes(n))) return null;
+	let id = baseid.replace(/^gen\d+/, '');
+	let natdex = false;
+	if (/^(nationaldex|natdex)/.test(id)) {
+		natdex = true;
+		id = id.replace(/^(nationaldex|natdex)/, '');
+	}
+	for (const seg of TIER_NEUTRAL) if (id.startsWith(seg)) id = id.slice(seg.length);
+	if (/^vgc\d/.test(id) || /^(battlestadium|battlespot|bss|gbu)/.test(id)) {
+		return { target: 2, floor: 1, slack: 0, doubles: !/singles/.test(id), natdex };
+	}
+	if (id === 'monotype') return { target: 2, floor: 1, slack: natdex ? 1 : 3, doubles: false, natdex };
+	let doubles = false;
+	if (id.startsWith('doubles')) {
+		doubles = true;
+		id = id.slice('doubles'.length);
+	}
+	if (!id) id = 'ou';
+	if (!Object.prototype.hasOwnProperty.call(TIER_TOKENS, id)) return null;
+	const target = TIER_TOKENS[id];
+	const floor = /^(ag|anythinggoes)$/.test(id) ? 0 : target;
+	return { target, floor, slack: doubles || natdex ? 0 : 1, doubles, natdex };
+}
+
+const tierGateCache = new Map();
+function tierGate(fdex, ruleTable, policy, fullid) {
+	if (!policy) return null;
+	if (tierGateCache.has(fullid)) return tierGateCache.get(fullid);
+	const bandFor = species => {
+		const tier = (policy.natdex && species.natDexTier) ||
+			(policy.doubles && species.doublesTier) || species.tier;
+		return bandOfTier(tier);
+	};
+	const bands = [];
+	for (const species of fdex.species.all()) {
+		if (!species.exists || !species.baseStats) continue;
+		if (species.isNonstandard && species.isNonstandard !== 'Past' && species.isNonstandard !== 'Unobtainable') continue;
+		if (ruleTable.check('pokemon:' + species.id) === 'banned') continue;
+		if (ruleTable.check('basepokemon:' + toId(species.baseSpecies)) === 'banned') continue;
+		const band = bandFor(species);
+		if (band !== null) bands.push(band);
+	}
+	let maxBand = Math.min(policy.target + policy.slack, 7);
+	const count = m => bands.filter(b => b >= policy.floor && b <= m).length;
+	while (maxBand < 9 && count(maxBand) < MIN_TIER_POOL) maxBand++;
+	let primeBand = policy.target;
+	while (primeBand < maxBand && count(primeBand) < MIN_PRIME_POOL) primeBand++;
+	const gate = {
+		size: count(maxBand),
+		accepts: name => {
+			const species = fdex.species.get(name);
+			if (!species.exists) return false;
+			const band = bandFor(species);
+			return band !== null && band >= policy.floor && band <= maxBand;
+		},
+		prime: name => {
+			const species = fdex.species.get(name);
+			if (!species.exists) return false;
+			const band = bandFor(species);
+			return band !== null && band >= policy.floor && band <= primeBand;
+		},
+		labels: TIER_SET_LABELS[policy.target] || [],
+		doubles: policy.doubles,
+		natdex: policy.natdex,
+	};
+	tierGateCache.set(fullid, gate);
+	return gate;
+}
+
 function wantsDoubles(baseid, format) {
 	if (format.gameType && format.gameType !== 'singles') return true;
 	return baseid.includes('doubles') || baseid.includes('vgc') || baseid.includes('freeforall') || baseid.includes('multi');
@@ -216,7 +313,7 @@ function sourceFor(baseid, format) {
 		if (wantsDoubles(baseid, format)) cands.push(`gen${gen}randomdoublesbattle`);
 		for (let g = gen; g >= 1; g--) cands.push(`gen${g}randombattle`);
 	}
-	for (let g = gen; g >= 1; g--) cands.push(`gen${g}purehackmons`);
+	for (let g = gen; g >= 1; g--) cands.push(`gen${g}purehackmons`, `gen${g}customgame`);
 	for (let g = gen; g >= 1; g--) cands.push(`gen${g}hackmonscup`);
 	return cands.find(hasGenerator) || null;
 }
@@ -412,7 +509,11 @@ function buildHackmonsMoves(set, role, fdex, ruleTable, opts) {
 		}
 	};
 	forced.forEach(add);
+	const attackPool = () => ((HM_STAB[types[0]] || {}).special || [])
+		.concat((HM_STAB[types[1]] || {}).special || [], HM_COVERAGE.special,
+			(HM_STAB[types[0]] || {}).physical || [], HM_COVERAGE.physical);
 	if (role === 'defensive') {
+		add(pickMove(attackPool(), fdex, ruleTable, used, 3, ctx));
 		add(pickMove(HM_PROTECT_TIER, fdex, ruleTable, used, 2, ctx));
 		for (const group of HM_WALL_MOVES) add(pickMove(group, fdex, ruleTable, used, 3, ctx));
 	} else {
@@ -451,6 +552,14 @@ function buildHackmonsMoves(set, role, fdex, ruleTable, opts) {
 			moves.push(m);
 			used.add(id);
 		}
+	}
+	const damaging = list => list.some(m => {
+		const mv = fdex.moves.get(('' + m).split(' (')[0]);
+		return mv.exists && mv.category !== 'Status';
+	});
+	if (moves.length && !damaging(moves)) {
+		const swap = pickMove(attackPool(), fdex, ruleTable, used, 3, ctx);
+		if (swap) moves[moves.length - 1] = swap;
 	}
 	if (moves.length) set.moves = moves.slice(0, 4);
 }
@@ -632,9 +741,11 @@ function applyCompetitiveSpreads(team, gen, fdex, ruleTable) {
 	}
 }
 
-function applySmogonSets(team, gen, fdex, ruleTable) {
+function applySmogonSets(team, gen, fdex, ruleTable, gate) {
 	const lib = loadSmogonSets()['gen' + gen];
 	if (!lib) return;
+	const labels = (gate && gate.labels) || [];
+	const wanted = labels.length ? labels.concat(gate.doubles ? ['doubles', 'vgc'] : [], gate.natdex ? ['nationaldex'] : []) : [];
 	for (const set of team) {
 		const id = toId(set.species || set.name);
 		const entries = lib[id] || lib[toId(fdex.species.get(set.species).baseSpecies || '')];
@@ -645,7 +756,9 @@ function applySmogonSets(team, gen, fdex, ruleTable) {
 			(!e.i || itemAllowed(e.i, fdex, ruleTable))
 		));
 		if (!legal.length) continue;
-		const pick = legal[Math.floor(Math.random() * legal.length)];
+		const onTier = wanted.length ? legal.filter(e => wanted.some(w => toId(e.n || '').startsWith(w))) : [];
+		const from = onTier.length ? onTier : legal;
+		const pick = from[Math.floor(Math.random() * from.length)];
 		set.moves = pick.m.slice(0, 4);
 		if (pick.a) set.ability = pick.a;
 		if (pick.i) set.item = pick.i;
@@ -702,7 +815,7 @@ function applyArchetype(team, fdex, ruleTable, usedAbilities) {
 	return plan.name;
 }
 
-function reshape(team, baseid, gen, rulesText, ruleTable, fdex, ctx) {
+function reshape(team, baseid, gen, rulesText, ruleTable, fdex, ctx, gate) {
 	const isCD = baseid.includes('customdisguise') && /^gen[89]/.test(baseid) && !toId(rulesText).includes('standardcustom');
 	const isHackmons = isHackmonsTarget(baseid) && gen >= 3 && !baseid.includes('metronome');
 	const usedAbilities = new Map();
@@ -710,7 +823,7 @@ function reshape(team, baseid, gen, rulesText, ruleTable, fdex, ctx) {
 		applyArchetype(team, fdex, ruleTable, usedAbilities);
 	}
 	if (!isHackmons) {
-		applySmogonSets(team, gen, fdex, ruleTable);
+		applySmogonSets(team, gen, fdex, ruleTable, gate);
 		applyCompetitiveSpreads(team, gen, fdex, ruleTable);
 	}
 	const isLetsGo = baseid.includes('letsgo');
@@ -740,24 +853,41 @@ function baseSpeciesId(set) {
 	return toId(species.baseSpecies || set.species);
 }
 
-function drawMonoTypePool(source, teamSize) {
+function drawFilteredPool(source, teamSize, opts) {
 	const { Dex, Teams } = loadSim();
+	const mono = opts && opts.mono;
+	const gate = opts && opts.gate;
+	const quota = gate && !mono ? Math.max(1, teamSize - 2) : 0;
+	const draws = mono ? 40 : 25;
 	let type = null;
-	const picked = [];
+	const prime = [];
+	const rest = [];
+	const spare = [];
 	const seen = new Set();
-	for (let draws = 0; draws < 15 && picked.length < teamSize; draws++) {
+	for (let draw = 0; draw < draws; draw++) {
+		if (prime.length >= quota && prime.length + rest.length >= teamSize) break;
 		const pool = Teams.generate(source);
 		for (const set of pool) {
-			if (picked.length >= teamSize) break;
 			const species = Dex.species.get(set.species);
 			if (!species.exists) continue;
-			if (!type) type = species.types[0];
-			if (!species.types.includes(type)) continue;
+			if (mono) {
+				if (!type) type = species.types[0];
+				if (!species.types.includes(type)) continue;
+			}
 			const sid = baseSpeciesId(set);
 			if (seen.has(sid)) continue;
 			seen.add(sid);
-			picked.push(set);
+			if (gate && !gate.accepts(set.species)) {
+				spare.push(set);
+			} else {
+				(gate && gate.prime(set.species) ? prime : rest).push(set);
+			}
 		}
+	}
+	const picked = shuffled(prime).slice(0, quota || teamSize);
+	for (const set of shuffled(rest).concat(shuffled(prime), mono ? shuffled(spare) : [])) {
+		if (picked.length >= teamSize) break;
+		if (!picked.includes(set)) picked.push(set);
 	}
 	return picked.length >= Math.min(teamSize, 3) ? picked : null;
 }
@@ -793,6 +923,7 @@ function generateTeam(formatid) {
 	const isMono = ruleTable.has('sametypeclause');
 	const synthesize = isHackmonsTarget(baseid) && gen >= 3 && !isMono &&
 		!baseid.includes('metronome') && !baseid.includes('letsgo');
+	const gate = synthesize ? null : tierGate(fdex, ruleTable, tierPolicyFor(baseid), fullid);
 	let team = null;
 	let problems = null;
 
@@ -812,8 +943,11 @@ function generateTeam(formatid) {
 				} else {
 					pool = Teams.generate(source);
 				}
+			} else if (isMono || gate) {
+				pool = drawFilteredPool(source, teamSize, { mono: isMono, gate }) ||
+					(gate ? drawFilteredPool(source, teamSize, { mono: isMono }) : null);
 			} else {
-				pool = isMono ? drawMonoTypePool(source, teamSize) : Teams.generate(source);
+				pool = Teams.generate(source);
 			}
 		} catch (e) {
 			return { error: `Generator failed: ${('' + e.message).slice(0, 200)}` };
@@ -848,13 +982,14 @@ function generateTeam(formatid) {
 				return true;
 			});
 			while (team.length < teamSize) {
-				const extra = (isMono ? [] : Teams.generate(source)).find(set => !seen.has(baseSpeciesId(set)));
+				const refill = isMono ? [] : (gate ? drawFilteredPool(source, teamSize, { gate }) || [] : Teams.generate(source));
+				const extra = refill.find(set => !seen.has(baseSpeciesId(set)));
 				if (!extra) break;
 				seen.add(baseSpeciesId(extra));
 				team.push(extra);
 			}
 		}
-		reshape(team, baseid, gen, rulesText, ruleTable, fdex, { permissive: isHackmonsTarget(baseid), validator, fullid });
+		reshape(team, baseid, gen, rulesText, ruleTable, fdex, { permissive: isHackmonsTarget(baseid), validator, fullid }, gate);
 		try {
 			problems = validator.validateTeam(JSON.parse(JSON.stringify(team))) || [];
 		} catch (e) {

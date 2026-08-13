@@ -165,7 +165,7 @@ export const createSmogonPokemon = (
     isSaltCure: 'saltcure' in pokemon.volatiles,
 
     // cheeky way to allow the user to "turn off" Multiscale w/o editing the HP value
-    ability: pseudoToggleAbility && !pseudoToggled ? 'Pressure' : ability,
+    ability: (pseudoToggleAbility && !pseudoToggled) || (!legacy && guessedAbility) ? 'Pressure' : ability,
     abilityOn: pokemon.abilityToggled,
     item,
     nature: legacy ? null : pokemon.nature,

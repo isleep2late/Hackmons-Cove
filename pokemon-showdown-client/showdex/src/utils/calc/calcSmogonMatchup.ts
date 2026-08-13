@@ -13,7 +13,7 @@ import {
 } from '@smogon/calc';
 import { type ShowdexSettings } from '@showdex/interfaces/app';
 import { type CalcdexBattleState, type CalcdexPlayerKey, CalcdexPlayerKeys as AllPlayerKeys } from '@showdex/interfaces/calc';
-import { toID } from '@showdex/utils/core';
+import { formatId } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import { detectDisguiseFormat, isPhnnKamehamehaMove, isPhnnShadowDamagingMove, isPhnnTypingKnown, setPhnnCalcContext } from '@showdex/phnn';
 import { getGenDexForFormat } from '@showdex/utils/dex';
@@ -214,7 +214,7 @@ export const calcSmogonMatchup = (
 
   // Poltergeist reads 0 when the defender holds nothing, but an unrevealed item is not the same as
   // no item -- report it as unknown instead of confidently claiming immunity
-  if (toID(playerMove) === 'poltergeist' && !opponentPokemon?.item && !opponentPokemon?.dirtyItem
+  if (formatId(playerMove) === 'poltergeist' && !opponentPokemon?.item && !opponentPokemon?.dirtyItem
     && !opponentPokemon?.prevItem) {
     matchup.damageRange = '???';
     return matchup;
