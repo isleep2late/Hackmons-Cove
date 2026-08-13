@@ -111,6 +111,18 @@ export const detectMaxEvsFormat = (format: string): boolean => {
   return gen !== 6;
 };
 
+// in hackmons-style formats any Pokemon can carry any ability, so the dex's first ability is a
+// guess with no evidence behind it -- and guessing wrong silently doubles or halves the damage
+export const isPhnnAnyAbilityFormat = (format: string): boolean => {
+  if (!format) {
+    return false;
+  }
+
+  const f = format.toLowerCase();
+
+  return /hackmons|nonerfs|customgame|customdisguise|disguise|status|anyability|nolimit|unified|bh/.test(f);
+};
+
 export const detectDisguiseFormat = (format: string): boolean => {
   if (!format) {
     return false;

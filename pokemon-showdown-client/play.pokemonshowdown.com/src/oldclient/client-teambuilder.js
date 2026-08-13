@@ -1315,7 +1315,6 @@
 				buf = '<div class="pad"><button name="back" class="button"><i class="fa fa-chevron-left"></i> List</button> ';
 				buf += '<input class="textbox teamnameedit" type="text" class="teamnameedit" size="30" value="' + BattleLog.escapeHTML(this.curTeam.name) + '" /> ';
 				buf += '<button name="import" class="button"><i class="fa fa-upload"></i> Import/Export</button> ';
-				buf += '<button name="generateTeam" class="button" style="margin-left:8px"><i class="fa fa-magic"></i> Build me a team</button>';
 				buf += '<div class="teamchartbox">';
 				buf += '<ol class="teamchart">';
 				buf += '<li>' + this.clipboardHTML() + '</li>';
@@ -1340,6 +1339,7 @@
 					buf += this.renderStatModToggle();
 					var btnClass = 'button' + (!this.curSetList.length || app.isDisconnected ? ' disabled' : '');
 					buf += ' <button name="validate" class="' + btnClass + '"><i class="fa fa-check"></i> Validate</button>';
+					buf += ' <button name="generateTeam" class="button"><i class="fa fa-magic"></i> Build me a team</button>';
 					var fmtParts = this.curTeam.format.split('@@@');
 					if (/customgame|customdisguises/.test(fmtParts[0])) {
 						buf += '<div style="padding-top:4px"><label class="label">Extra rules: <input type="text" name="phnncustomrules" class="textbox" style="width:280px" placeholder="e.g. Infinite HP, OHKO, Infinite Dyna" value="' + BattleLog.escapeHTML(fmtParts[1] || '') + '" /></label></div>';

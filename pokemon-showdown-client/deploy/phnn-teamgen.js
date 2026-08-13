@@ -84,6 +84,21 @@ const HM_ELITE_MOVES = {
 };
 // a one-time nuke is still worth a slot; Blizzard's freeze is effectively a second win condition
 const HM_NUKE_MOVES = ['Explosion', 'Self-Destruct', 'Misty Explosion'];
+// permanent G-Max moves: elemental nukes that ignore abilities and break protection
+// only the elemental G-Max moves carry real power (160 BP, ignores abilities, breaks protection).
+// every other G-Max is a 10 BP placeholder that derives power from a base move it will not have,
+// and the generic Z-moves are 1 BP for the same reason -- both are traps, so they stay out.
+const HM_GMAX_MOVES = ['G-Max Fireball', 'G-Max Hydrosnipe', 'G-Max Drum Solo'];
+// the worthwhile Z-moves are the permanent CFZ ones (200 BP, already in HM_ELITE_MOVES); the
+// crystal-and-base-move packages below only pay off where the signature Z-move keeps its power
+const HM_ZMOVE_PACKAGES = [
+	{ item: 'Ultranecrozium Z', move: 'Light That Burns the Sky', base: 'Photon Geyser' },
+	{ item: 'Solganium Z', move: 'Searing Sunraze Smash', base: 'Sunsteel Strike' },
+	{ item: 'Lunalium Z', move: 'Menacing Moonraze Maelstrom', base: 'Moongeist Beam' },
+	{ item: 'Mewnium Z', move: 'Genesis Supernova', base: 'Psychic' },
+	{ item: 'Pikanium Z', move: 'Catastropika', base: 'Volt Tackle' },
+	{ item: 'Marshadium Z', move: 'Soul-Stealing 7-Star Strike', base: 'Spectral Thief' },
+];
 // Protect is the weakest option in this family whenever the others are available
 const HM_PROTECT_TIER = ['Spiky Shield', "King's Shield", 'Max Guard', 'Silk Trap', 'Burning Bulwark', 'Baneful Bunker', 'Protect'];
 const HM_WALL_MOVES = [
@@ -249,11 +264,25 @@ function moveAllowed(name, fdex, ruleTable, ctx) {
 	return true;
 }
 
+function shuffled(list) {
+	const out = list.slice();
+	for (let i = out.length - 1; i > 0; i--) {
+		const j = Math.floor(Math.random() * (i + 1));
+		const t = out[i];
+		out[i] = out[j];
+		out[j] = t;
+	}
+	return out;
+}
+
 function pickMove(cands, fdex, ruleTable, used, variety, ctx) {
 	const legal = [];
 	for (const name of cands) {
 		if (used.has(toId(name))) continue;
 		if (!moveAllowed(name, fdex, ruleTable, ctx)) continue;
+		const move = fdex.moves.get(name);
+		// a damaging move that derives its power from a base move it will not have is a dead slot
+		if (move.category !== 'Status' && move.basePower > 0 && move.basePower < 40) continue;
 		legal.push(name);
 		if (legal.length >= (variety || 1) + 1) break;
 	}
@@ -351,7 +380,12 @@ function sampleSpecies(pools, validator, teamSize, allowDupes) {
 function buildHackmonsMoves(set, role, fdex, ruleTable, opts) {
 	const ctx = opts && opts.ctx;
 	const ability = toId((opts && opts.ability) || set.ability || '');
-	const forced = set.phnnForcedMoves || [];
+	const forced = (set.phnnForcedMoves || []).slice();
+	const zPackage = opts && opts.zPackage;
+	if (zPackage) {
+		forced.unshift(zPackage.move);
+		if (moveAllowed(zPackage.base, fdex, ruleTable, ctx)) forced.push(zPackage.base);
+	}
 	const species = fdex.species.get(set.species);
 	const types = species && species.exists ? species.types : [];
 	const used = new Set();
@@ -369,8 +403,11 @@ function buildHackmonsMoves(set, role, fdex, ruleTable, opts) {
 	} else {
 		add(pickMove(((HM_STAB[types[0]] || {})[role]) || [], fdex, ruleTable, used, 2, ctx));
 		const secondary = types[1] ? ((HM_STAB[types[1]] || {})[role] || []) : [];
-		if (Math.random() < 0.35 && HM_ELITE_MOVES[role]) {
-			add(pickMove(HM_ELITE_MOVES[role], fdex, ruleTable, used, 3, ctx));
+		const eliteRoll = Math.random();
+		if (eliteRoll < 0.3) {
+			add(pickMove(shuffled(HM_GMAX_MOVES), fdex, ruleTable, used, 3, ctx));
+		} else if (eliteRoll < 0.6 && HM_ELITE_MOVES[role]) {
+			add(pickMove(shuffled(HM_ELITE_MOVES[role]), fdex, ruleTable, used, 3, ctx));
 		}
 		add(pickMove(secondary.concat(HM_COVERAGE[role]), fdex, ruleTable, used, 3, ctx));
 		if (opts && opts.noGuardOhko) {
@@ -491,9 +528,19 @@ function upgradeHackmonsSet(set, fdex, ruleTable, usedAbilities, ctx) {
 			usedAbilities.set(toId(picked), 1);
 		}
 	}
-	buildHackmonsMoves(set, role, fdex, ruleTable, { noGuardOhko: wantsNoGuard, ability: set.ability, ctx });
+	const zPackage = !wantsNoGuard && Math.random() < 0.25
+		? shuffled(HM_ZMOVE_PACKAGES).find(z => (
+			itemAllowed(z.item, fdex, ruleTable) && moveAllowed(z.move, fdex, ruleTable, ctx)
+		))
+		: null;
+	buildHackmonsMoves(set, role, fdex, ruleTable, {
+		noGuardOhko: wantsNoGuard, ability: set.ability, ctx, zPackage,
+	});
 	applyHackmonsEvs(set, role, ruleTable);
-	if (fdex.gen >= 2) {
+	if (zPackage) set.phnnZItem = zPackage.item;
+	if (set.phnnZItem) {
+		set.item = set.phnnZItem;
+	} else if (fdex.gen >= 2) {
 		const signature = bestSpeciesItem(set, fdex, ruleTable);
 		const abilityItem = HM_ABILITY_ITEMS[toId(set.ability || '')];
 		if (signature) {
@@ -541,6 +588,35 @@ function upgradeCdSet(set, fdex, ruleTable) {
 	if (itemExtras.length) set.phItems = itemExtras.join('/');
 }
 
+// anything Smogon has no set for still deserves a real spread, never the 85-across-the-board default
+function applyCompetitiveSpreads(team, gen, fdex, ruleTable) {
+	const evLimited = ruleTable.evLimit !== null;
+	if (!evLimited) return;
+	for (const set of team) {
+		if (set.phnnSmogonSpread) continue;
+		const role = setRole(set);
+		if (role === 'physical') {
+			set.evs = { hp: 4, atk: 252, def: 0, spa: 0, spd: 0, spe: 252 };
+			set.nature = set.nature && set.nature !== 'Serious' ? set.nature : 'Jolly';
+			set.ivs = { hp: 31, atk: 31, def: 31, spa: 0, spd: 31, spe: 31 };
+		} else if (role === 'special') {
+			set.evs = { hp: 4, atk: 0, def: 0, spa: 252, spd: 0, spe: 252 };
+			set.nature = set.nature && set.nature !== 'Serious' ? set.nature : 'Timid';
+			set.ivs = { hp: 31, atk: 0, def: 31, spa: 31, spd: 31, spe: 31 };
+		} else {
+			// walls want the split that maximises total damage absorbed
+			const species = fdex.species.get(set.species);
+			const bs = species.baseStats;
+			const physSide = bs.def <= bs.spd ? 'def' : 'spd';
+			set.evs = { hp: 252, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
+			set.evs[physSide] = 252;
+			set.evs[physSide === 'def' ? 'spd' : 'def'] = 4;
+			set.nature = physSide === 'def' ? 'Bold' : 'Calm';
+			set.ivs = { hp: 31, atk: 0, def: 31, spa: 31, spd: 31, spe: 31 };
+		}
+	}
+}
+
 function applySmogonSets(team, gen, fdex, ruleTable) {
 	const lib = loadSmogonSets()['gen' + gen];
 	if (!lib) return;
@@ -559,6 +635,9 @@ function applySmogonSets(team, gen, fdex, ruleTable) {
 		if (pick.a) set.ability = pick.a;
 		if (pick.i) set.item = pick.i;
 		if (pick.na) set.nature = pick.na;
+		if (pick.e) set.evs = { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0, ...pick.e };
+		if (pick.v) set.ivs = { hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31, ...pick.v };
+		set.phnnSmogonSpread = !!pick.e;
 	}
 }
 
@@ -590,7 +669,10 @@ function reshape(team, baseid, gen, rulesText, ruleTable, fdex, ctx) {
 	if (isHackmons && !baseid.includes('letsgo') && Math.random() < 0.45) {
 		applyArchetype(team, fdex, ruleTable, usedAbilities);
 	}
-	if (!isHackmons) applySmogonSets(team, gen, fdex, ruleTable);
+	if (!isHackmons) {
+		applySmogonSets(team, gen, fdex, ruleTable);
+		applyCompetitiveSpreads(team, gen, fdex, ruleTable);
+	}
 	const isLetsGo = baseid.includes('letsgo');
 	const usedItems = new Set();
 	let fillerIdx = 0;
@@ -742,6 +824,8 @@ function generateTeam(formatid) {
 			for (const set of team) {
 				delete set.phnnForcedMoves;
 				delete set.phnnForcedRole;
+				delete set.phnnSmogonSpread;
+				delete set.phnnZItem;
 			}
 			return { team: Teams.pack(team), export: Teams.export(team), source, attempts: attempt + 1 };
 		}

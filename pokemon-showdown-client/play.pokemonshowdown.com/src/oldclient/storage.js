@@ -1268,6 +1268,13 @@ Storage.getTeamIcons = function (team) {
 	} else if (!team.iconCache) {
 		team.iconCache = Storage.packedTeamIcons(team.team);
 	}
+	// the dex may not have loaded yet, in which case every icon resolves to the '?' placeholder;
+	// caching that would keep the placeholders forever, so recompute next time instead
+	if (!window.BattlePokedex && team.iconCache) {
+		var uncached = team.iconCache;
+		team.iconCache = '';
+		return uncached;
+	}
 	return team.iconCache;
 };
 
