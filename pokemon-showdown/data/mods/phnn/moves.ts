@@ -5,6 +5,28 @@ function phnnIsShadowMon(target: any): boolean {
 	return target.moveSlots.some((s: any) => PHNN_SHADOW_MOVE_IDS.includes(s.id));
 }
 export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
+
+	// upstream leaves priority out of these descriptions; No Nerfs spells it out
+	babydolleyes: { inherit: true, shortDesc: "Lowers the target's Attack by 1. Nearly always goes first (priority +1).", desc: "Lowers the target's Attack by 1 stage. This move has a priority of +1, so it nearly always goes first within its priority bracket." },
+	banefulbunker: { inherit: true, shortDesc: "Protects from moves. Contact: poison. Nearly always goes first (priority +4).", desc: "The user is protected from most attacks made by other Pokemon during this turn, and Pokemon making contact with the user become poisoned. This move has a 1/X chance of being successful, where X starts at 1 and triples each time this move is successfully used. X resets to 1 if this move fails, if the user's last move used is not Baneful Bunker, Burning Bulwark, Detect, Endure, King's Shield, Max Guard, Obstruct, Protect, Quick Guard, Silk Trap, Spiky Shield, or Wide Guard, or if it was one of those moves and the user's protection was broken. Fails if the user moves last this turn. This move has a priority of +4, so it nearly always goes first within its priority bracket." },
+	burningbulwark: { inherit: true, shortDesc: "Protects from damaging attacks. Contact: burn. Nearly always goes first (priority +4).", desc: "The user is protected from most attacks made by other Pokemon during this turn, and Pokemon trying to make contact with the user become burned. Non-damaging moves go through this protection. This move has a 1/X chance of being successful, where X starts at 1 and triples each time this move is successfully used. X resets to 1 if this move fails, if the user's last move used is not Baneful Bunker, Burning Bulwark, Detect, Endure, King's Shield, Max Guard, Obstruct, Protect, Quick Guard, Silk Trap, Spiky Shield, or Wide Guard, or if it was one of those moves and the user's protection was broken. Fails if the user moves last this turn. This move has a priority of +4, so it nearly always goes first within its priority bracket." },
+	craftyshield: { inherit: true, shortDesc: "Protects allies from Status moves this turn. Nearly always goes first (priority +3).", desc: "The user and its party members are protected from non-damaging attacks made by other Pokemon, including allies, during this turn. Fails if the user moves last this turn or if this move is already in effect for the user's side. This move has a priority of +3, so it nearly always goes first within its priority bracket." },
+	detect: { inherit: true, shortDesc: "Prevents moves from affecting the user this turn. Nearly always goes first (priority +4).", desc: "The user is protected from most attacks made by other Pokemon during this turn. This move has a 1/X chance of being successful, where X starts at 1 and triples each time this move is successfully used. X resets to 1 if this move fails, if the user's last move used is not Baneful Bunker, Burning Bulwark, Detect, Endure, King's Shield, Max Guard, Obstruct, Protect, Quick Guard, Silk Trap, Spiky Shield, or Wide Guard, or if it was one of those moves and the user's protection was broken. Fails if the user moves last this turn. This move has a priority of +4, so it nearly always goes first within its priority bracket." },
+	endure: { inherit: true, shortDesc: "User survives attacks this turn with at least 1 HP. Nearly always goes first (priority +4).", desc: "The user will survive attacks made by other Pokemon during this turn with at least 1 HP. This move has a 1/X chance of being successful, where X starts at 1 and triples each time this move is successfully used. X resets to 1 if this move fails, if the user's last move used is not Baneful Bunker, Burning Bulwark, Detect, Endure, King's Shield, Max Guard, Obstruct, Protect, Quick Guard, Silk Trap, Spiky Shield, or Wide Guard, or if it was one of those moves and the user's protection was broken. Fails if the user moves last this turn. This move has a priority of +4, so it nearly always goes first within its priority bracket." },
+	fakeout: { inherit: true, shortDesc: "Hits first. First turn out only. 100% flinch chance. Nearly always goes first (priority +3).", desc: "Has a 100% chance to make the target flinch. Fails unless it is the user's first turn on the field. This move has a priority of +3, so it nearly always goes first within its priority bracket." },
+	helpinghand: { inherit: true, shortDesc: "One adjacent ally's move power is 1.5x this turn. Nearly always goes first (priority +5).", desc: "The power of the target's attack this turn is multiplied by 1.5 (this effect is stackable). Fails if there is no ally adjacent to the user or if the ally already moved this turn, but does not fail if the ally is using a two-turn move. This move has a priority of +5, so it nearly always goes first within its priority bracket." },
+	iondeluge: { inherit: true, shortDesc: "Normal moves become Electric type this turn. Nearly always goes first (priority +1).", desc: "Causes Normal-type moves to become Electric type this turn. The effect happens after other effects that change a move's type. This move has a priority of +1, so it nearly always goes first within its priority bracket." },
+	magiccoat: { inherit: true, shortDesc: "Bounces back certain non-damaging moves. Nearly always goes first (priority +4).", desc: "Until the end of the turn, the user is unaffected by certain non-damaging moves directed at it and will instead use such moves against the original user. Moves reflected in this way are unable to be reflected again by this or the Magic Bounce Ability's effect. Spikes, Stealth Rock, Sticky Web, and Toxic Spikes can only be reflected once per side, by the leftmost Pokemon under this or the Magic Bounce Ability's effect. The Lightning Rod and Storm Drain Abilities redirect their respective moves before this move takes effect. This move has a priority of +4, so it nearly always goes first within its priority bracket." },
+	obstruct: { inherit: true, shortDesc: "Protects from damaging attacks. Contact: -2 Def. Nearly always goes first (priority +4).", desc: "The user is protected from most attacks made by other Pokemon during this turn, and Pokemon trying to make contact with the user have their Defense lowered by 2 stages. Non-damaging moves go through this protection. This move has a 1/X chance of being successful, where X starts at 1 and triples each time this move is successfully used. X resets to 1 if this move fails, if the user's last move used is not Baneful Bunker, Burning Bulwark, Detect, Endure, King's Shield, Max Guard, Obstruct, Protect, Quick Guard, Silk Trap, Spiky Shield, or Wide Guard, or if it was one of those moves and the user's protection was broken. Fails if the user moves last this turn. This move has a priority of +4, so it nearly always goes first within its priority bracket." },
+	powder: { inherit: true, shortDesc: "If using a Fire move, target loses 1/4 max HP. Nearly always goes first (priority +1).", desc: "If the target uses a Fire-type move this turn, it is prevented from executing and the target loses 1/4 of its maximum HP, rounded half up. This effect does not happen if the Fire-type move is prevented by Primordial Sea. This move has a priority of +1, so it nearly always goes first within its priority bracket." },
+	protect: { inherit: true, shortDesc: "Prevents moves from affecting the user this turn. Nearly always goes first (priority +4).", desc: "The user is protected from most attacks made by other Pokemon during this turn. This move has a 1/X chance of being successful, where X starts at 1 and triples each time this move is successfully used. X resets to 1 if this move fails, if the user's last move used is not Baneful Bunker, Burning Bulwark, Detect, Endure, King's Shield, Max Guard, Obstruct, Protect, Quick Guard, Silk Trap, Spiky Shield, or Wide Guard, or if it was one of those moves and the user's protection was broken. Fails if the user moves last this turn. This move has a priority of +4, so it nearly always goes first within its priority bracket." },
+	silktrap: { inherit: true, shortDesc: "Protects from damaging attacks. Contact: -1 Spe. Nearly always goes first (priority +4).", desc: "The user is protected from most attacks made by other Pokemon during this turn, and Pokemon trying to make contact with the user have their Speed lowered by 1 stage. Non-damaging moves go through this protection. This move has a 1/X chance of being successful, where X starts at 1 and triples each time this move is successfully used. X resets to 1 if this move fails, if the user's last move used is not Baneful Bunker, Burning Bulwark, Detect, Endure, King's Shield, Max Guard, Obstruct, Protect, Quick Guard, Silk Trap, Spiky Shield, or Wide Guard, or if it was one of those moves and the user's protection was broken. Fails if the user moves last this turn. This move has a priority of +4, so it nearly always goes first within its priority bracket." },
+	snatch: { inherit: true, shortDesc: "User steals certain support moves to use itself. Nearly always goes first (priority +4).", desc: "If another Pokemon uses certain non-damaging moves this turn, the user steals that move to use itself. If multiple Pokemon use one of those moves this turn, the applicable moves are all stolen by the first Pokemon in turn order that used this move this turn. This effect is ignored while the user is under the effect of Sky Drop. This move has a priority of +4, so it nearly always goes first within its priority bracket." },
+	spikyshield: { inherit: true, shortDesc: "Protects from moves. Contact: loses 1/8 max HP. Nearly always goes first (priority +4).", desc: "The user is protected from most attacks made by other Pokemon during this turn, and Pokemon making contact with the user lose 1/8 of their maximum HP, rounded down. This move has a 1/X chance of being successful, where X starts at 1 and triples each time this move is successfully used. X resets to 1 if this move fails, if the user's last move used is not Baneful Bunker, Burning Bulwark, Detect, Endure, King's Shield, Max Guard, Obstruct, Protect, Quick Guard, Silk Trap, Spiky Shield, or Wide Guard, or if it was one of those moves and the user's protection was broken. Fails if the user moves last this turn. This move has a priority of +4, so it nearly always goes first within its priority bracket." },
+	spotlight: { inherit: true, shortDesc: "Target's foes' moves are redirected to it this turn. Nearly always goes first (priority +3).", desc: "Until the end of the turn, all single-target attacks from opponents of the target are redirected to the target. Such attacks are redirected to the target before they can be reflected by Magic Coat or the Magic Bounce Ability, or drawn in by the Lightning Rod or Storm Drain Abilities. Fails if it is not a Double Battle or Battle Royal. This move has a priority of +3, so it nearly always goes first within its priority bracket." },
+	wideguard: { inherit: true, shortDesc: "Protects allies from multi-target moves this turn. Nearly always goes first (priority +3).", desc: "The user and its party members are protected from moves made by other Pokemon, including allies, during this turn that target all adjacent foes or all adjacent Pokemon. This move modifies the same 1/X chance of being successful used by other protection moves, where X starts at 1 and triples each time this move is successfully used, but does not use the chance to check for failure. X resets to 1 if this move fails, if the user's last move used is not Baneful Bunker, Burning Bulwark, Detect, Endure, King's Shield, Max Guard, Obstruct, Protect, Quick Guard, Silk Trap, Spiky Shield, or Wide Guard, or if it was one of those moves and the user's protection was broken. Fails if the user moves last this turn or if this move is already in effect for the user's side. This move has a priority of +3, so it nearly always goes first within its priority bracket." },
+
+
 	shadowrift: {
 		gen: 9,
 		num: 0,
@@ -439,6 +461,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	feint: {
 		inherit: true,
 		basePower: 50,
+		shortDesc: "Nearly always goes first (priority +2).",
 	},
 	absorb: {
 		inherit: true,
@@ -459,6 +482,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	allyswitch: {
 		inherit: true,
 		onPrepareHit: undefined,
+		shortDesc: "Nearly always goes first (priority +2).",
 	},
 	mirrorcoat: {
 		inherit: true,
@@ -485,6 +509,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	bide: {
 		inherit: true,
 		accuracy: true,
+		shortDesc: "Nearly always goes first (priority +1).",
 	},
 	memento: {
 		inherit: true,
@@ -737,7 +762,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 				}
 			},
 		},
-		shortDesc: "Protects from moves, including status moves. Contact: lowers Atk by 2.",
+		shortDesc: "Protects from moves, including status moves. Contact: lowers Atk by 2. Nearly always goes first (priority +4).",
 		desc: "The user is protected from most attacks made by other Pokemon during this turn, including Status moves, and Pokemon that make contact with the user have their Attack lowered by 2 stages. Z-Moves and Max Moves are not blocked, but deal 25% of their usual damage. This move has a 1/X chance of being successful, where X starts at 1 and triples each time this move is successfully used. X resets to 1 if this move fails, if the user's last move used is not Baneful Bunker, Detect, Endure, King's Shield, Max Guard, Obstruct, Protect, Quick Guard, Silk Trap, Spiky Shield, or Wide Guard, or if it was one of those moves and the user's protection was broken. Fails if the user moves last this turn.",
 	},
 	amnesia: {
@@ -813,10 +838,12 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	followme: {
 		inherit: true,
 		priority: 3,
+		shortDesc: "Nearly always goes first (priority +3).",
 	},
 	ragepowder: {
 		inherit: true,
 		priority: 3,
+		shortDesc: "Nearly always goes first (priority +3).",
 	},
 
 	selfdestruct: {
@@ -1192,7 +1219,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		inherit: true,
 		isMax: false,
 		pp: 5,
-		shortDesc: "Protects user from most attacks, including Max/G-Max moves.",
+		shortDesc: "Protects user from most attacks, including Max/G-Max moves. Nearly always goes first (priority +4).",
 		desc: "Usable as a regular move (does not require Dynamax). The user is protected from most attacks made by other Pokemon this turn, including Max Moves, G-Max Moves, and Z-Moves. Subject to the usual diminishing success chance when used consecutively.",
 	},
 
@@ -1430,7 +1457,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		inherit: true,
 		pp: 15,
 		willCrit: true,
-		shortDesc: "Always crits; raises the user's evasion by 1.",
+		shortDesc: "Always crits; raises the user's evasion by 1. Nearly always goes first (priority +2).",
 		desc: "This move is always a critical hit unless the target is under the effect of Lucky Chant or has the Battle Armor or Shell Armor Abilities. Raises the user's evasion by 1 stage.",
 	},
 	weatherball: {
