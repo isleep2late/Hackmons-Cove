@@ -1568,7 +1568,7 @@
 					var bMeta = '';
 					if (this.id === 'battlelog') {
 						var bPw = /-([a-z0-9]+)pw$/.exec(id);
-						bMeta = ' <small class="battlelog-meta">' + BattleLog.escapeHTML(id) + (bPw ? ' (password: ' + BattleLog.escapeHTML(bPw[1]) + ')' : '') + '</small>';
+						if (bPw) bMeta = ' <small class="battlelog-meta">(password: ' + BattleLog.escapeHTML(bPw[1]) + ')</small>';
 					}
 					this.$chat.append('<div class="notice">' + bStamp + '<a href="' + app.root + id + '" class="ilink">' + battletype + ' started between <strong style="' + BattleLog.hashColor(toUserid(name)) + '">' + BattleLog.escapeHTML(name) + '</strong> and <strong style="' + BattleLog.hashColor(toUserid(name2)) + '">' + BattleLog.escapeHTML(name2) + '</strong>.</a>' + bMeta + '</div>');
 					break;
