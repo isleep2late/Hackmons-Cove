@@ -71,6 +71,9 @@ const HM_ABILITY_ITEMS = {
 // these abilities do nothing at all without the item that triggers them, so they outrank Eviolite
 const ITEM_DEPENDENT_ABILITIES = new Set(['poisonheal', 'guts', 'quickfeet', 'unburden', 'flareboost', 'toxicboost']);
 const HM_OHKO = ['Sheer Cold', 'Fissure', 'Horn Drill', 'Guillotine'];
+// at level 5 a flat 40 kills 103 of the 118 legal Little Cup bodies outright
+const HM_LOW_LEVEL_FIXED = ['Dragon Rage', 'Sonic Boom'];
+const HM_LOW_LEVEL_CAP = 10;
 // content the fork un-dexits: strictly better than the vanilla staples once legal
 const HM_ELITE_MOVES = {
 	physical: [
@@ -103,8 +106,8 @@ const HM_WALL_MOVES = [
 	['Core Enforcer', 'U-turn', 'Whirlwind', 'Haze', 'Knock Off', 'Seismic Toss'],
 ];
 // Imposter copies the foe outright; it wants maximum bulk and a way to break the copy stalemate
-const HM_IMPOSTER_BODIES = ['Snorlax-Gmax', 'Blissey', 'Chansey', 'Pikachu-Gmax', 'Snorlax', 'Ting-Lu', 'Guzzlord'];
-const HM_IMPOSTER_ITEMS = { chansey: 'Eviolite', pikachu: 'Light Ball', pikachugmax: 'Light Ball' };
+const HM_IMPOSTER_BODIES = ['Snorlax-Gmax', 'Blissey', 'Chansey', 'Pikachu-Gmax', 'Snorlax', 'Ting-Lu', 'Guzzlord', 'Happiny', 'Munchlax'];
+const HM_IMPOSTER_ITEMS = { chansey: 'Eviolite', happiny: 'Eviolite', munchlax: 'Eviolite', pikachu: 'Light Ball', pikachugmax: 'Light Ball' };
 // team-level strategy packages, drawn from how these actually get played
 const HM_ARCHETYPES = [
 	{
@@ -442,7 +445,21 @@ function speciesPool(fdex, ruleTable, fullid) {
 		/(-Shadow\b|Shadow-|-Totem\b|-Gmax\b|-Alpha\b|-Titan\b)/ :
 		/(-Shadow\b|Shadow-)/;
 	const spice = pool.filter(e => altRe.test(e.species.name) || /Shadow$/.test(e.species.name));
-	const result = { pool, spice };
+	// the fastest bodies are low-BST, so the BST-ranked window can never reach them
+	const scored = pool.map(e => ({
+		e,
+		spe: e.species.baseStats.spe,
+		aura: boosted && /-(Totem|Titan)$/.test(e.species.name) ? e.species.baseStats.spe * 2 : e.species.baseStats.spe,
+	}));
+	const seenKing = new Set();
+	const speedKings = [];
+	for (const s of scored.slice().sort((a, b) => b.aura - a.aura).slice(0, 2)
+		.concat(scored.slice().sort((a, b) => b.spe - a.spe).slice(0, 2))) {
+		if (seenKing.has(s.e.species.id)) continue;
+		seenKing.add(s.e.species.id);
+		speedKings.push(s.e);
+	}
+	const result = { pool, spice, speedKings };
 	speciesPoolCache.set(fullid, result);
 	return result;
 }
@@ -463,7 +480,7 @@ function probeSpecies(cand, validator) {
 }
 
 function sampleSpecies(pools, validator, teamSize, allowDupes, singletonBases) {
-	const { pool, spice } = pools;
+	const { pool, spice, speedKings } = pools;
 	const chosen = [];
 	const baseCounts = new Map();
 	const take = (cand) => {
@@ -489,6 +506,11 @@ function sampleSpecies(pools, validator, teamSize, allowDupes, singletonBases) {
 		let guard = 0;
 		while (chosen.length < spiceWanted && guard++ < 40) {
 			take(spice[Math.floor(Math.pow(Math.random(), 1.6) * spiceWindow)]);
+		}
+	}
+	if (speedKings && speedKings.length && chosen.length < teamSize && Math.random() < 0.35) {
+		for (let g = 0; g < 4; g++) {
+			if (take(speedKings[Math.floor(Math.random() * speedKings.length)])) break;
 		}
 	}
 	const dupeCount = allowDupes && Math.random() < 0.45 ? (Math.random() < 0.3 ? 2 : 1) : 0;
@@ -534,6 +556,10 @@ function buildHackmonsMoves(set, role, fdex, ruleTable, opts) {
 	};
 	forced.forEach(add);
 	if (opts && opts.noGuardOhko) add(pickMove(HM_OHKO, fdex, ruleTable, used, 1, ctx));
+	const battleLevel = ruleTable.adjustLevel || ruleTable.defaultLevel || ruleTable.maxLevel || 100;
+	if (battleLevel <= HM_LOW_LEVEL_CAP && !(opts && opts.noGuardOhko) && Math.random() < 0.35) {
+		add(pickMove(HM_LOW_LEVEL_FIXED, fdex, ruleTable, used, 1, ctx));
+	}
 	const attackPool = () => ((HM_STAB[types[0]] || {}).special || [])
 		.concat((HM_STAB[types[1]] || {}).special || [], HM_COVERAGE.special,
 			(HM_STAB[types[0]] || {}).physical || [], HM_COVERAGE.physical);
@@ -836,18 +862,26 @@ function applyArchetype(team, fdex, ruleTable, usedAbilities) {
 			// Imposter copies the target's stats but keeps its OWN HP, so the best body is simply the
 			// bulkiest legal one in THIS format -- which differs per generation (and Gmax only helps
 			// where Dynamax exists)
-			const dynamaxHere = ruleTable.has('totemaura');
+			// the Gmax HP doubling is baked into the phnn mod's statModify, not the Totem Aura rule
+			const gmaxDoubled = toId(fdex.currentMod || '') === 'phnn';
+			const wantStage = ruleTable.has('firststageonly') ? 'LC' :
+				ruleTable.has('middlestageonly') ? 'MC' : null;
 			const ranked = slot.bodies
 				.map(n => fdex.species.get(n))
-				.filter(sp => sp.exists && ruleTable.check('pokemon:' + sp.id) !== 'banned')
-				.map(sp => ({
-					sp,
-					// a Gmax forme only gets its HP boost in Extended; everywhere else it is a stat
-					// clone of the base species and must not outrank a real wall.
-					hp: sp.baseStats.hp + (dynamaxHere && /-Gmax$/.test(sp.name) ? sp.baseStats.hp : 0),
-				}))
+				.filter(sp => sp.exists && ruleTable.check('pokemon:' + sp.id) !== 'banned' &&
+					ruleTable.check('basepokemon:' + toId(sp.baseSpecies)) !== 'banned' &&
+					(!wantStage || evoStage(fdex, sp) === wantStage))
+				.map(sp => {
+					const base = sp.baseStats.hp + (gmaxDoubled && /-Gmax$/.test(sp.name) ? sp.baseStats.hp : 0);
+					const item = HM_IMPOSTER_ITEMS[toId(sp.name)] || HM_IMPOSTER_ITEMS[toId(sp.baseSpecies || '')];
+					const bonus = item === 'Eviolite' && itemAllowed('Eviolite', fdex, ruleTable) ? 1.15 :
+						item === 'Light Ball' && itemAllowed('Light Ball', fdex, ruleTable) ? 1.10 : 1;
+					return { sp, hp: base * bonus };
+				})
 				.sort((a, b) => b.hp - a.hp);
-			const body = ranked.length ? ranked[0].sp.name : null;
+			const cutoff = ranked.length ? ranked[0].hp * 0.9 : 0;
+			const viable = ranked.filter(r => r.hp >= cutoff);
+			const body = viable.length ? viable[Math.floor(Math.random() * viable.length)].sp.name : null;
 			if (body) {
 				set.species = fdex.species.get(body).name;
 				set.name = set.species;
