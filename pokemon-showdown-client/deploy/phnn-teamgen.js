@@ -404,6 +404,8 @@ function bstOf(species, boosted) {
 	return raw;
 }
 
+const SINGLETON_BASES = new Set(['arceus']);
+
 const speciesPoolCache = new Map();
 function speciesPool(fdex, ruleTable, fullid) {
 	if (speciesPoolCache.has(fullid)) return speciesPoolCache.get(fullid);
@@ -441,13 +443,14 @@ function probeSpecies(cand, validator) {
 	return true;
 }
 
-function sampleSpecies(pools, validator, teamSize, allowDupes) {
+function sampleSpecies(pools, validator, teamSize, allowDupes, singletonBases) {
 	const { pool, spice } = pools;
 	const chosen = [];
 	const baseCounts = new Map();
 	const take = (cand) => {
 		const baseId = toId(cand.species.baseSpecies || cand.species.name);
 		const count = baseCounts.get(baseId) || 0;
+		if (count >= 1 && singletonBases && singletonBases.has(baseId)) return false;
 		if (count >= 1 && (!allowDupes || count >= 3 || Math.random() >= 0.3)) return false;
 		if (!count && !probeSpecies(cand, validator)) return false;
 		baseCounts.set(baseId, count + 1);
@@ -479,7 +482,9 @@ function sampleSpecies(pools, validator, teamSize, allowDupes) {
 		take(cand);
 	}
 	while (chosen.length < teamSize && chosen.length > 0 && dupeCount > 0) {
-		chosen.push(chosen[Math.floor(Math.random() * Math.min(2, chosen.length))]);
+		const dupe = chosen[Math.floor(Math.random() * Math.min(2, chosen.length))];
+		if (singletonBases && singletonBases.has(toId(dupe.baseSpecies || dupe.name))) break;
+		chosen.push(dupe);
 	}
 	while (chosen.length < teamSize && guard++ < 300) {
 		const cand = pool[Math.floor(Math.pow(Math.random(), 2.2) * window)];
@@ -829,6 +834,17 @@ function reshape(team, baseid, gen, rulesText, ruleTable, fdex, ctx, gate) {
 	const isLetsGo = baseid.includes('letsgo');
 	const usedItems = new Set();
 	let fillerIdx = 0;
+	if (gen <= 7) {
+		const plainArceus = fdex.species.get('Arceus');
+		const arceusLegal = plainArceus.exists && ruleTable.check('pokemon:' + plainArceus.id) !== 'banned';
+		for (const set of team) {
+			if (!/^arceus./.test(toId(set.species || ''))) continue;
+			if (/plate$/.test(toId(set.item || ''))) continue;
+			if (!arceusLegal) continue;
+			if (toId(set.name || '') === toId(set.species || '')) set.name = plainArceus.name;
+			set.species = plainArceus.name;
+		}
+	}
 	for (const set of team) {
 		delete set.level;
 		if (gen < 9) delete set.teraType;
@@ -933,7 +949,7 @@ function generateTeam(formatid) {
 			if (synthesize) {
 				const sPool = speciesPool(fdex, ruleTable, fullid);
 				const allowDupes = !ruleTable.has('speciesclause') && !ruleTable.has('formeclause');
-				const picked = sampleSpecies(sPool, validator, teamSize, allowDupes);
+				const picked = sampleSpecies(sPool, validator, teamSize, allowDupes, gen <= 7 ? SINGLETON_BASES : null);
 				if (picked.length >= teamSize) {
 					pool = picked.map(sp => ({
 						name: sp.name, species: sp.name, ability: '', item: '',
