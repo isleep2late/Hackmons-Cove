@@ -1838,9 +1838,10 @@ p.or:after {
 	width: 155px;
 	margin-right: 4px;
 	height: 40px;
-	font: 10pt/100% Verdana, sans-serif;
+	font: 8.5pt/1 Verdana, sans-serif;
 	position: relative;
-	padding:  6px 4px 0 4px;
+	padding:  3px 4px 0 4px;
+	overflow-wrap: anywhere;
 }
 .movebutton small {
 	color: #777777;
@@ -1848,12 +1849,12 @@ p.or:after {
 .movebutton small.type {
 	padding-top: 3px;
 	float: left;
-	font-size: 8pt;
+	font-size: 7pt;
 }
 .movebutton small.pp {
 	padding-top: 2px;
 	float: right;
-	font-size: 8pt;
+	font-size: 7pt;
 }
 .megaevo-box {
 	clear: both;
@@ -2782,12 +2783,6 @@ p.or:after {
 	}
 	.maintabbar.minitabbar .roomtab.button small {
 		font-size: 8px;
-	}
-	.movebutton {
-		font-size: 8pt;
-		line-height: 1;
-		padding-top: 3px;
-		overflow-wrap: anywhere;
 	}
 	.battle-controls .whatdo button[name="toggleCalcdexOverlay"] {
 		clear: right;
