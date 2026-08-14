@@ -70,6 +70,34 @@ const HM_ABILITY_ITEMS = {
 
 // these abilities do nothing at all without the item that triggers them, so they outrank Eviolite
 const ITEM_DEPENDENT_ABILITIES = new Set(['poisonheal', 'guts', 'quickfeet', 'unburden', 'flareboost', 'toxicboost']);
+// formats with one dominant body the metagame actually stacks. Gen 1 Electrode outspeeds everything
+// and a Pokemon woken from sleep loses its whole turn, so Spore plus fixed damage is a lock; Gen 3
+// Slaking escapes Truant only by carrying no ability at all, which that format permits.
+const HM_FORMAT_CORES = {
+	gen1purehackmons: {
+		species: 'Electrode',
+		ability: null,
+		movesets: [
+			['Spore', 'Seismic Toss', 'Agility', 'Quick Attack'],
+			['Spore', 'Night Shade', 'Agility', 'Explosion'],
+			['Spore', 'Seismic Toss', 'Agility', 'Explosion'],
+			['Spore', 'Night Shade', 'Quick Attack', 'Agility'],
+		],
+		chance: 0.55, min: 3, max: 6,
+	},
+	gen3purehackmons: {
+		species: 'Slaking',
+		ability: 'No Ability',
+		movesets: [
+			['Fake Out', 'Extreme Speed', 'Swords Dance', 'Earthquake'],
+			['Fake Out', 'Extreme Speed', 'Shadow Ball', 'Earthquake'],
+			['Fake Out', 'Extreme Speed', 'Swords Dance', 'Return'],
+			['Fake Out', 'Extreme Speed', 'Earthquake', 'Explosion'],
+		],
+		chance: 0.5, min: 2, max: 4,
+	},
+};
+
 const HM_OHKO = ['Sheer Cold', 'Fissure', 'Horn Drill', 'Guillotine'];
 // at level 5 a flat 40 kills 103 of the 118 legal Little Cup bodies outright
 const HM_LOW_LEVEL_FIXED = ['Dragon Rage', 'Sonic Boom'];
@@ -557,7 +585,7 @@ function buildHackmonsMoves(set, role, fdex, ruleTable, opts) {
 	forced.forEach(add);
 	if (opts && opts.noGuardOhko) add(pickMove(HM_OHKO, fdex, ruleTable, used, 1, ctx));
 	const battleLevel = ruleTable.adjustLevel || ruleTable.defaultLevel || ruleTable.maxLevel || 100;
-	if (battleLevel <= HM_LOW_LEVEL_CAP && !(opts && opts.noGuardOhko) && Math.random() < 0.35) {
+	if (battleLevel <= HM_LOW_LEVEL_CAP && !(opts && opts.noGuardOhko) && Math.random() < 0.9) {
 		add(pickMove(HM_LOW_LEVEL_FIXED, fdex, ruleTable, used, 1, ctx));
 	}
 	const attackPool = () => ((HM_STAB[types[0]] || {}).special || [])
@@ -902,6 +930,25 @@ function applyArchetype(team, fdex, ruleTable, usedAbilities) {
 	return plan.name;
 }
 
+function applyFormatCore(team, baseid, fdex, ruleTable) {
+	const core = HM_FORMAT_CORES[baseid];
+	if (!core || Math.random() >= core.chance) return;
+	const species = fdex.species.get(core.species);
+	if (!species.exists || ruleTable.check('pokemon:' + species.id) === 'banned') return;
+	const count = Math.min(team.length, core.min + Math.floor(Math.random() * (core.max - core.min + 1)));
+	for (let i = 0; i < count; i++) {
+		const set = team[i];
+		if (!set) continue;
+		const moves = core.movesets[Math.floor(Math.random() * core.movesets.length)]
+			.filter(m => moveAllowed(m, fdex, ruleTable));
+		if (moves.length < 2) return;
+		set.species = species.name;
+		set.name = species.name;
+		set.moves = moves.slice(0, 4);
+		if (core.ability !== null) set.ability = core.ability;
+	}
+}
+
 function reshape(team, baseid, gen, rulesText, ruleTable, fdex, ctx, gate) {
 	const isCD = baseid.includes('customdisguise') && /^gen[89]/.test(baseid) && !toId(rulesText).includes('standardcustom');
 	const isHackmons = isHackmonsTarget(baseid) && gen >= 3 && !baseid.includes('metronome');
@@ -942,6 +989,7 @@ function reshape(team, baseid, gen, rulesText, ruleTable, fdex, ctx, gate) {
 		}
 		if (isCD) upgradeCdSet(set, fdex, ruleTable);
 	}
+	applyFormatCore(team, baseid, fdex, ruleTable);
 	return team;
 }
 
