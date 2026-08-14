@@ -406,16 +406,32 @@ function bstOf(species, boosted) {
 
 const SINGLETON_BASES = new Set(['arceus']);
 
+const EVO_AVAILABLE = new Set([null, undefined, 'Past', 'Unobtainable']);
+function evoAvailable(species) {
+	return !!species && species.exists && species.num > 0 && EVO_AVAILABLE.has(species.isNonstandard);
+}
+function evoStage(fdex, species) {
+	const evos = (species.evos || []).map(e => fdex.species.get(e)).filter(evoAvailable);
+	if (!evos.length) return 'FE';
+	const prevo = species.prevo ? fdex.species.get(species.prevo) : null;
+	if (evoAvailable(prevo)) return 'MC';
+	const again = evos.some(e => (e.evos || []).map(x => fdex.species.get(x)).filter(evoAvailable).length > 0);
+	return again ? 'LC' : 'NFE';
+}
+
 const speciesPoolCache = new Map();
 function speciesPool(fdex, ruleTable, fullid) {
 	if (speciesPoolCache.has(fullid)) return speciesPoolCache.get(fullid);
 	const pool = [];
 	const boosted = ruleTable.has('totemaura');
+	const wantStage = ruleTable.has('firststageonly') ? 'LC' :
+		ruleTable.has('middlestageonly') ? 'MC' : null;
 	for (const species of fdex.species.all()) {
 		if (!species.exists || !species.baseStats) continue;
 		if (species.isNonstandard && species.isNonstandard !== 'Past' && species.isNonstandard !== 'Unobtainable') continue;
 		if (ruleTable.check('pokemon:' + species.id) === 'banned') continue;
 		if (ruleTable.check('basepokemon:' + toId(species.baseSpecies)) === 'banned') continue;
+		if (wantStage && evoStage(fdex, species) !== wantStage) continue;
 		pool.push({ species, bst: bstOf(species, boosted) });
 	}
 	pool.sort((a, b) => b.bst - a.bst);
