@@ -70,7 +70,38 @@ const HM_ABILITY_ITEMS = {
 
 // these abilities do nothing at all without the item that triggers them, so they outrank Eviolite
 const ITEM_DEPENDENT_ABILITIES = new Set(['poisonheal', 'guts', 'quickfeet', 'unburden', 'flareboost', 'toxicboost']);
+// formats with one dominant body the metagame actually stacks. Gen 1 Electrode outspeeds everything
+// and a Pokemon woken from sleep loses its whole turn, so Spore plus fixed damage is a lock; Gen 3
+// Slaking escapes Truant only by carrying no ability at all, which that format permits.
+const HM_FORMAT_CORES = {
+	gen1purehackmons: {
+		species: 'Electrode',
+		ability: null,
+		movesets: [
+			['Spore', 'Seismic Toss', 'Agility', 'Quick Attack'],
+			['Spore', 'Night Shade', 'Agility', 'Explosion'],
+			['Spore', 'Seismic Toss', 'Agility', 'Explosion'],
+			['Spore', 'Night Shade', 'Quick Attack', 'Agility'],
+		],
+		chance: 0.55, min: 3, max: 6,
+	},
+	gen3purehackmons: {
+		species: 'Slaking',
+		ability: 'No Ability',
+		movesets: [
+			['Fake Out', 'Extreme Speed', 'Swords Dance', 'Earthquake'],
+			['Fake Out', 'Extreme Speed', 'Shadow Ball', 'Earthquake'],
+			['Fake Out', 'Extreme Speed', 'Swords Dance', 'Return'],
+			['Fake Out', 'Extreme Speed', 'Earthquake', 'Explosion'],
+		],
+		chance: 0.5, min: 2, max: 4,
+	},
+};
+
 const HM_OHKO = ['Sheer Cold', 'Fissure', 'Horn Drill', 'Guillotine'];
+// at level 5 a flat 40 kills 103 of the 118 legal Little Cup bodies outright
+const HM_LOW_LEVEL_FIXED = ['Dragon Rage', 'Sonic Boom'];
+const HM_LOW_LEVEL_CAP = 10;
 // content the fork un-dexits: strictly better than the vanilla staples once legal
 const HM_ELITE_MOVES = {
 	physical: [
@@ -103,8 +134,8 @@ const HM_WALL_MOVES = [
 	['Core Enforcer', 'U-turn', 'Whirlwind', 'Haze', 'Knock Off', 'Seismic Toss'],
 ];
 // Imposter copies the foe outright; it wants maximum bulk and a way to break the copy stalemate
-const HM_IMPOSTER_BODIES = ['Snorlax-Gmax', 'Blissey', 'Chansey', 'Pikachu-Gmax', 'Snorlax', 'Ting-Lu', 'Guzzlord'];
-const HM_IMPOSTER_ITEMS = { chansey: 'Eviolite', pikachu: 'Light Ball', pikachugmax: 'Light Ball' };
+const HM_IMPOSTER_BODIES = ['Snorlax-Gmax', 'Blissey', 'Chansey', 'Pikachu-Gmax', 'Snorlax', 'Ting-Lu', 'Guzzlord', 'Happiny', 'Munchlax'];
+const HM_IMPOSTER_ITEMS = { chansey: 'Eviolite', happiny: 'Eviolite', munchlax: 'Eviolite', pikachu: 'Light Ball', pikachugmax: 'Light Ball' };
 // team-level strategy packages, drawn from how these actually get played
 const HM_ARCHETYPES = [
 	{
@@ -442,7 +473,21 @@ function speciesPool(fdex, ruleTable, fullid) {
 		/(-Shadow\b|Shadow-|-Totem\b|-Gmax\b|-Alpha\b|-Titan\b)/ :
 		/(-Shadow\b|Shadow-)/;
 	const spice = pool.filter(e => altRe.test(e.species.name) || /Shadow$/.test(e.species.name));
-	const result = { pool, spice };
+	// the fastest bodies are low-BST, so the BST-ranked window can never reach them
+	const scored = pool.map(e => ({
+		e,
+		spe: e.species.baseStats.spe,
+		aura: boosted && /-(Totem|Titan)$/.test(e.species.name) ? e.species.baseStats.spe * 2 : e.species.baseStats.spe,
+	}));
+	const seenKing = new Set();
+	const speedKings = [];
+	for (const s of scored.slice().sort((a, b) => b.aura - a.aura).slice(0, 2)
+		.concat(scored.slice().sort((a, b) => b.spe - a.spe).slice(0, 2))) {
+		if (seenKing.has(s.e.species.id)) continue;
+		seenKing.add(s.e.species.id);
+		speedKings.push(s.e);
+	}
+	const result = { pool, spice, speedKings };
 	speciesPoolCache.set(fullid, result);
 	return result;
 }
@@ -463,7 +508,7 @@ function probeSpecies(cand, validator) {
 }
 
 function sampleSpecies(pools, validator, teamSize, allowDupes, singletonBases) {
-	const { pool, spice } = pools;
+	const { pool, spice, speedKings } = pools;
 	const chosen = [];
 	const baseCounts = new Map();
 	const take = (cand) => {
@@ -489,6 +534,11 @@ function sampleSpecies(pools, validator, teamSize, allowDupes, singletonBases) {
 		let guard = 0;
 		while (chosen.length < spiceWanted && guard++ < 40) {
 			take(spice[Math.floor(Math.pow(Math.random(), 1.6) * spiceWindow)]);
+		}
+	}
+	if (speedKings && speedKings.length && chosen.length < teamSize && Math.random() < 0.35) {
+		for (let g = 0; g < 4; g++) {
+			if (take(speedKings[Math.floor(Math.random() * speedKings.length)])) break;
 		}
 	}
 	const dupeCount = allowDupes && Math.random() < 0.45 ? (Math.random() < 0.3 ? 2 : 1) : 0;
@@ -534,6 +584,10 @@ function buildHackmonsMoves(set, role, fdex, ruleTable, opts) {
 	};
 	forced.forEach(add);
 	if (opts && opts.noGuardOhko) add(pickMove(HM_OHKO, fdex, ruleTable, used, 1, ctx));
+	const battleLevel = ruleTable.adjustLevel || ruleTable.defaultLevel || ruleTable.maxLevel || 100;
+	if (battleLevel <= HM_LOW_LEVEL_CAP && !(opts && opts.noGuardOhko) && Math.random() < 0.9) {
+		add(pickMove(HM_LOW_LEVEL_FIXED, fdex, ruleTable, used, 1, ctx));
+	}
 	const attackPool = () => ((HM_STAB[types[0]] || {}).special || [])
 		.concat((HM_STAB[types[1]] || {}).special || [], HM_COVERAGE.special,
 			(HM_STAB[types[0]] || {}).physical || [], HM_COVERAGE.physical);
@@ -618,6 +672,22 @@ function applyHackmonsEvs(set, role, ruleTable) {
 	}
 }
 
+// abilities that are a straight liability, so a format allowing No Ability would rather have none
+const LIABILITY_ABILITIES = new Set(['truant', 'slowstart', 'defeatist', 'klutz', 'stall', 'slowstart']);
+
+// formats carrying Obtainable Abilities (Gen 3 Pure Hackmons, Gen 1 Balanced Hackmons) only permit a
+// species' own abilities, plus No Ability where it has been unbanned
+function obtainableAbilityFor(set, fdex, ruleTable) {
+	const species = fdex.species.get(set.species || set.name);
+	const own = Object.values(species.abilities || {})
+		.filter(a => a && abilityAllowed(a, fdex, ruleTable));
+	const noneOk = ruleTable.check('ability:noability') !== 'banned';
+	const allLiability = own.length > 0 && own.every(a => LIABILITY_ABILITIES.has(toId(a)));
+	if (noneOk && (!own.length || allLiability || Math.random() < 0.2)) return 'No Ability';
+	if (own.length) return own[Math.floor(Math.random() * own.length)];
+	return noneOk ? 'No Ability' : (own[0] || 'No Ability');
+}
+
 function abilityAllowed(name, fdex, ruleTable) {
 	const ability = fdex.abilities.get(name);
 	if (!ability.exists || ability.gen > fdex.gen || ability.isNonstandard) return false;
@@ -637,6 +707,14 @@ function bestSpeciesItem(set, fdex, ruleTable) {
 function upgradeHackmonsSet(set, fdex, ruleTable, usedAbilities, ctx) {
 	const role = set.phnnForcedRole || setRole(set);
 	const ohkoLegal = !ruleTable.has('ohkoclause') && moveAllowed('Sheer Cold', fdex, ruleTable);
+	const restrictAbilities = ruleTable.has('obtainableabilities');
+	if (restrictAbilities) {
+		set.ability = obtainableAbilityFor(set, fdex, ruleTable);
+		buildHackmonsMoves(set, role, fdex, ruleTable, { ability: set.ability, ctx });
+		applyHackmonsEvs(set, role, ruleTable);
+		if (fdex.gen === 1) delete set.item;
+		return;
+	}
 	const noWeakness = /Arceus-Question|Terapagos-Stellar/.test(set.species || '');
 	if (noWeakness && !usedAbilities.get('wonderguard') && abilityAllowed('Wonder Guard', fdex, ruleTable)) {
 		set.ability = 'Wonder Guard';
@@ -812,18 +890,26 @@ function applyArchetype(team, fdex, ruleTable, usedAbilities) {
 			// Imposter copies the target's stats but keeps its OWN HP, so the best body is simply the
 			// bulkiest legal one in THIS format -- which differs per generation (and Gmax only helps
 			// where Dynamax exists)
-			const dynamaxHere = ruleTable.has('totemaura');
+			// the Gmax HP doubling is baked into the phnn mod's statModify, not the Totem Aura rule
+			const gmaxDoubled = toId(fdex.currentMod || '') === 'phnn';
+			const wantStage = ruleTable.has('firststageonly') ? 'LC' :
+				ruleTable.has('middlestageonly') ? 'MC' : null;
 			const ranked = slot.bodies
 				.map(n => fdex.species.get(n))
-				.filter(sp => sp.exists && ruleTable.check('pokemon:' + sp.id) !== 'banned')
-				.map(sp => ({
-					sp,
-					// a Gmax forme only gets its HP boost in Extended; everywhere else it is a stat
-					// clone of the base species and must not outrank a real wall.
-					hp: sp.baseStats.hp + (dynamaxHere && /-Gmax$/.test(sp.name) ? sp.baseStats.hp : 0),
-				}))
+				.filter(sp => sp.exists && ruleTable.check('pokemon:' + sp.id) !== 'banned' &&
+					ruleTable.check('basepokemon:' + toId(sp.baseSpecies)) !== 'banned' &&
+					(!wantStage || evoStage(fdex, sp) === wantStage))
+				.map(sp => {
+					const base = sp.baseStats.hp + (gmaxDoubled && /-Gmax$/.test(sp.name) ? sp.baseStats.hp : 0);
+					const item = HM_IMPOSTER_ITEMS[toId(sp.name)] || HM_IMPOSTER_ITEMS[toId(sp.baseSpecies || '')];
+					const bonus = item === 'Eviolite' && itemAllowed('Eviolite', fdex, ruleTable) ? 1.15 :
+						item === 'Light Ball' && itemAllowed('Light Ball', fdex, ruleTable) ? 1.10 : 1;
+					return { sp, hp: base * bonus };
+				})
 				.sort((a, b) => b.hp - a.hp);
-			const body = ranked.length ? ranked[0].sp.name : null;
+			const cutoff = ranked.length ? ranked[0].hp * 0.9 : 0;
+			const viable = ranked.filter(r => r.hp >= cutoff);
+			const body = viable.length ? viable[Math.floor(Math.random() * viable.length)].sp.name : null;
 			if (body) {
 				set.species = fdex.species.get(body).name;
 				set.name = set.species;
@@ -842,6 +928,25 @@ function applyArchetype(team, fdex, ruleTable, usedAbilities) {
 		if (slot.role) set.phnnForcedRole = slot.role;
 	});
 	return plan.name;
+}
+
+function applyFormatCore(team, baseid, fdex, ruleTable) {
+	const core = HM_FORMAT_CORES[baseid];
+	if (!core || Math.random() >= core.chance) return;
+	const species = fdex.species.get(core.species);
+	if (!species.exists || ruleTable.check('pokemon:' + species.id) === 'banned') return;
+	const count = Math.min(team.length, core.min + Math.floor(Math.random() * (core.max - core.min + 1)));
+	for (let i = 0; i < count; i++) {
+		const set = team[i];
+		if (!set) continue;
+		const moves = core.movesets[Math.floor(Math.random() * core.movesets.length)]
+			.filter(m => moveAllowed(m, fdex, ruleTable));
+		if (moves.length < 2) return;
+		set.species = species.name;
+		set.name = species.name;
+		set.moves = moves.slice(0, 4);
+		if (core.ability !== null) set.ability = core.ability;
+	}
 }
 
 function reshape(team, baseid, gen, rulesText, ruleTable, fdex, ctx, gate) {
@@ -884,6 +989,7 @@ function reshape(team, baseid, gen, rulesText, ruleTable, fdex, ctx, gate) {
 		}
 		if (isCD) upgradeCdSet(set, fdex, ruleTable);
 	}
+	applyFormatCore(team, baseid, fdex, ruleTable);
 	return team;
 }
 

@@ -1061,7 +1061,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		desc: "No Nerfs Standard, but up to level 255 and every banned Pokemon is allowed.",
 		mod: 'phnn',
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Team Preview', 'Data Preview', 'Max Level = 255', 'Default Level = 100', 'Prestatus', 'Totem Aura', 'Shadow Tera Clause'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Team Preview', 'Data Preview', 'Max Level = 255', 'Default Level = 255', 'Prestatus', 'Totem Aura', 'Shadow Tera Clause'],
 		unbanlist: ['Past', 'Future', 'Unobtainable', 'No Move', 'No Move-2', 'No Move-SW', 'Demo', 'Glitch'],
 	},
 	{
