@@ -67,6 +67,9 @@ const HM_ABILITY_ITEMS = {
 	poisonheal: 'Toxic Orb', guts: 'Flame Orb', quickfeet: 'Toxic Orb',
 	hadronengine: 'Life Orb', wonderguard: 'Leftovers', neutralizinggas: 'Leftovers',
 };
+
+// these abilities do nothing at all without the item that triggers them, so they outrank Eviolite
+const ITEM_DEPENDENT_ABILITIES = new Set(['poisonheal', 'guts', 'quickfeet', 'unburden', 'flareboost', 'toxicboost']);
 const HM_OHKO = ['Sheer Cold', 'Fissure', 'Horn Drill', 'Guillotine'];
 // content the fork un-dexits: strictly better than the vanilla staples once legal
 const HM_ELITE_MOVES = {
@@ -530,6 +533,7 @@ function buildHackmonsMoves(set, role, fdex, ruleTable, opts) {
 		}
 	};
 	forced.forEach(add);
+	if (opts && opts.noGuardOhko) add(pickMove(HM_OHKO, fdex, ruleTable, used, 1, ctx));
 	const attackPool = () => ((HM_STAB[types[0]] || {}).special || [])
 		.concat((HM_STAB[types[1]] || {}).special || [], HM_COVERAGE.special,
 			(HM_STAB[types[0]] || {}).physical || [], HM_COVERAGE.physical);
@@ -548,7 +552,7 @@ function buildHackmonsMoves(set, role, fdex, ruleTable, opts) {
 		}
 		add(pickMove(secondary.concat(HM_COVERAGE[role]), fdex, ruleTable, used, 3, ctx));
 		if (opts && opts.noGuardOhko) {
-			add(pickMove(HM_OHKO, fdex, ruleTable, used, 1, ctx));
+			// the OHKO move was already reserved a slot before anything else
 		} else if (ability === 'prankster') {
 			add(pickMove(HM_PRANKSTER_MOVES, fdex, ruleTable, used, 3, ctx));
 		} else if (Math.random() < 0.75) {
@@ -688,8 +692,12 @@ function upgradeHackmonsSet(set, fdex, ruleTable, usedAbilities, ctx) {
 	} else if (fdex.gen >= 2) {
 		const signature = bestSpeciesItem(set, fdex, ruleTable);
 		const abilityItem = HM_ABILITY_ITEMS[toId(set.ability || '')];
+		const needsItem = ITEM_DEPENDENT_ABILITIES.has(toId(set.ability || ''));
+		const stillEvolves = evoStage(fdex, fdex.species.get(set.species)) !== 'FE';
 		if (signature) {
 			set.item = signature;
+		} else if (stillEvolves && !needsItem && itemAllowed('Eviolite', fdex, ruleTable)) {
+			set.item = 'Eviolite';
 		} else if (abilityItem && itemAllowed(abilityItem, fdex, ruleTable)) {
 			set.item = abilityItem;
 		} else if (!set.item) {
