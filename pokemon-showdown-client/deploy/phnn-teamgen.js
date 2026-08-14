@@ -829,6 +829,15 @@ function reshape(team, baseid, gen, rulesText, ruleTable, fdex, ctx, gate) {
 	const isLetsGo = baseid.includes('letsgo');
 	const usedItems = new Set();
 	let fillerIdx = 0;
+	if (gen <= 7) {
+		const plainArceus = fdex.species.get('Arceus');
+		const arceusLegal = plainArceus.exists && ruleTable.check('pokemon:' + plainArceus.id) !== 'banned';
+		for (const set of team) {
+			if (!/^arceus./.test(toId(set.species || ''))) continue;
+			if (/plate$/.test(toId(set.item || ''))) continue;
+			if (arceusLegal) set.species = plainArceus.name;
+		}
+	}
 	for (const set of team) {
 		delete set.level;
 		if (gen < 9) delete set.teraType;
