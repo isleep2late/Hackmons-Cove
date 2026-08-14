@@ -2774,6 +2774,26 @@ p.or:after {
 		background: #0E1215;
 		color: #DDD;
 	}
+	.maintabbar.minitabbar .roomtab.button {
+		font-size: 9px;
+		max-width: calc(100vw - 215px);
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.maintabbar.minitabbar .roomtab.button small {
+		font-size: 8px;
+	}
+	.movebutton {
+		font-size: 8pt;
+		line-height: 1;
+		padding-top: 3px;
+		overflow-wrap: anywhere;
+	}
+	.battle-controls .whatdo button[name="toggleCalcdexOverlay"] {
+		clear: right;
+		margin-right: 0 !important;
+		margin-top: 2px;
+	}
 }
 
 .teamchartbox {
