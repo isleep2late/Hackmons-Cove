@@ -1673,6 +1673,7 @@ p.or:after {
 	padding: 0 8px;
 	font-size: 9pt;
 	color: #555555;
+	display: flow-root;
 }
 .battle-controls .whatdo small {
 	padding: 1px 2px;

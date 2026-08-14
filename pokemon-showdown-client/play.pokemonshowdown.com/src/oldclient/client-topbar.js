@@ -128,8 +128,9 @@
 			}
 		},
 		updateTabbar: function () {
-			if ($(window).width() < 420) return this.updateTabbarMini();
+			if ($(window).width() < 640) return this.updateTabbarMini();
 			this.$('.logo').show();
+			if (window.phnnFitTabbar) window.phnnFitTabbar();
 			this.$('.maintabbar').removeClass('minitabbar');
 
 			var buf = '<ul>' + (
