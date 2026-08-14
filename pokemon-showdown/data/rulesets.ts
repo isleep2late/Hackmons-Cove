@@ -2,6 +2,22 @@
 
 import type { Learnset } from "../sim/dex-species";
 
+const PHNN_EVO_AVAILABLE = new Set([null, undefined, 'Past', 'Unobtainable']);
+
+function phnnEvoAvailable(species: any) {
+	return !!species && species.exists && species.num > 0 && PHNN_EVO_AVAILABLE.has(species.isNonstandard);
+}
+
+function phnnEvoStage(dex: any, species: any): 'LC' | 'MC' | 'NFE' | 'FE' {
+	const evos = (species.evos || []).map((e: string) => dex.species.get(e)).filter(phnnEvoAvailable);
+	if (!evos.length) return 'FE';
+	const prevo = species.prevo ? dex.species.get(species.prevo) : null;
+	if (phnnEvoAvailable(prevo)) return 'MC';
+	const evoEvolvesAgain = evos.some((e: any) =>
+		(e.evos || []).map((x: string) => dex.species.get(x)).filter(phnnEvoAvailable).length > 0);
+	return evoEvolvesAgain ? 'LC' : 'NFE';
+}
+
 function getSpaceWorldDisguise(dex: any, pokemon: any) {
 	if (!pokemon.set.disguise) return null;
 	const disguise = dex.species.get(pokemon.set.disguise);
@@ -1232,6 +1248,28 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 			}
 			if (!species.nfe) {
 				return [set.species + " doesn't have an evolution family."];
+			}
+		},
+	},
+	firststageonly: {
+		effectType: 'ValidatorRule',
+		name: 'First Stage Only',
+		desc: "Only allows the first stage of a three-stage evolution family",
+		onValidateSet(set) {
+			const species = this.dex.species.get(set.species || set.name);
+			if (phnnEvoStage(this.dex, species) !== 'LC') {
+				return [`${species.name} is not the first stage of a three-stage evolution family.`];
+			}
+		},
+	},
+	middlestageonly: {
+		effectType: 'ValidatorRule',
+		name: 'Middle Stage Only',
+		desc: "Only allows the middle stage of a three-stage evolution family",
+		onValidateSet(set) {
+			const species = this.dex.species.get(set.species || set.name);
+			if (phnnEvoStage(this.dex, species) !== 'MC') {
+				return [`${species.name} is not the middle stage of a three-stage evolution family.`];
 			}
 		},
 	},
