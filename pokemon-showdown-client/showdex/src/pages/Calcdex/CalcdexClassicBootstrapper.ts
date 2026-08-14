@@ -396,10 +396,10 @@ export class CalcdexClassicBootstrapper extends MixinCalcdexBootstrappable(Bootd
       const $timerButton = $controlsTarget.find('button[name*="Timer"]');
       const hasTimerButton = !!$timerButton.length;
 
+      $controlsTarget.prepend($toggleButton);
+
       if (hasTimerButton) {
-        $toggleButton.insertAfter($timerButton);
-      } else {
-        $controlsTarget[hasTimerButton ? 'append' : 'prepend']($toggleButton);
+        $controlsTarget.prepend($timerButton);
       }
     };
 

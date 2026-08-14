@@ -52,9 +52,10 @@ https://psim.us/dev
 (function () {
 	function phnnFitTabbar() {
 		var logo = document.querySelector('.header img.logo');
-		if (!logo) return;
+		if (!logo || !logo.offsetWidth) return;
 		document.documentElement.style.setProperty('--phnn-tabbar-left', (logo.offsetLeft + logo.offsetWidth + 2) + 'px');
 	}
+	window.phnnFitTabbar = phnnFitTabbar;
 	phnnFitTabbar();
 	window.addEventListener('load', phnnFitTabbar);
 	window.addEventListener('resize', phnnFitTabbar);
