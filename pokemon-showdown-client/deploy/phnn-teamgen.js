@@ -618,6 +618,22 @@ function applyHackmonsEvs(set, role, ruleTable) {
 	}
 }
 
+// abilities that are a straight liability, so a format allowing No Ability would rather have none
+const LIABILITY_ABILITIES = new Set(['truant', 'slowstart', 'defeatist', 'klutz', 'stall', 'slowstart']);
+
+// formats carrying Obtainable Abilities (Gen 3 Pure Hackmons, Gen 1 Balanced Hackmons) only permit a
+// species' own abilities, plus No Ability where it has been unbanned
+function obtainableAbilityFor(set, fdex, ruleTable) {
+	const species = fdex.species.get(set.species || set.name);
+	const own = Object.values(species.abilities || {})
+		.filter(a => a && abilityAllowed(a, fdex, ruleTable));
+	const noneOk = ruleTable.check('ability:noability') !== 'banned';
+	const allLiability = own.length > 0 && own.every(a => LIABILITY_ABILITIES.has(toId(a)));
+	if (noneOk && (!own.length || allLiability || Math.random() < 0.2)) return 'No Ability';
+	if (own.length) return own[Math.floor(Math.random() * own.length)];
+	return noneOk ? 'No Ability' : (own[0] || 'No Ability');
+}
+
 function abilityAllowed(name, fdex, ruleTable) {
 	const ability = fdex.abilities.get(name);
 	if (!ability.exists || ability.gen > fdex.gen || ability.isNonstandard) return false;
@@ -637,6 +653,14 @@ function bestSpeciesItem(set, fdex, ruleTable) {
 function upgradeHackmonsSet(set, fdex, ruleTable, usedAbilities, ctx) {
 	const role = set.phnnForcedRole || setRole(set);
 	const ohkoLegal = !ruleTable.has('ohkoclause') && moveAllowed('Sheer Cold', fdex, ruleTable);
+	const restrictAbilities = ruleTable.has('obtainableabilities');
+	if (restrictAbilities) {
+		set.ability = obtainableAbilityFor(set, fdex, ruleTable);
+		buildHackmonsMoves(set, role, fdex, ruleTable, { ability: set.ability, ctx });
+		applyHackmonsEvs(set, role, ruleTable);
+		if (fdex.gen === 1) delete set.item;
+		return;
+	}
 	const noWeakness = /Arceus-Question|Terapagos-Stellar/.test(set.species || '');
 	if (noWeakness && !usedAbilities.get('wonderguard') && abilityAllowed('Wonder Guard', fdex, ruleTable)) {
 		set.ability = 'Wonder Guard';
