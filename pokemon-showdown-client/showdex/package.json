@@ -62,7 +62,7 @@
     "build:firefox": "pnpm clean:prod:firefox && cross-env NODE_ENV=production BUILD_TARGET=firefox node --conditions=production ./scripts/build",
     "build:firefox:fast": "cross-env PROD_ANALYZE_BUNDLES=false pnpm build:firefox",
     "build:firefox:re": "pnpm cache:purge && pnpm build:firefox",
-    "build:standalone": "pnpm clean:prod:standalone && cross-env NODE_ENV=production BUILD_TARGET=standalone node --conditions=production ./scripts/build",
+    "build:standalone": "pnpm clean:prod:standalone && pnpm typecheck && cross-env NODE_ENV=production BUILD_TARGET=standalone node --conditions=production ./scripts/build",
     "build:standalone:fast": "cross-env PROD_ANALYZE_BUNDLES=false pnpm build:standalone",
     "build:standalone:re": "pnpm cache:purge && pnpm build:standalone"
   },
