@@ -1,0 +1,159 @@
+@use 'config/colors';
+@use 'functions/color';
+@use 'mixins/position';
+@use 'mixins/spacing';
+@use 'mixins/transition';
+
+$padding-x: 5px;
+$padding-y: 1px;
+
+$background-color-light: colors.$transparent;
+$background-color-dark: colors.$transparent;
+$background-color-light-hover: color.alpha(colors.$black, 0.05);
+$background-color-dark-hover: color.alpha(colors.$white, 0.075);
+$background-color-light-active: color.alpha(colors.$black, 0.15);
+$background-color-dark-active: color.alpha(colors.$white, 0.15);
+
+$border-radius: 15px;
+
+$label-font-size: 10px;
+$label-color-light: color.shade(colors.$blue, 25%);
+$label-color-dark: color.tint(colors.$blue, 15%);
+$label-color-light-hover: color.shade(colors.$blue, 15%);
+$label-color-dark-hover: colors.$blue;
+$label-color-light-active: color.alpha($label-color-light-hover, 0.85);
+$label-color-dark-active: color.alpha(colors.$blue, 0.85);
+
+.container {
+  position: relative;
+  font-size: $label-font-size;
+  border-radius: $border-radius;
+  @include transition.apply(color, background-color);
+
+  &.light {
+    background-color: $background-color-light;
+  }
+
+  &.dark {
+    background-color: $background-color-dark;
+  }
+
+  &.highlight {
+    &.light {
+      color: $label-color-light;
+    }
+
+    &.dark {
+      color: $label-color-dark;
+    }
+  }
+
+  &:hover {
+    &.light {
+      color: $label-color-light-hover;
+      background-color: $background-color-light-hover;
+    }
+
+    &.dark {
+      color: $label-color-dark-hover;
+      background-color: $background-color-dark-hover;
+    }
+  }
+
+  &:active {
+    &.light {
+      color: $label-color-light-active;
+      background-color: $background-color-light-active;
+    }
+
+    &.dark {
+      color: $label-color-dark-active;
+      background-color: $background-color-dark-active;
+    }
+  }
+
+  &.disabled {
+    opacity: 0.3;
+  }
+}
+
+.absoluteHover {
+  background-color: colors.$transparent;
+
+  // basically a reproduction of .container lol
+  &::before {
+    content: '';
+    @include position.absolute-xy(-$padding-x, -$padding-y);
+    border-radius: $border-radius;
+    @include transition.apply(background-color);
+    user-select: none;
+    pointer-events: none;
+  }
+
+  // gross
+  &.light {
+    background-color: colors.$transparent;
+
+    &::before {
+      background-color: $background-color-light;
+    }
+  }
+
+  &.dark {
+    background-color: colors.$transparent;
+
+    &::before {
+      background-color: $background-color-dark;
+    }
+  }
+
+  &:hover {
+    &.light {
+      background-color: colors.$transparent;
+
+      &::before {
+        background-color: $background-color-light-hover;
+      }
+    }
+
+    &.dark {
+      background-color: colors.$transparent;
+
+      &::before {
+        background-color: $background-color-dark-hover;
+      }
+    }
+  }
+
+  &:active {
+    &.light {
+      background-color: colors.$transparent;
+
+      &::before {
+        background-color: $background-color-light-active;
+      }
+    }
+
+    &.dark {
+      background-color: colors.$transparent;
+
+      &::before {
+        background-color: $background-color-dark-active;
+      }
+    }
+  } // end &.active
+}
+
+.label {
+  display: inline-block;
+  @include spacing.margin-xy($padding-x, $padding-y);
+  font-weight: inherit;
+  font-size: inherit;
+  color: inherit;
+  user-select: none;
+  pointer-events: none;
+
+  .absoluteHover & {
+    @include spacing.margin-none;
+  }
+}
