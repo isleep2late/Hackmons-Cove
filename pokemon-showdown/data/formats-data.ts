@@ -1394,7 +1394,7 @@ export const FormatsData: import('../sim/dex-species').SpeciesFormatsDataTable =
 		natDexTier: "RU",
 	},
 	aipom: {
-		tier: "LC",
+		tier: "NFE",
 	},
 	ambipom: {
 		tier: "PU",
