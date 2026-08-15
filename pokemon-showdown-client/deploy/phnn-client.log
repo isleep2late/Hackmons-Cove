@@ -1,0 +1,5 @@
+PHNN client server on http://localhost:8100
+  static dir: /srv/phnn/pokemon-showdown-client/play.pokemonshowdown.com
+  login proxy: /action.php -> https://play.pokemonshowdown.com/action.php
+  game proxy:  /showdown -> localhost:8000
+  avatars dir: /srv/phnn/pokemon-showdown/config/avatars (served at /avatars/)

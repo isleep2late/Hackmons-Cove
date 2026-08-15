@@ -1,0 +1,967 @@
+{
+  "moves": {
+    "absorb": {
+      "pp": 20,
+      "isNonstandard": "Past"
+    },
+    "acid": {
+      "pp": 20,
+      "isNonstandard": "Past"
+    },
+    "aeroblast": {
+      "isNonstandard": "Past"
+    },
+    "anchorshot": {
+      "power": 90
+    },
+    "appleacid": {
+      "power": 90
+    },
+    "armthrust": {
+      "isNonstandard": "Past"
+    },
+    "astonish": {
+      "isNonstandard": "Past"
+    },
+    "astralbarrage": {
+      "power": 110,
+      "isNonstandard": "Past"
+    },
+    "attackorder": {
+      "isNonstandard": "Past"
+    },
+    "aurorabeam": {
+      "isNonstandard": "Past"
+    },
+    "banefulbunker": {
+      "pp": 5
+    },
+    "beakblast": {
+      "power": 120,
+      "pp": 5
+    },
+    "belch": {
+      "description": "Fails unless the user has eaten a Berry."
+    },
+    "behemothbash": {
+      "isNonstandard": "Past"
+    },
+    "behemothblade": {
+      "isNonstandard": "Past"
+    },
+    "blazingtorque": {
+      "isNonstandard": "Past"
+    },
+    "bleakwindstorm": {
+      "isNonstandard": "Past"
+    },
+    "bloodmoon": {
+      "power": 130,
+      "isNonstandard": "Past"
+    },
+    "blueflare": {
+      "isNonstandard": "Past"
+    },
+    "boltbeak": {
+      "power": 80
+    },
+    "boltstrike": {
+      "isNonstandard": "Past"
+    },
+    "bonerush": {
+      "power": 30
+    },
+    "branchpoke": {
+      "pp": 20,
+      "isNonstandard": "Past"
+    },
+    "brine": {
+      "isNonstandard": "Past"
+    },
+    "bubblebeam": {
+      "isNonstandard": "Past"
+    },
+    "burningbulwark": {
+      "isNonstandard": "Past"
+    },
+    "burnup": {
+      "isNonstandard": null
+    },
+    "celebrate": {
+      "pp": 20,
+      "isNonstandard": "Past"
+    },
+    "chloroblast": {
+      "isNonstandard": "Past"
+    },
+    "clangoroussoul": {
+      "accuracy": null
+    },
+    "collisioncourse": {
+      "isNonstandard": "Past"
+    },
+    "combattorque": {
+      "isNonstandard": "Past"
+    },
+    "confide": {
+      "isNonstandard": "Past"
+    },
+    "confusion": {
+      "pp": 20,
+      "isNonstandard": "Past"
+    },
+    "conversion": {
+      "pp": 20,
+      "isNonstandard": "Past"
+    },
+    "conversion2": {
+      "pp": 20,
+      "isNonstandard": "Past"
+    },
+    "corrosivegas": {
+      "pp": 20,
+      "isNonstandard": null
+    },
+    "courtchange": {
+      "isNonstandard": "Past"
+    },
+    "crabhammer": {
+      "accuracy": 95
+    },
+    "crushgrip": {
+      "isNonstandard": "Past"
+    },
+    "cut": {
+      "pp": 20,
+      "isNonstandard": "Past"
+    },
+    "darkvoid": {
+      "isNonstandard": "Past"
+    },
+    "defendorder": {
+      "isNonstandard": "Past"
+    },
+    "defensecurl": {
+      "pp": 20,
+      "isNonstandard": "Past"
+    },
+    "diamondstorm": {
+      "isNonstandard": "Past"
+    },
+    "direclaw": {
+      "description": "30% chance to sleep, poison, or paralyze target."
+    },
+    "disarmingvoice": {
+      "isNonstandard": "Past"
+    },
+    "doodle": {
+      "isNonstandard": "Past"
+    },
+    "doomdesire": {
+      "isNonstandard": "Past"
+    },
+    "doublekick": {
+      "pp": 20,
+      "isNonstandard": "Past"
+    },
+    "doubleshock": {
+      "isNonstandard": "Past"
+    },
+    "dragonascent": {
+      "isNonstandard": "Past"
+    },
+    "dragonbreath": {
+      "isNonstandard": "Past"
+    },
+    "dragonenergy": {
+      "isNonstandard": "Past"
+    },
+    "dragonhammer": {
+      "power": 100,
+      "isNonstandard": "Past"
+    },
+    "dreameater": {
+      "isNonstandard": "Past"
+    },
+    "drumbeating": {
+      "isNonstandard": "Past"
+    },
+    "dynamaxcannon": {
+      "isNonstandard": "Past"
+    },
+    "echoedvoice": {
+      "isNonstandard": "Past"
+    },
+    "electrify": {
+      "isNonstandard": null
+    },
+    "electrodrift": {
+      "isNonstandard": "Past"
+    },
+    "ember": {
+      "pp": 20,
+      "isNonstandard": "Past"
+    },
+    "esperwing": {
+      "isNonstandard": "Past"
+    },
+    "fairywind": {
+      "pp": 20,
+      "isNonstandard": "Past"
+    },
+    "falsesurrender": {
+      "isNonstandard": "Past"
+    },
+    "falseswipe": {
+      "pp": 20,
+      "isNonstandard": "Past"
+    },
+    "fierywrath": {
+      "isNonstandard": "Past"
+    },
+    "filletaway": {
+      "isNonstandard": "Past"
+    },
+    "firelash": {
+      "power": 90
+    },
+    "firepledge": {
+      "isNonstandard": "Past"
+    },
+    "firstimpression": {
+      "power": 100
+    },
+    "fishiousrend": {
+      "power": 80
+    },
+    "flamewheel": {
+      "pp": 20,
+      "isNonstandard": "Past"
+    },
+    "fleurcannon": {
+      "isNonstandard": "Past"
+    },
+    "floralhealing": {
+      "isNonstandard": "Past"
+    },
+    "forcepalm": {
+      "isNonstandard": "Past"
+    },
+    "freezedry": {
+      "description": "Super effective on Water."
+    },
+    "freezeshock": {
+      "isNonstandard": "Past"
+    },
+    "freezingglare": {
+      "isNonstandard": "Past"
+    },
+    "furyattack": {
+      "isNonstandard": "Past"
+    },
+    "furycutter": {
+      "isNonstandard": "Past"
+    },
+    "furyswipes": {
+      "isNonstandard": "Past"
+    },
+    "fusionbolt": {
+      "isNonstandard": "Past"
+    },
+    "fusionflare": {
+      "isNonstandard": "Past"
+    },
+    "geargrind": {
+      "power": 60,
+      "accuracy": 90
+    },
+    "glaciallance": {
+      "isNonstandard": "Past"
+    },
+    "glaciate": {
+      "isNonstandard": "Past"
+    },
+    "glaiverush": {
+      "isNonstandard": "Past"
+    },
+    "grasspledge": {
+      "isNonstandard": "Past"
+    },
+    "gravapple": {
+      "power": 90
+    },
+    "growl": {
+      "pp": 20,
+      "isNonstandard": "Past"
+    },
+    "gust": {
+      "pp": 20,
+      "isNonstandard": "Past"
+    },
+    "happyhour": {
+      "pp": 20,
+      "isNonstandard": "Past"
+    },
+    "harden": {
+      "pp": 20,
+      "isNonstandard": "Past"
+    },
+    "headbutt": {
+      "isNonstandard": "Past"
+    },
+    "heartswap": {
+      "isNonstandard": "Past"
+    },
+    "holdback": {
+      "pp": 20,
+      "isNonstandard": "Past"
+    },
+    "holdhands": {
+      "pp": 20,
+      "isNonstandard": "Past"
+    },
+    "honeclaws": {
+      "isNonstandard": "Past"
+    },
+    "hornattack": {
+      "pp": 20,
+      "isNonstandard": "Past"
+    },
+    "howl": {
+      "pp": 20
+    },
+    "hydrosteam": {
+      "isNonstandard": "Past"
+    },
+    "hyperdrill": {
+      "power": 120,
+      "isNonstandard": "Past"
+    },
+    "hyperspacefury": {
+      "isNonstandard": "Past"
+    },
+    "hyperspacehole": {
+      "isNonstandard": "Past"
+    },
+    "iceburn": {
+      "isNonstandard": "Past"
+    },
+    "incinerate": {
+      "isNonstandard": "Past"
+    },
+    "infernalparade": {
+      "power": 65
+    },
+    "ironhead": {
+      "description": "20% chance to make the target flinch."
+    },
+    "ivycudgel": {
+      "isNonstandard": "Past"
+    },
+    "jawlock": {
+      "isNonstandard": "Past"
+    },
+    "judgment": {
+      "isNonstandard": "Past"
+    },
+    "junglehealing": {
+      "isNonstandard": "Past"
+    },
+    "kingsshield": {
+      "pp": 5,
+      "isNonstandard": null
+    },
+    "leafage": {
+      "pp": 20,
+      "isNonstandard": "Past"
+    },
+    "leer": {
+      "pp": 20,
+      "isNonstandard": "Past"
+    },
+    "lick": {
+      "pp": 20,
+      "isNonstandard": "Past"
+    },
+    "lightofruin": {
+      "isNonstandard": null
+    },
+    "lunarblessing": {
+      "isNonstandard": "Past"
+    },
+    "lunardance": {
+      "isNonstandard": "Past"
+    },
+    "lusterpurge": {
+      "isNonstandard": "Past"
+    },
+    "magicalleaf": {
+      "isNonstandard": "Past"
+    },
+    "magicaltorque": {
+      "isNonstandard": "Past"
+    },
+    "magmastorm": {
+      "isNonstandard": "Past"
+    },
+    "makeitrain": {
+      "accuracy": 95,
+      "description": "Lowers the user's Sp. Atk by 2. Hits foe(s)."
+    },
+    "malignantchain": {
+      "isNonstandard": "Past"
+    },
+    "megadrain": {
+      "isNonstandard": "Past"
+    },
+    "megapunch": {
+      "isNonstandard": "Past"
+    },
+    "metalclaw": {
+      "pp": 20,
+      "isNonstandard": "Past"
+    },
+    "metronome": {
+      "isNonstandard": "Past"
+    },
+    "mightycleave": {
+      "isNonstandard": "Past"
+    },
+    "milkdrink": {
+      "isNonstandard": "Past"
+    },
+    "mimic": {
+      "isNonstandard": "Past"
+    },
+    "mist": {
+      "pp": 20,
+      "isNonstandard": "Past"
+    },
+    "mistball": {
+      "isNonstandard": "Past"
+    },
+    "moonblast": {
+      "description": "10% chance to lower the target's Sp. Atk by 1."
+    },
+    "moongeistbeam": {
+      "isNonstandard": "Past"
+    },
+    "mountaingale": {
+      "power": 120
+    },
+    "mysticalpower": {
+      "isNonstandard": "Past"
+    },
+    "nightdaze": {
+      "power": 90
+    },
+    "nightslash": {
+      "pp": 20
+    },
+    "nihillight": {
+      "pp": 5
+    },
+    "noxioustorque": {
+      "isNonstandard": "Past"
+    },
+    "obstruct": {
+      "pp": 5
+    },
+    "orderup": {
+      "isNonstandard": "Past"
+    },
+    "originpulse": {
+      "isNonstandard": "Past"
+    },
+    "overdrive": {
+      "isNonstandard": "Past"
+    },
+    "payday": {
+      "isNonstandard": "Past"
+    },
+    "peck": {
+      "pp": 20,
+      "isNonstandard": "Past"
+    },
+    "photongeyser": {
+      "isNonstandard": "Past"
+    },
+    "playnice": {
+      "isNonstandard": "Past"
+    },
+    "poisongas": {
+      "pp": 20,
+      "isNonstandard": "Past"
+    },
+    "poisonsting": {
+      "pp": 20,
+      "isNonstandard": "Past"
+    },
+    "poisontail": {
+      "pp": 20,
+      "isNonstandard": "Past"
+    },
+    "powdersnow": {
+      "pp": 20,
+      "isNonstandard": "Past"
+    },
+    "powershift": {
+      "isNonstandard": null
+    },
+    "precipiceblades": {
+      "isNonstandard": "Past"
+    },
+    "present": {
+      "isNonstandard": "Past"
+    },
+    "prismaticlaser": {
+      "isNonstandard": "Past"
+    },
+    "protect": {
+      "pp": 5
+    },
+    "psybeam": {
+      "isNonstandard": "Past"
+    },
+    "psyblade": {
+      "isNonstandard": "Past"
+    },
+    "psychoboost": {
+      "isNonstandard": "Past"
+    },
+    "psyshieldbash": {
+      "power": 90
+    },
+    "psystrike": {
+      "isNonstandard": "Past"
+    },
+    "purify": {
+      "pp": 5
+    },
+    "pyroball": {
+      "isNonstandard": "Past"
+    },
+    "ragefist": {
+      "description": "+50 BP/hit on user. Max 6 hits. Resets on switch-out."
+    },
+    "razorleaf": {
+      "pp": 20,
+      "isNonstandard": "Past"
+    },
+    "relicsong": {
+      "isNonstandard": "Past"
+    },
+    "retaliate": {
+      "isNonstandard": "Past"
+    },
+    "revelationdance": {
+      "power": 100,
+      "isNonstandard": "Past"
+    },
+    "revivalblessing": {
+      "isNonstandard": "Past"
+    },
+    "roaroftime": {
+      "isNonstandard": "Past"
+    },
+    "rocksmash": {
+      "isNonstandard": "Past"
+    },
+    "rockthrow": {
+      "isNonstandard": "Past"
+    },
+    "rollout": {
+      "isNonstandard": "Past"
+    },
+    "ruination": {
+      "isNonstandard": "Past"
+    },
+    "sacredfire": {
+      "isNonstandard": "Past"
+    },
+    "saltcure": {
+      "description": "Deals 1/16 max HP each turn; 1/8 on Steel, Water."
+    },
+    "sandattack": {
+      "isNonstandard": "Past"
+    },
+    "sandsearstorm": {
+      "isNonstandard": "Past"
+    },
+    "sandstorm": {
+      "pp": 5
+    },
+    "scratch": {
+      "pp": 20,
+      "isNonstandard": "Past"
+    },
+    "secretsword": {
+      "isNonstandard": "Past"
+    },
+    "seedflare": {
+      "isNonstandard": "Past"
+    },
+    "shadowforce": {
+      "isNonstandard": "Past"
+    },
+    "shelltrap": {
+      "pp": 10
+    },
+    "shiftgear": {
+      "isNonstandard": "Past"
+    },
+    "shockwave": {
+      "isNonstandard": "Past"
+    },
+    "shoreup": {
+      "isNonstandard": "Past"
+    },
+    "silktrap": {
+      "isNonstandard": "Past"
+    },
+    "sketch": {
+      "isNonstandard": "Past"
+    },
+    "slam": {
+      "isNonstandard": "Past"
+    },
+    "slash": {
+      "isNonstandard": "Past"
+    },
+    "sludge": {
+      "isNonstandard": "Past"
+    },
+    "smog": {
+      "isNonstandard": "Past"
+    },
+    "smokescreen": {
+      "isNonstandard": "Past"
+    },
+    "snaptrap": {
+      "isNonstandard": null
+    },
+    "snipeshot": {
+      "power": 85,
+      "isNonstandard": "Past"
+    },
+    "snowscape": {
+      "pp": 5
+    },
+    "spacialrend": {
+      "isNonstandard": "Past"
+    },
+    "spark": {
+      "isNonstandard": "Past"
+    },
+    "spikyshield": {
+      "pp": 5
+    },
+    "spinout": {
+      "pp": 10,
+      "isNonstandard": "Past"
+    },
+    "spiritshackle": {
+      "power": 90
+    },
+    "splash": {
+      "pp": 20,
+      "isNonstandard": "Past"
+    },
+    "springtidestorm": {
+      "isNonstandard": "Past"
+    },
+    "steameruption": {
+      "isNonstandard": "Past"
+    },
+    "stomp": {
+      "isNonstandard": "Past"
+    },
+    "stormthrow": {
+      "isNonstandard": null
+    },
+    "strangesteam": {
+      "isNonstandard": "Past"
+    },
+    "strength": {
+      "isNonstandard": "Past"
+    },
+    "stuffcheeks": {
+      "description": "Fails unless the user has a berry. User eats Berry, Def +2."
+    },
+    "sunsteelstrike": {
+      "isNonstandard": "Past"
+    },
+    "supersonic": {
+      "isNonstandard": "Past"
+    },
+    "surgingstrikes": {
+      "isNonstandard": "Past"
+    },
+    "swift": {
+      "isNonstandard": "Past"
+    },
+    "syrupbomb": {
+      "accuracy": 90
+    },
+    "tachyoncutter": {
+      "isNonstandard": "Past"
+    },
+    "tackle": {
+      "pp": 20,
+      "isNonstandard": "Past"
+    },
+    "tailglow": {
+      "isNonstandard": "Past"
+    },
+    "tailwhip": {
+      "pp": 20,
+      "isNonstandard": "Past"
+    },
+    "takedown": {
+      "isNonstandard": "Past"
+    },
+    "takeheart": {
+      "isNonstandard": "Past"
+    },
+    "tarshot": {
+      "isNonstandard": "Past"
+    },
+    "teleport": {
+      "isNonstandard": "Past"
+    },
+    "terablast": {
+      "isNonstandard": "Past"
+    },
+    "terastarstorm": {
+      "isNonstandard": "Past"
+    },
+    "thundercage": {
+      "isNonstandard": "Past"
+    },
+    "thunderclap": {
+      "isNonstandard": "Past"
+    },
+    "thunderouskick": {
+      "isNonstandard": "Past"
+    },
+    "thundershock": {
+      "pp": 20,
+      "isNonstandard": "Past"
+    },
+    "toxicthread": {
+      "description": "Lowers the target's Speed by 2 and poisons it."
+    },
+    "trickortreat": {
+      "isNonstandard": null
+    },
+    "tripledive": {
+      "power": 35,
+      "isNonstandard": "Past"
+    },
+    "triplekick": {
+      "isNonstandard": "Past"
+    },
+    "tropkick": {
+      "power": 85
+    },
+    "twister": {
+      "isNonstandard": "Past"
+    },
+    "vcreate": {
+      "isNonstandard": "Past"
+    },
+    "victorydance": {
+      "isNonstandard": "Past"
+    },
+    "vinewhip": {
+      "pp": 20,
+      "isNonstandard": "Past"
+    },
+    "visegrip": {
+      "pp": 20,
+      "isNonstandard": "Past"
+    },
+    "watergun": {
+      "pp": 20,
+      "isNonstandard": "Past"
+    },
+    "waterpledge": {
+      "isNonstandard": "Past"
+    },
+    "wickedblow": {
+      "isNonstandard": "Past"
+    },
+    "wickedtorque": {
+      "isNonstandard": "Past"
+    },
+    "wildboltstorm": {
+      "isNonstandard": "Past"
+    },
+    "wingattack": {
+      "pp": 20,
+      "isNonstandard": "Past"
+    },
+    "withdraw": {
+      "pp": 20,
+      "isNonstandard": "Past"
+    },
+    "workup": {
+      "pp": 20,
+      "isNonstandard": "Past"
+    },
+    "zingzap": {
+      "isNonstandard": "Past"
+    },
+    "acupressure": {
+      "pp": 20
+    },
+    "agility": {
+      "pp": 20
+    },
+    "aircutter": {
+      "pp": 20
+    },
+    "babydolleyes": {
+      "pp": 20
+    },
+    "batonpass": {
+      "pp": 20
+    },
+    "bite": {
+      "pp": 20
+    },
+    "bubble": {
+      "pp": 20
+    },
+    "bulletpunch": {
+      "pp": 20
+    },
+    "bulletseed": {
+      "pp": 20
+    },
+    "constrict": {
+      "pp": 20
+    },
+    "cottonspore": {
+      "pp": 20
+    },
+    "covet": {
+      "pp": 20
+    },
+    "fellstinger": {
+      "pp": 20
+    },
+    "focusenergy": {
+      "pp": 20
+    },
+    "foresight": {
+      "pp": 20
+    },
+    "glare": {
+      "pp": 20
+    },
+    "haze": {
+      "pp": 20
+    },
+    "heartstamp": {
+      "pp": 20
+    },
+    "hiddenpower": {
+      "description": ""
+    },
+    "iceshard": {
+      "pp": 20
+    },
+    "iciclespear": {
+      "pp": 20
+    },
+    "iondeluge": {
+      "pp": 20
+    },
+    "karatechop": {
+      "pp": 20
+    },
+    "laserfocus": {
+      "pp": 20
+    },
+    "lightscreen": {
+      "pp": 20
+    },
+    "luckychant": {
+      "pp": 20
+    },
+    "machpunch": {
+      "pp": 20
+    },
+    "magnitude": {
+      "pp": 20
+    },
+    "meditate": {
+      "pp": 20
+    },
+    "metalsound": {
+      "pp": 20
+    },
+    "miracleeye": {
+      "pp": 20
+    },
+    "nobleroar": {
+      "pp": 20
+    },
+    "odorsleuth": {
+      "pp": 20
+    },
+    "poisonpowder": {
+      "pp": 20
+    },
+    "pound": {
+      "pp": 20
+    },
+    "quickattack": {
+      "pp": 20
+    },
+    "rapidspin": {
+      "pp": 20
+    },
+    "safeguard": {
+      "pp": 20
+    },
+    "screech": {
+      "pp": 20
+    },
+    "shadowsneak": {
+      "pp": 20
+    },
+    "sharpen": {
+      "pp": 20
+    },
+    "steelwing": {
+      "pp": 20
+    },
+    "stringshot": {
+      "pp": 20
+    },
+    "stunspore": {
+      "pp": 20
+    },
+    "thief": {
+      "pp": 20
+    },
+    "vacuumwave": {
+      "pp": 20
+    }
+  },
+  "abilities": {
+    "healer": {
+      "description": "50% chance this Pokemon's ally has its status cured at the end of each turn."
+    },
+    "unseenfist": {
+      "description": "This Pokemon's contact moves ignore a target's protection and deal 1/4 the usual damage."
+    }
+  },
+  "items": {
+    "slowbronite": {
+      "description": "If held by a Slowbro (not Galarian Slowbro), this item allows it to Mega Evolve."
+    }
+  }
+}

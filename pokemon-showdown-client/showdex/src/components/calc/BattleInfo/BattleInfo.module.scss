@@ -1,0 +1,145 @@
+///
+/// @group BattleInfo
+/// @access private
+/// @author Keith Choison <keith@tize.io>
+/// @since 1.2.0
+///
+
+@use 'config/colors';
+@use 'config/fonts';
+@use 'functions/color';
+@use 'mixins/flex';
+@use 'mixins/font';
+@use 'mixins/position';
+@use 'mixins/spacing';
+@use 'mixins/transition';
+
+.container {
+  display: grid;
+  grid-template-columns: min-content minmax(150px, 1fr);
+  column-gap: 12px;
+  align-content: center;
+}
+
+button.toggleButton {
+  font-size: 8px;
+
+  i {
+    line-height: 7px;
+  }
+}
+
+.genWarning {
+  @include flex.row($align: center);
+  @include spacing.margin($bottom: 10px);
+  @include spacing.padding($x: 10px, $y: 8px);
+  border: 0.5px solid colors.$transparent;
+  border-radius: 8px;
+  @include transition.apply(color, background-color, border-color, box-shadow);
+  z-index: 1; // to go over the Tooltip's arrow
+
+  // $light-color: color.shade(colors.$pink, 16%);
+  // $dark-color: colors.$pink;
+  $light-color: colors.$gray-darkest;
+  $dark-color: colors.$gray-lighter;
+
+  &.light {
+    color: $light-color;
+    background-color: color.alpha($light-color, 0.12);
+    border-color: color.alpha($light-color, 0.32);
+    box-shadow: (
+      0 0 1px color.alpha(colors.$black, 0.08),
+      0 0 4px color.alpha($light-color, 0.24),
+    );
+  }
+
+  &.dark {
+    color: $dark-color;
+    background-color: color.alpha($dark-color, 0.08);
+    border-color: color.alpha($dark-color, 0.32);
+    box-shadow: (
+      0 0 1px color.alpha(colors.$white, 0.16),
+      0 0 4px color.alpha($dark-color, 0.24),
+    );
+  }
+
+  i {
+    display: inline-block;
+    vertical-align: middle;
+    @include spacing.margin($right: 4px);
+    font-size: 12px;
+    line-height: 13px;
+    opacity: 0.72;
+  }
+
+  .description {
+    @include font.apply(fonts.$primary, ( font-weight: 400 ));
+    font-size: 10px;
+    line-height: 13px;
+    white-space: normal;
+  }
+}
+
+div.genOptionButton {
+  &.genLocked {
+    &.light .label {
+      color: color.alpha(colors.$black, 0.64);
+    }
+
+    &.dark .label {
+      color: color.alpha(colors.$white, 0.64);
+    }
+  }
+}
+
+.honkInfo {
+  @include flex.col;
+  align-self: center;
+  row-gap: 6px;
+}
+
+.honkProps {
+  @include flex.row-start;
+  flex-wrap: wrap;
+  column-gap: 12px;
+  row-gap: 4px;
+}
+
+.honkName {
+  @include spacing.p($l: 4px, $r: 6px);
+  @include font.apply(fonts.$primary, ( font-weight: 500 ));
+  font-size: 14px;
+  letter-spacing: 0.1px;
+  line-height: 15px;
+
+  &::before {
+    @include position.inset-x(-8px);
+  }
+
+  &::after {
+    @include position.inset-x(-12px);
+  }
+}
+
+.honkStatus {
+  // @include spacing.margin($left: 12px);
+
+  &.saved {
+    .light & {
+      color: color.shade(colors.$green, 16%);
+    }
+
+    .dark & {
+      color: colors.$green;
+    }
+  }
+}
+
+.tooltipContent {
+  max-width: 248px;
+  font-size: 10px;
+  text-align: center;
+  line-height: 12px;
+  white-space: normal;
+  user-select: none;
+}
