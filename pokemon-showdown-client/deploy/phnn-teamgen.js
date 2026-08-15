@@ -431,7 +431,7 @@ function bstOf(species, boosted) {
 	const raw = bs.hp + bs.atk + bs.def + bs.spa + bs.spd + bs.spe;
 	if (!boosted) return raw;
 	const name = species.name || '';
-	if (/-Alpha$/.test(name)) return bs.hp + bs.spe + 2 * (bs.atk + bs.def + bs.spa + bs.spd);
+	if (/-Alpha$/.test(name)) return 2 * bs.hp + bs.spe + 2 * (bs.atk + bs.def + bs.spa + bs.spd);
 	if (/-Titan$/.test(name)) return raw + Math.floor((raw - bs.hp) * 0.4);
 	if (/-Totem$/.test(name)) return raw + Math.floor((raw - bs.hp) * 0.5);
 	if (/-Gmax$/.test(name)) return raw + bs.hp;

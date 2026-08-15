@@ -176,6 +176,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 			},
 			onTryHitPriority: 4,
 			onTryHit(target, source, effect) {
+				if (effect && (effect as any).phnnUnstoppable) return;
 				if (effect && (effect.priority <= 0.1 || effect.target === 'self')) {
 					return;
 				}
@@ -1880,6 +1881,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 			},
 			onBeforeMovePriority: 2,
 			onBeforeMove(pokemon, target, move) {
+				if ((move as any).phnnUnstoppable) return;
 				this.add('-activate', pokemon, 'move: Attract', '[of] ' + this.effectState.source);
 				if (this.randomChance(1, 2)) {
 					this.add('cant', pokemon, 'Attract');
@@ -1907,3 +1909,12 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 
 };
+
+const overlayDir = process.env.PHNN_BETA_CONTENT;
+if (overlayDir) {
+	try {
+		Object.assign(Moves, require(overlayDir + '/moves.js').Moves);
+	} catch (err) {
+		console.error(`PHNN_BETA_CONTENT moves overlay failed: ${err}`);
+	}
+}

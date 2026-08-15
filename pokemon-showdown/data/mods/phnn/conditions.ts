@@ -40,6 +40,7 @@ export const Conditions: import('../../../sim/dex-conditions').ModdedConditionDa
 				pokemon.removeVolatile('confusion');
 				return;
 			}
+			if ((move as any).phnnUnstoppable) return;
 			this.add('-activate', pokemon, 'confusion');
 			if (this.randomChance(1, 2)) {
 				return;
@@ -64,6 +65,7 @@ export const Conditions: import('../../../sim/dex-conditions').ModdedConditionDa
 			return spe;
 		},
     	onBeforeMove(pokemon, target, move) {
+			if ((move as any).phnnUnstoppable) return;
 			if (!pokemon.hasAbility('magicguard') && this.randomChance(1, 4)) {
 				this.add('cant', pokemon, 'par');
 				return false;
@@ -236,6 +238,7 @@ export const Conditions: import('../../../sim/dex-conditions').ModdedConditionDa
 	flinch: {
 		inherit: true,
 		onBeforeMove(pokemon, target, move) {
+			if ((move as any).phnnUnstoppable) return;
 			this.add('cant', pokemon, 'flinch');
 			this.runEvent('Flinch', pokemon);
 			return false;

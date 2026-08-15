@@ -53,6 +53,9 @@ export const Scripts: ModdedBattleScriptsData = {
 		if (species.forme === 'Gmax' || set.gigantamax) {
 			stat *= 2;
 		}
+		if (species.forme?.endsWith('Alpha') && this.dex.conditions.getByID('wildmight' as ID).exists) {
+			stat *= 2;
+		}
 	}
     return stat;
     },
@@ -198,7 +201,7 @@ export const Scripts: ModdedBattleScriptsData = {
 
 	actions: {
 		hitStepInvulnerabilityEvent(targets: Pokemon[], pokemon: Pokemon, move: ActiveMove) {
-			if (move.id === 'helpinghand') return new Array(targets.length).fill(true);
+			if (move.id === 'helpinghand' || (move as any).phnnUnstoppable) return new Array(targets.length).fill(true);
 			const hitResults: boolean[] = [];
 			for (const [i, target] of targets.entries()) {
 				if (target.volatiles['commanding']) {
@@ -220,6 +223,8 @@ export const Scripts: ModdedBattleScriptsData = {
 			return hitResults;
 		},
 		canMegaEvo(pokemon: Pokemon) {
+			const ascension = (pokemon.species as any).phnnAscension;
+			if (ascension && !pokemon.transformed) return ascension;
 			const species = pokemon.baseSpecies;
 			const altForme = species.otherFormes && this.dex.species.get(species.otherFormes[0]);
 			const item = pokemon.getItem();
@@ -236,6 +241,26 @@ export const Scripts: ModdedBattleScriptsData = {
 			return megaEvolution && megaEvolution !== species.name ? megaEvolution : null;
 		},
 		runMegaEvo(pokemon: Pokemon) {
+			const ascension = (pokemon.species as any).phnnAscension;
+			if (ascension && pokemon.canMegaEvo === ascension) {
+				pokemon.formeChange(ascension, null, true);
+				const ascended = pokemon.species as any;
+				if (ascended.phnnAscensionMessage) {
+					this.battle.add('-message', `${pokemon.name}${ascended.phnnAscensionMessage}`);
+				}
+				if (ascended.phnnAscensionEffect) {
+					const maxed = {atk: 6, def: 6, spa: 6, spd: 6, spe: 6, accuracy: 6, evasion: 6} as const;
+					pokemon.setBoost({...maxed});
+					for (const stat of Object.keys(maxed)) {
+						this.battle.add('-setboost', pokemon, stat, 6, '[from] move: ' + ascended.phnnAscensionEffect);
+					}
+				}
+				for (const ally of pokemon.side.pokemon) {
+					ally.canMegaEvo = false;
+				}
+				this.battle.runEvent('AfterMega', pokemon);
+				return true;
+			}
 			const speciesid = pokemon.canMegaEvo || pokemon.canUltraBurst;
 			if (!speciesid) return false;
 			pokemon.formeChange(speciesid, pokemon.getItem(), true);
