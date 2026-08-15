@@ -966,6 +966,7 @@ export class ChatTextEntry extends preact.Component<{
 			this.subscription.unsubscribe();
 			this.subscription = null;
 		}
+		this.miniedit?.destroy();
 	}
 	focusIfNoSelection = (e: Event) => {
 		if ((e.target as HTMLElement).tagName === 'TEXTAREA') return;
