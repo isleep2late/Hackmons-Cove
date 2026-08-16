@@ -1,3 +1,10 @@
+const PHNN_SHADOW_MOVE_IDS = ['shadowrush', 'shadowblast', 'shadowblitz', 'shadowbreak', 'shadowend', 'shadowbolt', 'shadowchill', 'shadowfire', 'shadowstorm', 'shadowwave', 'shadowrave', 'shadowdown', 'shadowmist', 'shadowpanic', 'shadowhold', 'shadowhalf', 'shadowshed', 'shadowsky'];
+function phnnIsShadowMon(target: any): boolean {
+	if (!target) return false;
+	if (target.hasType('Shadow')) return true;
+	return target.moveSlots.some((s: any) => PHNN_SHADOW_MOVE_IDS.includes(s.id));
+}
+
 export const Scripts: ModdedBattleScriptsData = {
 	gen: 9,
 	inherit: 'gen9',
@@ -63,11 +70,23 @@ export const Scripts: ModdedBattleScriptsData = {
 
 	pokemon: {
 
+		runEffectiveness(move: ActiveMove) {
+			if (move.type === 'Shadow') return phnnIsShadowMon(this) ? -1 : 1;
+			return Object.getPrototypeOf(this).runEffectiveness.call(this, move);
+		},
+
 		transformInto(pokemon: Pokemon, effect: Effect | null) {
 			const shadowMoveIds = ['shadowrush', 'shadowblast', 'shadowblitz', 'shadowbreak', 'shadowend', 'shadowbolt', 'shadowchill', 'shadowfire', 'shadowstorm', 'shadowwave', 'shadowrave', 'shadowdown', 'shadowmist', 'shadowpanic', 'shadowhold', 'shadowhalf', 'shadowshed', 'shadowsky'];
 			const isShadow = pokemon.hasType('Shadow') || pokemon.moveSlots.some((s: any) => shadowMoveIds.includes(s.id));
 			if (isShadow) return false;
-			return Object.getPrototypeOf(this).transformInto.call(this, pokemon, effect);
+			const transformed = Object.getPrototypeOf(this).transformInto.call(this, pokemon, effect);
+			if (
+				transformed && this.species.forme?.endsWith('Alpha') && !this.volatiles['wildmight'] &&
+				this.battle.dex.conditions.getByID('wildmight' as ID).exists
+			) {
+				this.addVolatile('wildmight');
+			}
+			return transformed;
 		},
 
 		getDynamaxRequest(skipChecks?: boolean) {

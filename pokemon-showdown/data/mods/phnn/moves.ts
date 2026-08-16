@@ -6,6 +6,12 @@ function phnnIsShadowMon(target: any): boolean {
 }
 export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 
+	transform: {
+		inherit: true,
+		shortDesc: "Copies target's stats, moves, types, and Ability. Wild Might applies exactly once.",
+		desc: "The user transforms into the target. The target's current stats, stat stages, types, moves, Ability, weight, gender, and sprite are copied. The user's level and HP remain the same and each copied move receives only 5 PP, with a maximum of 5 PP each. The user can no longer change formes if it would have the ability to do so. Eternatus-Eternamax can be copied here. Wild Might is a single flag, so the copy has it exactly once whenever either side is an Alpha forme: an Alpha keeps its own when it copies a non-Alpha, a non-Alpha gains it when it copies an Alpha, and an Alpha copying an Alpha still gets only one 2x to Attack, Defense, Sp. Atk and Sp. Def. Speed is never doubled, and the 2x HP stays with whichever Pokemon is itself an Alpha forme. This move fails if it hits a substitute, if either the user or the target is already transformed, if either is behind an Illusion, or if the target is a Shadow Pokemon or is carrying a Shadow move.",
+	},
+
 	// upstream leaves priority out of these descriptions; No Nerfs spells it out
 	babydolleyes: { inherit: true, shortDesc: "Lowers the target's Attack by 1. Nearly always goes first (priority +1).", desc: "Lowers the target's Attack by 1 stage. This move has a priority of +1, so it nearly always goes first within its priority bracket." },
 	banefulbunker: { inherit: true, shortDesc: "Protects from moves. Contact: poison. Nearly always goes first (priority +4).", desc: "The user is protected from most attacks made by other Pokemon during this turn, and Pokemon making contact with the user become poisoned. This move has a 1/X chance of being successful, where X starts at 1 and triples each time this move is successfully used. X resets to 1 if this move fails, if the user's last move used is not Baneful Bunker, Burning Bulwark, Detect, Endure, King's Shield, Max Guard, Obstruct, Protect, Quick Guard, Silk Trap, Spiky Shield, or Wide Guard, or if it was one of those moves and the user's protection was broken. Fails if the user moves last this turn. This move has a priority of +4, so it nearly always goes first within its priority bracket." },
@@ -831,10 +837,14 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	roar: {
 		inherit: true,
 		priority: -1,
+		shortDesc: "Forces the target to switch out. Goes late (priority -1); Prankster raises it to 0.",
+		desc: "The target is forced to switch out and be replaced with a random unfainted ally. Fails if the target is the last unfainted Pokemon in its party, or if the target used Ingrain previously or has the Suction Cups Ability. This move has a priority of -1 rather than the modern -6, so it goes late within its bracket but still beats Circle Throw and Dragon Tail. Prankster raises it to 0, which lets a fast user phaze before the target moves at all, and every forced switch takes another round of entry hazard damage.",
 	},
 	whirlwind: {
 		inherit: true,
 		priority: -1,
+		shortDesc: "Forces the target to switch out. Goes late (priority -1); Prankster raises it to 0.",
+		desc: "The target is forced to switch out and be replaced with a random unfainted ally. Fails if the target is the last unfainted Pokemon in its party, or if the target used Ingrain previously or has the Suction Cups Ability. This move has a priority of -1 rather than the modern -6, so it goes late within its bracket but still beats Circle Throw and Dragon Tail. Prankster raises it to 0, which lets a fast user phaze before the target moves at all, and every forced switch takes another round of entry hazard damage.",
 	},
 	followme: {
 		inherit: true,

@@ -1036,6 +1036,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 			'CAP',
 			'Mewtwo-Shadow', 'Mewtwo-Shadow-Mega-X', 'Lugia-Shadow', 'Arceus-Shadow', 'Mewtwo-Armored',
 			'Shadow Plate', 'Shadow Synergy Stone', 'Blank Plate', 'Legend Plate',
+			'Question Mark Plate',
 			'Shadowinium Z', 'Questinium Z', 'Shadow Cloak', 'Broken Disk',
 			'Shadow Rift', 'Glitch Cascade',
 			'Shadow Rush', 'Shadow Blast', 'Shadow Blitz', 'Shadow Break', 'Shadow End',
@@ -1063,7 +1064,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		desc: "No Nerfs Standard, but up to level 255 and every banned Pokemon is allowed.",
 		mod: 'phnn',
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Team Preview', 'Data Preview', 'Max Level = 255', 'Default Level = 255', 'Prestatus', 'Totem Aura', 'Shadow Tera Clause'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Team Preview', 'Data Preview', 'Max Level = 255', 'Default Level = 255', 'Prestatus', 'Totem Aura'],
 		unbanlist: ['Past', 'Future', 'Unobtainable', 'No Move', 'No Move-2', 'No Move-SW', 'Demo', 'Glitch'],
 	},
 	{

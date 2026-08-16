@@ -418,6 +418,22 @@ export function calculateNoNerfs(
     );
   }
 
+  // Shadow is FLAT: 2x into anything that is not Shadow, 0.5x into anything that is, no matter how
+  // many types the target has. A Pokemon counts as Shadow if it is Shadow-typed (including by Tera)
+  // or simply carries a Shadow move, so one Shadow slot also turns the same coverage away.
+  if (move.hasType('Shadow')) {
+    const shadowMoveNames = [
+      'Shadow Rush', 'Shadow Blast', 'Shadow Blitz', 'Shadow Break', 'Shadow End', 'Shadow Bolt',
+      'Shadow Chill', 'Shadow Fire', 'Shadow Storm', 'Shadow Wave', 'Shadow Rave', 'Shadow Down',
+      'Shadow Mist', 'Shadow Panic', 'Shadow Hold', 'Shadow Half', 'Shadow Shed', 'Shadow Sky',
+    ];
+    const shadowTarget = defender.types.includes('Shadow' as typeof defender.types[0])
+      || defender.teraType === ('Shadow' as typeof defender.teraType)
+      || (defender.moves || []).some((m) => shadowMoveNames.includes(String(m)));
+
+    typeEffectiveness = shadowTarget ? 0.5 : 2;
+  }
+
   if (typeEffectiveness === 0 && move.hasType('Ground') &&
     defender.hasItem('Iron Ball') && !defender.hasAbility('Klutz')) {
     typeEffectiveness = 1;

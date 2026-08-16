@@ -1330,7 +1330,7 @@ export class Pokemon {
 		if (
 			pokemon.fainted || this.illusion || pokemon.illusion || (pokemon.volatiles['substitute'] && this.battle.gen >= 5) ||
 			(pokemon.transformed && this.battle.gen >= 2) || (this.transformed && this.battle.gen >= 5) ||
-			species.name === 'Eternatus-Eternamax' ||
+			(species.name === 'Eternatus-Eternamax' && !this.battle.dex.currentMod.includes('phnn')) ||
 			(['Ogerpon', 'Terapagos'].includes(species.baseSpecies) && (this.terastallized || pokemon.terastallized)) ||
 			this.terastallized === 'Stellar'
 		) {

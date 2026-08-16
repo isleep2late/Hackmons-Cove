@@ -51,6 +51,15 @@ const HM_SETUP = {
 	physical: ['Shell Smash', 'Victory Dance', 'Swords Dance', 'Dragon Dance'],
 	special: ['Quiver Dance', 'Tail Glow', 'Nasty Plot', 'Calm Mind'],
 };
+// Shadow moves read as x2 against everything that is not a Shadow Pokemon and x0.5 against one, and a
+// Pokemon counts as Shadow the moment it carries a Shadow move -- so a single slot buys both the best
+// neutral coverage in the game and immunity to the same coverage coming back. Verified in a live sim:
+// Shadow Storm does 204 to a plain Snorlax and 54 to one holding Shadow Rush.
+const HM_SHADOW_MOVES = {
+	physical: ['Shadow End', 'Shadow Rush', 'Shadow Blast', 'Shadow Break'],
+	special: ['Shadow Storm', 'Shadow Bolt', 'Shadow Chill', 'Shadow Fire', 'Shadow Rave'],
+	status: ['Shadow Half', 'Shadow Hold', 'Shadow Mist', 'Shadow Down'],
+};
 const HM_UTILITY = ['Sucker Punch', 'Extreme Speed', 'Knock Off', 'Substitute', 'Taunt', 'U-turn', 'Spore', 'Recover'];
 // recovery on an offensive set is a niche choice, not the default it used to be
 const HM_UTILITY_RECOVERY = ['Strength Sap', 'Recover', 'Roost', 'Slack Off'];
@@ -136,6 +145,21 @@ const HM_WALL_MOVES = [
 // Imposter copies the foe outright; it wants maximum bulk and a way to break the copy stalemate
 const HM_IMPOSTER_BODIES = ['Snorlax-Gmax', 'Blissey', 'Chansey', 'Pikachu-Gmax', 'Snorlax', 'Ting-Lu', 'Guzzlord', 'Happiny', 'Munchlax'];
 const HM_IMPOSTER_ITEMS = { chansey: 'Eviolite', happiny: 'Eviolite', munchlax: 'Eviolite', pikachu: 'Light Ball', pikachugmax: 'Light Ball' };
+// effective HP pool a team member needs before it is worth handing Imposter to; Wild Might doubles an
+// Alpha's HP, so this is roughly "80 base HP as an Alpha, or 160 base HP without one"
+const HM_IMPOSTER_MIN_BULK = 160;
+// Custom Disguises allows 24 Pokemon per team and 24 moves per Pokemon. Generating the literal maximum
+// makes a team nobody wants to play, so use a healthy slice of the headroom instead of the ceiling.
+const HM_CD_TEAM_CAP = 12;
+const HM_CD_MOVE_CAP = 10;
+function movesAllowedPerSet(ruleTable) {
+	const cap = (ruleTable && ruleTable.maxMoveCount) || 4;
+	if (cap <= 4) return 4;
+	return Math.max(4, Math.min(cap, HM_CD_MOVE_CAP));
+}
+// Transform overwrites everything except HP, so a body that has real stats of its own loses them the
+// moment it copies. Eternamax, Zygarde-Complete and friends are bulky but far too valuable to spend.
+const HM_IMPOSTER_MAX_KEPT_STATS = 450;
 // team-level strategy packages, drawn from how these actually get played
 const HM_ARCHETYPES = [
 	{
@@ -165,9 +189,65 @@ const HM_ARCHETYPES = [
 			{ ability: null, moves: ['Baton Pass'], role: 'special' },
 		],
 	},
+	// No Nerfs restores Roar and Whirlwind to their Gen 2 form: -1 priority and perfect accuracy, not the
+	// modern -6. Prankster lifts that to 0, so a fast body phazes BEFORE the target moves and every forced
+	// switch eats a full layer of hazards. Sash guarantees the rocks land first. Verified in a live sim:
+	// Prankster Ribombee-Totem Roars first against a Regieleki and the Regieleki never gets a turn.
+	// Wonder Guard only lets super-effective damage through, so on a body with no weaknesses it is a
+	// blanket immunity to every damaging move in the game. Verified in a live sim: Arceus-??? with Wonder
+	// Guard and a Shadow move takes 0 from Shadow Storm, Close Combat, Boomburst, Psystrike, Sacred Fire
+	// and Thousand Arrows alike.
+	{
+		name: 'wonder-guard-wall',
+		slots: [
+			{ ability: 'Wonder Guard', moves: [], role: 'defensive', wgBodies: true },
+			{ ability: null, moves: ['Stealth Rock'], role: 'physical' },
+		],
+	},
+	{
+		name: 'prankster-phaze-rocks',
+		slots: [
+			{
+				ability: 'Prankster', moves: ['Stealth Rock', 'Roar'], role: 'defensive',
+				item: 'Focus Sash', fastBodies: true, fastEvs: true,
+			},
+			{ ability: null, moves: ['Spikes', 'Toxic Spikes'], role: 'special' },
+		],
+	},
+	// the fastest body in the format is also the one that most wants perfect-accuracy Sheer Cold, since
+	// it lands the OHKO before the target ever moves
+	{
+		name: 'speed-king-ohko',
+		slots: [
+			{ ability: 'No Guard', moves: ['Sheer Cold'], role: 'physical', item: 'Focus Sash', fastBodies: true },
+			{ ability: null, moves: ['Stealth Rock'], role: 'defensive' },
+		],
+	},
 ];
+// Ribombee-Totem is the fastest legal Pokemon in Extended: base 124 doubled to an effective 248 by its
+// +2 Totem aura, clear of Regieleki's flat 200. That also makes it the best No Guard Sheer Cold body.
+const HM_FAST_BODIES = ['Ribombee-Totem', 'Regieleki', 'Fezandipiti-Titan', 'Deoxys-Speed', 'Ninjask', 'Dragapult', 'Zeraora'];
+// pure Shadow has no weaknesses at all; the ???-typed bodies are weak only to Shadow, which their own
+// Shadow move then closes. The glitch Pokemon carry a 924 base stat total on top of that.
+const HM_WONDER_GUARD_BODIES = [
+	'Arceus-Shadow', 'Mewtwo-Shadow', 'Glitch (DB)', 'PC4SH', 'PokéWTrainer', 'Arceus-Question',
+	'????? (Crystal FE)', '????? (GS FE)', '94',
+];
+const HM_TOTEM_SPE_STAGES = {
+	ribombeetotem: 2, gumshoostotem: 2, raticatealolatotem: 2, marowakalolatotem: 2, lurantistotem: 2,
+	fezandipitititan: 2, araquanidtotem: 1, mimikyutotem: 1, mimikyubustedtotem: 1, kommoototem: 1,
+	vikavolttotem: 1, hakamoototem: 1,
+};
 
 const HM_PREMIUM_ABILITIES = ['Wonder Guard', 'Neutralizing Gas', 'Magic Guard', 'Huge Power', 'Pure Power', 'Parental Bond', 'Shadow Tag', 'Prankster', 'Unaware', 'Fur Coat', 'Ice Scales', 'Good as Gold'];
+// an ability that only reads one damage category is dead weight on a set built around the other one:
+// Huge Power on a special attacker was the reported bug. ATE abilities need a Normal-type attack to
+// convert. Everything absent from this map works on any set.
+const ABILITY_NEEDS = {
+	hugepower: 'physical', purepower: 'physical', toughclaws: 'physical', ironfist: 'physical',
+	hadronengine: 'special', beadsofruin: 'special',
+	pixilate: 'normal', refrigerate: 'normal', aerilate: 'normal', galvanize: 'normal',
+};
 const META_ABILITIES = {
 	physical: ['Huge Power', 'Pure Power', 'Parental Bond', 'No Guard', 'Mold Breaker', 'Libero'],
 	special: ['Hadron Engine', 'Parental Bond', 'No Guard', 'Beads of Ruin', 'Libero', 'Drought', 'Drizzle'],
@@ -574,10 +654,11 @@ function buildHackmonsMoves(set, role, fdex, ruleTable, opts) {
 	}
 	const species = fdex.species.get(set.species);
 	const types = species && species.exists ? species.types : [];
+	const moveCap = movesAllowedPerSet(ruleTable);
 	const used = new Set();
 	const moves = [];
 	const add = name => {
-		if (name && !used.has(toId(name)) && moves.length < 4) {
+		if (name && !used.has(toId(name)) && moves.length < moveCap) {
 			moves.push(name);
 			used.add(toId(name));
 		}
@@ -625,7 +706,7 @@ function buildHackmonsMoves(set, role, fdex, ruleTable, opts) {
 		}
 	}
 	for (const m of set.moves || []) {
-		if (moves.length >= 4) break;
+		if (moves.length >= moveCap) break;
 		const id = toId(('' + m).split(' (')[0]);
 		if (!used.has(id)) {
 			moves.push(m);
@@ -640,7 +721,108 @@ function buildHackmonsMoves(set, role, fdex, ruleTable, opts) {
 		const swap = pickMove(attackPool(), fdex, ruleTable, used, 3, ctx);
 		if (swap) moves[moves.length - 1] = swap;
 	}
-	if (moves.length) set.moves = moves.slice(0, 4);
+	if (moves.length) set.moves = moves.slice(0, moveCap);
+	// shadow coverage first, so the consistency pass is always the last word on the moveset
+	addShadowCoverage(set, role, fdex, ruleTable, ctx, forced);
+	enforceAbilityConsistency(set, role, fdex, ruleTable, ctx, forced);
+}
+
+function moveMatches(name, need, fdex) {
+	const mv = fdex.moves.get(('' + name).split(' (')[0]);
+	if (!mv.exists || mv.category === 'Status') return false;
+	if (need === 'normal') return mv.type === 'Normal';
+	return mv.category.toLowerCase() === need;
+}
+
+// swaps a move into the set without touching anything an archetype forced, preferring to drop a
+// status move and otherwise the last slot
+function swapInMove(set, name, fdex, forced, ruleTable) {
+	if (!name) return false;
+	const moves = set.moves || [];
+	const locked = new Set((forced || []).map(m => toId('' + m)));
+	if (moves.some(m => toId(('' + m).split(' (')[0]) === toId(name))) return false;
+	let idx = -1;
+	for (let i = moves.length - 1; i >= 0; i--) {
+		if (locked.has(toId(('' + moves[i]).split(' (')[0]))) continue;
+		const mv = fdex.moves.get(('' + moves[i]).split(' (')[0]);
+		if (mv.exists && mv.category === 'Status') { idx = i; break; }
+		if (idx < 0) idx = i;
+	}
+	if (idx < 0) {
+		if (moves.length >= movesAllowedPerSet(ruleTable)) return false;
+		moves.push(name);
+	} else {
+		moves[idx] = name;
+	}
+	set.moves = moves;
+	return true;
+}
+
+// the ability is picked before the moves are built, so this is the backstop that keeps the two in step
+function enforceAbilityConsistency(set, role, fdex, ruleTable, ctx, forced) {
+	const species = fdex.species.get(set.species);
+	// a ???-typed Wonder Guard body is weak to Shadow and nothing else, and carrying any Shadow move
+	// makes it count as Shadow -- so the move is what completes the immunity, not a nice-to-have
+	if (toId(set.ability || '') === 'wonderguard' && species.exists && !species.types.includes('Shadow')) {
+		const carried = (set.moves || []).some(m => fdex.moves.get(('' + m).split(' (')[0]).type === 'Shadow');
+		if (!carried) {
+			const shadow = shadowMovesAllowed(fdex, ruleTable, ctx);
+			const order = role === 'defensive' ? ['status', 'special', 'physical'] :
+				role === 'physical' ? ['physical', 'special', 'status'] : ['special', 'physical', 'status'];
+			const used = new Set((set.moves || []).map(m => toId(('' + m).split(' (')[0])));
+			for (const key of order) {
+				const pick = pickMove(shadow[key], fdex, ruleTable, used, 3, ctx);
+				if (pick && swapInMove(set, pick, fdex, forced, ruleTable)) break;
+			}
+		}
+	}
+	const need = ABILITY_NEEDS[toId(set.ability || '')];
+	if (!need) return;
+	const moves = set.moves || [];
+	if (moves.some(m => moveMatches(m, need, fdex))) return;
+	const types = species && species.exists ? species.types : [];
+	const used = new Set(moves.map(m => toId(('' + m).split(' (')[0])));
+	const other = role === 'physical' ? 'special' : 'physical';
+	// before Gen 4 a move's category follows its TYPE, so the physical/special lists above are only a
+	// starting guess -- the dex is the authority on what actually counts
+	const pool = (need === 'normal' ?
+		(HM_STAB.Normal[role] || []).concat(HM_STAB.Normal[other] || []) :
+		shadowMovesAllowed(fdex, ruleTable, ctx)[need]
+			.concat((HM_STAB[types[0]] || {})[need] || [], (HM_STAB[types[1]] || {})[need] || [], HM_COVERAGE[need] || [],
+				HM_STAB[types[0]] ? HM_STAB[types[0]][other] || [] : [], HM_COVERAGE[other] || [])
+	).filter(m => moveMatches(m, need, fdex));
+	const fix = pickMove(pool, fdex, ruleTable, used, 3, ctx);
+	if (fix && swapInMove(set, fix, fdex, forced, ruleTable)) return;
+	// nothing of that category is legal here, so the ability is the part that has to give -- but only
+	// where the format actually permits an empty ability, since a mismatch beats an invalid set
+	if (ruleTable.check('ability:noability') !== 'banned') {
+		set.ability = 'No Ability';
+		delete set.phnnForcedAbility;
+	}
+}
+
+function shadowMovesAllowed(fdex, ruleTable, ctx) {
+	const out = { physical: [], special: [], status: [] };
+	for (const key of Object.keys(out)) {
+		out[key] = HM_SHADOW_MOVES[key].filter(m => moveAllowed(m, fdex, ruleTable, ctx));
+	}
+	return out;
+}
+
+// Shadow coverage is close to free value, so an attacking set takes one most of the time and a set whose
+// ability only reads one category always takes that category's Shadow move
+function addShadowCoverage(set, role, fdex, ruleTable, ctx, forced) {
+	if (role === 'defensive') return;
+	const shadow = shadowMovesAllowed(fdex, ruleTable, ctx);
+	const pool = (shadow[role] || []).filter(m => moveMatches(m, role, fdex));
+	if (!pool.length) return;
+	const moves = set.moves || [];
+	if (moves.some(m => fdex.moves.get(('' + m).split(' (')[0]).type === 'Shadow')) return;
+	const locked = ABILITY_NEEDS[toId(set.ability || '')] === role;
+	if (!locked && Math.random() >= 0.6) return;
+	const used = new Set(moves.map(m => toId(('' + m).split(' (')[0])));
+	const pick = pickMove(pool, fdex, ruleTable, used, 3, ctx);
+	if (pick) swapInMove(set, pick, fdex, forced, ruleTable);
 }
 
 function applyHackmonsEvs(set, role, ruleTable) {
@@ -659,6 +841,10 @@ function applyHackmonsEvs(set, role, ruleTable) {
 			set.nature = 'Bold';
 			set.ivs = Object.assign({}, set.ivs, { atk: 0 });
 		}
+	} else if (set.phnnFastEvs) {
+		set.evs = { hp: 252, atk: 0, def: 4, spa: 0, spd: 0, spe: 252 };
+		set.nature = 'Timid';
+		set.ivs = Object.assign({}, set.ivs, { atk: 0 });
 	} else if (role === 'physical') {
 		set.evs = { hp: 4, atk: 252, def: 0, spa: 0, spd: 0, spe: 252 };
 		set.nature = 'Jolly';
@@ -715,7 +901,7 @@ function upgradeHackmonsSet(set, fdex, ruleTable, usedAbilities, ctx) {
 		if (fdex.gen === 1) delete set.item;
 		return;
 	}
-	const noWeakness = /Arceus-Question|Terapagos-Stellar/.test(set.species || '');
+	const noWeakness = wonderGuardBody(fdex.species.get(set.species), fdex);
 	if (noWeakness && !usedAbilities.get('wonderguard') && abilityAllowed('Wonder Guard', fdex, ruleTable)) {
 		set.ability = 'Wonder Guard';
 		usedAbilities.set('wonderguard', 1);
@@ -729,22 +915,20 @@ function upgradeHackmonsSet(set, fdex, ruleTable, usedAbilities, ctx) {
 		usedAbilities.set('noguard', 1);
 	} else {
 		let pool = (META_ABILITIES[role] || []).filter(a => toId(a) !== 'noguard');
-		if (role !== 'defensive') {
-			const hasNormalAttack = (set.moves || []).some(m => {
-				const move = fdex.moves.get(('' + m).split(' (')[0]);
-				return move.type === 'Normal' && move.category !== 'Status';
-			});
-			if (hasNormalAttack) pool = META_ABILITIES.ate.concat(pool);
-		}
+		if (role !== 'defensive') pool = META_ABILITIES.ate.concat(pool);
 		pool = pool.concat(META_ABILITIES.utility, META_ABILITIES.defensive);
-		const isLegal = name => !usedAbilities.get(toId(name)) && abilityAllowed(name, fdex, ruleTable);
+		// an ability whose whole effect reads the other damage category never belongs on this set, and
+		// Wonder Guard is a liability rather than a wall on anything that has a weakness to be hit by
+		const roleOk = name => {
+			if (toId(name) === 'wonderguard') return noWeakness;
+			const need = ABILITY_NEEDS[toId(name)];
+			return !need || need === 'normal' || need === role;
+		};
+		const isLegal = name => !usedAbilities.get(toId(name)) && roleOk(name) && abilityAllowed(name, fdex, ruleTable);
 		let picked = null;
 		if (Math.random() < 0.4) {
 			const premium = HM_PREMIUM_ABILITIES.filter(isLegal);
-			// a no-weakness body wants Wonder Guard above all else
-			if (/Question|Stellar/.test(set.species || '') && isLegal('Wonder Guard')) {
-				picked = 'Wonder Guard';
-			} else if (premium.length) picked = premium[Math.floor(Math.random() * premium.length)];
+			if (premium.length) picked = premium[Math.floor(Math.random() * premium.length)];
 		}
 		if (!picked) {
 			const legal = pool.filter(isLegal);
@@ -876,6 +1060,214 @@ function applySmogonSets(team, gen, fdex, ruleTable, gate) {
 	}
 }
 
+// Imposter copies the target's stats but keeps its OWN HP, so the best body is simply the bulkiest
+// legal one in THIS format -- which differs per generation (and Gmax only helps where Dynamax exists)
+// the Gmax HP doubling is baked into the phnn mod's statModify, not the Totem Aura rule
+// Wonder Guard only lets super-effective damage through, so it is worth an ability slot exactly when the
+// body has no weaknesses at all. Pure Shadow (Arceus-Shadow, Mewtwo-Shadow) has none; ???-typed bodies
+// (Arceus-Question and the 924 BST glitch Pokemon) are weak only to Shadow, and carrying a Shadow move
+// makes them count as Shadow, which closes that hole too. Terapagos-Stellar is NOT one of these -- it is
+// weak to Fighting and Shadow, and its own Tera Shell already does the job better.
+function effectiveSpeed(sp) {
+	const stage = HM_TOTEM_SPE_STAGES[sp.id] || 0;
+	return sp.baseStats.spe * (stage === 1 ? 1.5 : stage === 2 ? 2 : 1);
+}
+
+function legalBodies(names, fdex, ruleTable, team, self) {
+	const wantStage = ruleTable.has('firststageonly') ? 'LC' :
+		ruleTable.has('middlestageonly') ? 'MC' : null;
+	const taken = ruleTable.has('speciesclause') ?
+		new Set((team || []).filter(s => s && s !== self).map(s => toId(s.species || ''))) : null;
+	return names
+		.map(n => fdex.species.get(n))
+		.filter(sp => sp.exists && !(taken && taken.has(toId(sp.name))) &&
+			ruleTable.check('pokemon:' + sp.id) !== 'banned' &&
+			ruleTable.check('basepokemon:' + toId(sp.baseSpecies)) !== 'banned' &&
+			(!wantStage || evoStage(fdex, sp) === wantStage));
+}
+
+function fastestBody(fdex, ruleTable, team, self) {
+	return legalBodies(HM_FAST_BODIES, fdex, ruleTable, team, self)
+		.sort((a, b) => effectiveSpeed(b) - effectiveSpeed(a))[0] || null;
+}
+
+const wonderGuardCache = new Map();
+function wonderGuardBody(sp, fdex) {
+	if (!sp || !sp.exists) return false;
+	const key = fdex.currentMod + '|' + sp.id;
+	if (wonderGuardCache.has(key)) return wonderGuardCache.get(key);
+	let weaknesses = 0;
+	for (const type of fdex.types.all()) {
+		let mult = 1, immune = false;
+		for (const def of sp.types) {
+			if (!fdex.getImmunity(type.name, def)) { immune = true; break; }
+			mult *= Math.pow(2, fdex.getEffectiveness(type.name, def));
+		}
+		if (!immune && mult > 1 && type.name !== 'Shadow') weaknesses++;
+	}
+	const ok = weaknesses === 0;
+	wonderGuardCache.set(key, ok);
+	return ok;
+}
+
+// Terastallizing into Shadow is the strongest option the fork offers: it grants STAB on Shadow moves,
+// which are already 2x into everything that is not Shadow, AND it retypes the holder to Shadow, so the
+// same moves come back at 0.5x. ??? is the defensive counterpart -- typeless is weak to Shadow alone.
+// Which of these a format actually accepts is decided by several interacting rules (Shadow Tera Clause,
+// the nonstandard-type check, the Custom Disguises bypass), so ask the real validator once per format
+// and cache the answer rather than trying to restate those rules here and getting them wrong.
+const teraOptionCache = new Map();
+function teraOptionsFor(fullid, fdex, ruleTable, validator) {
+	if (teraOptionCache.has(fullid)) return teraOptionCache.get(fullid);
+	const probe = fdex.species.get('Rayquaza').exists ? 'Rayquaza' : 'Ditto';
+	const options = [];
+	for (const name of ['Shadow', '???', 'Stellar']) {
+		const type = fdex.types.get(name);
+		if (!type || !type.exists) continue;
+		const set = {
+			name: probe, species: probe, ability: 'No Ability', item: '', moves: ['Tackle'],
+			evs: {}, ivs: { hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31 },
+			level: ruleTable.defaultLevel || 100, nature: 'Hardy', teraType: name,
+		};
+		let bad = true;
+		try { bad = !!validator.validateSet(set, {}); } catch (e) { bad = true; }
+		if (!bad) options.push(name);
+	}
+	teraOptionCache.set(fullid, options);
+	return options;
+}
+
+function pickTeraType(sp, options) {
+	const own = (sp.types && sp.types[0]) || 'Normal';
+	if (!options.length) return own;
+	const roll = Math.random();
+	if (roll < 0.45 && options.includes('Shadow')) return 'Shadow';
+	if (roll >= 0.45 && roll < 0.55 && options.includes('???')) return '???';
+	if (roll >= 0.55 && roll < 0.85 && options.includes('Stellar')) return 'Stellar';
+	return own;
+}
+
+function imposterItemFor(sp) {
+	return HM_IMPOSTER_ITEMS[toId(sp.name)] || HM_IMPOSTER_ITEMS[toId(sp.baseSpecies || '')] || null;
+}
+
+function imposterItemWorks(sp, item) {
+	if (item === 'Eviolite') return !!sp.nfe;
+	if (item === 'Light Ball') return /^Pikachu/.test(sp.name || '');
+	return !!item;
+}
+
+// Alphas double HP the same way a Gmax forme does, but ALSO keep Wild Might through Transform, so the
+// copied Atk/Def/SpA/SpD land doubled too -- strictly better than the Gmax body at equal HP. They are
+// only legal where Alphas are allowed (Extended, the sole format with the Totem Aura rule).
+function imposterAlphasLegal(fdex, ruleTable) {
+	return toId(fdex.currentMod || '') === 'phnn' && ruleTable.has('totemaura');
+}
+
+function imposterBulk(sp, fdex, ruleTable) {
+	if (!sp || !sp.exists) return 0;
+	const doubles = (toId(fdex.currentMod || '') === 'phnn' && /-Gmax$/.test(sp.name)) ||
+		(imposterAlphasLegal(fdex, ruleTable) && /-Alpha$/.test(sp.name));
+	const base = sp.baseStats.hp + (doubles ? sp.baseStats.hp : 0);
+	const item = imposterItemFor(sp);
+	const usable = !!item && imposterItemWorks(sp, item) && itemAllowed(item, fdex, ruleTable);
+	return base * (usable && item === 'Eviolite' ? 1.15 : usable && item === 'Light Ball' ? 1.10 : 1);
+}
+
+function imposterCandidates(bodies, fdex, ruleTable, taken) {
+	const alphaLegal = imposterAlphasLegal(fdex, ruleTable);
+	const wantStage = ruleTable.has('firststageonly') ? 'LC' :
+		ruleTable.has('middlestageonly') ? 'MC' : null;
+	// never trade a body's working item away for the doubling: an -Alpha forme carries no evolution
+	// line of its own, so Eviolite stops functioning on it
+	const alphaOf = n => {
+		if (!alphaLegal) return null;
+		const base = fdex.species.get(n);
+		if (!base.exists) return null;
+		const alpha = fdex.species.get((base.baseSpecies || base.name) + '-Alpha');
+		if (!alpha.exists) return null;
+		const item = imposterItemFor(base);
+		if (item && imposterItemWorks(base, item) && !imposterItemWorks(alpha, item)) return null;
+		return alpha.name;
+	};
+	return bodies
+		.flatMap(n => { const a = alphaOf(n); return a ? [a, n] : [n]; })
+		.filter((n, i, arr) => arr.indexOf(n) === i)
+		.map(n => fdex.species.get(n))
+		.filter(sp => sp.exists && !(taken && taken.has(toId(sp.name))) &&
+			ruleTable.check('pokemon:' + sp.id) !== 'banned' &&
+			ruleTable.check('basepokemon:' + toId(sp.baseSpecies)) !== 'banned' &&
+			(!wantStage || evoStage(fdex, sp) === wantStage))
+		.map(sp => ({ sp, hp: imposterBulk(sp, fdex, ruleTable) }))
+		.sort((a, b) => b.hp - a.hp);
+}
+
+function imposterExpendable(sp) {
+	if (!sp || !sp.exists) return false;
+	const b = sp.baseStats;
+	return b.atk + b.def + b.spa + b.spd + b.spe <= HM_IMPOSTER_MAX_KEPT_STATS;
+}
+
+// Light Ball doubles Pikachu's Attack and Sp. Atk, and it keys off the HOLDER's base species, so it
+// survives Transform and stacks multiplicatively with Wild Might. Measured copying Rhyperior-Alpha:
+// every bulk body lands 632 Attack, Pikachu-Gmax or Pikachu-Alpha with a Light Ball lands 1264. That is
+// a completely different plan from the pink walls -- a glass cannon rather than a sponge -- so it gets
+// chosen on its own roll instead of losing the HP ranking every time.
+function imposterGlassCannon(bodies, fdex, ruleTable, taken) {
+	return imposterCandidates(bodies, fdex, ruleTable, taken)
+		.filter(c => {
+			const item = imposterItemFor(c.sp);
+			return item === 'Light Ball' && imposterItemWorks(c.sp, item) && itemAllowed(item, fdex, ruleTable);
+		})
+		.sort((a, b) => (b.sp.baseStats.atk + b.sp.baseStats.spa) - (a.sp.baseStats.atk + a.sp.baseStats.spa))[0] || null;
+}
+
+function makeImposter(set, sp, fdex, ruleTable) {
+	set.ability = 'Imposter';
+	set.phnnForcedAbility = 'Imposter';
+	set.phnnForcedRole = 'defensive';
+	const item = imposterItemFor(sp);
+	if (item && imposterItemWorks(sp, item) && itemAllowed(item, fdex, ruleTable)) set.phnnForcedItem = item;
+}
+
+// Wild Might survives Transform and doubles an Alpha's own HP, so on an Extended team most of the roster
+// is already a viable Imposter body -- hand the ability to the bulkiest members rather than to one
+// purpose-built slot, and only fall back to substituting a dedicated body when nothing on the team is
+// bulky enough to hold the ability at all.
+function applyImposters(team, fdex, ruleTable) {
+	if (ruleTable.has('obtainableabilities') || !abilityAllowed('Imposter', fdex, ruleTable)) return;
+	const isImposter = set => toId((set && set.phnnForcedAbility) || '') === 'imposter';
+	let target = 1 + (Math.random() < 0.55 ? 1 : 0) + (Math.random() < 0.25 ? 1 : 0);
+	target = Math.max(1, Math.min(target, team.length - 1));
+	let made = team.filter(isImposter).length;
+	const free = team
+		.map(set => ({ set, sp: fdex.species.get((set && set.species) || '') }))
+		.filter(e => e.set && !isImposter(e.set) && !e.set.phnnForcedAbility && !e.set.phnnForcedMoves)
+		.map(e => ({ set: e.set, sp: e.sp, hp: imposterBulk(e.sp, fdex, ruleTable) }))
+		.sort((a, b) => b.hp - a.hp);
+	const taken = ruleTable.has('speciesclause') ?
+		new Set(team.map(set => toId((set && set.species) || ''))) : null;
+	const bench = imposterCandidates(HM_IMPOSTER_BODIES, fdex, ruleTable, taken);
+	// a format whose best possible body is small (Little Cup) must not be held to the flat floor
+	const floor = Math.min(HM_IMPOSTER_MIN_BULK, bench.length ? bench[0].hp * 0.6 : HM_IMPOSTER_MIN_BULK);
+	const spare = [];
+	for (const entry of free) {
+		if (made >= target) break;
+		if (entry.hp < floor || !imposterExpendable(entry.sp)) { spare.push(entry); continue; }
+		makeImposter(entry.set, entry.sp, fdex, ruleTable);
+		made++;
+	}
+	// at most one team member is ever REPLACED by a purpose-built body, so a thin roster still fields an
+	// Imposter without the whole team collapsing into Chansey clones
+	const victim = spare[spare.length - 1] || free[free.length - 1];
+	if (made >= target || !bench.length || !victim || isImposter(victim.set)) return;
+	const cannon = Math.random() < 0.3 ? imposterGlassCannon(HM_IMPOSTER_BODIES, fdex, ruleTable, taken) : null;
+	const chosen = cannon ? cannon.sp : bench[0].sp;
+	victim.set.species = chosen.name;
+	victim.set.name = victim.set.species;
+	makeImposter(victim.set, chosen, fdex, ruleTable);
+}
+
 function applyArchetype(team, fdex, ruleTable, usedAbilities) {
 	const usable = HM_ARCHETYPES.filter(a => a.slots.every(slot => (
 		(!slot.ability || abilityAllowed(slot.ability, fdex, ruleTable)) &&
@@ -887,44 +1279,37 @@ function applyArchetype(team, fdex, ruleTable, usedAbilities) {
 		const set = team[i];
 		if (!set) return;
 		if (slot.bodies) {
-			// Imposter copies the target's stats but keeps its OWN HP, so the best body is simply the
-			// bulkiest legal one in THIS format -- which differs per generation (and Gmax only helps
-			// where Dynamax exists)
-			// the Gmax HP doubling is baked into the phnn mod's statModify, not the Totem Aura rule
-			const gmaxDoubled = toId(fdex.currentMod || '') === 'phnn';
-			// Alphas double HP the same way, but ALSO keep Wild Might through Transform, so the copied
-			// Atk/Def/SpA/SpD land doubled too -- strictly better than the Gmax body at equal HP. They are
-			// only legal where Alphas are allowed (Extended, the sole format with the Totem Aura rule).
-			const alphaLegal = gmaxDoubled && ruleTable.has('totemaura');
-			const alphaDoubled = sp => alphaLegal && /-Alpha$/.test(sp.name || '');
-			const wantStage = ruleTable.has('firststageonly') ? 'LC' :
-				ruleTable.has('middlestageonly') ? 'MC' : null;
-			const ranked = slot.bodies
-				.map(n => alphaLegal && n === 'Snorlax-Gmax' ? 'Snorlax-Alpha' : n)
-				.map(n => fdex.species.get(n))
-				.filter(sp => sp.exists && ruleTable.check('pokemon:' + sp.id) !== 'banned' &&
-					ruleTable.check('basepokemon:' + toId(sp.baseSpecies)) !== 'banned' &&
-					(!wantStage || evoStage(fdex, sp) === wantStage))
-				.map(sp => {
-					const doubles = (gmaxDoubled && /-Gmax$/.test(sp.name)) || alphaDoubled(sp);
-					const base = sp.baseStats.hp + (doubles ? sp.baseStats.hp : 0);
-					const item = HM_IMPOSTER_ITEMS[toId(sp.name)] || HM_IMPOSTER_ITEMS[toId(sp.baseSpecies || '')];
-					const bonus = item === 'Eviolite' && itemAllowed('Eviolite', fdex, ruleTable) ? 1.15 :
-						item === 'Light Ball' && itemAllowed('Light Ball', fdex, ruleTable) ? 1.10 : 1;
-					return { sp, hp: base * bonus };
-				})
-				.sort((a, b) => b.hp - a.hp);
+			const cannon = Math.random() < 0.3 ? imposterGlassCannon(slot.bodies, fdex, ruleTable, null) : null;
+			const ranked = imposterCandidates(slot.bodies, fdex, ruleTable, null);
 			const cutoff = ranked.length ? ranked[0].hp * 0.9 : 0;
 			const viable = ranked.filter(r => r.hp >= cutoff);
-			const body = viable.length ? viable[Math.floor(Math.random() * viable.length)].sp.name : null;
+			const body = cannon ? cannon.sp :
+				viable.length ? viable[Math.floor(Math.random() * viable.length)].sp : null;
 			if (body) {
-				set.species = fdex.species.get(body).name;
+				set.species = body.name;
 				set.name = set.species;
-				const itemKey = toId(set.species);
-				const item = HM_IMPOSTER_ITEMS[itemKey] || HM_IMPOSTER_ITEMS[toId(fdex.species.get(body).baseSpecies || '')];
-				if (item && itemAllowed(item, fdex, ruleTable)) set.phnnForcedItem = item;
+				makeImposter(set, body, fdex, ruleTable);
 			}
 		}
+		if (slot.fastBodies) {
+			const body = fastestBody(fdex, ruleTable, team, set);
+			if (body) {
+				set.species = body.name;
+				set.name = set.species;
+			}
+		}
+		if (slot.wgBodies) {
+			// before Gen 8 an Arceus forme without its Plate is rewritten back to plain Arceus later in
+			// reshape(), which would strand Wonder Guard on a Normal type
+			const pool = legalBodies(HM_WONDER_GUARD_BODIES, fdex, ruleTable, team, set)
+				.filter(sp => wonderGuardBody(sp, fdex) && !(fdex.gen <= 7 && /^Arceus-/.test(sp.name)));
+			const body = pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
+			if (!body) return;
+			set.species = body.name;
+			set.name = set.species;
+		}
+		if (slot.item && itemAllowed(slot.item, fdex, ruleTable)) set.phnnForcedItem = slot.item;
+		if (slot.fastEvs) set.phnnFastEvs = true;
 		if (slot.ability && !usedAbilities.get(toId(slot.ability)) && abilityAllowed(slot.ability, fdex, ruleTable)) {
 			set.ability = slot.ability;
 			set.phnnForcedAbility = slot.ability;
@@ -963,6 +1348,7 @@ function reshape(team, baseid, gen, rulesText, ruleTable, fdex, ctx, gate) {
 	if (isHackmons && !baseid.includes('letsgo') && Math.random() < 0.45) {
 		applyArchetype(team, fdex, ruleTable, usedAbilities);
 	}
+	if (isHackmons && !baseid.includes('letsgo')) applyImposters(team, fdex, ruleTable);
 	if (!isHackmons) {
 		applySmogonSets(team, gen, fdex, ruleTable, gate);
 		applyCompetitiveSpreads(team, gen, fdex, ruleTable);
@@ -1072,7 +1458,12 @@ function generateTeam(formatid) {
 	const source = hasGenerator(baseid) ? baseid : sourceFor(baseid, format);
 	if (!source) return { error: 'No team generator is available for this format.' };
 
-	const teamSize = Math.max(1, Math.min(6, ruleTable.maxTeamSize || 6));
+	// Custom Disguises really does allow 24 Pokemon and 24 moves each. Use the headroom, but stop well
+	// short of the ceiling so a generated team is still something you can actually pilot.
+	const sizeCap = ruleTable.has('disguisemod') ? HM_CD_TEAM_CAP : 6;
+	const roomFor = Math.max(1, Math.min(sizeCap, ruleTable.maxTeamSize || 6));
+	const teamSize = roomFor > 6 ? 6 + Math.floor(Math.random() * (roomFor - 5)) : roomFor;
+	const teraOpts = gen >= 9 ? teraOptionsFor(fullid, fdex, ruleTable, validator) : [];
 	const isMono = ruleTable.has('sametypeclause');
 	const synthesize = isHackmonsTarget(baseid) && gen >= 3 && !isMono &&
 		!baseid.includes('metronome') && !baseid.includes('letsgo');
@@ -1091,7 +1482,7 @@ function generateTeam(formatid) {
 					pool = picked.map(sp => ({
 						name: sp.name, species: sp.name, ability: '', item: '',
 						moves: [], nature: 'Serious', gender: '', evs: {}, ivs: {},
-						teraType: gen >= 9 ? (sp.types && sp.types[0]) || 'Normal' : undefined,
+						teraType: gen >= 9 ? pickTeraType(sp, teraOpts) : undefined,
 					}));
 				} else {
 					pool = Teams.generate(source);
@@ -1156,6 +1547,7 @@ function generateTeam(formatid) {
 				delete set.phnnZItem;
 				delete set.phnnForcedItem;
 				delete set.phnnForcedAbility;
+				delete set.phnnFastEvs;
 			}
 			return { team: Teams.pack(team), export: Teams.export(team), source, attempts: attempt + 1 };
 		}

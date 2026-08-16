@@ -154,7 +154,7 @@ function phnnEffectiveBST(species: { id: string, name: string, baseStats: StatsT
 
 function phnnEntryNote(species: { id: string, name: string }): string | null {
 	if (species.name.endsWith('-Alpha')) {
-		return 'Alpha: Enters battle with Wild Might, doubling its HP, Attack, Defense, Sp. Atk, and Sp. Def (Speed unchanged; kept even through Mega Evolution).';
+		return 'Alpha: Enters battle with Wild Might, doubling its HP, Attack, Defense, Sp. Atk, and Sp. Def (Speed unchanged; kept even through Mega Evolution). Wild Might never stacks: after Transform or Imposter it applies exactly once, and the copier keeps its own HP.';
 	}
 	if (PHNN_TOTEM_AURAS[species.id]) {
 		return `Totem: Gains ${PHNN_TOTEM_AURAS[species.id]} when it enters battle.`;

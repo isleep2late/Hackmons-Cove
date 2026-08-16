@@ -1,5 +1,10 @@
 export const Abilities: import('../../../sim/dex-abilities').ModdedAbilityDataTable = {
 
+	imposter: {
+		inherit: true,
+		shortDesc: "On switch-in, Transforms into the foe but keeps its own HP. Wild Might applies exactly once.",
+		desc: "On switch-in, this Pokemon Transforms into the opposing Pokemon that is facing it, copying its species, types, stat values, stat stages, moves and Ability while keeping its own HP, item and level. Eternatus-Eternamax can be copied here; Shadow Pokemon and anything carrying a Shadow move cannot. Wild Might is a single flag, so the copy has it exactly once whenever either side is an Alpha forme: an Alpha copying a non-Alpha keeps its own Wild Might, a non-Alpha copying an Alpha gains it, and an Alpha copying an Alpha still gets only one 2x to Attack, Defense, Sp. Atk and Sp. Def. Speed is never doubled. The 2x HP belongs to the Alpha forme rather than to Wild Might, so an Alpha copier keeps its own doubled HP pool and a non-Alpha copier keeps its own undoubled one. HP is the only stat Transform does not overwrite, which is why the best bodies are the ones with the biggest HP pool and the least worth keeping: Blissey-Alpha at 1302 leads, then Chansey-Alpha, Snorlax-Alpha and any other high-HP Alpha, while Chansey with Eviolite is the pick wherever Alphas are not legal. Nearly every Alpha is a usable body, because Wild Might doubles its HP and then doubles whatever it copies.",
+	},
 	cutecharm: {
 		inherit: true,
 		onDamagingHit(damage, target, source, move) {
