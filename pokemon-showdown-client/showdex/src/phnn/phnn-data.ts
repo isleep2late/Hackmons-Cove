@@ -294,6 +294,12 @@ export default {
 				"type": "Shadow",
 				"category": "Status",
 				"ignoreImmunity": true
+			},
+			"kamehameha": {
+				"basePower": 0,
+				"type": "Fighting",
+				"category": "Physical",
+				"ignoreImmunity": true
 			}
 		},
 		"typeChart": {
