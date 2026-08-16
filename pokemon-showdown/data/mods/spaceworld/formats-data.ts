@@ -336,7 +336,7 @@ export const FormatsData: import('../../../sim/dex-species').ModdedSpeciesFormat
 		tier: "OU",
 	},
 	chansey: {
-		tier: "LC",
+		tier: "OU",
 	},
 	tangela: {
 		tier: "NFE",
@@ -381,7 +381,7 @@ export const FormatsData: import('../../../sim/dex-species').ModdedSpeciesFormat
 		tier: "LC",
 	},
 	tauros: {
-		tier: "UU",
+		tier: "OU",
 	},
 	magikarp: {
 		tier: "LC",
@@ -432,7 +432,7 @@ export const FormatsData: import('../../../sim/dex-species').ModdedSpeciesFormat
 		tier: "UU",
 	},
 	zapdos: {
-		tier: "UU",
+		tier: "OU",
 	},
 	moltres: {
 		tier: "UU",
@@ -522,7 +522,7 @@ export const FormatsData: import('../../../sim/dex-species').ModdedSpeciesFormat
 		tier: "Brick",
 	},
 	hoppip: {
-		tier: "NFE",
+		tier: "UU",
 	},
 	skiploom: {
 		tier: "LC",
@@ -579,7 +579,8 @@ export const FormatsData: import('../../../sim/dex-species').ModdedSpeciesFormat
 		tier: "UU",
 	},
 	hooh: {
-		tier: "OU",
+		isNonstandard: "Unobtainable",
+		tier: "Illegal",
 	},
 	togepi: {
 		isNonstandard: "Unobtainable",
@@ -589,7 +590,7 @@ export const FormatsData: import('../../../sim/dex-species').ModdedSpeciesFormat
 		tier: "UU",
 	},
 	flambear: {
-		tier: "NFE",
+		tier: "UU",
 	},
 	volbear: {
 		tier: "LC",
@@ -598,7 +599,7 @@ export const FormatsData: import('../../../sim/dex-species').ModdedSpeciesFormat
 		tier: "UU",
 	},
 	cruz: {
-		tier: "NFE",
+		tier: "UU",
 	},
 	aqua: {
 		tier: "LC",
@@ -704,7 +705,7 @@ export const FormatsData: import('../../../sim/dex-species').ModdedSpeciesFormat
 		tier: "Illegal",
 	},
 	chikorita: {
-		tier: "NFE",
+		tier: "UU",
 	},
 	bayleef: {
 		tier: "LC",

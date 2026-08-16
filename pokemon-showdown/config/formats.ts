@@ -956,6 +956,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: false,
 		challengeShow: false,
 		ruleset: ['Standard'],
+		banlist: ['Uber', 'All Items', 'Explosion', 'Self-Destruct']
 	},
 	{
 		name: "[Gen 2] SpaceWorld Ubers",
@@ -964,6 +965,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: false,
 		challengeShow: false,
 		ruleset: ['Standard'],
+		banlist: ['All Items', 'Explosion', 'Self-Destruct']
 	},
 	{
 		name: "[Gen 2] SpaceWorld Bricks",
