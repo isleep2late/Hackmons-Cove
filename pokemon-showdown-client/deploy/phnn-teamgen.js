@@ -892,15 +892,22 @@ function applyArchetype(team, fdex, ruleTable, usedAbilities) {
 			// where Dynamax exists)
 			// the Gmax HP doubling is baked into the phnn mod's statModify, not the Totem Aura rule
 			const gmaxDoubled = toId(fdex.currentMod || '') === 'phnn';
+			// Alphas double HP the same way, but ALSO keep Wild Might through Transform, so the copied
+			// Atk/Def/SpA/SpD land doubled too -- strictly better than the Gmax body at equal HP. They are
+			// only legal where Alphas are allowed (Extended, the sole format with the Totem Aura rule).
+			const alphaLegal = gmaxDoubled && ruleTable.has('totemaura');
+			const alphaDoubled = sp => alphaLegal && /-Alpha$/.test(sp.name || '');
 			const wantStage = ruleTable.has('firststageonly') ? 'LC' :
 				ruleTable.has('middlestageonly') ? 'MC' : null;
 			const ranked = slot.bodies
+				.map(n => alphaLegal && n === 'Snorlax-Gmax' ? 'Snorlax-Alpha' : n)
 				.map(n => fdex.species.get(n))
 				.filter(sp => sp.exists && ruleTable.check('pokemon:' + sp.id) !== 'banned' &&
 					ruleTable.check('basepokemon:' + toId(sp.baseSpecies)) !== 'banned' &&
 					(!wantStage || evoStage(fdex, sp) === wantStage))
 				.map(sp => {
-					const base = sp.baseStats.hp + (gmaxDoubled && /-Gmax$/.test(sp.name) ? sp.baseStats.hp : 0);
+					const doubles = (gmaxDoubled && /-Gmax$/.test(sp.name)) || alphaDoubled(sp);
+					const base = sp.baseStats.hp + (doubles ? sp.baseStats.hp : 0);
 					const item = HM_IMPOSTER_ITEMS[toId(sp.name)] || HM_IMPOSTER_ITEMS[toId(sp.baseSpecies || '')];
 					const bonus = item === 'Eviolite' && itemAllowed('Eviolite', fdex, ruleTable) ? 1.15 :
 						item === 'Light Ball' && itemAllowed('Light Ball', fdex, ruleTable) ? 1.10 : 1;
