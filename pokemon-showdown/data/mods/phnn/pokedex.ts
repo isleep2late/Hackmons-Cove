@@ -3371,3 +3371,12 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 		eggGroups: ["Undiscovered"],
 	},
 };
+
+const overlayDir = process.env.PHNN_BETA_CONTENT;
+if (overlayDir) {
+	try {
+		Object.assign(Pokedex, require(overlayDir + '/pokedex.js').Pokedex);
+	} catch (err) {
+		console.error(`PHNN_BETA_CONTENT pokedex overlay failed: ${err}`);
+	}
+}

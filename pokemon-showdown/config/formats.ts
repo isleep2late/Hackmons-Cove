@@ -6632,3 +6632,12 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		ruleset: ['[Gen 1] OU', 'Allow Tradeback'],
 	},
 ];
+
+const overlayDir = process.env.PHNN_BETA_CONTENT;
+if (overlayDir) {
+	try {
+		require(overlayDir + '/formats.js').apply(Formats);
+	} catch (err) {
+		console.error(`PHNN_BETA_CONTENT formats overlay failed: ${err}`);
+	}
+}

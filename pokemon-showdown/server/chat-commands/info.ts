@@ -140,7 +140,7 @@ const PHNN_TOTEM_STAGES: { [id: string]: { [stat: string]: number } } = {
 function phnnEffectiveBST(species: { id: string, name: string, baseStats: StatsTable }): number | null {
 	const bs = species.baseStats;
 	if (species.name.endsWith('-Alpha')) {
-		return bs.hp + bs.spe + 2 * (bs.atk + bs.def + bs.spa + bs.spd);
+		return 2 * bs.hp + bs.spe + 2 * (bs.atk + bs.def + bs.spa + bs.spd);
 	}
 	const stages = PHNN_TOTEM_STAGES[species.id];
 	if (!stages) return null;
@@ -154,7 +154,7 @@ function phnnEffectiveBST(species: { id: string, name: string, baseStats: StatsT
 
 function phnnEntryNote(species: { id: string, name: string }): string | null {
 	if (species.name.endsWith('-Alpha')) {
-		return 'Alpha: Enters battle with Wild Might, doubling its Attack, Defense, Sp. Atk, and Sp. Def (HP and Speed unchanged; kept even through Mega Evolution).';
+		return 'Alpha: Enters battle with Wild Might, doubling its HP, Attack, Defense, Sp. Atk, and Sp. Def (Speed unchanged; kept even through Mega Evolution).';
 	}
 	if (PHNN_TOTEM_AURAS[species.id]) {
 		return `Totem: Gains ${PHNN_TOTEM_AURAS[species.id]} when it enters battle.`;

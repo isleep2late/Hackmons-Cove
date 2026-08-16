@@ -859,7 +859,7 @@ export const Dex = new class implements ModdedDex {
 				shiny: !!options.shiny,
 			};
 		}
-		const phnnMeta = phnnSpriteMeta[species.id];
+		const phnnMeta = phnnSpriteMeta[species.id] || (window as any).PhnnLocalSprites?.spriteMeta?.[species.id];
 		if (phnnMeta) {
 			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
 			const host = window.Config ? Config.routes.client : 'beta.hackmons.com';
@@ -878,7 +878,7 @@ export const Dex = new class implements ModdedDex {
 			return {
 				gen: mechanicsGen,
 				w, h, y: 0,
-				url: `${protocol}//${host}/sprites/phnn/${file}.${phnnMeta.ext || 'png'}`,
+				url: `${protocol}//${host}/${phnnMeta.dir || 'sprites/phnn'}/${file}.${phnnMeta.ext || 'png'}`,
 				pixelated: px,
 				isFrontSprite: isFront,
 				cryurl: species.id === 'jynxmega' ? `${protocol}//${host}/audio/cries/jynx-mega.mp3` : '',
@@ -1121,6 +1121,12 @@ export const Dex = new class implements ModdedDex {
 			}
 			return `background:transparent url(${protocol}//${host}/sprites/phnn/${id}-icon.png) no-repeat scroll center/contain;image-rendering:pixelated`;
 		}
+		const localIcon = (window as any).PhnnLocalSprites?.icons?.[id];
+		if (localIcon) {
+			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
+			const host = window.Config ? Config.routes.client : 'beta.hackmons.com';
+			return `background:transparent url(${protocol}//${host}/${localIcon}) no-repeat scroll center/contain;image-rendering:pixelated`;
+		}
 		let num = this.getPokemonIconNum(id, pokemon?.gender === 'F', facingLeft);
 
 		let top = Math.floor(num / 12) * 30;
@@ -1190,6 +1196,12 @@ export const Dex = new class implements ModdedDex {
 				pixelated: isPixel,
 				customPrefix: `${protocol}//${host}/`,
 			};
+		}
+		const localTb = (window as any).PhnnLocalSprites?.teambuilder?.[species.id];
+		if (localTb) {
+			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
+			const host = window.Config ? Config.routes.client : 'beta.hackmons.com';
+			return { ...localTb, customPrefix: `${protocol}//${host}/` };
 		}
 		if (Dex.afdMode) {
 			return {

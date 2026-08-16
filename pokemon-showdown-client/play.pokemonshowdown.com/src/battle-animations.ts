@@ -2619,6 +2619,27 @@ export class PokemonSprite extends Sprite {
 				// standard animation
 			} else if (speciesid === 'palafinhero') {
 				skipAnim = true;
+			} else if ((window as any).PhnnLocalSprites?.evolveAnim?.[speciesid]) {
+				const evo = (window as any).PhnnLocalSprites.evolveAnim[speciesid];
+				const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
+				const host = window.Config ? Config.routes.client : 'beta.hackmons.com';
+				const evoMs = evo.durationMs || 2150;
+				const $evolve = $(
+					`<img src="${protocol}//${host}/${evo.url}?t=${Date.now()}" style="display:block;position:absolute" />`
+				);
+				$evolve.css(this.scene.pos({ x: this.x, y: this.y, z: this.z, opacity: 1 }, { w: evo.w || 170, h: evo.h || 170 }));
+				this.$el.css('opacity', 0);
+				this.$el.parent().append($evolve);
+				const $newElLocal = $(`<img src="${sp.url}" style="display:block;opacity:0;position:absolute" />`);
+				$newElLocal.css(this.scene.pos({ x: this.x, y: this.y, z: this.z, opacity: 0 }, sp));
+				setTimeout(() => {
+					$evolve.remove();
+					this.$el.replaceWith($newElLocal);
+					this.$el = $newElLocal;
+					this.animReset();
+				}, evoMs);
+				scene.wait(evoMs);
+				return;
 			} else {
 				BattleOtherAnims.megaevo.anim(scene, [this]);
 				doCry = true;

@@ -806,7 +806,15 @@
 				}
 				var checkboxes = [];
 				if (canMegaEvo) {
-					checkboxes.push('<label class="megaevo"><input type="checkbox" name="megaevo" />&nbsp;Mega&nbsp;Evolution</label>');
+					var megaLabel = 'Mega&nbsp;Evolution';
+					var localLabels = window.PhnnLocalSprites && window.PhnnLocalSprites.megaEvoLabels;
+					if (localLabels) {
+						var sfid = toID(switchables[pos] && switchables[pos].speciesForme || '');
+						for (var lk in localLabels) {
+							if (sfid.indexOf(lk) === 0) megaLabel = localLabels[lk].replace(/ /g, '&nbsp;');
+						}
+					}
+					checkboxes.push('<label class="megaevo"><input type="checkbox" name="megaevo" />&nbsp;' + megaLabel + '</label>');
 				}
 				if (canMegaEvoX) {
 					checkboxes.push('<label class="megaevo"><input type="checkbox" name="megaevox" />&nbsp;Mega&nbsp;Evolution&nbsp;X</label>');

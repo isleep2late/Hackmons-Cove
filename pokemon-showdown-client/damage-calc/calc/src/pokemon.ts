@@ -100,6 +100,11 @@ export class Pokemon implements State.Pokemon {
       this.stats[stat] = val;
     }
 
+    if (this.isWildMight) {
+      this.rawStats.hp *= 2;
+      this.stats.hp = this.rawStats.hp;
+    }
+
     this.gigantamax = options.gigantamax;
 
     if (options.statOverrides) {
