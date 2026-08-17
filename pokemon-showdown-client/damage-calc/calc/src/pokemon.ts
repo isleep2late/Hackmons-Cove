@@ -67,8 +67,8 @@ export class Pokemon implements State.Pokemon {
     this.isDynamaxed = options.isDynamaxed;
     this.dynamaxLevel = this.isDynamaxed
       ? (options.dynamaxLevel === undefined ? 10 : options.dynamaxLevel) : undefined;
-    this.isWildMight = options.isWildMight ||
-      (gen.num === 10 && this.name.endsWith('-Alpha')) || undefined;
+    const isAlphaForme = gen.num === 10 && this.name.endsWith('-Alpha');
+    this.isWildMight = options.isWildMight || isAlphaForme || undefined;
     this.weightkg = this.isDynamaxed ? 0 : this.species.weightkg;
     this.alliesFainted = options.alliesFainted;
     this.boostedStat = options.boostedStat;
@@ -100,7 +100,7 @@ export class Pokemon implements State.Pokemon {
       this.stats[stat] = val;
     }
 
-    if (this.isWildMight) {
+    if (isAlphaForme) {
       this.rawStats.hp *= 2;
       this.stats.hp = this.rawStats.hp;
     }

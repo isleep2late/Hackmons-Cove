@@ -913,7 +913,8 @@ export class TeamValidator {
 					problems.push(`${name} has multiple Terastal types, which is only allowed in Custom Disguises formats.`);
 				}
 				const type = dex.types.get(set.teraType || species.requiredTeraType || species.types[0]);
-				if (!type.exists || (type.isNonstandard && !(dex.currentMod === 'phnn' && type.id === 'shadow'))) {
+				const customTeraOk = dex.currentMod === 'phnn' && ['shadow', '???'].includes(type.id);
+				if (!type.exists || (type.isNonstandard && !customTeraOk)) {
 					problems.push(`${name}'s Terastal type (${set.teraType}) is invalid.`);
 				} else if (species.requiredTeraType && species.requiredTeraType !== type.name && ruleTable.has('obtainablemisc')) {
 					problems.push(`${species.name}'s Terastal type needs to be ${species.requiredTeraType}.`);

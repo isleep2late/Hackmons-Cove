@@ -332,6 +332,94 @@ export const isPhnnTypingKnown = (pokemon: {
   return !!(pokemon.dirtyTypes?.length || pokemon.types?.length);
 };
 
+/**
+ * Whether a Pokemon counts as Shadow for Shadow-move effectiveness.
+ *
+ * The server's rule is `phnnIsShadowMon()`: a Pokemon is Shadow if it is Shadow-TYPED **or** carries
+ * any Shadow move. Carrying one flips a Shadow move from 2x per defending type to 0.5x per defending
+ * type - a flat 4x swing (mono-type 2x -> 0.5x, dual-type 4x -> 1x), verified against the live sim.
+ *
+ * Because a move the opponent has not used yet is hidden information, this deliberately returns
+ * `'unknown'` rather than guessing, and the Calcdex shows `???` until the answer is actually known.
+ * It becomes known the moment the Pokemon is a Shadow forme, is revealed to be Shadow-typed, uses a
+ * Shadow move, or has revealed a full moveset containing none.
+ */
+export const phnnShadowState = (pokemon: {
+  speciesForme?: string;
+  types?: string[];
+  dirtyTypes?: string[];
+  teraType?: string;
+  dirtyTeraType?: string;
+  terastallized?: boolean;
+  moves?: string[];
+  serverMoves?: string[];
+  revealedMoves?: string[];
+  transformedMoves?: string[];
+  serverSourced?: boolean;
+}): 'shadow' | 'plain' | 'unknown' => {
+  if (!pokemon?.speciesForme) {
+    return 'unknown';
+  }
+
+  const types = pokemon.dirtyTypes?.length ? pokemon.dirtyTypes : pokemon.types;
+
+  if (types?.some((t) => String(t).toLowerCase() === 'shadow')) {
+    return 'shadow';
+  }
+
+  if (pokemon.terastallized) {
+    const tera = pokemon.dirtyTeraType || pokemon.teraType;
+
+    if (String(tera || '').toLowerCase() === 'shadow') {
+      return 'shadow';
+    }
+  }
+
+  // a Shadow forme announces itself even before its typing has been seen
+  if (pokemon.speciesForme.toLowerCase().includes('shadow')) {
+    return 'shadow';
+  }
+
+  const known = [
+    ...(pokemon.transformedMoves || []),
+    ...(pokemon.serverMoves || []),
+    ...(pokemon.revealedMoves || []),
+  ].filter(Boolean);
+
+  if (known.some((m) => PHNN_SHADOW_MOVE_IDS.includes(toPhnnId(m)))) {
+    return 'shadow';
+  }
+
+  // our own Pokemon (and anything the server told us about) has a fully known moveset
+  const ours = pokemon.serverSourced || !!pokemon.serverMoves?.length;
+
+  if (ours) {
+    const all = [...(pokemon.transformedMoves || []), ...(pokemon.serverMoves || []), ...(pokemon.moves || [])];
+
+    return all.some((m) => PHNN_SHADOW_MOVE_IDS.includes(toPhnnId(m))) ? 'shadow' : 'plain';
+  }
+
+  // four revealed moves means there is nothing left to hide
+  return (pokemon.revealedMoves?.length || 0) >= 4 ? 'plain' : 'unknown';
+};
+
+/**
+ * Per-defending-type multiplier that reproduces the server's FLAT Shadow effectiveness.
+ *
+ * The server applies Shadow as a flat 2x into anything that is not Shadow and a flat 0.5x into
+ * anything that is, regardless of how many types the target has - `runEffectiveness` is overridden in
+ * the phnn mod to return a single total rather than accumulating per type. The calc's chart hook is
+ * applied once per defending type, so the value here has to be the n-th root of that total.
+ *
+ *   1 type  -> 2      / 0.5
+ *   2 types -> 1.414  / 0.707   (product 2 / 0.5)
+ */
+export const phnnShadowChartValue = (typeCount: number, isShadowTarget: boolean): number => {
+  const n = Math.max(1, typeCount || 1);
+
+  return (isShadowTarget ? 0.5 : 2) ** (1 / n);
+};
+
 export const isPhnnKamehamehaMove = (moveName: string): boolean => (
   toPhnnId(moveName) === 'kamehameha'
 );

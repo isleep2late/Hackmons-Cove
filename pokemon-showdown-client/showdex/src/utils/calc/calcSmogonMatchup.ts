@@ -15,7 +15,7 @@ import { type ShowdexSettings } from '@showdex/interfaces/app';
 import { type CalcdexBattleState, type CalcdexPlayerKey, CalcdexPlayerKeys as AllPlayerKeys } from '@showdex/interfaces/calc';
 import { formatId } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import { detectDisguiseFormat, isPhnnKamehamehaMove, isPhnnShadowDamagingMove, isPhnnTypingKnown, setPhnnCalcContext } from '@showdex/phnn';
+import { detectDisguiseFormat, isPhnnKamehamehaMove, isPhnnShadowDamagingMove, isPhnnTypingKnown, phnnShadowChartValue, phnnShadowState, setPhnnCalcContext } from '@showdex/phnn';
 import { getGenDexForFormat } from '@showdex/utils/dex';
 import { createSmogonField } from './createSmogonField';
 import { createSmogonMove } from './createSmogonMove';
@@ -220,9 +220,13 @@ export const calcSmogonMatchup = (
     return matchup;
   }
 
-  // Shadow hits everything the same except other Shadow types, so the number is only unknowable
-  // while the target's typing is still hidden
-  if (isPhnnShadowDamagingMove(playerMove) && !isPhnnTypingKnown(opponentPokemon)) {
+  // A Shadow move is 2x into anything that is not Shadow and 0.5x into anything that is - and a Pokemon
+  // counts as Shadow if it is Shadow-TYPED *or* carries any Shadow move. A move it has not used yet is
+  // hidden, so the honest answer is ??? until we actually know, and the real number the moment we do.
+  const shadowMove = isPhnnShadowDamagingMove(playerMove);
+  const shadowState = shadowMove ? phnnShadowState(opponentPokemon) : 'plain';
+
+  if (shadowMove && (!isPhnnTypingKnown(opponentPokemon) || shadowState === 'unknown')) {
     matchup.damageRange = '???';
     return matchup;
   }
@@ -269,6 +273,30 @@ export const calcSmogonMatchup = (
   );
 
   setPhnnCalcContext(format);
+
+  // a Shadow-TYPED defender is already 0.5x in the chart; this is for the other half of the server's
+  // rule, where an ordinary Pokemon counts as Shadow purely because it carries a Shadow move
+  const phnnCtx = (globalThis as Record<string, unknown>).__phnnCalc as {
+    typeChart?: Record<string, Record<string, number>>;
+  };
+
+  // the server applies Shadow as a FLAT 2x / 0.5x no matter how many types the target has, but the
+  // calc's chart hook runs once per defending type - so feed it the n-th root of the intended total
+  if (shadowMove && phnnCtx?.typeChart?.Shadow) {
+    const defenderTypes = (matchup.defender?.types || []).filter(Boolean);
+    const shadowTarget = shadowState === 'shadow'
+      || defenderTypes.some((t) => String(t).toLowerCase() === 'shadow');
+    const perType = phnnShadowChartValue(defenderTypes.length, shadowTarget);
+
+    phnnCtx.typeChart = {
+      ...phnnCtx.typeChart,
+      Shadow: Object.keys(phnnCtx.typeChart.Shadow).reduce((prev, type) => {
+        prev[type] = perType;
+
+        return prev;
+      }, {} as Record<string, number>),
+    };
+  }
 
   try {
     const result = calculate(
