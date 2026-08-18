@@ -285,8 +285,11 @@ export class BattleLog {
 				battletype = format + ' battle';
 				if (format === 'Random Battle') battletype = 'Random Battle';
 			}
+			const lastField = args[args.length - 1];
+			const battleTime = args.length > 4 && /^[0-9]{9,11}$/.test(lastField) ? parseInt(lastField) : 0;
 			divClass = 'notice';
-			divHTML = `<a href="/${BattleLog.escapeHTML(id)}" class="ilink">` +
+			divHTML = BattleLog.renderTimestamp(battleTime || null, battleTime ? showTimestamps : null) +
+				`<a href="/${BattleLog.escapeHTML(id)}" class="ilink">` +
 				`${battletype} started between ` +
 				`<strong style="color:${BattleLog.usernameColor(toUserid(args[2]))}">${BattleLog.escapeHTML(args[2])}</strong>` +
 				` and <strong style="color:${BattleLog.usernameColor(toUserid(args[3]))}">${BattleLog.escapeHTML(args[3])}</strong>.` +

@@ -1590,113 +1590,15 @@
 		}
 	});
 
-	function classifySmogonFormats() {
-		var buckets = { OU: [], Ubers: [], UU: [], VGC: [], RU: [], NU: [], PU: [], LC: [], Monotype: [], CAP: [], BSS: [], Other: [] };
-		if (!window.BattleFormats) return buckets;
+	function extraFormatMenu() {
+		var menu = window.PhnnExtraFormatMenu;
+		if (!menu || typeof menu.open !== 'function' || !menu.section) return null;
+		if (!window.BattleFormats) return null;
 		for (var id in BattleFormats) {
-			var f = BattleFormats[id];
-			if (f.section !== 'Smogon Formats') continue;
-			var name = BattleLog.escapeFormat(id);
-			var m = /^\[Gen ([^\]]+)\]\s*(.*)$/.exec(name);
-			var genLabel = m ? 'Gen ' + m[1] : name;
-			var rest = m ? m[2] : name;
-			var entry = { id: id, name: name, genLabel: genLabel, rest: rest };
-			if (/^Doubles OU$/.test(rest)) { entry.doubles = true; buckets.OU.push(entry); }
-			else if (/^OU( \(Blitz\))?$/.test(rest)) buckets.OU.push(entry);
-			else if (/^Doubles Ubers$/.test(rest)) { entry.doubles = true; buckets.Ubers.push(entry); }
-			else if (/^Ubers$/.test(rest)) buckets.Ubers.push(entry);
-			else if (/^Doubles UU$/.test(rest)) { entry.doubles = true; buckets.UU.push(entry); }
-			else if (/^UU$/.test(rest)) buckets.UU.push(entry);
-			else if (/^VGC/.test(rest)) buckets.VGC.push(entry);
-			else if (/^(BSS|Battle Stadium|Battle Spot)/.test(rest)) buckets.BSS.push(entry);
-			else if (/^RU$/.test(rest)) buckets.RU.push(entry);
-			else if (/^NU$/.test(rest)) buckets.NU.push(entry);
-			else if (/^PU$/.test(rest)) buckets.PU.push(entry);
-			else if (/^(LC|Little Cup)/.test(rest)) buckets.LC.push(entry);
-			else if (/^Monotype$/.test(rest)) buckets.Monotype.push(entry);
-			else if (/^CAP/.test(rest)) buckets.CAP.push(entry);
-			else buckets.Other.push(entry);
+			if (BattleFormats[id].section === menu.section) return menu;
 		}
-		return buckets;
+		return null;
 	}
-
-	var SmogonFormatsPopup = this.SmogonFormatsPopup = this.Popup.extend({
-		initialize: function (data) {
-			this.data = data;
-			this.doubles = false;
-			this.stage = 'root';
-			this.tier = '';
-			this.render();
-		},
-		events: {
-			'change input[name=doublescheck]': 'toggleDoubles'
-		},
-		render: function () {
-			var buf = '<p><ul class="popupmenu">';
-			if (this.stage === 'root') {
-				buf += '<li><strong style="color:#579">Smogon Formats</strong></li>';
-				var tiers = ['OU', 'Ubers', 'UU', 'VGC', 'Other'];
-				for (var i = 0; i < tiers.length; i++) {
-					buf += '<li><button name="pickTier" value="' + tiers[i] + '" class="option">' + tiers[i] + '</button></li>';
-				}
-				buf += '<li><label><input type="checkbox" name="doublescheck"' + (this.doubles ? ' checked' : '') + ' /> Build for Doubles (where available; VGC is always Doubles)</label></li>';
-			} else if (this.stage === 'other') {
-				buf += '<li><strong style="color:#579">Other tiers</strong></li>';
-				var others = ['RU', 'NU', 'PU', 'LC', 'Monotype', 'CAP', 'BSS', 'Other Metagames'];
-				for (var j = 0; j < others.length; j++) {
-					buf += '<li><button name="pickTier" value="' + others[j] + '" class="option">' + others[j] + '</button></li>';
-				}
-				buf += '<li><button name="goBack" value="root" class="option"><i class="fa fa-chevron-left"></i> Back</button></li>';
-			} else if (this.stage === 'list') {
-				var buckets = classifySmogonFormats();
-				var entries;
-				var wantDoubles = this.doubles;
-				if (this.tier === 'Other Metagames') {
-					entries = buckets.Other;
-				} else {
-					entries = buckets[this.tier] || [];
-					if (this.tier === 'OU' || this.tier === 'Ubers' || this.tier === 'UU') {
-						var filtered = entries.filter(function (e) { return wantDoubles ? e.doubles : !e.doubles; });
-						if (filtered.length) entries = filtered;
-					}
-				}
-				buf += '<li><strong style="color:#579">' + BattleLog.escapeHTML(this.tier) + (wantDoubles && ['OU', 'Ubers', 'UU'].indexOf(this.tier) >= 0 ? ' (Doubles)' : '') + '</strong></li>';
-				if (!entries.length) {
-					buf += '<li><em>Nothing here for this selection.</em></li>';
-				}
-				var useShortLabel = ['OU', 'Ubers', 'UU', 'RU', 'NU', 'PU', 'LC', 'Monotype'].indexOf(this.tier) >= 0 && !(this.tier === 'Other Metagames');
-				for (var k = 0; k < entries.length; k++) {
-					var label = useShortLabel ? entries[k].genLabel + (entries[k].doubles ? ' (Doubles)' : '') : entries[k].name;
-					buf += '<li><button name="pickFormat" value="' + entries[k].id + '" class="option">' + BattleLog.escapeHTML(label) + '</button></li>';
-				}
-				buf += '<li><button name="goBack" value="' + (['RU', 'NU', 'PU', 'LC', 'Monotype', 'CAP', 'BSS', 'Other Metagames'].indexOf(this.tier) >= 0 ? 'other' : 'root') + '" class="option"><i class="fa fa-chevron-left"></i> Back</button></li>';
-			}
-			buf += '</ul></p>';
-			this.$el.html('<div style="max-height:70vh;overflow-y:auto;min-width:260px">' + buf + '</div>');
-		},
-		toggleDoubles: function (e) {
-			this.doubles = !!e.currentTarget.checked;
-		},
-		pickTier: function (tier) {
-			if (tier === 'Other') {
-				this.stage = 'other';
-			} else {
-				this.tier = tier;
-				this.stage = 'list';
-			}
-			this.render();
-		},
-		goBack: function (stage) {
-			this.stage = stage;
-			this.tier = '';
-			this.render();
-		},
-		pickFormat: function (id) {
-			var onselect = this.data.onselect;
-			this.close();
-			if (onselect) onselect(id);
-		}
-	});
 
 	var FormatPopup = this.FormatPopup = this.Popup.extend({
 		events: {
@@ -1723,8 +1625,9 @@
 
 			var html = '<p><ul class="popupmenu"><li><input name="search" placeholder="Search formats" value="' + this.search + '" class="textbox autofocus" autocomplete="off" />';
 			html += '</li>';
-			if (this.selectType === 'teambuilder') {
-				html += '<li><button name="smogonFormats" class="option"><strong>Smogon Formats</strong> <small>(every main-server tier)</small></button></li>';
+			var extraMenu = extraFormatMenu();
+			if (this.selectType === 'teambuilder' && extraMenu) {
+				html += '<li><button name="extraFormats" class="option"><strong>' + BattleLog.escapeHTML(extraMenu.label || '') + '</strong> <small>' + BattleLog.escapeHTML(extraMenu.sublabel || '') + '</small></button></li>';
 			}
 			html += '</ul></p><span name="formats">';
 			html += this.renderFormats();
@@ -1836,7 +1739,8 @@
 			this.update();
 		},
 		shouldDisplayFormat: function (format) {
-			if (format.section === 'Smogon Formats') return false;
+			var extraMenu = window.PhnnExtraFormatMenu;
+			if (extraMenu && extraMenu.section && format.section === extraMenu.section) return false;
 			if (/customdisguises/.test(format.id) && format.id !== 'gen9nonerfscustomdisguises') return false;
 			if (/customgame/.test(format.id) && format.id !== 'gen9customgame') return false;
 			for (var fi = 0; fi < PHNN_FAMILIES.length; fi++) {
@@ -1853,10 +1757,12 @@
 			}
 			return true;
 		},
-		smogonFormats: function () {
+		extraFormats: function () {
+			var menu = extraFormatMenu();
+			if (!menu) return;
 			var onselect = this.data.onselect;
 			this.close();
-			app.addPopup(SmogonFormatsPopup, { onselect: onselect });
+			menu.open(onselect);
 		},
 		selectFormat: function (format) {
 			var $form = this.$form.length ? this.$form : this.sourceEl.closest('form');
