@@ -1158,14 +1158,11 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	clangoroussoulblaze: {
 		inherit: true,
 		selfBoost: undefined,
-		secondary: {
-			chance: 100,
-			self: {
-				boosts: { atk: 1, def: 1, spa: 1, spd: 1, spe: 1 },
-			},
+		self: {
+			boosts: { atk: 1, def: 1, spa: 1, spd: 1, spe: 1 },
 		},
-		shortDesc: "100% chance to raise user's Atk/Def/SpA/SpD/Spe by 1 per foe hit.",
-		desc: "Has a 100% chance to raise the user's Attack, Defense, Special Attack, Special Defense, and Speed by 1 stage for each opposing Pokemon this move damages. In Double Battles, damaging both foes raises each stat by 2 stages. The boosts do not occur if the move fails or if the user has the Sheer Force Ability.",
+		shortDesc: "Raises the user's Atk/Def/SpA/SpD/Spe by 1. Parental Bond boosts per hit.",
+		desc: "Raises the user's Attack, Defense, Special Attack, Special Defense, and Speed by 1 stage. The boost happens once per use no matter how many opposing Pokemon the move damages. A user whose move hits more than once, such as a Parental Bond user, is boosted on each hit. The boosts do not occur if the move fails or if the user has the Sheer Force Ability.",
 	},
 
 	gmaxdrumsolo: {

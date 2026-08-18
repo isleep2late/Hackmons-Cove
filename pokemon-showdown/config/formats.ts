@@ -1066,6 +1066,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Team Preview', 'Data Preview', 'Max Level = 255', 'Default Level = 255', 'Prestatus', 'Totem Aura'],
 		unbanlist: ['Past', 'Future', 'Unobtainable', 'No Move', 'No Move-2', 'No Move-SW', 'Demo', 'Glitch'],
+		banlist: ['CAP'],
 	},
 	{
 		name: "[Gen 9 No Nerfs] Little Cup",
@@ -1504,6 +1505,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 9999', 'Disguise Mod', 'Totem Aura'],
 		unbanlist: ['No Move', 'No Move-2', 'No Move-SW', 'Demo', 'Glitch'],
+		banlist: ['CAP'],
 	},
 	{
 		name: "[Gen 9 Champions] Custom Disguises",
@@ -1512,7 +1514,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 9999', 'Disguise Mod', 'Totem Aura'],
 		unbanlist: ['No Move', 'No Move-2', 'No Move-SW', 'Demo'],
-		banlist: ['Glitch', 'Jynx-Mega', 'Jynxite'],
+		banlist: ['CAP', 'Glitch', 'Jynx-Mega', 'Jynxite'],
 	},
 	{
 		name: "[Gen 9] Custom Disguises",
@@ -1521,7 +1523,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 9999', 'Disguise Mod', 'Totem Aura'],
 		unbanlist: ['No Move', 'No Move-2', 'No Move-SW', 'Demo'],
-		banlist: ['Glitch', 'Jynx-Mega', 'Jynxite'],
+		banlist: ['CAP', 'Glitch', 'Jynx-Mega', 'Jynxite'],
 	},
 	{
 		name: "[Gen 8] Custom Disguises",
@@ -1530,7 +1532,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 9999', 'Disguise Mod', 'Totem Aura'],
 		unbanlist: ['No Move', 'No Move-2', 'No Move-SW', 'Demo'],
-		banlist: ['Glitch', 'Jynx-Mega', 'Jynxite'],
+		banlist: ['CAP', 'Glitch', 'Jynx-Mega', 'Jynxite'],
 	},
 	{
 		name: "[Gen 8] BDSP Custom Disguises",
@@ -1539,7 +1541,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 9999', 'Disguise Mod', 'Totem Aura'],
 		unbanlist: ['No Move', 'No Move-2', 'No Move-SW', 'Demo'],
-		banlist: ['Glitch', 'Jynx-Mega', 'Jynxite'],
+		banlist: ['CAP', 'Glitch', 'Jynx-Mega', 'Jynxite'],
 	},
 	{
 		name: "[Gen 7] Custom Disguises",
@@ -1548,7 +1550,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 9999', 'Disguise Mod', 'Totem Aura'],
 		unbanlist: ['No Move', 'No Move-2', 'No Move-SW', 'Demo'],
-		banlist: ['Glitch', 'Jynx-Mega', 'Jynxite'],
+		banlist: ['CAP', 'Glitch', 'Jynx-Mega', 'Jynxite'],
 	},
 	{
 		name: "[Gen 7] Let's Go Custom Disguises",
@@ -1557,7 +1559,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 9999', 'Disguise Mod', 'Totem Aura'],
 		unbanlist: ['No Move', 'No Move-2', 'No Move-SW', 'Demo'],
-		banlist: ['Glitch', 'Jynx-Mega', 'Jynxite'],
+		banlist: ['CAP', 'Glitch', 'Jynx-Mega', 'Jynxite'],
 	},
 	{
 		name: "[Gen 6] Custom Disguises",
@@ -1566,7 +1568,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 9999', 'Disguise Mod', 'Totem Aura'],
 		unbanlist: ['No Move', 'No Move-2', 'No Move-SW', 'Demo'],
-		banlist: ['Glitch', 'Jynx-Mega', 'Jynxite'],
+		banlist: ['CAP', 'Glitch', 'Jynx-Mega', 'Jynxite'],
 	},
 	{
 		name: "[Gen 5] Custom Disguises",
@@ -1575,7 +1577,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 9999', 'Disguise Mod', 'Totem Aura'],
 		unbanlist: ['No Move', 'No Move-2', 'No Move-SW', 'Demo'],
-		banlist: ['Glitch', 'Jynx-Mega', 'Jynxite'],
+		banlist: ['CAP', 'Glitch', 'Jynx-Mega', 'Jynxite'],
 	},
 	{
 		name: "[Gen 4] Custom Disguises",
@@ -1584,7 +1586,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 9999', 'Disguise Mod', 'Totem Aura'],
 		unbanlist: ['No Move', 'No Move-2', 'No Move-SW', 'Demo'],
-		banlist: ['Glitch', 'Jynx-Mega', 'Jynxite'],
+		banlist: ['CAP', 'Glitch', 'Jynx-Mega', 'Jynxite'],
 	},
 	{
 		name: "[Gen 3] Custom Disguises",
@@ -1630,6 +1632,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		debug: true,
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100'],
+		banlist: ['CAP'],
 	},
 	{
 		name: "[Gen 8] Custom Game",
@@ -1638,6 +1641,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		debug: true,
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100'],
+		banlist: ['CAP'],
 	},
 	{
 		name: "[Gen 7] Custom Game",
@@ -1646,6 +1650,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		debug: true,
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100'],
+		banlist: ['CAP'],
 	},
 	{
 		name: "[Gen 6] Custom Game",
@@ -1654,6 +1659,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		debug: true,
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100'],
+		banlist: ['CAP'],
 	},
 	{
 		name: "[Gen 5] Custom Game",
@@ -1662,6 +1668,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		debug: true,
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100'],
+		banlist: ['CAP'],
 	},
 	{
 		name: "[Gen 4] Custom Game",
@@ -1670,6 +1677,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		debug: true,
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100'],
+		banlist: ['CAP'],
 	},
 	{
 		name: "[Gen 3] Custom Game",
