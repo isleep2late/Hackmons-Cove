@@ -1545,6 +1545,9 @@
 					name = row[2];
 					name2 = row[3];
 					silent = (row[0] === 'B');
+					var bTime = 0;
+					var bLastField = row[row.length - 1];
+					if (row.length > 4 && /^[0-9]{9,11}$/.test(bLastField)) bTime = parseInt(bLastField, 10);
 
 					var matches = ChatRoom.parseBattleID(id);
 					if (!matches) {
@@ -1560,9 +1563,9 @@
 						battletype = format + ' battle';
 						if (format === 'Random Battle') battletype = 'Random Battle';
 					}
-					var bStamp = ChatRoom.getTimestamp('chat');
-					if (!bStamp && this.id === 'battlelog') {
-						var bDate = new Date();
+					var bStamp = bTime ? ChatRoom.getTimestamp('chat', bTime) : '';
+					if (!bStamp && bTime && this.id === 'battlelog') {
+						var bDate = new Date(bTime * 1000);
 						bStamp = '<small>[' + [bDate.getHours(), bDate.getMinutes(), bDate.getSeconds()].map(function (x) { return x < 10 ? '0' + x : x; }).join(':') + '] </small>';
 					}
 					var bMeta = '';
