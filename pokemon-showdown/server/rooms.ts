@@ -1683,7 +1683,7 @@ export class GlobalRoomState {
 			for (const roomid of reportRooms) {
 				const reportRoom = Rooms.get(roomid);
 					if (!reportRoom) continue;
-				reportRoom.add(`|b|${room.roomid}|${reportPlayers}`);
+				reportRoom.add(`|b|${room.roomid}|${reportPlayers}|${Math.trunc(Date.now() / 1000)}`);
 				reportRoom.update();
 			}
 		}
