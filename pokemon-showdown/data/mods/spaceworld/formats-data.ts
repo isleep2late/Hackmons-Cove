@@ -81,7 +81,7 @@ export const FormatsData: import('../../../sim/dex-species').ModdedSpeciesFormat
 		tier: "LC",
 	},
 	sandslash: {
-		tier: "NFE",
+		tier: "UU",
 	},
 	nidoranf: {
 		tier: "LC",
@@ -150,7 +150,7 @@ export const FormatsData: import('../../../sim/dex-species').ModdedSpeciesFormat
 		tier: "LC",
 	},
 	dugtrio: {
-		tier: "UU",
+		tier: "OU",
 	},
 	meowth: {
 		tier: "NFE",
@@ -300,7 +300,7 @@ export const FormatsData: import('../../../sim/dex-species').ModdedSpeciesFormat
 		tier: "LC",
 	},
 	electrode: {
-		tier: "OU",
+		tier: "UU",
 	},
 	exeggcute: {
 		tier: "LC",
@@ -333,7 +333,7 @@ export const FormatsData: import('../../../sim/dex-species').ModdedSpeciesFormat
 		tier: "LC",
 	},
 	rhydon: {
-		tier: "OU",
+		tier: "UU",
 	},
 	chansey: {
 		tier: "OU",
@@ -576,7 +576,8 @@ export const FormatsData: import('../../../sim/dex-species').ModdedSpeciesFormat
 		tier: "UU",
 	},
 	sneasel: {
-		tier: "UU",
+		isNonstandard: "Unobtainable",
+		tier: "Illegal",
 	},
 	hooh: {
 		isNonstandard: "Unobtainable",

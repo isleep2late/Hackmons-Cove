@@ -1213,6 +1213,7 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	snubbull: {
 		inherit: true,
 		gender: "F",
+		types: ["Psychic"],
 		baseStats: { hp: 65, atk: 70, def: 60, spa: 70, spd: 50, spe: 50 },
 		evos: undefined,
 		eggGroups: ["Undiscovered"],
