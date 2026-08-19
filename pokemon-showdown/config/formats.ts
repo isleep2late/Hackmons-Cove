@@ -90,25 +90,15 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		ruleset: ['-Nonexistent', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 100'],
 	},
 	{
+		section: "Pure Hackmons Alt Metas",
+		column: 1,
+	},
+	{
 		name: "[Gen 9] National Dex Pure Hackmons",
 		desc: `Anything directly hackable onto a set (EVs, IVs, forme, ability, item, and move) and is usable in local battles is allowed.`,
 		mod: 'gen9',
 		searchShow: false,
 		ruleset: ['Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Hackmons Forme Legality', 'Species Reveal Clause', 'Endless Battle Clause', 'NatDex Mod'],
-	},
-	{
-		name: "[Gen 8 BDSP] Pure Hackmons",
-		desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
-		mod: 'gen8bdsp',
-		searchShow: false,
-		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
-	},
-	{
-		name: "[Gen 7 Let's Go] Pure Hackmons",
-		desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
-		mod: 'gen7letsgo',
-		searchShow: false,
-		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
 	},
 	{
 		name: "[Gen 9 Champions] Pure Hackmons",
@@ -147,6 +137,29 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 				return [`${set.name}'s ability ${ability.name} isn't reachable in Champions.`];
 			};
 		},
+	},
+	{
+		name: "[Gen 8 BDSP] Pure Hackmons",
+		desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
+		mod: 'gen8bdsp',
+		searchShow: false,
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
+	},
+	{
+		name: "[Gen 7 Let's Go] Pure Hackmons",
+		desc: "Anything directly hackable onto a set and usable in local battles is allowed.",
+		mod: 'gen7letsgo',
+		searchShow: false,
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
+	},
+	{
+		name: "[Gen 6 XY] Pure Hackmons",
+		desc: "Anything direclty hackable onto a set and jsable in local battles is allowed.",
+		mod: 'gen6xy',
+		searchShow: false,
+		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'EV limit = 510'],
+		banlist: ['Hyperspace Fury', 'Precipice Blades', 'Origin Pulse', 'Dragon Ascent'],
+		unbanlist: ['Hoopa', 'Volcanion'],
 	},
 	//////////////////////////////////
 	////////// OM Hackmons ///////////
