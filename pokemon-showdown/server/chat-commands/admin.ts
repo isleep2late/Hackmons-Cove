@@ -39,6 +39,29 @@ function bash(command: string, context: Chat.CommandContext, cwd?: string): Prom
 	});
 }
 
+function clearRequireCache(options: { exclude?: string[] } = {}) {
+	const excludes = [...(options?.exclude || []), '/node_modules/'];
+
+	for (const filepath in require.cache) {
+		if (excludes.some(p => filepath.includes(p))) continue;
+		const mod = require.cache[filepath]; // have to ref to appease ts
+		if (!mod) continue;
+		uncacheModuleTree(mod, excludes);
+		delete require.cache[filepath];
+	}
+}
+
+function uncacheModuleTree(mod: NodeJS.Module, excludes: string[]) {
+	const children = mod.children;
+	if (!children?.length || excludes.some(p => mod.filename.includes(p))) return;
+	// delete before recursing in case of circular requires
+	delete (mod as any).children;
+	for (const child of children) {
+		if (excludes.some(p => child.filename.includes(p))) continue;
+		uncacheModuleTree(child, excludes);
+	}
+}
+
 function keysIncludingNonEnumerable(obj: object) {
 	const methods = new Set<string>();
 	let current = obj;
@@ -679,7 +702,7 @@ export const commands: Chat.ChatCommands = {
 
 		target = toID(target);
 		try {
-			Utils.clearRequireCache({ exclude: ['/lib/process-manager'] });
+			clearRequireCache({ exclude: ['/lib/process-manager'] });
 			if (target === 'all') {
 				if (lock['all']) {
 					throw new Chat.ErrorMessage(`Hot-patching all has been disabled by ${lock['all'].by} (${lock['all'].reason})`);
@@ -731,7 +754,7 @@ export const commands: Chat.ChatCommands = {
 
 				// keep references
 				const cache = { ...require.cache };
-				Utils.clearRequireCache();
+				clearRequireCache();
 				const newPM = require('../../lib/process-manager');
 				require.cache = cache;
 
