@@ -272,13 +272,15 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 					return target.hp - 1;
 				}
 			},
-			onAfterMoveSecondary(target) {
+			onAnyAfterMove() {
+				this.effectState.target.removeVolatile('focussash');
+			},
+			onEnd(target) {
 				if (this.effectState.activated) target.useItem();
-				target.removeVolatile('focussash');
 			},
 		},
-		shortDesc: "If holder is at full HP, it survives all hits this turn with at least 1 HP. Single use.",
-		desc: "If the holder is at full HP, every attack that would knock it out this turn instead leaves it with 1 HP, as in Generation 4. This protects against every hit of multi-hit moves. Single use.",
+		shortDesc: "If holder is at full HP, it survives every hit of that one move with 1 HP. Single use.",
+		desc: "If the holder is at full HP when a move first strikes it, every hit of that same move that would knock it out instead leaves it with 1 HP, and hits after the first deal no damage; the Focus Sash is then consumed. This is Generation 4 behavior: the full-HP check only arms the effect, and the survival clamp is keyed to that armed state rather than to current HP, which is why one Sash absorbs an entire multi-hit move. The nuance is that this protection is scoped to the single move that armed it, exactly as in Generation 4, so a different attacker's move later in the same turn is not survived.",
 	},
 	griseousorb: {
 		inherit: true,
