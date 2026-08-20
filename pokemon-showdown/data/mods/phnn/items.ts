@@ -267,6 +267,7 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 		condition: {
 			duration: 1,
 			onDamage(damage, target, source, effect) {
+				if (this.effectState.activated) return;
 				if (effect && effect.effectType === 'Move' && damage >= target.hp) {
 					this.effectState.activated = true;
 					return target.hp - 1;
@@ -277,8 +278,8 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 				target.removeVolatile('focussash');
 			},
 		},
-		shortDesc: "If holder is at full HP, it survives all hits this turn with at least 1 HP. Single use.",
-		desc: "If the holder is at full HP, every attack that would knock it out this turn instead leaves it with 1 HP, as in Generation 4. This protects against every hit of multi-hit moves. Single use.",
+		shortDesc: "If holder is at full HP, it survives one would-be-KO hit this turn with 1 HP. Single use.",
+		desc: "If the holder is at full HP, the first attack this turn that would knock it out instead leaves it with 1 HP, as in Generation 4; later hits (including a multi-hit move's remaining hits) can still knock it out. Single use.",
 	},
 	griseousorb: {
 		inherit: true,
