@@ -115,7 +115,7 @@ export const Monitor = new class {
 
 	adminlog(text: string) {
 		this.notice(text);
-		const upperstaffRoom = Rooms.get('adminlog');
+		const upperstaffRoom = Rooms.get('upperstaff');
 		if (upperstaffRoom) {
 			upperstaffRoom.add(`|c|~|${text}`).update();
 		}
@@ -130,7 +130,7 @@ export const Monitor = new class {
 	}
 
 	error(text: string) {
-		const room = (Rooms.get('adminlog') || Rooms.get('staff'));
+		const room = (Rooms.get('upperstaff') || Rooms.get('staff'));
 		room?.add(`|error|${text}`).update();
 		if (Config.loglevel <= 3) console.error(text);
 	}

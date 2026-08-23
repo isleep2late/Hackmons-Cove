@@ -215,7 +215,7 @@ async function getModlog(
 	if (timed) connection.popup(`The modlog query took ${response.duration} ms to complete.`);
 }
 
-const shouldSearchGlobal = ['staff', 'adminlog'];
+const shouldSearchGlobal = ['staff', 'upperstaff'];
 
 export const commands: Chat.ChatCommands = {
 	ml: 'modlog',

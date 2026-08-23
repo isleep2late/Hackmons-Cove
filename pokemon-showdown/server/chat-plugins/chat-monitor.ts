@@ -334,7 +334,7 @@ Chat.registerMonitor('battlefilter', {
 					`You have been muted for using a banned phrase. Please do not say '${match[0]}'${publicReason ? ` ${publicReason}` : ``}.`
 				);
 				const text = `[BattleMonitor] <<${room.roomid}>> MUTED: ${user.name}: ${message}${reason ? ` __(${reason})__` : ''}`;
-				const adminlog = Rooms.get('adminlog');
+				const adminlog = Rooms.get('upperstaff');
 				if (adminlog) {
 					adminlog.add(`|c|~|${text}`).update();
 				} else {

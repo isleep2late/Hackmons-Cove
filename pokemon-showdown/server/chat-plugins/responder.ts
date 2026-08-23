@@ -235,7 +235,7 @@ export class AutoResponder {
 		return true;
 	}
 	static canOverride(user: User, room: Room) {
-		const devAuth = Rooms.get('adminlog')?.auth;
+		const devAuth = Rooms.get('upperstaff')?.auth;
 		return (devAuth?.atLeast(user, '%') && devAuth?.has(user.id) && room.auth.atLeast(user, '@')) || user.can('rangeban');
 	}
 	destroy() {

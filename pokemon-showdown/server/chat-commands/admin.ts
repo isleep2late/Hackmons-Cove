@@ -928,13 +928,13 @@ export const commands: Chat.ChatCommands = {
 			}
 		} catch (e: any) {
 			Rooms.global.notifyRooms(
-				['adminlog', 'staff', 'upperstaff'] as RoomID[],
+				['staff', 'upperstaff'] as RoomID[],
 				`|c|${user.getIdentity()}|/log ${user.name} used /hotpatch ${target} - but something failed while trying to hot-patch.`
 			);
 			throw new Chat.ErrorMessage([`Something failed while trying to hot-patch ${target}:`, e.stack]);
 		}
 		Rooms.global.notifyRooms(
-			['adminlog', 'staff', 'upperstaff'] as RoomID[],
+			['staff', 'upperstaff'] as RoomID[],
 			`|c|${user.getIdentity()}|/log ${user.name} used /hotpatch ${target}`
 		);
 	},
@@ -994,7 +994,7 @@ export const commands: Chat.ChatCommands = {
 			this.sendReply(`You have disabled hot-patching ${hotpatch}.`);
 		}
 		Rooms.global.notifyRooms(
-			['adminlog', 'staff', 'upperstaff'] as RoomID[],
+			['staff', 'upperstaff'] as RoomID[],
 			`|c|${user.getIdentity()}|/log ${user.name} has ${enable ? 'enabled' : 'disabled'} hot-patching ${hotpatch}. Reason: ${reason}`
 		);
 	},
@@ -1444,7 +1444,7 @@ export const commands: Chat.ChatCommands = {
 		const [result, err] = await LoginServer.request('restart');
 		if (err) {
 			Rooms.global.notifyRooms(
-				['staff', 'adminlog'],
+				['staff', 'upperstaff'],
 				`|c|${user.getIdentity()}|/log ${user.name} used /updateloginserver - but something failed while updating.`
 			);
 			throw new Chat.ErrorMessage([err.message, err.stack || '']);
@@ -1462,7 +1462,7 @@ export const commands: Chat.ChatCommands = {
 			this.errorReply(`FAILED. Conflicts were found while updating - the restart was aborted.`);
 		}
 		Rooms.global.notifyRooms(
-			['staff', 'adminlog'], `|c|${user.getIdentity()}|/log ${message}`
+			['staff', 'upperstaff'], `|c|${user.getIdentity()}|/log ${message}`
 		);
 	},
 	updateloginserverhelp: [
@@ -1477,7 +1477,7 @@ export const commands: Chat.ChatCommands = {
 		const cmd = `/bash cd ${clientDir} && node build ${full ? `full` : ``}`;
 		const message = `${user.name} used /updateclient`;
 		Rooms.global.notifyRooms(
-			['staff', 'adminlog'], `|c|${user.getIdentity()}|/log ${message}`
+			['staff', 'upperstaff'], `|c|${user.getIdentity()}|/log ${message}`
 		);
 		this.parse(cmd);
 	},

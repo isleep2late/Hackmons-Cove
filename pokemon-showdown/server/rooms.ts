@@ -1777,11 +1777,11 @@ export class GlobalRoomState {
 	}
 	startLockdown(err: Error | null = null, slow = false) {
 		if (this.lockdown && err) return;
-		const devRoom = Rooms.get('adminlog');
+		const devRoom = Rooms.get('upperstaff');
 		const stack = (err ? Utils.escapeHTML(err.stack!).split(`\n`).slice(0, 2).join(`<br />`) : ``);
 		for (const [id, curRoom] of Rooms.rooms) {
 			if (err) {
-				if (id === 'staff' || id === 'adminlog' || (!devRoom && id === 'lobby')) {
+				if (id === 'staff' || id === 'roomstaff') {
 					curRoom.addRaw(`<div class="broadcast-red"><b>The server needs to restart because of a crash:</b> ${stack}<br />Please restart the server.</div>`);
 					curRoom.addRaw(`<div class="broadcast-red">You will not be able to start new battles until the server restarts.</div>`);
 					curRoom.update();
@@ -1811,7 +1811,7 @@ export class GlobalRoomState {
 		this.lastReportedCrash = Date.now();
 	}
 	automaticKillRequest() {
-		const notifyPlaces: RoomID[] = ['adminlog', 'staff', 'upperstaff'];
+		const notifyPlaces: RoomID[] = ['staff', 'upperstaff'];
 		if (Config.autolockdown === undefined) Config.autolockdown = true; // on by default
 
 		if (Config.autolockdown && Rooms.global.lockdown === true && Rooms.global.battleCount === 0) {
@@ -1909,7 +1909,7 @@ export class GlobalRoomState {
 				crashMessage = `|html|<div class="broadcast-red"><b>${crasher} crashed in private code</b></div>`;
 			}
 		}
-		const devRoom = Rooms.get('adminlog');
+		const devRoom = Rooms.get('upperstaff');
 		if (devRoom) {
 			devRoom.add(crashMessage).update();
 		} else {

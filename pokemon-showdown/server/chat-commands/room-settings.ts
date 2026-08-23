@@ -1074,7 +1074,7 @@ export const commands: Chat.ChatCommands = {
 			`${room.settings.isPrivate.charAt(0).toUpperCase()}${room.settings.isPrivate.slice(1)}`;
 		if (!isGroupchat) {
 			Rooms.global.notifyRooms(
-				room.settings.isPrivate === true ? ['upperstaff'] : ['upperstaff', 'staff'],
+				room.settings.isPrivate === true ? ['upperstaff'] : ['staff'],
 				Utils.html`|raw|<div class="broadcast-green">${privacy} chat room <b>${oldTitle}</b> renamed to <b>${target}</b></div>`
 			);
 		}
