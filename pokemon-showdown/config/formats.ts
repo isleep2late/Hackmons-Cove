@@ -1506,6 +1506,8 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 	},
 	{
 		name: "[Gen 8] Broken Cup",
+		desc: '',
+		searchShow: false,
 		ruleset: ['HP Percentage Mod', 'Cancel Mod'],
 		banlist: ['All Pokemon', 'All Abilities', 'All Items', 'All Moves'],
 		unbanlist: [
@@ -1585,6 +1587,10 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 			'Wild Charge', 'Wildbolt Storm', 'Will-O-Wisp', 'Wise Glasses', 'Wish', 'Wishiwashi-School', 'Wonder Guard', 'Wood Hammer', 'Wyrdeer', 'Xerneas',
 			'Xurkitree', 'Yawn', 'Yveltal', 'Zacian', 'Zacian-Crowned', 'Zamazenta', 'Zamazenta-Crowned', 'Zap Plate', 'Zapdos', 'Zapdos-Galar', 'Zarude',
 			'Zekrom', 'Zeraora', 'Zing Zap', 'Zippy Zap', 'Zygarde', 'Zygarde-Complete',
+			'Snorlax-Gmax', 'Charizard-Gmax', 'Pikachu-Gmax', 'Eevee-Gmax', 'Butterfree-Gmax', 'Meowth-Gmax', 'Corviknight-Gmax', 'Alcremie-Gmax',
+			'Drednaw-Gmax', 'Machamp-Gmax', 'Gengar-Gmax', 'Toxtricity-Gmax', 'Melmetal-Gmax', 'Coalossal-Gmax', 'Sandaconda-Gmax', 'Centiskorch-Gmax',
+			'Grimmsnarl-Gmax', 'Hatterene-Gmax', 'Copperajah-Gmax', 'Duraludon-Gmax', 'Flapple-Gmax', 'Appletun-Gmax', 'Orbeetle-Gmax', 'Garbodor-Gmax',
+			'Kingler-Gmax', 'Lapras-Gmax', 'Inteleon-Gmax', 'Cinderace-Gmax', 'Rillaboom-Gmax', 'Venusaur-Gmax',
 		],
 	},
 	//////////////////////////////////
