@@ -1,4 +1,4 @@
-exports.BattleTextAFD = {
+export const DefaultText: { [id: IDEntry]: DefaultText } = {
 	default: {
 		// April Fool's 2019
 		// April Fool's 2025: tone down the most common text
@@ -72,7 +72,7 @@ exports.BattleTextAFD = {
 		activateWeaken: "  The [ITEM] weakened the damage to [POKEMON]!",
 
 		damage: "  ([POKEMON] was hurt!)",
-		damagePercentage: "  ([POKEMON] lost [PERCENTAGE] of its health!)",
+		damagePercentage: "  ([POKEMON] lost [PERCENTAGE]% of its health!)",
 		damageFromPokemon: "  [POKEMON] is hurt by [SOURCE]'s [ITEM]!", // Jaboca/Rowap Berry
 		damageFromItem: "  [POKEMON] is hurt by its [ITEM]!", // Sticky Barb
 		damageFromPartialTrapping: "  [POKEMON] is hurt by [MOVE]!",
@@ -125,8 +125,7 @@ exports.BattleTextAFD = {
 		noTarget: "  But there was no target...", // gen 5 and earlier
 		ohko: "  It's a one-hit KO!",
 		combine: "  The two moves have become one! It's a combined move!",
-		hitCount: "  Hit [NUMBER] times!",
-		hitCountSingular: "  Hit 1 time!",
+		hitCount: "  Hit [NUMBER] [INFLECT:NUMBER:s=time:p=times]!",
 	},
 	dynamax: {
 		// April Fool's 2020
@@ -204,8 +203,7 @@ exports.BattleTextAFD = {
 		damage: "  [POKEMON] is damaged by the recoil!",
 	},
 	unboost: {
-		fail: "  [POKEMON]'s stats were not lowered!",
-		failSingular: "  [POKEMON]'s [STAT] was not lowered!",
+		fail: "  [POKEMON]'s [STAT] [INFLECT:STAT:s=was:p=were] not lowered!",
 	},
 	struggle: {
 		activate: "  [POKEMON] has no moves left!",
@@ -214,5 +212,3 @@ exports.BattleTextAFD = {
 		start: "  [POKEMON] can no longer escape!",
 	},
 };
-
-exports.BattleTextNotAFD = exports.BattleText;

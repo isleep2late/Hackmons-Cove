@@ -1502,7 +1502,7 @@ export class BattleTooltips {
 				if (this.battle.gen === 1 && statName === 'spd') continue;
 				let statLabel = this.battle.gen === 1 && statName === 'spa' ? 'spc' : statName;
 				buf += statName === 'atk' ? '<small>' : '<small> / ';
-				buf += `${BattleText[statLabel].statShortName}&nbsp;</small>`;
+				buf += `${BattleTextParser.statShortName(statLabel)}&nbsp;</small>`;
 				buf += `${stats[statName]}`;
 				if (modifiedStats[statName] !== stats[statName]) hasModifiedStat = true;
 			}
@@ -1518,7 +1518,7 @@ export class BattleTooltips {
 			if (this.battle.gen === 1 && statName === 'spd') continue;
 			let statLabel = this.battle.gen === 1 && statName === 'spa' ? 'spc' : statName;
 			buf += statName === 'atk' ? '<small>' : '<small> / ';
-			buf += `${BattleText[statLabel].statShortName}&nbsp;</small>`;
+			buf += `${BattleTextParser.statShortName(statLabel)}&nbsp;</small>`;
 			if (modifiedStats[statName] === stats[statName]) {
 				buf += `${modifiedStats[statName]}`;
 			} else if (modifiedStats[statName] < stats[statName]) {

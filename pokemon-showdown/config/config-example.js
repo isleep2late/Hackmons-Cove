@@ -638,7 +638,7 @@ exports.grouplist = [
 		tournaments: true,
 	},
 	{
-		symbol: '\u2605',
+		symbol: '\u{1F732}',
 		id: "host",
 		name: "Host",
 		inherit: '@',
@@ -678,9 +678,9 @@ exports.grouplist = [
 		globalGroupInPersonalRoom: '@',
 
 		announce: true,
-		warn: '\u2605u',
+		warn: '\u{1F732}u',
 		kick: true,
-		mute: '\u2605u',
+		mute: '\u{1F732}u',
 		lock: true,
 		forcerename: true,
 		timer: true,
@@ -747,7 +747,7 @@ exports.grouplist = [
 		importinputlog: true,
 	},
 	{
-		symbol: '^',
+		symbol: '\u2605',
 		id: "prizewinner",
 		name: "Prize Winner",
 		roomonly: true,

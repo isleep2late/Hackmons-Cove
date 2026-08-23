@@ -15,8 +15,8 @@ upstream diff. Do not edit them by hand.
 
 ## pokemon-showdown
 
-Synced to upstream `master` @ `71bf477231321ed23da9e78f855e1a1c019bd7e7` (2026-08-20)
+Synced to upstream `master` @ `5e8ead64b366aa55b83be979dd3d1050115e8bfe` (2026-08-22)
 
 ## pokemon-showdown-client
 
-Synced to upstream `master` @ `daa28cfeb19775dea9f19f90a8c8f1418bac316a` (2026-08-17)
+Synced to upstream `master` @ `8aac6055f144600a51e4f0c29932f08399122be0` (2026-08-22)
