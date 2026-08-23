@@ -787,7 +787,7 @@ export class ChatRoom extends PSRoom {
 	}
 	sortOnlineUsers() {
 		PSUtils.sortBy(this.onlineUsers, ([id, name]) => (
-			[PS.server.getGroup(name.charAt(0)).order, !name.endsWith('@!'), id]
+			[PS.server.getGroup(String.fromCodePoint(name.codePointAt(0) || 32)).order, !name.endsWith('@!'), id]
 		));
 	}
 	addUser(username: string) {
@@ -1509,7 +1509,7 @@ export class ChatUserList extends preact.Component<{
 			)}
 			<ul>
 				{room.onlineUsers.map(([userid, name]) => {
-					const groupSymbol = name.charAt(0);
+					const groupSymbol = String.fromCodePoint(name.codePointAt(0) || 32);
 					const group = PS.server.groups[groupSymbol] || { type: 'user', order: 0 };
 					let color;
 					if (name.endsWith('@!')) {

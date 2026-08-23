@@ -105,6 +105,7 @@ type TableTag = TableGenericTag | TableSpeciesTag;
 interface EffectData {
 	name?: string;
 	desc?: string;
+	shortDesc?: string;
 	duration?: number;
 	durationCallback?: (this: Battle, target: Pokemon, source: Pokemon, effect: Effect | null) => number;
 	effectType?: string;
@@ -113,7 +114,6 @@ interface EffectData {
 	isNonstandard?: Nonstandard | null;
 	/** "Are you or are you not on this list" data. */
 	tags?: TableTag[];
-	shortDesc?: string;
 }
 
 type ModdedEffectData = EffectData | Partial<EffectData> & { inherit: true };
@@ -426,6 +426,13 @@ interface PlayerOptions {
 interface BasicTextData {
 	desc?: string;
 	shortDesc?: string;
+	grammar?: string;
+	articleRule?: 'stressed-a';
+	classified?: {
+		name: string,
+		grammar: string,
+		articleRule?: 'stressed-a',
+	};
 }
 interface ConditionTextData extends BasicTextData {
 	activate?: string;
@@ -485,6 +492,12 @@ type MoveText = TextFile<MoveTextData>;
 type ItemText = TextFile<ConditionTextData>;
 type PokedexText = TextFile<BasicTextData>;
 type DefaultText = AnyObject;
+
+type ResolvedText<T extends BasicTextData> = T & { desc: string, shortDesc: string };
+type ResolvedAbilityText = ResolvedText<AbilityText>;
+type ResolvedItemText = ResolvedText<ItemText>;
+type ResolvedMoveText = ResolvedText<MoveText>;
+type ResolvedPokedexText = ResolvedText<PokedexText>;
 
 declare namespace RandomTeamsTypes {
 	export interface TeamDetails {

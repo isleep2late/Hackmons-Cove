@@ -7,7 +7,7 @@ export type EffectiveGroupSymbol = GroupSymbol | 'whitelist';
 export type AuthLevel = EffectiveGroupSymbol | 'unlocked' | 'trusted' | 'autoconfirmed';
 
 export const PLAYER_SYMBOL: GroupSymbol = '\u2606';
-export const HOST_SYMBOL: GroupSymbol = '\u2605';
+export const HOST_SYMBOL: GroupSymbol = '\u{1F732}';
 
 export const ROOM_PERMISSIONS = [
 	'addhtml', 'announce', 'ban', 'bypassafktimer', 'declare', 'editprivacy', 'editroom', 'exportinputlog', 'game', 'gamemanagement', 'gamemoderation', 'joinbattle', 'kick', 'minigame', 'modchat', 'modlog', 'mute', 'nooverride', 'receiveauthmessages', 'roombot', 'roomdriver', 'roommod', 'roomowner', 'roomvoice', 'roomprizewinner', 'show', 'showmedia', 'timer', 'tournaments', 'warn',
