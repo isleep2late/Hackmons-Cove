@@ -852,15 +852,10 @@ class PSServer {
 			type: 'leadership',
 			order: 103,
 		},
-		'\u{1F732}': {
-			name: "Host (\u{1F732})",
+		'🜲': {
+			name: "Host (🜲)",
 			type: 'staff',
 			order: 104,
-		},
-		'\u2605': {
-			name: "Prize Winner (\u2605)",
-			type: 'staff',
-			order: 107,
 		},
 		'@': {
 			name: "Moderator (@)",
@@ -871,6 +866,11 @@ class PSServer {
 			name: "Driver (%)",
 			type: 'staff',
 			order: 106,
+		},
+		'\u2605': {
+			name: "Prize Winner (\u2605)",
+			type: 'staff',
+			order: 107,
 		},
 		// by default, unrecognized ranks go here, between driver and bot
 		'*': {
