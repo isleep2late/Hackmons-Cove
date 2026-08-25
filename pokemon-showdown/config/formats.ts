@@ -1805,6 +1805,18 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100'],
 	},
+	{
+		name: "[Gen 9] OM Mashup",
+		mod: 'gen9',
+		searchShow: false,
+		challengeShow: false,
+		ruleset: [
+			'NatDex Mod', 'Inverse Mod', 'OM Unobtainable Moves', 'Alphabet Cup Move Legality',
+			'Camomons Mod', '350 Cup Mod', 'Flipped Mod', 'Scalemons Mod', 'Bonus Type Mod',
+			'Tier Shift Mod', 'Revelationmons Mod', 'Re-Evolution Mod', 'Broken Record Mod',
+			'Force of the Fallen Mod', 'Category Swap Mod', 'Godly Gift Mod', 'Bad \'n Boosted Mod', 'Data Preview',
+		],
+	},
 ];
 
 const overlayDir = process.env.PHNN_BETA_CONTENT;
