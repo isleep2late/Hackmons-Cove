@@ -1032,6 +1032,13 @@ function applyCompetitiveSpreads(team, gen, fdex, ruleTable) {
 	}
 }
 
+function abilityFitsBody(name, set, fdex) {
+	if (toId(name) !== 'wonderguard') return true;
+	const species = fdex.species.get(set.species);
+	if (Object.values(species.abilities || {}).some(a => toId(a) === 'wonderguard')) return true;
+	return wonderGuardBody(species, fdex);
+}
+
 function applySmogonSets(team, gen, fdex, ruleTable, gate) {
 	const lib = loadSmogonSets()['gen' + gen];
 	if (!lib) return;
@@ -1043,7 +1050,7 @@ function applySmogonSets(team, gen, fdex, ruleTable, gate) {
 		if (!entries || !entries.length) continue;
 		const legal = entries.filter(e => (
 			e.m.every(m => moveAllowed(m, fdex, ruleTable)) &&
-			(!e.a || abilityAllowed(e.a, fdex, ruleTable)) &&
+			(!e.a || (abilityAllowed(e.a, fdex, ruleTable) && abilityFitsBody(e.a, set, fdex))) &&
 			(!e.i || itemAllowed(e.i, fdex, ruleTable))
 		));
 		if (!legal.length) continue;
