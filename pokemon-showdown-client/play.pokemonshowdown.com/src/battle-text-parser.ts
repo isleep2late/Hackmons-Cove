@@ -173,8 +173,19 @@ export class BattleTextParser {
 		}
 
 		case '-fail': {
+			let [, pokemon, effect, arg3] = args;
 			if (kwArgs.from === 'ability: Flower Veil') {
 				return { args: ['-block', kwArgs.of, 'ability: Flower Veil'], kwArgs: { of: args[1] } };
+			}
+			if (effect === 'unboost' && arg3) {
+				const statMap: { [key: string]: string } = {
+					'Attack': 'atk',
+					'Defense': 'def',
+					'Special Attack': 'spa',
+					'Special Defense': 'spd',
+					'Speed': 'spe',
+				};
+				if (statMap[arg3]) args[3] = statMap[arg3];
 			}
 			break;
 		}
@@ -595,6 +606,7 @@ export class BattleTextParser {
 	}
 
 	textName(table: keyof BattleTextData, name: string) {
+		if (!name) return '';
 		name = name.trim();
 		const id = toID(name);
 		const localized = BattleText[this.language]?.[table]?.[id]?.name;
