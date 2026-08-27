@@ -595,6 +595,7 @@ export class BattleTextParser {
 	}
 
 	textName(table: keyof BattleTextData, name: string) {
+		if (!name) return '';
 		name = name.trim();
 		const id = toID(name);
 		const localized = BattleText[this.language]?.[table]?.[id]?.name;
