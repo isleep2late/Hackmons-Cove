@@ -33,4 +33,4 @@ the tag.
 
 ## pokemon-showdown-client/damage-calc  (vendored fork, not a subtree)
 
-Synced to upstream `master` @ `920c5b8a4d015a236b0fbaeb8bd8b1e5ca008043` (2026-08-27)
+Synced to upstream `master` @ `2c50a89d9e369289965b1448a6f5c1b7d41520c7` (2026-08-29)
