@@ -47,6 +47,8 @@ that is pre-existing and unrelated.
 
 Synced to upstream `master` @ `44a0ccde824843ac6b3bf9f3e17ba18b0370c3ad` (2026-08-27)
 
+DECLINED @ `951cc1580bfbb190bb263b285ad9748894659f10`
+
 **DELIBERATELY LEFT BEHIND as of 2026-09-01.** The only unsynced commit is `951cc1580`
 "Support translating Preact client" (#2742), which is the client half of the same translations
 rework declined on the server side above — see the `## pokemon-showdown` note. The two are a
