@@ -15,11 +15,44 @@ upstream diff. Do not edit them by hand.
 
 ## pokemon-showdown
 
-Synced to upstream `master` @ `bb179fbf8449e3c31632bd56f671ffb4404fa6e7` (2026-08-27)
+Synced to upstream `master` @ `50408e6f959e7c1f9eea08eb9cb2e764641c4849` (2026-09-01)
+
+**ONE COMMIT IN THIS RANGE WAS DELIBERATELY NOT TAKEN: `833d0da44` "Better translations"
+(#12259).** Everything else between `bb179fbf8449` and the sha above is applied. The sha
+records how far the *content* sync reached; it does NOT mean the translations rework landed.
+Anyone revisiting translations must start from that commit, not from this base.
+
+Why it was excluded: the rework renames `this.tr` to `this.TL` across the server and moves
+`translations/<language>/` to ISO codes. Our fork has replaced whole commands in those files
+(`savereplay` became `infinitesubmit`, the version command points at Hackmons-Cove, the
+pmmodchat block is deleted, a helpticket path is commented out), and our `chat.ts` defines
+only `tr()`. Taking it piecemeal left seven files calling `this.TL` against a `TL` that does
+not exist, and the directory rename alone would have broken the loader: `chat.ts` skips any
+directory matching `/[^a-z0-9]/`, so `zh-cn` and `zh-tw` would be dropped silently, and every
+language id would shift from `english`/`german` to `en`/`de`, invalidating stored user
+preferences. It is all-or-nothing and needs its own change with a rebuild behind it.
+
+Also excluded as a consequence: the per-language `data/text/*/abilities.ts` Aura Guard entries
+(they use `name: null`, which only the rework's nullable schema accepts) and the 18 new
+`data/text/**/names.ts` and `tags.ts` files (they reference `TranslationString` and `TagText`,
+types the rework introduces). The English `data/text/abilities.ts` Aura Guard entry IS applied.
+
+Verified at the time of the sync: `tsc --noEmit` reports 249 errors both before and after —
+zero introduced; `npm run build` exits 0; the sim loads 1854 species and 122 formats, and
+`Obliteryx.prevo` resolves to the newly added `Scraptor`. The mocha suite cannot run against
+this fork at all (it demands `gen2randombattle`, which our curated format list has never had);
+that is pre-existing and unrelated.
 
 ## pokemon-showdown-client
 
 Synced to upstream `master` @ `44a0ccde824843ac6b3bf9f3e17ba18b0370c3ad` (2026-08-27)
+
+**DELIBERATELY LEFT BEHIND as of 2026-09-01.** The only unsynced commit is `951cc1580`
+"Support translating Preact client" (#2742), which is the client half of the same translations
+rework declined on the server side above — see the `## pokemon-showdown` note. The two are a
+matched pair: taking the client alone would have it expect translation plumbing the server does
+not provide. The nightly checker will keep reporting this subtree as behind, and that report is
+correct — it is behind on purpose. Sync both halves together or neither.
 
 ## pokemon-showdown-client/showdex  (vendored fork, not a subtree)
 
