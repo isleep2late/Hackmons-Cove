@@ -57,6 +57,7 @@ export interface PSConfig {
 		resourceServer?: string,
 	};
 	customcolors: Record<string, string>;
+	translationCachebuster?: string;
 	whitelist?: string[];
 	testclient?: boolean;
 }
