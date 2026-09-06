@@ -844,9 +844,13 @@ export const Dex = new class implements ModdedDex {
 			el.onerror = () => reject(new Error(`Failed to load text data from ${src}`));
 			document.getElementsByTagName('body')[0].appendChild(el);
 		});
-		let loading = loadScript(Config.testclient ? `data/text/${lang}.js` : `${this.resourcePrefix}data/text/${lang}.js`);
+		const cachebuster = Config.translationCachebuster ? `?${Config.translationCachebuster}` : '';
+		const textURL = Config.testclient ? `data/text/${lang}.js` : `${this.resourcePrefix}data/text/${lang}.js`;
+		let loading = loadScript(textURL + cachebuster);
 		if (Config.testclient) {
-			loading = loading.catch(() => loadScript(`https://play.pokemonshowdown.com/data/text/${lang}.js`));
+			loading = loading.catch(() =>
+				loadScript(`https://play.pokemonshowdown.com/data/text/${lang}.js${cachebuster}`)
+			);
 		}
 		loading = loading.catch(() => {
 			delete this.loadedTextData[lang];
