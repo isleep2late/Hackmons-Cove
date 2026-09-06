@@ -27,7 +27,10 @@ var cli = null;
 
 function build() {
 	if (cli.values['skip-build']) return;
-	require('child_process').execSync('node build', {stdio: 'inherit', cwd: __dirname});
+	// The build must run on the Node that runs the server. A bare "node" resolves through PATH, and under systemd's
+	// secure_path that is the system Node (v18 here), which the build script's version gate now refuses - the
+	// production service crash-looped on 2026-09-06 exactly this way. process.execPath is the interpreter we are in.
+	require('child_process').execSync(JSON.stringify(process.execPath) + ' build', {stdio: 'inherit', cwd: __dirname});
 }
 
 function readTeam(stream) {
