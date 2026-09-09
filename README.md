@@ -6,10 +6,8 @@
 
 ![Eternamax](https://i.ibb.co/GfpjyjLP/Emax-Gen8-NN.png)
 
-*Where every Pokémon reaches their peak potential*
-
 [![Pokemon Showdown](https://img.shields.io/badge/Pokemon-Showdown-orange)](https://pokemonshowdown.com/)
-[![OG PH Format](https://img.shields.io/badge/Format-Pure%20Hackmons-red)](https://www.smogon.com/dex/ss/formats/pure-hackmons/)
+[![Pure Hackmons Format Details](https://img.shields.io/badge/Format-Pure%20Hackmons-red)](https://www.smogon.com/dex/ss/formats/pure-hackmons/)
 
 </div>
 
@@ -23,7 +21,7 @@ Pure Hackmons: No Nerfs is a Pokémon battling format where every move, ability,
 
 Hackmons Cove is also proud to be the only known community that officially supports SpaceWorld '97, a real Pokemon pseudo-generation based on a beta version of Gold/Silver from 1997. Hackmons Cove boasts a true-to-the-game set of mechanics for this generation that no other Showdown server supports as of July 2026. We hope that other communities who want their own implementation of SpaceWorld studies our repository. You are of course welcome to use our open sourced code under the AGPL-3.0 license.
 
-Additionally, a wide range of formats are supported, including Custom Game, Custom Disguises, Gen 1 Disguises, Gen 2 Statuses, Gen 3 BH AAA (Balanced Hackmons Almost Any Ability), Gen 4 Rage, Gen 6 No Limit, and Gen 8 255 (SwSh, BDSP, and Unified). Our client also supports the innovative "Infinite Mode" where you can send out more Pokemon to battle after you have lost, additional generational drop-down menus per format, and a custom rules text box when challenging other players so you can customize the rules to what you want!
+Additionally, a wide range of formats are supported, including Custom Game, Custom Disguises, Gen 1 Disguises, Gen 2 Statuses, Gen 3 BH AAA (Balanced Hackmons Almost Any Ability), Gen 4 Rage, Gen 6 No Limit, and Gen 8 255 (SwSh, BDSP, and Unified). The client also supports an "Infinite Mode" where you can send out more Pokemon to battle after you have lost, additional generational drop-down menus per format, and a custom rules text box when challenging other players so you can customize the rules to what you want!
 
 If you enjoy our work, please consider supporting our community by [joining our Discord server](https://discord.gg/hackmons) or signing up for free to be a member [on our website.](https://hackmons.com)
 
@@ -54,9 +52,9 @@ This repository contains code from the Pokemon Showdown! server repository, clie
 - **TsengGames** for creating preview sprites for Shadow Lugia/Mewtwo/Mega X/Arceus, Arceus-???, and Majin, custom Arceus plates for ???/Shadow/Legend/Blank, item sprites for custom Z-stones/power-boosting items, Spaceworld items, while also drawing many of the custom avatars on our server
 - **Siphonaptera** for leading the [Gen 8] Unified project
 - **Penultimate Toast** for Hackmons.com database management as site admin
-- **Wyrd & Viola Lunala** for promoting the server and leadership (And Wyrd for making the SHADOW type badge)
+- **Wyrdwind and Tragic Fantasy** for server promotion and leadership
 - **ProKameron** for contributing to the bot and leadership
-- **aidan amoongus** for Room Intros and leadership
+- **aidan amoongus** for leadership
 - **Enigmatist** for early contributions to the project
 - The Pure Hackmons community for additional feedback
 
@@ -66,4 +64,4 @@ This repository contains code from the Pokemon Showdown! server repository, clie
 
 ## License
 
-This project is a modification of Pokémon Showdown and Showdex and is licensed under AGPL-3.0. Pokémon and all related properties are (c) The Pokemon Company / Nintendo / Creatures Inc. / GAME FREAK inc.
+This project is a modification of Pokémon Showdown and Showdex. It is not to be provided as a singular package, and is licensed under multiple licenses, including AGPL-3.0 and the MIT License. More details can be found in each module. Pokémon and all related properties are (c) The Pokemon Company / Nintendo / Creatures Inc. / GAME FREAK inc.
