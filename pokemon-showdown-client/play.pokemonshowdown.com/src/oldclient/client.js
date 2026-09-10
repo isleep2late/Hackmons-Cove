@@ -1498,32 +1498,27 @@ function toId() {
 			if (columnChanged) app.supports['formatColumns'] = true;
 			this.trigger('init:formats');
 		},
+		/**
+		 * Handles a `|queryresponse|savereplay|` line.
+		 *
+		 * This used to be the uploader: the server handed the battle log back to the browser
+		 * and the browser POSTed it to the login server's `act=uploadreplay`. The login server
+		 * removed that action, so the POST came back as the raw body
+		 * `]{"actionerror":"No longer exists; use addreplay."}` and no replay was ever saved.
+		 *
+		 * Saving is the server's job now - the "Upload and share replay" button sends
+		 * `/savereplay` and the server uploads the log itself, then reports the result as a
+		 * popup (see GameRoom#uploadReplay). A server new enough to have that fix never sends
+		 * this line, so reaching here means the server is older than the client; say so
+		 * instead of retrying a request that cannot succeed.
+		 */
 		uploadReplay: function (data) {
-			var id = data.id;
-			var serverid = Config.server.id && toID(Config.server.id.split(':')[0]);
-			var silent = data.silent;
-			if (serverid && serverid !== 'showdown') id = serverid + '-' + id;
-			$.post(app.user.getActionPHP(), {
-				act: 'uploadreplay',
-				log: data.log,
-				serverid: serverid,
-				password: data.password || '',
-				id: id
-			}, function (data) {
-				if (silent) return;
-				var sData = data.split(':');
-				if (sData[0] === 'success') {
-					app.addPopup(ReplayUploadedPopup, { id: sData[1] || id });
-				} else if (data === 'hash mismatch') {
-					app.addPopupMessage("Someone else is already uploading a replay of this battle. Try again in five seconds.");
-				} else if (data === 'not found') {
-					app.addPopupMessage("This server isn't registered, and doesn't support uploading replays.");
-				} else if (data === 'invalid id') {
-					app.addPopupMessage("This server is using invalid battle IDs, so this replay can't be uploaded.");
-				} else {
-					app.addPopupMessage("Error while uploading replay: " + data);
-				}
-			});
+			if (data && data.silent) return;
+			app.addPopupMessage(
+				"This server is too old to save replays: it asked this client to upload the replay itself, " +
+				"which the login server no longer allows. Tell the server's administrator to update, and " +
+				"use the Download replay button to keep a copy in the meantime."
+			);
 		},
 		roomsResponse: function (data) {
 			if (data) {
@@ -3062,7 +3057,10 @@ function toId() {
 		}
 	});
 
-	var ReplayUploadedPopup = this.ReplayUploadedPopup = Popup.extend({
+	// Nothing in this file opens this any more - the server reports a finished upload with a
+	// `|popup|` instead. Kept on the app namespace because add-ons (Showdex) can still reach
+	// for `app.ReplayUploadedPopup`.
+	this.ReplayUploadedPopup = Popup.extend({
 		type: 'semimodal',
 		events: {
 			'click a': 'clickClose'

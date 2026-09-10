@@ -1170,11 +1170,14 @@ export const commands: Chat.ChatCommands = {
 	],
 
 	uploadreplay: 'savereplay',
-	savereplay(target, room, user, connection) {
+	async savereplay(target, room, user, connection) {
 		if (!room?.battle) throw new Chat.ErrorMessage(this.tr`You can only save replays for battles.`);
-		const log = room.getLog(room.battle.ended ? -1 : 0);
-		const { id, password } = room.getReplayData();
-		connection.send(`|queryresponse|savereplay|${JSON.stringify({ id, log, password })}`);
+		// This used to hand the log back to the browser (`|queryresponse|savereplay|`) so the
+		// browser could POST it to the login server's `act=uploadreplay`. That action was
+		// removed from the login server, so the upload is done here now; the log never leaves
+		// the server. Callers pass 'forpunishment' / 'silent' / 'auto', or nothing.
+		const options = toID(target) || undefined;
+		await room.uploadReplay(user, connection, options as 'forpunishment' | 'silent' | 'auto' | undefined);
 	},
 	savereplayhelp: [`/savereplay - Saves the replay for the current battle.`],
 

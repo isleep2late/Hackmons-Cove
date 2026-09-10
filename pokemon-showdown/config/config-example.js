@@ -219,6 +219,17 @@ exports.routes = {
 };
 
 /**
+ * replayuploadurl - where /savereplay sends replays, for a server that has its own
+ *   replay store rather than a replay database (`replaysdb`) or a registration with
+ *   play.pokemonshowdown.com. Point it at an endpoint that accepts `act=uploadreplay`
+ *   and answers `success:<replayid>` - for this fork, the front server's action route,
+ *   e.g. 'http://127.0.0.1:8100/action.php'. Leave empty for upstream behaviour (the
+ *   replay database if one is configured, otherwise LoginServer's `addreplay`).
+ *   See server/replay-upload.ts.
+ */
+exports.replayuploadurl = '';
+
+/**
  * crashguardemail - if the server has been running for more than an hour
  *   and crashes, send an email using these settings, rather than locking down
  *   the server. Uncomment this definition if you want to use this feature;
