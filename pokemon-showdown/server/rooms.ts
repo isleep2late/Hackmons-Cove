@@ -44,6 +44,7 @@ import { Roomlogs, type Roomlog } from './roomlogs';
 import { RoomAuth } from './user-groups';
 import { type PartialModlogEntry, mainModlog } from './modlog';
 import { Replays } from './replays';
+import { summarizeUnknownError, uploadReplayToStore } from './replay-upload';
 import * as crypto from 'crypto';
 import type { SubProcessesConfig } from './config-loader';
 
@@ -2063,15 +2064,16 @@ export class GameRoom extends BasicRoom {
 		return true;
 	}
 	/**
-	 * Sends this room's replay to the connection to be uploaded to the replay
-	 * server. To be clear, the replay goes:
+	 * Saves this room's replay to the replay server. The replay goes:
 	 *
-	 * PS server -> user -> loginserver
+	 * PS server -> replay store
 	 *
-	 * NOT: PS server -> loginserver
+	 * NOT: PS server -> user -> replay store
 	 *
-	 * That's why this function requires a connection. For details, see the top
-	 * comment inside this function.
+	 * The browser used to be the uploader (it POSTed the log to the login server's
+	 * `act=uploadreplay`), but that action no longer exists, so the log never leaves
+	 * the server now. `connection` is only where the result popup goes, and is
+	 * optional - a silent or automatic save passes none.
 	 */
 	async uploadReplay(user?: User, connection?: Connection, options?: 'forpunishment' | 'silent' | 'auto') {
 		// The reason we don't upload directly to the loginserver, unlike every
@@ -2152,9 +2154,47 @@ export class GameRoom extends BasicRoom {
 			return;
 		}
 
+		// Fork: this server is not registered with play.pokemonshowdown.com, so LoginServer's
+		// `addreplay` will never answer it. When Config.replayuploadurl is set we POST to our
+		// own replay store instead (the front server that serves Config.routes.replays).
+		// See server/replay-upload.ts.
+		//
+		// KNOWN LIMIT, not fixed here: that store writes a replay once and never overwrites it
+		// (`fs.writeFileSync(..., { flag: 'wx' })` in deploy/phnn-client-server.js), and has no
+		// delete. So re-saving a battle cannot change a replay that is already up. Concretely,
+		// `/hidereplay` after a public `/savereplay` re-runs this method and files a *second*,
+		// password-protected copy - the public copy stays up. Closing that needs a way to
+		// replace or retract a stored replay, which is a front-server change with its own
+		// authentication problem, so it is deliberately out of scope for this fix.
+		if (Config.replayuploadurl) {
+			// The store has no `private` column - the only thing that keeps a replay out of the
+			// public listing is having a password (it is filed as `<id>-<password>pw`). So map
+			// every not-public `hidden` level onto a password, including the two upstream leaves
+			// passwordless because its database can express them directly: 2 (saved for a
+			// punishment) and 10 (autosaved). Without this, a moderator saving a replay as
+			// evidence would publish it.
+			if (hidden !== 0 && !password) password = (battle.password ||= Replays.generatePassword());
+			const uploaded = await uploadReplayToStore({
+				url: Config.replayuploadurl,
+				id,
+				log,
+				password,
+				serverid: Config.serverid,
+			});
+			if (uploaded.error) {
+				// Let the player retry, and stop room-battle's end-of-battle autosave from
+				// believing a replay already exists for this battle.
+				battle.replaySaved = false;
+				connection?.popup(`Your replay could not be saved. ${uploaded.error}`);
+				return;
+			}
+			connection?.popup(this.replayUploadedPopup(`https://${Config.routes.replays}/${uploaded.fullid}`));
+			return;
+		}
+
 		// Otherwise, (we're probably a side server), upload the replay through LoginServer
 
-		const [result] = await LoginServer.request('addreplay', {
+		const [result, error] = await LoginServer.request('addreplay', {
 			id,
 			log,
 			players: battle.players.map(p => p.name).join(','),
@@ -2170,12 +2210,24 @@ export class GameRoom extends BasicRoom {
 		}
 
 		const fullid = result?.replayid;
-		const url = `https://${Config.routes.replays}/${fullid}`;
-		connection?.popup(
-			`|html|<p>Your replay has been uploaded! It's available at:</p><p> ` +
+		// A login server that refuses the request answers with an `actionerror` (or nothing at
+		// all, if the request failed outright). Without this the popup below happily announced
+		// a replay at `.../undefined`, and the browser-side uploader it replaced showed the raw
+		// `]{"actionerror":...}` body. Say what went wrong in words instead.
+		if (!fullid) {
+			battle.replaySaved = false;
+			const reason = error?.message || result?.actionerror || '';
+			connection?.popup(
+				`Your replay could not be saved. The replay server rejected it: ${summarizeUnknownError(reason)}`
+			);
+			return;
+		}
+		connection?.popup(this.replayUploadedPopup(`https://${Config.routes.replays}/${fullid}`));
+	}
+	replayUploadedPopup(url: string) {
+		return `|html|<p>Your replay has been uploaded! It's available at:</p><p> ` +
 			`<a class="no-panel-intercept" href="${url}" target="_blank">${url}</a> ` +
-			`<copytext value="${url}">Copy</copytext>`
-		);
+			`<copytext value="${url}">Copy</copytext>`;
 	}
 
 	getReplayData() {
