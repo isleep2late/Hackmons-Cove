@@ -26,15 +26,17 @@ To reload chat commands:
 import type { RoomPermission, GlobalPermission } from './user-groups';
 import type { Punishment } from './punishments';
 import type { PartialModlogEntry } from './modlog';
-import * as ConfigLoader from './config-loader';
+import type * as ConfigLoader from './config-loader';
 import * as Friends from './friends';
-import { SQL, FS, Utils } from '../lib';
+import { FS, Utils } from '../lib';
 import * as Artemis from './artemis';
-import { Dex } from '../sim';
 import { PrivateMessages } from './private-messages';
 import * as pathModule from 'path';
 import * as JSX from './chat-jsx';
-import type { TextEffect, TextLanguage } from '../sim/dex-data';
+import { pluginDatabase } from './chat-db';
+import type { TextLanguage } from '../sim/dex-data';
+import { TLfor, TLadd, type Translator, type TranslationCatalog } from '../sim/dex-text';
+export type { Translator, TranslationCatalog } from '../sim/dex-text';
 
 export interface DataHTMLRenderOptions {
 	dex?: ModdedDex;
@@ -42,50 +44,6 @@ export interface DataHTMLRenderOptions {
 	language?: ID | null;
 	tier?: string;
 }
-
-const LANGUAGE_CODES: Readonly<Record<string, TextLanguage>> = {
-	english: 'en',
-	german: 'de',
-	spanish: 'es',
-	french: 'fr',
-	italian: 'it',
-	japanese: 'ja',
-	korean: 'ko',
-	simplifiedchinese: 'zh-cn',
-	traditionalchinese: 'zh-tw',
-};
-
-const LANGUAGE_NATIVE_NAMES: Readonly<Record<string, string>> = {
-	english: 'English',
-	german: 'Deutsch',
-	spanish: 'Español',
-	french: 'Français',
-	italian: 'Italiano',
-	dutch: 'Nederlands',
-	portuguese: 'Português',
-	turkish: 'Türkçe',
-	hindi: 'हिंदी',
-	japanese: '日本語',
-	korean: '한국어',
-	simplifiedchinese: '简体中文',
-	traditionalchinese: '繁體中文',
-};
-
-const TRANSLATION_LANGUAGE_IDS = {
-	en: 'english',
-	de: 'german',
-	es: 'spanish',
-	fr: 'french',
-	it: 'italian',
-	nl: 'dutch',
-	pt: 'portuguese',
-	tr: 'turkish',
-	hi: 'hindi',
-	ja: 'japanese',
-	ko: 'korean',
-	'zh-cn': 'simplifiedchinese',
-	'zh-tw': 'traditionalchinese',
-} as const;
 
 export type PageHandler = (this: PageContext, query: string[], user: User, connection: Connection)
 => Promise<string | null | void | JSX.VNode> | string | null | void | JSX.VNode;
@@ -190,11 +148,6 @@ export type PunishmentFilter = (user: User | ID, punishment: Punishment) => void
 export type LoginFilter = (user: User, oldUser: User | null, userType: string) => void;
 export type HostFilter = (host: string, user: User, connection: Connection, hostType: string) => void;
 
-export interface Translations {
-	name?: string;
-	strings: { [english: string]: string };
-}
-
 const LINK_WHITELIST = [
 	'*.pokemonshowdown.com', 'psim.us', 'smogtours.psim.us',
 	'*.smogon.com', '*.pastebin.com', '*.hastebin.com',
@@ -210,7 +163,6 @@ const MAX_PARSE_RECURSION = 10;
 const VALID_COMMAND_TOKENS = '/!';
 const BROADCAST_TOKEN = '!';
 
-const PLUGIN_DATABASE_PATH = './databases/chat-plugins.db';
 const MAX_PLUGIN_LOADING_DEPTH = 3;
 
 import { formatText, linkRegex, stripFormatting } from './chat-formatter';
@@ -224,10 +176,7 @@ try {
 const EMOJI_REGEX = /[\p{Emoji_Modifier_Base}\p{Emoji_Presentation}\uFE0F]/u;
 
 const TRANSLATION_DIRECTORY = pathModule.resolve(__dirname, '..', 'translations');
-
-const PM = SQL('chat-db', module, {
-	file: global.Config?.nofswriting ? ':memory:' : PLUGIN_DATABASE_PATH,
-});
+const DEX_TRANSLATION_DIRECTORY = pathModule.resolve(__dirname, '..', 'data', 'text');
 
 class PatternTester {
 	// This class sounds like a RegExp
@@ -310,24 +259,6 @@ export class Interruption extends Error {
 		Error.captureStackTrace(this, ErrorMessage);
 	}
 }
-
-export type Translator = {
-	(strings: TemplateStringsArray | string, ...keys: any[]): string,
-	(effect: TextEffect): string,
-	term: { [id: string]: string },
-	type: { [id: string]: string },
-	nature: { [id: string]: string },
-	gender: { [id: string]: string },
-	egggroup: { [id: string]: string },
-	tag: { [id: string]: string },
-	color: { [id: string]: string },
-	status: { [id: string]: string },
-	target: { [id: string]: string },
-	stat: { [id: string]: string },
-	statShort: { [id: string]: string },
-	statMedium: { [id: string]: string },
-	ui: { [id: string]: string },
-};
 
 // These classes need to be declared here because they aren't hoisted
 export abstract class MessageContext {
@@ -584,14 +515,17 @@ export class PageContext extends MessageContext {
 /**
  * This is a message sent in a PM or to a chat/battle room.
  *
- * There are three cases to be aware of:
- * - PM to user: `context.pmTarget` will exist and `context.room` will be `null`
+ * There are four cases to be aware of:
  * - message to room: `context.room` will exist and `context.pmTarget` will be `null`
+ * - PM to online user: `context.pmTarget` will exist and `context.room` will be `null`
  * - console command (PM to `~`): `context.pmTarget` and `context.room` will both be `null`
+ * - PM to offline user: `context.pmTargetName` will exist, while
+ *   `context.pmTarget` and `context.room` will be `null`
  */
 export class CommandContext extends MessageContext {
 	message: string;
 	pmTarget: User | null;
+	pmTargetName: string | null;
 	room: Room | null;
 	connection: Connection;
 
@@ -610,7 +544,8 @@ export class CommandContext extends MessageContext {
 	broadcastMessage: string;
 	constructor(options: {
 		message: string, user: User, connection: Connection,
-		room?: Room | null, pmTarget?: User | null, cmd?: string, cmdToken?: string, target?: string, fullCmd?: string,
+		room?: Room | null, pmTarget?: User | null, pmTargetName?: string | null,
+		cmd?: string, cmdToken?: string, target?: string, fullCmd?: string,
 		recursionDepth?: number, isQuiet?: boolean, broadcastPrefix?: string, bypassRoomCheck?: boolean,
 	}) {
 		super(
@@ -623,6 +558,7 @@ export class CommandContext extends MessageContext {
 
 		// message context
 		this.pmTarget = options.pmTarget || null;
+		this.pmTargetName = options.pmTargetName || options.pmTarget?.name || null;
 		this.room = options.room || null;
 		this.connection = options.connection;
 
@@ -655,6 +591,7 @@ export class CommandContext extends MessageContext {
 				connection: this.connection,
 				room: this.room,
 				pmTarget: this.pmTarget,
+				pmTargetName: this.pmTargetName,
 				recursionDepth: this.recursionDepth + 1,
 				bypassRoomCheck: this.bypassRoomCheck,
 				...options,
@@ -783,6 +720,8 @@ export class CommandContext extends MessageContext {
 				}
 			}
 			Chat.PrivateMessages.send(message, this.user, this.pmTarget);
+		} else if (this.pmTargetName) {
+			this.errorReply(`Your message could not be sent:\n${message}\nSending command messages to offline users is not supported.`);
 		} else if (this.room) {
 			this.room.add(`|c|${this.user.getIdentity(this.room)}|${message}`);
 			this.room.game?.onLogMessage?.(message, this.user);
@@ -879,7 +818,7 @@ export class CommandContext extends MessageContext {
 		if (!sender) {
 			if (this.room) throw new Error(`Not a PM`);
 			sender = this.user;
-			receiver = this.pmTarget;
+			receiver = this.pmTarget || this.pmTargetName;
 		}
 		const targetIdentity = typeof receiver === 'string' ? ` ${receiver}` : receiver ? receiver.getIdentity() : '~';
 		const prefix = `|pm|${sender.getIdentity()}|${targetIdentity}|`;
@@ -1111,7 +1050,7 @@ export class CommandContext extends MessageContext {
 	}
 	canUseConsole() {
 		if (!this.user.hasConsoleAccess(this.connection)) {
-			throw new Chat.ErrorMessage(`${(this.cmdToken + this.fullCmd).trim()} - Requires console access.`);
+			throw new Chat.ErrorMessage(`${(this.cmdToken + this.fullCmd).trim()} - Requires console access, please set up \`Config.consoleips\`.`);
 		}
 		return true;
 	}
@@ -1121,6 +1060,9 @@ export class CommandContext extends MessageContext {
 	checkBroadcast(overrideCooldown?: boolean | string, suppressMessage?: string | null) {
 		if (this.broadcasting || !this.shouldBroadcast()) {
 			return true;
+		}
+		if (this.pmTargetName && !this.pmTarget) {
+			throw new Chat.ErrorMessage(`You cannot broadcast commands in offline PMs.`);
 		}
 
 		if (this.user.locked && !(this.room?.roomid.startsWith('help-') || this.pmTarget?.can('lock'))) {
@@ -1631,7 +1573,12 @@ export const Chat = new class {
 	commands!: AnnotatedChatCommands;
 	basePages!: PageTable;
 	pages!: PageTable;
-	readonly destroyHandlers: (() => void)[] = [Artemis.destroy, Friends.destroy];
+	readonly destroyHandlers: (() => void)[] = [
+		Artemis.destroy,
+		Friends.destroy,
+		() => void pluginDatabase.destroy(),
+		() => Chat.PrivateMessages.destroy(),
+	];
 	readonly crqHandlers: { [k: string]: CRQHandler } = {};
 	readonly handlers: { [k: string]: ((...args: any) => any)[] } = Object.create(null);
 	/** The key is the name of the plugin. */
@@ -1792,154 +1739,48 @@ export const Chat = new class {
 	 *********************************************************/
 	/** language id -> language name */
 	readonly languages = new Map<ID, string>();
-	/** language id -> (english string -> translated string) */
-	readonly translations = new Map<ID, Map<string, [string, string[], string[]]>>();
 
 	getDexLanguage(language: ID | null = null): TextLanguage {
-		return LANGUAGE_CODES[language || 'english'] || 'en';
+		return Dex.text.findLanguage(language || 'english')?.code as TextLanguage || 'en';
 	}
-	readonly translators = new Map<ID, Translator>();
 	getTranslator(language: ID | null = null): Translator {
-		const lang = language || 'english' as ID;
-		let translator = this.translators.get(lang);
-		if (!translator) {
-			const dexLang = this.getDexLanguage(lang);
-			const text = Dex.loadTextData(dexLang);
-			translator = Object.assign(
-				(strings: TemplateStringsArray | string | TextEffect, ...keys: any[]) => {
-					if (typeof strings !== 'string' && !Array.isArray(strings)) {
-						return Dex.text.get(strings as TextEffect, dexLang).name;
-					}
-					return Chat.tr(lang, strings as TemplateStringsArray | string, ...keys);
-				},
-				{
-					term: text.TermNames,
-					type: text.TypeNames,
-					nature: text.NatureNames,
-					gender: text.GenderNames,
-					egggroup: text.EggGroupNames,
-					tag: Object.fromEntries(Object.entries(text.Tags).map(([id, tag]) => [id, tag.name])),
-					color: text.ColorNames,
-					status: text.StatusNames,
-					target: text.TargetNames,
-					stat: text.StatNames,
-					statShort: text.StatShortNames,
-					statMedium: text.StatMediumNames,
-					ui: { ...Dex.loadTextData('en').Default.ui, ...text.Default.ui } as { [id: string]: string },
-				}
-			);
-			this.translators.set(lang, translator);
-		}
-		return translator;
+		const code = Dex.text.findLanguage(language || 'english')?.code || 'en';
+		return TLfor(code);
 	}
 	getLanguageName(language: ID): string {
-		const englishName = Chat.languages.get(language) || "Unknown Language";
-		const nativeName = LANGUAGE_NATIVE_NAMES[language];
-		return nativeName && nativeName !== englishName ? `${nativeName} (${englishName})` : englishName;
+		return Dex.text.findLanguage(language)?.fullName || "Unknown Language";
 	}
 	getLanguageID(language: string): ID | null {
-		const languageID = toID(language);
-		if (Chat.languages.has(languageID)) return languageID;
-
-		const code = language.trim().toLowerCase().replace(/_/g, '-');
-		const languageName = TRANSLATION_LANGUAGE_IDS[
-			code as keyof typeof TRANSLATION_LANGUAGE_IDS
-		];
-		if (!languageName) return null;
-		const codeLanguageID = toID(languageName);
-		return Chat.languages.has(codeLanguageID) ? codeLanguageID : null;
+		const languageID = Dex.text.findLanguage(language)?.legacyId as ID | undefined;
+		return languageID && Chat.languages.has(languageID) ? languageID : null;
 	}
 
 	async loadTranslations() {
 		const directories = await FS(TRANSLATION_DIRECTORY).readdir();
-
-		// ensure that english is the first entry when we iterate over Chat.languages
 		Chat.languages.set('english' as ID, 'English');
 		for (const dirname of directories) {
-			const languageName = TRANSLATION_LANGUAGE_IDS[
-				dirname as keyof typeof TRANSLATION_LANGUAGE_IDS
-			];
-			if (!languageName) continue;
-			const dir = FS(`${TRANSLATION_DIRECTORY}/${dirname}`);
-
-			// For some reason, toID() isn't available as a global when this executes.
-			const languageID = Dex.toID(languageName);
-			const files = await dir.readdir();
-			for (const filename of files) {
+			const language = Dex.text.findLanguage(dirname);
+			if (!language || language.code !== dirname) continue;
+			const files = await FS(`${TRANSLATION_DIRECTORY}/${dirname}`).readdir();
+			const catalogs: TranslationCatalog[] = [];
+			for (const filename of files.sort()) {
 				if (!filename.endsWith('.js')) continue;
-
-				const content: Translations = require(`${TRANSLATION_DIRECTORY}/${dirname}/${filename}`).translations;
-
-				if (!Chat.translations.has(languageID)) {
-					Chat.translations.set(languageID, new Map());
-				}
-				const translationsSoFar = Chat.translations.get(languageID)!;
-
-				if (content.name && !Chat.languages.has(languageID)) {
-					Chat.languages.set(languageID, content.name);
-				}
-
-				if (content.strings) {
-					for (const key in content.strings) {
-						const keyLabels: string[] = [];
-						const valLabels: string[] = [];
-						const newKey = key.replace(/\${.+?}/g, str => {
-							keyLabels.push(str);
-							return '${}';
-						}).replace(/\[TN: ?.+?\]/g, '');
-						const val = content.strings[key].replace(/\${.+?}/g, (str: string) => {
-							valLabels.push(str);
-							return '${}';
-						}).replace(/\[TN: ?.+?\]/g, '');
-						translationsSoFar.set(newKey, [val, keyLabels, valLabels]);
-					}
-				}
+				catalogs.push(require(`${TRANSLATION_DIRECTORY}/${dirname}/${filename}`).translations);
 			}
-			if (!Chat.languages.has(languageID)) {
-				// Fallback in case no translation files provide the language's name
-				Chat.languages.set(languageID, "Unknown Language");
-			}
+			const uiCatalog = `${DEX_TRANSLATION_DIRECTORY}/${dirname}/ui.js`;
+			if (await FS(uiCatalog).exists()) catalogs.push(require(uiCatalog).translations);
+			TLadd(dirname, catalogs);
+
+			const englishName = /\(([^()]*)\)$/.exec(language.fullName)?.[1] || language.name;
+			Chat.languages.set(language.legacyId as ID, englishName);
 		}
 	}
-	tr(language: ID | null): (fStrings: TemplateStringsArray | string, ...fKeys: any) => string;
-	tr(language: ID | null, strings: TemplateStringsArray | string, ...keys: any[]): string;
-	tr(language: ID | null, strings: TemplateStringsArray | string = '', ...keys: any[]) {
-		if (!language) language = 'english' as ID;
-		// If strings is an array (normally the case), combine before translating.
-		const trString = typeof strings === 'string' ? strings : strings.join('${}');
-
-		if (Chat.translationsLoaded && !Chat.translations.has(language)) {
-			throw new Error(`Trying to translate to a nonexistent language: ${language}`);
-		}
-		if (!strings.length) {
-			return (fStrings: TemplateStringsArray | string, ...fKeys: any) => Chat.tr(language, fStrings, ...fKeys);
-		}
-
-		const entry = Chat.translations.get(language)?.get(trString);
-		let [translated, keyLabels, valLabels] = entry || ["", [], []];
-		if (!translated) translated = trString;
-
-		// Replace the gaps in the species string
-		if (keys.length) {
-			let reconstructed = '';
-
-			const left: (string | null)[] = keyLabels.slice();
-			for (const [i, str] of translated.split('${}').entries()) {
-				reconstructed += str;
-				if (keys[i]) {
-					let index = left.indexOf(valLabels[i]);
-					if (index < 0) {
-						index = left.findIndex(val => !!val);
-					}
-					if (index < 0) index = i;
-					reconstructed += keys[index];
-					left[index] = null;
-				}
-			}
-
-			translated = reconstructed;
-		}
-		return translated;
+	TLto(language: ID | null): Translator;
+	TLto(language: ID | null, strings: TemplateStringsArray | string, ...keys: any[]): string;
+	TLto(language: ID | null, strings?: TemplateStringsArray | string, ...keys: any[]) {
+		const translator = this.getTranslator(language);
+		if (strings === undefined) return translator;
+		return typeof strings === 'string' ? translator(strings, keys[0]) : translator(strings, ...keys);
 	}
 
 	/**
@@ -1948,7 +1789,7 @@ export const Chat = new class {
 	 * All chat plugins share one database.
 	 * Chat.databaseReadyPromise will be truthy if the database is not yet ready.
 	 */
-	database = PM;
+	database = pluginDatabase;
 	databaseReadyPromise: Promise<void> | null = null;
 
 	async prepareDatabase() {
@@ -1984,11 +1825,6 @@ export const Chat = new class {
 		for (const { file } of migrationsToRun) {
 			await this.database.runFile(pathModule.resolve(migrationsFolder, file));
 		}
-
-		Chat.destroyHandlers.push(
-			() => void Chat.database?.destroy(),
-			() => Chat.PrivateMessages.destroy(),
-		);
 	}
 
 	readonly MessageContext = MessageContext;
@@ -2691,21 +2527,6 @@ export const Chat = new class {
 	}
 
 	/**
-	 * Normalize a message for the purposes of applying chat filters.
-	 *
-	 * Not used by PS itself, but feel free to use it in your own chat filters.
-	 */
-	normalize(message: string) {
-		message = message.replace(/'/g, '').replace(/[^A-Za-z0-9]+/g, ' ').trim();
-		if (!/[A-Za-z][A-Za-z]/.test(message)) {
-			message = message.replace(/ */g, '');
-		} else if (!message.includes(' ')) {
-			message = message.replace(/([A-Z])/g, ' $1').trim();
-		}
-		return ' ' + message.toLowerCase() + ' ';
-	}
-
-	/**
 	 * Generates dimensions to fit an image at url into a maximum size of maxWidth x maxHeight,
 	 * preserving aspect ratio.
 	 *
@@ -2811,6 +2632,7 @@ export const Chat = new class {
 // backwards compatibility; don't actually use these
 // they're just there so forks have time to slowly transition
 (Chat as any).escapeHTML = Utils.escapeHTML;
+(Chat as any).normalize = Utils.normalize;
 (Chat as any).splitFirst = Utils.splitFirst;
 (Chat as any).sendPM = Chat.PrivateMessages.send.bind(Chat.PrivateMessages);
 (CommandContext.prototype as any).can = CommandContext.prototype.checkCan;
@@ -2864,30 +2686,14 @@ export interface Monitor {
 	monitor?: MonitorHandler;
 }
 
-if (!PM.isParentProcess) {
-	ConfigLoader.ensureLoaded();
-	global.Monitor = {
-		crashlog(error: Error, source = 'A chat child process', details: AnyObject | null = null) {
-			const repr = JSON.stringify([error.name, error.message, source, details]);
-			process.send!(`THROW\n@!!@${repr}\n${error.stack}`);
-		},
-	} as any;
-	process.on('uncaughtException', err => {
-		Monitor.crashlog(err, 'A chat database process');
-	});
-	process.on('unhandledRejection', err => {
-		Monitor.crashlog(err as Error, 'A chat database process');
-	});
-	// eslint-disable-next-line no-eval
-	PM.startRepl(cmd => eval(cmd));
-}
-
 function start(processCount: ConfigLoader.SubProcessesConfig) {
 	if (Config.usesqlite) {
-		PM.spawn(processCount['chatdb'] ?? 1);
+		pluginDatabase.spawn(processCount['chatdb'] ?? 1);
 		Chat.databaseReadyPromise = Chat.prepareDatabase();
 	}
 	Chat.PrivateMessages.start(processCount);
 	Friends.start(processCount);
 	Artemis.start(processCount);
 }
+
+setTimeout(() => Chat.loadPlugins(), 5000);
