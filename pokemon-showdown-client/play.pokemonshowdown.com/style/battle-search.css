@@ -280,14 +280,16 @@
 	white-space: nowrap;
 	padding-top: 8px;
 	font-size: 8pt;
-	float: none;
-	display: block;
-	width: auto;
-	max-width: 488px;
+	width: 488px;
 	height: 21px;
 	overflow: hidden;
-	text-overflow: ellipsis;
 	color: #777777;
+}
+.dexlist .movedesccol {
+	width: 284px;
+}
+.dexlist .itemdesccol {
+	width: 464px;
 }
 
 .dexlist .sortrow {
@@ -331,6 +333,9 @@
 }
 .dexlist .abilitysortcol {
 	width: 172px;
+}
+.dexlist .singleabilitysortcol {
+	width: 86px;
 }
 .dexlist .statsortcol {
 	width: 24px;
