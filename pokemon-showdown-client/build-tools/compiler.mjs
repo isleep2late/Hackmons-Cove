@@ -102,12 +102,54 @@ async function combineResults(fileResults, sourceMapOptions, opts) {
 	return { map, code };
 }
 
+/**
+ * Newest ctime across the build configuration - everything under build-tools/ plus .babelrc.
+ * Compiled output is a function of (source, build configuration), so comparing only the source
+ * leaves output stale forever when the configuration changes and the source does not. That is a
+ * real defect, not a theoretical one: adding build-tools/babel-plugin-scope-template-cache.cjs on
+ * 2026-09-10 left panel-chat.js (compiled 2026-08-23) and panel-chat-tournament.js (2026-08-03)
+ * declaring a bare `var _templateObject` in the shared global scope, and no rebuild ever fixed
+ * them because their sources had not changed. Computed once per process - the build compiles
+ * hundreds of files and this walk should not be repeated for each one.
+ */
+let buildConfigCtimeMsCache = null;
+function buildConfigCtimeMs() {
+	if (buildConfigCtimeMsCache !== null) return buildConfigCtimeMsCache;
+	const root = path.join(path.dirname(new URL(import.meta.url).pathname), '..');
+	let newest = 0;
+	const visit = entryPath => {
+		let stat;
+		try {
+			stat = fs.statSync(entryPath);
+		} catch {
+			return;
+		}
+		if (stat.ctimeMs > newest) newest = stat.ctimeMs;
+		if (!stat.isDirectory()) return;
+		let names;
+		try {
+			names = fs.readdirSync(entryPath);
+		} catch {
+			return;
+		}
+		// node_modules under build-tools would dominate the walk and never affects output here.
+		for (const name of names) {
+			if (name === 'node_modules') continue;
+			visit(path.join(entryPath, name));
+		}
+	};
+	visit(path.join(root, 'build-tools'));
+	visit(path.join(root, '.babelrc'));
+	buildConfigCtimeMsCache = newest;
+	return newest;
+}
+
 function noRebuildNeeded(src, dest) {
 	try {
 		const srcStat = fs.statSync(src, { throwIfNoEntry: false });
 		if (!srcStat) return true;
 		const destStat = fs.statSync(dest);
-		if (srcStat.ctimeMs < destStat.ctimeMs) return true;
+		if (srcStat.ctimeMs < destStat.ctimeMs && buildConfigCtimeMs() < destStat.ctimeMs) return true;
 	} catch {}
 
 	return false;
