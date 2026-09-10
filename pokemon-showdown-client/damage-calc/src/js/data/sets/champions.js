@@ -17,13 +17,15 @@ var SETDEX_CHAMPIONS = {
     "BSS Reg M-B Drought Offense": {"level":50,"ability":"Blaze","item":"Charizardite Y","nature":"Timid","sps":{"hp":2,"sa":32,"sp":32},"moves":["Flamethrower","Solar Beam","Overheat","Flame Charge"]},
     "BSS Reg M-B Dragon Dance": {"level":50,"ability":"Blaze","item":"Charizardite X","nature":"Jolly","sps":{"hp":12,"at":29,"df":3,"sd":1,"sp":21},"moves":["Flare Blitz","Dragon Claw","Roost","Dragon Dance"]},
     "BSS Reg M-B Double Dance": {"level":50,"ability":"Blaze","item":"Charizardite X","nature":"Jolly","sps":{"hp":12,"at":29,"df":3,"sd":1,"sp":21},"moves":["Flare Blitz","Scale Shot","Roost","Swords Dance"]},
-    "BSS Reg M-B Tank": {"level":50,"ability":"Blaze","item":"Charizardite X","nature":"Impish","sps":{"hp":30,"df":29,"sp":7},"moves":["Dragon Tail","Flame Charge","Roost","Will-O-Wisp"]}
+    "BSS Reg M-B Tank": {"level":50,"ability":"Blaze","item":"Charizardite X","nature":"Impish","sps":{"hp":30,"df":29,"sp":7},"moves":["Dragon Tail","Flame Charge","Roost","Will-O-Wisp"]},
+    "VGC 2026 Reg M-B Setup Sweeper": {"level":50,"ability":"Blaze","item":"Charizardite X","nature":"Adamant","sps":{"hp":2,"at":32,"sp":32},"moves":["Protect","Flare Blitz","Dragon Claw","Dragon Dance"]}
   },
   "Charizard-Mega-X": {
     "OU Dragon Dance": {"ability":"Tough Claws","item":"Charizardite X","nature":"Adamant","sps":{"hp":2,"at":32,"sp":32},"moves":["Dragon Dance","Dragon Claw","Flare Blitz","Roost"]},
     "BSS Reg M-B Dragon Dance": {"level":50,"ability":"Tough Claws","item":"Charizardite X","nature":"Jolly","sps":{"hp":12,"at":29,"df":3,"sd":1,"sp":21},"moves":["Flare Blitz","Dragon Claw","Roost","Dragon Dance"]},
     "BSS Reg M-B Double Dance": {"level":50,"ability":"Tough Claws","item":"Charizardite X","nature":"Jolly","sps":{"hp":12,"at":29,"df":3,"sd":1,"sp":21},"moves":["Flare Blitz","Scale Shot","Roost","Swords Dance"]},
-    "BSS Reg M-B Tank": {"level":50,"ability":"Tough Claws","item":"Charizardite X","nature":"Impish","sps":{"hp":30,"df":29,"sp":7},"moves":["Dragon Tail","Flame Charge","Roost","Will-O-Wisp"]}
+    "BSS Reg M-B Tank": {"level":50,"ability":"Tough Claws","item":"Charizardite X","nature":"Impish","sps":{"hp":30,"df":29,"sp":7},"moves":["Dragon Tail","Flame Charge","Roost","Will-O-Wisp"]},
+    "VGC 2026 Reg M-B Setup Sweeper": {"level":50,"ability":"Blaze","item":"Charizardite X","nature":"Adamant","sps":{"hp":2,"at":32,"sp":32},"moves":["Protect","Flare Blitz","Dragon Claw","Dragon Dance"]}
   },
   "Charizard-Mega-Y": {
     "OU Special Wallbreaker": {"ability":"Drought","item":"Charizardite Y","nature":"Timid","sps":{"sa":32,"sd":2,"sp":32},"moves":["Weather Ball","Solar Beam","Air Slash","Roost"]},
@@ -55,11 +57,11 @@ var SETDEX_CHAMPIONS = {
   },
   "Clefable": {
     "OU Physical Wall": {"ability":"Magic Guard","item":"Leftovers","nature":"Bold","sps":{"hp":32,"df":32,"sd":2},"moves":["Moonblast","Moonlight","Thunder Wave","Stealth Rock"]},
-    "OU Magic Bounce": {"ability":"Magic Guard","item":"Clefablite","nature":"Modest","sps":{"hp":32,"sa":21,"sp":13},"moves":["Calm Mind","Moonlight","Moonblast","Flamethrower"]},
+    "OU Utility": {"ability":"Magic Bounce","item":"Clefablite","nature":"Modest","sps":{"hp":21,"sa":32,"sp":13},"moves":["Moonblast","Moonlight","Calm Mind","Flamethrower"]},
     "BSS Reg M-B Showdown Usage": {"level":50,"ability":"Unaware","item":"Leftovers","nature":"Bold","sps":{"hp":32,"df":32,"sp":2},"moves":["Moonblast","Calm Mind","Wish","Protect"]}
   },
   "Clefable-Mega": {
-    "OU Magic Bounce": {"ability":"Magic Bounce","item":"Clefablite","nature":"Modest","sps":{"hp":32,"sa":21,"sp":13},"moves":["Calm Mind","Moonlight","Moonblast","Flamethrower"]},
+    "OU Utility": {"ability":"Magic Bounce","item":"Clefablite","nature":"Modest","sps":{"hp":21,"sa":32,"sp":13},"moves":["Moonblast","Moonlight","Calm Mind","Flamethrower"]},
     "BSS Reg M-B Showdown Usage": {"level":50,"ability":"Magic Bounce","item":"Clefablite","nature":"Bold","sps":{"hp":32,"df":32,"sd":2},"moves":["Moonlight","Moonblast","Cosmic Power","Stored Power"]}
   },
   "Ninetales-Alola": {
