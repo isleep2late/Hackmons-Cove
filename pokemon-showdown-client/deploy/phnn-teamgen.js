@@ -170,9 +170,11 @@ const HM_ARCHETYPES = [
 		],
 	},
 	{
+		// three forced moves, not four: a slot has to stay free for an attack, or the phazer's only
+		// damaging move is Circle Throw and a Ghost body takes literally nothing from the whole set
 		name: 'prankster-phaze',
 		slots: [
-			{ ability: 'Prankster', moves: ['Stealth Rock', 'Circle Throw', 'Copycat', 'Recover'], role: 'defensive' },
+			{ ability: 'Prankster', moves: ['Stealth Rock', 'Circle Throw', 'Recover'], role: 'defensive' },
 			{ ability: null, moves: ['Spikes', 'Toxic Spikes'], role: 'defensive' },
 		],
 	},
@@ -707,7 +709,12 @@ function buildHackmonsMoves(set, role, fdex, ruleTable, opts) {
 	}
 	for (const m of set.moves || []) {
 		if (moves.length >= moveCap) break;
-		const id = toId(('' + m).split(' (')[0]);
+		const name = ('' + m).split(' (')[0];
+		const id = toId(name);
+		// these are carried over from whatever generator seeded the set, which is not always the same
+		// generation as the format being built for -- run them past the same gate as everything else
+		// so a set never depends on a move its own generation does not have
+		if (!moveAllowed(name, fdex, ruleTable, ctx)) continue;
 		if (!used.has(id)) {
 			moves.push(m);
 			used.add(id);
@@ -732,6 +739,123 @@ function moveMatches(name, need, fdex) {
 	if (!mv.exists || mv.category === 'Status') return false;
 	if (need === 'normal') return mv.type === 'Normal';
 	return mv.category.toLowerCase() === need;
+}
+
+// A type immunity is total: Ghost does exactly zero to Normal, Ground zero to Flying, Electric zero
+// to Ground, Normal and Fighting zero to Ghost. A set whose damaging moves all share one of those
+// attacking types is not merely bad into the immune body, it cannot move that body's HP bar at all,
+// for the whole game, with no play available. That is what was reported: a set whose only attack was
+// Moongeist Beam. Moongeist Beam ignores abilities, which reads like it ignores everything - but an
+// immunity is a property of the TYPE CHART, not an ability, so the ignore clause buys nothing here.
+//
+// Which pairs bite is read out of the format's own chart rather than listed here, so a generation
+// without Steel or Fairy is never asked about them, and the types this fork adds (Shadow, Bird, ???)
+// are covered by whatever the chart says about them.
+const coverageTargetsCache = new Map();
+function coverageTargets(fdex) {
+	const key = fdex.currentMod;
+	if (coverageTargetsCache.has(key)) return coverageTargetsCache.get(key);
+	const names = fdex.types.all().map(t => t.name);
+	// only defending types that zero SOMETHING can wall a set; against every other type any damaging
+	// move at all is enough, so they need no separate check
+	const targets = names.filter(def => names.some(atk => !fdex.getImmunity(atk, def)));
+	coverageTargetsCache.set(key, targets);
+	return targets;
+}
+
+// mirrors what the battle engine does before it looks at the type chart: a move carrying
+// ignoreImmunity for its own type (Thousand Arrows against Flying) is not stopped by that immunity
+function moveHitsType(mv, defType, fdex) {
+	const ignore = mv.ignoreImmunity;
+	if (ignore === true) return true;
+	if (ignore && typeof ignore === 'object' && ignore[mv.type]) return true;
+	return fdex.getImmunity(mv.type, defType);
+}
+
+function coverageWalls(moves, fdex, targets) {
+	const damaging = [];
+	for (const m of moves || []) {
+		const mv = fdex.moves.get(('' + m).split(' (')[0]);
+		if (mv.exists && mv.category !== 'Status') damaging.push(mv);
+	}
+	if (!damaging.length) return targets.slice();
+	return targets.filter(t => !damaging.some(mv => moveHitsType(mv, t, fdex)));
+}
+
+// candidates in the order the rest of the generator would reach for them: this body's own STAB, then
+// the curated coverage list, then every other type's STAB, and only then Shadow. Shadow is last on
+// purpose - it hits everything for x2, so putting it first would make every repaired set identical.
+function coveragePool(role, types, fdex, ruleTable, ctx) {
+	const cat = role === 'defensive' ? 'special' : role;
+	const other = cat === 'physical' ? 'special' : 'physical';
+	const out = [];
+	const push = list => {
+		for (const name of list || []) if (!out.includes(name)) out.push(name);
+	};
+	push((HM_STAB[types[0]] || {})[cat]);
+	push((HM_STAB[types[1]] || {})[cat]);
+	push(HM_COVERAGE[cat]);
+	for (const t of Object.keys(HM_STAB)) push(HM_STAB[t][cat]);
+	push((HM_STAB[types[0]] || {})[other]);
+	push(HM_COVERAGE[other]);
+	for (const t of Object.keys(HM_STAB)) push(HM_STAB[t][other]);
+	const shadow = shadowMovesAllowed(fdex, ruleTable, ctx);
+	push(shadow[cat]);
+	push(shadow[other]);
+	return out;
+}
+
+// The guarantee: when this returns, the set has at least one damaging move that is not zeroed by any
+// type immunity in this format's chart. It is the last word on the moveset, so it runs after the
+// archetype, the ability-consistency pass and the format core have all had their say.
+function enforceTypeCoverage(set, role, fdex, ruleTable, ctx, forced) {
+	const targets = coverageTargets(fdex);
+	if (!targets.length) return;
+	const species = fdex.species.get(set.species);
+	const types = species && species.exists ? species.types : [];
+	// whichever move satisfies the ability's damage category has to survive the swap, or fixing the
+	// coverage hole would open the ability hole enforceAbilityConsistency just closed
+	const need = ABILITY_NEEDS[toId(set.ability || '')];
+	const keeper = need ? (set.moves || []).find(m => moveMatches(m, need, fdex)) : null;
+	const preferLocked = (forced || []).concat(keeper ? [keeper] : []);
+	// Candidates are scored on the moveset that would RESULT, not on the holes they would plug. That
+	// distinction is the whole thing: when every slot is already spoken for, adding coverage means
+	// dropping the move that was doing the damage, so a candidate can close the hole it was picked
+	// for and open a fresh one in the same swap. Scoring on "holes closed" made a Poison/Dragon
+	// Baton Passer trade Poison Jab for Dragon Darts for Gunk Shot and finish as walled as it began.
+	const trial = (name, locked) => {
+		const clone = { species: set.species, ability: set.ability, moves: (set.moves || []).slice() };
+		if (!swapInMove(clone, name, fdex, locked, ruleTable)) return null;
+		return clone.moves;
+	};
+	// three passes because one swap is not always enough to close every hole at once
+	for (let pass = 0; pass < 3; pass++) {
+		const walls = coverageWalls(set.moves, fdex, targets);
+		if (!walls.length) return;
+		const used = new Set((set.moves || []).map(m => toId(('' + m).split(' (')[0])));
+		let best = null;
+		for (const name of coveragePool(role, types, fdex, ruleTable, ctx)) {
+			if (used.has(toId(name))) continue;
+			if (!moveAllowed(name, fdex, ruleTable, ctx)) continue;
+			const mv = fdex.moves.get(name);
+			if (!mv.exists || mv.category === 'Status') continue;
+			// same dead-slot rule pickMove uses: a low-BP move derives its power from a base move
+			// this set will not have
+			if (mv.basePower > 0 && mv.basePower < 40) continue;
+			if (!walls.some(t => moveHitsType(mv, t, fdex))) continue;
+			// an archetype's flavour moves yield to the damage guarantee, but only after every slot it
+			// did not claim has already been tried
+			const moves = trial(name, preferLocked) || trial(name, keeper ? [keeper] : []);
+			if (!moves) continue;
+			const left = coverageWalls(moves, fdex, targets).length;
+			if (!best || left < best.left) best = { moves, left };
+			// the pool is in preference order, so the first candidate that leaves nothing walled wins
+			if (!left) break;
+		}
+		if (!best || best.left >= walls.length) return;
+		set.moves = best.moves;
+		if (!best.left) return;
+	}
 }
 
 // swaps a move into the set without touching anything an archetype forced, preferring to drop a
@@ -1390,6 +1514,25 @@ function reshape(team, baseid, gen, rulesText, ruleTable, fdex, ctx, gate) {
 		if (isCD) upgradeCdSet(set, fdex, ruleTable);
 	}
 	applyFormatCore(team, baseid, fdex, ruleTable);
+	// Last word on every moveset this generator authored. applyFormatCore rewrites whole movesets and
+	// applyArchetype can claim all four slots, so this has to sit after both of them rather than
+	// inside buildHackmonsMoves, or those two would hand back sets that cannot damage a Normal type.
+	//
+	// LIMIT: this follows isHackmons, so Gen 1 and Gen 2 are NOT covered - those formats never reach
+	// upgradeHackmonsSet either, and ship the upstream random-battle sets as-is. Those sets really do
+	// contain mono-Normal bodies that a Gengar walls outright (Rest / Sleep Talk / Curse / Body Slam
+	// Pinsir); measured at 3/120 sets in Gen 1 Pure Hackmons and 20/120 in Gen 2. Fixing them means
+	// either rewriting upstream sets or extending the synthesiser down two generations, and the Gen 1
+	// Electrode core in HM_FORMAT_CORES is a deliberate metagame lock that such a pass would rewrite,
+	// so that is the owner's call, not this one. Non-Hackmons ladders are excluded for the same kind
+	// of reason: their movesets are mined Smogon sets, and changing them is a fidelity decision.
+	// tools/check-teamgen-coverage.js measures all of this; run it with --formats to see the residue.
+	if (isHackmons) {
+		for (const set of team) {
+			enforceTypeCoverage(set, set.phnnForcedRole || setRole(set), fdex, ruleTable, ctx,
+				set.phnnForcedMoves);
+		}
+	}
 	return team;
 }
 
