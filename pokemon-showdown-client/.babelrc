@@ -31,7 +31,11 @@
 		"@babel/plugin-transform-member-expression-literals",
 		"@babel/plugin-transform-property-literals",
 
-		"@babel/plugin-transform-strict-mode"
+		"@babel/plugin-transform-strict-mode",
+
+		// Must stay LAST: it renames the template caches the transform above creates, and it can
+		// only see them once every other plugin has finished with the program.
+		"./build-tools/babel-plugin-scope-template-cache.cjs"
 	],
 	"ignore": [
 		"src/globals.d.ts"
