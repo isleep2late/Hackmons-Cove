@@ -52,11 +52,13 @@ const TEAMGEN = process.env.PHNN_TEAMGEN ||
 // ability-restricted ones, the cup generators, the 255-EV variants and the alt metas.
 // Hackmons Cup is not here because you cannot bring a team to it at all - the server rolls one, and
 // the validator answers "This format doesn't let you use your own team", so there is nothing to
-// check. [Gen 9 Champions] Pure Hackmons is not here either, for a different and real reason: that
-// format caps Stat Points and the generator does not know about that rule, so it fails to produce a
-// team at all. That is a separate defect from this one; add the format back once it is fixed.
+// check. [Gen 9 Champions] Pure Hackmons IS here now. It used to be excluded because that format
+// caps Stat Points and the generator did not know the rule existed, so it failed to produce a team
+// 100% of the time; the generator reads the cap off the format's own rule table now, so the format
+// is held to the same properties as every other one.
 const DEFAULT_FORMATS = [
 	'gen6purehackmons', 'gen7purehackmons', 'gen8purehackmons', 'gen9purehackmons',
+	'gen9championspurehackmons',
 	'gen6balancedhackmons', 'gen7balancedhackmons', 'gen8balancedhackmons', 'gen9balancedhackmons',
 	'gen6255purehackmons', 'gen7255purehackmons', 'gen8255purehackmons', 'gen9255purehackmons',
 	'gen6disguises', 'gen7disguises', 'gen8disguises', 'gen9disguises',
@@ -71,12 +73,19 @@ const DEFAULT_FORMATS = [
 // it is a curiosity (Gen 1 has three Ghosts) rather than something a ladder set has to answer
 const MIN_BODIES_PER_TYPE = 3;
 
-// The generator sometimes gives up on a format entirely - it picks a body or a move the validator
-// then refuses and runs out of attempts. That is its own defect and not the one this file checks, so
-// it does not fail a run on its own; but a team that was never built also cannot be checked, so it
-// cannot be free either. Measured over 8 seeds x 825 teams against the unmodified generator the rate
-// was 33/6562 = 0.50%, so 2% is well clear of the existing flake and still catches a real collapse.
-const GEN_ERROR_CEILING = 0.02;
+// The generator used to give up on a format entirely often enough to need a budget: it picked a body
+// or a move the validator then refused, re-rolled the same way twenty times, and returned an error
+// instead of a team. Measured over 8 seeds x 825 teams that was 33/6562 = 0.50%, and this constant
+// was 0.02 so the pre-existing flake did not fail a run it was not about.
+//
+// It is zero now, and zero is the point. The generator no longer probes move legality with a fixed
+// body it does not intend to use, and a failed attempt teaches the next one what the validator just
+// refused, so a systematically-illegal choice cannot burn all twenty attempts any more. Measured at
+// 0/11050 teams over 13 seeds (20260910, 1, 2, 3, 5, 7, 11, 99, 12345, 424242, 20250101, 20260101,
+// 31337) x 850 teams with the format list above, against 28/850 for the same seed before it. A team
+// that never gets built cannot be checked for anything else in this file either, so there is no
+// budget for one: any regression that brings the failures back trips this immediately.
+const GEN_ERROR_CEILING = 0;
 
 const args = process.argv.slice(2);
 const argOf = (name, fallback) => {
