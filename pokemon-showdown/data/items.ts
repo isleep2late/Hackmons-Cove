@@ -7872,7 +7872,7 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 		},
 		onResidualOrder: 10,
 		onResidual(pokemon) {
-			if (pokemon.hp <= pokemon.maxhp / 2) {
+			if (pokemon.hp < pokemon.maxhp / 2) {
 				pokemon.eatItem();
 			}
 		},
@@ -7957,7 +7957,7 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 		},
 		onResidualOrder: 10,
 		onResidual(pokemon) {
-			if (pokemon.hp <= pokemon.maxhp / 2) {
+			if (pokemon.hp < pokemon.maxhp / 2) {
 				pokemon.eatItem();
 			}
 		},
