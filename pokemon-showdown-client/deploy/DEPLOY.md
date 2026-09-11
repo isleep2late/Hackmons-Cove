@@ -103,6 +103,44 @@ subdomain (e.g. `beta.hackmons.com`), rebuild, add a DNS record + the same
 tunnel rules for that subdomain → :8100, and test there. Revert `routes.json`
 to `play.hackmons.com` for production.
 
+## Replay saving (sim-side config — REQUIRED, and not in git)
+
+"Upload and share replay" is saved by the **sim**, not the browser. The browser used to
+POST the battle log to the login server's `act=uploadreplay`; Smogon removed that action,
+so the upload came back as the literal body
+`]{"actionerror":"No longer exists; use addreplay."}` and no replay was saved. Both clients
+now just send `/savereplay`, and `GameRoom#uploadReplay` POSTs the log to the front
+server's `act=uploadreplay` route itself (see `pokemon-showdown/server/replay-upload.ts`).
+
+That means the **sim's** `config/config.js` (gitignored, so it has to be set by hand on
+each box) needs two things:
+
+```js
+// Where the sim sends replays. Must be the front server's action route on this box, NOT
+// play.pokemonshowdown.com - we are not a registered side server, so the login server's
+// `addreplay` will never answer us.
+exports.replayuploadurl = 'http://127.0.0.1:8100/action.php';  // 8101 on beta
+
+exports.routes = {
+	root: 'pokemonshowdown.com',
+	client: 'play.hackmons.com',
+	dex: 'dex.pokemonshowdown.com',
+	replays: 'replay.hackmons.com',   // NOT replay.pokemonshowdown.com - this is the URL
+	                                  // the "your replay is at ..." popup shows the player
+};
+```
+
+If `replayuploadurl` is left empty the sim falls back to upstream behaviour (`addreplay`
+through the login server), which on this fork fails — but it now fails with a sentence in
+a popup instead of announcing a replay at `.../undefined`. The replay is not saved either
+way; the difference is whether the player is told.
+
+Both gates for this live in the repo: `pokemon-showdown/test/server/replay-upload.js` (the
+sim really uploads, and reports failures in words) and
+`pokemon-showdown-client/test/replay-store-upload.test.js` (boots this front server on a
+scratch port and drives the real uploader against it). Neither can check the deployed
+`config.js`, because it is not in git — that is the one step this has to be trusted on.
+
 ## Login behaviour
 
 First login on play.hackmons.com asks for PS username+password (the proxy can't

@@ -48,6 +48,7 @@ export class PSSearchResults extends preact.Component<{
 	renderPokemonSortRowHTML(index: number) {
 		const search = this.props.search;
 		const sortCol = search.sortCol;
+		const abilityWidthClass = search.numAbilityCols === 1 ? 'singleabilitysortcol' : 'abilitysortcol';
 		return [
 			`<li class="result" value="${index}"><div class="sortrow">`,
 			`<button class="sortcol numsortcol${!sortCol ? ' cur' : ''}">`,

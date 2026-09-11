@@ -170,9 +170,11 @@ const HM_ARCHETYPES = [
 		],
 	},
 	{
+		// three forced moves, not four: a slot has to stay free for an attack, or the phazer's only
+		// damaging move is Circle Throw and a Ghost body takes literally nothing from the whole set
 		name: 'prankster-phaze',
 		slots: [
-			{ ability: 'Prankster', moves: ['Stealth Rock', 'Circle Throw', 'Copycat', 'Recover'], role: 'defensive' },
+			{ ability: 'Prankster', moves: ['Stealth Rock', 'Circle Throw', 'Recover'], role: 'defensive' },
 			{ ability: null, moves: ['Spikes', 'Toxic Spikes'], role: 'defensive' },
 		],
 	},
@@ -443,24 +445,115 @@ function setRole(set) {
 	return bs.atk >= bs.spa ? 'physical' : 'special';
 }
 
-// hackmons formats un-dexit content at the VALIDATOR, not in the dex, so isNonstandard is the wrong
-// gate there -- ask the validator itself (cached) or entire classes of moves stay invisible
-const permissiveCache = new Map();
-function movePermittedByValidator(name, validator, fullid) {
-	const key = fullid + '|' + toId(name);
-	if (permissiveCache.has(key)) return permissiveCache.get(key);
-	let ok = false;
+/* ---------- asking the validator, and believing the answer ----------
+ *
+ * Hackmons formats un-dexit content at the VALIDATOR rather than in the dex, so isNonstandard is the
+ * wrong gate on its own: ask the validator, or entire classes of move stay invisible. Two questions
+ * get asked -- "may this body be used in this format" and "may this move go on that body" -- and both
+ * used to be answered by running a probe set through validateSet and testing the complaint TEXT
+ * against a regex of ban-sounding phrases. That is a guess about wording, and it was wrong twice:
+ *
+ *  - The phrase list was incomplete. "Eternatus's move G-Max Fireball is a placeholder for the
+ *    Gigantamax version of Cinderace. It can't actually exist on a normal moveset." says nothing
+ *    about being banned, illegal, nonexistent or unobtainable, so the probe waved through a move the
+ *    team validator was about to refuse -- and the retry loop then re-rolled the same way twenty
+ *    times and handed the user an error instead of a team. The species probe had the same hole:
+ *    "Ribombee-Totem is illegal." and "Zamazenta-Crowned is required to hold Rusted Shield." match
+ *    none of the phrases it looked for either.
+ *
+ *  - Widening the regex would not have been enough, because the move probe was asking the wrong
+ *    question. It always probed with a Mewtwo, so the only thing it could learn was whether a move is
+ *    legal in this FORMAT. A G-Max move's legality is a property of the BODY: it is fine on the
+ *    Gigantamax forme it is the signature of, refused on every other body, and in some formats (Gen 8
+ *    Pure Hackmons) fine on anything at all. No fixed probe body can answer a body-dependent
+ *    question, whatever regex reads the answer.
+ *
+ * So both probes changed shape. The probe set is built to be legal in every respect the generator
+ * controls -- maxed IVs, one EV so the "did you forget to EV it" nag never fires, the body's own
+ * ability, whatever item the body requires -- and the verdict comes from ATTRIBUTION instead of from
+ * wording: the validator always writes the offending thing's own name into its own message, so a
+ * complaint belongs to whichever part of the probe set it names. A move is refused when a complaint
+ * names the move; a body is refused when a complaint names the body and names none of the parts
+ * bolted onto it. That needs no catalogue of phrasings and survives an upstream rewording.
+ */
+
+const MAXED_IVS = { hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31 };
+// Something has to be in the moves array or the validator complains about the empty slot instead,
+// and that complaint names only the body -- which would read as "this body is unusable".
+const PROBE_MOVE = 'Tackle';
+
+// One EV, never zero: "has exactly 0 EVs - did you forget to EV it?" is a complaint about the probe
+// rather than about the thing being probed, and a single point fits inside even the tightest
+// EV Limits rule. Level is left unset so the format's own default applies.
+function probeSetFor(species, moves) {
+	const abilities = species.abilities || {};
+	return {
+		species: species.name, name: species.name,
+		ability: abilities['0'] || 'No Ability',
+		item: (species.requiredItems || [])[0] || '',
+		moves: moves.slice(),
+		evs: { hp: 1 }, ivs: Object.assign({}, MAXED_IVS), nature: 'Serious', level: undefined,
+	};
+}
+
+// the validator rewrites parts of the set it is handed (battle-only formes get folded back to their
+// base), so it never sees anything this generator still holds a reference to
+function probeProblems(validator, probe) {
 	try {
-		const probe = {
-			species: 'Mewtwo', ability: 'Pressure', moves: [name],
-			evs: {}, ivs: {}, nature: 'Serious', level: 100,
-		};
-		const problems = validator.validateSet(probe, {}) || [];
-		ok = !problems.some(p => /is banned|does not exist|isn't obtainable|not allowed|illegal/i.test(p));
+		return validator.validateSet(JSON.parse(JSON.stringify(probe)), {}) || [];
 	} catch (e) {
-		ok = false;
+		return null; // the validator could not even run on this, so nothing here is usable
 	}
-	permissiveCache.set(key, ok);
+}
+
+// which part of the probe set is this complaint about? Everything bolted onto the body owns the
+// complaints that name it; whatever is left over is about the body itself.
+function blamesBody(problems, species, probe) {
+	const attached = [probe.ability, probe.item].concat(probe.moves).filter(Boolean);
+	return problems.some(p => p.includes(species.name) && !attached.some(a => p.includes(a)));
+}
+
+const speciesProbeCache = new Map();
+function speciesUsable(species, fdex, ruleTable, ctx) {
+	if (!species || !species.exists) return false;
+	if (!ctx || !ctx.validator) return true;
+	const key = ctx.fullid + '|' + species.id;
+	if (speciesProbeCache.has(key)) return speciesProbeCache.get(key);
+	const probe = probeSetFor(species, [PROBE_MOVE]);
+	const problems = probeProblems(ctx.validator, probe);
+	const ok = problems !== null && !blamesBody(problems, species, probe);
+	speciesProbeCache.set(key, ok);
+	return ok;
+}
+
+// The old fallback body was a hardcoded Mewtwo, which is not a legal body everywhere: in
+// [Gen 9 Champions] Pure Hackmons every Pokemon outside the Champions dex is refused outright, so a
+// Mewtwo probe answered "no" to every question that format was ever asked. Draw the stand-in out of
+// the format's own pool instead, preferring bodies the mod treats as native.
+const referenceBodyCache = new Map();
+function referenceBody(fdex, ruleTable, ctx) {
+	if (referenceBodyCache.has(ctx.fullid)) return referenceBodyCache.get(ctx.fullid);
+	const { pool } = speciesPool(fdex, ruleTable, ctx.fullid);
+	const order = pool.filter(e => !e.species.isNonstandard).concat(pool.filter(e => e.species.isNonstandard));
+	let found = null;
+	for (const entry of order) {
+		if (speciesUsable(entry.species, fdex, ruleTable, ctx)) { found = entry.species; break; }
+	}
+	referenceBodyCache.set(ctx.fullid, found);
+	return found;
+}
+
+const movePermittedCache = new Map();
+function movePermittedByValidator(move, fdex, ruleTable, ctx) {
+	const asked = ctx.body ? fdex.species.get(ctx.body) : null;
+	const body = asked && asked.exists ? asked : referenceBody(fdex, ruleTable, ctx);
+	if (!body) return false;
+	const key = ctx.fullid + '|' + body.id + '|' + move.id;
+	if (movePermittedCache.has(key)) return movePermittedCache.get(key);
+	const probe = probeSetFor(body, [move.name]);
+	const problems = probeProblems(ctx.validator, probe);
+	const ok = problems !== null && !problems.some(p => p.includes(move.name));
+	movePermittedCache.set(key, ok);
 	return ok;
 }
 
@@ -469,11 +562,85 @@ function moveAllowed(name, fdex, ruleTable, ctx) {
 	if (!move.exists || move.gen > fdex.gen) return false;
 	if (move.status === 'slp' && (ruleTable.has('sleepmovesclause') || ruleTable.has('sleepclause'))) return false;
 	if (ruleTable.check('move:' + toId(name)) === 'banned') return false;
+	// a choice this build already watched the validator refuse, on this body (see learnFromProblems)
+	if (ctx && ctx.blocks && ctx.blocks.moves.has(toId(ctx.body || '') + '|' + move.id)) return false;
 	if (move.isNonstandard) {
-		if (ctx && ctx.permissive) return movePermittedByValidator(name, ctx.validator, ctx.fullid);
+		if (ctx && ctx.permissive) return movePermittedByValidator(move, fdex, ruleTable, ctx);
 		return false;
 	}
 	return true;
+}
+
+// The body a move is being considered for is part of the question, so it travels with the context
+// rather than being guessed at the probe. A fresh object per set keeps the previous body from
+// leaking into the next one.
+function ctxForBody(ctx, set) {
+	if (!ctx) return ctx;
+	return Object.assign({}, ctx, { body: (set && (set.species || set.name)) || null });
+}
+
+/* ---------- learning from a failed attempt ----------
+ *
+ * The retry loop used to re-roll blind. Every attempt drew from the same rules with the same odds, so
+ * a choice that was SYSTEMATICALLY illegal rather than unluckily illegal - a G-Max move on a body
+ * that is not its Gigantamax forme - came back attempt after attempt, burned all twenty, and left the
+ * user with an error message instead of a team. Twenty samples of the same distribution is one
+ * sample, repeated.
+ *
+ * But the validator has already said precisely what it objected to. A failed attempt is not a wasted
+ * attempt, it is a measurement, so this reads the complaints back and bans the specific choices that
+ * caused them for the rest of THIS build. Attribution works exactly as it does in the probes above:
+ * whichever part of the set a complaint names is the part that has to change.
+ *
+ *   move     banned on the body it was refused on, and only there - the same move is perfectly legal
+ *            on the Gigantamax forme it belongs to, so banning it everywhere would throw away the
+ *            half of the answer that is worth keeping
+ *   ability  banned format-wide, because that is the shape those complaints have ("The Ability
+ *            "Parental Bond" is restricted." does not even name a body). Formats carrying Obtainable
+ *            Abilities are the exception, and there the ability is picked per body anyway
+ *   body     banned outright, but only after re-asking the species probe. "Tyranitar has 508 total
+ *            Stat Points" also names nothing but Tyranitar, and blaming the body for a spread problem
+ *            would strip the pool for no reason
+ *
+ * That is the whole answer to "should the loop learn": yes, and from the validator's own words rather
+ * than from a model of them. Modelling causes one at a time (above) only ever covers the causes we
+ * have already met; this covers the next one too, because it does not need to understand a complaint
+ * in order to know which choice produced it.
+ */
+function learnFromProblems(problems, team, fdex, ruleTable, ctx) {
+	if (!problems || !problems.length || !ctx || !ctx.blocks) return;
+	const learnAbilities = !ruleTable.has('obtainableabilities');
+	const blameAbility = (set, problem) => {
+		const ability = fdex.abilities.get(set.ability || '');
+		if (!learnAbilities || !ability.exists || !ability.name || !problem.includes(ability.name)) return false;
+		ctx.blocks.abilities.add(ability.id);
+		return true;
+	};
+	for (const problem of problems) {
+		let claimed = false;
+		for (const set of team) {
+			const species = fdex.species.get(set.species || set.name || '');
+			const label = '' + (set.name || set.species || '');
+			const named = (label && problem.includes(label)) ||
+				(set.species && problem.includes('' + set.species)) ||
+				(species.exists && problem.includes(species.name));
+			if (!named) continue;
+			claimed = true;
+			let blamed = false;
+			for (const entry of set.moves || []) {
+				const mv = fdex.moves.get(('' + entry).split(' (')[0]);
+				if (!mv.exists || !mv.name || !problem.includes(mv.name)) continue;
+				ctx.blocks.moves.add(toId(set.species || '') + '|' + mv.id);
+				blamed = true;
+			}
+			if (blamed || blameAbility(set, problem) || !species.exists) continue;
+			// nothing the set is carrying owns it, so it may be the body - but only the probe gets to
+			// say so, since a spread or level complaint names the body and means nothing of the kind
+			if (!speciesUsable(species, fdex, ruleTable, ctx)) ctx.blocks.species.add(species.id);
+		}
+		// a complaint that named no set at all still came from something the team is carrying
+		if (!claimed) for (const set of team) blameAbility(set, problem);
+	}
 }
 
 function shuffled(list) {
@@ -572,22 +739,7 @@ function speciesPool(fdex, ruleTable, fullid) {
 	return result;
 }
 
-function probeSpecies(cand, validator) {
-	const probe = {
-		species: cand.species.name, ability: cand.species.abilities['0'] || 'No Ability',
-		moves: ['Tackle'], evs: {}, ivs: {}, level: undefined, nature: 'Serious',
-	};
-	let problems = null;
-	try {
-		problems = validator.validateSet(JSON.parse(JSON.stringify(probe)), {});
-	} catch (e) {
-		return false;
-	}
-	if (problems && problems.length && problems.some(p => /does not exist|isn't obtainable|is banned|only allowed|must be|not allowed|roster/i.test(p))) return false;
-	return true;
-}
-
-function sampleSpecies(pools, validator, teamSize, allowDupes, singletonBases) {
+function sampleSpecies(pools, fdex, ruleTable, ctx, teamSize, allowDupes, singletonBases) {
 	const { pool, spice, speedKings } = pools;
 	const chosen = [];
 	const baseCounts = new Map();
@@ -596,7 +748,11 @@ function sampleSpecies(pools, validator, teamSize, allowDupes, singletonBases) {
 		const count = baseCounts.get(baseId) || 0;
 		if (count >= 1 && singletonBases && singletonBases.has(baseId)) return false;
 		if (count >= 1 && (!allowDupes || count >= 3 || Math.random() >= 0.3)) return false;
-		if (!count && !probeSpecies(cand, validator)) return false;
+		if (ctx && ctx.blocks && ctx.blocks.species.has(cand.species.id)) return false;
+		// every FORME is probed, not just the first one of a base species: legality is a property of
+		// the forme, and letting Ribombee-Totem in as a "duplicate" of a Ribombee that probed clean is
+		// how "Ribombee-Totem is illegal." reached the team validator in the first place
+		if (!speciesUsable(cand.species, fdex, ruleTable, ctx)) return false;
 		baseCounts.set(baseId, count + 1);
 		chosen.push(cand.species);
 		return true;
@@ -644,7 +800,8 @@ function sampleSpecies(pools, validator, teamSize, allowDupes, singletonBases) {
 }
 
 function buildHackmonsMoves(set, role, fdex, ruleTable, opts) {
-	const ctx = opts && opts.ctx;
+	// every moveAllowed below is a question about THIS body, so the body goes into the context
+	const ctx = ctxForBody(opts && opts.ctx, set);
 	const ability = toId((opts && opts.ability) || set.ability || '');
 	const forced = (set.phnnForcedMoves || []).slice();
 	const zPackage = opts && opts.zPackage;
@@ -707,7 +864,12 @@ function buildHackmonsMoves(set, role, fdex, ruleTable, opts) {
 	}
 	for (const m of set.moves || []) {
 		if (moves.length >= moveCap) break;
-		const id = toId(('' + m).split(' (')[0]);
+		const name = ('' + m).split(' (')[0];
+		const id = toId(name);
+		// these are carried over from whatever generator seeded the set, which is not always the same
+		// generation as the format being built for -- run them past the same gate as everything else
+		// so a set never depends on a move its own generation does not have
+		if (!moveAllowed(name, fdex, ruleTable, ctx)) continue;
 		if (!used.has(id)) {
 			moves.push(m);
 			used.add(id);
@@ -732,6 +894,124 @@ function moveMatches(name, need, fdex) {
 	if (!mv.exists || mv.category === 'Status') return false;
 	if (need === 'normal') return mv.type === 'Normal';
 	return mv.category.toLowerCase() === need;
+}
+
+// A type immunity is total: Ghost does exactly zero to Normal, Ground zero to Flying, Electric zero
+// to Ground, Normal and Fighting zero to Ghost. A set whose damaging moves all share one of those
+// attacking types is not merely bad into the immune body, it cannot move that body's HP bar at all,
+// for the whole game, with no play available. That is what was reported: a set whose only attack was
+// Moongeist Beam. Moongeist Beam ignores abilities, which reads like it ignores everything - but an
+// immunity is a property of the TYPE CHART, not an ability, so the ignore clause buys nothing here.
+//
+// Which pairs bite is read out of the format's own chart rather than listed here, so a generation
+// without Steel or Fairy is never asked about them, and the types this fork adds (Shadow, Bird, ???)
+// are covered by whatever the chart says about them.
+const coverageTargetsCache = new Map();
+function coverageTargets(fdex) {
+	const key = fdex.currentMod;
+	if (coverageTargetsCache.has(key)) return coverageTargetsCache.get(key);
+	const names = fdex.types.all().map(t => t.name);
+	// only defending types that zero SOMETHING can wall a set; against every other type any damaging
+	// move at all is enough, so they need no separate check
+	const targets = names.filter(def => names.some(atk => !fdex.getImmunity(atk, def)));
+	coverageTargetsCache.set(key, targets);
+	return targets;
+}
+
+// mirrors what the battle engine does before it looks at the type chart: a move carrying
+// ignoreImmunity for its own type (Thousand Arrows against Flying) is not stopped by that immunity
+function moveHitsType(mv, defType, fdex) {
+	const ignore = mv.ignoreImmunity;
+	if (ignore === true) return true;
+	if (ignore && typeof ignore === 'object' && ignore[mv.type]) return true;
+	return fdex.getImmunity(mv.type, defType);
+}
+
+function coverageWalls(moves, fdex, targets) {
+	const damaging = [];
+	for (const m of moves || []) {
+		const mv = fdex.moves.get(('' + m).split(' (')[0]);
+		if (mv.exists && mv.category !== 'Status') damaging.push(mv);
+	}
+	if (!damaging.length) return targets.slice();
+	return targets.filter(t => !damaging.some(mv => moveHitsType(mv, t, fdex)));
+}
+
+// candidates in the order the rest of the generator would reach for them: this body's own STAB, then
+// the curated coverage list, then every other type's STAB, and only then Shadow. Shadow is last on
+// purpose - it hits everything for x2, so putting it first would make every repaired set identical.
+function coveragePool(role, types, fdex, ruleTable, ctx) {
+	const cat = role === 'defensive' ? 'special' : role;
+	const other = cat === 'physical' ? 'special' : 'physical';
+	const out = [];
+	const push = list => {
+		for (const name of list || []) if (!out.includes(name)) out.push(name);
+	};
+	push((HM_STAB[types[0]] || {})[cat]);
+	push((HM_STAB[types[1]] || {})[cat]);
+	push(HM_COVERAGE[cat]);
+	for (const t of Object.keys(HM_STAB)) push(HM_STAB[t][cat]);
+	push((HM_STAB[types[0]] || {})[other]);
+	push(HM_COVERAGE[other]);
+	for (const t of Object.keys(HM_STAB)) push(HM_STAB[t][other]);
+	const shadow = shadowMovesAllowed(fdex, ruleTable, ctx);
+	push(shadow[cat]);
+	push(shadow[other]);
+	return out;
+}
+
+// The guarantee: when this returns, the set has at least one damaging move that is not zeroed by any
+// type immunity in this format's chart. It is the last word on the moveset, so it runs after the
+// archetype, the ability-consistency pass and the format core have all had their say.
+function enforceTypeCoverage(set, role, fdex, ruleTable, ctx, forced) {
+	ctx = ctxForBody(ctx, set);
+	const targets = coverageTargets(fdex);
+	if (!targets.length) return;
+	const species = fdex.species.get(set.species);
+	const types = species && species.exists ? species.types : [];
+	// whichever move satisfies the ability's damage category has to survive the swap, or fixing the
+	// coverage hole would open the ability hole enforceAbilityConsistency just closed
+	const need = ABILITY_NEEDS[toId(set.ability || '')];
+	const keeper = need ? (set.moves || []).find(m => moveMatches(m, need, fdex)) : null;
+	const preferLocked = (forced || []).concat(keeper ? [keeper] : []);
+	// Candidates are scored on the moveset that would RESULT, not on the holes they would plug. That
+	// distinction is the whole thing: when every slot is already spoken for, adding coverage means
+	// dropping the move that was doing the damage, so a candidate can close the hole it was picked
+	// for and open a fresh one in the same swap. Scoring on "holes closed" made a Poison/Dragon
+	// Baton Passer trade Poison Jab for Dragon Darts for Gunk Shot and finish as walled as it began.
+	const trial = (name, locked) => {
+		const clone = { species: set.species, ability: set.ability, moves: (set.moves || []).slice() };
+		if (!swapInMove(clone, name, fdex, locked, ruleTable)) return null;
+		return clone.moves;
+	};
+	// three passes because one swap is not always enough to close every hole at once
+	for (let pass = 0; pass < 3; pass++) {
+		const walls = coverageWalls(set.moves, fdex, targets);
+		if (!walls.length) return;
+		const used = new Set((set.moves || []).map(m => toId(('' + m).split(' (')[0])));
+		let best = null;
+		for (const name of coveragePool(role, types, fdex, ruleTable, ctx)) {
+			if (used.has(toId(name))) continue;
+			if (!moveAllowed(name, fdex, ruleTable, ctx)) continue;
+			const mv = fdex.moves.get(name);
+			if (!mv.exists || mv.category === 'Status') continue;
+			// same dead-slot rule pickMove uses: a low-BP move derives its power from a base move
+			// this set will not have
+			if (mv.basePower > 0 && mv.basePower < 40) continue;
+			if (!walls.some(t => moveHitsType(mv, t, fdex))) continue;
+			// an archetype's flavour moves yield to the damage guarantee, but only after every slot it
+			// did not claim has already been tried
+			const moves = trial(name, preferLocked) || trial(name, keeper ? [keeper] : []);
+			if (!moves) continue;
+			const left = coverageWalls(moves, fdex, targets).length;
+			if (!best || left < best.left) best = { moves, left };
+			// the pool is in preference order, so the first candidate that leaves nothing walled wins
+			if (!left) break;
+		}
+		if (!best || best.left >= walls.length) return;
+		set.moves = best.moves;
+		if (!best.left) return;
+	}
 }
 
 // swaps a move into the set without touching anything an archetype forced, preferring to drop a
@@ -858,6 +1138,107 @@ function applyHackmonsEvs(set, role, ruleTable) {
 	}
 }
 
+/* ---------- how much stat investment this format actually sells ----------
+ *
+ * Every spread above is written in the currency of a normal format: 510 EVs, at most 252 in a stat.
+ * That is not a universal constant, it is a rule, and a format is free to set it somewhere else.
+ * [Gen 9 Champions] Pure Hackmons does: it sells 192 "Stat Points" with no stat above 32, and against
+ * a 252/252 spread the validator answered "Tyranitar has 508 total Stat Points, which is more than
+ * this format's limit of 192" on every body, every attempt, so the format never produced a team at
+ * all. Both numbers are read off the rule table rather than written down here - `EV Limit = N` lands
+ * in ruleTable.evLimit and `EV Limits = Atk 0-32 / ...` in the evlimits value rule - so a format that
+ * caps it somewhere else is served by the same code.
+ *
+ * The budget is spent in PROPORTION to what the spread asked for, not flattened: a 252 Atk / 252 Spe
+ * sweeper stays a sweeper on 32/32 rather than turning into six equal stats.
+ */
+const EV_STATS = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
+
+const evRangeCache = new Map();
+function evRanges(ruleTable) {
+	const spec = (ruleTable.valueRules && ruleTable.valueRules.get('evlimits')) || '';
+	if (evRangeCache.has(spec)) return evRangeCache.get(spec);
+	const ranges = {};
+	// already normalised to "atk 0-32 / def 0-32 / ..." by the rule's own onValidateRule
+	for (const part of ('' + spec).split(' / ')) {
+		const [stat, range] = part.split(' ');
+		if (!stat || !range) continue;
+		const [low, high] = range.split('-').map(Number);
+		if (!isNaN(low) && !isNaN(high)) ranges[toId(stat)] = [low, high];
+	}
+	evRangeCache.set(spec, ranges);
+	return ranges;
+}
+
+// Champions formats score investment as Stat Points and additionally require every IV to be 31
+// (sim/team-validator.ts checks `dex.currentMod.startsWith('champions')` for both). The usual trick
+// of dumping the Attack IV to blunt confusion and Foul Play is simply not on sale there.
+function requiresMaxedIvs(fdex) {
+	return ('' + (fdex.currentMod || '')).startsWith('champions');
+}
+
+function applyStatLimits(set, fdex, ruleTable) {
+	if (requiresMaxedIvs(fdex) && set.ivs) set.ivs = Object.assign({}, MAXED_IVS);
+	if (!set.evs) return;
+	const total = ruleTable.evLimit;
+	const ranges = evRanges(ruleTable);
+	const perStat = Object.keys(ranges).length;
+	if (total === null && !perStat) return;
+	const ceiling = total === null ? 255 : 252;
+	const lowOf = stat => (ranges[stat] || [0])[0] || 0;
+	const highOf = stat => (ranges[stat] ? ranges[stat][1] : ceiling);
+	const want = Object.assign({ hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }, set.evs);
+	const out = {};
+	let sum = 0;
+	for (const stat of EV_STATS) {
+		out[stat] = Math.max(lowOf(stat), Math.min(highOf(stat), want[stat] || 0));
+		sum += out[stat];
+	}
+	// whichever stats the spread asked for most get served first, both when there is too little budget
+	// to go round and when there is change left over
+	const byPreference = EV_STATS.slice().sort((a, b) => (want[b] || 0) - (want[a] || 0));
+	if (total !== null && sum > total) {
+		const floors = EV_STATS.reduce((n, s) => n + lowOf(s), 0);
+		const budget = Math.max(0, total - floors);
+		const asked = EV_STATS.reduce((n, s) => n + (out[s] - lowOf(s)), 0);
+		let spent = 0;
+		for (const stat of EV_STATS) {
+			const share = asked ? Math.floor((out[stat] - lowOf(stat)) * budget / asked) : 0;
+			out[stat] = lowOf(stat) + share;
+			spent += share;
+		}
+		// integer division leaves change over
+		let left = budget - spent;
+		for (const stat of byPreference) {
+			if (left <= 0) break;
+			const give = Math.min(highOf(stat) - out[stat], left);
+			if (give > 0) { out[stat] += give; left -= give; }
+		}
+		sum = EV_STATS.reduce((n, s) => n + out[s], 0);
+	}
+	// A per-stat rule can leave the total budget UNDERSPENT rather than overspent, and badly so: a
+	// 4 HP / 252 Atk / 252 Spe sweeper clamped to Champions' 0-32 per stat lands on 68 of the 192 Stat
+	// Points the format sells, throwing away 124 points for nothing. Knowing the cap means spending
+	// it, so what the clamp could not fit goes back out in the same preference order. This is deliberately
+	// limited to formats that declare per-stat ranges: on a normal 510-EV ladder the 2 EVs a 4/252/252
+	// spread leaves over are unspendable by design and topping them up would only make the export odd.
+	if (perStat && total !== null && sum < total) {
+		let left = total - sum;
+		for (const stat of byPreference) {
+			if (left <= 0) break;
+			const give = Math.min(highOf(stat) - out[stat], left);
+			if (give > 0) { out[stat] += give; left -= give; }
+		}
+	}
+	// "has exactly 0 EVs - did you forget to EV it?" is a validation failure in its own right, so a
+	// format that sells any investment at all gets at least one point spent
+	if (total !== 0 && EV_STATS.every(s => !out[s])) {
+		const first = EV_STATS.find(s => highOf(s) > 0);
+		if (first) out[first] = 1;
+	}
+	set.evs = out;
+}
+
 // abilities that are a straight liability, so a format allowing No Ability would rather have none
 const LIABILITY_ABILITIES = new Set(['truant', 'slowstart', 'defeatist', 'klutz', 'stall', 'slowstart']);
 
@@ -874,14 +1255,33 @@ function obtainableAbilityFor(set, fdex, ruleTable) {
 	return noneOk ? 'No Ability' : (own[0] || 'No Ability');
 }
 
-function abilityAllowed(name, fdex, ruleTable) {
+function abilityAllowed(name, fdex, ruleTable, ctx) {
 	const ability = fdex.abilities.get(name);
 	if (!ability.exists || ability.gen > fdex.gen || ability.isNonstandard) return false;
 	if (ruleTable.check('ability:' + toId(name)) === 'banned') return false;
+	// something this build already watched the validator refuse (see learnFromProblems). The rule
+	// table does not carry every restriction: [Gen 9] Pokebilities answers `The Ability "Parental
+	// Bond" is restricted.` out of a handler of its own, and nothing here can see that in advance.
+	if (ctx && ctx.blocks && ctx.blocks.abilities.has(ability.id)) return false;
 	return true;
 }
 
+// A handful of bodies do not merely PREFER an item, they cannot be brought without it: Zamazenta-
+// Crowned is refused outright unless it is holding Rusted Shield, and Necrozma-Ultra unless it is
+// holding Ultranecrozium Z. That is not a list worth keeping here - the dex already carries it as
+// `species.requiredItems` - and it outranks every other item this function might prefer, because the
+// alternative is not a worse set but no set at all.
+function requiredItemFor(set, fdex, ruleTable) {
+	const species = fdex.species.get(set.species);
+	for (const item of species.requiredItems || []) {
+		if (itemAllowed(item, fdex, ruleTable)) return item;
+	}
+	return null;
+}
+
 function bestSpeciesItem(set, fdex, ruleTable) {
+	const required = requiredItemFor(set, fdex, ruleTable);
+	if (required) return required;
 	const ids = [toId(set.species), toId(fdex.species.get(set.species).baseSpecies || '')];
 	for (const id of ids) {
 		const item = HM_SPECIES_ITEMS[id];
@@ -891,6 +1291,7 @@ function bestSpeciesItem(set, fdex, ruleTable) {
 }
 
 function upgradeHackmonsSet(set, fdex, ruleTable, usedAbilities, ctx) {
+	ctx = ctxForBody(ctx, set);
 	const role = set.phnnForcedRole || setRole(set);
 	const ohkoLegal = !ruleTable.has('ohkoclause') && moveAllowed('Sheer Cold', fdex, ruleTable);
 	const restrictAbilities = ruleTable.has('obtainableabilities');
@@ -902,12 +1303,12 @@ function upgradeHackmonsSet(set, fdex, ruleTable, usedAbilities, ctx) {
 		return;
 	}
 	const noWeakness = wonderGuardBody(fdex.species.get(set.species), fdex);
-	if (noWeakness && !usedAbilities.get('wonderguard') && abilityAllowed('Wonder Guard', fdex, ruleTable)) {
+	if (noWeakness && !usedAbilities.get('wonderguard') && abilityAllowed('Wonder Guard', fdex, ruleTable, ctx)) {
 		set.ability = 'Wonder Guard';
 		usedAbilities.set('wonderguard', 1);
 	}
 	const wantsNoGuard = !set.ability && !set.phnnForcedAbility && role !== 'defensive' && ohkoLegal && !usedAbilities.has('noguard') &&
-		abilityAllowed('No Guard', fdex, ruleTable) && Math.random() < 0.3;
+		abilityAllowed('No Guard', fdex, ruleTable, ctx) && Math.random() < 0.3;
 	if (set.phnnForcedAbility || set.ability === 'Wonder Guard') {
 		// an archetype (or a no-weakness body) already decided this one
 	} else if (wantsNoGuard) {
@@ -924,7 +1325,7 @@ function upgradeHackmonsSet(set, fdex, ruleTable, usedAbilities, ctx) {
 			const need = ABILITY_NEEDS[toId(name)];
 			return !need || need === 'normal' || need === role;
 		};
-		const isLegal = name => !usedAbilities.get(toId(name)) && roleOk(name) && abilityAllowed(name, fdex, ruleTable);
+		const isLegal = name => !usedAbilities.get(toId(name)) && roleOk(name) && abilityAllowed(name, fdex, ruleTable, ctx);
 		let picked = null;
 		if (Math.random() < 0.4) {
 			const premium = HM_PREMIUM_ABILITIES.filter(isLegal);
@@ -949,7 +1350,12 @@ function upgradeHackmonsSet(set, fdex, ruleTable, usedAbilities, ctx) {
 	});
 	applyHackmonsEvs(set, role, ruleTable);
 	if (zPackage) set.phnnZItem = zPackage.item;
-	if (set.phnnForcedItem) {
+	const required = requiredItemFor(set, fdex, ruleTable);
+	if (required) {
+		// an archetype's preferred item loses to the one the body cannot be brought without
+		set.item = required;
+		set.phnnForcedItem = required;
+	} else if (set.phnnForcedItem) {
 		set.item = set.phnnForcedItem;
 	} else if (fdex.gen >= 2) {
 		const signature = bestSpeciesItem(set, fdex, ruleTable);
@@ -1080,21 +1486,34 @@ function effectiveSpeed(sp) {
 	return sp.baseStats.spe * (stage === 1 ? 1.5 : stage === 2 ? 2 : 1);
 }
 
-function legalBodies(names, fdex, ruleTable, team, self) {
+// Six places in this file swap a chosen body into a set - the archetypes, the Imposter bench, the fast
+// body, the format cores - and each was checking only the rule table's banlist. That is not the whole
+// question: "Blissey is illegal." and "????? (Crystal FE) is illegal." are answers the rule table does
+// not have, they come out of the format's own onChangeSet, and both were reaching the team validator
+// through these side doors while the species pool proper was probing correctly. One predicate now,
+// used by all of them.
+function bodyUsable(sp, fdex, ruleTable, ctx) {
+	if (!sp || !sp.exists) return false;
+	if (ruleTable.check('pokemon:' + sp.id) === 'banned') return false;
+	if (ruleTable.check('basepokemon:' + toId(sp.baseSpecies)) === 'banned') return false;
+	if (ctx && ctx.blocks && ctx.blocks.species.has(sp.id)) return false;
+	return speciesUsable(sp, fdex, ruleTable, ctx);
+}
+
+function legalBodies(names, fdex, ruleTable, ctx, team, self) {
 	const wantStage = ruleTable.has('firststageonly') ? 'LC' :
 		ruleTable.has('middlestageonly') ? 'MC' : null;
 	const taken = ruleTable.has('speciesclause') ?
 		new Set((team || []).filter(s => s && s !== self).map(s => toId(s.species || ''))) : null;
 	return names
 		.map(n => fdex.species.get(n))
-		.filter(sp => sp.exists && !(taken && taken.has(toId(sp.name))) &&
-			ruleTable.check('pokemon:' + sp.id) !== 'banned' &&
-			ruleTable.check('basepokemon:' + toId(sp.baseSpecies)) !== 'banned' &&
-			(!wantStage || evoStage(fdex, sp) === wantStage));
+		.filter(sp => !(taken && taken.has(toId(sp.name))) &&
+			(!wantStage || evoStage(fdex, sp) === wantStage) &&
+			bodyUsable(sp, fdex, ruleTable, ctx));
 }
 
-function fastestBody(fdex, ruleTable, team, self) {
-	return legalBodies(HM_FAST_BODIES, fdex, ruleTable, team, self)
+function fastestBody(fdex, ruleTable, ctx, team, self) {
+	return legalBodies(HM_FAST_BODIES, fdex, ruleTable, ctx, team, self)
 		.sort((a, b) => effectiveSpeed(b) - effectiveSpeed(a))[0] || null;
 }
 
@@ -1181,7 +1600,7 @@ function imposterBulk(sp, fdex, ruleTable) {
 	return base * (usable && item === 'Eviolite' ? 1.15 : usable && item === 'Light Ball' ? 1.10 : 1);
 }
 
-function imposterCandidates(bodies, fdex, ruleTable, taken) {
+function imposterCandidates(bodies, fdex, ruleTable, ctx, taken) {
 	const alphaLegal = imposterAlphasLegal(fdex, ruleTable);
 	const wantStage = ruleTable.has('firststageonly') ? 'LC' :
 		ruleTable.has('middlestageonly') ? 'MC' : null;
@@ -1201,10 +1620,9 @@ function imposterCandidates(bodies, fdex, ruleTable, taken) {
 		.flatMap(n => { const a = alphaOf(n); return a ? [a, n] : [n]; })
 		.filter((n, i, arr) => arr.indexOf(n) === i)
 		.map(n => fdex.species.get(n))
-		.filter(sp => sp.exists && !(taken && taken.has(toId(sp.name))) &&
-			ruleTable.check('pokemon:' + sp.id) !== 'banned' &&
-			ruleTable.check('basepokemon:' + toId(sp.baseSpecies)) !== 'banned' &&
-			(!wantStage || evoStage(fdex, sp) === wantStage))
+		.filter(sp => !(taken && taken.has(toId(sp.name))) &&
+			(!wantStage || evoStage(fdex, sp) === wantStage) &&
+			bodyUsable(sp, fdex, ruleTable, ctx))
 		.map(sp => ({ sp, hp: imposterBulk(sp, fdex, ruleTable) }))
 		.sort((a, b) => b.hp - a.hp);
 }
@@ -1220,8 +1638,8 @@ function imposterExpendable(sp) {
 // every bulk body lands 632 Attack, Pikachu-Gmax or Pikachu-Alpha with a Light Ball lands 1264. That is
 // a completely different plan from the pink walls -- a glass cannon rather than a sponge -- so it gets
 // chosen on its own roll instead of losing the HP ranking every time.
-function imposterGlassCannon(bodies, fdex, ruleTable, taken) {
-	return imposterCandidates(bodies, fdex, ruleTable, taken)
+function imposterGlassCannon(bodies, fdex, ruleTable, ctx, taken) {
+	return imposterCandidates(bodies, fdex, ruleTable, ctx, taken)
 		.filter(c => {
 			const item = imposterItemFor(c.sp);
 			return item === 'Light Ball' && imposterItemWorks(c.sp, item) && itemAllowed(item, fdex, ruleTable);
@@ -1241,8 +1659,8 @@ function makeImposter(set, sp, fdex, ruleTable) {
 // is already a viable Imposter body -- hand the ability to the bulkiest members rather than to one
 // purpose-built slot, and only fall back to substituting a dedicated body when nothing on the team is
 // bulky enough to hold the ability at all.
-function applyImposters(team, fdex, ruleTable) {
-	if (ruleTable.has('obtainableabilities') || !abilityAllowed('Imposter', fdex, ruleTable)) return;
+function applyImposters(team, fdex, ruleTable, ctx) {
+	if (ruleTable.has('obtainableabilities') || !abilityAllowed('Imposter', fdex, ruleTable, ctx)) return;
 	const isImposter = set => toId((set && set.phnnForcedAbility) || '') === 'imposter';
 	let target = 1 + (Math.random() < 0.55 ? 1 : 0) + (Math.random() < 0.25 ? 1 : 0);
 	target = Math.max(1, Math.min(target, team.length - 1));
@@ -1254,7 +1672,7 @@ function applyImposters(team, fdex, ruleTable) {
 		.sort((a, b) => b.hp - a.hp);
 	const taken = ruleTable.has('speciesclause') ?
 		new Set(team.map(set => toId((set && set.species) || ''))) : null;
-	const bench = imposterCandidates(HM_IMPOSTER_BODIES, fdex, ruleTable, taken);
+	const bench = imposterCandidates(HM_IMPOSTER_BODIES, fdex, ruleTable, ctx, taken);
 	// a format whose best possible body is small (Little Cup) must not be held to the flat floor
 	const floor = Math.min(HM_IMPOSTER_MIN_BULK, bench.length ? bench[0].hp * 0.6 : HM_IMPOSTER_MIN_BULK);
 	const spare = [];
@@ -1268,16 +1686,16 @@ function applyImposters(team, fdex, ruleTable) {
 	// Imposter without the whole team collapsing into Chansey clones
 	const victim = spare[spare.length - 1] || free[free.length - 1];
 	if (made >= target || !bench.length || !victim || isImposter(victim.set)) return;
-	const cannon = Math.random() < 0.3 ? imposterGlassCannon(HM_IMPOSTER_BODIES, fdex, ruleTable, taken) : null;
+	const cannon = Math.random() < 0.3 ? imposterGlassCannon(HM_IMPOSTER_BODIES, fdex, ruleTable, ctx, taken) : null;
 	const chosen = cannon ? cannon.sp : bench[0].sp;
 	victim.set.species = chosen.name;
 	victim.set.name = victim.set.species;
 	makeImposter(victim.set, chosen, fdex, ruleTable);
 }
 
-function applyArchetype(team, fdex, ruleTable, usedAbilities) {
+function applyArchetype(team, fdex, ruleTable, ctx, usedAbilities) {
 	const usable = HM_ARCHETYPES.filter(a => a.slots.every(slot => (
-		(!slot.ability || abilityAllowed(slot.ability, fdex, ruleTable)) &&
+		(!slot.ability || abilityAllowed(slot.ability, fdex, ruleTable, ctx)) &&
 		slot.moves.every(m => moveAllowed(m, fdex, ruleTable) || slot.moves.length > 1)
 	)));
 	if (!usable.length || team.length < 2) return null;
@@ -1286,8 +1704,8 @@ function applyArchetype(team, fdex, ruleTable, usedAbilities) {
 		const set = team[i];
 		if (!set) return;
 		if (slot.bodies) {
-			const cannon = Math.random() < 0.3 ? imposterGlassCannon(slot.bodies, fdex, ruleTable, null) : null;
-			const ranked = imposterCandidates(slot.bodies, fdex, ruleTable, null);
+			const cannon = Math.random() < 0.3 ? imposterGlassCannon(slot.bodies, fdex, ruleTable, ctx, null) : null;
+			const ranked = imposterCandidates(slot.bodies, fdex, ruleTable, ctx, null);
 			const cutoff = ranked.length ? ranked[0].hp * 0.9 : 0;
 			const viable = ranked.filter(r => r.hp >= cutoff);
 			const body = cannon ? cannon.sp :
@@ -1299,7 +1717,7 @@ function applyArchetype(team, fdex, ruleTable, usedAbilities) {
 			}
 		}
 		if (slot.fastBodies) {
-			const body = fastestBody(fdex, ruleTable, team, set);
+			const body = fastestBody(fdex, ruleTable, ctx, team, set);
 			if (body) {
 				set.species = body.name;
 				set.name = set.species;
@@ -1308,7 +1726,7 @@ function applyArchetype(team, fdex, ruleTable, usedAbilities) {
 		if (slot.wgBodies) {
 			// before Gen 8 an Arceus forme without its Plate is rewritten back to plain Arceus later in
 			// reshape(), which would strand Wonder Guard on a Normal type
-			const pool = legalBodies(HM_WONDER_GUARD_BODIES, fdex, ruleTable, team, set)
+			const pool = legalBodies(HM_WONDER_GUARD_BODIES, fdex, ruleTable, ctx, team, set)
 				.filter(sp => wonderGuardBody(sp, fdex) && !(fdex.gen <= 7 && /^Arceus-/.test(sp.name)));
 			const body = pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
 			if (!body) return;
@@ -1317,7 +1735,7 @@ function applyArchetype(team, fdex, ruleTable, usedAbilities) {
 		}
 		if (slot.item && itemAllowed(slot.item, fdex, ruleTable)) set.phnnForcedItem = slot.item;
 		if (slot.fastEvs) set.phnnFastEvs = true;
-		if (slot.ability && !usedAbilities.get(toId(slot.ability)) && abilityAllowed(slot.ability, fdex, ruleTable)) {
+		if (slot.ability && !usedAbilities.get(toId(slot.ability)) && abilityAllowed(slot.ability, fdex, ruleTable, ctx)) {
 			set.ability = slot.ability;
 			set.phnnForcedAbility = slot.ability;
 			usedAbilities.set(toId(slot.ability), 1);
@@ -1329,11 +1747,11 @@ function applyArchetype(team, fdex, ruleTable, usedAbilities) {
 	return plan.name;
 }
 
-function applyFormatCore(team, baseid, fdex, ruleTable) {
+function applyFormatCore(team, baseid, fdex, ruleTable, ctx) {
 	const core = HM_FORMAT_CORES[baseid];
 	if (!core || Math.random() >= core.chance) return;
 	const species = fdex.species.get(core.species);
-	if (!species.exists || ruleTable.check('pokemon:' + species.id) === 'banned') return;
+	if (!bodyUsable(species, fdex, ruleTable, ctx)) return;
 	const count = Math.min(team.length, core.min + Math.floor(Math.random() * (core.max - core.min + 1)));
 	for (let i = 0; i < count; i++) {
 		const set = team[i];
@@ -1353,9 +1771,9 @@ function reshape(team, baseid, gen, rulesText, ruleTable, fdex, ctx, gate) {
 	const isHackmons = isHackmonsTarget(baseid) && gen >= 3 && !baseid.includes('metronome');
 	const usedAbilities = new Map();
 	if (isHackmons && !baseid.includes('letsgo') && Math.random() < 0.45) {
-		applyArchetype(team, fdex, ruleTable, usedAbilities);
+		applyArchetype(team, fdex, ruleTable, ctx, usedAbilities);
 	}
-	if (isHackmons && !baseid.includes('letsgo')) applyImposters(team, fdex, ruleTable);
+	if (isHackmons && !baseid.includes('letsgo')) applyImposters(team, fdex, ruleTable, ctx);
 	if (!isHackmons) {
 		applySmogonSets(team, gen, fdex, ruleTable, gate);
 		applyCompetitiveSpreads(team, gen, fdex, ruleTable);
@@ -1380,7 +1798,7 @@ function reshape(team, baseid, gen, rulesText, ruleTable, fdex, ctx, gate) {
 		if (gen === 1 || isLetsGo) delete set.item;
 		if (isLetsGo) delete set.evs;
 		if (isHackmons && !baseid.includes('letsgo')) upgradeHackmonsSet(set, fdex, ruleTable, usedAbilities, ctx);
-		if (ruleTable.has('itemclause') && set.item) {
+		if (ruleTable.has('itemclause') && set.item && !requiredItemFor(set, fdex, ruleTable)) {
 			if (usedItems.has(toId(set.item))) {
 				while (fillerIdx < FILLER_ITEMS.length && usedItems.has(toId(FILLER_ITEMS[fillerIdx]))) fillerIdx++;
 				set.item = FILLER_ITEMS[fillerIdx] || '';
@@ -1389,7 +1807,32 @@ function reshape(team, baseid, gen, rulesText, ruleTable, fdex, ctx, gate) {
 		}
 		if (isCD) upgradeCdSet(set, fdex, ruleTable);
 	}
-	applyFormatCore(team, baseid, fdex, ruleTable);
+	applyFormatCore(team, baseid, fdex, ruleTable, ctx);
+	// Last word on every moveset this generator authored. applyFormatCore rewrites whole movesets and
+	// applyArchetype can claim all four slots, so this has to sit after both of them rather than
+	// inside buildHackmonsMoves, or those two would hand back sets that cannot damage a Normal type.
+	//
+	// LIMIT: this follows isHackmons, so Gen 1 and Gen 2 are NOT covered - those formats never reach
+	// upgradeHackmonsSet either, and ship the upstream random-battle sets as-is. Those sets really do
+	// contain mono-Normal bodies that a Gengar walls outright (Rest / Sleep Talk / Curse / Body Slam
+	// Pinsir); measured at 3/120 sets in Gen 1 Pure Hackmons and 20/120 in Gen 2. Fixing them means
+	// either rewriting upstream sets or extending the synthesiser down two generations, and the Gen 1
+	// Electrode core in HM_FORMAT_CORES is a deliberate metagame lock that such a pass would rewrite,
+	// so that is the owner's call, not this one. Non-Hackmons ladders are excluded for the same kind
+	// of reason: their movesets are mined Smogon sets, and changing them is a fidelity decision.
+	// tools/check-teamgen-coverage.js measures all of this; run it with --formats to see the residue.
+	if (isHackmons) {
+		for (const set of team) {
+			enforceTypeCoverage(set, set.phnnForcedRole || setRole(set), fdex, ruleTable, ctx,
+				set.phnnForcedMoves);
+		}
+	}
+	// last of all, and for every path into this function: five different places above write a spread,
+	// and none of them knows what this format is willing to sell
+	for (const set of team) {
+		if (isLetsGo) continue;
+		applyStatLimits(set, fdex, ruleTable);
+	}
 	return team;
 }
 
@@ -1477,6 +1920,9 @@ function generateTeam(formatid) {
 	const gate = synthesize ? null : tierGate(fdex, ruleTable, tierPolicyFor(baseid), fullid);
 	let team = null;
 	let problems = null;
+	// what this build has watched the validator refuse; see learnFromProblems
+	const blocks = { moves: new Set(), abilities: new Set(), species: new Set() };
+	const ctx = { permissive: isHackmonsTarget(baseid), validator, fullid, blocks, body: null };
 
 	for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
 		let pool;
@@ -1484,7 +1930,7 @@ function generateTeam(formatid) {
 			if (synthesize) {
 				const sPool = speciesPool(fdex, ruleTable, fullid);
 				const allowDupes = !ruleTable.has('speciesclause') && !ruleTable.has('formeclause');
-				const picked = sampleSpecies(sPool, validator, teamSize, allowDupes, gen <= 7 ? SINGLETON_BASES : null);
+				const picked = sampleSpecies(sPool, fdex, ruleTable, ctx, teamSize, allowDupes, gen <= 7 ? SINGLETON_BASES : null);
 				if (picked.length >= teamSize) {
 					pool = picked.map(sp => ({
 						name: sp.name, species: sp.name, ability: '', item: '',
@@ -1540,12 +1986,13 @@ function generateTeam(formatid) {
 				team.push(extra);
 			}
 		}
-		reshape(team, baseid, gen, rulesText, ruleTable, fdex, { permissive: isHackmonsTarget(baseid), validator, fullid }, gate);
+		reshape(team, baseid, gen, rulesText, ruleTable, fdex, ctx, gate);
 		try {
 			problems = validator.validateTeam(JSON.parse(JSON.stringify(team))) || [];
 		} catch (e) {
 			return { error: `Validator error: ${('' + e.message).slice(0, 200)}` };
 		}
+		learnFromProblems(problems, team, fdex, ruleTable, ctx);
 		if (!problems.length) {
 			for (const set of team) {
 				delete set.phnnForcedMoves;
