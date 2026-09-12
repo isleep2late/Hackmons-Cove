@@ -109,11 +109,17 @@ var SETDEX_CHAMPIONS = {
   "Gyarados-Mega": {
     "BSS Reg M-B Sweeper": {"level":50,"ability":"Mold Breaker","item":"Gyaradosite","nature":"Jolly","sps":{"hp":1,"at":32,"df":1,"sp":32},"moves":["Dragon Dance","Waterfall","Earthquake","Ice Fang"]}
   },
+  "Ditto": {
+    "OU Among Us (Revenge Killer)": {"ability":"Imposter","item":"Choice Scarf","nature":"Quiet","sps":{"hp":31,"at":3,"sa":32},"moves":["Transform"]},
+    "BSS Reg M-B Showdown Usage": {"level":50,"ability":"Imposter","item":"Choice Scarf","nature":"Timid","sps":{"hp":32,"sd":2,"sp":32},"moves":["Transform"]}
+  },
   "Aerodactyl": {
+    "VGC 2026 Reg M-B Offensive Tailwind Setter": {"level":50,"ability":"Unnerve","item":"Aerodactylite","nature":"Jolly","sps":{"hp":2,"at":32,"sp":32},"moves":["Rock Slide","Dual Wingbeat","Ice Fang","Tailwind"]},
     "VGC 2026 Reg M-B Focus Sash Offensive Support": {"level":50,"ability":"Unnerve","item":"Focus Sash","nature":"Jolly","sps":{"hp":2,"at":32,"sp":32},"moves":["Rock Slide","Tailwind","Dual Wingbeat","Protect"]},
     "VGC 2026 Reg M-B Tailwind Setter": {"level":50,"ability":"Unnerve","item":"Aerodactylite","nature":"Jolly","sps":{"hp":2,"at":32,"sp":32},"moves":["Rock Slide","Dual Wingbeat","Tailwind","Protect"]}
   },
   "Aerodactyl-Mega": {
+    "VGC 2026 Reg M-B Offensive Tailwind Setter": {"level":50,"ability":"Tough Claws","item":"Aerodactylite","nature":"Jolly","sps":{"hp":2,"at":32,"sp":32},"moves":["Rock Slide","Dual Wingbeat","Ice Fang","Tailwind"]},
     "VGC 2026 Reg M-B Tailwind Setter": {"level":50,"ability":"Tough Claws","item":"Aerodactylite","nature":"Jolly","sps":{"hp":2,"at":32,"sp":32},"moves":["Rock Slide","Dual Wingbeat","Tailwind","Protect"]}
   },
   "Snorlax": {
@@ -393,28 +399,28 @@ var SETDEX_CHAMPIONS = {
   },
   "Aegislash": {
     "OU Mixed Attacker": {"ability":"Stance Change","item":"Spell Tag","nature":"Naughty","sps":{"at":32,"sa":2,"sp":32},"moves":["Poltergeist","Shadow Ball","Shadow Sneak","Close Combat"]},
-    "OU Swords Dance": {"ability":"Stance Change","item":"Leftovers","nature":"Adamant","sps":{"hp":26,"at":32,"sp":8},"moves":["Swords Dance","Shadow Sneak","Close Combat","King's Shield"]},
+    "OU Bulky Swords Dance": {"ability":"Stance Change","item":"Colbur Berry","nature":"Adamant","sps":{"hp":26,"at":32,"sp":8},"moves":["Swords Dance","Poltergeist","Close Combat","Shadow Sneak"]},
     "VGC 2026 Reg M-B Bulky Attacker": {"level":50,"ability":"Stance Change","item":"Spell Tag","nature":"Adamant","sps":{"hp":27,"at":32,"sp":7},"moves":["Poltergeist","Shadow Sneak","Iron Head","King's Shield"]},
     "BSS Reg M-B Physical Attacker": {"level":50,"ability":"Stance Change","item":"Spell Tag","nature":"Adamant","sps":{"hp":32,"at":32,"df":2},"moves":["Poltergeist","Shadow Sneak","Swords Dance","Close Combat"]},
     "BSS Reg M-B Mixed Attacker": {"level":50,"ability":"Stance Change","item":"Leftovers","nature":"Quiet","sps":{"hp":32,"at":2,"sa":32},"moves":["Shadow Ball","Shadow Sneak","King's Shield","Close Combat"]}
   },
   "Aegislash-Blade": {
     "OU Mixed Attacker": {"ability":"Stance Change","item":"Spell Tag","nature":"Naughty","sps":{"at":32,"sa":2,"sp":32},"moves":["Poltergeist","Shadow Ball","Shadow Sneak","Close Combat"]},
-    "OU Swords Dance": {"ability":"Stance Change","item":"Leftovers","nature":"Adamant","sps":{"hp":26,"at":32,"sp":8},"moves":["Swords Dance","Shadow Sneak","Close Combat","King's Shield"]},
+    "OU Bulky Swords Dance": {"ability":"Stance Change","item":"Colbur Berry","nature":"Adamant","sps":{"hp":26,"at":32,"sp":8},"moves":["Swords Dance","Poltergeist","Close Combat","Shadow Sneak"]},
     "VGC 2026 Reg M-B Bulky Attacker": {"level":50,"ability":"Stance Change","item":"Spell Tag","nature":"Adamant","sps":{"hp":27,"at":32,"sp":7},"moves":["Poltergeist","Shadow Sneak","Iron Head","King's Shield"]},
     "BSS Reg M-B Physical Attacker": {"level":50,"ability":"Stance Change","item":"Spell Tag","nature":"Adamant","sps":{"hp":32,"at":32,"df":2},"moves":["Poltergeist","Shadow Sneak","Swords Dance","Close Combat"]},
     "BSS Reg M-B Mixed Attacker": {"level":50,"ability":"Stance Change","item":"Leftovers","nature":"Quiet","sps":{"hp":32,"at":2,"sa":32},"moves":["Shadow Ball","Shadow Sneak","King's Shield","Close Combat"]}
   },
   "Aegislash-Shield": {
     "OU Mixed Attacker": {"ability":"Stance Change","item":"Spell Tag","nature":"Naughty","sps":{"at":32,"sa":2,"sp":32},"moves":["Poltergeist","Shadow Ball","Shadow Sneak","Close Combat"]},
-    "OU Swords Dance": {"ability":"Stance Change","item":"Leftovers","nature":"Adamant","sps":{"hp":26,"at":32,"sp":8},"moves":["Swords Dance","Shadow Sneak","Close Combat","King's Shield"]},
+    "OU Bulky Swords Dance": {"ability":"Stance Change","item":"Colbur Berry","nature":"Adamant","sps":{"hp":26,"at":32,"sp":8},"moves":["Swords Dance","Poltergeist","Close Combat","Shadow Sneak"]},
     "VGC 2026 Reg M-B Bulky Attacker": {"level":50,"ability":"Stance Change","item":"Spell Tag","nature":"Adamant","sps":{"hp":27,"at":32,"sp":7},"moves":["Poltergeist","Shadow Sneak","Iron Head","King's Shield"]},
     "BSS Reg M-B Physical Attacker": {"level":50,"ability":"Stance Change","item":"Spell Tag","nature":"Adamant","sps":{"hp":32,"at":32,"df":2},"moves":["Poltergeist","Shadow Sneak","Swords Dance","Close Combat"]},
     "BSS Reg M-B Mixed Attacker": {"level":50,"ability":"Stance Change","item":"Leftovers","nature":"Quiet","sps":{"hp":32,"at":2,"sa":32},"moves":["Shadow Ball","Shadow Sneak","King's Shield","Close Combat"]}
   },
   "Aegislash-Both": {
     "OU Mixed Attacker": {"ability":"Stance Change","item":"Spell Tag","nature":"Naughty","sps":{"at":32,"sa":2,"sp":32},"moves":["Poltergeist","Shadow Ball","Shadow Sneak","Close Combat"]},
-    "OU Swords Dance": {"ability":"Stance Change","item":"Leftovers","nature":"Adamant","sps":{"hp":26,"at":32,"sp":8},"moves":["Swords Dance","Shadow Sneak","Close Combat","King's Shield"]},
+    "OU Bulky Swords Dance": {"ability":"Stance Change","item":"Colbur Berry","nature":"Adamant","sps":{"hp":26,"at":32,"sp":8},"moves":["Swords Dance","Poltergeist","Close Combat","Shadow Sneak"]},
     "VGC 2026 Reg M-B Bulky Attacker": {"level":50,"ability":"Stance Change","item":"Spell Tag","nature":"Adamant","sps":{"hp":27,"at":32,"sp":7},"moves":["Poltergeist","Shadow Sneak","Iron Head","King's Shield"]},
     "BSS Reg M-B Physical Attacker": {"level":50,"ability":"Stance Change","item":"Spell Tag","nature":"Adamant","sps":{"hp":32,"at":32,"df":2},"moves":["Poltergeist","Shadow Sneak","Swords Dance","Close Combat"]},
     "BSS Reg M-B Mixed Attacker": {"level":50,"ability":"Stance Change","item":"Leftovers","nature":"Quiet","sps":{"hp":32,"at":2,"sa":32},"moves":["Shadow Ball","Shadow Sneak","King's Shield","Close Combat"]}
@@ -496,6 +502,7 @@ var SETDEX_CHAMPIONS = {
   },
   "Basculegion": {
     "VGC 2026 Reg M-B Choice Scarf": {"level":50,"ability":"Adaptability","item":"Choice Scarf","nature":"Jolly","sps":{"hp":2,"at":32,"sp":32},"moves":["Wave Crash","Last Respects","Flip Turn","Aqua Jet"]},
+    "VGC 2026 Reg M-B Glass Cannon": {"level":50,"ability":"Adaptability","item":"Life Orb","nature":"Adamant","sps":{"at":32,"df":14,"sp":20},"moves":["Wave Crash","Last Respects","Aqua Jet","Protect"]},
     "VGC 2026 Reg M-B Revenge Killer": {"level":50,"ability":"Adaptability","item":"Choice Scarf","nature":"Jolly","sps":{"hp":2,"at":32,"sp":32},"moves":["Wave Crash","Flip Turn","Last Respects","Aqua Jet"]},
     "VGC 2026 Reg M-B Bulky Attacker": {"level":50,"ability":"Adaptability","item":"Mystic Water","nature":"Adamant","sps":{"hp":16,"at":24,"df":6,"sp":20},"moves":["Wave Crash","Last Respects","Aqua Jet","Protect"]},
     "VGC 2026 Reg M-B Focus Sash Attacker": {"level":50,"ability":"Adaptability","item":"Focus Sash","nature":"Adamant","sps":{"hp":2,"at":32,"sp":32},"moves":["Liquidation","Last Respects","Aqua Jet","Protect"]},
@@ -623,10 +630,6 @@ var SETDEX_CHAMPIONS = {
   },
   "Scolipede": {
     "BSS Reg M-B Showdown Usage": {"level":50,"ability":"Speed Boost","item":"Sitrus Berry","nature":"Bold","sps":{"hp":32,"df":27,"sd":2,"sp":5},"moves":["Baton Pass","Iron Defense","Protect","Substitute"]}
-  },
-  "Ditto": {
-    "BSS Reg M-B Showdown Usage": {"level":50,"ability":"Imposter","item":"Choice Scarf","nature":"Timid","sps":{"hp":32,"sd":2,"sp":32},"moves":["Transform"]},
-    "OU Showdown Usage": {"ability":"Imposter","item":"Choice Scarf","nature":"Bold","sps":{"hp":32,"df":32,"sd":2},"moves":["Transform"]}
   },
   "Victreebel-Mega": {
     "BSS Reg M-B Showdown Usage": {"level":50,"ability":"Innards Out","item":"Victreebelite","nature":"Rash","sps":{"hp":32,"at":2,"sa":32},"moves":["Giga Drain","Strength Sap","Sucker Punch","Encore"]}
