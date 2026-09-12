@@ -6,7 +6,14 @@ const child_process = require('node:child_process');
 
 process.chdir(__dirname + '/..');
 
+fs.mkdirSync('play.pokemonshowdown.com/data', { recursive: true });
+
+const noUpdate = process.argv.includes('--no-update');
 if (!fs.existsSync('caches/pokemon-showdown')) {
+	if (noUpdate) {
+		console.error('Missing caches/pokemon-showdown. Check out the server before using --no-update.');
+		process.exit(1);
+	}
 	child_process.execSync('git clone https://github.com/smogon/pokemon-showdown.git', {
 		cwd: 'caches',
 	});
@@ -17,6 +24,11 @@ if (!fs.existsSync('caches/pokemon-showdown')) {
 } else {
 	console.log("Using local caches/pokemon-showdown (skipping upstream sync)");
 }
+
+// Upstream now pulls and rebuilds caches/pokemon-showdown unconditionally here (unless
+// --no-update). This fork's caches/pokemon-showdown is a symlink to the sibling server checkout,
+// so a `git pull` in it would act on this repository; the fork keeps its "local checkout, skip
+// the sync" branch above and takes upstream's --no-update guard only for the missing-checkout case.
 
 const Dex = require('../caches/pokemon-showdown/dist/sim/dex').Dex;
 const CompoundWordNames = require('../caches/pokemon-showdown/dist/data/aliases').CompoundWordNames;
@@ -1872,20 +1884,7 @@ process.stdout.write("Building `data/moves,items,abilities,typechart,learnsets.j
  *********************************************************/
 
 {
-	const LANGS = fs.readdirSync('caches/pokemon-showdown/data/text', { withFileTypes: true })
-		.filter(entry => entry.isDirectory())
-		.map(entry => entry.name)
-		.concat('en');
-
-	fs.mkdirSync('play.pokemonshowdown.com/data/text', { recursive: true });
-	for (const lang of LANGS) {
-		const translation = Dex.loadTextData(lang);
-		fs.writeFileSync(
-			`play.pokemonshowdown.com/data/text/${lang}.js`,
-			'exports.BattleText = exports.BattleText || {};\n' +
-			`exports.BattleText[${JSON.stringify(lang)}] = ` + es3stringify(translation) + ';'
-		);
-	}
+	require('./build-translations').buildTextFiles(Dex);
 }
 
 console.log("DONE");

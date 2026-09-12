@@ -8,11 +8,11 @@
 
 import preact from "../js/lib/preact";
 import { type Team, Config, PS } from "./client-main";
-import { Dex, type ModdedDex, toID, type ID, PSUtils } from "./battle-dex";
+import { Dex, type ModdedDex, toID, type ID, PSUtils, TL } from "./battle-dex";
 import { Teams } from './battle-teams';
 import { DexSearch, type SearchRow, type SearchType } from "./battle-dex-search";
 import { PSSearchResults } from "./battle-searchresults";
-import { BattleNatures, BattleStatNames, type StatName } from "./battle-dex-data";
+import { BattleNatures, type StatName } from "./battle-dex-data";
 import { BattleStatGuesser, BattleStatOptimizer, BattleTooltips } from "./battle-tooltips";
 import { PSModel } from "./client-core";
 import { Net } from "./client-connection";
@@ -64,6 +64,7 @@ export class TeamEditorState extends PSModel {
 	format: ID = `gen${this.gen}` as ID;
 	originalSpecies: string | null = null;
 	narrow = false;
+	narrowStats = false;
 	innerFocus: InnerFocusState | null = null;
 	isLetsGo = false;
 	isNatDex = false;
@@ -446,7 +447,7 @@ export class TeamEditorState extends PSModel {
 		sets.push(...TeamEditorState.clipboard.otherSets || []);
 		if (sets.length) {
 			const team: Team = {
-				name: `Pasted Team`,
+				name: TL`Pasted team`,
 				format: Dex.modid,
 				folder,
 				packedTeam: Teams.pack(sets),
@@ -951,7 +952,7 @@ export class TeamEditorState extends PSModel {
 			))}
 			{TeamEditorState.clipboard.otherSets?.map(set => renderSet(set))}
 			<button class="button" onClick={cancelClipboard}>
-				<i class="fa fa-times" aria-hidden></i> Cancel
+				<i class="fa fa-times" aria-hidden></i> {TL`[Cancel]`}
 			</button>
 		</div>;
 	}
@@ -963,12 +964,92 @@ export class TeamEditor extends preact.Component<{
 	editorRef?: (editor: TeamEditorState) => void,
 }> {
 	mode: TeamEditorMode = 'form';
+	spacious: boolean | null = null;
+	zoomOutForms = false;
+	zoomOutSearch = false;
 	editor!: TeamEditorState;
+	optionsMenu: HTMLDetailsElement | null = null;
+	getSpacious() {
+		return window.PS?.prefs.teameditorspacious ?? this.spacious ?? document.documentElement.clientHeight >= 950;
+	}
+	getZoomOutForms() {
+		return window.PS?.prefs.teameditorzoomoutforms ?? this.zoomOutForms;
+	}
+	getZoomOutSearch() {
+		return window.PS?.prefs.teameditorzoomoutsearch ?? this.zoomOutSearch;
+	}
 	setTab = (ev: Event) => {
 		const target = ev.currentTarget as HTMLButtonElement;
 		this.mode = target.value as TeamEditorMode;
 		this.forceUpdate();
 	};
+	setLayout = (ev: Event) => {
+		const layout = (ev.currentTarget as HTMLSelectElement).value;
+		const spacious = layout === 'automatic' ? null : layout === 'comfortable';
+		if (window.PS) {
+			window.PS.prefs.set('teameditorspacious', spacious);
+		} else {
+			this.spacious = spacious;
+		}
+		this.forceUpdate();
+	};
+	setZoomOutForms = (ev: Event) => {
+		const checked = (ev.currentTarget as HTMLInputElement).checked;
+		if (window.PS) {
+			window.PS.prefs.set('teameditorzoomoutforms', checked ? true : null);
+		}
+		this.zoomOutForms = checked;
+		this.forceUpdate();
+	};
+	setZoomOutSearch = (ev: Event) => {
+		const checked = (ev.currentTarget as HTMLInputElement).checked;
+		if (window.PS) {
+			window.PS.prefs.set('teameditorzoomoutsearch', checked ? true : null);
+		}
+		this.zoomOutSearch = checked;
+		this.forceUpdate();
+	};
+	updateMobileScale = () => {
+		const elem = this.base as HTMLElement | null;
+		if (!elem) return;
+		const scale = Math.min(window.innerWidth / 635, 1) || 1;
+		elem.style.setProperty('--teameditor-mobile-scale', `${scale}`);
+		if (this.getZoomOutForms()) {
+			const setList = elem.querySelector<HTMLElement>('.set-list, .team-focus-editor .set-form');
+			const heightOffset = setList ? -setList.offsetHeight * (1 - scale) : 0;
+			elem.style.setProperty('--teameditor-mobile-height-offset', `${heightOffset}px`);
+		} else {
+			elem.style.setProperty('--teameditor-mobile-height-offset', `0px`);
+		}
+		if (this.getZoomOutSearch()) {
+			const focusEditor = elem.querySelector<HTMLElement>('.team-focus-editor');
+			const searchResults = focusEditor?.querySelector<HTMLElement>('.set-searchresults');
+			if (focusEditor && searchResults) {
+				const availableHeight = focusEditor.clientHeight - searchResults.offsetTop;
+				elem.style.setProperty('--teameditor-mobile-search-height', `${availableHeight / scale}px`);
+			}
+		}
+	};
+	closeOptionsOnClick = (ev: MouseEvent) => {
+		if (!this.optionsMenu?.open) return;
+		if (ev.target && this.optionsMenu.contains(ev.target as Node)) return;
+		this.optionsMenu.open = false;
+	};
+	handleResize = () => {
+		this.forceUpdate();
+	};
+	override componentDidMount() {
+		window.addEventListener('click', this.closeOptionsOnClick);
+		window.addEventListener('resize', this.handleResize);
+		this.updateMobileScale();
+	}
+	override componentDidUpdate() {
+		this.updateMobileScale();
+	}
+	override componentWillUnmount() {
+		window.removeEventListener('click', this.closeOptionsOnClick);
+		window.removeEventListener('resize', this.handleResize);
+	}
 	static probablyMobile() {
 		return window.innerWidth < 500;
 	}
@@ -982,9 +1063,9 @@ export class TeamEditor extends preact.Component<{
 		const good = [], medium = [], bad = [];
 		const renderTypeDefensive = (counter: typeof counters[number]) => (
 			<tr>
-				<th>{counter.type}</th>
-				<td>{counter.resists} <small class="gray">resist</small></td>
-				<td>{counter.weaknesses} <small class="gray">weak</small></td>
+				<th>{editor.dex.text.typeName(counter.type)}</th>
+				<td>{counter.resists} <small class="gray">{TL`Resist`}</small></td>
+				<td>{counter.weaknesses} <small class="gray">{TL`Weak`}</small></td>
 			</tr>
 		);
 		for (const counter of counters) {
@@ -998,10 +1079,10 @@ export class TeamEditor extends preact.Component<{
 		}
 		return <details class="details">
 			<summary>
-				<strong>Defensive coverage</strong>
+				<strong>{TL`Defensive coverage`}</strong>
 				<table class="details-preview table">
 					{bad}
-					<tr><td colSpan={3}><span class="details-preview ilink"><small>See all</small></span></td></tr>
+					<tr><td colSpan={3}><span class="details-preview ilink"><small>{TL`[See all]`}</small></span></td></tr>
 				</table>
 			</summary>
 			<table class="table">{bad}{medium}{good}</table>
@@ -1025,19 +1106,54 @@ export class TeamEditor extends preact.Component<{
 		const editor = this.editor;
 		window.editor = editor; // debug
 		editor.updateTeam(!!this.props.readOnly);
-		editor.narrow = this.props.narrow ?? window.innerWidth < 500;
+		const mobileOptions = window.innerWidth < 635;
+		const spacious = this.getSpacious();
+		const zoomOutForms = this.getZoomOutForms();
+		const zoomOutSearch = this.getZoomOutSearch();
+		const useZoomedOutForms = this.mode === 'form' && zoomOutForms && mobileOptions;
+		const narrow = this.props.narrow ?? window.innerWidth < 500;
+		editor.narrow = !useZoomedOutForms && narrow;
+		editor.narrowStats = useZoomedOutForms || narrow;
 		if (this.props.team.format !== editor.format) {
 			editor.setFormat(this.props.team.format);
 		}
+		const useSpaciousCSS = spacious && !mobileOptions || useZoomedOutForms;
+		const className = `teameditor${useSpaciousCSS ? ' teameditor-spacious' : ''}` +
+			`${useZoomedOutForms ? ' teameditor-zoom-out-forms' : ''}` +
+			`${zoomOutSearch && mobileOptions ? ' teameditor-full-size-search' : ''}`;
+		const layout = window.PS ? window.PS.prefs.teameditorspacious : this.spacious;
+		const automaticLayout = document.documentElement.clientHeight >= 950 ? TL`Comfortable` : TL`Compact`;
 
-		return <div class="teameditor">
-			<ul class="tabbar">
+		return <div class={className}>
+			<ul class="tabbar unpadded-tabbar">
 				<li><button onClick={this.setTab} value="form" class={`button${this.mode === 'form' ? ' cur' : ''}`}>
-					Form
+					{TL`Form`}
 				</button></li>
-				<li><button onClick={this.setTab} value="import" class={`button${this.mode === 'import' ? ' cur' : ''}`}>
-					Import/Export
+				<li><button onClick={this.setTab} value="import" class={`button button-last${this.mode === 'import' ? ' cur' : ''}`}>
+					{TL`Import/Export`}
 				</button></li>
+				<li class="teameditor-options" style="float: right; margin-top: 1px; margin-right: 8px;">
+					<details ref={el => { this.optionsMenu = el; }}>
+						<summary class="button button-first">{TL`[Options]`}</summary>
+						<div class="teameditor-options-menu">
+							{mobileOptions ? <label class="checkbox"><input
+								name="zoomoutforms" type="checkbox"
+								checked={zoomOutForms} onChange={this.setZoomOutForms}
+							/> {TL`Zoom out forms`}</label> : <label>{TL.label(TL`Layout`)}<select
+								name="layout" class="select" onChange={this.setLayout}
+								value={layout === null ? 'automatic' : layout ? 'comfortable' : 'compact'}
+							>
+								<option value="automatic">{TL`Automatic (${automaticLayout})`}</option>
+								<option value="compact">{TL`Compact`}</option>
+								<option value="comfortable">{TL`Comfortable`}</option>
+							</select></label>}
+							{mobileOptions && <label class="checkbox"><input
+								name="zoomoutsearch" type="checkbox"
+								checked={zoomOutSearch} onChange={this.setZoomOutSearch}
+							/> {TL`Zoom out search results`}</label>}
+						</div>
+					</details>
+				</li>
 			</ul>
 			{TeamEditorState.renderClipboard(this.cancelClipboard)}
 			{this.mode === 'form' ? (
@@ -1045,14 +1161,14 @@ export class TeamEditor extends preact.Component<{
 			) : (
 				<TeamTextbox editor={editor} onChange={this.props.onChange} onUpdate={this.update} />
 			)}
-			{!this.editor.innerFocus && <>
+			{!this.editor.innerFocus && <div class="team-pad">
 				{this.props.children}
 				<div class="team-resources">
 					<br /><hr /><br />
 					{this.renderDefensiveCoverage()}
 					{this.props.resources}
 				</div>
-			</>}
+			</div>}
 		</div>;
 	}
 }
@@ -1684,31 +1800,28 @@ class TeamTextbox extends preact.Component<{
 		const editor = this.editor;
 		const species = editor.dex.species.get(set.species);
 
-		const GenderChart = {
-			'M': 'Male',
-			'F': 'Female',
-			'N': '\u2014', // em dash
-		};
-		const gender = GenderChart[(set.gender || species.gender || 'N') as 'N'];
+		const genderID = (set.gender || species.gender || 'N') as Dex.GenderName;
+		// em dash
+		const gender = genderID === 'N' ? '\u2014' : editor.dex.text.genderName(genderID);
 
 		return <button class="textbox setdetails" name="details" value={i} onClick={this.clickDetails}>
 			<span class="detailcell">
-				<label>Level</label>{set.level || editor.defaultLevel}
+				<label>{TL`Level`}</label>{set.level || editor.defaultLevel}
 			</span>
 			<span class="detailcell">
-				<label>Shiny</label>{set.shiny ? 'Yes' : '\u2014'}
+				<label>{TL`Shiny`}</label>{set.shiny ? 'Yes' : '\u2014'}
 			</span>
 			{editor.gen === 9 && !editor.isChampions ? (
 				<span class="detailcell">
-					<label>Tera</label><PSIcon type={set.teraType || species.requiredTeraType || species.types[0]} />
+					<label>{TL`Tera`}</label><PSIcon type={set.teraType || species.requiredTeraType || species.types[0]} />
 				</span>
 			) : editor.hpTypeMatters(set) ? (
 				<span class="detailcell">
-					<label>H. Power</label><PSIcon type={editor.getHPType(set)} />
+					<label>{TL`H. Power`}</label><PSIcon type={editor.getHPType(set)} />
 				</span>
 			) : (
 				<span class="detailcell">
-					<label>Gender</label>{gender}
+					<label>{TL`Gender`}</label>{gender}
 				</span>
 			)}
 		</button>;
@@ -1745,13 +1858,13 @@ class TeamTextbox extends preact.Component<{
 		const resultsCSS = this.innerFocus && (
 			`top:${(this.setInfo[this.innerFocus.setIndex]?.bottomY ?? this.bottomY() + 50) - 12}px`
 		);
-		return <div>
+		return <div class="team-pad">
 			<p>
 				<button class={`button ${this.state.copyButtonUsed ? 'cur' : ''}`} onClick={this.copyAll}>
 					{this.state.copyButtonUsed ? (
-						<><i class="fa fa-check" aria-hidden></i> Copied!</>
+						<><i class="fa fa-check" aria-hidden></i> {TL`Copied!`}</>
 					) : (
-						<><i class="fa fa-copy" aria-hidden></i> Copy</>
+						<><i class="fa fa-copy" aria-hidden></i> {TL`[Copy]`}</>
 					)}
 				</button>
 			</p>
@@ -1806,7 +1919,7 @@ class TeamTextbox extends preact.Component<{
 					{editor.canAdd() && !(this.innerFocus && this.innerFocus.setIndex >= this.setInfo.length) && (
 						<div style={`top:${this.bottomY() - 3}px;left:${editor.narrow ? 55 : 105}px;position:absolute`}>
 							<button class="button" onClick={this.addPokemon}>
-								<i class="fa fa-plus" aria-hidden></i> Add Pok&eacute;mon
+								<i class="fa fa-plus" aria-hidden></i> {TL`[Add Pokémon]`}
 							</button>
 						</div>
 					)}
@@ -1821,14 +1934,14 @@ class TeamTextbox extends preact.Component<{
 					this.innerFocus.type === 'stats' ? (
 						<div class="searchresults" style={resultsCSS}>
 							<button class="button closesearch" onClick={this.closeMenu}>
-								{!editor.narrow && <kbd>Esc</kbd>} <i class="fa fa-times" aria-hidden></i> Close
+								{!editor.narrow && <kbd>Esc</kbd>} <i class="fa fa-times" aria-hidden></i> {TL`[Close]`}
 							</button>
 							<StatForm editor={editor} set={this.editor.sets[this.innerFocus.setIndex]} onChange={this.handleSetChange} />
 						</div>
 					) : this.innerFocus.type === 'details' ? (
 						<div class="searchresults" style={resultsCSS}>
 							<button class="button closesearch" onClick={this.closeMenu}>
-								{!editor.narrow && <kbd>Esc</kbd>} <i class="fa fa-times" aria-hidden></i> Close
+								{!editor.narrow && <kbd>Esc</kbd>} <i class="fa fa-times" aria-hidden></i> {TL`[Close]`}
 							</button>
 							<DetailsForm editor={editor} set={this.editor.sets[this.innerFocus.setIndex]} onChange={this.handleSetChange} />
 					</div>
@@ -1841,7 +1954,7 @@ class TeamTextbox extends preact.Component<{
 						<PSSearchResults
 							class="searchresults" style={resultsCSS}
 							prepend={<button class="button closesearch" onClick={this.closeMenu}>
-								{!editor.narrow && <kbd>Esc</kbd>} <i class="fa fa-times" aria-hidden></i> Close
+								{!editor.narrow && <kbd>Esc</kbd>} <i class="fa fa-times" aria-hidden></i> {TL`[Close]`}
 							</button>}
 							search={editor.search}
 							onSelect={this.selectResult}
@@ -2100,16 +2213,16 @@ class TeamEditorForm extends preact.Component<{
 		const cur = (i: number) => setIndex === i ? ' cur' : '';
 		const isSearchMode = type !== 'stats' && type !== 'details' && type !== 'import';
 		const SEARCH_PLACEHOLDERS = {
-			'pokemon': 'Search species or filter by type, learnable moves, ability, or egg group',
-			'ability': 'Search abilities',
-			'item': 'Search items',
-			'move': 'Search moves or filter by type or category',
+			'pokemon': TL`Search species or filter by type, learnable moves, ability, tier, or egg group`,
+			'ability': TL`Search abilities`,
+			'item': TL`Search items`,
+			'move': TL`Search moves or filter by type or category`,
 		};
 		return <div class="team-focus-editor" onKeyDown={editor.handleParentKeyDown}>
 			<div class={isSearchMode && (set?.moves.length || 0) > 5 ? 'team-focus-top' : ''}>
 				<ul class="tabbar">
 					<li class="home-li"><button class="button" onClick={this.closeInnerFocus}>
-						<i class="fa fa-chevron-left" aria-hidden></i> Back
+						<i class="fa fa-chevron-left" aria-hidden></i> {TL`[Back]`}
 					</button></li>
 					{editor.sets.map((curSet, i) => <li><button
 						class={`button picontab${cur(i)}`} onClick={this.setFocus}
@@ -2122,12 +2235,12 @@ class TeamEditorForm extends preact.Component<{
 						class={`button picontab${cur(editor.sets.length)}`} name="addpokemon"
 						onClick={this.setFocus}
 						value={`set-${editor.sets.length}-pokemon`}
-						aria-label="Add Pokemon"
+						aria-label={TL`[Add Pokémon]`}
 					>
 						<i class="fa fa-plus"></i>
 					</button></li>}
 				</ul>
-				<div class="pad" style="padding-top:0">{this.renderSet(set, setIndex)}</div>
+				<div class="team-pad" style="padding-top:0">{this.renderSet(set, setIndex)}</div>
 				{isSearchMode && <div class="searchboxwrapper pad" onClick={this.handleClickFilters}>
 					<input
 						type="search" name="value" class="textbox" placeholder={SEARCH_PLACEHOLDERS[type] || ''}
@@ -2163,7 +2276,7 @@ class TeamEditorForm extends preact.Component<{
 		const { editor } = this.props;
 		if (editor.innerFocus) return this.renderInnerFocus();
 		if (editor.fetching) {
-			return <div class="teameditor">Fetching Paste...</div>;
+			return <div class="teameditor">{TL`Fetching Paste...`}</div>;
 		}
 
 		const clipboard = TeamEditorState.clipboard;
@@ -2176,17 +2289,17 @@ class TeamEditorForm extends preact.Component<{
 			null
 		) : clipboard ? <p>
 			<button class="button notifying" onClick={this.pasteSet} value={i}>
-				<i class="fa fa-clipboard" aria-hidden></i> Paste copy here
+				<i class="fa fa-clipboard" aria-hidden></i> {TL`[Paste copy here]`}
 			</button> {}
 			{!willNotMove(i) && <button class="button notifying" onClick={this.moveSet} value={i} disabled={clipboard.readonly}>
-				<i class="fa fa-arrow-right" aria-hidden></i> Move here
+				<i class="fa fa-arrow-right" aria-hidden></i> {TL`[Move here]`}
 			</button>}
 		</p> : editor.deletedSet?.index === i ? <p style="text-align:right">
 			<button class="button" onClick={this.undeleteSet}>
-				<i class="fa fa-undo" aria-hidden></i> Undo delete
+				<i class="fa fa-undo" aria-hidden></i> {TL`[Undo delete]`}
 			</button>
 		</p> : null;
-		return <div class={`teameditor${editor.readonly ? ' readonly' : ''}`}>
+		return <div class={`set-list team-pad${editor.readonly ? ' readonly' : ''}`}>
 			{editor.sets.map((set, i) => [
 				pasteControls(i),
 				this.renderSet(set, i),
@@ -2196,7 +2309,7 @@ class TeamEditorForm extends preact.Component<{
 				class="button big" name="addpokemon" onClick={this.setFocus}
 				value={`set-${editor.sets.length}-pokemon`}
 			>
-				<i class="fa fa-plus" aria-hidden></i> Add Pok&eacute;mon
+				<i class="fa fa-plus" aria-hidden></i> {TL`[Add Pokémon]`}
 			</button></p>}
 		</div>;
 	}
@@ -2215,7 +2328,8 @@ class TeamEditorForm extends preact.Component<{
 		];
 		target.classList.remove('incomplete');
 		this.startFocusAnimation(target);
-		this.changeFocus(focus);
+		const refocusing = editor.stringifyFocus(editor.innerFocus) === editor.stringifyFocus(focus);
+		this.changeFocus(focus, false, true, refocusing);
 	}
 	setFocusTextbox = (ev: FocusEvent) => {
 		const target = ev.currentTarget as HTMLInputElement;
@@ -2238,7 +2352,9 @@ class TeamEditorForm extends preact.Component<{
 		if (!target || ev.target !== target) return;
 		this.openFocusTextbox(target);
 	};
-	changeFocus(focus: TeamEditorState['innerFocus'], focusButton = false, polite = true) {
+	changeFocus(
+		focus: TeamEditorState['innerFocus'], focusButton = false, polite = true, preserveSearch = false
+	) {
 		const { editor } = this.props;
 		editor.innerFocus = focus;
 		this.pendingFocus = focus;
@@ -2250,7 +2366,7 @@ class TeamEditorForm extends preact.Component<{
 		}
 
 		const set = editor.sets[focus.setIndex];
-		if (focus.type !== 'details' && focus.type !== 'stats' && focus.type !== 'import') {
+		if (!preserveSearch && focus.type !== 'details' && focus.type !== 'stats' && focus.type !== 'import') {
 			let value = '';
 			if (focus.type === 'pokemon') value = set?.species || '';
 			else if (focus.type === 'item') value = set?.item || '';
@@ -2276,9 +2392,9 @@ class TeamEditorForm extends preact.Component<{
 			const input = this.base!.querySelector<HTMLInputElement | HTMLButtonElement>(
 				(focus.type === 'details' || focus.type === 'stats' || focus.type === 'import') && this.pendingFocusButton ?
 					`button[name="${focus.type}"][value="${focusValue}"]` :
-					focus.type === 'details' ? `div[aria-label=Details] input:not([name=nickname]), div[aria-label=Details] select` :
-					focus.type === 'stats' ? `div[aria-label=Stats] input` :
-					focus.type === 'import' ? `div[aria-label="Import/Export"] textarea` :
+					focus.type === 'details' ? `div.set-details-form input:not([name=nickname]), div.set-details-form select` :
+					focus.type === 'stats' ? `div.set-stats-form input` :
+					focus.type === 'import' ? `div.set-import-form textarea` :
 					focus.type === 'move' && focus.typeIndex === -1 ? `input[name=value]` :
 					`input.set-field[data-focus="${focusValue}"]`
 			);
@@ -2711,6 +2827,7 @@ class TeamEditorForm extends preact.Component<{
 			this.resetScroll();
 			this.forceUpdate();
 		} else if (!type) {
+			this.focusFocusedSetField();
 			const searchBox = this.base!.querySelector<HTMLInputElement>('input[name=value]');
 			if (searchBox) {
 				searchBox.value = '';
@@ -2792,10 +2909,11 @@ class TeamEditorForm extends preact.Component<{
 		const { editor } = this.props;
 		const set = editor.sets[setIndex];
 		const species = editor.dex.species.get(set.species);
+		const baseSpecies = editor.dex.text.get(species).baseSpecies;
 		return <input
 			type="text" class="textbox default-placeholder set-field" name="nickname"
 			data-focus={`set-${setIndex}-nickname`}
-			defaultValue={set.name || ''} placeholder={species.baseSpecies} readOnly={editor.readonly}
+			defaultValue={set.name || ''} placeholder={baseSpecies} readOnly={editor.readonly}
 			onInput={this.inputField} onChange={this.inputField} onKeyDown={this.keyDownNickname} autocomplete="off"
 		/>;
 	}
@@ -2807,22 +2925,22 @@ class TeamEditorForm extends preact.Component<{
 			return <div class="set-form" data-set-index={i}>
 				<div style="text-align:right">
 					{editor.deletedSet ? (
-						<button onClick={this.undeleteSet} class="option"><i class="fa fa-undo" aria-hidden></i> Undo delete</button>
+						<button onClick={this.undeleteSet} class="option"><i class="fa fa-undo" aria-hidden></i> {TL`[Undo delete]`}</button>
 					) : (
-						<button class="option" style="visibility:hidden"><i class="fa fa-trash" aria-hidden></i> Delete</button>
+						<button class="option" style="visibility:hidden"><i class="fa fa-trash" aria-hidden></i> {TL`[Delete]`}</button>
 					)} {}
 					<button
 						class="option" name="import" onClick={this.clickPanelButton}
 						value={`set-${i}-import`}
 					>
-						<i class="fa fa-upload" aria-hidden></i> Import
+						<i class="fa fa-upload" aria-hidden></i> {TL`[Import]`}
 					</button>
 				</div>
 				<table class={spriteClass} style={sprite}>
 					<tr>
 						<td rowSpan={2} class="set-pokemon"><div class="border-collapse">
 							<span class="sprite-inner">
-								<strong class="label">Pokemon</strong> {}
+								<strong class="label">{TL`Pokémon`}</strong> {}
 								{this.renderInput(i, 'pokemon', '')}
 							</span>
 						</div></td>
@@ -2847,22 +2965,22 @@ class TeamEditorForm extends preact.Component<{
 			<div style="text-align:right">
 				<button class="option" onClick={this.copySet} value={i}>
 					<i class="fa fa-copy" aria-hidden></i> {
-						isCur ? "Deselect" :
-						TeamEditorState.clipboard ? "Add to clipboard" :
-						editor.readonly ? "Copy" :
-						"Copy/Move"
+						isCur ? TL`[Deselect]` :
+						TeamEditorState.clipboard ? TL`[Add to clipboard]` :
+						editor.readonly ? TL`[Copy]` :
+						TL`[Copy/Move]`
 					}
 				</button> {}
 				{!(TeamEditorState.clipboard || editor.readonly) && <button
 					class="option" name="import" onClick={this.clickPanelButton}
 					value={`set-${i}-import`}
 				>
-					<i class="fa fa-upload" aria-hidden></i> Import/Export
+					<i class="fa fa-upload" aria-hidden></i> {TL`[Import/Export]`}
 				</button>} {}
 				{!(TeamEditorState.clipboard || editor.readonly) && <button
 					class="option" name="delete" onClick={this.deleteSet} value={i}
 				>
-					<i class="fa fa-trash" aria-hidden></i> Delete
+					<i class="fa fa-trash" aria-hidden></i> {TL`[Delete]`}
 				</button>}
 			</div>
 			<table class={`${spriteClass}${tintClass}`} style={sprite}>
@@ -2870,39 +2988,39 @@ class TeamEditorForm extends preact.Component<{
 					<td rowSpan={2} class="set-pokemon"><div class="border-collapse">
 						<span class="sprite-inner">
 							<label class="label">
-								<span>Pokemon</span> {}
+								<span>{TL`Pokémon`}</span> {}
 								{this.renderInput(i, 'pokemon', set.species)}
 							</label>
 						</span>
 					</div></td>
 					<td colSpan={2} class="set-details"><div class="border-collapse">
 						<label class="label">
-							Details {}
+							{TL`Details`} {}
 							<button
 								class={`textbox${this.cur('details', i)}`} onClick={this.clickPanelButton}
 								onKeyDown={this.keyDownPanelButton} name="details"
 								value={`set-${i}-details`}
 							>
 								<span class="detailcell">
-									<label>Level</label> {}
+									<label>{TL`Level`}</label> {}
 									{set.level || editor.defaultLevel}
 								</span>
 								{!!(set.shiny || editor.gen >= 2) && <span class="detailcell">
-									<label>Shiny</label> {}
+									<label>{TL`Shiny`}</label> {}
 									{set.shiny ? <img
 										src={`${Dex.resourcePrefix}sprites/misc/shiny.png`} width={18} height={18} alt="Yes" style="margin-top: -2px"
 									/> : '\u2014'}
 								</span>}
 								{editor.gen === 9 && !editor.isChampions && <span class="detailcell">
-									<label>Tera</label> {}
+									<label>{TL`Tera`}</label> {}
 									<PSIcon type={set.teraType || species.requiredTeraType || species.types[0]} new={!editor.narrow} tera />
 								</span>}
 								{editor.hpTypeMatters(set) && <span class="detailcell">
-									<label>H.P.</label> {}
+									<label>{TL`H.P.`}</label> {}
 									<PSIcon type={editor.getHPType(set)} new={!editor.narrow} />
 								</span>}
 								{set.gender && set.gender !== 'N' && <span class="detailcell">
-									<label>Gender</label> {}
+									<label>{TL`Gender`}</label> {}
 									<PSIcon gender={set.gender} />
 								</span>}
 							</button>
@@ -2913,7 +3031,7 @@ class TeamEditorForm extends preact.Component<{
 					</div></td>
 					<td rowSpan={2} class={`set-moves${overfull}`}><div class="border-collapse">
 						<label class={`label ${this.cur('move', i)}`}>
-							Moves <button
+							{TL`Moves`} <button
 								class={`button ${this.cur('move', i)}`} onClick={this.setFocus} value={`set-${i}-move`}
 							>+</button>
 						</label> {}
@@ -2923,7 +3041,7 @@ class TeamEditorForm extends preact.Component<{
 					</div></td>
 					<td rowSpan={2} class="set-stats">
 						<label class="label">
-							Stats {}
+							{TL`Stats`} {}
 							<button
 								class={`textbox${this.cur('stats', i)}`} onClick={this.clickPanelButton}
 								onKeyDown={this.keyDownPanelButton} name="stats"
@@ -2937,16 +3055,19 @@ class TeamEditorForm extends preact.Component<{
 				<tr>
 					<td class="set-ability"><div class="border-collapse">
 						{editor.showAbility(set) && <label class="label">
-							Ability {}
-							{this.renderInput(i, 'ability', set.ability, -1, editor.gen <= 2 ? '(no ability)' : '(choose ability)')}
+							{TL`Ability`} {}
+							{this.renderInput(
+								i, 'ability', set.ability, -1,
+								editor.gen <= 2 ? TL`(no ability)` : TL`(choose ability)`
+							)}
 						</label>}
 					</div></td>
 					<td class="set-item"><div class="border-collapse">
 						{editor.showItem(set) && <>
 							{set.item && <PSIcon item={set.item} />}
 							<label class="label">
-								Item {}
-								{this.renderInput(i, 'item', set.item, -1, '(no item)')}
+								{TL`Item`} {}
+								{this.renderInput(i, 'item', set.item, -1, TL`(no item)`)}
 							</label>
 						</>}
 					</div></td>
@@ -2954,7 +3075,7 @@ class TeamEditorForm extends preact.Component<{
 			</table>
 			<div class={`set-nickname${tintClass}`}>
 				<label class="label">
-					<span>Nickname</span>
+					<span>{TL`Nickname`}</span>
 					{this.renderNicknameInput(i)}
 				</label>
 			</div>
@@ -2975,7 +3096,7 @@ function SetSourceButtons(props: {
 	return <>
 		{sampleSets?.length !== 0 && (
 			<div class="sample-sets">
-				<h3>Sample sets</h3>
+				<h3>{TL`Sample sets`}</h3>
 				{sampleSets ? (
 					<div>
 						{sampleSets.map(setName => <>
@@ -2985,13 +3106,13 @@ function SetSourceButtons(props: {
 						</>)}
 					</div>
 				) : (
-					<div>Loading...</div>
+					<div>{TL`Loading...`}</div>
 				)}
 			</div>
 		)}
 		{userSets !== null && (
 			<div class="sample-sets">
-				<h3>Box sets</h3>
+				<h3>{TL`Box sets`}</h3>
 				{Object.keys(userSets).length > 0 ? (
 					<div>
 						{Object.keys(userSets).map(setName => <>
@@ -3115,18 +3236,18 @@ class SetImportForm extends preact.Component<{
 	};
 	override render() {
 		const { editor } = this.props;
-		return <div role="dialog" aria-label="Import/Export" class="set-import-form">
-			<div class="resultheader"><h3>Import/Export Set</h3></div>
+		return <div role="dialog" aria-label={TL`Import/Export`} class="set-import-form">
+			<div class="resultheader"><h3>{TL`Import/Export set`}</h3></div>
 			<div class="pad">
 				<p>
 					<button class={`button${this.state.copied ? ' cur' : ''}`} onClick={this.copyText}>
 						<i class={`fa fa-${this.state.copied ? 'check' : 'copy'}`} aria-hidden></i> {}
-						{this.state.copied ? 'Copied!' : 'Copy'}
+						{this.state.copied ? TL`Copied!` : TL`[Copy]`}
 					</button> {}
 					{this.state.dirty && <button
 						class="button" onClick={this.revertTextToRevertPoint} disabled={editor.readonly}
 					>
-						<i class="fa fa-undo" aria-hidden></i> Revert
+						<i class="fa fa-undo" aria-hidden></i> {TL`[Revert]`}
 					</button>}
 				</p>
 				{this.state.error && <p class="message-error">{this.state.error}</p>}
@@ -3162,8 +3283,8 @@ class StatForm extends preact.Component<{
 				Math.floor(247 * editor.defaultLevel / 50) + 5;
 			const width = Math.min(stat * 75 / maxStat, 75);
 			const hue = Math.min(Math.floor(stat * 180 / maxStat), 360);
-			const statName = editor.gen === 1 && statID === 'spa' ? 'Spc' : BattleStatNames[statID];
-			if (evs && !ev && !set.evs && statID === 'hp') ev = 'EVs';
+			const statName = editor.gen === 1 && statID === 'spa' ? TL.statShort.spc : TL.statShort[statID];
+			if (evs && !ev && !set.evs && statID === 'hp') ev = TL`EVs`;
 			return <span class="statrow">
 				<em>{statName}</em> {}
 				<span class="statgraph">
@@ -3189,19 +3310,19 @@ class StatForm extends preact.Component<{
 		const autoSpreadValue = autoSpread && Object.values(autoSpread).join('/');
 		if (editor.isChampions) return null;
 		if (!hpIVdata) {
-			return <select name="ivspread" class="button" onChange={this.changeIVSpread}>
-				<option value="" selected>IV spreads</option>
-				{autoSpreadValue && <option value="auto">Auto ({autoSpreadValue})</option>}
-				<optgroup label="min Atk">
+			return <select name="ivspread" class="select" onChange={this.changeIVSpread}>
+				<option value="" selected>{TL`IV spreads`}</option>
+				{autoSpreadValue && <option value="auto">{TL`Automatic (${autoSpreadValue})`}</option>}
+				<optgroup label={TL`min Atk`}>
 					<option value="31/0/31/31/31/31">31/0/31/31/31/31</option>
 				</optgroup>
-				<optgroup label="min Atk, min Spe">
+				<optgroup label={TL`min Atk, min Spe`}>
 					<option value="31/0/31/31/31/0">31/0/31/31/31/0</option>
 				</optgroup>
-				<optgroup label="max all">
+				<optgroup label={TL`max all`}>
 					<option value="31/31/31/31/31/31">31/31/31/31/31/31</option>
 				</optgroup>
-				<optgroup label="min Spe">
+				<optgroup label={TL`min Spe`}>
 					<option value="31/31/31/31/31/0">31/31/31/31/31/0</option>
 				</optgroup>
 			</select>;
@@ -3209,28 +3330,28 @@ class StatForm extends preact.Component<{
 		const minStat = editor.gen >= 6 ? 0 : 2;
 		const hpIVs = hpIVdata.map(ivs => ivs.split('').map(iv => parseInt(iv)));
 
-		return <select name="ivspread" class="button" onChange={this.changeIVSpread}>
-			<option value="" selected>Hidden Power {hpType} IVs</option>
-			{autoSpreadValue && <option value="auto">Auto ({autoSpreadValue})</option>}
-			<optgroup label="min Atk">
+		return <select name="ivspread" class="select" onChange={this.changeIVSpread}>
+			<option value="" selected>{TL`Hidden Power ${hpType} IVs`}</option>
+			{autoSpreadValue && <option value="auto">{TL`Automatic (${autoSpreadValue})`}</option>}
+			<optgroup label={TL`min Atk`}>
 				{hpIVs.map(ivs => {
 					const spread = ivs.map((iv, i) => (i === 1 ? minStat : 30) + iv).join('/');
 					return <option value={spread}>{spread}</option>;
 				})}
 			</optgroup>
-			<optgroup label="min Atk, min Spe">
+			<optgroup label={TL`min Atk, min Spe`}>
 				{hpIVs.map(ivs => {
 					const spread = ivs.map((iv, i) => (i === 5 || i === 1 ? minStat : 30) + iv).join('/');
 					return <option value={spread}>{spread}</option>;
 				})}
 			</optgroup>
-			<optgroup label="max all">
+			<optgroup label={TL`max all`}>
 				{hpIVs.map(ivs => {
 					const spread = ivs.map(iv => 30 + iv).join('/');
 					return <option value={spread}>{spread}</option>;
 				})}
 			</optgroup>
-			<optgroup label="min Spe">
+			<optgroup label={TL`min Spe`}>
 				{hpIVs.map(ivs => {
 					const spread = ivs.map((iv, i) => (i === 5 ? minStat : 30) + iv).join('/');
 					return <option value={spread}>{spread}</option>;
@@ -3351,17 +3472,17 @@ class StatForm extends preact.Component<{
 		const guessedPlus = guess.plusStat || null;
 		const guessedMinus = guess.minusStat || null;
 		return <p class="suggested">
-			<small>Guessed spread: </small>
+			<small>{TL.label(TL`Guessed spread`)}</small>
 			{role === '?' ? (
-				"(Please choose 4 moves to get a guessed spread)"
+				TL`(Please choose 4 moves to get a guessed spread)`
 			) : (
 				<button name="setStatFormGuesses" class="button" onClick={this.handleGuess}>{role}: {}
 					{
-						Dex.statNames.map(statID => guessedEVs[statID] ? `${guessedEVs[statID]} ${BattleStatNames[statID]}` : null)
+						Dex.statNames.map(statID => guessedEVs[statID] ? `${guessedEVs[statID]} ${TL.statShort[statID]}` : null)
 							.filter(Boolean).join(' / ')
 					}
 					{!!(guessedPlus && guessedMinus) && (
-						` (+${BattleStatNames[guessedPlus]}, -${BattleStatNames[guessedMinus]})`
+						` (+${TL.statShort[guessedPlus]}, -${TL.statShort[guessedMinus]})`
 					)}
 				</button>
 			)}
@@ -3378,18 +3499,18 @@ class StatForm extends preact.Component<{
 		if (!optimized) return null;
 
 		return <p>
-			<small><em>Protip:</em> Use a different nature to {
+			<small><em>{TL.label(TL`Protip`)}</em>{
 				optimized.savedEVs ?
-					`save ${optimized.savedEVs} EVs` :
-					'get higher stats'
-			}: </small>
+					TL`Use a different nature to save ${optimized.savedEVs} EVs:` :
+					TL`Use a different nature to get higher stats:`
+			} </small>
 			<button name="setStatFormOptimization" class="button" onClick={this.handleOptimize}>
 				{
-					Dex.statNames.map(statID => optimized.evs[statID] ? `${optimized.evs[statID]} ${BattleStatNames[statID]}` : null)
+					Dex.statNames.map(statID => optimized.evs[statID] ? `${optimized.evs[statID]} ${TL.statShort[statID]}` : null)
 						.filter(Boolean).join(' / ')
 				}
 				{!!(optimized.plus && optimized.minus) && (
-					` (+${BattleStatNames[optimized.plus]}, -${BattleStatNames[optimized.minus]})`
+					` (+${TL.statShort[optimized.plus]}, -${TL.statShort[optimized.minus]})`
 				)}
 			</button>
 		</p>;
@@ -3475,7 +3596,7 @@ class StatForm extends preact.Component<{
 		} else {
 			if (target.value.includes('+')) {
 				if (statID === 'hp') {
-					alert("Natures cannot raise or lower HP.");
+					alert(TL`Natures cannot raise or lower HP.`);
 					return;
 				}
 				this.plus = statID;
@@ -3484,7 +3605,7 @@ class StatForm extends preact.Component<{
 			}
 			if (target.value.includes('-')) {
 				if (statID === 'hp') {
-					alert("Natures cannot raise or lower HP.");
+					alert(TL`Natures cannot raise or lower HP.`);
 					return;
 				}
 				this.minus = statID;
@@ -3535,17 +3656,17 @@ class StatForm extends preact.Component<{
 	};
 	renderNatureButtons(statID: Dex.StatName) {
 		if (statID === 'hp' || this.props.editor.gen < 3) return null;
-		const statName = BattleStatNames[statID];
+		const minus = '\u2212';
 		return <span class="stat-nature-buttons">
 			<button
 				class={`button button-first${this.minus === statID ? ' cur' : ''}`}
 				value={`${statID}-`} onClick={this.changeNatureModifier}
-				tabIndex={-1} aria-label={`Minus ${statName} Nature`}
+				tabIndex={-1} aria-label={TL`${minus + TL.statShort[statID]} nature`}
 			>&ndash;</button>
 			<button
 				class={`button button-last${this.plus === statID ? ' cur' : ''}`}
 				value={`${statID}+`} onClick={this.changeNatureModifier}
-				tabIndex={-1} aria-label={`Plus ${statName} Nature`}
+				tabIndex={-1} aria-label={TL`${'+' + TL.statShort[statID]} nature`}
 			>+</button>
 		</span>;
 	}
@@ -3611,6 +3732,7 @@ class StatForm extends preact.Component<{
 	}
 	override render() {
 		const { editor, set } = this.props;
+		const narrow = editor.narrowStats;
 		const species = editor.dex.species.get(set.species);
 
 		const baseStats = species.baseStats;
@@ -3623,22 +3745,8 @@ class StatForm extends preact.Component<{
 		const useIVs = editor.gen > 2;
 
 		// label column
-		const statNames = editor.narrow ? {
-			hp: 'HP',
-			atk: 'Atk',
-			def: 'Def',
-			spa: 'SpA',
-			spd: 'SpD',
-			spe: 'Spe',
-		} : {
-			hp: 'HP',
-			atk: 'Attack',
-			def: 'Defense',
-			spa: 'Sp. Atk.',
-			spd: 'Sp. Def.',
-			spe: 'Speed',
-		};
-		if (editor.gen === 1) statNames.spa = 'Special';
+		let statNames = narrow ? TL.statShort : TL.statMedium;
+		if (editor.gen === 1) statNames = { ...statNames, spa: statNames.spc };
 
 		const ivs = editor.getIVs(set);
 		const stats = Dex.statNames.filter(statID => editor.gen > 1 || statID !== 'spd').map(statID => [
@@ -3659,18 +3767,18 @@ class StatForm extends preact.Component<{
 		}
 		const defaultIVs = editor.defaultIVs(set);
 
-		return <div style="font-size:10pt" role="dialog" aria-label="Stats">
-			<div class="resultheader"><h3>EVs, IVs, and Nature</h3></div>
+		return <div class={`set-stats-form${narrow ? ' tiny-layout' : ''}`} role="dialog" aria-label={TL`Stats`}>
+			<div class="resultheader"><h3>{TL`EVs, IVs, and nature`}</h3></div>
 			<div class="pad">
 				{this.renderSpreadGuesser()}
 				<table>
 					<tr>
 						<th>{/* Stat name */}</th>
-						<th>Base</th>
+						<th>{TL`Base`}</th>
 						<th class="setstatbar">{/* Stat bar */}</th>
-						<th>{editor.isLetsGo ? 'AVs' : editor.isChampions ? 'Points' : 'EVs'}</th>
+						<th>{editor.isLetsGo ? TL`AVs` : editor.isChampions ? TL`Points` : TL`EVs`}</th>
 						<th>{/* EV slider */}</th>
-						{!editor.isChampions && <th>{useIVs ? 'IVs' : 'DVs'}</th>}
+						{!editor.isChampions && <th>{useIVs ? TL`IVs` : TL`DVs`}</th>}
 						<th>{/* Final stat */}</th>
 					</tr>
 					{stats.map(([statID, statName, stat]) => <tr>
@@ -3689,7 +3797,7 @@ class StatForm extends preact.Component<{
 						/></td>
 						{!editor.isChampions && <td><input
 							name={`iv-${statID}`} min={0} max={useIVs ? 31 : 15} placeholder={`${defaultIVs[statID]}`}
-							style={editor.narrow ? "width:22px" : "width:40px"} type={editor.narrow ? 'text' : 'number'} inputMode="numeric"
+							style={narrow ? "width:22px" : "width:40px"} type={narrow ? 'text' : 'number'} inputMode="numeric"
 							class="textbox default-placeholder stat-input" onInput={this.changeIV}
 							onChange={this.changeIV} onKeyDown={this.keyDownStatInput}
 						/></td>}
@@ -3697,23 +3805,28 @@ class StatForm extends preact.Component<{
 					</tr>)}
 					<tr>
 						<td colSpan={2}></td>
-						<td class="setstatbar" style="text-align:right">{remaining !== null ? 'Remaining:' : <>&nbsp;</>}</td>
+						<td class="setstatbar" style="text-align:right">{remaining !== null ? TL.label(TL`Remaining`) : <>&nbsp;</>}</td>
 						<td style="text-align:center">{remaining && remaining < 0 ? <b class="message-error">{remaining}</b> : remaining}</td>
 						<td colSpan={3} style="text-align:right">{this.renderIVMenu()}</td>
 					</tr>
 				</table>
 				{editor.gen >= 3 && <p>
-					Nature: <select name="nature" class="button" onChange={this.changeNature} value={set.nature || 'Serious'}>
-						{Object.entries(BattleNatures).map(([natureName, curNature]) => (
-							<option value={natureName}>
-								{natureName}
-								{curNature.plus && ` (+${BattleStatNames[curNature.plus]}, -${BattleStatNames[curNature.minus!]})`}
+					{TL.label(TL`Nature`)}<select
+						name="nature" class="select" onChange={this.changeNature} value={set.nature || 'Serious'}
+					>
+						{Object.values(BattleNatures).map(curNature => (
+							<option value={curNature.name}>
+								{TL(curNature)}
+								{curNature.plus && ` (+${TL.statShort[curNature.plus]}, -${TL.statShort[curNature.minus!]})`}
 							</option>
 						))}
 					</select>
 				</p>}
-				{editor.gen >= 3 && !editor.narrow && <p>
-					<small><em>Protip:</em> You can also set natures by typing <kbd>+</kbd> and <kbd>-</kbd> in the EV box.</small>
+				{editor.gen >= 3 && !narrow && <p>
+					<small><em>{TL.label(TL`Protip`)}</em>{TL('You can also set natures by typing {PLUS} and {MINUS} in the EV box.')
+						.split(/(\{(?:PLUS|MINUS)\})/).map(part =>
+							part === '{PLUS}' ? <kbd>+</kbd> : part === '{MINUS}' ? <kbd>-</kbd> : part
+						)}</small>
 				</p>}
 				{editor.gen >= 3 && this.renderStatOptimizer()}
 			</div>
@@ -3803,7 +3916,7 @@ class DetailsForm extends preact.Component<{
 	changeShiny = (ev: Event) => {
 		const target = ev.currentTarget as HTMLInputElement;
 		const { set } = this.props;
-		if (target.value) {
+		if (target.checked) {
 			set.shiny = true;
 		} else {
 			delete set.shiny;
@@ -3841,24 +3954,24 @@ class DetailsForm extends preact.Component<{
 		this.props.onChange();
 	};
 	renderGender(gender: Dex.GenderName) {
-		const genderTable = { 'M': "Male", 'F': "Female" };
-		if (gender === 'N') return 'Unknown';
+		if (gender === 'N') return this.props.editor.dex.text.genderName(gender);
 		return <>
 			<PSIcon gender={gender} /> {}
-			{genderTable[gender]}
+			{this.props.editor.dex.text.genderName(gender)}
 		</>;
 	}
 	render() {
 		const { editor, set } = this.props;
 		const species = editor.dex.species.get(set.species);
-		return <div style="font-size:10pt" role="dialog" aria-label="Details">
-			<div class="resultheader"><h3>Details</h3></div>
+		const baseSpecies = editor.dex.text.get(species).baseSpecies;
+		return <div class="set-details-form" role="dialog" aria-label={TL`Details`}>
+			<div class="resultheader"><h3>{TL`Details`}</h3></div>
 			<div class="pad">
-				<p><label class="label">Nickname: <input
-					name="nickname" class="textbox default-placeholder" placeholder={species.baseSpecies}
+				<p><label class="label">{TL.label(TL`Nickname`)}<input
+					name="nickname" class="textbox default-placeholder" placeholder={baseSpecies}
 					onInput={this.changeNickname} onChange={this.changeNickname}
 				/></label></p>
-				<p><label class="label">Level: <input
+				<p><label class="label">{TL.label(TL`Level`)}<input
 					name="level" value={set.level ?? ''} placeholder={`${editor.defaultLevel}`}
 					type="number" inputMode="numeric" min="1" max="100" step="1"
 					class="textbox inputform numform default-placeholder" style="width: 50px"
@@ -3873,17 +3986,13 @@ class DetailsForm extends preact.Component<{
 					/></label><small>(Custom starting HP is active for this format)</small></p>
 				)}
 				{editor.gen > 1 && (<>
-					<p><div class="label">Shiny: <div class="labeled">
+					<p><div class="label">{TL.label(TL`Shiny`)}<div class="labeled">
 						<label class="checkbox inline"><input
-							type="radio" name="shiny" value="true" checked={set.shiny}
+							type="checkbox" name="shiny" checked={set.shiny}
 							onInput={this.changeShiny} onChange={this.changeShiny}
-						/> <img src={`${Dex.resourcePrefix}sprites/misc/shiny.png`} width={22} height={22} alt="Shiny" /> Yes</label>
-						<label class="checkbox inline"><input
-							type="radio" name="shiny" value="" checked={!set.shiny}
-							onInput={this.changeShiny} onChange={this.changeShiny}
-						/> No</label>
+						/> <img src={`${Dex.resourcePrefix}sprites/misc/shiny.png`} width={22} height={22} alt="" /> {TL`Shiny`}</label>
 					</div></div></p>
-					<p><div class="label">Gender: {species.gender ? (
+					<p><div class="label">{TL.label(TL`Gender`)}{species.gender ? (
 						<strong>{this.renderGender(species.gender)}</strong>
 					) : (
 						<div class="labeled">
@@ -3902,14 +4011,14 @@ class DetailsForm extends preact.Component<{
 						</div>
 					)}</div></p>
 					{editor.isLetsGo ? (
-						<p><label class="label">Happiness: <input
+						<p><label class="label">{TL.label(TL`Happiness`)}<input
 							name="happiness" value="" placeholder="70"
 							type="number" inputMode="numeric"
 							class="textbox inputform numform default-placeholder" style="width: 50px"
 							onInput={this.changeHappiness} onChange={this.changeHappiness}
 						/></label></p>
 					) : (editor.gen < 8 || editor.isNatDex) && (
-						<p><label class="label">Happiness: <input
+						<p><label class="label">{TL.label(TL`Happiness`)}<input
 							name="happiness" value={set.happiness ?? ''} placeholder="255"
 							type="number" inputMode="numeric" min="0" max="255" step="1"
 							class="textbox inputform numform default-placeholder" style="width: 50px"
@@ -3920,7 +4029,7 @@ class DetailsForm extends preact.Component<{
 				)}
 				{editor.gen === 8 && !editor.isBDSP && !species.cannotDynamax && (
 					<p>
-						<label class="label" style="display:inline">Dynamax Level: <input
+						<label class="label" style="display:inline">{TL.label(TL`Dynamax Level`)}<input
 							name="dynamaxlevel" value={set.dynamaxLevel ?? ''} placeholder="10"
 							type="number" inputMode="numeric" min="0" max="10" step="1" class="textbox inputform numform default-placeholder"
 							onInput={this.changeDynamaxLevel} onChange={this.changeDynamaxLevel}
@@ -3938,21 +4047,23 @@ class DetailsForm extends preact.Component<{
 					</p>
 				)}
 				{((!editor.isLetsGo && editor.gen === 7) || editor.isNatDex || species.baseSpecies === 'Unown') && <p>
-					<label class="label">Hidden Power Type: <select
-						name="hptype" class="button" onChange={this.changeHPType} value={editor.getHPType(set)}
+					<label class="label">{TL.label(TL`Hidden Power Type`)}<select
+						name="hptype" class="select" onChange={this.changeHPType} value={editor.getHPType(set)}
 					>
 						{Dex.types.all().map(type => (
 							type.HPivs && <option value={type.name}>
-								{type.name}
+								{editor.dex.text.typeName(type.name)}
 							</option>
 						))}
 					</select></label>
 				</p>}
 				{editor.gen === 9 && !editor.isChampions && <p>
-					<label class="label" title="Tera Type">
-						Tera Type: {}
+					<label class="label" title={TL`Tera Type`}>
+						{TL.label(TL`Tera Type`)}{}
 						{species.requiredTeraType && editor.formeLegality === 'normal' ? (
-							<select name="teratype" class="button cur" disabled><option>{species.requiredTeraType}</option></select>
+							<button name="teratype" class="button cur" disabled>
+								<PSIcon type={species.requiredTeraType} new tera />
+							</button>
 						) : (
 							<select
 								name="teratype" class="button base-select" onChange={this.changeTera}
@@ -3967,7 +4078,7 @@ class DetailsForm extends preact.Component<{
 					</label>
 				</p>}
 				{species.cosmeticFormes && <div>
-					<p><strong>Form:</strong></p>
+					<p><strong>{TL.label(TL`Form`)}</strong></p>
 					<div style="display:flex;flex-wrap:wrap;gap:6px;max-width:400px;">
 						{(() => {
 							const baseId = toID(species.baseSpecies);
