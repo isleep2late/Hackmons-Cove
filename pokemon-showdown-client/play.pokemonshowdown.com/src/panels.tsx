@@ -11,7 +11,7 @@
 
 import preact from "../js/lib/preact";
 import type { Pokemon, ServerPokemon } from "./battle";
-import { Dex, PSUtils, toID } from "./battle-dex";
+import { Dex, PSUtils, TL, toID } from "./battle-dex";
 import type { Args } from "./battle-text-parser";
 import { BattleTooltips } from "./battle-tooltips";
 import { Net } from "./client-connection";
@@ -100,7 +100,7 @@ export class PSRouter {
 		const panelState = (PS.leftPanelWidth && room === PS.panel ?
 			PS.leftPanel.id + '..' + PS.rightPanel!.id :
 			room.id);
-		const newTitle = roomid === '' ? 'Hackmons!' : `${room.title} - Hackmons!`;
+		const newTitle = roomid === '' ? 'Hackmons!' : `${room.getTitle()} - Hackmons!`;
 		let changed: boolean | null = (roomid !== this.roomid);
 
 		this.roomid = roomid;
@@ -266,7 +266,7 @@ export class PSRoomPanel<T extends PSRoom = PSRoom> extends preact.Component<{ r
 	chooseParentValue(value: string) {
 		const dropdownButton = this.props.room.parentElem as HTMLButtonElement;
 		dropdownButton.value = value;
-		if (dropdownButton.name === 'format' && dropdownButton.getAttribute('data-href') !== '/formatdropdown') {
+		if (!dropdownButton.getAttribute('data-href')) {
 			// button was made by |html| rather than <FormatDropdown>
 			dropdownButton.innerText = value;
 		}
@@ -284,7 +284,7 @@ export class PSRoomPanel<T extends PSRoom = PSRoom> extends preact.Component<{ r
 	}
 	override render() {
 		return <PSPanelWrapper room={this.props.room}>
-			<div class="mainmessage"><p>Loading...</p></div>
+			<div class="mainmessage"><p>{TL`Loading...`}</p></div>
 		</PSPanelWrapper>;
 	}
 }
@@ -389,18 +389,18 @@ export class PSView extends preact.Component {
 	static snapVelocityX = 0;
 	static snapAnimating = false;
 	static snapRestingX = NARROW_MODE_HEADER_WIDTH;
-	static snapDebug = false;
+	static debugMenu: 'snap' | 'panels' | null = null;
 	commandPreviewTextbox: HTMLElement | null = null;
 	commandPreviewPlaceholder: string | null = null;
-	static setSnapDebug(enabled: boolean) {
-		this.snapDebug = enabled;
+	static setDebug(mode: 'snap' | 'panels' | null) {
+		this.debugMenu = mode;
 		PS.update();
-		if (!enabled) {
-			const elem = document.getElementById('ps-snap-debug');
+		if (mode === null) {
+			const elem = document.getElementById('ps-debug-menu');
 			if (elem) elem.style.display = 'none';
 			return;
 		}
-		setTimeout(() => this.updateSnapDebug(`command ${enabled ? 'on' : 'off'}`), 1);
+		setTimeout(() => this.updateSnapDebug(`command ${this.debugMenu || 'off'}`), 1);
 	}
 	override componentDidMount() {
 		PSView.scrollFrame = this.base!.children[0] as HTMLDivElement | null;
@@ -452,7 +452,6 @@ export class PSView extends preact.Component {
 		if (this.scrollFrame) {
 			if (this.useScrollFrame()) {
 				this.scrollFrame.scrollLeft = Math.max(this.scrollFrame.scrollLeft, window.scrollX);
-				if (window.scrollX) window.scrollTo(0, window.scrollY);
 			} else if (this.scrollFrame.scrollLeft) {
 				this.scrollFrame.scrollLeft = 0;
 			}
@@ -563,6 +562,9 @@ export class PSView extends preact.Component {
 		if (dx > 0) return scrollX > 1;
 		return true;
 	}
+	static hasTextSelection() {
+		return window.getSelection()?.type === 'Range';
+	}
 	static clearSnap() {
 		if (this.snapTimeout) {
 			clearTimeout(this.snapTimeout);
@@ -594,10 +596,10 @@ export class PSView extends preact.Component {
 		return naturalEndpoint < roomX / 2 ? 0 : roomX;
 	}
 	static updateSnapDebug(event = '') {
-		if (!this.snapDebug || this.cssScrollSnap || !this.narrowMode) {
+		if (this.debugMenu !== 'snap' || this.cssScrollSnap || !this.narrowMode) {
 			return;
 		}
-		const elem = document.getElementById('ps-snap-debug');
+		const elem = document.getElementById('ps-debug-menu');
 		if (!elem) return;
 
 		const x = this.getScrollX();
@@ -690,7 +692,8 @@ export class PSView extends preact.Component {
 		this.snapFrame = requestAnimationFrame(animate);
 	}
 	static startSnapGesture(x: number, y: number, target: EventTarget | null) {
-		if (!this.shouldJSSnap()) return;
+		if (!this.shouldJSSnap() || this.hasTextSelection()) return;
+		if ((target as HTMLInputElement)?.type === 'range') return;
 		this.clearSnap();
 		const now = performance.now();
 		this.snapStart = {
@@ -705,7 +708,16 @@ export class PSView extends preact.Component {
 		this.updateSnapDebug('start');
 	}
 	static moveSnapGesture(x: number, y: number) {
-		if (!this.shouldJSSnap() || !this.snapStart) return false;
+		if (!this.snapStart) return false;
+		if (!this.shouldJSSnap()) {
+			this.clearSnap();
+			return false;
+		}
+		if (this.hasTextSelection()) {
+			this.snapStart = null;
+			this.updateSnapDebug('text selection');
+			return false;
+		}
 		const start = this.snapStart;
 		const now = performance.now();
 		const dx = x - start.x;
@@ -743,7 +755,16 @@ export class PSView extends preact.Component {
 		return true;
 	}
 	static finishSnapGesture(x: number, y: number) {
-		if (!this.shouldJSSnap() || !this.snapStart) return;
+		if (!this.snapStart) return;
+		if (!this.shouldJSSnap()) {
+			this.clearSnap();
+			return;
+		}
+		if (this.hasTextSelection()) {
+			this.snapStart = null;
+			this.updateSnapDebug('text selection');
+			return;
+		}
 		const now = performance.now();
 		const dx = x - this.snapStart.x;
 		const dy = y - this.snapStart.y;
@@ -1405,6 +1426,13 @@ export class PSView extends preact.Component {
 		}
 	};
 	handleButtonClick(elem: HTMLButtonElement) {
+		if (elem.classList.contains('formatselect')) {
+			// this is an abomination but we gotta support it for backcompat
+			PS.join('formatdropdown' as RoomID, {
+				parentElem: elem,
+			});
+			return true;
+		}
 		switch (elem.name) {
 		case 'closeRoom': {
 			const roomid = elem.value as RoomID || PS.getRoom(elem)?.id || '' as RoomID;
@@ -1517,7 +1545,7 @@ export class PSView extends preact.Component {
 
 		return { display: 'none' };
 	}
-	static getPopupStyle(room: PSRoom, width?: number | 'auto', fullSize?: boolean): any {
+	static getPopupStyle(room: PSRoom, maxWidth?: number | 'auto', fullSize?: boolean): any {
 		if (fullSize) {
 			return { width: '90%', maxHeight: '90%', maxWidth: 'none', position: 'relative', margin: '5vh auto 0' };
 		}
@@ -1530,7 +1558,7 @@ export class PSView extends preact.Component {
 		}
 
 		if (!room.parentElem || !source) {
-			return { maxWidth: width || 480 };
+			return { maxWidth: maxWidth || 480 };
 		}
 		if (!room.width || !room.height) {
 			room.focusNextUpdate = true;
@@ -1542,7 +1570,7 @@ export class PSView extends preact.Component {
 				margin: 0,
 				top: 0,
 				left: 0,
-				...(width ? { maxWidth: typeof width === 'number' ? width - 2 : width } : {}),
+				...(maxWidth ? { maxWidth: typeof maxWidth === 'number' ? maxWidth - 2 : maxWidth } : {}),
 			};
 		}
 		// nonmodal popup: should be positioned near source element
@@ -1569,7 +1597,7 @@ export class PSView extends preact.Component {
 		const sourceLeft = source.left + offsetLeft;
 
 		const height = room.height;
-		width = width || room.width;
+		const width = room.width;
 
 		if (room.rightPopup) {
 
@@ -1582,7 +1610,7 @@ export class PSView extends preact.Component {
 				style.top = Math.max(0, availableHeight - height);
 			}
 			const popupLeft = sourceLeft + sourceWidth;
-			if (width !== 'auto' && popupLeft + width > availableWidth) {
+			if (popupLeft + width > availableWidth) {
 				// can't fit, give up and put it in the normal place
 				style = {
 					position: 'absolute',
@@ -1608,7 +1636,7 @@ export class PSView extends preact.Component {
 			}
 
 			const availableAlignedWidth = availableWidth - sourceLeft;
-			if (width !== 'auto' && availableAlignedWidth < width + 10) {
+			if (availableAlignedWidth < width + 10) {
 				// while `right: 10` would be simpler, it doesn't work if there is horizontal scrolling,
 				// like in the mobile layout
 				style.left = Math.max(availableWidth - width - 10, offsetLeft);
@@ -1619,7 +1647,7 @@ export class PSView extends preact.Component {
 		}
 
 		// -2 to exclude 1px border on each side
-		if (width) style.maxWidth = typeof width === 'number' ? width - 2 : width;
+		if (maxWidth) style.maxWidth = typeof maxWidth === 'number' ? maxWidth - 2 : maxWidth;
 
 		return style;
 	}
@@ -1630,6 +1658,15 @@ export class PSView extends preact.Component {
 		return <div key={room.id} class="ps-overlay" onClick={this.handleClickOverlay} role="dialog">
 			<PSPanelErrorBoundary room={room} />
 		</div>;
+	}
+	renderDebugMenu() {
+		if (PSView.debugMenu === 'panels') {
+			return `room: ${JSON.stringify(PS.room?.id)} (connected: ${JSON.stringify(PS.room?.connected)}) (connectMode: ${JSON.stringify(PS.room?.connectMode)})\n` +
+				`onepanel: ${JSON.stringify(PS.prefs.onepanel)}, leftPanelWidth: ${JSON.stringify(PS.leftPanelWidth)}\n` +
+				`panel: ${JSON.stringify(PS.panel?.id)}, left: ${JSON.stringify(PS.leftPanel?.id)}, right: ${JSON.stringify(PS.rightPanel?.id)}\n` +
+				`popups: ${JSON.stringify(PS.popups)}`;
+		}
+		return null;
 	}
 	render() {
 		let rooms = [] as preact.VNode[];
@@ -1647,12 +1684,9 @@ export class PSView extends preact.Component {
 					{rooms}
 				</div>
 			</div>
-			{PSView.snapDebug && <pre
-				id="ps-snap-debug" aria-hidden="true"
-				style={`display:none;position:fixed;left:8px;bottom:8px;z-index:9999;margin:0;padding:6px 8px;` +
-					`background:rgba(0,0,0,.75);color:white;font:11px/1.35 monospace;pointer-events:none;` +
-					`white-space:pre-wrap;border-radius:4px;`}
-			></pre>}
+			{PSView.debugMenu && <pre id="ps-debug-menu" aria-hidden="true" style={{ display: 'block' }}>
+				{this.renderDebugMenu()}
+			</pre>}
 			{PS.popups.map(roomid => this.renderPopup(PS.rooms[roomid]!))}
 		</div>;
 	}
@@ -1686,14 +1720,14 @@ export function PSIcon(
 		return <span class="itemicon" style={Dex.getItemIcon(props.item)} />;
 	}
 	if ('type' in props) {
-		let type = Dex.types.get(props.type).name;
-		if (!type) type = '???';
+		const type = Dex.types.get(props.type);
+		const typeName = type.name || '???';
 		if (props.new) {
-			return <span class={`typeicon typeicon-${type}${props.tera ? ' tera' : ''}`}>{type}</span>;
+			return <span class={`typeicon typeicon-${typeName}${props.tera ? ' tera' : ''}`}>{TL(type)}</span>;
 		}
-		let sanitizedType = type.replace(/\?/g, '%3f');
+		const sanitizedType = typeName.replace(/\?/g, '%3f');
 		return <img
-			src={`${Dex.resourcePrefix}sprites/types/${sanitizedType}.png`} alt={type}
+			src={`${Dex.resourcePrefix}sprites/types/${sanitizedType}.png`} alt={Dex.text.typeName(typeName)}
 			height="14" width="32" class={`pixelated${props.b ? ' b' : ''}`} style="vertical-align:middle"
 		/>;
 	}
@@ -1711,14 +1745,15 @@ export function PSIcon(
 			break;
 		}
 		return <img
-			src={`${Dex.resourcePrefix}sprites/categories/${sanitizedCategory}.png`} alt={sanitizedCategory}
+			src={`${Dex.resourcePrefix}sprites/categories/${sanitizedCategory}.png`}
+			alt={Dex.text.categoryName(sanitizedCategory)}
 			height="14" width="32" class="pixelated" style="vertical-align:middle"
 		/>;
 	}
 	if ('gender' in props) {
 		return <img
 			src={`${Dex.resourcePrefix}sprites/misc/gender-${props.gender.toLowerCase()}.png`}
-			width={18} height={18} alt={props.gender} style="margin-top: -1px; filter: grayscale(30%)"
+			width={18} height={18} alt={Dex.text.genderName(props.gender)} style="margin-top: -1px; filter: grayscale(30%)"
 		/>;
 	}
 	return null!;
