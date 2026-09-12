@@ -1993,6 +1993,9 @@ export default {
 			"infernalparade": {
 				"basePower": 65
 			},
+			"meteorassault": {
+				"basePower": 170
+			},
 			"mountaingale": {
 				"basePower": 120
 			},
@@ -2004,6 +2007,9 @@ export default {
 			},
 			"revelationdance": {
 				"basePower": 100
+			},
+			"slash": {
+				"basePower": 80
 			},
 			"snaptrap": {
 				"type": "Steel"
@@ -2234,9 +2240,6 @@ export default {
 			},
 			"Berserk": {
 				"onDamage": "modified"
-			},
-			"Disguise": {
-				"onEffectiveness": "modified"
 			},
 			"Unseen Fist": {
 				"onModifyMove": null

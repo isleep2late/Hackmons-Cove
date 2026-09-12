@@ -512,6 +512,10 @@
 
 /* setstats */
 
+.set-stats-form, .set-details-form {
+	font-size: 10pt;
+}
+
 .setdetails, .setstats {
 	display: block;
 	box-sizing: border-box;
@@ -987,4 +991,3 @@ you can't delete it by pressing Backspace */
 .sample-sets h3 {
 	margin: 0 0 10px;
 }
-
