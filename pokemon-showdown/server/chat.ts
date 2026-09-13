@@ -151,6 +151,12 @@ export type HostFilter = (host: string, user: User, connection: Connection, host
 const LINK_WHITELIST = [
 	'*.pokemonshowdown.com', 'psim.us', 'smogtours.psim.us',
 	'*.smogon.com', '*.pastebin.com', '*.hastebin.com',
+	// Fork: this server hands players hackmons.com links of its own. Config.routes.replays is
+	// replay.hackmons.com, so every replay link the server announces is a hackmons.com link, and
+	// without this entry a room with filterLinks on rejects the very link it just gave the user.
+	// One wildcard is enough: checkBannedLinks tests `*.${domain}` and domain is the last two
+	// labels, so this covers a bare hackmons.com as well as replay./play./www. under it.
+	'*.hackmons.com',
 ];
 
 const MAX_MESSAGE_LENGTH = 1000;
