@@ -1474,7 +1474,12 @@ export const commands: Chat.ChatCommands = {
 		this.sendReply('Restarting...');
 		const full = this.fullCmd.includes('full');
 		const clientDir = require('path').resolve(process.cwd(), '..', 'pokemon-showdown-client');
-		const cmd = `/bash cd ${clientDir} && node build ${full ? `full` : ``}`;
+		// Same reason as /rebuild below: a bare `node` resolves through the child
+		// shell's inherited PATH, which on production points at /usr/bin/node
+		// v18 while the server runs on v22, so this died with "We require
+		// Node.js version 22.18 or later; you're using v18.19.1" and the client
+		// was never rebuilt. execPath is this process's own interpreter.
+		const cmd = `/bash cd ${clientDir} && ${process.execPath} build ${full ? `full` : ``}`;
 		const message = `${user.name} used /updateclient`;
 		Rooms.global.notifyRooms(
 			['staff', 'upperstaff'], `|c|${user.getIdentity()}|/log ${message}`
@@ -1488,7 +1493,16 @@ export const commands: Chat.ChatCommands = {
 
 	async rebuild() {
 		this.canUseConsole();
-		const [, , stderr] = await bash('node ./build', this);
+		// process.execPath, NOT a bare `node`. The child shell inherits this
+		// process's PATH, and on the production box that PATH resolves `node` to
+		// /usr/bin/node v18, while the server itself runs on v22 - so `node
+		// ./build` died with "We require Node.js version 22 ... you're using
+		// v18.19.1". That failure is NOT fatal to /hotpatch, which calls this
+		// first and then carries on: every hotpatch there was quietly reloading
+		// whatever dist/ already held, reporting DONE over stale code.
+		// execPath is the interpreter running this very process, so it cannot
+		// drift from the server's own version however the PATH is set up.
+		const [, , stderr] = await bash(`${process.execPath} ./build`, this);
 		if (stderr) {
 			throw new Chat.ErrorMessage(`Crash while rebuilding: ${stderr}`);
 		}
