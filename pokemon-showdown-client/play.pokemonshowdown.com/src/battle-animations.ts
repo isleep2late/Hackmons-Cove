@@ -595,7 +595,7 @@ export class BattleScene implements BattleSceneStub {
 
 		const rated = this.battle.rated;
 		let bg: string;
-		if (typeof rated === 'string' && rated.startsWith("Smogon Premier League")) {
+		if (typeof rated === 'string' && (rated.startsWith("Smogon Premier League") || rated.startsWith("Hackmons Premier League"))) {
 			if (gen <= 1) bg = 'fx/bg-gen1-spl.png';
 			else if (gen <= 2) bg = 'fx/bg-gen2-spl.png';
 			else if (gen <= 3) bg = 'fx/bg-gen3-spl.png';
@@ -608,7 +608,7 @@ export class BattleScene implements BattleSceneStub {
 		} else if (typeof rated === 'string' && rated.startsWith('World Cup of Pokemon')) {
 			bg = 'fx/bg-wcop.png';
 			this.setBgm(-101);
-		} else if (typeof rated === 'string' && rated.startsWith('Smogon Champions League')) {
+		} else if (typeof rated === 'string' && (rated.startsWith('Smogon Champions League') || rated.startsWith('Official Tournament'))) {
 			bg = 'fx/bg-scl.png';
 			this.setBgm(-101);
 		} else {
