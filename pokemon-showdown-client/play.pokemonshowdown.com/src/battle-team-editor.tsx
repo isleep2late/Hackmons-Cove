@@ -1063,7 +1063,7 @@ export class TeamEditor extends preact.Component<{
 		const good = [], medium = [], bad = [];
 		const renderTypeDefensive = (counter: typeof counters[number]) => (
 			<tr>
-				<th>{editor.dex.text.typeName(counter.type)}</th>
+				<th>{TL.type[counter.type] || counter.type}</th>
 				<td>{counter.resists} <small class="gray">{TL`Resist`}</small></td>
 				<td>{counter.weaknesses} <small class="gray">{TL`Weak`}</small></td>
 			</tr>
@@ -1802,7 +1802,7 @@ class TeamTextbox extends preact.Component<{
 
 		const genderID = (set.gender || species.gender || 'N') as Dex.GenderName;
 		// em dash
-		const gender = genderID === 'N' ? '\u2014' : editor.dex.text.genderName(genderID);
+		const gender = genderID === 'N' ? '\u2014' : TL.gender[genderID] || genderID;
 
 		return <button class="textbox setdetails" name="details" value={i} onClick={this.clickDetails}>
 			<span class="detailcell">
@@ -3954,10 +3954,10 @@ class DetailsForm extends preact.Component<{
 		this.props.onChange();
 	};
 	renderGender(gender: Dex.GenderName) {
-		if (gender === 'N') return this.props.editor.dex.text.genderName(gender);
+		if (gender === 'N') return TL.gender[gender] || gender;
 		return <>
 			<PSIcon gender={gender} /> {}
-			{this.props.editor.dex.text.genderName(gender)}
+			{TL.gender[gender] || gender}
 		</>;
 	}
 	render() {
@@ -4052,7 +4052,7 @@ class DetailsForm extends preact.Component<{
 					>
 						{Dex.types.all().map(type => (
 							type.HPivs && <option value={type.name}>
-								{editor.dex.text.typeName(type.name)}
+								{TL.type[type.name] || type.name}
 							</option>
 						))}
 					</select></label>

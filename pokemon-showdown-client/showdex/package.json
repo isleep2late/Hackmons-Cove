@@ -1,6 +1,6 @@
 {
   "name": "showdex",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "Pokémon Showdown extension that harnesses the power of parabolic calculus to strategically extract your opponents' Elo.",
   "author": "Keith Choison <keith@tize.io>",
   "license": "AGPL-3.0",
@@ -24,7 +24,7 @@
     "commit": "./node_modules/cz-customizable/standalone.js",
     "cm": "pnpm commit",
     "cz": "pnpm commit",
-    "postinstall": "pnpm patch-ghooks",
+    "postinstall": "pnpm patch-ghooks && node scripts/patch-calc.cjs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
