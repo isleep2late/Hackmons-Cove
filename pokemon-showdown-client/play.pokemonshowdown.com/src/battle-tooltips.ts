@@ -916,7 +916,7 @@ export class BattleTooltips {
 		let genderBuf = '';
 		const gender = pokemon.gender;
 		if (gender === 'M' || gender === 'F') {
-			const genderName = TL.gender[gender === 'M' ? 'male' : 'female'] || gender;
+			const genderName = TL.gender[gender] || gender;
 			genderBuf = ` <img src="${Dex.fxPrefix}gender-${gender.toLowerCase()}.png" alt="${BattleLog.escapeHTML(genderName)}" width="7" height="10" class="pixelated" /> `;
 		}
 
@@ -1053,7 +1053,7 @@ export class BattleTooltips {
 
 		// Only display when you don't also have stats
 		if (clientPokemon?.nature && !serverPokemon) {
-			const nature = TL.nature[toID(clientPokemon.nature)] || clientPokemon.nature;
+			const nature = TL.nature[clientPokemon.nature] || clientPokemon.nature;
 			let natureText = `<small>${TL.label(TL`Nature`)}</small>` + nature;
 			text += `<p>${natureText}</p>`;
 		}

@@ -1731,33 +1731,33 @@ export function PSIcon(
 		}
 		const sanitizedType = typeName.replace(/\?/g, '%3f');
 		return <img
-			src={`${Dex.resourcePrefix}sprites/types/${sanitizedType}.png`} alt={Dex.text.typeName(typeName)}
+			src={`${Dex.resourcePrefix}sprites/types/${sanitizedType}.png`} alt={TL.type[typeName] || typeName}
 			height="14" width="32" class={`pixelated${props.b ? ' b' : ''}`} style="vertical-align:middle"
 		/>;
 	}
 	if ('category' in props) {
 		const categoryID = toID(props.category);
-		let sanitizedCategory = '';
+		let categoryName = '';
 		switch (categoryID) {
 		case 'physical':
 		case 'special':
 		case 'status':
-			sanitizedCategory = categoryID.charAt(0).toUpperCase() + categoryID.slice(1);
+			categoryName = categoryID.charAt(0).toUpperCase() + categoryID.slice(1);
 			break;
 		default:
-			sanitizedCategory = 'undefined';
+			categoryName = 'undefined';
 			break;
 		}
 		return <img
-			src={`${Dex.resourcePrefix}sprites/categories/${sanitizedCategory}.png`}
-			alt={Dex.text.categoryName(sanitizedCategory)}
+			src={`${Dex.resourcePrefix}sprites/categories/${categoryName}.png`}
+			alt={TL.tag[categoryID] || categoryName}
 			height="14" width="32" class="pixelated" style="vertical-align:middle"
 		/>;
 	}
 	if ('gender' in props) {
 		return <img
 			src={`${Dex.resourcePrefix}sprites/misc/gender-${props.gender.toLowerCase()}.png`}
-			width={18} height={18} alt={Dex.text.genderName(props.gender)} style="margin-top: -1px; filter: grayscale(30%)"
+			width={18} height={18} alt={TL.gender[props.gender] || props.gender} style="margin-top: -1px; filter: grayscale(30%)"
 		/>;
 	}
 	return null!;
