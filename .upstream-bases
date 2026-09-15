@@ -1,0 +1,19 @@
+# Upstream bases for the git-subtree prefixes vendored in this repo.
+#
+# Written by Upstream_Sync_Safe.sh as part of every sync commit, and machine-read by
+# tirelessgolem-bot/scripts/upstream-sync-check.js out of origin/main.
+#
+# WHY THIS FILE EXISTS. The base used to live only in the sync commit's
+# `git-subtree-dir:` / `git-subtree-split:` trailers. Those do not survive a
+# squash-merge that retitles the PR, which is normal practice on this repo - it
+# happened to PR #75 on 2026-08-20 and again to PR #94 on 2026-09-15. A tracked file
+# is content, not a commit message, so no retitle can reach it.
+#
+# The trailers are still written and are still a valid fallback. This file wins.
+# Internal bookkeeping - which commits were declined and why - stays in the private
+# bot repo's phnn-upstream.md. Only the bare upstream shas belong here.
+#
+# Format: <subtree prefix> <40-char upstream sha>   (one per line, '#' comments ignored)
+
+pokemon-showdown c23d2e942c9c0daadb13a7162a385bf78e3c9353
+pokemon-showdown-client f2faebd6892b314d785a0038f77309afed36970c

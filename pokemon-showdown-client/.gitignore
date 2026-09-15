@@ -54,3 +54,7 @@ config/routes.json
 /play.pokemonshowdown.com/showdex/
 !/showdex/.env
 !/showdex/package.json
+
+# damage-calc (vendored smogon/damage-calc) build outputs are per-box builds
+/damage-calc/dist/
+/play.pokemonshowdown.com/calc/
