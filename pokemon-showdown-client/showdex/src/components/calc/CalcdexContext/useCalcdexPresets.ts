@@ -20,7 +20,8 @@ import {
 import { formatId, nonEmptyObject } from '@showdex/utils/core';
 import { logger, runtimer } from '@showdex/utils/debug';
 import { determineTerrain, determineWeather, getGenlessFormat } from '@showdex/utils/dex';
-import { detectMaxEvsFormat, getMaxStatEv } from '@showdex/phnn';
+import { PokemonNatureBoosts } from '@showdex/consts/dex';
+import { applyPhnnMinConfusionSpread, detectMaxEvsFormat, getMaxStatEv, getPhnnMinConfusionNature } from '@showdex/phnn';
 import {
   type CalcdexBattlePresetsHookValue,
   applyPreset,
@@ -571,6 +572,12 @@ export const useCalcdexPresets = (
           pokemon.evs = populateStatsTable(maxEv ? {
             hp: maxEv, atk: maxEv, def: maxEv, spa: maxEv, spd: maxEv, spe: maxEv,
           } : {}, { spread: 'ev', format: state.format });
+
+          // same treatment as applyPreset(): keep every other max-EV default, zero Atk, minus-Atk nature
+          if (pokemon.phnnMinConfusion) {
+            applyPhnnMinConfusionSpread(pokemon.evs, pokemon.ivs);
+            pokemon.nature = getPhnnMinConfusionNature(pokemon.nature, PokemonNatureBoosts);
+          }
           pokemon.altTeraTypes = [];
           pokemon.altAbilities = [];
           pokemon.altItems = [];
