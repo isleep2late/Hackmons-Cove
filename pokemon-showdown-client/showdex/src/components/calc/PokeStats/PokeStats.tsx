@@ -21,7 +21,12 @@ import {
 } from '@showdex/utils/calc';
 import { clamp, env, formatId } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import { detectMaxEvsFormat, getMaxStatEv } from '@showdex/phnn';
+import {
+  buildPhnnMinConfusionPatch,
+  calcPhnnPokemonConfusion,
+  detectMaxEvsFormat,
+  getMaxStatEv,
+} from '@showdex/phnn';
 import { getDefaultSpreadValue, legalLockedFormat } from '@showdex/utils/dex';
 import { useRandomUuid } from '@showdex/utils/hooks';
 import { detectStatBoostDelta, formatStatBoost } from '@showdex/utils/ui';
@@ -225,6 +230,35 @@ export const PokeStats = ({
             }, `${l.scope}:ToggleButton~Genetics:onPress()`)}
           />
         }
+
+        {/*
+          Only offered in the max-EV formats, since it exists to carve an exception out of the
+          252/31-everywhere assumption those formats apply. Never inferred - see the note on
+          CalcdexPokemon.phnnMinConfusion.
+        */}
+        {detectMaxEvsFormat(format) && !legacy && (
+          <ToggleButton
+            className={styles.small}
+            label="0 Atk"
+            tooltip={(
+              <div className={styles.tooltipContent}>
+                {pokemon?.phnnMinConfusion ? (
+                  <>Assuming <strong>0 Atk EVs/IVs</strong> and a minus-Atk nature,<br />so confusion hurts less. Tap to assume max Atk again.</>
+                ) : (
+                  <>Assume this Pokemon dumps Attack<br />to reduce <strong>confusion</strong> self-damage.<br />Zeroes Atk EVs/IVs and picks a minus-Atk nature.</>
+                )}
+              </div>
+            )}
+            tooltipDisabled={!settings?.showUiTooltips}
+            primary={pokemon?.phnnMinConfusion}
+            active={pokemon?.phnnMinConfusion}
+            disabled={!pokemon?.speciesForme}
+            onPress={() => updatePokemon(
+                buildPhnnMinConfusionPatch(format, pokemon, PokemonNatureBoosts),
+                `${l.scope}:ToggleButton~PhnnMinConfusion:onPress()`,
+              )}
+          />
+        )}
       </TableGridItem>
 
       {statNames.map((stat) => {
@@ -611,6 +645,13 @@ export const PokeStats = ({
         const formattedStat = formatStatBoost(finalStat) || '???';
         const mods = statMods?.[stat];
 
+        // What this Pokemon's Atk investment costs it when confused. Only on the Atk row, since
+        // that is the stat the number is about. Fed spreadStats (not finalStats) inside the helper:
+        // the server's getConfusionDamage() applies boosts but no ability or item modifiers.
+        const confusion = stat === 'atk'
+          ? calcPhnnPokemonConfusion(format, pokemon, field)
+          : null;
+
         const didDirtyBoost = stat !== 'hp' && typeof pokemon?.dirtyBoosts?.[stat] === 'number';
         const autoBoosts = Object.values(pokemon?.autoBoostMap || {})
           .filter((fx) => stat in (fx?.boosts || {}) && fx.active);
@@ -700,13 +741,30 @@ export const PokeStats = ({
                     </React.Fragment>
                   );
                 })}
+
+                {!!confusion && (
+                  <>
+                    <div className={styles.statModValue}>
+                      {confusion.minPercent.toFixed(1)}&ndash;{confusion.maxPercent.toFixed(1)}%
+                    </div>
+                    <div className={styles.statModLabel}>
+                      confusion self-hit
+                    </div>
+                    <div className={styles.statModValue}>
+                      {confusion.hitsToKo}
+                    </div>
+                    <div className={styles.statModLabel}>
+                      hits to KO ({confusion.selfHitChance}% per turn)
+                    </div>
+                  </>
+                )}
               </div>
             )}
             offset={[0, 10]}
             delay={[1000, 50]}
             trigger="mouseenter"
             touch={['hold', 500]}
-            disabled={!mods?.length}
+            disabled={!mods?.length && !confusion}
           >
             <TableGridItem
               className={cx(

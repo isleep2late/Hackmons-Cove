@@ -436,3 +436,321 @@ export const setPhnnCalcContext = (format: string): void => {
     }
     : null;
 };
+
+/**
+ * Confusion self-damage.
+ *
+ * This server does NOT route confusion through the normal move pipeline, so none of the usual
+ * damage modifiers apply. `BattleActions#getConfusionDamage()` (pokemon-showdown
+ * sim/battle-actions.ts) is closed-form:
+ *
+ *   attack     = pokemon.calculateStat('atk', boosts.atk)
+ *   defense    = pokemon.calculateStat('def', boosts.def)
+ *   baseDamage = tr(tr(tr(tr(2 * level / 5 + 2) * basePower * attack) / defense) / 50) + 2
+ *   damage     = max(1, randomizer(tr(baseDamage, 16)))
+ *
+ * It calls no runEvent, so NOTHING modifies it: no STAB, no type effectiveness, no crit, no
+ * ability (Wonder Guard, Huge Power, Guts, Fur Coat included), no item, no burn, no screens, no
+ * weather, no terrain, no Tera, no Parental Bond. That is why this is computed here rather than
+ * through @smogon/calc - routing it through the engine would be LESS accurate, since the engine
+ * would apply Reflect, Life Orb, Protean's type-blind STAB and Wonder Guard's typeless zeroing.
+ *
+ * Ported against the server sources on 2026-09-15; keep it in step if those move.
+ */
+
+/** `Dex#trunc()` - sim/dex.ts. 32-bit unsigned wrap, optionally narrowed to `bits`. */
+const phnnTrunc = (num: number, bits = 0): number => (
+  bits ? (num >>> 0) % (2 ** bits) : (num >>> 0)
+);
+
+/**
+ * Boost application exactly as `Pokemon#calculateStat()` does it - sim/pokemon.ts.
+ *
+ * Note the asymmetry: positive stages FLOOR a multiply, negative stages FLOOR a DIVIDE. Do not be
+ * tempted to reuse a `stat * (1 / value)` helper: Math.floor(3 * (1 / 1.5)) is 1, while
+ * Math.floor(3 / 1.5) is 2.
+ */
+const phnnBoostedStat = (stat: number, stage: number): number => {
+  const boostTable = [1, 1.5, 2, 2.5, 3, 3.5, 4];
+  const boost = Math.max(-6, Math.min(6, Math.trunc(Number(stage) || 0)));
+
+  return boost >= 0
+    ? Math.floor(stat * boostTable[boost])
+    : Math.floor(stat / boostTable[-boost]);
+};
+
+/**
+ * Odds that a confused Pokemon hits ITSELF on a given turn, as a percentage.
+ *
+ * The `phnn` mod overrides this to a coin flip - `randomChance(1, 2)` in
+ * data/mods/phnn/conditions.ts - where standard Showdown uses `randomChance(33, 100)`.
+ *
+ * Deliberately keyed off the format id rather than detectPhnnKey(). Every one of the eight
+ * `mod: 'phnn'` formats in config/formats.ts is gen 9 and carries "nonerfs" in its id, but they do
+ * NOT all resolve to the gen9phnn data key - gen9nonerfscustomdisguises resolves to
+ * gen9customdisguises, and would have been given the wrong chance. The mod, not the type chart, is
+ * what decides this.
+ */
+export const getPhnnConfusionSelfHitChance = (format: string): number => {
+  const f = String(format || '').toLowerCase();
+
+  return f.includes('nonerfs') && /gen9/.test(f) ? 50 : 33;
+};
+
+export interface PhnnConfusionDamage {
+  /** Atk actually fed to the formula: spread stat plus stage, with no ability/item modifiers. */
+  atk: number;
+  /** Def actually fed to the formula (the Spd spread stat instead, under Wonder Room). */
+  def: number;
+  level: number;
+  maxHp: number;
+  /** All 16 damage rolls, ascending (85% through 100%). */
+  rolls: number[];
+  minDamage: number;
+  maxDamage: number;
+  minPercent: number;
+  maxPercent: number;
+  /** Worst case: self-hits needed to faint from full HP. NOT turns - see selfHitChance. */
+  hitsToKo: number;
+  /** Percent chance of hitting yourself on a given turn. */
+  selfHitChance: number;
+}
+
+export const calcPhnnConfusionDamage = (input: {
+  level?: number;
+  atk?: number;
+  def?: number;
+  /** Only read when wonderRoom is true. */
+  spd?: number;
+  atkStage?: number;
+  defStage?: number;
+  spdStage?: number;
+  maxHp?: number;
+  wonderRoom?: boolean;
+  /** Confusion is always 40 in every gen this fork hosts; overridable for tests. */
+  basePower?: number;
+  selfHitChance?: number;
+}): PhnnConfusionDamage | null => {
+  const basePower = input?.basePower || 40;
+  const level = Math.max(1, Math.trunc(input?.level || 100));
+
+  // Wonder Room swaps the defenses BEFORE boosts are applied, so the STAGE swaps with the stat.
+  const rawAtk = Math.trunc(input?.atk || 0);
+  const rawDef = Math.trunc((input?.wonderRoom ? input?.spd : input?.def) || 0);
+  const defStage = input?.wonderRoom ? input?.spdStage : input?.defStage;
+
+  if (rawAtk < 1 || rawDef < 1) {
+    return null;
+  }
+
+  const atk = phnnBoostedStat(rawAtk, input?.atkStage || 0);
+  const def = Math.max(1, phnnBoostedStat(rawDef, defStage || 0));
+
+  const levelFactor = phnnTrunc(((2 * level) / 5) + 2);
+  const baseDamage = phnnTrunc(phnnTrunc(phnnTrunc(levelFactor * basePower * atk) / def) / 50) + 2;
+
+  // 16-bit context, and it is a WRAP, not a clamp. In a format with inflated base stats, +6 Atk
+  // into -6 Def can exceed 65536 and the server genuinely wraps to a small number.
+  const damage16 = phnnTrunc(baseDamage, 16);
+
+  // randomizer(): tr(tr(baseDamage * (100 - random(16))) / 100), so r runs 0..15.
+  const rolls: number[] = [];
+
+  for (let r = 15; r >= 0; r--) {
+    rolls.push(Math.max(1, phnnTrunc(phnnTrunc(damage16 * (100 - r)) / 100)));
+  }
+
+  const maxHp = Math.max(1, Math.trunc(input?.maxHp || 0));
+  const minDamage = rolls[0];
+  const maxDamage = rolls[rolls.length - 1];
+
+  return {
+    atk,
+    def,
+    level,
+    maxHp,
+    rolls,
+    minDamage,
+    maxDamage,
+    minPercent: (minDamage / maxHp) * 100,
+    maxPercent: (maxDamage / maxHp) * 100,
+    hitsToKo: Math.ceil(maxHp / minDamage),
+    selfHitChance: input?.selfHitChance || 33,
+  };
+};
+
+/**
+ * Adapter from a CalcdexPokemon to calcPhnnConfusionDamage().
+ *
+ * `pokemon` is typed STRUCTURALLY on purpose: @showdex/utils/calc already imports this module, so
+ * importing its interfaces back would be a cycle.
+ *
+ * Feeds `spreadStats`, never `finalStats`. finalStats layers in ability and item modifiers (Huge
+ * Power, Choice Band, Fur Coat), and the server's calculateStat() reads storedStats and applies
+ * only boosts - so spreadStats plus a stage is the exact analogue. Using finalStats here is the
+ * difference between a correct readout and a merely plausible one.
+ */
+export const calcPhnnPokemonConfusion = (
+  format: string,
+  pokemon: {
+    level?: number;
+    spreadStats?: Partial<Record<string, number>>;
+    transformedSpreadStats?: Partial<Record<string, number>>;
+    boosts?: Partial<Record<string, number>>;
+    dirtyBoosts?: Partial<Record<string, number>>;
+    maxhp?: number;
+    transformedForme?: string;
+  },
+  /** Showdex names this `isWonderRoom` on CalcdexBattleField (see sanitizeField.ts). */
+  field?: { isWonderRoom?: boolean },
+): PhnnConfusionDamage | null => {
+  if (!pokemon) {
+    return null;
+  }
+
+  const stats = (pokemon.transformedForme && pokemon.transformedSpreadStats)
+    || pokemon.spreadStats;
+
+  if (!stats) {
+    return null;
+  }
+
+  const stage = (stat: string): number => (
+    typeof pokemon.dirtyBoosts?.[stat] === 'number'
+      ? pokemon.dirtyBoosts[stat]
+      : (pokemon.boosts?.[stat] || 0)
+  );
+
+  // maxhp of 100 means the client is reporting PERCENTAGES rather than points, in which case the
+  // spread HP is the real number.
+  const maxHp = (pokemon.maxhp && pokemon.maxhp !== 100 ? pokemon.maxhp : 0) || stats.hp || 0;
+
+  return calcPhnnConfusionDamage({
+    level: pokemon.level,
+    atk: stats.atk,
+    def: stats.def,
+    spd: stats.spd,
+    atkStage: stage('atk'),
+    defStage: stage('def'),
+    spdStage: stage('spd'),
+    maxHp,
+    wonderRoom: !!field?.isWonderRoom,
+    selfHitChance: getPhnnConfusionSelfHitChance(format),
+  });
+};
+
+/**
+ * "Minimise confusion damage": the spread a pure special attacker or wall actually runs.
+ *
+ * The fork assumes 252 EVs and 31 IVs in every stat, which is the right worst case for an unknown
+ * opponent but wrong for a Pokemon that deliberately dumps Attack so confusion hurts less.
+ * Confusion self-damage is a physical hit that uses the Pokemon's OWN Atk (see
+ * calcPhnnConfusionDamage above), so zero EVs, zero IVs and a minus-Atk nature is the standard
+ * answer - at no cost to a Pokemon that never clicks a physical move.
+ *
+ * This is opt-in per Pokemon and never inferred. In Pure Hackmons any Pokemon can carry any move
+ * and any ability, so guessing that an opponent is "special" would make the Calcdex under-report
+ * every physical move it might click - a worse error than the conservative one it replaces.
+ */
+
+/** The four natures that lower Attack, keyed by the stat they raise. */
+export const PHNN_MINUS_ATK_NATURES: Record<string, string> = {
+  def: 'Bold',
+  spa: 'Modest',
+  spd: 'Calm',
+  spe: 'Timid',
+};
+
+/**
+ * Picks the minus-Atk nature that best preserves what the Pokemon was already doing.
+ *
+ * If it already lowers Atk, leave it alone. Otherwise keep its boosted stat and swap the drop onto
+ * Atk - a +SpA Pokemon becomes Modest, a +Spe one Timid, and so on. Only a neutral or +Atk nature
+ * has nothing to preserve, and those fall back to Modest.
+ */
+export const getPhnnMinConfusionNature = (
+  nature?: string,
+  natureBoosts?: Record<string, [up?: string, down?: string]>,
+): Showdown.PokemonNature => {
+  const boosts = natureBoosts?.[nature as string];
+  const up = boosts?.[0];
+  const down = boosts?.[1];
+
+  if (down === 'atk') {
+    return nature as Showdown.PokemonNature;
+  }
+
+  const preserved = up && up !== 'atk' ? PHNN_MINUS_ATK_NATURES[up] : null;
+
+  return (preserved || 'Modest') as Showdown.PokemonNature;
+};
+
+/**
+ * Applies the min-confusion spread in place on a mutable stat table pair.
+ *
+ * Deliberately narrow: it only ever zeroes Atk. Everything else the caller decided - including the
+ * 252/31 max-EV defaults - is left exactly as it was, so this composes with the existing spread
+ * logic instead of replacing it.
+ */
+export const applyPhnnMinConfusionSpread = (
+  evs?: Partial<Record<string, number>>,
+  ivs?: Partial<Record<string, number>>,
+): void => {
+  if (evs && typeof evs.atk === 'number') {
+    evs.atk = 0;
+  }
+
+  if (ivs && typeof ivs.atk === 'number') {
+    ivs.atk = 0;
+  }
+};
+
+/**
+ * The exact patch the "0 Atk" toggle should apply, for a given current state.
+ *
+ * Lives here rather than inline in PokeStats so it can be unit tested and so the upstream
+ * component keeps only a call, not a decision. Returns a plain object for updatePokemon().
+ *
+ * Turning it ON zeroes Atk and swaps to a minus-Atk nature, remembering the one displaced.
+ * Turning it OFF restores that remembered nature and the format max for Atk, so the button is a
+ * real toggle rather than a one-way door that would leave a minus-Atk nature sitting next to
+ * restored 252 Atk EVs.
+ */
+export const buildPhnnMinConfusionPatch = (
+  format: string,
+  pokemon?: {
+    phnnMinConfusion?: boolean;
+    phnnPrevNature?: string;
+    nature?: string;
+    evs?: Partial<Record<string, number>>;
+    ivs?: Partial<Record<string, number>>;
+  },
+  natureBoosts?: Record<string, [up?: string, down?: string]>,
+): Record<string, unknown> => {
+  const next = !pokemon?.phnnMinConfusion;
+  const evs = { ...(pokemon?.evs || {}) };
+  const ivs = { ...(pokemon?.ivs || {}) };
+
+  if (next) {
+    applyPhnnMinConfusionSpread(evs, ivs);
+
+    return {
+      phnnMinConfusion: true,
+      evs,
+      ivs,
+      nature: getPhnnMinConfusionNature(pokemon?.nature, natureBoosts),
+      ...(pokemon?.nature ? { phnnPrevNature: pokemon.nature } : {}),
+    };
+  }
+
+  evs.atk = getMaxStatEv(format);
+  ivs.atk = 31;
+
+  return {
+    phnnMinConfusion: false,
+    evs,
+    ivs,
+    ...(pokemon?.phnnPrevNature ? { nature: pokemon.phnnPrevNature } : {}),
+    phnnPrevNature: null,
+  };
+};

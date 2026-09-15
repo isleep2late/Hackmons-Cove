@@ -8,6 +8,7 @@ import { calcPokemonSpreadStats, populateStatsTable } from '@showdex/utils/calc'
 import { formatId, nonEmptyObject } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
 import { PokemonStatNames } from '@showdex/consts/dex';
+import { PokemonNatureBoosts } from '@showdex/consts/dex';
 import {
   detectGenFromFormat,
   detectLegacyGen,
@@ -15,7 +16,7 @@ import {
   evToStatPoint,
   legalLockedFormat,
 } from '@showdex/utils/dex';
-import { detectMaxEvsFormat, getMaxStatEv } from '@showdex/phnn';
+import { applyPhnnMinConfusionSpread, detectMaxEvsFormat, getMaxStatEv, getPhnnMinConfusionNature } from '@showdex/phnn';
 import { detectCompletePreset } from './detectCompletePreset';
 import { detectUsageAlt, detectUsageAlts } from './detectUsageAlt';
 import { flattenAlt, flattenAlts } from './flattenAlts';
@@ -385,6 +386,22 @@ export const applyPreset = (
     output.ivs = populateStatsTable({
       hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31,
     }, { spread: 'iv', format });
+  }
+
+  // a Pokemon flagged as dumping Attack keeps every other max-EV default, but its Atk is zeroed and
+  // its nature swapped to a minus-Atk one. Applied AFTER the block above on purpose: that block
+  // rewrites evs/ivs wholesale, so anything done before it would be silently overwritten.
+  if (pokemon.phnnMinConfusion) {
+    applyPhnnMinConfusionSpread(output.evs, output.ivs);
+
+    // remember what the swap displaces, so switching the flag off restores THIS nature - the one
+    // the preset just asked for - rather than whatever was there before the preset was applied
+    const displaced = output.nature || pokemon.nature;
+
+    output.nature = getPhnnMinConfusionNature(displaced, PokemonNatureBoosts);
+    if (displaced) {
+      output.phnnPrevNature = displaced;
+    }
   }
 
   // update (2023/10/15): only apply the presetId if we have a complete preset (in case we're applying an OTS preset,

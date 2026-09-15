@@ -735,6 +735,32 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
   dirtyBoosts?: Showdown.StatsTableNoHp;
 
   /**
+   * Whether this Pokemon is assumed to dump Attack to reduce confusion self-damage.
+   *
+   * * Opt-in per Pokemon; never inferred, since in Pure Hackmons anything can carry a physical move.
+   * * When `true`, the fork's max-EV defaults still apply to every other stat, but Atk EVs and IVs
+   *   are zeroed and the nature is swapped to a minus-Atk one.
+   * * Survives preset re-application, which is the whole reason it is stored here rather than being
+   *   a one-off edit to `evs`/`ivs` that the next `applyPreset()` would overwrite.
+   *
+   * @default false
+   * @since 1.4.2
+   */
+  phnnMinConfusion?: boolean;
+
+  /**
+   * The nature `phnnMinConfusion` displaced, so turning it off can put it back.
+   *
+   * * Rewritten every time the minus-Atk swap runs, including when a preset is applied while the
+   *   flag is on - so switching off after a preset refresh restores the PRESET's nature rather
+   *   than a stale one from before it.
+   * * Cleared when the flag is turned off.
+   *
+   * @since 1.4.2
+   */
+  phnnPrevNature?: Showdown.PokemonNature;
+
+  /**
    * Currently applied stage boosts applied as a result of an ability's effect.
    *
    * * This includes stage boosts applied to both `boosts` & `dirtyBoosts`, depending on each effect's `turn` value.
