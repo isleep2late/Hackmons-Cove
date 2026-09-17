@@ -1083,21 +1083,11 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 	},
 	{
 		name: "[Gen 9 No Nerfs] Little Cup",
+		desc: "No Nerfs, but only baby Pokemon! Played at level 5.",
 		mod: 'phnn',
 		searchShow: false,
 		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Team Preview', 'Data Preview', 'Max Level = 5', 'Prestatus', 'Totem Aura', 'First Stage Only'],
-		banlist: ['Glitch', 'CAP'],
-		unbanlist: ['Past', 'Future', 'Unobtainable', 'Demo'],
-	},
-	{
-		name: "[Gen 9 No Nerfs] Middle Cup",
-		mod: 'phnn',
-		searchShow: false,
-		battle: {trunc: Math.trunc},
-		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Team Preview', 'Data Preview', 'Max Level = 50', 'Prestatus', 'Totem Aura', 'Middle Stage Only'],
-		banlist: ['Glitch', 'CAP'],
-		unbanlist: ['Past', 'Future', 'Unobtainable', 'Demo'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Team Preview', 'Data Preview', 'Prestatus', 'Totem Aura', 'Little Cup'],
 	},
 	{
 		name: "[Gen 5] Pure Hackmons No Nerfs",

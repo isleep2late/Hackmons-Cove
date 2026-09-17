@@ -1252,28 +1252,6 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 			}
 		},
 	},
-	firststageonly: {
-		effectType: 'ValidatorRule',
-		name: 'First Stage Only',
-		desc: "Only allows the first stage of a three-stage evolution family",
-		onValidateSet(set) {
-			const species = this.dex.species.get(set.species || set.name);
-			if (phnnEvoStage(this.dex, species) !== 'LC') {
-				return [`${species.name} is not the first stage of a three-stage evolution family.`];
-			}
-		},
-	},
-	middlestageonly: {
-		effectType: 'ValidatorRule',
-		name: 'Middle Stage Only',
-		desc: "Only allows the middle stage of a three-stage evolution family",
-		onValidateSet(set) {
-			const species = this.dex.species.get(set.species || set.name);
-			if (phnnEvoStage(this.dex, species) !== 'MC') {
-				return [`${species.name} is not the middle stage of a three-stage evolution family.`];
-			}
-		},
-	},
 	timerstarting: {
 		effectType: 'Rule',
 		name: 'Timer Starting',
