@@ -1467,7 +1467,7 @@ export const commands: Chat.ChatCommands = {
 		if (!target) {
 			(room.game as any).tie();
 			this.modlog('FORCETIE');
-			Monitor.adminlog(`${user.id} used /forcetie in ${room}`)
+			Monitor.adminlog(`${user.id} used /forcetie in <<${room}>>`);
 			return false;
 		}
 		const targetUser = Users.getExact(target);
@@ -1475,7 +1475,7 @@ export const commands: Chat.ChatCommands = {
 
 		(room.game as any).win(targetUser);
 		this.modlog('FORCEWIN', targetUser.id);
-		Monitor.adminlog(`${user.id} used /forcewin for ${targetUser.id} in ${room}`);
+		Monitor.adminlog(`${user.id} used /forcewin for ${targetUser.id} in <<${room}>>`);
 	},
 	forcewinhelp: [
 		`/forcetie - Forces the current match to end in a tie. Requires: ~`,
