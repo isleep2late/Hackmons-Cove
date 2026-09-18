@@ -826,6 +826,27 @@ export abstract class BasicRoom {
 		// this doesn't update parentid or subroom user symbols because it's
 		// intended to be used for cleanup only
 	}
+	/**
+	 * Battlelog announces a battle when it is CREATED (`GlobalRoomState.onCreateBattleRoom`), and the
+	 * announcement is just the room id at that moment. A battle that is made private later - which is most
+	 * of them, since a hidden replay makes the room private the instant the battle ends
+	 * (`RoomBattle.onEnd` -> `setPrivate('hidden', this.password)`) - is renamed to
+	 * `<roomid>-<password>pw`, so the link Battlelog already posted names a room that no longer exists and
+	 * carries no password. Only a battle that was ALREADY private when it was announced carried one.
+	 *
+	 * So the rename is reported, and the client moves the entry it already has onto the new id
+	 * (`|bpw|<old>|<new>`, BattleLog's `case 'bpw'`). It repoints that one line rather than posting a
+	 * second: the build before this one posted a `|html|` "went private as ... (password: ...)" line here
+	 * and staff asked for one line per battle, which is why it was removed - along with, by accident, the
+	 * only place the password was ever shown for a battle that went private after it started.
+	 */
+	private reportBattleRename(oldRoomid: RoomID) {
+		if (!Config.reportbattles || oldRoomid === this.roomid) return;
+		// Not `this.battle` - a best-of room renames the same way and is announced the same way.
+		const battlelogRoom = Rooms.get('battlelog');
+		if (!battlelogRoom) return;
+		battlelogRoom.add(`|bpw|${oldRoomid}|${this.roomid}`).update();
+	}
 	setPrivate(privacy: PrivacySetting, password?: string) {
 		this.settings.isPrivate = privacy;
 		this.saveSettings();
@@ -850,14 +871,18 @@ export abstract class BasicRoom {
 					for (let i = 0; i < 31; i++) password += ALPHABET[crypto.randomInt(0, ALPHABET.length - 1)];
 				}
 
+				const publicRoomid = this.roomid;
 				this.rename(this.title, `${this.roomid}-${password}pw` as RoomID, true);
+				this.reportBattleRename(publicRoomid);
 			} else {
 				if (!this.roomid.endsWith('pw')) return true;
 
 				const lastDashIndex = this.roomid.lastIndexOf('-');
 				if (lastDashIndex < 0) throw new Error(`invalid battle ID ${this.roomid}`);
 
+				const privateRoomid = this.roomid;
 				this.rename(this.title, this.roomid.slice(0, lastDashIndex) as RoomID);
+				this.reportBattleRename(privateRoomid);
 			}
 		}
 		this.bestOf?.setPrivacyOfGames(privacy);

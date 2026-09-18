@@ -301,6 +301,25 @@ export class BattleLog {
 			break;
 		}
 
+		case 'bpw': {
+			// `|bpw|OLDROOMID|NEWROOMID` - a battle this log already announced with `|b|` has been made
+			// private (or public again) and renamed, so the link in that entry names a room that no longer
+			// exists. Move the entry onto the new id, which for a private battle is the one carrying the
+			// password: one line per battle, and it stays the line that is actually clickable. Replaying a
+			// room's log applies these in order, so somebody who opens Battlelog afterwards gets the
+			// corrected links too.
+			const [, oldId, newId] = args as any as string[];
+			if (!/^[a-z0-9-]+$/.test(oldId || '') || !/^[a-z0-9-]+$/.test(newId || '')) return;
+			for (const elem of [this.innerElem, this.preemptElem]) {
+				elem?.querySelectorAll<HTMLAnchorElement>(`a.ilink[href="/${oldId}"]`).forEach(link => {
+					link.href = `/${newId}`;
+					// The room id is the password, so let a staffer read it off without opening the battle.
+					link.title = newId;
+				});
+			}
+			return;
+		}
+
 		case 'askreg':
 			this.addDiv('chat', `<div class="broadcast-blue"><b>${TL`Register an account to protect your ladder rating!`}</b><br /><button name="register" value="${BattleLog.escapeHTML(args[1])}"><b>${TL`[Register]`}</b></button></div>`);
 			return;

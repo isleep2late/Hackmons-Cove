@@ -352,6 +352,15 @@ export const LogViewer = new class {
 			const [, , html] = Utils.splitFirst(line, '|', 2);
 			return `<div ${getClass('notice')}>${html}</div>`;
 		}
+		case 'bpw': {
+			// `|bpw|OLDROOMID|NEWROOMID` - the battle announced above went private (or public) and was
+			// renamed. Live, the client moves the announcement onto the new id; in a log being read back
+			// the announcement is already written, so say where it went. For a private battle the new id
+			// carries the password, which is the whole point of showing this line.
+			const [, oldId, newId] = Utils.splitFirst(line, '|', 2);
+			return `<div ${getClass('notice')}><small>[${timeLink}] </small>` +
+				Utils.html`<code>${oldId}</code> is now <a href="/${newId}">${newId}</a></div>`;
+		}
 		case '!NT':
 			return `<div ${getClass('chat')}>${Utils.escapeHTML(fullLine)}</div>`;
 		case '':

@@ -68,6 +68,46 @@ describe('Rooms features', () => {
 			}
 		});
 
+		it('should point Battlelog at the new room id when a battle goes private', () => {
+			// Battlelog announces a battle when it is CREATED, under the id it has then. A battle that is
+			// made private afterwards - every battle with a hidden replay, the moment it ends - is renamed
+			// to `<roomid>-<password>pw`, so that announcement named a room that no longer exists and
+			// carried no password at all. `Room.reportBattleRename` tells Battlelog where the battle went.
+			const battlelog = Rooms.get('battlelog') || Rooms.createChatRoom('battlelog');
+			const reportbattles = Config.reportbattles;
+			Config.reportbattles = true;
+			try {
+				room = Rooms.createBattle({
+					format: 'customgame',
+					players: [
+						{ user: makeUser(), team: packedTeam },
+						{ user: makeUser(), team: packedTeam },
+					],
+					rated: false,
+					tour: false,
+				});
+				const publicRoomid = room.roomid;
+
+				room.setPrivate('hidden');
+				assert(room.roomid.endsWith('pw'), `expected a passworded room id, got ${room.roomid}`);
+				const privateRoomid = room.roomid;
+				assert(
+					battlelog.log.log.includes(`|bpw|${publicRoomid}|${privateRoomid}`),
+					`Battlelog was not told the battle is now ${privateRoomid}`
+				);
+
+				// ...and back onto the public id when it is made public again.
+				room.setPrivate(false);
+				assert.equal(room.roomid, publicRoomid);
+				assert(
+					battlelog.log.log.includes(`|bpw|${privateRoomid}|${publicRoomid}`),
+					`Battlelog was not told the battle went back to ${publicRoomid}`
+				);
+			} finally {
+				Config.reportbattles = reportbattles;
+			}
+		});
+
 		it('should copy auth from tournament', () => {
 			parent = Rooms.createChatRoom('parentroom');
 			parent.auth.get = () => '%';
