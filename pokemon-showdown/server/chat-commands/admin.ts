@@ -1479,7 +1479,7 @@ export const commands: Chat.ChatCommands = {
 		// v18 while the server runs on v22, so this died with "We require
 		// Node.js version 22.18 or later; you're using v18.19.1" and the client
 		// was never rebuilt. execPath is this process's own interpreter.
-		const cmd = `/bash cd ${clientDir} && ${process.execPath} build ${full ? `full` : ``}`;
+		const cmd = `/bash cd ${clientDir} && git pull origin && ${process.execPath} build ${full ? `full` : ``}`;
 		const message = `${user.name} used /updateclient`;
 		Rooms.global.notifyRooms(
 			['staff', 'upperstaff'], `|c|${user.getIdentity()}|/log ${message}`
