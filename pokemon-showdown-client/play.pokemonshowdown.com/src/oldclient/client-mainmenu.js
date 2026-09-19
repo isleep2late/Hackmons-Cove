@@ -1488,7 +1488,7 @@
 			}
 			app.addPopupPrompt("Username", "Open", function (target) {
 				if (!target) return;
-				if (['iforgetwhyimhere', 'isleep2late'].includes.toID(target)) {
+				if (toID(target) === 'iforgetwhyimhere' || toID(target) === 'isleep2late') {
 					app.addPopup(Popup, { htmlMessage: "Our tech staff can be very busy, please don't seek them out this way." });
 					return;
 				}
