@@ -340,7 +340,7 @@ export const commands: Chat.ChatCommands = {
 	pm: 'msg',
 	whisper: 'msg',
 	w: 'msg',
-	msg(target, room, user, connection) {
+	msg(target, room, user) {
 		if (!target) return this.parse('/help msg');
 		if (!target.includes(',')) {
 			this.errorReply(this.TL`You forgot the comma.`);
@@ -349,41 +349,30 @@ export const commands: Chat.ChatCommands = {
 		this.checkRecursion();
 
 		const { targetUser, targetUsername, rest: message } = this.splitUser(target);
-		if (targetUsername === '~') {
-			this.pmTarget = null;
-			this.room = null;
-		} else if (!targetUser) {
-			if (Chat.PrivateMessages.offlineIsEnabled) {
-				if (user.lastCommand === 'pm') {
-					// don't delete lastCommand so they can just keep sending pms
-					return this.parse(`/offlinemsg ${targetUsername},${message}`);
-				}
-				user.lastCommand = 'pm';
-				throw new Chat.ErrorMessage(
-					this.TL`User ${targetUsername} is offline. Send the message again to confirm. If you are using /msg, use /offlinemsg instead.`
-				);
-			}
-			let error = this.TL`User ${targetUsername} not found. Did you misspell their name?`;
-			error = `|pm|${this.user.getIdentity()}| ${targetUsername}|/error ${error}`;
-			connection.send(error);
-			return;
-		} else {
-			this.pmTarget = targetUser;
-			this.room = null;
-		}
+		const offlineTarget = targetUser ? targetUser.getLastId() : targetUsername;
+		this.pmTarget = targetUser?.connected ? targetUser : null;
+		this.pmTargetName = targetUser?.connected ? targetUsername : offlineTarget;
+		this.room = null;
 
-		if (targetUser && !targetUser.connected) {
-			if (Chat.PrivateMessages.offlineIsEnabled) {
-				if (user.lastCommand === 'pm') {
-					// don't delete lastCommand so they can just keep sending pms
-					return this.parse(`/offlinemsg ${targetUser.getLastId()},${message}`);
-				}
-				user.lastCommand = 'pm';
-				throw new Chat.ErrorMessage(
-					this.TL`User ${targetUsername} is offline. Send the message again to confirm. If you are using /msg, use /offlinemsg instead.`
-				);
+		if (targetUsername === '~') {
+			this.pmTargetName = null;
+		} else if (!targetUser?.connected) {
+			if (!Chat.PrivateMessages.offlineIsEnabled) {
+				if (targetUser) throw new Chat.ErrorMessage(`${targetUsername} is offline.`);
+				throw new Chat.ErrorMessage(this.TL`User ${targetUsername} not found. Did you misspell their name?`);
 			}
-			throw new Chat.ErrorMessage(`${targetUsername} is offline.`);
+			// Upstream also short-circuits a COMMAND straight to /offlinemsg here (`isCommand ||`
+			// in the condition below). This fork does not support commands in offline PMs at all -
+			// /offlinemsg rejects them outright - so that half of upstream's change is deliberately
+			// not taken, and msghelp keeps its single line for the same reason.
+			if (user.lastCommand === 'pm') {
+				// don't delete lastCommand so only the first offline DM needs to be repeated
+				return this.parse(`/offlinemsg ${offlineTarget},${message}`);
+			}
+			user.lastCommand = 'pm';
+			throw new Chat.ErrorMessage(
+				this.TL`User ${targetUsername} is offline. Send the message again to confirm. If you are using /msg, use /offlinemsg instead.`
+			);
 		}
 
 		return this.parse(message);

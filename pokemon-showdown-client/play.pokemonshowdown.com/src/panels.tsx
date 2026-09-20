@@ -198,7 +198,6 @@ export class PSRoomPanel<T extends PSRoom = PSRoom> extends preact.Component<{ r
 		return subscription;
 	}
 	override componentDidMount() {
-		this.props.room.onRequestFocus = options => this.focus(options);
 		this.subscriptions.push(this.props.room.subscribe(args => {
 			if (!args) this.forceUpdate();
 			else this.receiveLine(args);
@@ -237,14 +236,13 @@ export class PSRoomPanel<T extends PSRoom = PSRoom> extends preact.Component<{ r
 		const currentlyHidden = !room.width && room.parentElem && ['popup', 'modal-popup'].includes(room.location);
 		this.updateDimensions();
 		if (currentlyHidden) return;
-		if (room.focusNextUpdate) {
-			const focusOptions = room.focusNextUpdate === true ? undefined : room.focusNextUpdate;
-			room.focusNextUpdate = false;
-			this.focus(focusOptions);
+		if (PS.pendingFocus?.room === room) {
+			const { options } = PS.pendingFocus;
+			PS.pendingFocus = null;
+			this.focus(options);
 		}
 	}
 	override componentWillUnmount() {
-		this.props.room.onRequestFocus = null;
 		for (const subscription of this.subscriptions) {
 			subscription.unsubscribe();
 		}
@@ -275,11 +273,20 @@ export class PSRoomPanel<T extends PSRoom = PSRoom> extends preact.Component<{ r
 		PS.closePopup();
 	}
 	focus(options?: PSRoomFocusOptions) {
-		if (!options?.preventScroll && !PS.isPopup(this.props.room)) PSView.scrollToRoom();
+		const room = this.props.room;
+		if (!options?.preventScroll && !PS.isPopup(room)) {
+			PSView.scrollToRoom();
+			if (room.location === 'mini-window') {
+				this.base?.closest<HTMLElement>('.mini-window')?.scrollIntoView({
+					block: 'nearest',
+					inline: 'nearest',
+				});
+			}
+		}
 		if (PSView.hasTapped) return;
 
 		const autofocus = this.base?.querySelector<HTMLElement>('.autofocus');
-		PSView.politeFocus(autofocus);
+		PSView.politeFocus(autofocus || (PS.isPopup(room) ? this.base! : null));
 		(autofocus as HTMLInputElement)?.select?.();
 	}
 	override render() {
@@ -326,7 +333,10 @@ export function PSPanelWrapper(props: {
 	}
 	if (PS.isPopup(room)) {
 		const style = PSView.getPopupStyle(room, props.width, props.fullSize);
-		return <div class="ps-popup" id={`room-${room.id}`} style={style} onDragEnter={props.onDragEnter}>
+		// tabIndex -1 makes it focusable but not tabbable, for use as a default focus
+		return <div
+			class="ps-popup" id={`room-${room.id}`} style={style} tabIndex={-1} onDragEnter={props.onDragEnter}
+		>
 			{contents}
 		</div>;
 	}
@@ -1416,7 +1426,8 @@ Supported file types:
 
 		if (window.getSelection?.()?.type === 'Range') return;
 		room.autoDismissNotifications();
-		PS.setFocus(room);
+		PS.queueFocus(room);
+		room.update(null);
 	};
 	handleClickOverlay = (ev: MouseEvent) => {
 		// iOS Safari bug, no global click events when tapping
@@ -1565,7 +1576,6 @@ Supported file types:
 			return { maxWidth: maxWidth || 480 };
 		}
 		if (!room.width || !room.height) {
-			room.focusNextUpdate = true;
 			// dimensions unknown; render hidden at top-left so width/height can be grabbed
 			// next render will be able to calculate position
 			return {
