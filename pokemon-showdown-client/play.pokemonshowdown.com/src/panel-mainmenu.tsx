@@ -9,7 +9,7 @@ import preact from "../js/lib/preact";
 import { PSLoginServer } from "./client-connection";
 import { PSBackground } from "./client-core";
 import {
-	Config, PS, PSRoom, type PSRoomFocusOptions, type RoomID, type RoomOptions, type Team,
+	Config, PS, PSRoom, type PSRoomFocusOptions, type RoomID, type Team,
 } from "./client-main";
 import { PSIcon, PSPanelErrorBoundary, PSPanelWrapper, PSRoomPanel, PSView, ReconnectTimer } from "./panels";
 import type { BattlesRoom } from "./panel-battle";
@@ -54,18 +54,6 @@ export class MainMenuRoom extends PSRoom {
 	search: { searching: string[], games: Record<RoomID, string> | null } = { searching: [], games: null };
 	disallowSpectators: boolean | null = PS.prefs.disallowspectators;
 	lastChallenged: number | null = null;
-	constructor(options: RoomOptions) {
-		super(options);
-		if (this.backlog) {
-			// these aren't set yet, but a lot of things could go wrong if we don't
-			PS.rooms[''] = this;
-			PS.mainmenu = this;
-			for (const args of this.backlog) {
-				this.receiveLine(args);
-			}
-			this.backlog = null;
-		}
-	}
 	adjustPrivacy() {
 		PS.prefs.set('disallowspectators', this.disallowSpectators);
 		if (this.disallowSpectators) return '/noreply /hidenext \n';
@@ -124,7 +112,8 @@ export class MainMenuRoom extends PSRoom {
 		PS.send(`/utm ${search.packedTeam}`);
 		PS.send(`${privacy}/search ${search.format}`);
 	};
-	override receiveLine(args: Args) {
+	override handleLine(args: Args): boolean {
+		if (super.handleLine(args)) return true;
 		const [cmd] = args;
 		switch (cmd) {
 		case 'challstr': {
@@ -144,7 +133,7 @@ export class MainMenuRoom extends PSRoom {
 				}
 				PS.user.handleAssertion(res.username, res.assertion);
 			});
-			return;
+			return true;
 		} case 'updateuser': {
 			const [, fullName, namedCode, avatar, settingsJSON] = args;
 			const named = namedCode === '1';
@@ -158,32 +147,32 @@ export class MainMenuRoom extends PSRoom {
 			void Dex.loadTextData().then(() => PS.updateTranslatedText());
 			PS.user.setName(fullName, named, avatar);
 			PS.teams.loadRemoteTeams();
-			return;
+			return true;
 		} case 'updatechallenges': {
 			const [, challengesBuf] = args;
 			this.receiveChallenges(challengesBuf);
-			return;
+			return true;
 		} case 'updatesearch': {
 			const [, searchBuf] = args;
 			this.receiveSearch(searchBuf);
-			return;
+			return true;
 		} case 'queryresponse': {
 			const [, queryId, responseJSON] = args;
 			this.handleQueryResponse(queryId as ID, JSON.parse(responseJSON));
-			return;
+			return true;
 		} case 'pm': {
 			const [, user1, user2, message] = args;
 			this.handlePM(user1, user2, message);
 			let sideRoom = PS.rightPanel as ChatRoom;
 			if (sideRoom?.type === "chat" && PS.prefs.inchatpm) sideRoom?.log?.add(args);
-			return;
+			return true;
 		} case 'customgroups': {
 			const [, groupsList] = args;
 			PS.server.parseGroups(groupsList);
-			return;
+			return true;
 		} case 'formats': {
 			this.parseFormats(args);
-			return;
+			return true;
 		} case 'popup': {
 			let [, message] = args;
 			for (const roomid in PS.rooms) {
@@ -200,11 +189,12 @@ export class MainMenuRoom extends PSRoom {
 				width = 960;
 			}
 			PS.alert(message.replace(/\|\|/g, '\n'), { width });
-			return;
+			return true;
 		}
 		}
 		const lobby = PS.rooms['lobby'];
-		if (lobby) lobby.receiveLine(args);
+		if (lobby) lobby.receiveBatch([args]);
+		return true;
 	}
 	receiveChallenges(dataBuf: string) {
 		let json;
@@ -396,7 +386,7 @@ export class MainMenuRoom extends PSRoom {
 		} else {
 			room.updateTarget(pmTarget);
 		}
-		if (message) room.receiveLine([`c`, user1, message]);
+		if (message) room.receiveBatch([[`c`, user1, message]]);
 		PS.update();
 	}
 	/**
@@ -629,6 +619,7 @@ class MainMenuPanel extends PSRoomPanel<MainMenuRoom> {
 		const room = PS.getRoom(e.currentTarget);
 		if (room) {
 			room.minimized = !room.minimized;
+			if (!room.minimized) PS.queueFocus(room);
 			this.forceUpdate();
 		}
 	};
