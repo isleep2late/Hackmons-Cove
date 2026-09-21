@@ -47,6 +47,8 @@ export declare namespace Teams {
 		phAbilities?: string;
 	phItems?: string;
 		phStats?: Partial<Dex.StatsTable>;
+		/** Custom Disguises only: per-set base stats, 0-255, before EVs/IVs/level/nature */
+		phBaseStats?: Partial<Dex.StatsTable>;
 	}
 	export interface PokemonSet extends Partial<FullPokemonSet> {
 		/** Defaults to species name (not including forme), like in games */
@@ -124,31 +126,44 @@ export const Teams = new class {
 
 			if (set.pokeball || set.hpType || set.gigantamax ||
 				(set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10) || set.teraType ||
-				set.phType || set.disguise || set.startStatus || set.startHp !== undefined || set.phAbilities || set.phItems || set.phStats) {
+				set.phType || set.disguise || set.startStatus || set.startHp !== undefined || set.phAbilities || set.phItems ||
+				set.phStats || set.phBaseStats) {
 				buf += `,${set.hpType || ''}`;
 				buf += `,${this.packName(set.pokeball || '')}`;
 				buf += `,${set.gigantamax ? 'G' : ''}`;
 				buf += `,${set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10 ? set.dynamaxLevel : ''}`;
 				buf += `,${set.teraType ? set.teraType.replace(/\//g, '-') : ''}`;
-				if (set.phType || set.disguise || set.startStatus || set.startHp !== undefined || set.phAbilities || set.phItems || set.phStats) {
+				if (set.phType || set.disguise || set.startStatus || set.startHp !== undefined || set.phAbilities || set.phItems ||
+					set.phStats || set.phBaseStats) {
 					buf += `,${(set.phType || '').replace(/\//g, '-')}`;
 					buf += `,${this.packName(set.disguise || '')}`;
 					buf += `,${set.startStatus || ''}`;
-					if (set.startHp !== undefined || set.phAbilities || set.phItems || set.phStats) buf += `,${set.startHp !== undefined ? set.startHp : ''}`;
-					if (set.phAbilities || set.phItems || set.phStats) {
+					if (set.startHp !== undefined || set.phAbilities || set.phItems || set.phStats || set.phBaseStats) buf += `,${set.startHp !== undefined ? set.startHp : ''}`;
+					if (set.phAbilities || set.phItems || set.phStats || set.phBaseStats) {
 						buf += `,${(set.phAbilities || '').split('/').filter(Boolean).map(a => this.packName(a)).join('-')}`;
 					}
-					if (set.phItems || set.phStats) {
+					if (set.phItems || set.phStats || set.phBaseStats) {
 						buf += `,${(set.phItems || '').split('/').filter(Boolean).map(a => this.packName(a)).join('-')}`;
 					}
-					if (set.phStats) {
+					// slot 12 - phStats, slot 13 - phBaseStats. Slot 12 must be written whenever
+					// slot 13 is, or the base stats land in the wrong field.
+					if (set.phStats || set.phBaseStats) {
 						const overrideOrder = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'] as const;
 						let overrideBuf = '';
 						for (const statName of overrideOrder) {
 							if (statName !== 'hp') overrideBuf += '.';
-							overrideBuf += `${set.phStats[statName] ?? ''}`;
+							overrideBuf += `${set.phStats?.[statName] ?? ''}`;
 						}
 						buf += `,${overrideBuf}`;
+					}
+					if (set.phBaseStats) {
+						const baseOrder = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'] as const;
+						let baseBuf = '';
+						for (const statName of baseOrder) {
+							if (statName !== 'hp') baseBuf += '.';
+							baseBuf += `${set.phBaseStats[statName] ?? ''}`;
+						}
+						buf += `,${baseBuf}`;
 					}
 				}
 			}
@@ -278,9 +293,9 @@ export const Teams = new class {
 			j = buf.indexOf(']', i);
 			let misc;
 			if (j < 0) {
-				if (i < buf.length) misc = buf.substring(i).split(',', 13);
+				if (i < buf.length) misc = buf.substring(i).split(',', 14);
 			} else {
-				if (i !== j) misc = buf.substring(i, j).split(',', 13);
+				if (i !== j) misc = buf.substring(i, j).split(',', 14);
 			}
 			if (misc) {
 				set.happiness = (misc[0] ? Number(misc[0]) : undefined);
@@ -303,12 +318,17 @@ export const Teams = new class {
 						itemid => window.BattleItems?.[toID(itemid)]?.name || itemid
 					).join('/');
 				}
+				// DO NOT use `for (const [i, x] of arr.entries())` in this file: the client's ES5
+				// downlevel compiles it to an indexed loop over the Array Iterator, which has no
+				// `.length`, so the body silently never runs. That is exactly how the phStats block
+				// below shipped dead. Plain indexed loops only.
 				if (misc[12]) {
 					const overrideParts = misc[12].split('.');
 					const overrideOrder = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'] as const;
 					const phStats: Partial<Dex.StatsTable> = {};
 					let anyOverride = false;
-					for (const [oi, statName] of overrideOrder.entries()) {
+					for (let oi = 0; oi < overrideOrder.length; oi++) {
+						const statName = overrideOrder[oi];
 						const num = parseInt(overrideParts[oi]);
 						if (!isNaN(num) && num >= 1) {
 							phStats[statName] = num;
@@ -316,6 +336,22 @@ export const Teams = new class {
 						}
 					}
 					if (anyOverride) set.phStats = phStats;
+				}
+				if (misc[13]) {
+					// base stats, unlike the final-stat overrides above, are allowed to be 0
+					const baseParts = misc[13].split('.');
+					const baseOrder = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'] as const;
+					const phBaseStats: Partial<Dex.StatsTable> = {};
+					let anyBase = false;
+					for (let bi = 0; bi < baseOrder.length; bi++) {
+						const statName = baseOrder[bi];
+						const num = parseInt(baseParts[bi]);
+						if (!isNaN(num) && num >= 0 && num <= 255) {
+							phBaseStats[statName] = num;
+							anyBase = true;
+						}
+					}
+					if (anyBase) set.phBaseStats = phBaseStats;
 				}
 			}
 			i = j + 1;
@@ -386,6 +422,11 @@ export const Teams = new class {
 			const overrideNames = { hp: 'HP', atk: 'Atk', def: 'Def', spa: 'SpA', spd: 'SpD', spe: 'Spe' };
 			const overrideParts = Object.entries(set.phStats).map(([statName, value]) => `${value} ${overrideNames[statName as Dex.StatName]}`);
 			if (overrideParts.length) text += `Overrides: ${overrideParts.join(' / ')}\n`;
+		}
+		if (!newFormat && set.phBaseStats) {
+			const baseNames = { hp: 'HP', atk: 'Atk', def: 'Def', spa: 'SpA', spd: 'SpD', spe: 'Spe' };
+			const baseParts = Object.entries(set.phBaseStats).map(([statName, value]) => `${value} ${baseNames[statName as Dex.StatName]}`);
+			if (baseParts.length) text += `Base Stats: ${baseParts.join(' / ')}\n`;
 		}
 
 		if (newFormat) {
@@ -556,6 +597,21 @@ export const Teams = new class {
 				}
 			}
 			if (anyOverride) set.phStats = phStats;
+		} else if (line.startsWith('Base Stats: ')) {
+			const baseIds: { [k: string]: Dex.StatName } = { hp: 'hp', atk: 'atk', def: 'def', spa: 'spa', spd: 'spd', spe: 'spe' };
+			const phBaseStats: Partial<Dex.StatsTable> = {};
+			let anyBase = false;
+			for (const part of line.slice(12).split('/')) {
+				const bm = /^\s*(\d+)\s+([A-Za-z]+)\s*$/.exec(part);
+				if (!bm) continue;
+				const bid = baseIds[bm[2].toLowerCase()];
+				const bnum = parseInt(bm[1]);
+				if (bid && bnum >= 0) {
+					phBaseStats[bid] = Math.min(bnum, 255);
+					anyBase = true;
+				}
+			}
+			if (anyBase) set.phBaseStats = phBaseStats;
 		} else if (line.startsWith('Items: ')) {
 			const itemParts = line.slice(7).split('/').map(part => part.trim()).filter(part => part && part !== '(none)');
 			if (itemParts[0]) set.item = itemParts[0];

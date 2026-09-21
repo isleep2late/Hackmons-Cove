@@ -315,6 +315,24 @@ function getTextEntry(effect: TranslatableEffect, modid: string, gen: number, la
 		if (englishMod && typeof englishMod === 'object') assignTextFields(entry, englishMod);
 		if (localizedMod && typeof localizedMod === 'object') assignTextFields(entry, localizedMod);
 	}
+	// FORK CONTENT HAS NO data/text ENTRY, SO FALL BACK TO THE INLINE DESCRIPTION.
+	//
+	// The server's DexText.get() has exactly this fallback (pokemon-showdown/sim/dex-text.ts) and
+	// the client's copy of it does not, which is why /dt printed a description for Shadow Blast or
+	// TM01 while the teambuilder's description column was blank for all 95 fork moves and 73 fork
+	// items. Descriptions moved out of data/moves.js into data/text/en.js when the client adopted
+	// upstream's translation rework, and data/text is built only from the server's data/text/*.ts
+	// plus build-translations' CLIENT_MODS list - neither of which carries anything the fork added.
+	//
+	// This only fires when the text tables produced NOTHING for the effect, so a real translation
+	// always wins and localized clients are unaffected for every move that actually has one.
+	if (typeof entry.desc !== 'string' && typeof entry.shortDesc !== 'string') {
+		const inlineText = effect as { desc?: string, shortDesc?: string };
+		if (inlineText.desc || inlineText.shortDesc) {
+			entry.desc = inlineText.desc || inlineText.shortDesc!;
+			entry.shortDesc = inlineText.shortDesc || inlineText.desc!;
+		}
+	}
 	if (typeof entry.name !== 'string') entry.name = effect.name;
 	if (typeof entry.desc !== 'string') entry.desc = typeof entry.shortDesc === 'string' ? entry.shortDesc : '';
 	if (typeof entry.shortDesc !== 'string') entry.shortDesc = entry.desc;

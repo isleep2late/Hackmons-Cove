@@ -2884,6 +2884,19 @@ p.or:after {
 .statform .basestatscol {
 	width: 38px;
 }
+/* Custom Disguises base-stat editing. An input.numform's footprint is 48px (40 content + 1px
+   padding + 1px border + 1px/3px margin each side), which is why .evcol/.ivcol are 48px wide;
+   the Base column is 38px, so it only widens while the inputs are actually there - otherwise
+   they spill over the stat bars this feature exists to let you watch. */
+.statform .basestatscol.editing {
+	width: 48px;
+}
+/* An overridden value is italicised in place. It must NOT be a nested <b><em>: both selectors
+   carry `padding: 5px 0 0 0`, so nesting them doubles the padding and drops the number out of
+   its 28px row. */
+.statform .basestatscol b.phnn-basemod {
+	font-style: italic;
+}
 .statform .statscol {
 	width: 36px;
 }

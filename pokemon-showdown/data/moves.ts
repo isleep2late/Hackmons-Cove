@@ -1152,8 +1152,9 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 		accuracy: 100,
 		basePower: 0,
 		basePowerCallback(pokemon, target, move) {
-			const setSpecies = this.dex.species.get(move.allies!.shift()!.set.species);
-			const bp = 5 + Math.floor(setSpecies.baseStats.atk / 10);
+			const ally = move.allies!.shift()!;
+			const setSpecies = this.dex.species.get(ally.set.species);
+			const bp = 5 + Math.floor((ally.set.phBaseStats?.atk ?? setSpecies.baseStats.atk) / 10);
 			this.debug(`BP for ${setSpecies.name} hit: ${bp}`);
 			return bp;
 		},

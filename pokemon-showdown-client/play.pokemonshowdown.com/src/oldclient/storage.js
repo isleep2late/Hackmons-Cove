@@ -877,26 +877,35 @@ Storage.packTeam = function (team) {
 		}
 
 		if (set.pokeball || (set.hpType && !hasHP) || set.gigantamax || (set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10) || set.teraType ||
-			set.phType || set.disguise || set.startStatus || set.startHp !== undefined || set.phAbilities || set.phItems || set.phStats) {
+			set.phType || set.disguise || set.startStatus || set.startHp !== undefined || set.phAbilities || set.phItems ||
+			set.phStats || set.phBaseStats) {
 			buf += ',' + (set.hpType || '');
 			buf += ',' + toID(set.pokeball);
 			buf += ',' + (set.gigantamax ? 'G' : '');
 			buf += ',' + (set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10 ? set.dynamaxLevel : '');
 			buf += ',' + ((set.teraType || '').replace(/\//g, '-'));
-			if (set.phType || set.disguise || set.startStatus || set.startHp !== undefined || set.phAbilities || set.phItems || set.phStats) {
+			if (set.phType || set.disguise || set.startStatus || set.startHp !== undefined || set.phAbilities || set.phItems ||
+				set.phStats || set.phBaseStats) {
 				buf += ',' + ((set.phType || '').replace(/\//g, '-'));
 				buf += ',' + toID(set.disguise);
 				buf += ',' + (set.startStatus || '');
-				if (set.startHp !== undefined || set.phAbilities || set.phItems || set.phStats) buf += ',' + (set.startHp !== undefined ? set.startHp : '');
-				if (set.phAbilities || set.phItems || set.phStats) {
+				if (set.startHp !== undefined || set.phAbilities || set.phItems || set.phStats || set.phBaseStats) buf += ',' + (set.startHp !== undefined ? set.startHp : '');
+				if (set.phAbilities || set.phItems || set.phStats || set.phBaseStats) {
 					buf += ',' + (set.phAbilities || '').split('/').filter(function (a) { return a; }).map(function (a) { return toID(a); }).join('-');
 				}
-				if (set.phItems || set.phStats) {
+				if (set.phItems || set.phStats || set.phBaseStats) {
 					buf += ',' + (set.phItems || '').split('/').filter(function (a) { return a; }).map(function (a) { return toID(a); }).join('-');
 				}
-				if (set.phStats) {
+				// slot 12 - phStats, slot 13 - phBaseStats. Slot 12 must be written whenever
+				// slot 13 is, or the base stats land in the wrong field.
+				if (set.phStats || set.phBaseStats) {
 					var overrideOrder = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
-					buf += ',' + overrideOrder.map(function (statName) { return set.phStats[statName] !== undefined ? set.phStats[statName] : ''; }).join('.');
+					var phStatsForPack = set.phStats || {};
+					buf += ',' + overrideOrder.map(function (statName) { return phStatsForPack[statName] !== undefined ? phStatsForPack[statName] : ''; }).join('.');
+				}
+				if (set.phBaseStats) {
+					var baseOrder = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
+					buf += ',' + baseOrder.map(function (statName) { return set.phBaseStats[statName] !== undefined ? set.phBaseStats[statName] : ''; }).join('.');
 				}
 			}
 		}
@@ -1048,6 +1057,21 @@ Storage.fastUnpackTeam = function (buf) {
 					}
 				}
 				if (anyOverride) set.phStats = phStats;
+			}
+			if (misc[13]) {
+				// base stats, unlike the final-stat overrides above, are allowed to be 0
+				var baseParts = misc[13].split('.');
+				var baseOrder = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
+				var phBaseStats = {};
+				var anyBase = false;
+				for (var bi = 0; bi < baseOrder.length; bi++) {
+					var bnum = parseInt(baseParts[bi], 10);
+					if (!isNaN(bnum) && bnum >= 0 && bnum <= 255) {
+						phBaseStats[baseOrder[bi]] = bnum;
+						anyBase = true;
+					}
+				}
+				if (anyBase) set.phBaseStats = phBaseStats;
 			}
 		}
 		if (j < 0) break;
@@ -1203,6 +1227,21 @@ Storage.unpackTeam = function (buf) {
 					}
 				}
 				if (anyOverride) set.phStats = phStats;
+			}
+			if (misc[13]) {
+				// base stats, unlike the final-stat overrides above, are allowed to be 0
+				var baseParts = misc[13].split('.');
+				var baseOrder = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
+				var phBaseStats = {};
+				var anyBase = false;
+				for (var bi = 0; bi < baseOrder.length; bi++) {
+					var bnum = parseInt(baseParts[bi], 10);
+					if (!isNaN(bnum) && bnum >= 0 && bnum <= 255) {
+						phBaseStats[baseOrder[bi]] = bnum;
+						anyBase = true;
+					}
+				}
+				if (anyBase) set.phBaseStats = phBaseStats;
 			}
 		}
 		if (j < 0 || buf.indexOf('|', j) < 0) break;
@@ -1416,6 +1455,22 @@ Storage.importTeam = function (buffer, teams) {
 				}
 			}
 			if (anyOverride) curSet.phStats = phStats;
+		} else if (line.substr(0, 12) === 'Base Stats: ') {
+			var baseIds = { hp: 'hp', atk: 'atk', def: 'def', spa: 'spa', spd: 'spd', spe: 'spe' };
+			var phBaseStatsImp = {};
+			var anyBaseImp = false;
+			var baseImpParts = line.substr(12).split('/');
+			for (var bpi = 0; bpi < baseImpParts.length; bpi++) {
+				var bm = /^\s*(\d+)\s+([A-Za-z]+)\s*$/.exec(baseImpParts[bpi]);
+				if (!bm) continue;
+				var bid = baseIds[bm[2].toLowerCase()];
+				var bnumImp = parseInt(bm[1], 10);
+				if (bid && bnumImp >= 0) {
+					phBaseStatsImp[bid] = Math.min(bnumImp, 255);
+					anyBaseImp = true;
+				}
+			}
+			if (anyBaseImp) curSet.phBaseStats = phBaseStatsImp;
 		} else if (line.substr(0, 7) === 'Items: ') {
 			var itemParts = line.substr(7).split('/').map(function (part) { return $.trim(part); }).filter(function (part) { return !!part && part !== '(none)'; });
 			if (itemParts[0]) curSet.item = itemParts[0];
@@ -1573,6 +1628,14 @@ Storage.exportTeam = function (team, hidestats) {
 				if (curSet.phStats[osn] !== undefined) overrideParts.push(curSet.phStats[osn] + ' ' + overrideNames[osn]);
 			}
 			if (overrideParts.length) text += 'Overrides: ' + overrideParts.join(' / ') + "  \n";
+		}
+		if (curSet.phBaseStats) {
+			var baseNames = { hp: 'HP', atk: 'Atk', def: 'Def', spa: 'SpA', spd: 'SpD', spe: 'Spe' };
+			var baseParts = [];
+			for (var bsn in baseNames) {
+				if (curSet.phBaseStats[bsn] !== undefined) baseParts.push(curSet.phBaseStats[bsn] + ' ' + baseNames[bsn]);
+			}
+			if (baseParts.length) text += 'Base Stats: ' + baseParts.join(' / ') + "  \n";
 		}
 		if (curSet.disguise) {
 			text += 'Sprite: ' + curSet.disguise + "  \n";
