@@ -34,7 +34,7 @@ export const translations: TranslationCatalog = {
 	"~ <strong>Global Administrator</strong> - They can do anything, like change what this message says and promote users globally": null,
 
 	"<strong>Room ranks</strong>": null,
-	"^ <strong>Prize Winner</strong> - They don't have any powers beyond a symbol.": null,
+	"^ <strong>Prize Winner</strong> - They don't have any powers beyond a symbol.": null, // NOT USED
 	"+ <strong>Voice</strong> - They can use ! commands like !groups": null,
 	"% <strong>Driver</strong> - The above, and they can mute and warn": null,
 	"@ <strong>Moderator</strong> - The above, and they can room ban users": null,
@@ -238,5 +238,7 @@ export const translations: TranslationCatalog = {
 	"You are not blocking friend requests.": null,
 	"You are currently allowing friend notifications.": null,
 	"Your friend notifications are disabled.": null,
+	"★ <strong>Prize Winner</strong> - They don't have any powers beyond a symbol.": null,
+	"& <strong>Global Leader</strong> - The above, and they make important decisions about the server": null,
 
 };
