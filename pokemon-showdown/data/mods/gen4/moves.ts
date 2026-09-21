@@ -91,12 +91,13 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 					this.add('-activate', pokemon, 'move: Beat Up', '[of] ' + move.allies![0].name);
 				}
 				this.event.modifier = 1;
-				return this.dex.species.get(move.allies!.shift()!.set.species).baseStats.atk;
+				const ally = move.allies!.shift()!;
+				return ally.set.phBaseStats?.atk ?? this.dex.species.get(ally.set.species).baseStats.atk;
 			},
 			onFoeModifyDefPriority: -101,
 			onFoeModifyDef(def, pokemon) {
 				this.event.modifier = 1;
-				return this.dex.species.get(pokemon.set.species).baseStats.def;
+				return pokemon.set.phBaseStats?.def ?? this.dex.species.get(pokemon.set.species).baseStats.def;
 			},
 		},
 	},
@@ -273,7 +274,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 				delete move.volatileStatus;
 				delete move.onHit;
 				move.self = { boosts: { atk: 1, def: 1, spe: -1 } };
-				move.target = move.nonGhostTarget!;
+				move.target = 'self';
 			} else if (target?.volatiles['substitute']) {
 				delete move.volatileStatus;
 				delete move.onHit;

@@ -1048,7 +1048,7 @@ export class Pokemon {
 			switch (moveSlot.id) {
 			case 'curse':
 				if (!this.hasType('Ghost')) {
-					target = this.battle.dex.moves.get('curse').nonGhostTarget;
+					target = 'self';
 				}
 				break;
 			case 'pollenpuff':
@@ -1438,6 +1438,33 @@ export class Pokemon {
 	}
 
 	/**
+	 * The base stats this Pokemon's stat formula should actually run on.
+	 *
+	 * Custom Disguises lets a set carry its own base stats (`phBaseStats`, 0-255), and unlike
+	 * `phStats` - which replaces the FINAL stat after the formula and therefore still wins over
+	 * this - these go in at the front, so EVs, IVs, level and nature apply on top of them.
+	 *
+	 * Species objects are deep-frozen and shared by every battle in the process
+	 * (sim/dex-species.ts), so this always returns a detached copy and never writes through to
+	 * `this.species.baseStats`. Both places that consume base stats - setSpecies and
+	 * updateMaxHp - go through here, or max HP silently desyncs from the rest of the stats the
+	 * first time anything recomputes it.
+	 */
+	baseStatsForSet(): StatsTable {
+		const overrides = this.set.phBaseStats;
+		if (!overrides) return this.species.baseStats;
+		const baseStats: StatsTable = { ...this.species.baseStats };
+		let statName: StatID;
+		for (statName in overrides) {
+			const value = overrides[statName];
+			if (typeof value === 'number' && !isNaN(value)) {
+				baseStats[statName] = this.battle.clampIntRange(value, 0, 255);
+			}
+		}
+		return baseStats;
+	}
+
+	/**
 	 * Changes this Pokemon's species to the given speciesId (or species).
 	 * This function only handles changes to stats and type.
 	 * Use formeChange to handle changes to ability and sending client messages.
@@ -1453,7 +1480,7 @@ export class Pokemon {
 		this.knownType = true;
 		this.weighthg = species.weighthg;
 
-		const stats = this.battle.spreadModify(this.species.baseStats, this.set);
+		const stats = this.battle.spreadModify(this.baseStatsForSet(), this.set);
 		if (this.species.maxHP) stats.hp = this.species.maxHP;
 		if (this.set.phStats) {
 			let overrideName: StatID;
@@ -1563,7 +1590,16 @@ export class Pokemon {
 	}
 
 	updateMaxHp() {
-		const newBaseMaxHp = this.battle.statModify(this.species.baseStats, this.set, 'hp');
+		let newBaseMaxHp = this.battle.statModify(this.baseStatsForSet(), this.set, 'hp');
+		// setSpecies applies phStats AFTER the formula, so a final-stat override beats a base-stat
+		// one. This has to do the same or the precedence inverts the moment anything recomputes max
+		// HP: the HP the set asked for would be thrown away and recomputed from the base stat it is
+		// supposed to override. (Before base stats existed this line lost phStats too, but it fell
+		// back to the species' real base HP, so the inversion was not visible.)
+		const hpOverride = this.set.phStats?.hp;
+		if (typeof hpOverride === 'number' && hpOverride >= 1) {
+			newBaseMaxHp = this.battle.clampIntRange(hpOverride, 1, 65535);
+		}
 		if (newBaseMaxHp === this.baseMaxhp) return;
 		this.baseMaxhp = newBaseMaxHp;
 		const newMaxHP = this.volatiles['dynamax'] ? (2 * this.baseMaxhp) : this.baseMaxhp;

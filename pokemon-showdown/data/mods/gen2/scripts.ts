@@ -600,9 +600,9 @@ export const Scripts: ModdedBattleScriptsData = {
 
 			// Using Beat Up
 			if (move.allies) {
-				attack = move.allies[0].species.baseStats.atk;
+				attack = move.allies[0].baseStatsForSet().atk;
 				move.allies.shift();
-				defense = defender.species.baseStats.def;
+				defense = defender.baseStatsForSet().def;
 			}
 
 			// Moves that ignore offense and defense respectively.

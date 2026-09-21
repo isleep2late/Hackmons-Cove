@@ -699,6 +699,11 @@ export class TeamValidator {
 		if (set.phStats && !statmodAllowed) {
 			problems.push(`${set.name || set.species} has manual stat overrides, which are only allowed in Custom Disguises formats or with the Stat Mod rule.`);
 		}
+		// Base stat overrides are Custom Disguises ONLY - the Stat Mod rule does not grant them,
+		// because Stat Mod is about the final stat and these go through the stat formula.
+		if (set.phBaseStats && !isCustomDisguises) {
+			problems.push(`${set.name || set.species} has base stat overrides, which are only allowed in Custom Disguises formats.`);
+		}
 		const findTypeName = (typeText: string): string | null => {
 			const wanted = typeText.trim().toLowerCase();
 			if (!wanted) return null;
@@ -869,6 +874,26 @@ export class TeamValidator {
 				set.phStats = cleaned;
 			} else {
 				delete set.phStats;
+			}
+		}
+		if (set.phBaseStats && isCustomDisguises) {
+			const statOrder = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'] as StatID[];
+			const cleanedBase: Partial<StatsTable> = {};
+			let anyBase = false;
+			for (const statName of statOrder) {
+				const value = set.phBaseStats[statName];
+				if (value === undefined) continue;
+				if (typeof value !== 'number' || isNaN(value) || value < 0 || value > 255 || value % 1 !== 0) {
+					problems.push(`${name}'s ${statName.toUpperCase()} base stat must be a whole number from 0 to 255.`);
+					continue;
+				}
+				cleanedBase[statName] = value;
+				anyBase = true;
+			}
+			if (anyBase) {
+				set.phBaseStats = cleanedBase;
+			} else {
+				delete set.phBaseStats;
 			}
 		}
 		if (nature.id && !nature.exists) {

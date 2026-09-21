@@ -121,6 +121,13 @@ export interface PokemonSet {
 	phAbilities?: string;
 	phItems?: string;
 	phStats?: Partial<StatsTable>;
+	/**
+	 * Custom Disguises only: the species' own base stats, overridden per set (0-255).
+	 * EVs, IVs, level and nature are applied on top of these, so unlike `phStats` -
+	 * which replaces the FINAL stat and therefore wins over this - a base stat here
+	 * still goes through the normal stat formula.
+	 */
+	phBaseStats?: Partial<StatsTable>;
 }
 
 export const Teams = new class Teams {
@@ -208,32 +215,44 @@ export const Teams = new class Teams {
 
 			if (set.pokeball || set.hpType || set.gigantamax ||
 				(set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10) || set.teraType ||
-				set.phType || set.disguise || set.startStatus || set.startHp !== undefined || set.phAbilities || set.phItems || set.phStats) {
+				set.phType || set.disguise || set.startStatus || set.startHp !== undefined || set.phAbilities || set.phItems ||
+				set.phStats || set.phBaseStats) {
 				buf += `,${set.hpType || ''}`;
 				buf += `,${this.packName(set.pokeball || '')}`;
 				buf += `,${set.gigantamax ? 'G' : ''}`;
 				buf += `,${set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10 ? set.dynamaxLevel : ''}`;
 				buf += `,${set.teraType ? set.teraType.replace(/\//g, '-') : ''}`;
-				if (set.phType || set.disguise || set.startStatus || set.startHp !== undefined || set.phAbilities || set.phItems || set.phStats) {
+				if (set.phType || set.disguise || set.startStatus || set.startHp !== undefined || set.phAbilities || set.phItems ||
+					set.phStats || set.phBaseStats) {
 					buf += `,${(set.phType || '').replace(/\//g, '-')}`;
 					buf += `,${this.packName(set.disguise || '')}`;
 					buf += `,${set.startStatus || ''}`;
-					if (set.startHp !== undefined || set.phAbilities || set.phItems || set.phStats) buf += `,${set.startHp !== undefined ? set.startHp : ''}`;
-					if (set.phAbilities || set.phItems || set.phStats) {
+					if (set.startHp !== undefined || set.phAbilities || set.phItems || set.phStats || set.phBaseStats) buf += `,${set.startHp !== undefined ? set.startHp : ''}`;
+					if (set.phAbilities || set.phItems || set.phStats || set.phBaseStats) {
 						buf += `,${(set.phAbilities || '').split('/').filter(Boolean).map(a => this.packName(a)).join('-')}`;
 					}
-					if (set.phItems || set.phStats) {
+					if (set.phItems || set.phStats || set.phBaseStats) {
 						buf += `,${(set.phItems || '').split('/').filter(Boolean).map(a => this.packName(a)).join('-')}`;
 					}
-					if (set.phStats) {
+					// slot 12 - phStats, and slot 13 - phBaseStats. Slot 12 has to be written
+					// whenever slot 13 is, or the base stats land in the wrong field.
+					// Both stat slots are six values joined by '.', so a NON-INTEGER would contribute a
+					// second '.' and shift every later stat one field to the right - and because
+					// unpack runs before validateSet, the pieces arrive as whole numbers and the
+					// validator's integer check never fires. Round here so the slot can only ever
+					// hold six fields.
+					const packStats = (stats: Partial<StatsTable> | undefined) => {
 						const order = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'] as const;
-						let overrideBuf = '';
+						let out = '';
 						for (const statName of order) {
-							if (statName !== 'hp') overrideBuf += '.';
-							overrideBuf += `${set.phStats[statName] ?? ''}`;
+							if (statName !== 'hp') out += '.';
+							const value = stats?.[statName];
+							out += typeof value === 'number' && isFinite(value) ? `${Math.round(value)}` : '';
 						}
-						buf += `,${overrideBuf}`;
-					}
+						return out;
+					};
+					if (set.phStats || set.phBaseStats) buf += `,${packStats(set.phStats)}`;
+					if (set.phBaseStats) buf += `,${packStats(set.phBaseStats)}`;
 				}
 			}
 		}
@@ -359,9 +378,9 @@ export const Teams = new class Teams {
 			j = buf.indexOf(']', i);
 			let misc;
 			if (j < 0) {
-				if (i < buf.length) misc = buf.substring(i).split(',', 13);
+				if (i < buf.length) misc = buf.substring(i).split(',', 14);
 			} else {
-				if (i !== j) misc = buf.substring(i, j).split(',', 13);
+				if (i !== j) misc = buf.substring(i, j).split(',', 14);
 			}
 			if (misc) {
 				set.happiness = (misc[0] ? Number(misc[0]) : 255);
@@ -393,6 +412,21 @@ export const Teams = new class Teams {
 						}
 					}
 					if (any) set.phStats = phStats;
+				}
+				if (misc[13]) {
+					// base stats, unlike the final-stat overrides above, are allowed to be 0
+					const parts = misc[13].split('.');
+					const order = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'] as const;
+					const phBaseStats: Partial<StatsTable> = {};
+					let any = false;
+					for (const [statIndex, statName] of order.entries()) {
+						const num = parseInt(parts[statIndex]);
+						if (!isNaN(num) && num >= 0 && num <= 255) {
+							phBaseStats[statName] = num;
+							any = true;
+						}
+					}
+					if (any) set.phBaseStats = phBaseStats;
 				}
 			}
 			if (j < 0) break;
@@ -462,6 +496,11 @@ export const Teams = new class Teams {
 			const statNames = { hp: 'HP', atk: 'Atk', def: 'Def', spa: 'SpA', spd: 'SpD', spe: 'Spe' };
 			const parts = Object.entries(set.phStats).map(([statName, value]) => `${value} ${statNames[statName as StatID]}`);
 			if (parts.length) out += `Overrides: ${parts.join(' / ')}  \n`;
+		}
+		if (set.phBaseStats) {
+			const statNames = { hp: 'HP', atk: 'Atk', def: 'Def', spa: 'SpA', spd: 'SpD', spe: 'Spe' };
+			const parts = Object.entries(set.phBaseStats).map(([statName, value]) => `${value} ${statNames[statName as StatID]}`);
+			if (parts.length) out += `Base Stats: ${parts.join(' / ')}  \n`;
 		}
 		if (set.disguise) {
 			out += `Sprite: ${set.disguise}  \n`;
@@ -590,6 +629,21 @@ export const Teams = new class Teams {
 				}
 			}
 			if (any) set.phStats = phStats;
+		} else if (line.startsWith('Base Stats: ')) {
+			const statIds: { [k: string]: StatID } = { hp: 'hp', atk: 'atk', def: 'def', spa: 'spa', spd: 'spd', spe: 'spe' };
+			const phBaseStats: Partial<StatsTable> = {};
+			let any = false;
+			for (const part of line.slice(12).split('/')) {
+				const m = /^\s*(\d+)\s+([A-Za-z]+)\s*$/.exec(part);
+				if (!m) continue;
+				const statId = statIds[m[2].toLowerCase()];
+				const num = parseInt(m[1]);
+				if (statId && num >= 0) {
+					phBaseStats[statId] = Math.min(num, 255);
+					any = true;
+				}
+			}
+			if (any) set.phBaseStats = phBaseStats;
 		} else if (line.startsWith('Items: ')) {
 			const itemParts = line.slice(7).split('/').map(part => part.trim()).filter(part => part && part !== '(none)');
 			if (itemParts[0]) set.item = aggressive ? toID(itemParts[0]) : itemParts[0];

@@ -460,7 +460,7 @@ export const Scripts: ModdedBattleScriptsData = {
 				let counter = 6;
 				if (source.volatiles['focusenergy']) counter -= 3;
 				if (highCrit.includes(move.id)) counter -= 2;
-				let critChance = source.species.baseStats.spe * 4;
+				let critChance = source.baseStatsForSet().spe * 4;
 				for (let i = 1; i < counter; i++) critChance = Math.floor(critChance / 2);
 				critChance = Math.min(critChance, 255);
 				isCrit = critChance > 0 ? this.battle.randomChance(critChance, 256) : false;

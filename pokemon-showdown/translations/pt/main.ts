@@ -236,5 +236,7 @@ export const translations: TranslationCatalog = {
 	"You are not blocking friend requests.": null, // NEEDS TRANSLATION
 	"You are currently allowing friend notifications.": null, // NEEDS TRANSLATION
 	"Your friend notifications are disabled.": null, // NEEDS TRANSLATION
+	"★ <strong>Prize Winner</strong> - They don't have any powers beyond a symbol.": null, // NEEDS TRANSLATION
+	"& <strong>Global Leader</strong> - The above, and they make important decisions about the server": null, // NEEDS TRANSLATION
 
 };

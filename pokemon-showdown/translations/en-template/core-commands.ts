@@ -111,7 +111,7 @@ export const translations: TranslationCatalog = {
 	"You are locked and cannot challenge unlocked users. If this user is your friend, ask them to challenge you instead.": null,
 	"You are banned from battling and cannot challenge users.": null,
 	"You must choose a username before you challenge someone.": null,
-	"This server requires you to be rank {GROUP} or higher to challenge users.": null,
+	"This server requires you to be rank {GROUP} or higher to challenge users.": null, // NOT USED
 	"This command does not support specifying multiple users": null,
 	"Provide a valid format.": null,
 	"Please provide a valid format.": null,
@@ -156,5 +156,6 @@ export const translations: TranslationCatalog = {
 	"{TARGETUSER} was kicked from a battle by {USER}.{REASON}": null,
 	"unlocked": null,
 	"friended": null,
+	"This isn't a battle room.": null,
 
 };

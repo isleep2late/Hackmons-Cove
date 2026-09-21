@@ -603,7 +603,7 @@ export const Scripts: ModdedBattleScriptsData = {
 			if (!isCrit) {
 				// In Stadium, the critical chance is based on speed.
 				// First, we get the base speed and store it. Then we add 76. This is our current crit chance.
-				let critChance = source.species.baseStats['spe'] + 76;
+				let critChance = source.baseStatsForSet()['spe'] + 76;
 
 				// Now we right logical shift it two places, essentially dividing by 4 and flooring it.
 				critChance >>= 2;

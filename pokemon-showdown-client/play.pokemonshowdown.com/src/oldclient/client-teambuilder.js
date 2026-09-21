@@ -54,6 +54,7 @@
 			'change input[name=phnncustomrules]': 'phnnCustomRulesChanged',
 			'click button.formatselect': 'selectFormat',
 			'click button.statmodtoggle': 'toggleStatMod',
+			'click button.basestatmodtoggle': 'toggleBaseStatMod',
 			'change input[name=nickname]': 'nicknameChange',
 
 			// misc
@@ -1337,6 +1338,7 @@
 					buf += this.renderCdModeSelect();
 					buf += this.renderVersionSelect();
 					buf += this.renderStatModToggle();
+					buf += this.renderBaseStatModToggle();
 					var btnClass = 'button' + (!this.curSetList.length || app.isDisconnected ? ' disabled' : '');
 					buf += ' <button name="validate" class="' + btnClass + '"><i class="fa fa-check"></i> Validate</button>';
 					buf += ' <button name="generateTeam" class="button"><i class="fa fa-magic"></i> Build me a team</button>';
@@ -1850,6 +1852,18 @@
 			}
 			var cfVersionMod = this.phnnVersionModId(this.curTeam.format);
 			if (cfVersionMod) this.curTeam.dex = Dex.mod(cfVersionMod);
+			// LEAVING CUSTOM DISGUISES MUST DROP BASE STAT OVERRIDES FROM EVERY SET. The only other
+			// cleanup site is detailsChange, which fires for at most one set and only if the user
+			// happens to edit a Details field afterwards - so without this a team carried invisible
+			// overrides into an ordinary format, where the server rejects the team on Validate and the
+			// teambuilder offers no toggle, no input and no value to clear.
+			if (!this.phnnBaseStatModAllowed(this.curTeam.format)) {
+				var cfSets = (this.curTeam && this.curTeam.team) || [];
+				for (var cfi = 0; cfi < cfSets.length; cfi++) {
+					if (cfSets[cfi] && cfSets[cfi].phBaseStats) delete cfSets[cfi].phBaseStats;
+				}
+				this.phnnBaseStatEdit = false;
+			}
 			this.save();
 			if (this.curTeam.gen === 5 && !Dex.loadedSpriteData['bw']) Dex.loadSpriteData('bw');
 			this.update();
@@ -2000,6 +2014,34 @@
 			if (!had) rules.push('Stat Mod');
 			var newFormat = rules.length ? base + '@@@' + rules.join(', ') : base;
 			this.changeFormat(newFormat);
+		},
+		// Base stat modding is Custom Disguises ONLY. It is deliberately NOT tied to the Stat Mod
+		// rule: Stat Mod replaces the FINAL stat, this replaces the number the stat formula starts
+		// from, so EVs, IVs, level and nature still apply on top. Where both are set on one stat,
+		// Stat Mod wins - that is the order getStat() below and the server's setSpecies() agree on.
+		phnnBaseStatModAllowed: function (format) {
+			var f = '' + (format || this.curTeam && this.curTeam.format || '');
+			return f.includes('customdisguise');
+		},
+		renderBaseStatModToggle: function () {
+			if (!this.phnnBaseStatModAllowed(this.curTeam.format)) return '';
+			var on = !!this.phnnBaseStatEdit;
+			return ' <button class="button basestatmodtoggle' + (on ? ' cur' : '') +
+				'" title="Make the Base column editable (0-255). EVs, IVs, level and nature still apply on top."><i class="fa fa-pencil"></i> Base Stats' + (on ? ': On' : '') + '</button>';
+		},
+		toggleBaseStatMod: function () {
+			this.phnnBaseStatEdit = !this.phnnBaseStatEdit;
+			this.update();
+		},
+		// the base stats the teambuilder should actually display and calculate from
+		phnnBaseStatsFor: function (set, species) {
+			var baseStats = species && species.baseStats ? species.baseStats : { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
+			if (!set || !set.phBaseStats || !this.phnnBaseStatModAllowed(this.curTeam.format)) return baseStats;
+			var out = {};
+			for (var k in baseStats) {
+				out[k] = set.phBaseStats[k] !== undefined ? set.phBaseStats[k] : baseStats[k];
+			}
+			return out;
 		},
 		phnnStatModAllowed: function (format) {
 			var f = '' + (format || this.curTeam && this.curTeam.format || '');
@@ -2721,7 +2763,18 @@
 			var set = this.curSet;
 			var species = this.curTeam.dex.species.get(this.curSet.species);
 
-			var baseStats = species.baseStats || { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
+			var speciesBaseStats = species.baseStats || { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
+			// GEN 1 HAS ONE SPECIAL. The stat form deletes stats.spd below, so a base-stat override on
+			// spd alone has no row to live in - it would be invisible and uneditable here while the sim
+			// still applied it to special DEFENSE. Keep spd pinned to spa so what is shown is what runs.
+			if (this.curTeam.gen === 1 && set.phBaseStats) {
+				if (set.phBaseStats.spa !== undefined) {
+					set.phBaseStats.spd = set.phBaseStats.spa;
+				} else if (set.phBaseStats.spd !== undefined) {
+					set.phBaseStats.spa = set.phBaseStats.spd;
+				}
+			}
+			var baseStats = this.phnnBaseStatsFor(set, species);
 
 			buf += '<div class="resultheader"><h3>EVs</h3></div>';
 			buf += '<div class="statform">';
@@ -2809,9 +2862,25 @@
 
 			buf += '<div><label>Speed</label></div></div>';
 
-			buf += '<div class="col basestatscol"><div><em>Base</em></div>';
+			// The Base column shows the stats the numbers are ACTUALLY built from, overridden or not,
+			// so there is never a hidden override applying behind a species value. The toggle only
+			// decides whether they are editable. updateStatGraph() deliberately does not rewrite this
+			// column, so typing in one of these inputs does not blow away the caret.
+			var baseModOn = this.phnnBaseStatModAllowed(this.curTeam.format);
+			var editBase = baseModOn && this.phnnBaseStatEdit;
+			buf += '<div class="col basestatscol' + (editBase ? ' editing' : '') + '"><div><em>Base</em></div>';
 			for (var i in stats) {
-				buf += '<div><b>' + baseStats[i] + '</b></div>';
+				if (editBase) {
+					var bval = set.phBaseStats && set.phBaseStats[i] !== undefined ? '' + set.phBaseStats[i] : '' + baseStats[i];
+					buf += '<div><input type="number" name="basestat-' + i + '" value="' + BattleLog.escapeHTML(bval) + '" class="textbox inputform numform" min="0" max="255" step="1" /></div>';
+				} else if (baseModOn && set.phBaseStats && set.phBaseStats[i] !== undefined) {
+					// gated on baseModOn for the same reason phnnBaseStatsFor is: outside Custom
+					// Disguises the override is not applied, so baseStats[i] IS the species value and
+					// flagging it "Overridden" would label the species number as something it is not
+					buf += '<div><b class="phnn-basemod" title="Overridden (species base ' + speciesBaseStats[i] + ')">' + baseStats[i] + '</b></div>';
+				} else {
+					buf += '<div><b>' + baseStats[i] + '</b></div>';
+				}
 			}
 			buf += '</div>';
 
@@ -3148,6 +3217,43 @@
 					this.setSlider(stat, val);
 					this.updateStatGraph();
 				}
+			} else if (inputName.substr(0, 9) === 'basestat-') {
+				var stat = inputName.substr(9);
+				var raw = ('' + e.currentTarget.value).trim();
+				var species = this.curTeam.dex.species.get(set.species);
+				var speciesBase = species.exists && species.baseStats ? species.baseStats[stat] : 0;
+				// `val` was Math.abs()'d at the top of statChange, so testing `val < 0` here would be
+				// dead code and a typed "-20" would silently become a base stat of 20. Read the sign
+				// off the raw string instead and treat a negative as "clear this override".
+				if (raw === '' || isNaN(val) || raw.charAt(0) === '-') {
+					// blank means "back to the species value", not zero
+					if (set.phBaseStats) {
+						delete set.phBaseStats[stat];
+						if (stat === 'spa' && this.curTeam.gen === 1) delete set.phBaseStats.spd;
+						var remainingBase = false;
+						for (var bk in set.phBaseStats) { remainingBase = true; break; }
+						if (!remainingBase) delete set.phBaseStats;
+					}
+				} else {
+					if (val > 255) val = 255;
+					val = Math.floor(val);
+					if (val === speciesBase) {
+						// typing the species value back is the same as clearing it
+						if (set.phBaseStats) {
+							delete set.phBaseStats[stat];
+							if (stat === 'spa' && this.curTeam.gen === 1) delete set.phBaseStats.spd;
+							var stillBase = false;
+							for (var bk2 in set.phBaseStats) { stillBase = true; break; }
+							if (!stillBase) delete set.phBaseStats;
+						}
+					} else {
+						if (!set.phBaseStats) set.phBaseStats = {};
+						set.phBaseStats[stat] = val;
+						// gen 1 has no Sp. Def of its own; the form shows one Special box
+						if (stat === 'spa' && this.curTeam.gen === 1) set.phBaseStats.spd = val;
+					}
+				}
+				this.updateStatGraph();
 			} else if (inputName.substr(0, 9) === 'override-') {
 				var stat = inputName.substr(9);
 				var raw = ('' + e.currentTarget.value).trim();
@@ -3939,6 +4045,11 @@
 				if (set.phStats && !this.phnnStatModAllowed(this.curTeam.format)) {
 					delete set.phStats;
 				}
+				// leaving Custom Disguises drops base stat overrides, the same way leaving a Stat Mod
+				// format drops the final-stat ones - the server would reject them anyway
+				if (set.phBaseStats && !this.phnnBaseStatModAllowed(this.curTeam.format)) {
+					delete set.phBaseStats;
+				}
 				
 				var ppSaveFmt = this.curTeam.format;
 				var ppSaveStatMod = this.curTeam.gen !== 3 && this.phnnStatModAllowed(ppSaveFmt);
@@ -4599,7 +4710,11 @@
 			if (!set.level) set.level = this.phnnDefaultLevel();
 			if (typeof set.ivs[stat] === 'undefined') set.ivs[stat] = 31;
 
-			var baseStat = species.baseStats[stat];
+			var speciesBaseStat = species.baseStats[stat];
+			var baseStat = speciesBaseStat;
+			if (set.phBaseStats && set.phBaseStats[stat] !== undefined && this.phnnBaseStatModAllowed(this.curTeam.format)) {
+				baseStat = set.phBaseStats[stat];
+			}
 			var iv = (set.ivs[stat] || 0);
 			if (this.curTeam.gen <= 2) iv &= 30;
 			var ev = set.evs[stat];
@@ -4607,7 +4722,12 @@
 			if (ev === undefined) ev = (this.curTeam.gen > 2 ? 0 : 252);
 
 			if (stat === 'hp') {
-				if (baseStat === 1) return 1;
+				// Shedinja's 1 HP is a property of the SPECIES (the sim keys it off species.maxHP,
+				// which the client dex does not carry), not of any base HP that happens to be 1. So
+				// this stays keyed on the species value: an OVERRIDDEN base HP of 1 goes through the
+				// formula like any other number, which is what the server does. Getting this wrong
+				// would have the teambuilder print 1 where the battle gives 143.
+				if (speciesBaseStat === 1) return 1;
 				if (usesStatPoints) return baseStat + ev + 75;
 				if (!supportsEVs) return Math.floor(Math.floor(2 * baseStat + iv + 100) * set.level / 100 + 10) + (supportsAVs ? ev : 0);
 				return Math.floor(Math.floor(2 * baseStat + iv + Math.floor(ev / 4) + 100) * set.level / 100 + 10);

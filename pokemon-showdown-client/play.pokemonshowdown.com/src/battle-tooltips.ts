@@ -3607,7 +3607,10 @@ export class BattleStatGuesser {
 
 		let level = set.level || 100;
 
-		let baseStat = species.baseStats[stat];
+		// Custom Disguises sets can carry their own base stats; guessing a spread from the species
+		// value would suggest EVs and natures that do not match the stats the set actually has.
+		let baseStat = (set as { phBaseStats?: Partial<Dex.StatsTable> }).phBaseStats?.[stat] ??
+			species.baseStats[stat];
 
 		let iv = set.ivs?.[stat];
 		if (typeof iv !== 'number') iv = 31;
@@ -3659,8 +3662,11 @@ export function BattleStatOptimizer(set: Dex.PokemonSet, formatid: ID) {
 
 	const species = dex.species.get(set.species);
 	const level = set.level || 100;
+	const setBaseStats = (set as { phBaseStats?: Partial<Dex.StatsTable> }).phBaseStats;
 	const getStat = (stat: Dex.StatNameExceptHP, ev: number, nature: Dex.Nature, statPoints: boolean) => {
-		const baseStat = species.baseStats[stat];
+		// same reason as BattleStatGuesser above: optimise against the set's real base stats, or the
+		// "use a different nature to get higher stats" tip is computed from numbers the set is not using
+		const baseStat = setBaseStats?.[stat] ?? species.baseStats[stat];
 		const iv = set.ivs?.[stat] || 31;
 		let val = ~~(~~(2 * baseStat + iv + ~~(ev / 4)) * level / 100 + 5);
 		if (statPoints) val = baseStat + ev + 20;

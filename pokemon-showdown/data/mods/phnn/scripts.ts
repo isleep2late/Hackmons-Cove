@@ -382,7 +382,9 @@ export const Scripts: ModdedBattleScriptsData = {
 				}
 				if (move.category !== 'Status') move.critModifier = 2;
 				if (move.category !== 'Status' && !move.ohko && move.willCrit === undefined) {
-					let critChance = Math.floor(source.species.baseStats.spe / 2);
+					// base Speed here must be the set's, or a Custom Disguises base-stat override changes
+					// the Speed stat and silently leaves the crit rate on the species value
+					let critChance = Math.floor(source.baseStatsForSet().spe / 2);
 					critChance = this.battle.clampIntRange(critChance * 2, 1, 255);
 					const critRatio = this.battle.runEvent('ModifyCritRatio', source, target, move, move.critRatio || 1);
 					if (critRatio >= 5) {
