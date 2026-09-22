@@ -6283,6 +6283,66 @@ export const FormatsData: import('../sim/dex-species').SpeciesFormatsDataTable =
         isNonstandard: "Demo",
         tier: "Illegal",
     },
+    happa: {
+        isNonstandard: "Demo",
+        tier: "Illegal",
+    },
+    hanamogura: {
+        isNonstandard: "Demo",
+        tier: "Illegal",
+    },
+    hanaryu: {
+        isNonstandard: "Demo",
+        tier: "Illegal",
+    },
+    bobo: {
+        isNonstandard: "Demo",
+        tier: "Illegal",
+    },
+    pachimee: {
+        isNonstandard: "Demo",
+        tier: "Illegal",
+    },
+    puku: {
+        isNonstandard: "Demo",
+        tier: "Illegal",
+    },
+    shibirefugu: {
+        isNonstandard: "Demo",
+        tier: "Illegal",
+    },
+    mizuuo: {
+        isNonstandard: "Demo",
+        tier: "Illegal",
+    },
+    twohead: {
+        isNonstandard: "Demo",
+        tier: "Illegal",
+    },
+    sunny: {
+        isNonstandard: "Demo",
+        tier: "Illegal",
+    },
+    paon: {
+        isNonstandard: "Demo",
+        tier: "Illegal",
+    },
+    painter: {
+        isNonstandard: "Demo",
+        tier: "Illegal",
+    },
+    mitsuboshi: {
+        isNonstandard: "Demo",
+        tier: "Illegal",
+    },
+    gift: {
+        isNonstandard: "Demo",
+        tier: "Illegal",
+    },
+    tail: {
+        isNonstandard: "Demo",
+        tier: "Illegal",
+    },
     trifox: {
         isNonstandard: "Demo",
         tier: "Illegal",

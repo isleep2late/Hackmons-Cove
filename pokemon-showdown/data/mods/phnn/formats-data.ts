@@ -96,6 +96,66 @@ export const FormatsData: import('../../../sim/dex-species').ModdedSpeciesFormat
         isNonstandard: null,
         tier: "OU",
     },
+    happa: {
+        isNonstandard: null,
+        tier: "OU",
+    },
+    hanamogura: {
+        isNonstandard: null,
+        tier: "OU",
+    },
+    hanaryu: {
+        isNonstandard: null,
+        tier: "OU",
+    },
+    bobo: {
+        isNonstandard: null,
+        tier: "OU",
+    },
+    pachimee: {
+        isNonstandard: null,
+        tier: "OU",
+    },
+    puku: {
+        isNonstandard: null,
+        tier: "OU",
+    },
+    shibirefugu: {
+        isNonstandard: null,
+        tier: "OU",
+    },
+    mizuuo: {
+        isNonstandard: null,
+        tier: "OU",
+    },
+    twohead: {
+        isNonstandard: null,
+        tier: "OU",
+    },
+    sunny: {
+        isNonstandard: null,
+        tier: "OU",
+    },
+    paon: {
+        isNonstandard: null,
+        tier: "OU",
+    },
+    painter: {
+        isNonstandard: null,
+        tier: "OU",
+    },
+    mitsuboshi: {
+        isNonstandard: null,
+        tier: "OU",
+    },
+    gift: {
+        isNonstandard: null,
+        tier: "OU",
+    },
+    tail: {
+        isNonstandard: null,
+        tier: "OU",
+    },
     trifox: {
         isNonstandard: null,
         tier: "OU",

@@ -804,6 +804,7 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	},
 	flaaffy: {
 		inherit: true,
+		prevo: "Pachimee",
 		baseStats: { hp: 50, atk: 50, def: 50, spa: 50, spd: 50, spe: 50 },
 		evoLevel: 16,
 		eggGroups: ["Undiscovered"],
@@ -813,6 +814,41 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 		baseStats: { hp: 55, atk: 45, def: 45, spa: 70, spd: 50, spe: 50 },
 		evoLevel: 32,
 		eggGroups: ["Undiscovered"],
+	},
+	happa: {
+		inherit: true,
+		// The demo ROM ships Happa fully evolved: this evolution is present but COMMENTED OUT
+		// in evos_attacks.asm. Carried here as demo intent so Happa counts as NFE and, with its
+		// SW_EVIOLITE entry, benefits from Eviolite.
+		evos: ["Hanamogura"],
+	},
+	hanamogura: {
+		inherit: true,
+		prevo: "Happa",
+		evoLevel: 16,
+		evos: ["Hanaryu"],
+	},
+	hanaryu: {
+		inherit: true,
+		prevo: "Hanamogura",
+		evoLevel: 32,
+	},
+	pachimee: {
+		inherit: true,
+		evos: ["Flaaffy"],
+	},
+	paon: {
+		inherit: true,
+		evos: ["Donphan"],
+	},
+	puku: {
+		inherit: true,
+		evos: ["Shibirefugu"],
+	},
+	shibirefugu: {
+		inherit: true,
+		prevo: "Puku",
+		evoLevel: 18,
 	},
 	trifox: {
 		inherit: true,
@@ -939,6 +975,7 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	},
 	donphan: {
 		inherit: true,
+		prevo: "Paon",
 		baseStats: { hp: 70, atk: 70, def: 70, spa: 50, spd: 50, spe: 50 },
 		evoLevel: 33,
 		eggGroups: ["Undiscovered"],
