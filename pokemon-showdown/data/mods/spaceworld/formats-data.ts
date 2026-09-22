@@ -608,6 +608,51 @@ export const FormatsData: import('../../../sim/dex-species').ModdedSpeciesFormat
 	aquaria: {
 		tier: "UU",
 	},
+	happa: {
+		tier: "NFE",
+	},
+	hanamogura: {
+		tier: "NFE",
+	},
+	hanaryu: {
+		tier: "UU",
+	},
+	bobo: {
+		tier: "Brick",
+	},
+	pachimee: {
+		tier: "Brick",
+	},
+	puku: {
+		tier: "NFE",
+	},
+	shibirefugu: {
+		tier: "Brick",
+	},
+	mizuuo: {
+		tier: "UU",
+	},
+	twohead: {
+		tier: "Brick",
+	},
+	sunny: {
+		tier: "Brick",
+	},
+	paon: {
+		tier: "Brick",
+	},
+	painter: {
+		tier: "Brick",
+	},
+	mitsuboshi: {
+		tier: "Brick",
+	},
+	gift: {
+		tier: "Brick",
+	},
+	tail: {
+		tier: "UU",
+	},
 	trifox: {
 		tier: "Brick",
 	},

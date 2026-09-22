@@ -1,4 +1,4 @@
-const SW_EVIOLITE: string[] = ['ballerine', 'ditto', 'farfetchd', 'farfetchdsw', 'golppy', 'minicorn', 'para', 'pinsir', 'pinsirmega', 'pinsirsw', 'shuckle', 'slowbro', 'slowbromega', 'slowbrosw', 'tangel', 'trifox', 'twinz'];
+const SW_EVIOLITE: string[] = ['ballerine', 'ditto', 'farfetchd', 'farfetchdsw', 'golppy', 'hanamogura', 'happa', 'minicorn', 'pachimee', 'paon', 'para', 'pinsir', 'pinsirmega', 'pinsirsw', 'puku', 'shuckle', 'slowbro', 'slowbromega', 'slowbrosw', 'tangel', 'trifox', 'twinz'];
 
 export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 
