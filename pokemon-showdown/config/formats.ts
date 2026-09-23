@@ -1498,6 +1498,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		name: "[Gen 8] Broken Cup",
 		desc: '',
 		searchShow: false,
+		team: 'randomHC',
 		ruleset: ['HP Percentage Mod', 'Cancel Mod'],
 		banlist: ['All Pokemon', 'All Abilities', 'All Items', 'All Moves'],
 		unbanlist: [
