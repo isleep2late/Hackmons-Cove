@@ -804,7 +804,7 @@ export const commands: Chat.ChatCommands = {
 								) : (
 									Avatars.img(avatar!)
 								)} {}
-								<code>/avatar {avatar!.replace('#', '')}</code>
+								<code>/avatar {avatar!.replace('.png', '')}</code>
 							</p>
 						))
 					);
@@ -855,7 +855,8 @@ export const commands: Chat.ChatCommands = {
 	async defaultavatar(target, room, user) {
 		this.checkCan('bypassall');
 		if (!target) return this.parse(`/help defaultavatar`);
-		const [inputUsername, inputAvatar] = this.splitOne(target);
+		let [inputUsername, inputAvatar] = this.splitOne(target);
+		inputAvatar = inputAvatar + '.png';
 		if (!Users.isUsername(inputUsername)) {
 			throw new Chat.ErrorMessage(`"${inputUsername}" is not a valid username.`);
 		}
