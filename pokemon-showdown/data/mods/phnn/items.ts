@@ -102,6 +102,18 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 		gen: 9,
 		shortDesc: "Holder's ???-type moves have 1.2x power.",
 	},
+	darkrock: {
+		name: "Dark Rock",
+		// The item sheet's generic Poke Ball tile, on purpose: a placeholder until someone draws it
+		// (then add the png under sprites/phnn/ and map it in the client's getItemIcon).
+		spritenum: 0,
+		fling: {
+			basePower: 60,
+		},
+		num: 0,
+		gen: 9,
+		shortDesc: "Holder's use of Shadow Sky lasts 8 turns instead of 5.",
+	},
 	shadowplate: {
 		name: "Shadow Plate",
 		spritenum: 8,

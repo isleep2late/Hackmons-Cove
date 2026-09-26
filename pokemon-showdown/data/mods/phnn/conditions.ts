@@ -187,8 +187,19 @@ export const Conditions: import('../../../sim/dex-conditions').ModdedConditionDa
 		name: 'Shadow Sky',
 		effectType: 'Weather',
 		duration: 5,
+		durationCallback(source, effect) {
+			if (source?.hasItem('darkrock')) {
+				return 8;
+			}
+			return 5;
+		},
 		onFieldStart(field, source, effect) {
-			this.add('-weather', 'Shadow Sky');
+			if (effect?.effectType === 'Ability') {
+				this.effectState.duration = 0;
+				this.add('-weather', 'Shadow Sky', '[from] ability: ' + effect.name, `[of] ${source}`);
+			} else {
+				this.add('-weather', 'Shadow Sky');
+			}
 		},
 		onWeatherModifyDamage(damage, attacker, defender, move) {
 			if (move.type === 'Shadow') {

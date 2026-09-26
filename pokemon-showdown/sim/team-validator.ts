@@ -658,24 +658,33 @@ export class TeamValidator {
 			}
 		}
 		if (set.startStatus) {
-			const legalStatuses = ['brn', 'par', 'slp', 'psn', 'tox', 'frz', 'confusion', 'attract'];
-			const volatileStatuses = ['confusion', 'attract'];
+			const legalStatuses = ['brn', 'par', 'slp', 'psn', 'tox', 'frz', 'confusion', 'attract', 'wildmight'];
+			const volatileStatuses = ['confusion', 'attract', 'wildmight'];
+			const volatileNames: { [k: string]: string } = {
+				confusion: 'a confusion', attract: 'an infatuation', wildmight: 'a Wild Might',
+			};
 			const seenFamilies = new Set<string>();
 			const statusParts = set.startStatus.split('/').filter(Boolean);
 			const majorParts = statusParts.filter(part => !volatileStatuses.includes(part));
 			const volatileParts = statusParts.filter(part => volatileStatuses.includes(part));
-			if (majorParts.length > 1) {
+			// Count families, not tokens: 'brn/brn' is a duplicate (reported below), not a MultiStatus case.
+			const majorFamilies = new Set(majorParts.map(part => (part === 'tox' ? 'psn' : part)));
+			if (majorFamilies.size > 1) {
 				if (!ruleTable.has('multistatusmod')) {
-					problems.push(`${set.name || set.species} has ${majorParts.length} major starting statuses, which is only legal in Custom Disguises battles with the MultiStatus Mod rule (add "MultiStatus Mod" to the battle's custom rules).`);
+					problems.push(`${set.name || set.species} has ${majorFamilies.size} major starting statuses, which is only legal in Custom Disguises battles with the MultiStatus Mod rule (add "MultiStatus Mod" to the battle's custom rules).`);
 				} else {
 					const multiLimit = parseInt(ruleTable.valueRules.get('multistatus') || '') || 5;
-					if (majorParts.length > multiLimit) {
-						problems.push(`${set.name || set.species} has ${majorParts.length} major starting statuses, but this battle's MultiStatus limit is ${multiLimit} (it would need "MultiStatus = ${Math.min(majorParts.length, 5)}").`);
+					if (majorFamilies.size > multiLimit) {
+						problems.push(`${set.name || set.species} has ${majorFamilies.size} major starting statuses, but this battle's MultiStatus limit is ${multiLimit} (it would need "MultiStatus = ${Math.min(majorFamilies.size, 5)}").`);
 					}
 				}
 			}
 			if (volatileParts.length && !isCustomDisguises) {
-				problems.push(`${set.name || set.species} has a ${volatileParts.includes('attract') ? 'infatuation' : 'confusion'} starting status, which is only allowed in Custom Disguises formats.`);
+				problems.push(`${set.name || set.species} has ${volatileNames[volatileParts[0]]} starting status, which is only allowed in Custom Disguises formats.`);
+			}
+			// Wild Might is the Alpha formes' volatile and only exists in the No Nerfs mods.
+			if (volatileParts.includes('wildmight') && isCustomDisguises && !dex.conditions.get('wildmight').exists) {
+				problems.push(`${set.name || set.species} has a Wild Might starting status, which only exists in No Nerfs Custom Disguises.`);
 			}
 			for (const part of statusParts) {
 				if (!legalStatuses.includes(part)) {
@@ -684,7 +693,8 @@ export class TeamValidator {
 				}
 				const fam = part === 'tox' ? 'psn' : part;
 				if (seenFamilies.has(fam)) {
-					problems.push(`${set.name || set.species} has duplicate starting statuses (Poison and Toxic can't be combined).`);
+					const why = fam === 'psn' ? " (Poison and Toxic can't be combined)" : '';
+					problems.push(`${set.name || set.species} has duplicate starting statuses${why}.`);
 				}
 				seenFamilies.add(fam);
 			}

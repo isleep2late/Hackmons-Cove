@@ -1367,7 +1367,7 @@ export class Battle {
 		pokemon.m.phnnStartStatusApplied = true;
 		const parts = pokemon.set.startStatus.split('/').filter(Boolean);
 		if (!parts.length) return;
-		const volatileStatuses = ['confusion', 'attract'];
+		const volatileStatuses = ['confusion', 'attract', 'wildmight'];
 		const majors = parts.filter(part => !volatileStatuses.includes(part));
 		const volatiles = parts.filter(part => volatileStatuses.includes(part));
 		if (majors.length) {
@@ -1390,6 +1390,10 @@ export class Battle {
 				pokemon.addVolatile('attract', source);
 				source.gender = sourceGender;
 				pokemon.gender = targetGender;
+			} else if (extra === 'wildmight') {
+				// Alpha formes already carry it (added right before this call); addVolatile refuses a duplicate.
+				if (!this.dex.conditions.getByID('wildmight' as ID).exists) continue;
+				pokemon.addVolatile('wildmight');
 			} else {
 				pokemon.addVolatile(extra, pokemon);
 			}

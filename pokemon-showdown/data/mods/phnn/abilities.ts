@@ -337,6 +337,18 @@ export const Abilities: import('../../../sim/dex-abilities').ModdedAbilityDataTa
 		shortDesc: "On switch-in, this Pokemon summons permanent Sandstorm.",
 		desc: "On switch-in, this Pokemon summons Sandstorm. The sandstorm does not end on its own (Gen 5 behavior, rather than the 5-turn limit of Gen 6+).",
 	},
+	shadewarning: {
+		onStart(source) {
+			this.field.setWeather('shadowsky');
+		},
+		flags: {},
+		name: "Shade Warning",
+		rating: 4,
+		num: 0,
+		gen: 9,
+		shortDesc: "On switch-in, this Pokemon summons permanent Shadow Sky.",
+		desc: "On switch-in, this Pokemon summons Shadow Sky. The Shadow Sky does not end on its own (Gen 5 behavior, rather than the 5-turn limit of Gen 6+).",
+	},
 	arenatrap: {
 		inherit: true,
 		onFoeTrapPokemon(pokemon) {
