@@ -891,7 +891,8 @@ abstract class BattleTypedSearch<T extends SearchType> {
 		}
 
 		if (!this.baseResults) {
-			this.baseResults = this.getBaseResults();
+			// Own copy: the legality pass below pushes into it, and a getter may return a shared array.
+			this.baseResults = [...this.getBaseResults()];
 		}
 
 		if (!this.baseIllegalResults) {
@@ -909,6 +910,13 @@ abstract class BattleTypedSearch<T extends SearchType> {
 					const allowMissingno = isOpenCustom || isNoNerfs ||
 						this.format === 'disguises' || this.format === 'disguisesenglish';
 					if (isOpenCustom) {
+						// Fork-only abilities carry isNonstandard 'Custom' and exist only in the phnn mod, so an
+						// open-custom format on any other mod must not offer them (the server rejects them).
+						if (this.searchType === 'ability' && !isNoNerfs && (this.getTable() as any)[id]?.isNonstandard === 'Custom') {
+							this.baseIllegalResults.push([this.searchType, id as ID]);
+							this.illegalReasons[id] = 'Illegal';
+							continue;
+						}
 						this.baseResults.push([this.searchType, id as ID]);
 						continue;
 					}
@@ -1641,7 +1649,10 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 		}
 		const fmt = this.format || '';
 		const allowsDemoItems = fmt.includes('nonerfs') || fmt.includes('customgame') || fmt.includes('customdisguise') || this.dex.modid === 'gen2spaceworld';
-		if (allowsDemoItems) return table.itemSet;
+		// A copy: getResults() appends the format's extra legal items to whatever this returns, and the
+		// table's itemSet is shared by every chart of the session, so handing it back directly leaked
+		// the No Nerfs / Custom Disguises extras into every other gen 9 item chart afterwards.
+		if (allowsDemoItems) return table.itemSet.slice();
 		const filtered: SearchRow[] = table.itemSet.filter((row: SearchRow) =>
 			row[0] !== 'item' || this.dex.items.get(row[1]).isNonstandard !== 'Demo'
 		);

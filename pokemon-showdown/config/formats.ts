@@ -467,43 +467,32 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		desc: `Balanced Hackmons where Pok&eacute;mon have all of their released abilities simultaneously.`,
 		mod: 'pokebilities',
 		searchShow: false,
+		// Self-contained: the Pokebilities mechanics and the parts of upstream's [Gen 9] Pokebilities
+		// banlist that BH keeps live here; the hidden base format they used to come from is gone.
 		ruleset: [
-			'[Gen 9] Pokebilities', '!Obtainable', 'Hackmons Forme Legality', 'Species Reveal Clause', 'Terastal Clause', 'AAA Restricted Abilities',
+			'Standard OMs', 'Sleep Moves Clause', '!Obtainable', 'Hackmons Forme Legality', 'Species Reveal Clause', 'Terastal Clause', 'AAA Restricted Abilities',
 		],
 		banlist: [
 			'Blaziken-Mega', 'Darmanitan-Galar', 'Diancie-Mega', 'Enamorus-Base', 'Gardevoir-Mega', 'Gengar-Mega', 'Groudon-Primal', 'Gyarados-Mega', 'Hawlucha', 'Kangaskhan-Mega',
 			'Kartana', 'Kyogre-Primal', 'Lucario-Mega', 'Mawile-Mega', 'Medicham-Mega', 'Mewtwo-Mega-X', 'Mewtwo-Mega-Y', 'Rayquaza-Mega', 'Shedinja',
-			'Comatose', 'Magnet Pull', 'Neutralizing Gas', 'Regenerator + Emergency Exit', 'Regenerator + Fur Coat', 'Regenerator + Ice Scales', 'Regenerator + Wimp Out',
-			'Belly Drum', 'Burning Bulwark', 'Ceaseless Edge', 'Clangorous Soul', 'Dire Claw', 'Electro Shot', 'Fillet Away', 'Imprison', 'Lumina Crash', 'No Retreat',
-			'Photon Geyser', 'Population Bomb', 'Power Trip', 'Quiver Dance', 'Rage Fist', 'Revival Blessing', 'Substitute', 'Shell Smash', 'Tail Glow', 'Triple Arrows', 'V-create',
+			'Basculegion', 'Basculegion-F', 'Calyrex-Shadow', 'Deoxys-Attack', 'Excadrill', 'Gouging Fire', 'Koraidon', 'Kyurem-Black', 'Kyurem-White', 'Miraidon',
+			// Both Urshifu formes were banned in practice: the old unbanlist's 'Urshifu' was a base-species unban and
+			// the forme-level 'Urshifu-Single-Strike' ban outranked it. Kept as it played; lift it deliberately if wanted.
+			'Ogerpon-Hearthflame', 'Porygon-Z', 'Reshiram', 'Urshifu-Single-Strike', 'Urshifu-Rapid-Strike', 'Volcarona', 'Zacian-Crowned', 'Zamazenta-Crowned', 'Zekrom',
+			'Arena Trap', 'Comatose', 'Magnet Pull', 'Moody', 'Neutralizing Gas', 'Shadow Tag',
+			'Regenerator + Emergency Exit', 'Regenerator + Fur Coat', 'Regenerator + Ice Scales', 'Regenerator + Wimp Out',
+			'King\'s Rock', 'Razor Fang',
+			'Baton Pass', 'Belly Drum', 'Burning Bulwark', 'Ceaseless Edge', 'Clangorous Soul', 'Dire Claw', 'Electro Shot', 'Fillet Away', 'Imprison', 'Last Respects', 'Lumina Crash',
+			'No Retreat', 'Photon Geyser', 'Population Bomb', 'Power Trip', 'Quiver Dance', 'Rage Fist', 'Revival Blessing', 'Shed Tail', 'Substitute', 'Shell Smash', 'Tail Glow',
+			'Triple Arrows', 'V-create',
 		],
-		unbanlist: [
-			'Annihilape', 'Arceus', 'Archaludon', 'Baxcalibur', 'Braviary-Hisui', 'Calyrex-Ice', 'Conkeldurr', 'Chi-Yu', 'Chien-Pao', 'Deoxys-Normal', 'Dialga', 'Dialga-Origin',
-			'Espathra', 'Eternatus', 'Flutter Mane', 'Giratina', 'Giratina-Origin', 'Groudon', 'Ho-Oh', 'Iron Bundle', 'Kingambit', 'Kyogre', 'Landorus-Base', 'Lugia', 'Lunala',
-			'Magearna', 'Mewtwo', 'Necrozma-Dusk-Mane', 'Necrozma-Dawn-Wings', 'Palafin', 'Palkia', 'Palkia-Origin', 'Rayquaza', 'Regieleki', 'Roaring Moon', 'Shaymin-Sky',
-			'Smeargle', 'Sneasler', 'Solgaleo', 'Spectrier', 'Terapagos', 'Ursaluna-Bloodmoon', 'Urshifu', 'Zacian',
-			'Bright Powder', 'Damp Rock', 'Icy Rock', 'Smooth Rock',
-		],
+		// Hackmons Forme Legality only keeps a battle-only forme (Palafin-Hero, Terapagos-Terastal/Stellar,
+		// Zacian-Crowned) on a set when its base species carries an explicit unban. The old unbanlist supplied
+		// these three by accident; without them such sets were quietly rewritten to the base forme.
+		unbanlist: ['Palafin', 'Terapagos', 'Zacian'],
 		restricted: [
 			'Contrary', 'Gorilla Tactics', 'Hadron Engine', 'Huge Power', 'Illusion', 'Innards Out', 'Libero', 'Liquid Ooze', 'Orichalcum Pulse', 'Parental Bond',
 			'Poison Heal', 'Protean', 'Pure Power', 'Stakeout', 'Stench', 'Unburden', 'Water Bubble', 'Wonder Guard',
-		],
-	},
-	// hidden, just a base for above
-	{
-		name: "[Gen 9] Pokebilities",
-		desc: `Pok&eacute;mon have all of their released abilities simultaneously.`,
-		mod: 'pokebilities',
-		searchShow: false,
-		challengeShow: false,
-		ruleset: ['Standard OMs', 'Sleep Moves Clause'],
-		banlist: [
-			'Arceus', 'Annihilape', 'Archaludon', 'Basculegion', 'Basculegion-F', 'Baxcalibur', 'Braviary-Hisui', 'Calyrex-Ice', 'Calyrex-Shadow', 'Chi-Yu', 'Chien-Pao', 'Conkeldurr',
-			'Deoxys-Normal', 'Deoxys-Attack', 'Dialga', 'Dialga-Origin', 'Espathra', 'Eternatus', 'Excadrill', 'Flutter Mane', 'Giratina', 'Giratina-Origin', 'Gouging Fire', 'Groudon',
-			'Ho-Oh', 'Iron Bundle', 'Kingambit', 'Koraidon', 'Kyogre', 'Kyurem-Black', 'Kyurem-White', 'Landorus-Incarnate', 'Lugia', 'Lunala', 'Magearna', 'Miraidon', 'Mewtwo', 'Necrozma-Dusk-Mane',
-			'Necrozma-Dawn-Wings', 'Ogerpon-Hearthflame', 'Palafin', 'Palkia', 'Palkia-Origin', 'Porygon-Z', 'Rayquaza', 'Regieleki', 'Reshiram', 'Roaring Moon', 'Shaymin-Sky', 'Sneasler',
-			'Solgaleo', 'Spectrier', 'Terapagos', 'Ursaluna-Bloodmoon', 'Urshifu-Single-Strike', 'Urshifu-Rapid-Strike', 'Volcarona', 'Zacian', 'Zacian-Crowned', 'Zamazenta-Crowned',
-			'Zekrom', 'Arena Trap', 'Moody', 'Shadow Tag', 'Bright Powder', 'Damp Rock', 'Icy Rock', 'King\'s Rock', 'Razor Fang', 'Smooth Rock', 'Baton Pass', 'Shed Tail', 'Last Respects',
 		],
 		onValidateSet(set) {
 			const species = this.dex.species.get(set.species);
@@ -558,7 +547,6 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 			pokemon.m.innates = undefined;
 		},
 	},
-	
 
 	//////////////////////////////////
 	////// Miscellaneous Tiers ///////
@@ -1050,7 +1038,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 			'Mewtwo-Shadow', 'Mewtwo-Shadow-Mega-X', 'Lugia-Shadow', 'Arceus-Shadow', 'Mewtwo-Armored',
 			'Shadow Plate', 'Shadow Synergy Stone', 'Blank Plate', 'Legend Plate',
 			'Question Mark Plate',
-			'Shadowinium Z', 'Questinium Z', 'Shadow Cloak', 'Broken Disk',
+			'Shadowinium Z', 'Questinium Z', 'Shadow Cloak', 'Broken Disk', 'Dark Rock', 'Shade Warning',
 			'Shadow Rift', 'Glitch Cascade',
 			'Shadow Rush', 'Shadow Blast', 'Shadow Blitz', 'Shadow Break', 'Shadow End',
 			'Shadow Bolt', 'Shadow Chill', 'Shadow Fire', 'Shadow Storm', 'Shadow Wave', 'Shadow Rave',

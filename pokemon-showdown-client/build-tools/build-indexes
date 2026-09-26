@@ -208,6 +208,13 @@ function requireNoCache(pathSpec) {
 		index.push(id + ' item');
 		pushPhnnAliases(id, item.name, 'item');
 	}
+	for (const id in phnnSI.data.Abilities) {
+		if (index.includes(id + ' ability')) continue;
+		const ability = phnnSI.abilities.get(id);
+		if (!ability.exists) continue;
+		index.push(id + ' ability');
+		pushPhnnAliases(id, ability.name, 'ability');
+	}
 
 	index.sort();
 
@@ -245,11 +252,14 @@ function requireNoCache(pathSpec) {
 	const BattleSearchIndexOffset = BattleSearchIndex.map(entry => {
 		const id = entry[0];
 		let name = '';
+		// Fork-only entries exist only in the phnn mod; without the fallback their offset string is
+		// empty and the search highlight stops one character short at each space in the name.
+		const phnnFallback = (table, modTable) => (table.get(id).exists ? table : modTable).get(id).name;
 		switch (entry[1]) {
-		case 'pokemon': name = Dex.species.get(id).name; break;
-		case 'move': name = Dex.moves.get(id).name; break;
-		case 'item': name = Dex.items.get(id).name; break;
-		case 'ability': name = Dex.abilities.get(id).name; break;
+		case 'pokemon': name = phnnFallback(Dex.species, Dex.mod('phnn').species); break;
+		case 'move': name = phnnFallback(Dex.moves, Dex.mod('phnn').moves); break;
+		case 'item': name = phnnFallback(Dex.items, Dex.mod('phnn').items); break;
+		case 'ability': name = phnnFallback(Dex.abilities, Dex.mod('phnn').abilities); break;
 		case 'article': name = BattleArticleTitles[id] || ''; break;
 		}
 		let res = '';
@@ -1472,6 +1482,12 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 		for (const id in modData.Abilities) {
 			const modEntry = modDex.abilities.get(id);
 			const parentEntry = parentDex.abilities.get(id);
+			// A mod-only ability is emitted into BattleAbilities as 'Custom' (see the abilities build
+			// below); its own mod's table lifts the tag so the mod's teambuilder can list it.
+			if (modEntry.exists && !parentEntry.exists) {
+				overrideAbilityData[id] = { ...(overrideAbilityData[id] || {}), isNonstandard: null };
+				continue;
+			}
 			for (const key of overrideAbilityKeys) {
 				if (JSON.stringify(modEntry[key]) !== JSON.stringify(parentEntry[key])) {
 					if (!overrideAbilityData[id]) overrideAbilityData[id] = {};
@@ -1799,6 +1815,25 @@ process.stdout.write("Building `data/moves,items,abilities,typechart,learnsets.j
 
 {
 	const Abilities = requireNoCache('../caches/pokemon-showdown/dist/data/abilities.js').Abilities;
+	// Fork-only abilities live in the phnn mod (same treatment as its items above); the teambuilder
+	// lists abilities straight out of BattleAbilities, so anything missing here can't be picked.
+	// They are tagged 'Custom' so every other gen 9 format's ability list skips them; the gen9phnn
+	// teambuilder table lifts the tag (see the override tables above).
+	for (const id in Dex.mod('phnn').data.Abilities) {
+		const ab = Dex.mod('phnn').abilities.get(id);
+		if (ab.exists && !Abilities[id]) {
+			Abilities[id] = {
+				name: ab.name,
+				num: ab.num,
+				gen: ab.gen,
+				rating: ab.rating,
+				flags: ab.flags,
+				isNonstandard: 'Custom',
+				desc: ab.desc || ab.shortDesc || '',
+				shortDesc: ab.shortDesc || ab.desc || '',
+			};
+		}
+	}
 	const buf = 'exports.BattleAbilities = ' + es3stringify(Abilities) + ';';
 	fs.writeFileSync('play.pokemonshowdown.com/data/abilities.js', buf);
 }

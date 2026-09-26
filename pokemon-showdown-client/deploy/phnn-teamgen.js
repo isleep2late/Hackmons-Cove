@@ -1260,8 +1260,9 @@ function abilityAllowed(name, fdex, ruleTable, ctx) {
 	if (!ability.exists || ability.gen > fdex.gen || ability.isNonstandard) return false;
 	if (ruleTable.check('ability:' + toId(name)) === 'banned') return false;
 	// something this build already watched the validator refuse (see learnFromProblems). The rule
-	// table does not carry every restriction: [Gen 9] Pokebilities answers `The Ability "Parental
-	// Bond" is restricted.` out of a handler of its own, and nothing here can see that in advance.
+	// table does not carry every restriction: [Gen 9] Pokebilities Balanced Hackmons answers `The
+	// Ability "Parental Bond" is restricted.` from its AAA Restricted Abilities rule, and nothing here
+	// can see that in advance.
 	if (ctx && ctx.blocks && ctx.blocks.abilities.has(ability.id)) return false;
 	return true;
 }

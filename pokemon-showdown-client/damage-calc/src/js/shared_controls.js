@@ -390,6 +390,13 @@ function autosetWeather(ability, i) {
 			$("#hail").prop("checked", true);
 		}
 		break;
+	case "Shade Warning":
+		// No Nerfs only; the Shadow Sky radio exists in the gen 10 weather block
+		if (gen >= 10) {
+			lastAutoWeather[i] = "Shadow Sky";
+			$("#shadowsky").prop("checked", true);
+		}
+		break;
 	case "Desolate Land":
 		lastAutoWeather[i] = "Harsh Sunshine";
 		$("#harsh-sunshine").prop("checked", true);

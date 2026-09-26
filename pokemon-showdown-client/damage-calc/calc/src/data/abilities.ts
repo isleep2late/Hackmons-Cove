@@ -550,7 +550,8 @@ const CHAMPIONS = [
   'Zero to Hero',
 ];
 
-const NN = SV;
+// No Nerfs: everything in SV plus the fork's own abilities.
+const NN = [...SV, 'Shade Warning'];
 const SW: string[] = [];
 
 export const ABILITIES = [CHAMPIONS, RBY, GSC, ADV, DPP, BW, XY, SM, SS, SV, NN, SW];

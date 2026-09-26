@@ -3568,9 +3568,12 @@
 					if (set.ability) curAbilities.push(set.ability);
 					if (set.phAbilities) curAbilities = curAbilities.concat(set.phAbilities.split('/'));
 					var abilityNames = [];
+					// fork-only abilities (tagged Custom) exist only in the No Nerfs mod
+					var phCustomAbilitiesOk = this.curTeam.format.includes('nonerfs');
 					for (var abid in BattleAbilities) {
 						if (!abid || abid === 'noability') continue;
 						if (BattleAbilities[abid].exists === false) continue;
+						if (BattleAbilities[abid].isNonstandard === 'Custom' && !phCustomAbilitiesOk) continue;
 						var abilOptName = BattleAbilities[abid].name || abid;
 						if (abilOptName) abilityNames.push(abilOptName);
 					}
@@ -3658,10 +3661,13 @@
 					buf += '</select></div></div>';
 				}
 				var isStandardNN = this.curTeam.format.includes('nonerfsstandard');
-				var phStatusIdToName = { psn: 'Poisoned', tox: 'Toxic', par: 'Paralyzed', slp: 'Asleep', brn: 'Burned', frz: 'Frozen', confusion: 'Confused', attract: 'Infatuated' };
+				var phStatusIdToName = { psn: 'Poisoned', tox: 'Toxic', par: 'Paralyzed', slp: 'Asleep', brn: 'Burned', frz: 'Frozen', confusion: 'Confused', attract: 'Infatuated', wildmight: 'Wild Might' };
 				if (isCustomDisguise) {
-					buf += '<div class="formrow"><label class="formlabel" title="Bring this Pokemon in already afflicted with a status. Confusion and infatuation stack freely; extra major statuses beyond the first only apply with the MultiStatus Mod challenge rule (MultiStatus = N sets a limit).">Status:</label><div>';
+					// Wild Might (the Alpha formes' volatile) only exists in the No Nerfs mods.
+					var phWildMightOk = this.curTeam.format.includes('nonerfs');
+					buf += '<div class="formrow"><label class="formlabel" title="Bring this Pokemon in already afflicted with a status. ' + (phWildMightOk ? 'Confusion, infatuation and Wild Might' : 'Confusion and infatuation') + ' stack freely; extra major statuses beyond the first only apply with the MultiStatus Mod challenge rule (MultiStatus = N sets a limit).">Status:</label><div>';
 					var phStatusOptions = ['Poisoned', 'Toxic', 'Paralyzed', 'Asleep', 'Burned', 'Frozen', 'Confused', 'Infatuated'];
+					if (phWildMightOk) phStatusOptions.push('Wild Might');
 					var selectedStatuses = [];
 					if (set.startStatus) {
 						var ssParts = set.startStatus.split('/');
@@ -4005,7 +4011,7 @@
 					}
 				}
 				if (this.$chart.find('details.phnn-multiselect[data-name=startstatuses]').length) {
-					var phStatusNameToId = { Poisoned: 'psn', Toxic: 'tox', Paralyzed: 'par', Asleep: 'slp', Burned: 'brn', Frozen: 'frz', Confused: 'confusion', Infatuated: 'attract' };
+					var phStatusNameToId = { Poisoned: 'psn', Toxic: 'tox', Paralyzed: 'par', Asleep: 'slp', Burned: 'brn', Frozen: 'frz', Confused: 'confusion', Infatuated: 'attract', 'Wild Might': 'wildmight' };
 					var checkedStatuses = this.phnnMultiselectValues('startstatuses').map(function (v) { return phStatusNameToId[v] || ''; }).filter(function (v) { return !!v; });
 					var prevStatuses = set.startStatus ? set.startStatus.split('/') : [];
 					var orderedStatuses = [];
