@@ -772,6 +772,9 @@ export default {
 				"onModifySpA": null,
 				"onBasePower": "modified"
 			},
+			"Shade Warning": {
+				"added": true
+			},
 			"Wonder Guard": {
 				"onTryHit": "modified"
 			}
