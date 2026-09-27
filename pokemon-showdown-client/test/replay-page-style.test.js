@@ -1,14 +1,3 @@
-/**
- * Gate: the replay page shell keeps upstream's inline stylesheet.
- *
- * replay.hackmons.com pages are built by deploy/phnn-client-server.js, not by upstream's
- * replay.pokemonshowdown.com/index.php. The viewer's layout rules (the (max-width:820px)
- * rule that puts the battle log under the battle on phones, the control rows, the page
- * centering) live in index.php's <style> block, so the shell carries a verbatim copy. An
- * upstream sync updates index.php and nothing else; this is the only thing that notices
- * when the copy falls behind. Static: it reads both files and compares text.
- */
-
 const assert = require('assert').strict;
 const fs = require('fs');
 const path = require('path');
