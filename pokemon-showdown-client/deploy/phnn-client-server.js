@@ -489,12 +489,6 @@ const UPSTREAM_REPLAY_SCRIPTS = [
 	'/js/battle.js',
 ];
 
-// The stylesheet upstream's replay page (replay.pokemonshowdown.com/index.php) carries inline.
-// The viewer's markup is written against it: battle.css alone puts .battle-log at left:640px as an
-// absolutely positioned column, which is a 100px sliver on a tablet and entirely off-screen on a
-// phone - the page then "only renders the battle view". The (max-width:820px) rule here is what
-// turns the log into a block under the battle. Copied verbatim from index.php so a future upstream
-// change to that block shows up as a plain diff; keep the two in step.
 const UPSTREAM_REPLAY_STYLE = `	@media (max-width:820px) {
 		.battle {
 			margin: 0 auto;
@@ -623,16 +617,7 @@ const UPSTREAM_REPLAY_STYLE = `	@media (max-width:820px) {
 		}
 	}
 `;
-// Fork adjustments on top of the block above.
-// - Typography: replay.css gave the transport buttons Verdana 10pt; kept. Everything else about
-//   the controls now follows upstream's block: they sit in normal flow under the battle instead of
-//   being pinned at top:373px (an 11px shift on desktop), and links and inputs are 11pt.
-// - Title colour: upstream paints the h1 #CCC because it sits on their dark site background
-//   (global.css, which this page does not load); this page is white, so keep it readable.
-// - Page margin: upstream's global.css zeroes the html/body margin. battle.ts scales the battle to
-//   the full window width below 640px, and a 640px battle needs 656px with the browser's default
-//   8px body margin, so up to that width the margin is dropped or the page scrolls sideways.
-//   Above it the default gutter is kept so the desktop page is unchanged.
+
 const PHNN_REPLAY_STYLE = `
 	.replay-controls button, .replay-controls select { font-family: Verdana, sans-serif; font-size: 10pt; }
 	.replay-controls h1 { color: #222; }
@@ -641,11 +626,7 @@ const PHNN_REPLAY_STYLE = `
 		html, body { margin: 0; padding: 0; }
 	}
 `;
-// The viewer's router turns clicks on same-origin links to its index ("More replays", href ".")
-// into an in-page render of upstream's SearchPanel, which this page never loads: the index is
-// served by this server. Without this, that click throws "SearchPanel is not defined" and leaves
-// the battle on screen under the index URL. Capture-phase, so it runs before the router's
-// listener on #main; no preventDefault, so the browser simply follows the link.
+
 const PHNN_REPLAY_NAV_GUARD = '<script>\n' +
 	'document.addEventListener("click", function (e) {\n' +
 	'\tvar el = e.target;\n' +
@@ -657,9 +638,7 @@ const PHNN_REPLAY_NAV_GUARD = '<script>\n' +
 	'}, true);\n' +
 	'<\/script>\n';
 
-// The upstream replay viewer (replay.pokemonshowdown.com/src/replays*.tsx, built to js/).
-// Upstream's index.php embeds the log inline in a text/plain script tag and the viewer
-// reads it from there, so a replay opens without waiting on a second request.
+
 function upstreamReplayHtml(id, log, meta) {
 	const title = meta && meta.players && meta.players.length ?
 		escapeHtml(meta.players.join(' vs. ')) + ' - Hackmons Cove Replay' : 'Hackmons Cove Replay';
