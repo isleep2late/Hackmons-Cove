@@ -646,9 +646,6 @@ function upstreamReplayHtml(id, log, meta) {
 	out += '<meta charset="utf-8" />\n';
 	out += '<meta name="viewport" content="width=device-width, initial-scale=1" />\n';
 	out += '<title>' + title + '</title>\n';
-	// battle.css + utilichart.css are what upstream's index.php links, plus the inline sheet below.
-	// replay.css is deliberately NOT linked: it belongs to the old embed (replay-embed.js) and pins
-	// .replay-controls at top:373px, which sits on top of the log once the log moves under the battle.
 	for (const href of ['/style/font-awesome.css', '/style/battle.css', '/style/utilichart.css']) {
 		out += '<link rel="stylesheet" href="' + CLIENT_ORIGIN + href + '" />\n';
 	}
