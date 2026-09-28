@@ -1290,9 +1290,10 @@ export class ChatTextEntry extends preact.Component<{
 		const { room } = this.props;
 		const OLD_TEXTBOX = !PSView.useContentEditable && !this.miniedit;
 		if (room.connectMode === null && room.id.startsWith('battle-')) {
+			// Fork: our own replay host, not upstream's short link.
 			return <div
 				class="chat-log-add hasuserlist" onClick={this.focusIfNoSelection} style={{ left: this.props.left || 0 }}
-			><CopyableURLBox url={`https://psim.us/r/${room.id.slice(7)}`} /></div>;
+			><CopyableURLBox url={`https://${Config.routes.replays}/${room.id.slice(7)}`} /></div>;
 		}
 
 		const canTalk = PS.user.named || room.id === 'dm-';

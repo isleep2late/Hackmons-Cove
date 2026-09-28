@@ -1071,9 +1071,9 @@ function toId() {
 					this.renameRoom(roomid, parts[0], parts[1]);
 				} else if (data === 'nonexistent' && Config.server.id && roomid.slice(0, 7) === 'battle-' && errormessage) {
 					var replayid = roomid.slice(7);
-					if (Config.server.id !== 'showdown') replayid = Config.server.id + '-' + replayid;
+					// Fork: our replay store keeps ids unprefixed and serves them on this origin.
 					var replayLink = 'https://' + Config.routes.replays + '/' + replayid;
-					$.ajax(replayLink + '.json', { dataType: 'json' }).done(function (replay) {
+					$.ajax('/replays/' + replayid + '.json', { dataType: 'json' }).done(function (replay) {
 						if (replay) {
 							var title = replay.players[0] + ' vs. ' + replay.players[1];
 							app.receive('>battle-' + replayid + '\n|init|battle\n|title|' + title + '\n' + replay.log);

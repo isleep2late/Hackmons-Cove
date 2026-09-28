@@ -7,6 +7,7 @@ import { Battle } from '../../play.pokemonshowdown.com/src/battle';
 import { BattleLog } from '../../play.pokemonshowdown.com/src/battle-log';
 import { BattleSound } from '../../play.pokemonshowdown.com/src/battle-sound';
 import type { ID } from '../../play.pokemonshowdown.com/src/battle-dex';
+declare const Config: any;
 declare function toID(input: string): string;
 
 function showAd(id: string) {
@@ -396,7 +397,8 @@ export class BattlePanel extends preact.Component<{ id: string, user: PSReplays[
 	shareURL() {
 		if (!this.result) return '';
 		const fullid = this.result.id + (this.result.password ? `-${this.result.password}pw` : '');
-		return `https://psim.us/r/${fullid}`;
+		// Fork: our own replay host. Upstream's psim.us/r/ short link has none of our replays.
+		return `https://${Config.routes.replays}/${fullid}`;
 	}
 	selectShareURL = (e: Event) => {
 		(e.currentTarget as HTMLInputElement).select();

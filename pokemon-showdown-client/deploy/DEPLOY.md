@@ -40,7 +40,7 @@ neither contains secrets. Create them before building:
     "client": "play.hackmons.com",
     "resourceServer": "play.pokemonshowdown.com",
     "dex": "dex.pokemonshowdown.com",
-    "replays": "replay.pokemonshowdown.com",
+    "replays": "replay.hackmons.com",
     "users": "pokemonshowdown.com/users",
     "teams": "teams.pokemonshowdown.com"
 }

@@ -17,7 +17,7 @@ import { BattleTooltips } from "./battle-tooltips";
 import { Net } from "./client-connection";
 import type { PSModel, PSStreamModel, PSSubscription } from "./client-core";
 import {
-	NARROW_MODE_HEADER_WIDTH, PS, type PSRoom, type PSRoomFocusOptions, type RoomID, VERTICAL_HEADER_WIDTH,
+	Config, NARROW_MODE_HEADER_WIDTH, PS, type PSRoom, type PSRoomFocusOptions, type RoomID, VERTICAL_HEADER_WIDTH,
 } from "./client-main";
 import type { ChatRoom } from "./panel-chat";
 import { PSHeader, PSMiniHeader } from "./panel-topbar";
@@ -51,11 +51,10 @@ export class PSRouter {
 			if (url.startsWith('teams.pokemonshowdown.com/view/') && /[0-9]/.test(url.charAt(31))) {
 				url = `viewteam-${url.slice(31)}`;
 			}
-			if (url.startsWith('psim.us/r/')) {
-				url = `battle-${url.slice(10)}`;
-			}
-			if (url.startsWith('replay.pokemonshowdown.com/') && /[a-z]/.test(url.charAt(27))) {
-				url = `battle-${url.slice(27)}`;
+			// Fork: our own replay host opens in-client; upstream's short links are not ours.
+			const replayHost = `${Config.routes.replays}/`;
+			if (url.startsWith(replayHost) && /[a-z]/.test(url.charAt(replayHost.length))) {
+				url = `battle-${url.slice(replayHost.length)}`;
 			}
 			if (url.startsWith(document.location.host)) {
 				url = url.slice(document.location.host.length);
@@ -63,8 +62,8 @@ export class PSRouter {
 				url = url.slice(24);
 			} else if (PS.server.id === 'showdown' && url.startsWith('psim.us')) {
 				url = url.slice(7);
-			} else if (url.startsWith('replay.pokemonshowdown.com')) {
-				url = url.slice(26).replace('/', '/battle-');
+			} else if (url.startsWith(Config.routes.replays)) {
+				url = url.slice(Config.routes.replays.length).replace('/', '/battle-');
 			}
 		}
 		if (url.startsWith('/')) url = url.slice(1);
