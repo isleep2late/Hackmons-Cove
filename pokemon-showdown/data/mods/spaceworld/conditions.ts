@@ -1,4 +1,34 @@
 export const Conditions: import('../../../sim/dex-conditions').ModdedConditionDataTable = {
+	confusion: {
+		inherit: true,
+		onBeforeMove(pokemon, target, move) {
+			pokemon.volatiles['confusion'].time--;
+			if (!pokemon.volatiles['confusion'].time) {
+				pokemon.removeVolatile('confusion');
+				return;
+			}
+			this.add('-activate', pokemon, 'confusion');
+			if (this.randomChance(1, 2)) {
+				return;
+			}
+			const selfHit = {
+				basePower: 40,
+				type: '???',
+				baseMoveType: move.type,
+				category: 'Physical',
+				willCrit: false,
+				isConfusionSelfHit: true,
+				noDamageVariance: true,
+				flags: {},
+				selfdestruct: move.selfdestruct,
+			} as unknown as ActiveMove;
+			const damage = this.actions.getDamage(pokemon, pokemon, selfHit);
+			if (typeof damage !== 'number') throw new Error("Confusion damage not dealt");
+			this.lastDamage = damage;
+			this.directDamage(damage);
+			return false;
+		},
+	},
 	brn: {
 		inherit: true,
 		onAfterMoveSelfPriority: 3,
@@ -191,8 +221,11 @@ export const Conditions: import('../../../sim/dex-conditions').ModdedConditionDa
 		onSideStart(side) {
 			this.add('-sidestart', side, 'move: Sandstorm');
 		},
-		onResidualOrder: 12,
-		onResidual(pokemon) {
+		onAfterMoveSelfPriority: -1,
+		onAfterMoveSelf(pokemon) {
+			this.damage(this.clampIntRange(Math.floor(pokemon.maxhp / 8), 1), pokemon);
+		},
+		onAfterSwitchInSelf(pokemon) {
 			this.damage(this.clampIntRange(Math.floor(pokemon.maxhp / 8), 1), pokemon);
 		},
 	},

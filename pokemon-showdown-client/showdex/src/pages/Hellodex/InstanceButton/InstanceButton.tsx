@@ -172,7 +172,7 @@ export const InstanceButton = React.forwardRef<InstanceButtonRef, InstanceButton
           }
 
           {!!suffixes && ' '}
-          {suffixes.map((s) => s[1]).join(` ${bullop} `)}
+          {suffixes?.map((s) => s[1]).join(` ${bullop} `)}
         </div>
 
         {operatingMode === 'standalone' ? (

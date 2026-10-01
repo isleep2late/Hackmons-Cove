@@ -9,6 +9,8 @@ import { calcdexSlice } from '@showdex/redux/store';
 import { formatId, nonEmptyObject } from '@showdex/utils/core';
 import { logger, wtf } from '@showdex/utils/debug';
 import { detectPreactHost } from '@showdex/utils/host';
+import { partitionPreactBattleRooms } from '@showdex/utils/host/partitionPreactBattleRooms';
+import { rebuildPreactBattleRoom } from '@showdex/utils/host/rebuildPreactBattleRoom';
 import { BootdexPreactBootstrappable } from '../Bootdex/BootdexPreactBootstrappable';
 import { MixinCalcdexBootstrappable } from './CalcdexBootstrappable';
 import { CalcdexPreactBattle } from './CalcdexPreactBattle';
@@ -251,8 +253,35 @@ export class CalcdexPreactBootstrapper extends MixinCalcdexBootstrappable(Bootde
       // (typically occurs when the user refreshes the page mid-battle, so we join the BattleRoom first)
       // (note: this is a lil jank & can leave the battle in some corrupted half-init state;
       // refreshing again seems to do trick LOL inb4 I break Showdown again)
-      const existingBattleRooms = (Object.keys(window.PS.rooms) as Showdown.RoomID[])
-        .filter((roomId) => roomId.startsWith('battle-'));
+      const {
+        rebuild: rebuiltBattleRooms,
+        reload: reloadedBattleRooms,
+        rejoin: existingBattleRooms,
+      } = partitionPreactBattleRooms(window.PS.rooms as unknown as Parameters<typeof partitionPreactBattleRooms>[0]);
+
+      const rebuildRoom = (roomId: Showdown.RoomID, replacementBatch?: string[][] | null) => {
+        try {
+          rebuildPreactBattleRoom(
+            window.PS as unknown as Parameters<typeof rebuildPreactBattleRoom>[0],
+            roomId,
+            CalcdexPreactBattleRoom as unknown as Parameters<typeof rebuildPreactBattleRoom>[2],
+            (line) => window.BattleTextParser.parseLine(line),
+            replacementBatch,
+          );
+        } catch (error) {
+          l.error('Couldn\'t rebuild the Showdown.BattleRoom', roomId, error);
+        }
+      };
+
+      rebuiltBattleRooms.forEach((roomId) => rebuildRoom(roomId));
+
+      reloadedBattleRooms.forEach((roomId) => {
+        const { battle, connectError } = window.PS.rooms[roomId] as Showdown.BattleRoom & { connectError?: string };
+
+        rebuildRoom(roomId, battle ? [['noinit', connectError ? 'joinfailed' : 'nonexistent', connectError || '']] : null);
+      });
+
+      window.PS.update();
 
       l.debug('Reloading any existing Showdown.BattleRoom\'s...', existingBattleRooms);
 

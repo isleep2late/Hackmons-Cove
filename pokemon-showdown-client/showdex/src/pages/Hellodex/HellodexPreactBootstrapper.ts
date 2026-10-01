@@ -6,7 +6,7 @@
 
 import { env } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import { detectPreactHost } from '@showdex/utils/host';
+import { detectPreactHost, getPreactPanel } from '@showdex/utils/host';
 import { BootdexPreactAdapter } from '../Bootdex/BootdexPreactAdapter';
 import { BootdexPreactBootstrappable } from '../Bootdex/BootdexPreactBootstrappable';
 import { HellodexPreactPanel } from './HellodexPreactPanel';
@@ -23,14 +23,14 @@ export class HellodexPreactBootstrapper extends BootdexPreactBootstrappable {
     super.startTimer(HellodexPreactBootstrapper.scope);
   }
 
-  public open(): void {
+  public open(focus = true): void {
     if (!detectPreactHost(window) || !this.roomId) {
       return;
     }
 
     const { rootState } = HellodexPreactBootstrapper.Adapter;
     const { hellodex: settings } = rootState?.showdex?.settings || {};
-    const shouldFocus = !settings?.focusRoomsRoom;
+    const shouldFocus = focus && !settings?.focusRoomsRoom;
 
     if (window.PS.rooms[this.roomId]) {
       if (window.PS.room?.id !== this.roomId && shouldFocus) {
@@ -46,7 +46,7 @@ export class HellodexPreactBootstrapper extends BootdexPreactBootstrappable {
       autoclosePopups: false, // default: true; login popup might be open at this stage
     });
 
-    if (shouldFocus) {
+    if (shouldFocus || !focus) {
       return;
     }
 
@@ -91,7 +91,7 @@ export class HellodexPreactBootstrapper extends BootdexPreactBootstrappable {
     // l.debug('PS.roomTypes', window.PS.roomTypes);
 
     l.debug('Attempting to open the Hellodex w/ roomId', this.roomId);
-    this.open();
+    this.open(BootdexPreactBootstrappable.detectMainMenuRoom(getPreactPanel(window.PS)));
     this.endTimer('(hellodex enabled)');
   }
 }

@@ -2258,6 +2258,9 @@ export default {
 			"doubleedge": {
 				"basePower": 100
 			},
+			"flail": {
+				"ignoreImmunity": true
+			},
 			"karatechop": {
 				"type": "Normal"
 			},
@@ -2272,6 +2275,27 @@ export default {
 			},
 			"raindance": {
 				"type": "Normal"
+			},
+			"reversal": {
+				"ignoreImmunity": true
+			},
+			"dragonrage": {
+				"ignoreImmunity": true
+			},
+			"nightshade": {
+				"ignoreImmunity": true
+			},
+			"psywave": {
+				"ignoreImmunity": true
+			},
+			"seismictoss": {
+				"ignoreImmunity": true
+			},
+			"sonicboom": {
+				"ignoreImmunity": true
+			},
+			"superfang": {
+				"ignoreImmunity": true
 			},
 			"spikes": {
 				"type": "Normal"

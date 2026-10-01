@@ -35,6 +35,7 @@ interface BattleRequestTracker {
 	 */
 	isWait: 'cantUndo' | true | false;
 	choice: string;
+	infinite?: boolean;
 }
 
 /** 5 seconds */
@@ -448,7 +449,7 @@ export class RoomBattleTimer {
 		for (const player of players) {
 			if (player.eliminated) continue;
 			if (player.turnSecondsLeft > 0) continue;
-			if (this.settings.timeoutAutoChoose && player.secondsLeft > 0 && player.knownActive) {
+			if (this.settings.timeoutAutoChoose && player.secondsLeft > 0 && player.knownActive && !player.request.infinite) {
 				void this.battle.stream.write(`>${player.slot} default`);
 				didSomething = true;
 			} else {
@@ -623,11 +624,11 @@ export class RoomBattle extends RoomGame<RoomBattlePlayer> {
 		const [choice, rqid] = data.split('|', 2);
 		if (!player) return;
 		const request = player.request;
-		if (request.isWait !== false && request.isWait !== true) {
+		if ((request.isWait !== false && request.isWait !== true) || request.infinite) {
 			player.sendRoom(`|error|[Invalid choice] There's nothing to choose`);
 			return;
 		}
-		const allPlayersWait = this.players.every(p => !!p.request.isWait);
+		const allPlayersWait = this.players.every(p => !!p.request.isWait || p.request.infinite);
 		if (allPlayersWait || // too late
 			(rqid && rqid !== `${request.rqid}`)) { // WAY too late
 			player.sendRoom(`|error|[Invalid choice] Sorry, too late to make a different move; the next turn has already started`);
@@ -647,7 +648,7 @@ export class RoomBattle extends RoomGame<RoomBattlePlayer> {
 			player.sendRoom(`|error|[Invalid choice] There's nothing to cancel`);
 			return;
 		}
-		const allPlayersWait = this.players.every(p => !!p.request.isWait);
+		const allPlayersWait = this.players.every(p => !!p.request.isWait || p.request.infinite);
 		if (allPlayersWait || // too late
 			(rqid && rqid !== `${request.rqid}`)) { // WAY too late
 			player.sendRoom(`|error|[Invalid choice] Sorry, too late to cancel; the next turn has already started`);
@@ -801,8 +802,9 @@ export class RoomBattle extends RoomGame<RoomBattlePlayer> {
 				this[slot].request = {
 					rqid: this.rqid,
 					request: requestJSON,
-					isWait: request.wait ? 'cantUndo' : false,
+					isWait: request.wait && !request.infinite ? 'cantUndo' : false,
 					choice: '',
+					infinite: !!request.infinite,
 				};
 				this.requestCount++;
 				player?.sendRoom(`|request|${requestJSON}`);

@@ -81,6 +81,8 @@ declare namespace Showdown {
      * * Clicking inside a panel will focus it, in two-panel mode.
      */
     public room?: PSRoom = null;
+    public baseRoom?: PSRoom = null;
+    public getPanel(): PSRoom;
     /**
      * Currently active panel.
      *

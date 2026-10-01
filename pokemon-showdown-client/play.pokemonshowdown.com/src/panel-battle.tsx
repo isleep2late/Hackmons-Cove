@@ -20,7 +20,7 @@ import {
 	type BattleRequest, type BattleMoveRequest, type BattleSwitchRequest, type BattleTeamRequest,
 } from "./battle-choices";
 import { BattleTextParser, type Args } from "./battle-text-parser";
-import { ModifiableValue } from "./battle-tooltips";
+import { BattleTooltips, ModifiableValue } from "./battle-tooltips";
 import { Net } from "./client-connection";
 import { BattleLog } from "./battle-log";
 
@@ -167,6 +167,7 @@ export class BattleRoom extends ChatRoom {
 	private pendingLines: Args[] = [];
 	/** showdex compat */
 	onRequest: ((request: BattleRequest | null) => void) | null = null;
+	infinite: { [side: string]: { slots: number, total: number, draft: string } } = {};
 
 	override receiveBatch(batch: Args[]) {
 		for (const args of batch) (this as any).receiveLine(args); // showdex compat
@@ -195,6 +196,11 @@ export class BattleRoom extends ChatRoom {
 			case 'win': case 'tie': case 'error':
 				controlLines.push(args);
 				break;
+			case 'infinite': {
+				const slots = parseInt(args[2]) || 1;
+				this.infinite[args[1]] = { slots, total: slots, draft: this.infinite[args[1]]?.draft || '' };
+				break;
+			}
 			}
 			battleLines.push('|' + args.join('|'));
 		}
@@ -254,6 +260,7 @@ export class BattleRoom extends ChatRoom {
 		if (!request) {
 			this.request = null;
 			this.choices = null;
+			this.infinite = {};
 			return;
 		}
 
@@ -263,6 +270,7 @@ export class BattleRoom extends ChatRoom {
 		}
 
 		BattleChoiceBuilder.fixRequest(request, this.battle);
+		if (request.requestType !== 'wait') this.infinite = {};
 
 		if (request.side) {
 			this.battle.myPokemon = request.side.pokemon;
@@ -292,6 +300,19 @@ export class BattleRoom extends ChatRoom {
 	}
 	isPlaying() {
 		return this.battle && !this.battle.ended && this.request && this.connectMode !== 'deleted';
+	}
+	infiniteState() {
+		const side = this.side;
+		if (!side || this.request?.requestType !== 'wait' || this.battle.ended) return null;
+		if (!side.pokemon.every(pokemon => pokemon.fainted)) return null;
+		return this.infinite[side.id] || null;
+	}
+	infiniteSubmit(data: string) {
+		const infinite = this.infiniteState();
+		if (!infinite || infinite.slots <= 0) return;
+		this.send(`/infinitesubmit ${data.trim().replace(/\r?\n/g, '\\n')}`);
+		infinite.slots--;
+		this.update(null);
 	}
 	updateChoiceNotification() {
 		const oName = this.battle?.farSide.name;
@@ -334,6 +355,7 @@ export class BattleRoom extends ChatRoom {
 		this.side = null;
 		this.request = null;
 		this.choices = null;
+		this.infinite = {};
 		this.updateChoiceNotification();
 		return false;
 	}
@@ -408,7 +430,7 @@ class TimerButton extends preact.Component<{ room: BattleRoom, top: number }> {
 		const room = this.props.room;
 		if (!this.timerInterval && room.battle.kickingInactive) {
 			this.timerInterval = setInterval(() => {
-				if (room.choices?.isDone()) return;
+				if (room.choices?.isDone() && !room.infiniteState()) return;
 				if (typeof room.battle.kickingInactive === 'number' && room.battle.kickingInactive > 1) {
 					room.battle.kickingInactive--;
 					if (room.battle.graceTimeLeft) room.battle.graceTimeLeft--;
@@ -421,8 +443,8 @@ class TimerButton extends preact.Component<{ room: BattleRoom, top: number }> {
 			this.timerInterval = null;
 		}
 
-		let timerTicking = (room.battle.kickingInactive &&
-			room.request && room.request.requestType !== "wait" && (room.choices && !room.choices.isDone())) ?
+		let timerTicking = (room.battle.kickingInactive && (!!room.infiniteState() ||
+			(room.request && room.request.requestType !== "wait" && (room.choices && !room.choices.isDone())))) ?
 			' timerbutton-on' : '';
 
 		if (room.battle.kickingInactive) {
@@ -539,7 +561,30 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 		this.forceUpdate();
 	};
 	send = (text: string, elem?: HTMLElement) => {
-		this.props.room.send(text, elem);
+		const room = this.props.room;
+		if (room.infiniteState()?.slots && text.trim() && !text.startsWith('/')) {
+			room.infiniteSubmit(text);
+			return;
+		}
+		room.send(text, elem);
+	};
+	updateInfiniteDraft = (ev: Event) => {
+		const infinite = this.props.room.infiniteState();
+		if (infinite) infinite.draft = (ev.currentTarget as HTMLTextAreaElement).value;
+	};
+	submitInfiniteSet = (ev: Event) => {
+		ev.preventDefault();
+		const infinite = this.props.room.infiniteState();
+		if (!infinite?.draft.trim()) return;
+		const set = infinite.draft;
+		if (infinite.slots > 1) infinite.draft = '';
+		this.props.room.infiniteSubmit(set);
+	};
+	reviveInfinite = (ev: Event) => {
+		this.props.room.infiniteSubmit(`existing ${(ev.currentTarget as HTMLButtonElement).value}`);
+	};
+	deferInfinite = () => {
+		this.props.room.infiniteSubmit('defer');
 	};
 	focusIfNoSelection = () => {
 		if (window.getSelection?.()?.type === 'Range') return;
@@ -599,6 +644,7 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 		const scene = battle.scene as BattleScene;
 		room.log = scene.log;
 		room.log.getHighlight = room.handleHighlight;
+		room.log.isIgnored = room.isIgnored;
 		scene.tooltips.unlisten(scene.$frame);
 		scene.tooltips.listen(this.base!);
 		battle.subscribe(() => this.forceUpdate());
@@ -616,6 +662,22 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 		const scene = this.props.room.battle?.scene as BattleScene | undefined;
 		if (this.base) scene?.tooltips.unlisten(this.base);
 		super.componentWillUnmount();
+	}
+	infiniteShown = false;
+	override componentDidUpdate() {
+		super.componentDidUpdate();
+		const room = this.props.room;
+		const infiniteShown = !!room.battle?.atQueueEnd && !!room.infiniteState();
+		if (infiniteShown && !this.infiniteShown) {
+			BattleTooltips.hideTooltip();
+			const log = this.base?.querySelector<HTMLElement>('.battle-log');
+			const controls = log?.querySelector<HTMLElement>('.battle-controls');
+			if (log && controls) {
+				const above = controls.getBoundingClientRect().top - (log.getBoundingClientRect().top + log.clientTop);
+				if (above < 0) log.scrollTop += above;
+			}
+		}
+		this.infiniteShown = infiniteShown;
 	}
 	battleHeight = 360;
 	updateLayout() {
@@ -918,7 +980,10 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 		};
 
 		let movesListToRender = currentActiveData.moves;
-		if ((isMaxChecked || (currentActiveData.maxMoves && !currentActiveData.canDynamax)) && !isMegaChecked && !isMegaXChecked && !isMegaYChecked) {
+		if (
+			(isMaxChecked || (currentActiveData.maxMoves && !currentActiveData.canDynamax)) &&
+			!isMegaChecked && !isMegaXChecked && !isMegaYChecked
+		) {
 			movesListToRender = currentActiveData.maxMoves || [];
 		} else if (isZChecked) {
 			movesListToRender = (currentActiveData.zMoves as any) || [];
@@ -928,7 +993,7 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 			if (!moveData) return <button class="movebutton" disabled>&nbsp;</button>;
 			const move = dex.moves.get(moveData.name);
 			const [moveType, tags] = tooltips.getMoveTypeText(move, valueTracker, isMaxChecked);
-			const tooltip = isMaxChecked ? `maxmove|${moveData.name}|${currentSlotIndex}` : isZChecked ? `zmove|${moveData.name}|${currentSlotIndex}` : `move|${moveData.name}|${currentSlotIndex}`;
+			const tooltip = `${isMaxChecked ? 'maxmove' : isZChecked ? 'zmove' : 'move'}|${moveData.name}|${currentSlotIndex}`;
 
 			const pp = moveData.maxpp ? `${moveData.pp}/${moveData.maxpp}` : '\u2014';
 			return (
@@ -1000,9 +1065,10 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 		const moveRequest = choices.currentMoveRequest()!;
 
 		const canDynamax = moveRequest.canDynamax && !choices.alreadyMax;
-		const canMegaEvo = moveRequest.canMegaEvo && !choices.alreadyMega;
-		const canMegaEvoX = moveRequest.canMegaEvoX && !choices.alreadyMega;
-		const canMegaEvoY = moveRequest.canMegaEvoY && !choices.alreadyMega;
+		const alreadyMega = choices.alreadyMega && !this.props.room.battle.format.allowMultipleMegas;
+		const canMegaEvo = moveRequest.canMegaEvo && !alreadyMega;
+		const canMegaEvoX = moveRequest.canMegaEvoX && !alreadyMega;
+		const canMegaEvoY = moveRequest.canMegaEvoY && !alreadyMega;
 		const canZMove = moveRequest.zMoves && !choices.alreadyZ;
 		const canUltraBurst = moveRequest.canUltraBurst;
 		const canTerastallize = moveRequest.canTerastallize;
@@ -1084,7 +1150,7 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 					type: moveType,
 					tags,
 					tooltip,
-					moveData,
+					moveData: { ...moveData, disabled: active.maxMoves![i].disabled },
 				});
 			});
 		}
@@ -1533,6 +1599,8 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 		const room = this.props.room;
 		const atEnd = room.battle.atQueueEnd;
 		if (!atEnd) return this.renderPlayerAnimationControls(overlayVersion);
+		const infinite = room.infiniteState();
+		if (infinite) return this.renderInfiniteControls(infinite);
 
 		let choices = room.choices;
 		if (!choices) return 'Error: Missing BattleChoiceBuilder';
@@ -1578,6 +1646,55 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 			return this.renderPlayerTeamPreviewControls(request, choices, overlayVersion);
 		}
 		return null;
+	}
+	renderTwinTag(pokemon: ServerPokemon, team: ServerPokemon[]) {
+		const twins = team.filter(p => p !== pokemon && p.name === pokemon.name);
+		if (!twins.length) return null;
+		const tags = (p: ServerPokemon) => [p.speciesForme, p.gender, p.level, p.item, ...p.moves];
+		const own = tags(pokemon);
+		const k = own.findIndex((tag, i) => twins.some(twin => tags(twin)[i] !== tag));
+		const tag = k < 0 ? `#${team.indexOf(pokemon) + 1}` :
+			k === 0 ? pokemon.speciesForme :
+			k === 1 ? ({ M: '\u2642', F: '\u2640' } as { [g: string]: string })[pokemon.gender] || 'genderless' :
+			k === 2 ? `L${pokemon.level}` :
+			k === 3 ? Dex.items.get(pokemon.item).name || 'no item' :
+			Dex.moves.get(pokemon.moves[k - 4]).name;
+		return <small> ({tag})</small>;
+	}
+	renderInfiniteControls(infinite: { slots: number, total: number, draft: string }) {
+		if (infinite.slots <= 0) {
+			return <div class="inline-controls"><div class="whatdo">
+				<em>Waiting for the battle to continue...</em>
+			</div></div>;
+		}
+		const submitted = infinite.total - infinite.slots;
+		const ordinal = ['second', 'third', 'fourth', 'fifth'][submitted - 1] || `${submitted + 1}th`;
+		return <div class="inline-controls">
+			<div class="whatdo">
+				{submitted ? `Now choose a ${ordinal} Pokémon.` : `Your team is out of Pokémon! Choose one to keep battling.`}
+			</div>
+			<div class="switchcontrols">
+				<h3 class="switchselect">Revive at half HP</h3>
+				<div class="switchmenu">
+					{this.props.room.side!.pokemon.map((pokemon, i, team) => <button value={i + 1} onClick={this.reviveInfinite}>
+						{PSIcon({ pokemon })}{pokemon.name}{this.renderTwinTag(pokemon, team)}
+					</button>)}
+					<div style="clear:left"></div>
+				</div>
+				<h3 class="switchselect">Or send a new set</h3>
+				<form onSubmit={this.submitInfiniteSet}>
+					<p><textarea
+						name="infiniteset" class="textbox" rows={7} style="min-height:8em"
+						placeholder="Paste a set in Showdown export format (pasting it into the chat works too)"
+						value={infinite.draft} onInput={this.updateInfiniteDraft}
+					/></p>
+					<p>
+						<button type="submit" class="button"><strong>Submit set</strong></button> {}
+						{infinite.slots > 1 && <button type="button" class="button" onClick={this.deferInfinite}>Defer</button>}
+					</p>
+				</form>
+			</div>
+		</div>;
 	}
 
 	renderAfterBattleControls() {
@@ -1657,7 +1774,8 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 			dangerouslySetInnerHTML={{ __html: `#${id} .battle .turn, #${id} .battle-history { display: none !important; }` }}
 		></style> : null;
 		const { layout, battleHeight, battleWidth, overlayControls } = this.chooseLayout();
-		const overlayVersion = overlayControls && !!room.battle && !!room.side && !!room.request && !room.battle.ended;
+		const overlayVersion = overlayControls && !!room.battle && !!room.side && !!room.request && !room.battle.ended &&
+			!room.infiniteState();
 
 		if (layout === 'scrolling') {
 			// low-width-low-height layout
@@ -1665,11 +1783,8 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 			return <PSPanelWrapper room={room} focusClick noScroll="hidden">
 				{hardcoreStyle}
 				<ChatLog
-					class="battle-log hasuserlist" room={room} noSubscription hasPreempt bottom={0}
+					class="battle-log hasuserlist battle-log-toolbar" room={room} noSubscription hasPreempt bottom={0}
 				>
-					<div style="height:18px;position:relative">
-						<ChatUserList room={room} top={0} minimized />
-					</div>
 					<ChatTextEntry room={room} onMessage={this.send} onKey={this.onKey} left={0} tinyLayout={room.width < 400} />
 					<div style={`height:${battleHeight}px;width:${battleWidth}px;margin: 0 auto;position:relative`}>
 						<BattleDiv room={room} />
@@ -1685,6 +1800,7 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 						{this.renderConnectError()}
 					</div>
 				</ChatLog>
+				<ChatUserList room={room} top={0} minimized />
 				{(room.battle && !room.battle.ended && room.request && room.battle.mySide.id === PS.user.userid) &&
 					<TimerButton room={room} top={7} />}
 				<div class="battle-controls-container"></div>
@@ -1705,7 +1821,7 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 					{this.renderControls(true)}
 				</div>}
 				<ChatLog
-					class="battle-log hasuserlist" room={room} top={battleHeight} noSubscription hasPreempt
+					class="battle-log hasuserlist battle-log-toolbar" room={room} top={battleHeight} noSubscription hasPreempt
 				>
 					<div
 						class={`battle-controls${room.width > 660 ? ' wide-controls' : ''}`}

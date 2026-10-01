@@ -1,3 +1,13 @@
+const SW97_STATUS_STAB = new Set([
+	'sing', 'sleeppowder', 'hypnosis', 'lovelykiss', 'spore', 'supersonic', 'confuseray', 'sweetkiss', 'stalker',
+	'poisonpowder', 'poisongas', 'toxic', 'stunspore', 'thunderwave', 'glare', 'mirrormove',
+]);
+const SW97_DAMAGE_AFTER_HIT_CHECK = new Set([
+	'doubleslap', 'cometpunch', 'doublekick', 'furyattack', 'twineedle', 'pinmissile', 'spikecannon', 'barrage',
+	'furyswipes', 'bonemerang', 'bind', 'wrap', 'firespin', 'clamp', 'thrash', 'petaldance', 'outrage', 'triplekick',
+	'present',
+]);
+
 export const Scripts: ModdedBattleScriptsData = {
 	gen: 2,
 	inherit: 'gen2',
@@ -66,6 +76,55 @@ export const Scripts: ModdedBattleScriptsData = {
 	},
 	actions: {
 		inherit: true,
+		runMove(moveOrMoveName, pokemon, targetLoc, options) {
+			let move = this.dex.getActiveMove(moveOrMoveName);
+			let target = this.battle.getTarget(pokemon, move, targetLoc);
+			if (!options?.sourceEffect && move.id !== 'struggle') {
+				const changedMove = this.battle.runEvent('OverrideAction', pokemon, target, move);
+				if (changedMove && changedMove !== true) {
+					move = this.dex.getActiveMove(changedMove);
+					target = this.battle.getRandomTarget(pokemon, move);
+				}
+			}
+			if (!target && target !== false) target = this.battle.getRandomTarget(pokemon, move);
+
+			this.battle.setActiveMove(move, pokemon, target);
+
+			if (pokemon.moveThisTurn) {
+				this.battle.debug(`${pokemon.fullname} INCONSISTENT STATE, ALREADY MOVED: ${pokemon.moveThisTurn}`);
+				this.battle.clearActiveMove(true);
+				return;
+			}
+			const foeStanding = () => !!pokemon.side.foe.active[0]?.hp;
+			if (!this.battle.runEvent('BeforeMove', pokemon, target, move)) {
+				this.battle.runEvent('MoveAborted', pokemon, target, move);
+				this.battle.clearActiveMove(true);
+				if (foeStanding()) this.battle.runEvent('AfterMoveSelf', pokemon, target, move);
+				return;
+			}
+			if (move.beforeMoveCallback) {
+				if (move.beforeMoveCallback.call(this.battle, pokemon, target, move)) {
+					this.battle.clearActiveMove(true);
+					if (foeStanding()) this.battle.runEvent('AfterMoveSelf', pokemon, target, move);
+					return;
+				}
+			}
+			pokemon.lastDamage = 0;
+			const lockedMove = pokemon.getLockedMove() || pokemon.getSemiLockedMove();
+			if (!lockedMove) {
+				if (!pokemon.deductPP(move, null, target) && (move.id !== 'struggle')) {
+					this.battle.add('cant', pokemon, 'nopp', move);
+					this.battle.clearActiveMove(true);
+					return;
+				}
+			}
+			pokemon.moveUsed(move);
+			this.battle.actions.useMove(move, pokemon, { target, sourceEffect: options?.sourceEffect });
+			this.battle.singleEvent('AfterMove', move, null, pokemon, target, move);
+			if (!(pokemon.switchFlag && this.battle.canSwitch(pokemon.side)) && foeStanding()) {
+				this.battle.runEvent('AfterMoveSelf', pokemon, target, move);
+			}
+		},
 		moveHit(target, pokemon, move, moveData, isSecondary, isSelf) {
 			let damage: number | false | null | undefined = undefined;
 			move = this.dex.getActiveMove(move);
@@ -239,6 +298,32 @@ export const Scripts: ModdedBattleScriptsData = {
 			const negativeBoostTable = [1, 0.66, 0.5, 0.4, 0.33, 0.28, 0.25];
 			const doSelfDestruct = true;
 			let damage: number | false | undefined = 0;
+			if (move.category !== 'Status' && move.id !== 'counter' && move.id !== 'bide') {
+				this.battle.lastDamage = 0;
+			}
+			const opponent = pokemon.side.foe.active[0];
+			if (SW97_STATUS_STAB.has(move.id) && opponent) {
+				let curDamage = this.battle.lastDamage;
+				if (pokemon.hasType(move.type)) curDamage = (curDamage + (curDamage >> 1)) & 0xffff;
+				for (const type of opponent.getTypes()) {
+					if (!this.dex.getImmunity(move.type, type)) {
+						curDamage = 0;
+					} else {
+						const factor = [5, 10, 20][this.dex.getEffectiveness(move.type, type) + 1] ?? 10;
+						curDamage = Math.floor(curDamage * factor / 10);
+					}
+				}
+				this.battle.lastDamage = curDamage;
+			}
+			const afterHitCheck = () => {
+				if (SW97_DAMAGE_AFTER_HIT_CHECK.has(move.id)) {
+					const hitMove = move.id === 'present' ? { ...move, basePower: 50, heal: undefined } as ActiveMove : move;
+					const wouldBe = this.getDamage(pokemon, target, hitMove, true);
+					this.battle.lastDamage = typeof wouldBe === 'number' ? wouldBe : 0;
+				} else if (move.id === 'jumpkick' || move.id === 'highjumpkick') {
+					this.battle.lastDamage = 1;
+				}
+			};
 
 			if (['explosion', 'selfdestruct'].includes(move.id) && doSelfDestruct) {
 				pokemon.cureStatus(true);
@@ -282,6 +367,8 @@ export const Scripts: ModdedBattleScriptsData = {
 
 			hitResult = this.battle.runEvent('Invulnerability', target, pokemon, move);
 			if (hitResult === false) {
+				this.battle.lastDamage = 0;
+				afterHitCheck();
 				this.battle.attrLastMove('[miss]');
 				this.battle.add('-miss', pokemon);
 				return false;
@@ -292,6 +379,7 @@ export const Scripts: ModdedBattleScriptsData = {
 			}
 
 			if (!target.runImmunity(move, true)) {
+				if (move.id === 'jumpkick' || move.id === 'highjumpkick') this.battle.lastDamage = 1;
 				return false;
 			}
 
@@ -303,11 +391,15 @@ export const Scripts: ModdedBattleScriptsData = {
 
 			hitResult = this.battle.runEvent('TryHit', target, pokemon, move);
 			if (!hitResult) {
+				if (target.volatiles['protect'] && move.flags['protect']) {
+					this.battle.lastDamage = 0;
+					afterHitCheck();
+				}
 				if (hitResult === false) this.battle.add('-fail', target);
 				return false;
 			}
 
-			if (move.ohko && pokemon.level < target.level) {
+			if (move.ohko && (target.runEffectiveness(move) < 0 || pokemon.getStat('spe') < target.getStat('spe'))) {
 				this.battle.add('-immune', target, '[ohko]');
 				return false;
 			}
@@ -320,10 +412,6 @@ export const Scripts: ModdedBattleScriptsData = {
 			}
 			if (accuracy !== true) {
 				accuracy = Math.floor(accuracy * 255 / 100);
-				if (move.ohko) {
-					accuracy += (pokemon.level - target.level) * 2;
-					accuracy = Math.min(accuracy, 255);
-				}
 				if (!move.ignoreAccuracy) {
 					if (pokemon.boosts.accuracy > 0) {
 						accuracy *= positiveBoostTable[pokemon.boosts.accuracy];
@@ -353,6 +441,8 @@ export const Scripts: ModdedBattleScriptsData = {
 				accuracy = this.battle.runEvent('Accuracy', target, pokemon, move, accuracy);
 			}
 			if (accuracy !== true && !this.battle.randomChance(accuracy, 256)) {
+				this.battle.lastDamage = 0;
+				afterHitCheck();
 				this.battle.attrLastMove('[miss]');
 				this.battle.add('-miss', pokemon);
 				damage = false;
@@ -396,6 +486,8 @@ export const Scripts: ModdedBattleScriptsData = {
 			if (move.category !== 'Status') {
 				target.gotAttacked(move, damage, pokemon);
 			}
+			if (move.drain && this.battle.lastDamage) this.battle.lastDamage = Math.max(this.battle.lastDamage >> 1, 1);
+			if (move.ohko && damage) this.battle.lastDamage = 0xffff;
 			if (move.ohko) this.battle.add('-ohko');
 
 			this.battle.singleEvent('AfterMoveSecondary', move, null, target, pokemon, move);
@@ -424,7 +516,7 @@ export const Scripts: ModdedBattleScriptsData = {
 			}
 
 			if (move.ohko) {
-				return target.maxhp;
+				return 0xffff;
 			}
 
 			if (move.damageCallback) {
@@ -549,11 +641,12 @@ export const Scripts: ModdedBattleScriptsData = {
 				damage = Math.floor(damage / 2);
 			}
 
-			if (type !== '???' && source.hasType(type)) {
+			const typeless = move.id === 'flail' || move.id === 'reversal';
+			if (!typeless && type !== '???' && source.hasType(type)) {
 				damage += Math.floor(damage / 2);
 			}
 
-			const totalTypeMod = target.runEffectiveness(move);
+			const totalTypeMod = typeless ? 0 : target.runEffectiveness(move);
 			if (totalTypeMod > 0) {
 				if (!suppressMessages) this.battle.add('-supereffective', target);
 				damage *= 2;

@@ -98,6 +98,25 @@ const formatEndpointFormat = (
   return replacements;
 };
 
+const presetIndexes: Record<string, Promise<Record<string, unknown>>> = {};
+
+export const readPresetIndex = (
+  url: string,
+): Promise<Record<string, unknown>> => {
+  presetIndexes[url] ||= runtimeFetch<Record<string, unknown>>(url, {
+    method: HttpMethod.GET,
+    headers: { Accept: 'application/json' },
+  })
+    .then((response) => {
+      const index = response.ok ? response.json() : null;
+
+      return nonEmptyObject(index) ? index : null;
+    })
+    .catch(() => null);
+
+  return presetIndexes[url];
+};
+
 /**
  * RTK Query factory for fetching `CalcdexPokemonPreset`'s, or if available & still fresh,
  * use the cached `CalcdexPokemonPreset`'s from `LocalStorage`.
@@ -175,6 +194,16 @@ export const buildPresetQuery = <
       // e.g., '/smogon/data/sets//gen9ou' -> '/smogon/data/sets/gen9ou'
       + `${path}/${endpoint}`.replace(/\/{2,}/g, '/')
       + env('pkmn-presets-endpoint-suffix');
+
+    const index = await readPresetIndex(
+      env('pkmn-presets-base-url') + `${path}/index`.replace(/\/{2,}/g, '/') + env('pkmn-presets-endpoint-suffix'),
+    );
+
+    if (index && !(`${endpoint}${env('pkmn-presets-endpoint-suffix')}` in index)) {
+      endTimer('(not published)', 'endpoint', endpoint);
+
+      return { data: output };
+    }
 
     try {
       // fetch the presets

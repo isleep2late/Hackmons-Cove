@@ -21893,7 +21893,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 		weightkg: 0,
 		color: "Black",
 		prevo: "Kurstraw",
-		evoLevel: 2,
+		evoLevel: 1,
 		eggGroups: ["Undiscovered"],
 	},
 	plux: {
@@ -21929,7 +21929,7 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 		weightkg: 0,
 		color: "Red",
 		prevo: "Wolfman",
-		evoLevel: 25,
+		evoLevel: 35,
 		eggGroups: ["Undiscovered"],
 	},
 	likk: {

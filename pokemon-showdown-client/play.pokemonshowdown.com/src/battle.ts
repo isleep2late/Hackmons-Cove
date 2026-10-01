@@ -76,6 +76,8 @@ export class Pokemon implements PokemonDetails, PokemonHealth {
 	 * change during the first switch-in.
 	 */
 	searchid = '';
+	faintLine = 0;
+	pasted = false;
 
 	side: Side;
 	slot = 0;
@@ -367,7 +369,7 @@ export class Pokemon implements PokemonDetails, PokemonHealth {
 			if (ppUsed[1] < 0) ppUsed[1] = 0;
 			const move = this.side.battle.dex.moves.get(entry[0]);
 			let maxpp = (move.pp === 1 || move.noPPBoosts ? move.pp : move.pp * 8 / 5);
-			if (this.side.battle.tier.includes('Champions')) {
+			if (this.side.battle.format.isChampions) {
 				maxpp = move.pp > 20 ? 20 : move.pp;
 				maxpp = move.pp === 1 || move.noPPBoosts ? move.pp : (move.pp / 5 + 1) * 4;
 			}
@@ -666,6 +668,9 @@ export class Side {
 		[id: string]: [effectName: string, levels: number, minDuration: number, maxDuration: number],
 	} = {};
 	faintCounter = 0;
+	faintLines = 0;
+	newPokemon = 0;
+	pasted = false;
 
 	constructor(battle: Battle, n: number) {
 		this.battle = battle;
@@ -719,6 +724,9 @@ export class Side {
 		this.clearPokemon();
 		this.sideConditions = {};
 		this.faintCounter = 0;
+		this.faintLines = 0;
+		this.newPokemon = 0;
+		this.pasted = false;
 	}
 	setAvatar(avatar: string) {
 		this.avatar = avatar;
@@ -804,7 +812,7 @@ export class Side {
 		delete this.sideConditions[id];
 		this.battle.scene.removeSideCondition(this.n, id);
 	}
-	addPokemon(name: string, ident: string, details: string, replaceSlot = -1) {
+	addPokemon(name: string, ident: string, details: string, replaceSlot = -1, isNew = false) {
 		const oldPokemon = replaceSlot >= 0 ? this.pokemon[replaceSlot] : undefined;
 
 		const data = this.battle.parseDetails(name, ident, details);
@@ -825,7 +833,7 @@ export class Side {
 		} else {
 			this.pokemon.push(poke);
 		}
-		if (this.pokemon.length > this.totalPokemon || this.battle.speciesClause) {
+		if (!isNew && (this.pokemon.length > this.totalPokemon || (this.battle.speciesClause && !this.pasted))) {
 			// check for Illusion
 			let existingTable: { [searchid: string]: number } = {};
 			let toRemove = -1;
@@ -835,6 +843,9 @@ export class Side {
 				if (poke1.searchid in existingTable) {
 					let poke2i = existingTable[poke1.searchid];
 					let poke2 = this.pokemon[poke2i];
+					if (poke1.fainted && poke2.fainted && (poke1.pasted || poke2.pasted) && !this.pokemon.some(p => p !== poke &&
+						!p.fainted && !this.active.includes(p) &&
+						(['Zoroark', 'Zorua'].includes(p.getBaseSpecies().baseSpecies) || p.ability === 'Illusion'))) continue;
 					if (poke === poke1) {
 						toRemove = poke2i;
 					} else if (poke === poke2) {
@@ -860,7 +871,7 @@ export class Side {
 						if (curPoke === poke) continue;
 						if (curPoke.fainted) continue;
 						if (this.active.includes(curPoke)) continue;
-						if (curPoke.speciesForme === 'Zoroark' || curPoke.speciesForme === 'Zorua' || curPoke.ability === 'Illusion') {
+						if (['Zoroark', 'Zorua'].includes(curPoke.getBaseSpecies().baseSpecies) || curPoke.ability === 'Illusion') {
 							illusionFound = curPoke;
 							break;
 						}
@@ -880,6 +891,7 @@ export class Side {
 					}
 					if (illusionFound) {
 						illusionFound.fainted = true;
+						illusionFound.faintLine = this.pokemon[toRemove].faintLine;
 						illusionFound.hp = 0;
 						illusionFound.status = '';
 					}
@@ -975,7 +987,7 @@ export class Side {
 		}
 		pokemon.statusData.toxicTurns = 0;
 		if (this.battle.gen === 5) pokemon.statusData.sleepTurns = 0;
-		if (this.battle.tier.includes('Champions')) {
+		if (this.battle.format.isChampions) {
 			pokemon.timesAttacked = 0;
 		}
 		this.lastPokemon = pokemon;
@@ -1169,6 +1181,7 @@ export class Battle {
 	teamPreviewCount = 0;
 	speciesClause = false;
 	tier = '';
+	format = Dex.formats.get('');
 	gameType: 'singles' | 'doubles' | 'triples' | 'multi' | 'freeforall' | 'rotation' = 'singles';
 	compatMode = true;
 	rated: string | boolean = false;
@@ -1356,6 +1369,7 @@ export class Battle {
 		// activity queue state
 		this.activeMoveIsSpread = null;
 		this.currentStep = 0;
+		this.preemptStepQueue = [];
 		this.resetTurnsSinceMoved();
 		this.nextStep();
 	}
@@ -1856,7 +1870,13 @@ export class Battle {
 			break;
 		}
 		case '-heal': {
-			let poke = this.getPokemon(args[1], Dex.getEffect(kwArgs.from).id === 'revivalblessing')!;
+			const revive = Dex.getEffect(kwArgs.from).id === 'revivalblessing';
+			const poke = revive && kwArgs.faint ?
+				this.getRevivedPokemon(args[1], Number(kwArgs.faint)) : this.getPokemon(args[1], revive);
+			if (!poke) {
+				this.log(args, kwArgs);
+				break;
+			}
 			let damage = poke.healthParse(args[2], true, true);
 			if (damage === null) break;
 			let range = poke.getDamageRange(damage);
@@ -1892,6 +1912,7 @@ export class Battle {
 					const side = this.sides[siden];
 					poke.fainted = false;
 					poke.status = '';
+					if (side.lastPokemon === poke) side.lastPokemon = null;
 					this.scene.updateSidebar(side);
 					break;
 				}
@@ -3398,6 +3419,25 @@ export class Battle {
 		}
 		return { name, siden, slot, pokemonid };
 	}
+	getRevivedPokemon(pokemonid: string, faintLine: number) {
+		const side = this.getSide(pokemonid);
+		const fainted = side.pokemon?.find(p => p.faintLine === faintLine && p.fainted);
+		if (!fainted) return this.getPokemon(pokemonid, true);
+		const { pokemonid: ident } = this.parsePokemonId(pokemonid);
+		if (fainted.ident === ident) return fainted;
+		if (!fainted.searchid && (side.pokemon.length <= side.totalPokemon ||
+			!side.pokemon.some(p => p.searchid && fainted.checkDetails(p.details)))) return fainted;
+		if (side.lastPokemon === fainted) side.lastPokemon = null;
+		if (!fainted.searchid || side.pokemon.some(p => p !== fainted && p.searchid === fainted.searchid)) {
+			side.pokemon.splice(side.pokemon.indexOf(fainted), 1);
+		} else {
+			fainted.fainted = false;
+			fainted.hp = fainted.maxhp;
+			fainted.status = '???';
+		}
+		this.scene.updateSidebar(side);
+		return side.pokemon.find(p => p.ident === ident && !p.fainted && !side.active.includes(p)) || null;
+	}
 	getSwitchedPokemon(pokemonid: string, details: string) {
 		if (pokemonid === '??') throw new Error(`pokemonid not passed`);
 		const { name, siden, slot, pokemonid: parsedPokemonid } = this.parsePokemonId(pokemonid);
@@ -3405,6 +3445,13 @@ export class Battle {
 
 		const searchid = `${pokemonid}|${details}`;
 		const side = this.sides[siden];
+		if (side.newPokemon > 0) {
+			side.newPokemon--;
+			const pokemon = side.addPokemon(name, pokemonid, details, -1, true);
+			pokemon.pasted = true;
+			if (slot >= 0) pokemon.slot = slot;
+			return pokemon;
+		}
 
 		// search inactive revealed pokemon
 		for (let i = 0; i < side.pokemon.length; i++) {
@@ -3546,6 +3593,7 @@ export class Battle {
 		}
 		case 'tier': {
 			this.tier = args[1];
+			this.format = Dex.formats.get(this.tier);
 			if (this.tier.endsWith('Random Battle')) {
 				this.speciesClause = true;
 			}
@@ -3553,13 +3601,13 @@ export class Battle {
 				this.messageFadeTime = 40;
 				this.isBlitz = true;
 			}
-			if (this.tier.includes(`Let's Go`)) {
+			if (this.format.isLetsGo) {
 				this.dex = Dex.mod('gen7letsgo' as ID);
 			}
 			if (this.tier.includes('Super Staff Bros')) {
 				this.dex = Dex.mod('gen9ssb' as ID);
 			}
-			if (this.tier.includes(`Champions`)) {
+			if (this.format.isChampions) {
 				this.dex = Dex.mod('champions' as ID);
 			}
 			if (this.tier.includes('No Nerfs') && this.gen === 9) {
@@ -3737,7 +3785,12 @@ export class Battle {
 		}
 		case 'teamsize': {
 			let side = this.getSide(args[1]);
-			side.totalPokemon = parseInt(args[2], 10);
+			const size = parseInt(args[2], 10);
+			if (this.turn > 0 && size > side.totalPokemon) {
+				side.newPokemon += size - side.totalPokemon;
+				side.pasted = true;
+			}
+			side.totalPokemon = size;
 			this.scene.updateSidebar(side);
 			break;
 		}
@@ -3824,6 +3877,7 @@ export class Battle {
 		}
 		case 'faint': {
 			let poke = this.getPokemon(args[1])!;
+			poke.faintLine = ++poke.side.faintLines;
 			poke.side.faint(poke);
 			this.log(args, kwArgs);
 			break;

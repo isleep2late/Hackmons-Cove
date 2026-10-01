@@ -78,10 +78,13 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	},
 	pidgey: {
 		inherit: true,
+		evos: [],
 		eggGroups: ["Undiscovered"],
 	},
 	pidgeotto: {
 		inherit: true,
+		prevo: '',
+		evoLevel: undefined,
 		eggGroups: ["Undiscovered"],
 	},
 	pidgeot: {
@@ -91,10 +94,13 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	},
 	rattata: {
 		inherit: true,
+		evos: [],
 		eggGroups: ["Undiscovered"],
 	},
 	raticate: {
 		inherit: true,
+		prevo: '',
+		evoLevel: undefined,
 		eggGroups: ["Undiscovered"],
 	},
 	spearow: {
@@ -107,16 +113,20 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	},
 	ekans: {
 		inherit: true,
+		evos: [],
 		baseStats: { hp: 35, atk: 60, def: 44, spa: 50, spd: 40, spe: 55 },
 		eggGroups: ["Undiscovered"],
 	},
 	arbok: {
 		inherit: true,
+		prevo: '',
+		evoLevel: undefined,
 		baseStats: { hp: 60, atk: 85, def: 69, spa: 85, spd: 65, spe: 80 },
 		eggGroups: ["Undiscovered"],
 	},
 	pikachu: {
 		inherit: true,
+		evos: [],
 		baseStats: { hp: 35, atk: 55, def: 30, spa: 50, spd: 40, spe: 90 },
         evoType: undefined,
         evoLevel: 12,
@@ -124,6 +134,9 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	},
 	raichu: {
 		inherit: true,
+		prevo: '',
+		evoType: undefined,
+		evoItem: undefined,
 		baseStats: { hp: 60, atk: 90, def: 55, spa: 90, spd: 80, spe: 100 },
 		eggGroups: ["Undiscovered"],
 	},
@@ -178,10 +191,10 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	},
 	vulpix: {
 		inherit: true,
+		evoLevel: 13,
 		gender: null,
 		baseStats: { hp: 38, atk: 41, def: 40, spa: 65, spd: 45, spe: 65 },
         prevo: "Trifox",
-        evoLevel: 12,
 		eggGroups: ["Undiscovered"],
 	},
 	ninetales: {
@@ -584,6 +597,10 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	},
 	chansey: {
 		inherit: true,
+		evoType: undefined,
+		evoItem: undefined,
+		evoCondition: undefined,
+		prevo: '',
 		eggGroups: ["Undiscovered"],
 	},
 	tangela: {
@@ -662,7 +679,7 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	pinsir: {
 		inherit: true,
 		baseStats: { hp: 65, atk: 125, def: 100, spa: 55, spd: 75, spe: 85 },
-		evos: ["Plucks"],
+		evos: ["Plux"],
 		eggGroups: ["Undiscovered"],
 	},
 	tauros: {
@@ -748,6 +765,8 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	},
 	snorlax: {
 		inherit: true,
+		evoType: undefined,
+		prevo: '',
 		gender: null,
 		baseStats: { hp: 160, atk: 110, def: 65, spa: 65, spd: 100, spe: 30 },
 		eggGroups: ["Undiscovered"],
@@ -766,12 +785,15 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	},
 	chikorita: {
 		inherit: true,
+		evos: [],
 		gender: null,
 		baseStats: { hp: 55, atk: 40, def: 45, spa: 75, spd: 50, spe: 40 },
 		eggGroups: ["Undiscovered"],
 	},
 	bayleef: {
 		inherit: true,
+		prevo: '',
+		evoLevel: undefined,
 		gender: null,
 		baseStats: { hp: 50, atk: 45, def: 50, spa: 45, spd: 50, spe: 50 },
 		eggGroups: ["Undiscovered"],
@@ -817,15 +839,12 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	},
 	happa: {
 		inherit: true,
-		// The demo ROM ships Happa fully evolved: this evolution is present but COMMENTED OUT
-		// in evos_attacks.asm. Carried here as demo intent so Happa counts as NFE and, with its
-		// SW_EVIOLITE entry, benefits from Eviolite.
-		evos: ["Hanamogura"],
+		evos: [],
 	},
 	hanamogura: {
 		inherit: true,
-		prevo: "Happa",
-		evoLevel: 16,
+		prevo: '',
+		evoLevel: undefined,
 		evos: ["Hanaryu"],
 	},
 	hanaryu: {
@@ -865,6 +884,9 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	},
 	mantine: {
 		inherit: true,
+		evoType: undefined,
+		evoCondition: undefined,
+		prevo: '',
 		baseStats: { hp: 50, atk: 50, def: 50, spa: 50, spd: 50, spe: 50 },
 		eggGroups: ["Undiscovered"],
 	},
@@ -895,6 +917,7 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	},
 	quagsire: {
 		inherit: true,
+		evoLevel: undefined,
 		types: ["Water"],
 		baseStats: { hp: 50, atk: 45, def: 50, spa: 75, spd: 50, spe: 55 },
 		prevo: undefined,
@@ -908,6 +931,7 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	},
 	xatu: {
 		inherit: true,
+		evoLevel: undefined,
 		types: ["Flying", "Psychic"],
 		baseStats: { hp: 55, atk: 50, def: 50, spa: 70, spd: 50, spe: 80 },
 		evoType: "useItem",
@@ -920,12 +944,15 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	},
 	marill: {
 		inherit: true,
+		evoType: undefined,
+		prevo: '',
 		baseStats: { hp: 45, atk: 50, def: 55, spa: 55, spd: 50, spe: 40 },
 		evos: undefined,
 		eggGroups: ["Undiscovered"],
 	},
 	crobat: {
 		inherit: true,
+		evoType: undefined,
 		baseStats: { hp: 60, atk: 65, def: 50, spa: 45, spd: 50, spe: 85 },
 		evoLevel: 44,
 		eggGroups: ["Undiscovered"],
@@ -936,6 +963,7 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	},
 	spinarak: {
 		inherit: true,
+		evos: ['Ariados', 'Twohead'],
 		baseStats: { hp: 50, atk: 50, def: 50, spa: 50, spd: 50, spe: 50 },
 		eggGroups: ["Undiscovered"],
 	},
@@ -963,6 +991,8 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	},
 	sunflora: {
 		inherit: true,
+		evoType: undefined,
+		evoItem: undefined,
 		types: ["Grass", "Psychic"],
 		baseStats: { hp: 50, atk: 50, def: 50, spa: 50, spd: 50, spe: 50 },
 		prevo: undefined,
@@ -984,8 +1014,14 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 		inherit: true,
 		evos: ["Girafarig"],
 	},
+	twohead: {
+		inherit: true,
+		prevo: 'Spinarak',
+		evoLevel: 23,
+	},
 	girafarig: {
 		inherit: true,
+		prevo: 'Twinz',
 		types: ["Dark", "Normal"],
 		baseStats: { hp: 70, atk: 50, def: 50, spa: 45, spd: 50, spe: 45 },
 		evoLevel: 29,
@@ -1027,6 +1063,7 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	},
 	ledian: {
 		inherit: true,
+		evoLevel: undefined,
 		baseStats: { hp: 50, atk: 50, def: 50, spa: 50, spd: 50, spe: 50 },
 		prevo: undefined,
 		eggGroups: ["Undiscovered"],
@@ -1037,6 +1074,7 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	},
 	espeon: {
 		inherit: true,
+		evoCondition: undefined,
 		gender: null,
 		baseStats: { hp: 50, atk: 50, def: 50, spa: 50, spd: 50, spe: 50 },
 		evoType: "useItem",
@@ -1045,6 +1083,7 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	},
 	umbreon: {
 		inherit: true,
+		evoCondition: undefined,
 		gender: null,
 		types: ["Poison"],
 		baseStats: { hp: 50, atk: 50, def: 50, spa: 50, spd: 50, spe: 50 },
@@ -1092,6 +1131,8 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	},
 	skiploom: {
 		inherit: true,
+		prevo: '',
+		evoLevel: undefined,
 		baseStats: { hp: 50, atk: 50, def: 45, spa: 60, spd: 50, spe: 50 },
 		eggGroups: ["Undiscovered"],
 	},
@@ -1165,6 +1206,7 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	},
 	scizor: {
 		inherit: true,
+		evoItem: undefined,
 		types: ["Bug", "Flying"],
 		baseStats: { hp: 50, atk: 50, def: 50, spa: 50, spd: 50, spe: 50 },
 		evoType: undefined,
@@ -1203,6 +1245,7 @@ export const Pokedex: import('../../../sim/dex-species').ModdedSpeciesDataTable 
 	},
 	steelix: {
 		inherit: true,
+		evoItem: undefined,
 		baseStats: { hp: 50, atk: 50, def: 50, spa: 50, spd: 50, spe: 50 },
 		eggGroups: ["Undiscovered"],
 		evoType: undefined,

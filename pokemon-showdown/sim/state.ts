@@ -71,7 +71,8 @@ export const State = new class {
 		// else has been deserialized to avoid anything accidentally `add`-ing to it.
 		state.log = battle.log;
 		state.queue = this.serializeWithRefs(battle.queue.list, battle);
-		state.formatid = battle.format.id;
+		state.formatid = battle.format.customRules ?
+			`${battle.format.id}@@@${battle.format.customRules.join(',')}` : battle.format.id;
 		return state;
 	}
 
@@ -135,6 +136,10 @@ export const State = new class {
 			this.deserializeSide(side, battle.sides[i]);
 			activeRequests = activeRequests || side.activeRequest === undefined;
 		}
+		if (battle.gameType === 'multi') {
+			battle.sides[2]!.sideConditions = battle.sides[0].sideConditions;
+			battle.sides[3]!.sideConditions = battle.sides[1].sideConditions;
+		}
 		// Since battle.getRequests depends on the state of each side we can't combine
 		// this loop with the one above which deserializes the sides. We also only do this
 		// if there are any active requests, not only to avoid have to recompute request
@@ -181,9 +186,11 @@ export const State = new class {
 		const state: /* Side */ AnyObject = this.serialize(side, SIDE, side.battle);
 		state.pokemon = new Array(side.pokemon.length);
 		const team = new Array(side.pokemon.length);
+		let added = side.team.length;
 		for (const [i, pokemon] of side.pokemon.entries()) {
 			state.pokemon[i] = this.serializePokemon(pokemon);
-			team[side.team.indexOf(pokemon.set)] = i + 1;
+			const index = side.team.indexOf(pokemon.set);
+			team[index >= 0 ? index : added++] = i + 1;
 		}
 		// We encode the team such that it could be used as a valid `/team` command
 		// during decoding to transform the current ordering of the serialized Side's
@@ -192,7 +199,8 @@ export const State = new class {
 		// pokemon in team preview, but this encoding results in the most intuitive
 		// and readable debugging of the raw JSON, so we're willing to add a small
 		// amount of complexity to the encoding/decoding process to accommodate this.
-		state.team = team.join(team.length > 9 ? ',' : '');
+		const listed = team.filter(Boolean);
+		state.team = listed.join(listed.length > 9 ? ',' : '');
 		state.choice = this.serializeChoice(side.choice, side.battle);
 		// If activeRequest is null we encode it as a tombstone indicator to ensure
 		// that during serialization when we recompute the activeRequest we don't turn

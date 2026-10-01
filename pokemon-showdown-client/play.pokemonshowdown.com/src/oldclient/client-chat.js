@@ -141,17 +141,9 @@
 			this.tabComplete.reset();
 			this.chatHistory.push(text);
 			text = this.parseCommand(text);
-			if (this.infiniteWaiting > 0) {
+			if (this.infiniteWaiting > 0 && typeof text === 'string' && text.charAt(0) !== '/') {
 				this.infiniteWaiting--;
-				var submitTxt = text.trim();
-				var encoded = submitTxt.replace(/\r?\n/g, '\\n');
-				if (submitTxt === 'defer') {
-					this.send('/infinitesubmit defer');
-				} else if (submitTxt.startsWith('/infinitesubmit')) {
-					this.send(encoded);
-				} else {
-					this.send('/infinitesubmit ' + encoded);
-				}
+				this.send('/infinitesubmit ' + text.trim().replace(/\r?\n/g, '\\n'));
 				this.$chatbox.val('');
 				if (this.infiniteWaiting > 0 && this.infiniteTotalSlots) {
 					var submitted = this.infiniteTotalSlots - this.infiniteWaiting;

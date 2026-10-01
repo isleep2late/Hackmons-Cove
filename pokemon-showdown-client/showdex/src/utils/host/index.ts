@@ -2,5 +2,8 @@ export * from './detectClassicHost';
 export * from './detectPreactHost';
 export * from './getAuthUsername';
 export * from './getColorScheme';
+export * from './getPreactPanel';
+export * from './injectPreactBattleControls';
+export * from './isShowdownClientOrigin';
 export * from './openShowdownUser';
 export * from './openSmogonDex';

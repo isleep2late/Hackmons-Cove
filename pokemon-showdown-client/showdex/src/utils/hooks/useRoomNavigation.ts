@@ -6,7 +6,7 @@
 
 // import * as React from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { detectClassicHost, detectPreactHost } from '@showdex/utils/host';
+import { detectClassicHost, detectPreactHost, getPreactPanel } from '@showdex/utils/host';
 import { parseHotkeyCombo } from '@showdex/utils/ui';
 // import { logger } from '@showdex/utils/debug';
 
@@ -40,13 +40,19 @@ const moveRoomBy = (amount: number): void => {
     return void window.app.moveRoomBy(currentRoom, amount);
   }
 
-  // note: PS.room includes popups, PS.panel doesn't
-  if (!detectPreactHost(window) || !window.PS.panel?.id || !amount) {
+  if (!detectPreactHost(window) || !amount) {
     return;
   }
 
-  const leftRoomIndex = window.PS.leftRoomList.indexOf(window.PS.panel.id);
-  const rightRoomIndex = window.PS.rightRoomList.indexOf(window.PS.panel.id);
+  // note: PS.room includes popups, the panel doesn't
+  const panel = getPreactPanel(window.PS);
+
+  if (!panel?.id) {
+    return;
+  }
+
+  const leftRoomIndex = window.PS.leftRoomList.indexOf(panel.id);
+  const rightRoomIndex = window.PS.rightRoomList.indexOf(panel.id);
 
   if (leftRoomIndex < 0 && rightRoomIndex < 0) {
     return;
@@ -56,14 +62,14 @@ const moveRoomBy = (amount: number): void => {
     const nextIndex = leftRoomIndex + amount;
 
     if (nextIndex < 0) { // wrap move the left panel back to the end of the right panels
-      // l.debug('wrapping left panel', window.PS.panel.id, 'to the right index', window.PS.rightRoomList.length);
-      window.PS.moveRoom(window.PS.panel, 'right', false, window.PS.rightRoomList.length);
+      // l.debug('wrapping left panel', panel.id, 'to the right index', window.PS.rightRoomList.length);
+      window.PS.moveRoom(panel, 'right', false, window.PS.rightRoomList.length);
     } else if (nextIndex >= window.PS.leftRoomList.length) { // wrap move the left panel to the start of the right panels
-      // l.debug('wrapping left panel', window.PS.panel.id, 'to the right index', window.PS.leftRoomList.length - nextIndex);
-      window.PS.moveRoom(window.PS.panel, 'right', false, window.PS.leftRoomList.length - nextIndex);
+      // l.debug('wrapping left panel', panel.id, 'to the right index', window.PS.leftRoomList.length - nextIndex);
+      window.PS.moveRoom(panel, 'right', false, window.PS.leftRoomList.length - nextIndex);
     } else {
-      // l.debug('moving left panel', window.PS.panel.id, 'to the left index', nextIndex);
-      window.PS.moveRoom(window.PS.panel, 'left', false, nextIndex);
+      // l.debug('moving left panel', panel.id, 'to the left index', nextIndex);
+      window.PS.moveRoom(panel, 'left', false, nextIndex);
     }
 
     return void window.PS.update();
@@ -73,14 +79,14 @@ const moveRoomBy = (amount: number): void => {
   const nextIndex = rightRoomIndex + amount;
 
   if (nextIndex < 0) { // wrap move the right panel back to the end of the left panels
-    // l.debug('wrapping right panel', window.PS.panel.id, 'to the left index', window.PS.leftRoomList.length);
-    window.PS.moveRoom(window.PS.panel, 'left', false, window.PS.leftRoomList.length);
+    // l.debug('wrapping right panel', panel.id, 'to the left index', window.PS.leftRoomList.length);
+    window.PS.moveRoom(panel, 'left', false, window.PS.leftRoomList.length);
   } else if (nextIndex >= window.PS.rightRoomList.length) { // wrap move the right panel to the start of the left panels
-    // l.debug('wrapping right panel', window.PS.panel.id, 'to the left index', window.PS.rightRoomList.length - nextIndex);
-    window.PS.moveRoom(window.PS.panel, 'left', false, window.PS.rightRoomList.length - nextIndex);
+    // l.debug('wrapping right panel', panel.id, 'to the left index', window.PS.rightRoomList.length - nextIndex);
+    window.PS.moveRoom(panel, 'left', false, window.PS.rightRoomList.length - nextIndex);
   } else {
-    // l.debug('moving right panel', window.PS.panel.id, 'to the right index', nextIndex);
-    window.PS.moveRoom(window.PS.panel, 'right', false, nextIndex);
+    // l.debug('moving right panel', panel.id, 'to the right index', nextIndex);
+    window.PS.moveRoom(panel, 'right', false, nextIndex);
   }
 
   window.PS.update();

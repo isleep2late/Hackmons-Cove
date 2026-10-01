@@ -1440,7 +1440,7 @@ export class Battle {
 		}
 		this.sentRequests = false;
 
-		if (this.sides.every(side => side.isChoiceDone())) {
+		if (this.sides.every(side => side.isChoiceDone()) && !this.sides.some(side => (side as any).infiniteWaiting)) {
 			throw new Error(`Choices are done immediately after a request`);
 		}
 	}
@@ -1478,9 +1478,10 @@ export class Battle {
 			break;
 
 		default:
+			const infiniteHold = this.sides.some(side => (side as any).infiniteWaiting);
 			for (let i = 0; i < this.sides.length; i++) {
 				const side = this.sides[i];
-				if (!side.pokemonLeft) continue;
+				if (!side.pokemonLeft || infiniteHold) continue;
 				const activeData = side.activeAndSubActives().map(pokemon => pokemon?.getMoveRequestData());
 				requests[i] = { active: activeData, side: side.getRequestData() };
 				if (side.allySide) {
@@ -1496,6 +1497,7 @@ export class Battle {
 				if (!this.supportCancel || !multipleRequestsExist) requests[i].noCancel = true;
 			} else {
 				requests[i] = { wait: true, side: this.sides[i].getRequestData() };
+				if ((this.sides[i] as any).infiniteWaiting) (requests[i] as any).infinite = true;
 			}
 		}
 
@@ -1587,6 +1589,20 @@ export class Battle {
 		if (!side) return; // can happen if a battle crashes
 		if (this.gameType !== 'freeforall') {
 			return this.win(side.foe);
+		}
+		if (this.ruleTable.has('infinitemod')) {
+			(side as any).infiniteLost = true;
+			if ((side as any).infiniteWaiting) {
+				(side as any).infiniteWaiting = false;
+				(side as any).infiniteQueue = [];
+				this.checkWin();
+				if (!this.ended) {
+					side.emitRequest({ wait: true, side: side.getRequestData() });
+					this.runInfiniteSwitchIns();
+					if (!this.ended && this.allChoicesDone()) this.commitChoices();
+				}
+				return true;
+			}
 		}
 		if (!side.pokemonLeft) return;
 
@@ -2669,20 +2685,22 @@ export class Battle {
 	checkWin(faintData?: Battle['faintQueue'][0]) {
 		if (this.ruleTable.has('infinitemod')) {
 			for (const side of this.sides) {
-				if (!side.pokemonLeft && !(side as any).infiniteWaiting) {
+				if (!side.pokemonLeft && !(side as any).infiniteWaiting && !(side as any).infiniteLost) {
 					const totalSlots = 1;
 					const clientSlots = 1;
 					(side as any).infiniteWaiting = true;
 					(side as any).infiniteSlotsNeeded = totalSlots;
 					(side as any).infiniteInitialSlots = totalSlots;
 					(side as any).infiniteQueue = [];
-					const slotsMsg = clientSlots === 1
-						? 'Paste a Pokémon set into the chat to keep battling, or close the tab to forfeit.'
-						: `Paste ${clientSlots} Pokémon sets (one at a time) into the chat to keep battling, or close the tab to forfeit.`;
-					this.add('-message', `Your team is out of Pokémon! ${slotsMsg}`);
+					const slotsMsg = clientSlots === 1 ?
+						'They can send in a new one to keep battling.' :
+						`They can send in ${clientSlots} new ones to keep battling.`;
+					this.add('-message', `${side.name} is out of Pokémon! ${slotsMsg}`);
 					this.add('infinite', side.id, clientSlots);
 				}
 			}
+			const inPlay = this.sides.filter(side => !(side as any).infiniteLost);
+			if (this.gameType === 'freeforall' && inPlay.length === 1) return this.win(inPlay[0]);
 			if (this.sides.some((side: Side) => (side as any).infiniteWaiting)) return;
 		}
 		if (this.sides.every(side => !side.pokemonLeft)) {
@@ -2699,22 +2717,34 @@ export class Battle {
 
 	infiniteSubmit(sideId: SideID, data: string) {
 		const side = this.getSide(sideId);
-		if (!(side as any).infiniteWaiting) return;
+		if (this.ended || !(side as any).infiniteWaiting) return;
+		this.inputLog.push(`>infinite ${side.id} ${data}`);
 
 		data = data.replace(/\\n/g, '\n');
 
-		if (data === 'defer') {
+		if (data === 'defer' && !(side as any).infiniteQueue.length && (side as any).infiniteSlotsNeeded <= 1) {
+			this.addSplit(side.id, ['-message', `You can't skip your only slot. Send a set or revive a Pokémon.`]);
+			this.add('infinite', side.id, 1);
+			return;
+		} else if (data === 'defer') {
 			(side as any).infiniteSlotsNeeded--;
 		} else if (data.startsWith('existing ')) {
 			const pos = parseInt(data.slice(9)) - 1;
 			const candidate = side.pokemon[pos];
-			if (candidate && candidate.fainted) {
-				candidate.fainted = false;
-				candidate.hp = Math.max(1, Math.floor(candidate.maxhp / 2));
-				candidate.status = '' as ID;
-				side.pokemonLeft++;
-				(side as any).infiniteQueue.push(candidate);
+			if (!candidate?.fainted) {
+				this.addSplit(side.id, ['-message', `That Pokémon can't be revived. Try again.`]);
+				this.add('infinite', side.id, 1);
+				return;
 			}
+			candidate.fainted = false;
+			candidate.faintQueued = false;
+			candidate.subFainted = false;
+			if (candidate.maxhp > candidate.baseMaxhp && !candidate.volatiles['dynamax']) candidate.maxhp = candidate.baseMaxhp;
+			candidate.hp = Math.max(1, Math.floor(candidate.maxhp / 2));
+			candidate.status = '' as ID;
+			this.add('-heal', candidate, candidate.getHealth, '[from] move: Revival Blessing');
+			side.pokemonLeft++;
+			(side as any).infiniteQueue.push(candidate);
 			(side as any).infiniteSlotsNeeded--;
 		} else {
 			let spriteValue = '';
@@ -2735,11 +2765,11 @@ export class Battle {
 			let sets: any;
 			try {
 				sets = Teams.import(cleaned);
-			} catch (e) {
+			} catch {
 				sets = null;
 			}
 			if (!sets || sets.length === 0) {
-				this.add('-message', `That doesn't look like a valid Pokémon set. Try again.`);
+				this.addSplit(side.id, ['-message', `That doesn't look like a valid Pokémon set. Try again.`]);
 				this.add('infinite', side.id, 1);
 				return;
 			}
@@ -2753,15 +2783,15 @@ export class Battle {
 			try {
 				const { TeamValidator } = require('./team-validator');
 				const problems = new TeamValidator(this.format).validateSet(sets[0], {});
-				if (problems && problems.length) {
-					this.add('-message', `That set isn't legal in this format: ${problems[0]}`);
+				if (problems?.length) {
+					this.addSplit(side.id, ['-message', `That set isn't legal in this format: ${problems[0]}`]);
 					this.add('infinite', side.id, 1);
 					return;
 				}
 			} catch (e) {
 				const msg = (e instanceof Error) ? e.message : String(e);
 				console.error('[infiniteSubmit] validation failed:', msg);
-				this.add('-message', `That Pokémon couldn't be validated. Try again.`);
+				this.addSplit(side.id, ['-message', `That Pokémon couldn't be validated. Try again.`]);
 				this.add('infinite', side.id, 1);
 				return;
 			}
@@ -2771,11 +2801,17 @@ export class Battle {
 			} catch (e) {
 				const msg = (e instanceof Error) ? e.message : String(e);
 				console.error('[infiniteSubmit] addPokemon failed:', msg);
-				this.add('-message', `That Pokémon couldn't be added. Try again.`);
+				this.addSplit(side.id, ['-message', `That Pokémon couldn't be added. Try again.`]);
 				this.add('infinite', side.id, 1);
 				return;
 			}
-			if (newPokemon) (side as any).infiniteQueue.push(newPokemon);
+			if (!newPokemon) {
+				this.addSplit(side.id, ['-message', `Your team is full; revive a Pokémon instead.`]);
+				this.add('infinite', side.id, 1);
+				return;
+			}
+			this.add('teamsize', side.id, side.pokemon.length);
+			(side as any).infiniteQueue.push(newPokemon);
 			(side as any).infiniteSlotsNeeded--;
 		}
 
@@ -2785,78 +2821,126 @@ export class Battle {
 			const handled = initial - remaining;
 			const ordinals = ['second', 'third', 'fourth', 'fifth'];
 			const ordinal = ordinals[handled - 1] || `${handled + 1}th`;
-			this.add('-message', `Set accepted! A ${ordinal} set is needed to continue.`);
+			this.addSplit(side.id, ['-message', `Set accepted! A ${ordinal} set is needed to continue.`]);
 		}
 
 		if ((side as any).infiniteSlotsNeeded <= 0) {
 			(side as any).infiniteWaiting = false;
 
 			const queue: Pokemon[] = ((side as any).infiniteQueue as Pokemon[]) || [];
-			let qIdx = 0;
-			for (let i = 0; i < side.active.length && qIdx < queue.length; i++) {
-				const oldActive = side.active[i];
-				if (!oldActive || oldActive.fainted) {
-					const pokemon = queue[qIdx++];
-					if (oldActive && oldActive !== pokemon) {
-						oldActive.isActive = false;
-						const oldPos = pokemon.position;
-						pokemon.position = i;
-						oldActive.position = oldPos;
-						side.pokemon[pokemon.position] = pokemon;
-						side.pokemon[oldActive.position] = oldActive;
+			(side as any).infiniteQueue = [];
+			for (const pokemon of queue) {
+				let i = side.active.indexOf(pokemon);
+				if (i < 0) i = side.active.findIndex(active => !active || active.fainted);
+				if (i < 0) continue;
+				this.queue.cancelAction(pokemon);
+				if (pokemon.set.disguise) {
+					const disguise = this.dex.species.get(pokemon.set.disguise);
+					if (disguise.exists) {
+						(pokemon as any).name = disguise.name;
+						(pokemon as any).fullname = `${pokemon.side.id}: ${disguise.name}`;
 					}
-					side.active[i] = pokemon;
-					pokemon.isActive = true;
-					pokemon.activeTurns = 0;
-					pokemon.activeMoveActions = 0;
-					if (pokemon.set.disguise) {
-						const disguise = this.dex.species.get(pokemon.set.disguise);
-						if (disguise.exists) {
-							(pokemon as any).name = disguise.name;
-							(pokemon as any).fullname = `${pokemon.side.id}: ${disguise.name}`;
-						}
-					}
-					this.add('switch', pokemon, pokemon.getFullDetails);
-					if (pokemon.set.phType) {
-						const types = (pokemon.set.phType as string).split('/').filter((t: string) => this.dex.types.isName(t));
-						if (types.length) {
-							pokemon.setType(types, true);
-							this.addSplit(pokemon.side.id, ['-start', pokemon, 'typechange', types.join('/'), '[from] rule: Disguise Mod']);
-						}
-					}
-					if (pokemon.set.phAbilities) {
-						for (const abilityName of pokemon.set.phAbilities.split('/')) {
-							const extraAbility = this.dex.abilities.get(abilityName);
-							if (!extraAbility.exists || extraAbility.id === pokemon.ability) continue;
-							pokemon.addVolatile('ability:' + extraAbility.id);
-						}
-					}
-					if (pokemon.set.phItems) {
-						for (const itemName of pokemon.set.phItems.split('/')) {
-							const extraItem = this.dex.items.get(itemName);
-							if (!extraItem.exists || extraItem.id === pokemon.item) continue;
-							pokemon.addVolatile('item:' + extraItem.id);
-						}
-					}
-					if (pokemon.species.forme?.endsWith('Alpha') && this.dex.conditions.getByID('wildmight' as ID).exists) {
-						pokemon.addVolatile('wildmight');
-					}
-					this.applyStartStatus(pokemon);
+				}
+				if (side.active[i] === pokemon) side.active[i] = null!;
+				if (this.gameType === 'rotation' && side.active[i] && (pokemon.position === 1 || pokemon.position === 2)) {
+					const front = side.active[i];
+					[side.pokemon[front.position], side.pokemon[pokemon.position]] = [pokemon, front];
+					[front.position, pokemon.position] = [pokemon.position, front.position];
+					front.status = '' as ID;
+					side.active[i] = null!;
+				}
+				this.actions.switchIn(pokemon, i);
+			}
+
+			if (!this.runInfiniteSwitchIns()) this.sendInfiniteRequest(side, this.sides.some(foe => (foe as any).infiniteWaiting));
+			this.sendUpdates();
+			if (!this.ended && this.allChoicesDone()) this.commitChoices();
+		}
+	}
+
+	runInfiniteSwitchIns() {
+		if (this.ended || this.requestState !== 'move') return false;
+		if (this.sides.some(side => (side as any).infiniteWaiting)) return false;
+		if (this.queue.peek()?.choice === 'runSwitch') {
+			this.midTurn = true;
+			let action;
+			while ((action = this.queue.shift())) {
+				this.runAction(action);
+				if (this.ended || this.requestState !== 'move') {
+					if ((this.requestState as RequestState) === 'switch') (this as any).infiniteSwitchTurn = true;
+					return true;
 				}
 			}
-			(side as any).infiniteQueue = [];
-
-			const activeData = side.activeAndSubActives().map(
-				(p: Pokemon | null) => p?.getMoveRequestData()!
-			);
-			const request: MoveRequest = { active: activeData, side: side.getRequestData() };
-			side.activeRequest = request;
-			side.clearChoice();
-			side.emitRequest(request);
-
-			this.sendUpdates();
-			if (this.allChoicesDone()) this.commitChoices();
+			this.midTurn = false;
 		}
+		const stillOut = this.sides.some(side => (side as any).infiniteWaiting);
+		for (const side of this.sides) {
+			if (!(side as any).infiniteLost) this.sendInfiniteRequest(side, stillOut);
+		}
+		return true;
+	}
+
+	refreshInfiniteActive(side: Side) {
+		for (const pokemon of side.active) {
+			if (!pokemon || pokemon.fainted) continue;
+			pokemon.maybeDisabled = false;
+			pokemon.maybeLocked = false;
+			for (const moveSlot of pokemon.moveSlots) {
+				moveSlot.disabled = false;
+				moveSlot.disabledSource = '';
+			}
+			this.runEvent('DisableMove', pokemon);
+			for (const moveSlot of pokemon.moveSlots) {
+				const activeMove = this.dex.getActiveMove(moveSlot.id);
+				this.singleEvent('DisableMove', activeMove, null, pokemon);
+				if (activeMove.flags['cantusetwice'] && pokemon.lastMove?.id === moveSlot.id) {
+					pokemon.disableMove(pokemon.lastMove.id);
+				}
+			}
+			pokemon.trapped = pokemon.maybeTrapped = false;
+			this.runEvent('TrapPokemon', pokemon);
+			if (!pokemon.knownType || this.dex.getImmunity('trapped', pokemon)) {
+				this.runEvent('MaybeTrapPokemon', pokemon);
+			}
+			if (this.gen > 2) {
+				for (const source of pokemon.foes()) {
+					const species = (source.illusion || source).species;
+					if (!species.abilities) continue;
+					for (const abilitySlot in species.abilities) {
+						const abilityName = species.abilities[abilitySlot as keyof Species['abilities']];
+						if (abilityName === source.ability) continue;
+						const ruleTable = this.ruleTable;
+						if ((ruleTable.has('+hackmons') || !ruleTable.has('obtainableabilities')) && !this.format.team) continue;
+						if (abilitySlot === 'H' && species.unreleasedHidden) continue;
+						const ability = this.dex.abilities.get(abilityName);
+						if (ruleTable.has('-ability:' + ability.id)) continue;
+						if (pokemon.knownType && !this.dex.getImmunity('trapped', pokemon)) continue;
+						this.singleEvent('FoeMaybeTrapPokemon', ability, {}, pokemon, source);
+					}
+				}
+			}
+		}
+	}
+
+	sendInfiniteRequest(side: Side, holdForOthers = false) {
+		let request: ChoiceRequest;
+		if ((side as any).infiniteWaiting) {
+			request = { wait: true, side: side.getRequestData() };
+			(request as any).infinite = true;
+		} else if (this.requestState === 'switch' || holdForOthers) {
+			request = { wait: true, side: side.getRequestData() };
+		} else {
+			this.refreshInfiniteActive(side);
+			request = {
+				active: side.activeAndSubActives().map(pokemon => pokemon?.getMoveRequestData()),
+				side: side.getRequestData(),
+			};
+			if (side.allySide) request.ally = side.allySide.getRequestData(true);
+			if (!this.supportCancel) request.noCancel = true;
+		}
+		side.activeRequest = request;
+		side.clearChoice();
+		side.emitRequest(request);
 	}
 
 	getActionSpeed(action: AnyObject) {
@@ -3083,7 +3167,7 @@ export class Battle {
 			break;
 
 		case 'rotate':
-			this.actions.rotateIn(action.target!);
+			this.actions.rotateIn(action.target);
 			break;
 
 		case 'beforeTurn':
@@ -3164,7 +3248,7 @@ export class Battle {
 				if (!switches[i]) continue;
 				const side = this.sides[i];
 				const front = side.active[0];
-				if (!front || !front.fainted) continue;
+				if (!front?.fainted) continue;
 				const benchStart = side.activeAndSubActives().length;
 				const hasBench = side.pokemon.slice(benchStart).some(p => p && !p.fainted);
 				if (hasBench) continue;
@@ -3249,6 +3333,15 @@ export class Battle {
 		while ((action = this.queue.shift())) {
 			this.runAction(action);
 			if (this.requestState || this.ended) return;
+		}
+
+		if ((this as any).infiniteSwitchTurn) {
+			(this as any).infiniteSwitchTurn = false;
+			this.midTurn = false;
+			this.queue.clear();
+			for (const side of this.sides) this.refreshInfiniteActive(side);
+			this.makeRequest('move');
+			return;
 		}
 
 		this.endTurn();
@@ -3391,6 +3484,13 @@ export class Battle {
 	}
 
 	add(...parts: (Part | (() => { side: SideID, secret: string, shared: string }))[]) {
+		if (parts[0] === 'faint' && parts[1] instanceof Pokemon) {
+			const side = parts[1].side as any;
+			(parts[1] as any).faintLine = side.faintLines = (side.faintLines || 0) + 1;
+		} else if (parts[0] === '-heal' && parts[1] instanceof Pokemon && (parts[1] as any).faintLine &&
+			parts.includes('[from] move: Revival Blessing') && !parts.some(part => `${part}`.startsWith('[faint] '))) {
+			parts.push(`[faint] ${(parts[1] as any).faintLine}`);
+		}
 		if (!parts.some(part => typeof part === 'function')) {
 			this.log.push(`|${parts.join('|')}`);
 			return;

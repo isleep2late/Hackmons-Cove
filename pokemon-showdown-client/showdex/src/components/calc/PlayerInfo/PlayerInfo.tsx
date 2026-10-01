@@ -16,6 +16,7 @@ import { useColorScheme } from '@showdex/redux/store';
 import { usePlayerTitle } from '@showdex/utils/app';
 import { formatId } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
+import { isShowdownClientOrigin } from '@showdex/utils/host';
 import { capitalize } from '@showdex/utils/humanize';
 import { useCalcdexContext } from '../CalcdexContext';
 import styles from './PlayerInfo.module.scss';
@@ -82,7 +83,8 @@ export const PlayerInfo = ({
   const skipLadderQuery = !settings?.showPlayerRatings
     || !playerId
     || !format
-    || !!ratingFromBattle;
+    || !!ratingFromBattle
+    || !isShowdownClientOrigin();
 
   React.useEffect(() => {
     // checking `playerId` in case the component hasn't received its props yet;

@@ -130,6 +130,12 @@
 				app.roomTitleChanged(this);
 			}
 			if (this.battle.stepQueue.length) return;
+			this.infiniteLog = {};
+			for (var i = 0; i < log.length; i++) {
+				if (log[i].substr(0, 10) !== '|infinite|') continue;
+				var infParts = log[i].substr(10).split('|');
+				this.infiniteLog[infParts[0]] = parseInt(infParts[1]) || 1;
+			}
 			this.battle.stepQueue = log;
 			this.battle.seekTurn(Infinity, true);
 			if (this.battle.ended) this.battleEnded = true;
@@ -222,6 +228,7 @@
 					// empty
 				} else if (logLine.substr(0, 5) === '|win|' || logLine === '|tie') {
 					this.battleEnded = true;
+					this.endInfinite();
 					this.battle.stepQueue.push(logLine);
 				} else if (logLine.substr(0, 6) === '|chat|' || logLine.substr(0, 3) === '|c|' || logLine.substr(0, 4) === '|c:|' || logLine.substr(0, 9) === '|chatmsg|' || logLine.substr(0, 10) === '|inactive|') {
 					this.battle.instantAdd(logLine);
@@ -254,45 +261,85 @@
 			}
 		},
 		showInfiniteSubmit: function (slotsNeeded) {
-			var self = this;
 			this.infiniteWaiting = slotsNeeded;
 			this.infiniteTotalSlots = slotsNeeded;
+			this.controlsShown = false;
+			if (this.$chatbox) {
+				this.$chatbox.focus();
+				this.showInfiniteHint();
+			}
+		},
+		endInfinite: function () {
+			if (!this.infiniteTotalSlots) return;
+			this.infiniteWaiting = this.infiniteTotalSlots = 0;
+			if (this.$chatbox) this.$chatbox.attr('placeholder', '');
+		},
+		focusText: function () {
+			ConsoleRoom.prototype.focusText.call(this);
+			this.showInfiniteHint();
+		},
+		blurText: function () {
+			ConsoleRoom.prototype.blurText.call(this);
+			this.showInfiniteHint();
+		},
+		showInfiniteHint: function () {
+			if (!(this.infiniteWaiting > 0) || !this.$chatbox) return;
+			var submitted = this.infiniteTotalSlots - this.infiniteWaiting;
+			var ordinal = ['second', 'third', 'fourth', 'fifth'][submitted - 1] || (submitted + 1) + 'th';
+			this.$chatbox.attr('placeholder', 'Paste a ' + (submitted ? ordinal : 'Pokémon') + ' set here — Shift+Enter for newline, Enter to submit…');
+		},
+		isOutOfPokemon: function () {
+			var request = this.request;
+			if (!request || request.requestType !== 'wait' || !request.side || this.battleEnded || this.battle.ended) return false;
+			return _.every(request.side.pokemon, function (pokemon) { return / fnt$/.test(pokemon.condition); });
+		},
+		twinTagHTML: function (pokemon, team) {
+			var twins = _.filter(team, function (p) { return p !== pokemon && p.name === pokemon.name; });
+			if (!twins.length) return '';
+			var tags = function (p) { return [p.speciesForme, p.gender, p.level, p.item].concat(p.moves || []); };
+			var own = tags(pokemon);
+			var k = -1;
+			for (var i = 0; i < own.length && k < 0; i++) {
+				for (var j = 0; j < twins.length; j++) {
+					if (tags(twins[j])[i] !== own[i]) k = i;
+				}
+			}
+			var tag = k < 0 ? '#' + (team.indexOf(pokemon) + 1) :
+				k === 0 ? pokemon.speciesForme :
+				k === 1 ? ({ M: '\u2642', F: '\u2640' })[pokemon.gender] || 'genderless' :
+				k === 2 ? 'L' + pokemon.level :
+				k === 3 ? Dex.items.get(pokemon.item).name || 'no item' :
+				Dex.moves.get(pokemon.moves[k - 4]).name;
+			return ' <small>(' + BattleLog.escapeHTML(tag) + ')</small>';
+		},
+		updateInfiniteControls: function () {
+			var submitted = this.infiniteTotalSlots - this.infiniteWaiting;
+			var ordinal = ['second', 'third', 'fourth', 'fifth'][submitted - 1] || (submitted + 1) + 'th';
 			var myPokemon = this.battle.myPokemon || [];
 			var teamPickerHTML = '';
 			for (var i = 0; i < myPokemon.length; i++) {
 				var p = myPokemon[i];
 				if (!p || !p.fainted) continue;
 				var picon = '<span class="picon" style="' + Dex.getPokemonIcon(p) + '"></span>';
-				teamPickerHTML += '<button class="button" name="infiniteExisting" value="' + (i + 1) + '">' + picon + BattleLog.escapeHTML(p.name) + '</button> ';
+				teamPickerHTML += '<button class="button" name="infiniteExisting" value="' + (i + 1) + '">' + picon + BattleLog.escapeHTML(p.name) + this.twinTagHTML(p, myPokemon) + '</button> ';
 			}
-			var html = '<div class="infinite-submit" style="padding:8px">';
-			if (slotsNeeded > 1) {
-				html += '<p>Or type <code>defer</code> to skip a slot.</p>';
-			}
-			if (teamPickerHTML) {
-				html += '<p><strong>Quick-revive a fainted team member:</strong></p>';
-				html += '<p>' + teamPickerHTML + '</p>';
-			}
-			html += '</div>';
-			this.$controls.html(html);
-			this.$controls.find('[name=infiniteExisting]').on('click', function () {
-				var pos = $(this).val();
-				self.infiniteWaiting = Math.max(0, (self.infiniteWaiting || 1) - 1);
-				self.send('/infinitesubmit existing ' + pos);
-				if (self.infiniteWaiting > 0) {
-					var submitted = (self.infiniteTotalSlots || 1) - self.infiniteWaiting;
-					var ordinals = ['second', 'third', 'fourth', 'fifth'];
-					var ordinal = ordinals[submitted - 1] || (submitted + 1) + 'th';
-					self.$controls.html('<p>Revived! Now paste a ' + ordinal + ' Pokémon set in the chat — Shift+Enter for newline, Enter to submit.</p>');
-					if (self.$chatbox) self.$chatbox.attr('placeholder', 'Paste a ' + ordinal + ' set here — Shift+Enter for newline, Enter to submit…');
-				} else {
-					self.$controls.html('<p>Reviving Pokémon… waiting for battle to continue.</p>');
-					if (self.$chatbox) self.$chatbox.attr('placeholder', '');
-				}
-			});
-			if (this.$chatbox) {
-				this.$chatbox.attr('placeholder', 'Paste a Pokémon set here — Shift+Enter for newline, Enter to submit…');
-				this.$chatbox.focus();
+			var html = '<div class="controls"><p>' + this.getTimerHTML() + '<strong>' + (submitted ? 'Now choose a ' + ordinal + ' Pokémon.' : 'Your team is out of Pokémon! Choose one to keep battling.') + '</strong></p>';
+			if (teamPickerHTML) html += '<p><small>Revive at half HP:</small><br />' + teamPickerHTML + '</p>';
+			html += '<p><small>Or paste a set in Showdown export format into the chat (Shift+Enter for a new line, Enter to submit)' + (this.infiniteWaiting > 1 ? ', or type <code>defer</code> to skip this slot' : '') + '.</small></p>';
+			this.$controls.html(html + '</div>');
+		},
+		infiniteExisting: function (pos) {
+			if (!(this.infiniteWaiting > 0)) return;
+			this.infiniteWaiting--;
+			this.send('/infinitesubmit existing ' + pos);
+			if (this.infiniteWaiting > 0) {
+				var submitted = this.infiniteTotalSlots - this.infiniteWaiting;
+				var ordinal = ['second', 'third', 'fourth', 'fifth'][submitted - 1] || (submitted + 1) + 'th';
+				this.$controls.html('<p>Revived! Now paste a ' + ordinal + ' Pokémon set in the chat — Shift+Enter for newline, Enter to submit.</p>');
+				this.showInfiniteHint();
+			} else {
+				this.$controls.html('<p>Reviving Pokémon… waiting for battle to continue.</p>');
+				if (this.$chatbox) this.$chatbox.attr('placeholder', '');
 			}
 		},
 
@@ -512,14 +559,16 @@
 				break;
 
 			default:
-				this.updateWaitControls();
+				if (this.infiniteWaiting > 0 && this.isOutOfPokemon()) this.updateInfiniteControls();
+				else this.updateWaitControls();
 				break;
 			}
 		},
 		timerInterval: 0,
 		getTimerHTML: function (nextTick) {
 			var time = 'Timer';
-			var timerTicking = (this.battle.kickingInactive && this.request && !this.request.wait && !(this.choice && this.choice.waiting)) ? ' timerbutton-on' : '';
+			var infiniteTicking = this.infiniteWaiting > 0 && this.isOutOfPokemon();
+			var timerTicking = (this.battle.kickingInactive && this.request && (infiniteTicking || !this.request.wait) && !(this.choice && this.choice.waiting)) ? ' timerbutton-on' : '';
 
 			if (!nextTick) {
 				var self = this;
@@ -1280,6 +1329,7 @@
 		receiveRequest: function (request, choiceText) {
 			if (!request) {
 				this.side = '';
+				this.endInfinite();
 				return;
 			}
 
@@ -1302,6 +1352,13 @@
 			this.request = request;
 			if (request.side) {
 				this.updateSideLocation(request.side);
+			}
+			var infiniteLog = this.infiniteLog;
+			this.infiniteLog = null;
+			if (request.requestType !== 'wait' || !this.isOutOfPokemon()) {
+				this.endInfinite();
+			} else if (infiniteLog && infiniteLog[this.side] && this.isOutOfPokemon()) {
+				this.showInfiniteSubmit(infiniteLog[this.side]);
 			}
 			this.notifyRequest();
 			this.controlsShown = false;

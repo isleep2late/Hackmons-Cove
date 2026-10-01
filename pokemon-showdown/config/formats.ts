@@ -882,7 +882,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: false,
 		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Overflow Stat Mod', 'Max Level = 255', 'Default Level = 100'],
 		onBegin() {
-			this.add('-rule', 'No Limits: Pokemon can max all EVs');
+			this.add('rule', 'No Limits: Pokemon can max all EVs');
 		},
 	},
 	{
@@ -928,7 +928,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 	},
 	{
 		name: "[Gen 2] SpaceWorld Disguises",
-		desc: "Pure Hackmons on the 1997 SpaceWorld demo's decomp-verified battle engine, where Pokemon can disguise as any species and start the battle pre-statused. Unlike Gen 1 Disguises there is no custom typing: the demo derives a Pokemon's types from its species byte, so a disguised Pokemon takes on its disguise's typing. Engine quirks: gen 1-style Counter (any physical type, shared last-damage), gen 1-style partial trapping with Rapid Spin escape, targeted permanent Sandstorm, no-recharge Hyper Beam on KOs, the Explosion HP-byte glitch, the Fly/Dig invulnerability glitch, Special Defense stages only applying after Baton Pass, held type-boost items, and RBY movesets via the working Time Capsule. Known conventions: Protect/Endure expire at end of turn, Morning Sun/Synthesis/Moonlight heal a flat 50%, and dual status is not modeled.",
+		desc: "Pure Hackmons on the 1997 SpaceWorld demo's decomp-verified battle engine, where Pokemon can disguise as any species and start the battle pre-statused. Unlike Gen 1 Disguises there is no custom typing: the demo derives a Pokemon's types from its species byte, so a disguised Pokemon takes on its disguise's typing. Engine quirks: gen 1-style Counter (any physical type, shared last-damage), gen 1-style partial trapping with Rapid Spin escape, targeted permanent Sandstorm, no-recharge Hyper Beam on KOs, the Explosion HP-byte glitch, the Fly/Dig invulnerability glitch, Special Defense stages only applying after Baton Pass, held type-boost items, and RBY movesets via the working Time Capsule. Also as in the demo: each Pokemon takes its residual damage (including Sandstorm) right after its own action, and a faint skips the rest of that turn's; fixed-damage moves, Flail, Reversal, and Bide ignore type immunity; Protect and Endure never fail and, like Destiny Bond, last until the foe's next action; Spikes, Rain Dance, Sunny Day, Safeguard, Perish Song, Metronome, Mirror Move, and Sleep Talk check accuracy against the foe; Bide adds the last damage dealt again on each turn it stores; OHKO moves fail against a faster target or one that resists them, whatever the levels; Psywave's range wraps at 8 bits (1-125 at level 255); confusion moves respect type immunity. Known conventions: Morning Sun/Synthesis/Moonlight heal their off-hours amount (a random 25-50%), and dual status is not modeled.",
 		mod: 'spaceworld',
 		searchShow: false,
 		ruleset: ['-Nonexistent', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 255', 'Prestatus', 'SpaceWorld Disguise Mod', 'No Move Exclusivity'],

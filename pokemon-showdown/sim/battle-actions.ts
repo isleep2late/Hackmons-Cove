@@ -156,8 +156,7 @@ export class BattleActions {
 		pokemon.abilityState = this.battle.initEffectState({ id: pokemon.ability, target: pokemon });
 		pokemon.itemState = this.battle.initEffectState({ id: pokemon.item, target: pokemon });
 		this.battle.runEvent('BeforeSwitchIn', pokemon);
-		if (this.battle.gameType === 'rotation' && (oldPosition === 1 || oldPosition === 2)) {
-		} else {
+		if (this.battle.gameType !== 'rotation' || (oldPosition !== 1 && oldPosition !== 2)) {
 			if (sourceEffect) {
 				this.battle.add(isDrag ? 'drag' : 'switch', pokemon, pokemon.getFullDetails, `[from] ${sourceEffect}`);
 			} else {

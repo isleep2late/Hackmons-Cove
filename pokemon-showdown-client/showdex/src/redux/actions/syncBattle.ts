@@ -915,7 +915,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         // (this typically only applies for opponent Pokemon in Randoms, where the Pokemon are revealed as they're switched-in;
         // duplicate mimicked Pokemon don't exist for myPokemon and formats like OU, where the entire team is already revealed)
         // see: https://github.com/smogon/pokemon-showdown-client/blob/4e5002411cc80ff8044fd586bd0db2f80979b8f6/src/battle.ts#L747-L808
-        if (playerState.pokemon.length >= playerState.maxPokemon || speciesClause) {
+        if (playerState.pokemon.length >= playerState.maxPokemon || (speciesClause && !player.pasted)) {
           const existingTable: Record<string, number> = {};
           let removalId: string = null;
 

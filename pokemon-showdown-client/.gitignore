@@ -52,6 +52,8 @@ config/routes.json
 /showdex/build/
 /showdex/cache/
 /play.pokemonshowdown.com/showdex/
+/play.pokemonshowdown.com/showdex.new/
+/play.pokemonshowdown.com/showdex.old/
 !/showdex/.env
 !/showdex/package.json
 

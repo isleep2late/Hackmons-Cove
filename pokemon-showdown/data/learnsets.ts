@@ -102545,7 +102545,7 @@ export const Learnsets: import('../sim/dex-species').LearnsetDataTable = {
             growl: ["3L4"],
             tailwhip: ["3L8"],
             bellchime: ["3L13", "3M"],
-            faintattack: ["3L19"],
+            feintattack: ["3L19"],
             screech: ["3L26"],
             lovelykiss: ["3L34"],
             sweetkiss: ["3L34", "3M"],
@@ -102616,7 +102616,7 @@ export const Learnsets: import('../sim/dex-species').LearnsetDataTable = {
             growl: ["3L5"],
             tailwhip: ["3L10"],
             bellchime: ["3L16", "3M"],
-            faintattack: ["3L23"],
+            feintattack: ["3L23"],
             screech: ["3L31"],
             lovelykiss: ["3L40"],
             sweetkiss: ["3L40", "3M"],
@@ -103528,7 +103528,7 @@ export const Learnsets: import('../sim/dex-species').LearnsetDataTable = {
     },
     plux: {
         learnset: {
-            vicegrip: ["3L1"],
+            visegrip: ["3L1"],
             focusenergy: ["3L7"],
             harden: ["3L14"],
             seismictoss: ["3L22"],
@@ -103931,7 +103931,7 @@ export const Learnsets: import('../sim/dex-species').LearnsetDataTable = {
     },
     purakkusu: {
         learnset: {
-            vicegrip: ["3L1"],
+            visegrip: ["3L1"],
             focusenergy: ["3L7"],
             bind: ["3L13"],
             seismictoss: ["3L19"],
@@ -104172,10 +104172,10 @@ export const Learnsets: import('../sim/dex-species').LearnsetDataTable = {
 		learnset: { pound: ["2L1"], hypnosis: ["2L7"], disable: ["2L13"], headbutt: ["2L19"], confusion: ["2L25"], poisongas: ["2L31"], meditate: ["2L37"], stalker: ["2L43"], psychic: ["2L49"], confuseray: ["2L55"], sketch: ["2M"], conversion2: ["2M"], cottonspore: ["2M"], spite: ["2M"], powdersnow: ["2M"], machpunch: ["2M"], mudslap: ["2M"], zapcannon: ["2M"], destinybond: ["2M"], bonelock: ["2M"], lockon: ["2M"], bellchime: ["2M"], present: ["2M"], painsplit: ["2M"], sacredfire: ["2M"], dynamicpunch: ["2M"], megaphone: ["2M"], dragonbreath: ["2M"], triplekick: ["2M"], spiderweb: ["2M"], flamewheel: ["2M"], naildown: ["2M"], protect: ["2M"], endure: ["2M"], magnitude: ["2M"], brightmoss: ["2M"] },
 	},
 	krabbysw: {
-		learnset: { bubble: ["2L1"], leer: ["2L3"], vicegrip: ["2L6", "2L28"], watergun: ["2L10"], falseswipe: ["2L15"], harden: ["2L21"], stomp: ["2L36"], guillotine: ["2L45"], crabhammer: ["2L55"], snore: ["2M"], cottonspore: ["2M"], spite: ["2M"], powdersnow: ["2M"], machpunch: ["2M"], scaryface: ["2M"], sweetkiss: ["2M"], bellydrum: ["2M"], sludgebomb: ["2M"], lockon: ["2M"], painsplit: ["2M"], sacredfire: ["2M"], megaphone: ["2M"], flamewheel: ["2M"], magnitude: ["2M"], uproot: ["2M"], watersport: ["2M"], strongarm: ["2M"] },
+		learnset: { bubble: ["2L1"], leer: ["2L3"], visegrip: ["2L6", "2L28"], watergun: ["2L10"], falseswipe: ["2L15"], harden: ["2L21"], stomp: ["2L36"], guillotine: ["2L45"], crabhammer: ["2L55"], snore: ["2M"], cottonspore: ["2M"], spite: ["2M"], powdersnow: ["2M"], machpunch: ["2M"], scaryface: ["2M"], sweetkiss: ["2M"], bellydrum: ["2M"], sludgebomb: ["2M"], lockon: ["2M"], painsplit: ["2M"], sacredfire: ["2M"], megaphone: ["2M"], flamewheel: ["2M"], magnitude: ["2M"], uproot: ["2M"], watersport: ["2M"], strongarm: ["2M"] },
 	},
 	kinglersw: {
-		learnset: { bubble: ["2L1"], leer: ["2L4"], vicegrip: ["2L8", "2L34"], watergun: ["2L13"], falseswipe: ["2L19"], harden: ["2L26"], stomp: ["2L43"], guillotine: ["2L53"], crabhammer: ["2L64"], snore: ["2M"], cottonspore: ["2M"], spite: ["2M"], powdersnow: ["2M"], machpunch: ["2M"], scaryface: ["2M"], sweetkiss: ["2M"], bellydrum: ["2M"], sludgebomb: ["2M"], mudslap: ["2M"], lockon: ["2M"], painsplit: ["2M"], sacredfire: ["2M"], megaphone: ["2M"], flamewheel: ["2M"], magnitude: ["2M"], uproot: ["2M"], watersport: ["2M"], strongarm: ["2M"] },
+		learnset: { bubble: ["2L1"], leer: ["2L4"], visegrip: ["2L8", "2L34"], watergun: ["2L13"], falseswipe: ["2L19"], harden: ["2L26"], stomp: ["2L43"], guillotine: ["2L53"], crabhammer: ["2L64"], snore: ["2M"], cottonspore: ["2M"], spite: ["2M"], powdersnow: ["2M"], machpunch: ["2M"], scaryface: ["2M"], sweetkiss: ["2M"], bellydrum: ["2M"], sludgebomb: ["2M"], mudslap: ["2M"], lockon: ["2M"], painsplit: ["2M"], sacredfire: ["2M"], megaphone: ["2M"], flamewheel: ["2M"], magnitude: ["2M"], uproot: ["2M"], watersport: ["2M"], strongarm: ["2M"] },
 	},
 	exeggcutesw: {
 		learnset: { barrage: ["2L1"], hypnosis: ["2L6"], confusion: ["2L11"], leechseed: ["2L17"], reflect: ["2L23"], poisonpowder: ["2L30"], stunspore: ["2L37"], sleeppowder: ["2L45"], tempt: ["2L53"], solarbeam: ["2L62"], cottonspore: ["2M"], powdersnow: ["2M"], machpunch: ["2M"], lockon: ["2M"], bellchime: ["2M"], present: ["2M"], painsplit: ["2M"], sacredfire: ["2M"], dynamicpunch: ["2M"], megaphone: ["2M"], encore: ["2M"], rockhead: ["2M"], flamewheel: ["2M"], protect: ["2M"], spikes: ["2M"], magnitude: ["2M"] },
@@ -104190,7 +104190,7 @@ export const Learnsets: import('../sim/dex-species').LearnsetDataTable = {
 		learnset: { boneclub: ["2L1"], growl: ["2L8"], leer: ["2L15"], rage: ["2L22"], bonemerang: ["2L29"], charm: ["2L36"], thrash: ["2L43"], focusenergy: ["2L50"], bonelock: ["2L57", "2M"], sketch: ["2M"], conversion2: ["2M"], cottonspore: ["2M"], spite: ["2M"], powdersnow: ["2M"], machpunch: ["2M"], scaryface: ["2M"], sweetkiss: ["2M"], bellydrum: ["2M"], sludgebomb: ["2M"], mudslap: ["2M"], zapcannon: ["2M"], destinybond: ["2M"], lockon: ["2M"], spark: ["2M"], steelwing: ["2M"], sleeptalk: ["2M"], painsplit: ["2M"], sacredfire: ["2M"], megaphone: ["2M"], crosscutter: ["2M"], triplekick: ["2M"], flamewheel: ["2M"], magnitude: ["2M"], strongarm: ["2M"] },
 	},
 	hitmonleesw: {
-		learnset: { tackle: ["2L1"], rollingkick: ["2L6"], doublekick: ["2L11"], meditate: ["2L17"], jumpkick: ["2L23"], detect: ["2L30"], foresight: ["2L37"], hijumpkick: ["2L45"], focusenergy: ["2L53"], megakick: ["2L62"], reversal: ["2L71"], sketch: ["2M"], conversion2: ["2M"], cottonspore: ["2M"], spite: ["2M"], powdersnow: ["2M"], machpunch: ["2M"], zapcannon: ["2M"], destinybond: ["2M"], bonelock: ["2M"], lockon: ["2M"], painsplit: ["2M"], sacredfire: ["2M"], megaphone: ["2M"], dragonbreath: ["2M"], twister: ["2M"], triplekick: ["2M"], flamewheel: ["2M"], magnitude: ["2M"], strongarm: ["2M"] },
+		learnset: { tackle: ["2L1"], rollingkick: ["2L6"], doublekick: ["2L11"], meditate: ["2L17"], jumpkick: ["2L23"], detect: ["2L30"], foresight: ["2L37"], highjumpkick: ["2L45"], focusenergy: ["2L53"], megakick: ["2L62"], reversal: ["2L71"], sketch: ["2M"], conversion2: ["2M"], cottonspore: ["2M"], spite: ["2M"], powdersnow: ["2M"], machpunch: ["2M"], zapcannon: ["2M"], destinybond: ["2M"], bonelock: ["2M"], lockon: ["2M"], painsplit: ["2M"], sacredfire: ["2M"], megaphone: ["2M"], dragonbreath: ["2M"], twister: ["2M"], triplekick: ["2M"], flamewheel: ["2M"], magnitude: ["2M"], strongarm: ["2M"] },
 	},
 	hitmonchansw: {
 		learnset: { tackle: ["2L1"], machpunch: ["2L8", "2M"], firepunch: ["2L15"], thunderpunch: ["2L15"], icepunch: ["2L15"], agility: ["2L23"], megapunch: ["2L31"], mindreader: ["2L40"], counter: ["2L49"], cometpunch: ["2L59"], dynamicpunch: ["2L69"], sketch: ["2M"], conversion2: ["2M"], cottonspore: ["2M"], spite: ["2M"], powdersnow: ["2M"], zapcannon: ["2M"], destinybond: ["2M"], bonelock: ["2M"], lockon: ["2M"], painsplit: ["2M"], sacredfire: ["2M"], megaphone: ["2M"], dragonbreath: ["2M"], twister: ["2M"], triplekick: ["2M"], flamewheel: ["2M"], magnitude: ["2M"], strongarm: ["2M"] },
@@ -104235,7 +104235,7 @@ export const Learnsets: import('../sim/dex-species').LearnsetDataTable = {
 		learnset: { scratch: ["2L1"], leer: ["2L7"], smog: ["2L14"], ember: ["2L21"], flamewheel: ["2L28", "2M"], firepunch: ["2L35"], smokescreen: ["2L42"], confuseray: ["2L49"], flamethrower: ["2L56"], sketch: ["2M"], conversion2: ["2M"], cottonspore: ["2M"], spite: ["2M"], powdersnow: ["2M"], machpunch: ["2M"], mudslap: ["2M"], zapcannon: ["2M"], destinybond: ["2M"], bonelock: ["2M"], lockon: ["2M"], bellchime: ["2M"], present: ["2M"], painsplit: ["2M"], sacredfire: ["2M"], megaphone: ["2M"], dragonbreath: ["2M"], crosscutter: ["2M"], triplekick: ["2M"], protect: ["2M"], magnitude: ["2M"], strongarm: ["2M"] },
 	},
 	pinsirsw: {
-		learnset: { vicegrip: ["2L1"], focusenergy: ["2L6"], harden: ["2L12"], seismictoss: ["2L19"], endure: ["2L27"], slash: ["2L36"], crosscutter: ["2L46"], swordsdance: ["2L57"], guillotine: ["2L69"], snore: ["2M"], cottonspore: ["2M"], spite: ["2M"], powdersnow: ["2M"], machpunch: ["2M"], mudslap: ["2M"], zapcannon: ["2M"], bonelock: ["2M"], lockon: ["2M"], painsplit: ["2M"], sacredfire: ["2M"], megaphone: ["2M"], flamewheel: ["2M"], magnitude: ["2M"], uproot: ["2M"], strongarm: ["2M"] },
+		learnset: { visegrip: ["2L1"], focusenergy: ["2L6"], harden: ["2L12"], seismictoss: ["2L19"], endure: ["2L27"], slash: ["2L36"], crosscutter: ["2L46"], swordsdance: ["2L57"], guillotine: ["2L69"], snore: ["2M"], cottonspore: ["2M"], spite: ["2M"], powdersnow: ["2M"], machpunch: ["2M"], mudslap: ["2M"], zapcannon: ["2M"], bonelock: ["2M"], lockon: ["2M"], painsplit: ["2M"], sacredfire: ["2M"], megaphone: ["2M"], flamewheel: ["2M"], magnitude: ["2M"], uproot: ["2M"], strongarm: ["2M"] },
 	},
 	taurossw: {
 		learnset: { tackle: ["2L1"], tailwhip: ["2L8"], rage: ["2L16"], leer: ["2L25"], stomp: ["2L35"], thrash: ["2L46"], swagger: ["2L58"], takedown: ["2L71"], cottonspore: ["2M"], reversal: ["2M"], spite: ["2M"], powdersnow: ["2M"], machpunch: ["2M"], bellydrum: ["2M"], sludgebomb: ["2M"], mudslap: ["2M"], lockon: ["2M"], falseswipe: ["2M"], milkdrink: ["2M"], spark: ["2M"], steelwing: ["2M"], painsplit: ["2M"], sacredfire: ["2M"], megaphone: ["2M"], crosscutter: ["2M"], triplekick: ["2M"], flamewheel: ["2M"], magnitude: ["2M"], strongarm: ["2M"] },
@@ -104355,7 +104355,7 @@ export const Learnsets: import('../sim/dex-species').LearnsetDataTable = {
 		learnset: { tackle: ["2L1"], tailwhip: ["2L8"], bide: ["2L16"], charm: ["2L25"], stomp: ["2L35"], bodyslam: ["2L46"], milkdrink: ["2L58", "2M"], takedown: ["2L71"], sketch: ["2M"], conversion2: ["2M"], cottonspore: ["2M"], spite: ["2M"], powdersnow: ["2M"], machpunch: ["2M"], scaryface: ["2M"], sweetkiss: ["2M"], bellydrum: ["2M"], sludgebomb: ["2M"], mudslap: ["2M"], zapcannon: ["2M"], destinybond: ["2M"], bonelock: ["2M"], lockon: ["2M"], gigadrain: ["2M"], falseswipe: ["2M"], bellchime: ["2M"], present: ["2M"], painsplit: ["2M"], sacredfire: ["2M"], dynamicpunch: ["2M"], megaphone: ["2M"], dragonbreath: ["2M"], encore: ["2M"], crosscutter: ["2M"], triplekick: ["2M"], flamewheel: ["2M"], naildown: ["2M"], protect: ["2M"], endure: ["2M"], magnitude: ["2M"], strongarm: ["2M"], brightmoss: ["2M"] },
 	},
 	murkrowsw: {
-		learnset: { peck: ["2L1"], sandattack: ["2L6"], spikes: ["2L12"], detect: ["2L19"], foresight: ["2L27"], faintattack: ["2L36"], furyattack: ["2L46"], stalker: ["2L57"], perishsong: ["2L69"], sketch: ["2M"], conversion2: ["2M"], cottonspore: ["2M"], spite: ["2M"], powdersnow: ["2M"], machpunch: ["2M"], scaryface: ["2M"], sweetkiss: ["2M"], bellydrum: ["2M"], sludgebomb: ["2M"], mudslap: ["2M"], zapcannon: ["2M"], destinybond: ["2M"], bonelock: ["2M"], lockon: ["2M"], gigadrain: ["2M"], falseswipe: ["2M"], milkdrink: ["2M"], bellchime: ["2M"], present: ["2M"], painsplit: ["2M"], sacredfire: ["2M"], dynamicpunch: ["2M"], megaphone: ["2M"], dragonbreath: ["2M"], encore: ["2M"], crosscutter: ["2M"], triplekick: ["2M"], flamewheel: ["2M"], naildown: ["2M"], protect: ["2M"], endure: ["2M"], magnitude: ["2M"], strongarm: ["2M"], brightmoss: ["2M"] },
+		learnset: { peck: ["2L1"], sandattack: ["2L6"], spikes: ["2L12"], detect: ["2L19"], foresight: ["2L27"], feintattack: ["2L36"], furyattack: ["2L46"], stalker: ["2L57"], perishsong: ["2L69"], sketch: ["2M"], conversion2: ["2M"], cottonspore: ["2M"], spite: ["2M"], powdersnow: ["2M"], machpunch: ["2M"], scaryface: ["2M"], sweetkiss: ["2M"], bellydrum: ["2M"], sludgebomb: ["2M"], mudslap: ["2M"], zapcannon: ["2M"], destinybond: ["2M"], bonelock: ["2M"], lockon: ["2M"], gigadrain: ["2M"], falseswipe: ["2M"], milkdrink: ["2M"], bellchime: ["2M"], present: ["2M"], painsplit: ["2M"], sacredfire: ["2M"], dynamicpunch: ["2M"], megaphone: ["2M"], dragonbreath: ["2M"], encore: ["2M"], crosscutter: ["2M"], triplekick: ["2M"], flamewheel: ["2M"], naildown: ["2M"], protect: ["2M"], endure: ["2M"], magnitude: ["2M"], strongarm: ["2M"], brightmoss: ["2M"] },
 	},
 	blisseysw: {
 		learnset: { pound: ["2L1"], tailwhip: ["2L6"], growl: ["2L12"], defensecurl: ["2L19"], doubleslap: ["2L27"], sing: ["2L36"], minimize: ["2L46"], lightscreen: ["2L57"], doubleedge: ["2L69"], painsplit: ["2L82", "2M"], sketch: ["2M"], conversion2: ["2M"], cottonspore: ["2M"], spite: ["2M"], powdersnow: ["2M"], machpunch: ["2M"], scaryface: ["2M"], sweetkiss: ["2M"], bellydrum: ["2M"], sludgebomb: ["2M"], mudslap: ["2M"], zapcannon: ["2M"], destinybond: ["2M"], bonelock: ["2M"], lockon: ["2M"], gigadrain: ["2M"], falseswipe: ["2M"], milkdrink: ["2M"], bellchime: ["2M"], present: ["2M"], sacredfire: ["2M"], dynamicpunch: ["2M"], megaphone: ["2M"], dragonbreath: ["2M"], encore: ["2M"], crosscutter: ["2M"], triplekick: ["2M"], flamewheel: ["2M"], naildown: ["2M"], protect: ["2M"], endure: ["2M"], magnitude: ["2M"], strongarm: ["2M"], brightmoss: ["2M"] },
@@ -104388,7 +104388,7 @@ export const Learnsets: import('../sim/dex-species').LearnsetDataTable = {
 		learnset: { scratch: ["2L1"], watergun: ["2L10"], quickattack: ["2L19"], focusenergy: ["2L29"], bite: ["2L39"], furyswipes: ["2L50"], bubblebeam: ["2L61"], mindreader: ["2L73"], hydropump: ["2L85"], sketch: ["2M"], conversion2: ["2M"], cottonspore: ["2M"], spite: ["2M"], powdersnow: ["2M"], machpunch: ["2M"], scaryface: ["2M"], sweetkiss: ["2M"], bellydrum: ["2M"], sludgebomb: ["2M"], mudslap: ["2M"], zapcannon: ["2M"], destinybond: ["2M"], bonelock: ["2M"], lockon: ["2M"], gigadrain: ["2M"], falseswipe: ["2M"], milkdrink: ["2M"], bellchime: ["2M"], present: ["2M"], painsplit: ["2M"], sacredfire: ["2M"], dynamicpunch: ["2M"], megaphone: ["2M"], dragonbreath: ["2M"], encore: ["2M"], crosscutter: ["2M"], triplekick: ["2M"], flamewheel: ["2M"], naildown: ["2M"], protect: ["2M"], endure: ["2M"], magnitude: ["2M"], strongarm: ["2M"], brightmoss: ["2M"] },
 	},
 	sneaselsw: {
-		learnset: { scratch: ["2L1"], tailwhip: ["2L6"], leer: ["2L12"], pursuit: ["2L18"], sandattack: ["2L24"], faintattack: ["2L30"], detect: ["2L36"], furyswipes: ["2L42"], slash: ["2L48"], sketch: ["2M"], conversion2: ["2M"], cottonspore: ["2M"], spite: ["2M"], powdersnow: ["2M"], machpunch: ["2M"], scaryface: ["2M"], sweetkiss: ["2M"], bellydrum: ["2M"], sludgebomb: ["2M"], mudslap: ["2M"], zapcannon: ["2M"], destinybond: ["2M"], bonelock: ["2M"], lockon: ["2M"], gigadrain: ["2M"], falseswipe: ["2M"], milkdrink: ["2M"], bellchime: ["2M"], present: ["2M"], painsplit: ["2M"], sacredfire: ["2M"], dynamicpunch: ["2M"], megaphone: ["2M"], dragonbreath: ["2M"], encore: ["2M"], crosscutter: ["2M"], triplekick: ["2M"], flamewheel: ["2M"], naildown: ["2M"], protect: ["2M"], endure: ["2M"], magnitude: ["2M"], strongarm: ["2M"], brightmoss: ["2M"] },
+		learnset: { scratch: ["2L1"], tailwhip: ["2L6"], leer: ["2L12"], pursuit: ["2L18"], sandattack: ["2L24"], feintattack: ["2L30"], detect: ["2L36"], furyswipes: ["2L42"], slash: ["2L48"], sketch: ["2M"], conversion2: ["2M"], cottonspore: ["2M"], spite: ["2M"], powdersnow: ["2M"], machpunch: ["2M"], scaryface: ["2M"], sweetkiss: ["2M"], bellydrum: ["2M"], sludgebomb: ["2M"], mudslap: ["2M"], zapcannon: ["2M"], destinybond: ["2M"], bonelock: ["2M"], lockon: ["2M"], gigadrain: ["2M"], falseswipe: ["2M"], milkdrink: ["2M"], bellchime: ["2M"], present: ["2M"], painsplit: ["2M"], sacredfire: ["2M"], dynamicpunch: ["2M"], megaphone: ["2M"], dragonbreath: ["2M"], encore: ["2M"], crosscutter: ["2M"], triplekick: ["2M"], flamewheel: ["2M"], naildown: ["2M"], protect: ["2M"], endure: ["2M"], magnitude: ["2M"], strongarm: ["2M"], brightmoss: ["2M"] },
 	},
 	hoohsw: {
 		learnset: { wingattack: ["2L1"], leer: ["2L9"], detect: ["2L18"], gust: ["2L28"], lightscreen: ["2L39"], reflect: ["2L39"], safeguard: ["2L39"], sacredfire: ["2L51", "2M"], scaryface: ["2L64", "2M"], recover: ["2L78"], skyattack: ["2L93"], sketch: ["2M"], conversion2: ["2M"], cottonspore: ["2M"], spite: ["2M"], powdersnow: ["2M"], machpunch: ["2M"], sweetkiss: ["2M"], bellydrum: ["2M"], sludgebomb: ["2M"], mudslap: ["2M"], zapcannon: ["2M"], destinybond: ["2M"], bonelock: ["2M"], lockon: ["2M"], gigadrain: ["2M"], falseswipe: ["2M"], milkdrink: ["2M"], bellchime: ["2M"], present: ["2M"], painsplit: ["2M"], dynamicpunch: ["2M"], megaphone: ["2M"], dragonbreath: ["2M"], encore: ["2M"], crosscutter: ["2M"], triplekick: ["2M"], flamewheel: ["2M"], naildown: ["2M"], protect: ["2M"], endure: ["2M"], magnitude: ["2M"], strongarm: ["2M"], brightmoss: ["2M"] },

@@ -102,4 +102,5 @@ if (fs.existsSync('play.pokemonshowdown.com/sprites/ani/')) {
 		fs.unlinkSync('play.pokemonshowdown.com/data/pokedex-mini-bw.js');
 	} catch {}
 	console.log('SKIPPED');
+	await (await import('./phnn-minidex.js')).default.updateMinidex();
 }

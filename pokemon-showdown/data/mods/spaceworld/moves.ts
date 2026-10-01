@@ -1,3 +1,65 @@
+const SW97_NO_HIT_CHECK = ['bide', 'counter', 'sketch', 'haze'];
+const SW97_STATUS_WITH_POWER = [
+	'leechseed', 'metronome', 'nightmare', 'naildown', 'mudslap', 'spikes', 'sandstorm', 'painsplit', 'pursuit',
+];
+
+function sw97FlailPower(pokemon: Pokemon) {
+	const product = pokemon.hp * 48;
+	let dividend = product;
+	let divisor = pokemon.maxhp;
+	if (pokemon.maxhp >= 256) {
+		dividend = (product & 0xff0000) | ((product & 0xffff) >> 2);
+		divisor = (pokemon.maxhp >> 2) & 0xff;
+	}
+	const ratio = divisor ? Math.floor(dividend / divisor) & 0xff : 0xff;
+	if (ratio <= 1) return 200;
+	if (ratio <= 4) return 150;
+	if (ratio <= 9) return 100;
+	if (ratio <= 16) return 80;
+	if (ratio <= 32) return 40;
+	return 20;
+}
+
+function sw97HitsFoe(battle: Battle, pokemon: Pokemon, move: ActiveMove) {
+	const target = pokemon.side.foe.active[0];
+	if (!target || target.fainted) return true;
+	if (target.volatiles['protect']) {
+		battle.lastDamage = 0;
+		battle.add('-activate', target, 'move: Protect');
+		return false;
+	}
+	if (battle.runEvent('Invulnerability', target, pokemon, move) === false) {
+		battle.lastDamage = 0;
+		battle.attrLastMove('[miss]');
+		battle.add('-miss', pokemon, target);
+		return false;
+	}
+	const boosted = battle.runEvent('Accuracy', target, pokemon, move, 100);
+	if (boosted === true) return true;
+	const positiveBoostTable = [1, 1.5, 2, 2.5, 3, 3.5, 4];
+	const negativeBoostTable = [1, 0.66, 0.5, 0.4, 0.33, 0.28, 0.25];
+	let accuracy = 255;
+	if (pokemon.boosts.accuracy > 0) {
+		accuracy = Math.floor(accuracy * positiveBoostTable[pokemon.boosts.accuracy]);
+	} else {
+		accuracy = Math.floor(accuracy * negativeBoostTable[-pokemon.boosts.accuracy]);
+	}
+	if (target.boosts.evasion > 0) {
+		accuracy = Math.floor(accuracy * negativeBoostTable[target.boosts.evasion]);
+	} else if (target.boosts.evasion < 0) {
+		accuracy = Math.floor(accuracy * positiveBoostTable[-target.boosts.evasion]);
+	}
+	accuracy = Math.max(Math.min(accuracy, 255), 1);
+	const modified = battle.runEvent('ModifyAccuracy', target, pokemon, move, accuracy);
+	if (modified !== true && !battle.randomChance(Math.max(modified, 0), 256)) {
+		battle.lastDamage = 0;
+		battle.attrLastMove('[miss]');
+		battle.add('-miss', pokemon, target);
+		return false;
+	}
+	return true;
+}
+
 export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	attract: {
 		inherit: true,
@@ -9,6 +71,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		desc: "Changes the target's type to a single type chosen at random from the demo's 16 types (including Bird) that the target does not already have. Fails if no new type is available.",
 		pp: 15,
 		target: "normal",
+		accuracy: 100,
+		flags: { protect: 1, bypasssub: 1, metronome: 1 },
 		onHit(target, source) {
 			const pool = ['Normal', 'Fighting', 'Flying', 'Poison', 'Ground', 'Rock', 'Bird', 'Bug', 'Ghost', 'Fire', 'Water', 'Grass', 'Electric', 'Psychic', 'Ice', 'Dragon'].filter(t => !target.getTypes().includes(t));
 			if (!pool.length) return false;
@@ -19,14 +83,18 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	counter: {
 		inherit: true,
-		shortDesc: "Deals double the last damage dealt in battle; counters physical-type moves.",
-		desc: "Deals damage equal to twice the last damage dealt in the battle by a damaging move, even if it was dealt to or by a different Pokemon. Fails if no damage has been dealt yet, or if the target's last used move was Counter, had 0 power, or was a special-type move (Fire, Water, Grass, Electric, Psychic, Ice, Dragon, or Dark; Hidden Power counts as its actual type). Hits Ghost-types and does not check accuracy.",
+		shortDesc: "Deals double the battle's last damage value; counters physical-type moves.",
+		desc: "Deals damage equal to twice the battle's last damage value, even if it came from a different Pokemon. That value is the damage the last attack computed, and a move that misses or hits a Protect resets it to 0, except that multi-hit, trapping and rampage moves, Triple Kick and Present keep the damage they would have dealt and Jump Kick leaves 1; draining moves halve it, Pain Split sets it to the shared HP, a confusion self-hit sets it to the self-inflicted damage, and sleep, confusion, poison and paralysis moves scale it by their same-type bonus and type matchup. Fails if the value is 0, or if the target's last used move was Counter, had 0 power in the demo's move data, or was a special-type move (Fire, Water, Grass, Electric, Psychic, Ice, Dragon, or Dark; Hidden Power counts as its actual type). Fixed-damage and OHKO moves, Return, Frustration, Magnitude, Hidden Power, and the status moves Leech Seed, Metronome, Nightmare, Nail Down, Mud-Slap, Spikes, Sandstorm, Pain Split and Pursuit all have power there; Bide has none until it is released. Hits Ghost-types, does not check accuracy, and goes through Protect, Fly and Dig.",
 		priority: -1,
 		accuracy: true,
+		flags: { contact: 1, failmefirst: 1, noassist: 1, failcopycat: 1 },
 		ignoreImmunity: true,
 		damageCallback(pokemon, target) {
 			const lastMove = target.lastMove;
-			if (!lastMove || lastMove.id === 'counter' || !lastMove.basePower) return false;
+			if (!lastMove || lastMove.id === 'counter') return false;
+			const hasPower = lastMove.category === 'Status' ? SW97_STATUS_WITH_POWER.includes(lastMove.id) :
+				lastMove.id !== 'bounce' && !(lastMove.id === 'bide' && target.volatiles['bide']);
+			if (!hasPower) return false;
 			let moveType = lastMove.type;
 			if (lastMove.id === 'hiddenpower') moveType = target.hpType || 'Dark';
 			const specialTypes = ['Fire', 'Water', 'Grass', 'Electric', 'Psychic', 'Ice', 'Dragon', 'Dark'];
@@ -56,19 +124,34 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	endure: {
 		inherit: true,
-		shortDesc: "User survives all hits with at least 1 HP this turn; fails if it moves last.",
-		desc: "The user survives all hits with at least 1 HP for the rest of the turn. Has no increased priority and never fails from consecutive use; it fails only if the user is the last Pokemon to act this turn. The effect expires at the end of the turn.",
+		shortDesc: "User survives hits with 1 HP until the foe next acts. Never fails.",
+		desc: "The user survives all hits with at least 1 HP until the end of the foe's next action, even if the user moved last this turn. Has no increased priority and never fails, even when used repeatedly.",
 		priority: 0,
 		stallingMove: false,
-		onTryHit(pokemon) {
-			return !!this.queue.willAct();
-		},
+		onPrepareHit: undefined,
 		onHit(pokemon) {},
+		condition: {
+			inherit: true,
+			duration: undefined,
+			onFoeAfterMoveSelf() {
+				this.effectState.target.removeVolatile('endure');
+			},
+			onFoeAfterSwitchInSelf() {
+				this.effectState.target.removeVolatile('endure');
+			},
+		},
 	},
 	flail: {
 		inherit: true,
+		shortDesc: "More power the less HP the user has left. Ignores type.",
+		desc: "The power of this move is 20 if X is 33 or more, 40 if X is 17 to 32, 80 if X is 10 to 16, 100 if X is 5 to 9, 150 if X is 2 to 4, and 200 if X is 0 or 1, where X is the user's current HP * 48 / its maximum HP, rounded down. If the maximum HP is 256 or more, the demo divides (current HP * 48) / 4 by (maximum HP / 4) kept to its low 8 bits instead, which shifts the thresholds. The demo runs it as fixed-power damage: it gets no same-type bonus, no type effectiveness or immunity, no random variation, and it cannot be a critical hit.",
 		pp: 10,
 		willCrit: false,
+		ignoreImmunity: true,
+		noDamageVariance: true,
+		basePowerCallback(pokemon) {
+			return sw97FlailPower(pokemon);
+		},
 	},
 	foresight: {
 		inherit: true,
@@ -99,25 +182,112 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	moonlight: {
 		inherit: true,
-		shortDesc: "Heals the user by 1/2 its max HP in any weather.",
-		desc: "The user restores 1/2 of its maximum HP, rounded down, regardless of the weather.",
+		shortDesc: "Heals the user by a random 25-50% of its max HP.",
+		desc: "The user restores half of its maximum HP multiplied by a random factor from 128/255 to 255/255, rounded down; if half its maximum HP is a multiple of 256, it is increased by 1 first. This is the demo's amount outside the move's time of day, since battles here have no clock. Weather has no effect.",
 		pp: 10,
 		onHit(pokemon) {
-			return !!this.heal(Math.floor(pokemon.maxhp / 2));
+			let half = Math.floor(pokemon.maxhp / 2);
+			if (half % 256 === 0) half++;
+			return !!this.heal(Math.floor(half * this.random(128, 256) / 255));
 		},
 	},
 	morningsun: {
 		inherit: true,
-		shortDesc: "Heals the user by 1/2 its max HP in any weather.",
-		desc: "The user restores 1/2 of its maximum HP, rounded down, regardless of the weather.",
+		shortDesc: "Heals the user by a random 25-50% of its max HP.",
+		desc: "The user restores half of its maximum HP multiplied by a random factor from 128/255 to 255/255, rounded down; if half its maximum HP is a multiple of 256, it is increased by 1 first. This is the demo's amount outside the move's time of day, since battles here have no clock. Weather has no effect.",
 		pp: 10,
 		onHit(pokemon) {
-			return !!this.heal(Math.floor(pokemon.maxhp / 2));
+			let half = Math.floor(pokemon.maxhp / 2);
+			if (half % 256 === 0) half++;
+			return !!this.heal(Math.floor(half * this.random(128, 256) / 255));
+		},
+	},
+	metronome: {
+		inherit: true,
+		onTry(source, target, move) {
+			if (!sw97HitsFoe(this, source, move)) return null;
+		},
+	},
+	mirrormove: {
+		inherit: true,
+		onTry(source, target, move) {
+			if (!sw97HitsFoe(this, source, move)) return null;
+		},
+	},
+	sleeptalk: {
+		inherit: true,
+		onTry(source, target, move) {
+			if (!sw97HitsFoe(this, source, move)) return null;
+			return source.status === 'slp';
+		},
+	},
+	bide: {
+		inherit: true,
+		accuracy: true,
+		shortDesc: "Stores energy for 2-3 turns, then deals double. Never misses.",
+		desc: "The user spends two or three of its turns storing energy, and then deals damage to the current opponent equal to twice the energy stored. Energy is the damage the user takes from attacks, including hits to its substitute, plus the last damage dealt in the battle, added again on each turn it stores. A turn the user loses to sleep, freeze, flinching or a trapping move does not count, and Bide carries on afterward; full paralysis, a confusion self-hit or infatuation ends it. The release ignores accuracy, evasion, Protect, Fly, Dig and type immunity, and fails if no energy was stored. The demo keeps energy in 16 bits, so it wraps past 65535.",
+		condition: {
+			inherit: true,
+			duration: undefined,
+			durationCallback: undefined,
+			onStart(pokemon) {
+				this.effectState.totalDamage = 0;
+				this.effectState.storing = this.random(2, 4);
+				this.add('-start', pokemon, 'move: Bide');
+			},
+			onDamage(damage, target, source, effect) {
+				if (!effect || effect.effectType !== 'Move' || !source) return;
+				this.effectState.totalDamage = Math.min(this.effectState.totalDamage + damage, 0xffff);
+			},
+			onMoveAborted(pokemon) {
+				if (['slp', 'frz'].includes(pokemon.status) || pokemon.volatiles['flinch'] ||
+					pokemon.volatiles['partiallytrapped']) return;
+				pokemon.removeVolatile('bide');
+			},
+			onBeforeMove(pokemon) {
+				this.effectState.totalDamage = (this.effectState.totalDamage + this.lastDamage) & 0xffff;
+				this.effectState.storing--;
+				if (this.effectState.storing > 0) {
+					this.add('-activate', pokemon, 'move: Bide');
+					return;
+				}
+				this.add('-end', pokemon, 'move: Bide');
+				const damage = (this.effectState.totalDamage * 2) & 0xffff;
+				pokemon.removeVolatile('bide');
+				const foe = pokemon.side.foe.active[0];
+				if (!damage || !foe || foe.fainted) {
+					this.lastDamage = 0;
+					this.add('-fail', pokemon);
+					return false;
+				}
+				const moveData = {
+					id: 'bide' as ID,
+					name: "Bide",
+					accuracy: true,
+					damage,
+					category: "Physical",
+					priority: 0,
+					flags: { contact: 1 },
+					ignoreImmunity: true,
+					effectType: 'Move',
+					type: 'Normal',
+				} as unknown as ActiveMove;
+				this.actions.tryMoveHit(foe, pokemon, moveData);
+				this.lastDamage = damage;
+				return false;
+			},
 		},
 	},
 	nightmare: {
 		inherit: true,
 		pp: 10,
+		flags: { mirror: 1, metronome: 1 },
+		condition: {
+			inherit: true,
+			onAfterSwitchInSelf(pokemon) {
+				if (pokemon.status === 'slp') this.damage(pokemon.baseMaxhp / 4);
+			},
+		},
 	},
 	outrage: {
 		inherit: true,
@@ -133,22 +303,65 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	present: {
 		inherit: true,
-		shortDesc: "40, 80, or 120 power; or 50 power plus healing the target 1/4.",
-		desc: "Has a 40% chance for 40 power, a 30% chance for 80 power, and a 10% chance for 120 power. The remaining 20% of the time, it deals damage with 50 power and then heals the target for 1/4 of its maximum HP.",
+		shortDesc: "40, 80, or 120 power, or heals the target 1/4 max HP.",
+		desc: "A random roll out of 256 picks 40 power (103 in 256), 80 power (77 in 256), 120 power (25 in 256), or, the remaining 51 in 256, no damage at all: the target instead regains 1/4 of its maximum HP, rounded down, even through a substitute and even if it is a Ghost-type.",
 		basePower: 50,
 		pp: 10,
 		accuracy: 100,
+		onModifyMove(move) {
+			const roll = this.random(256);
+			if (roll <= 102) {
+				move.basePower = 40;
+			} else if (roll <= 179) {
+				move.basePower = 80;
+			} else if (roll <= 204) {
+				move.basePower = 120;
+			} else {
+				move.basePower = 0;
+				move.infiltrates = true;
+				move.ignoreImmunity = true;
+				move.onHit = function (target) {
+					let quarter = target.maxhp >> 2;
+					if (!(quarter & 0xff)) quarter++;
+					this.heal(quarter, target);
+				};
+			}
+		},
 	},
 	protect: {
 		inherit: true,
-		shortDesc: "Protects the user this turn. No priority; fails if the user moves last.",
-		desc: "The user is protected from attacks for the rest of the turn. Has no increased priority and never fails from consecutive use; it fails only if the user is the last Pokemon to act this turn. The effect expires at the end of the turn.",
+		shortDesc: "Protects the user until the foe next acts. Never fails.",
+		desc: "The user is protected from the foe's attacks until the end of the foe's next action, even if the user moved last this turn. Has no increased priority and never fails, even when used repeatedly.",
 		priority: 0,
 		stallingMove: false,
-		onPrepareHit(pokemon) {
-			return !!this.queue.willAct();
-		},
+		onPrepareHit: undefined,
 		onHit(pokemon) {},
+		condition: {
+			inherit: true,
+			duration: undefined,
+			onFoeAfterMoveSelf() {
+				this.effectState.target.removeVolatile('protect');
+			},
+			onFoeAfterSwitchInSelf() {
+				this.effectState.target.removeVolatile('protect');
+			},
+		},
+	},
+	destinybond: {
+		inherit: true,
+		shortDesc: "If the foe KOs the user before its next action ends, the foe faints.",
+		desc: "Until the end of the foe's next action, if the user faints due to an attack by the foe, the foe also faints. The user's own actions do not end the effect, so it can carry into the next turn.",
+		condition: {
+			inherit: true,
+			onBeforeMove: undefined,
+			onMoveAborted: undefined,
+			onFoeAfterMoveSelf() {
+				this.effectState.target.removeVolatile('destinybond');
+			},
+			onFoeAfterSwitchInSelf() {
+				this.effectState.target.removeVolatile('destinybond');
+			},
+		},
 	},
 	pursuit: {
 		num: 228,
@@ -171,6 +384,9 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	raindance: {
 		inherit: true,
 		pp: 10,
+		onTry(source, target, move) {
+			if (!sw97HitsFoe(this, source, move)) return null;
+		},
 		type: "Normal",
 	},
 	razorleaf: {
@@ -196,8 +412,59 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	reversal: {
 		inherit: true,
+		shortDesc: "More power the less HP the user has left. Ignores type.",
+		desc: "The power of this move is 20 if X is 33 or more, 40 if X is 17 to 32, 80 if X is 10 to 16, 100 if X is 5 to 9, 150 if X is 2 to 4, and 200 if X is 0 or 1, where X is the user's current HP * 48 / its maximum HP, rounded down. If the maximum HP is 256 or more, the demo divides (current HP * 48) / 4 by (maximum HP / 4) kept to its low 8 bits instead, which shifts the thresholds. The demo runs it as fixed-power damage: it gets no same-type bonus, no type effectiveness or immunity, no random variation, and it cannot be a critical hit.",
 		pp: 10,
 		willCrit: false,
+		ignoreImmunity: true,
+		noDamageVariance: true,
+		basePowerCallback(pokemon) {
+			return sw97FlailPower(pokemon);
+		},
+	},
+	dragonrage: {
+		inherit: true,
+		shortDesc: "Always does 40 HP of damage. Hits any type.",
+		desc: "Deals 40 HP of damage to the target. The demo applies no type check to this move.",
+		ignoreImmunity: true,
+	},
+	nightshade: {
+		inherit: true,
+		shortDesc: "Does damage equal to the user's level. Hits Normal types.",
+		desc: "Deals damage to the target equal to the user's level. The demo applies no type check to this move, so it hits Normal-type Pokemon.",
+		ignoreImmunity: true,
+	},
+	psywave: {
+		inherit: true,
+		shortDesc: "Random damage from 1 to 1.5x the user's level, kept to 8 bits.",
+		desc: "Deals damage to the target equal to a random number from 1 to X - 1, where X is the user's level plus half its level, kept to its low 8 bits (so a level 255 user deals 1 to 125). Fails at levels where X is 0 or 1 (levels 1 and 171), where the demo freezes. The demo applies no type check to this move.",
+		ignoreImmunity: true,
+		damageCallback(pokemon) {
+			const range = (pokemon.level + (pokemon.level >> 1)) & 0xff;
+			if (range < 2) {
+				this.hint("In the SpaceWorld demo, Psywave used at level 1 or 171 freezes the game.");
+				return false;
+			}
+			return this.random(1, range);
+		},
+	},
+	seismictoss: {
+		inherit: true,
+		shortDesc: "Does damage equal to the user's level. Hits Ghost types.",
+		desc: "Deals damage to the target equal to the user's level. The demo applies no type check to this move, so it hits Ghost-type Pokemon.",
+		ignoreImmunity: true,
+	},
+	sonicboom: {
+		inherit: true,
+		shortDesc: "Always does 20 HP of damage. Hits Ghost types.",
+		desc: "Deals 20 HP of damage to the target. The demo applies no type check to this move, so it hits Ghost-type Pokemon.",
+		ignoreImmunity: true,
+	},
+	superfang: {
+		inherit: true,
+		shortDesc: "Does damage equal to 1/2 target's current HP. Hits Ghost types.",
+		desc: "Deals damage to the target equal to half of its current HP, rounded down, but not less than 1 HP. The demo applies no type check to this move, so it hits Ghost-type Pokemon.",
+		ignoreImmunity: true,
 	},
 	roar: {
 		inherit: true,
@@ -212,11 +479,14 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	safeguard: {
 		inherit: true,
 		pp: 10,
+		onTry(source, target, move) {
+			if (!sw97HitsFoe(this, source, move)) return null;
+		},
 	},
 	sandstorm: {
 		num: 201,
-		shortDesc: "Permanently damages the target's side 1/8 per turn; no type is immune.",
-		desc: "Applies a permanent condition to the target's side of the field: at the end of each turn, the active Pokemon on that side loses 1/8 of its maximum HP, rounded down - Rock, Ground, and Steel types included. Does not change the weather and never wears off. Fails if the target's side is already sandstormed.",
+		shortDesc: "Target's side loses 1/8 max HP after each action; no immunity.",
+		desc: "Applies a permanent condition to the target's side of the field: each Pokemon on that side loses 1/8 of its maximum HP, rounded down, right after it uses a move or voluntarily switches in, Rock, Ground, and Steel types included. Like the demo's other residual damage, it is skipped for the rest of a turn once a Pokemon faints. Does not change the weather and never wears off. Fails if the target's side is already sandstormed.",
 		accuracy: 100,
 		basePower: 0,
 		category: "Status",
@@ -241,6 +511,9 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	spikes: {
 		inherit: true,
 		pp: 10,
+		onTry(source, target, move) {
+			if (!sw97HitsFoe(this, source, move)) return null;
+		},
 		type: "Normal",
 	},
 	spite: {
@@ -283,6 +556,9 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	sunnyday: {
 		inherit: true,
 		pp: 10,
+		onTry(source, target, move) {
+			if (!sw97HitsFoe(this, source, move)) return null;
+		},
 		type: "Normal",
 	},
 	swagger: {
@@ -292,11 +568,13 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	synthesis: {
 		inherit: true,
-		shortDesc: "Heals the user by 1/2 its max HP in any weather.",
-		desc: "The user restores 1/2 of its maximum HP, rounded down, regardless of the weather.",
+		shortDesc: "Heals the user by a random 25-50% of its max HP.",
+		desc: "The user restores half of its maximum HP multiplied by a random factor from 128/255 to 255/255, rounded down; if half its maximum HP is a multiple of 256, it is increased by 1 first. This is the demo's amount outside the move's time of day, since battles here have no clock. Weather has no effect.",
 		pp: 10,
 		onHit(pokemon) {
-			return !!this.heal(Math.floor(pokemon.maxhp / 2));
+			let half = Math.floor(pokemon.maxhp / 2);
+			if (half % 256 === 0) half++;
+			return !!this.heal(Math.floor(half * this.random(128, 256) / 255));
 		},
 	},
 	thief: {
@@ -412,7 +690,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	rollout: {
 		inherit: true,
-		accuracy: 78,
+		accuracy: 78.5,
 		pp: 10,
 	},
 	furycutter: {
@@ -488,6 +766,13 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		desc: "Has a 30% chance to confuse the target. Fails if the user is not asleep.",
 		pp: 10,
 		secondary: {chance: 30, volatileStatus: 'confusion'},
+		onTry(source, target, move) {
+			if (source.status === 'slp') return;
+			if (!sw97HitsFoe(this, source, move)) return null;
+			const wouldBe = this.actions.getDamage(source, target, move, true);
+			this.lastDamage = typeof wouldBe === 'number' ? wouldBe : 0;
+			return false;
+		},
 	},
 	coinhurl: {
 		inherit: true,
@@ -522,7 +807,34 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	sweetkiss: {
 		inherit: true,
+		shortDesc: "Confuses the target. Ghost-types are immune.",
 		accuracy: 100,
+		ignoreImmunity: false,
+	},
+	supersonic: {
+		inherit: true,
+		shortDesc: "Confuses the target. Ghost-types are immune.",
+		ignoreImmunity: false,
+	},
+	confuseray: {
+		inherit: true,
+		shortDesc: "Confuses the target. Normal-types are immune.",
+		ignoreImmunity: false,
+	},
+	fissure: {
+		inherit: true,
+		shortDesc: "OHKOs the target. Fails if it is faster or resists.",
+		desc: "Deals damage equal to the target's maximum HP. Fails if the target is faster than the user, or if the move would be not very effective against it or have no effect. The user's level does not matter, and accuracy and evasion apply as for any other move.",
+	},
+	guillotine: {
+		inherit: true,
+		shortDesc: "OHKOs the target. Fails if it is faster or resists.",
+		desc: "Deals damage equal to the target's maximum HP. Fails if the target is faster than the user, or if the move would be not very effective against it or have no effect. The user's level does not matter, and accuracy and evasion apply as for any other move.",
+	},
+	horndrill: {
+		inherit: true,
+		shortDesc: "OHKOs the target. Fails if it is faster or resists.",
+		desc: "Deals damage equal to the target's maximum HP. Fails if the target is faster than the user, or if the move would be not very effective against it or have no effect. The user's level does not matter, and accuracy and evasion apply as for any other move.",
 	},
 	sludgebomb: {
 		inherit: true,
@@ -543,13 +855,16 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	perishsong: {
 		inherit: true,
 		pp: 10,
+		onTry(source, target, move) {
+			if (!sw97HitsFoe(this, source, move)) return null;
+		},
 	},
 	synchronize: {
 		inherit: true,
 		shortDesc: "User copies the target's types.",
-		desc: "The user's types change to match the target's current types (the same effect as the demo's Conversion).",
+		desc: "The user's types change to match the target's current types (the same effect as the demo's Conversion). Never misses.",
 		isNonstandard: null,
-		accuracy: 100,
+		accuracy: true,
 		basePower: 0,
 		pp: 10,
 		category: "Status",
@@ -608,6 +923,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		inherit: true,
 		isNonstandard: null,
 		accuracy: 100,
+		ignoreImmunity: false,
 		basePower: 0,
 		pp: 10,
 		category: "Status",
@@ -627,7 +943,18 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	painsplit: {
 		inherit: true,
+		shortDesc: "Shares HP of user and target equally. Fails on a substitute.",
+		desc: "The user and the target's HP become the average of their current HP, rounded down, but not more than the maximum HP of either one. Fails if the target has a substitute.",
 		pp: 5,
+		onHit(target, pokemon) {
+			if (target.volatiles['substitute']) return false;
+			const averagehp = Math.floor((target.hp + pokemon.hp) / 2) || 1;
+			this.lastDamage = averagehp;
+			target.sethp(averagehp);
+			this.add('-sethp', target, target.getHealth, '[from] move: Pain Split', '[silent]');
+			pokemon.sethp(averagehp);
+			this.add('-sethp', pokemon, pokemon.getHealth, '[from] move: Pain Split');
+		},
 	},
 	sacredfire: {
 		inherit: true,
@@ -971,9 +1298,19 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	leechseed: {
 		inherit: true,
 		shortDesc: "Leeches 1/8 target's max HP each turn. Grass-types are not immune.",
-		desc: "The Pokemon at the user's position steals 1/8 of the target's maximum HP, rounded down, after the target moves each turn. Grass-types are not immune; instead, due to the demo's type-byte check, this move fails against a target whose current HP has 22 (the Grass type's internal index) as its low byte or high byte.",
+		desc: "The Pokemon at the user's position steals 1/8 of the target's maximum HP, rounded down, after the target moves each turn, and right away when the seed is passed to a Pokemon by Baton Pass. Grass-types are not immune; instead, due to the demo's type-byte check, this move fails against a target whose current HP has 22 (the Grass type's internal index) as its low byte or high byte.",
 		onTryImmunity(target) {
 			return !(target.hp % 256 === 22 || Math.floor(target.hp / 256) === 22);
+		},
+		condition: {
+			inherit: true,
+			onAfterSwitchInSelf(pokemon) {
+				if (!pokemon.hp) return;
+				const leecher = this.getAtSlot(pokemon.volatiles['leechseed'].sourceSlot);
+				if (!leecher || leecher.fainted || leecher.hp <= 0) return;
+				const damage = this.damage(this.clampIntRange(pokemon.maxhp / 8, 1), pokemon, leecher);
+				if (damage) this.heal(damage, leecher, pokemon);
+			},
 		},
 	},
 	haze: {
@@ -1080,6 +1417,10 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 				if (!damage) {
 					return damage;
 				}
+				this.lastDamage = damage;
+				if (target.volatiles['bide']) {
+					target.volatiles['bide'].totalDamage = Math.min(target.volatiles['bide'].totalDamage + damage, 0xffff);
+				}
 				if (damage > target.volatiles['substitute'].hp) {
 					damage = target.volatiles['substitute'].hp as number;
 				}
@@ -1112,7 +1453,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		condition: {
 			duration: 2,
 			onInvulnerability(target, source, move) {
-				if (['whirlwind', 'thunder', 'swift'].includes(move.id)) {
+				if (['whirlwind', 'thunder', 'swift'].includes(move.id) || SW97_NO_HIT_CHECK.includes(move.id)) {
 					return;
 				}
 				if (source.volatiles['lockon'] && target === source.volatiles['lockon'].source) {
@@ -1129,7 +1470,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		condition: {
 			duration: 2,
 			onInvulnerability(target, source, move) {
-				if (['earthquake', 'fissure', 'swift'].includes(move.id)) {
+				if (['earthquake', 'fissure', 'swift'].includes(move.id) || SW97_NO_HIT_CHECK.includes(move.id)) {
 					return;
 				}
 				if (source.volatiles['lockon'] && target === source.volatiles['lockon'].source) {
@@ -1147,6 +1488,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	naildown: {
 		inherit: true,
 		isNonstandard: null,
+		accuracy: true,
+		flags: { reflectable: 1, metronome: 1 },
 	},
 	bellchime: {
 		inherit: true,
@@ -1183,6 +1526,12 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	curse: {
 		inherit: true,
 		isNonstandard: "Future",
+		condition: {
+			inherit: true,
+			onAfterSwitchInSelf(pokemon) {
+				this.damage(pokemon.baseMaxhp / 4);
+			},
+		},
 	},
 	extremespeed: {
 		inherit: true,

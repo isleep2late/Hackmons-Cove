@@ -59,6 +59,7 @@ declare namespace Showdown {
     /** `[effectName, levels, minDuration, maxDuration]` */
     public sideConditions: Partial<Record<SideConditionName, SideConditionState>> = {};
     public faintCounter = 0;
+    public pasted = false;
 
     public constructor(battle: Battle, n: number);
 

@@ -25,6 +25,8 @@ const http = require('http');
 const https = require('https');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
+const zlib = require('zlib');
 const { URL } = require('url');
 const net = require('net');
 const phnnTeamgen = require('./phnn-teamgen');
@@ -34,6 +36,10 @@ const STATIC_DIR = path.resolve(__dirname, process.env.PHNN_STATIC_DIR || '../pl
 // Upstream's replay front-end (built by ./build) lives in its own tree; its js/ is
 // served alongside the play client's so the viewer can be loaded from our origin.
 const REPLAY_STATIC_DIR = path.resolve(__dirname, process.env.PHNN_REPLAY_STATIC_DIR || '../replay.pokemonshowdown.com');
+const BUILT_INDEX = new Map([
+	[path.join(STATIC_DIR, 'index-new.html'), '/caches/index-new.html'],
+	[path.join(STATIC_DIR, 'index-old.html'), '/caches/index-old.html'],
+]);
 const LOGIN_ORIGIN = process.env.PHNN_LOGIN_ORIGIN || 'https://play.pokemonshowdown.com';
 // PHNN custom avatars live in the server repo's config/avatars dir and are
 // served at /avatars/ (see resolveAvatar in battle-dex.ts).
@@ -157,52 +163,355 @@ function proxyGame(req, res, reqUrl) {
 // Cache-bust token for config.js; changes each restart so browsers refetch.
 const START_TOKEN = Date.now().toString(36);
 
-function serveStatic(req, res, pathname) {
-	let rel = decodeURIComponent(pathname);
-	// Serve the (built) old-client production page at the site root. caches/index-old.html
-	// is produced by `./build` with URLs rewritten to Config.routes.client (play.hackmons.com).
-	const isIndex = (rel === '/' || rel === '/index.html');
-	if (isIndex) rel = '/caches/index-old.html';
-	else if (rel.endsWith('/')) rel += 'index.html';
+function indexPageFor(page, cookie) {
+	const room = page.replace(/^\/+/, '').replace(/^index\.html$/, '');
+	if (room === 'oldclient' || !/^(|[A-Za-z0-9][A-Za-z0-9-]*)$/.test(room)) return '/caches/index-old.html';
+	if (/(?:^|;\s*)preactalpha=1(?:;|$)/.test(cookie || '')) return '/caches/index-new.html';
+	if (/^(newclient|preactalpha|preactbeta|beta|dev|development|login|users|(dm|challenge|user|viewuser|ladder)-[a-z0-9-]*)$/.test(room)) {
+		return '/caches/index-new.html';
+	}
+	return '/caches/index-old.html';
+}
+
+const COMPRESSIBLE = new Set(['.html', '.js', '.css', '.json', '.svg', '.map', '.txt', '.xml', '.md']);
+const ASSET_CACHE_MAX = Number(process.env.PHNN_ASSET_CACHE_MB || 256) * 1024 * 1024;
+const ASSET_MAX_FILE = 64 * 1024 * 1024;
+const ASSET_SETTLE_MS = Number(process.env.PHNN_ASSET_SETTLE_MS) || 2000;
+const COMPRESS_WAIT_MS = 1000;
+const IMMUTABLE = 'public, max-age=31536000, immutable';
+const assetCache = new Map();
+const assetLoads = new Map();
+const indexAssetPaths = new Set();
+let assetCacheBytes = 0;
+
+function statKey(st) {
+	return `${st.dev}:${st.ino}:${st.size}:${st.mtimeMs}:${st.ctimeMs}`;
+}
+
+function trimAssetCache() {
+	for (const [filePath, entry] of assetCache) {
+		if (assetCacheBytes <= ASSET_CACHE_MAX) break;
+		assetCache.delete(filePath);
+		assetCacheBytes -= entry.bytes;
+		entry.inCache = false;
+	}
+}
+
+function addAssetBytes(entry, n) {
+	entry.bytes += n;
+	if (entry.inCache) { assetCacheBytes += n; trimAssetCache(); }
+}
+
+async function readAsset(filePath) {
+	const fh = await fs.promises.open(filePath, 'r');
+	try {
+		const before = await fh.stat();
+		const raw = await fh.readFile();
+		const after = await fh.stat();
+		const key = statKey(before);
+		return {
+			key, raw, md5: crypto.createHash('md5').update(raw).digest('hex'),
+			lastModified: new Date(Math.floor(after.ctimeMs / 1000) * 1000),
+			cacheable: key === statKey(after) && raw.length === before.size && Date.now() - after.ctimeMs >= ASSET_SETTLE_MS,
+			enc: {}, pending: {}, bytes: raw.length, inCache: false,
+		};
+	} finally {
+		await fh.close();
+	}
+}
+
+function loadAsset(filePath, st) {
+	const key = statKey(st);
+	const hit = assetCache.get(filePath);
+	if (hit && hit.key === key) {
+		assetCache.delete(filePath);
+		assetCache.set(filePath, hit);
+		return Promise.resolve(hit);
+	}
+	const loadId = filePath + '\0' + key;
+	let loading = assetLoads.get(loadId);
+	if (!loading) {
+		loading = readAsset(filePath).then(entry => {
+			if (entry.cacheable) {
+				const old = assetCache.get(filePath);
+				if (old) { assetCache.delete(filePath); assetCacheBytes -= old.bytes; old.inCache = false; }
+				assetCache.set(filePath, entry);
+				entry.inCache = true;
+				assetCacheBytes += entry.bytes;
+				trimAssetCache();
+			}
+			return entry;
+		}).finally(() => assetLoads.delete(loadId));
+		assetLoads.set(loadId, loading);
+	}
+	return loading;
+}
+
+function compressAsset(entry, enc) {
+	if (enc in entry.enc) return Promise.resolve(entry.enc[enc]);
+	if (!entry.pending[enc]) {
+		const raw = entry.raw;
+		entry.pending[enc] = new Promise(resolve => {
+			const done = (err, out) => {
+				const buf = !err && out.length < raw.length ? out : null;
+				entry.enc[enc] = buf;
+				delete entry.pending[enc];
+				if (buf) addAssetBytes(entry, buf.length);
+				resolve(buf);
+			};
+			if (enc === 'br') {
+				zlib.brotliCompress(raw, { params: {
+					[zlib.constants.BROTLI_PARAM_MODE]: zlib.constants.BROTLI_MODE_TEXT,
+					[zlib.constants.BROTLI_PARAM_QUALITY]: 9,
+					[zlib.constants.BROTLI_PARAM_LGWIN]: Math.max(10, Math.min(24, Math.ceil(Math.log2(raw.length + 1)))),
+					[zlib.constants.BROTLI_PARAM_SIZE_HINT]: raw.length,
+				} }, done);
+			} else {
+				zlib.gzip(raw, { level: 6 }, done);
+			}
+		});
+		entry.pending[enc].startedAt = Date.now();
+	}
+	return entry.pending[enc];
+}
+
+function compressedSoon(entry, enc) {
+	if (enc in entry.enc) return Promise.resolve(entry.enc[enc]);
+	const pending = compressAsset(entry, enc);
+	const wait = pending.startedAt + COMPRESS_WAIT_MS - Date.now();
+	if (wait <= 0) return Promise.resolve(null);
+	return new Promise(resolve => {
+		const timer = setTimeout(resolve, wait, null);
+		pending.then(buf => { clearTimeout(timer); resolve(buf); });
+	});
+}
+
+function acceptedEncoding(header) {
+	const weights = {};
+	for (const part of String(header || '').toLowerCase().split(',')) {
+		const [name, ...params] = part.split(';').map(s => s.trim());
+		if (!name) continue;
+		const q = params.map(p => /^q=([0-9.]+)$/.exec(p)).find(Boolean);
+		weights[name] = q ? Number(q[1]) : 1;
+	}
+	const ok = enc => (weights[enc] ?? weights['*'] ?? 0) > 0;
+	return ok('br') ? 'br' : ok('gzip') ? 'gzip' : null;
+}
+
+function heldEncoding(req, entry) {
+	if (req.method !== 'GET' && req.method !== 'HEAD') return undefined;
+	const inm = req.headers['if-none-match'];
+	if (inm !== undefined) {
+		for (let tag of inm.split(',')) {
+			tag = tag.trim();
+			if (tag === '*') return null;
+			const match = /^(?:W\/)?"?([0-9a-f]{32})(?:-(br|gzip))?"?$/.exec(tag);
+			if (match && match[1] === entry.md5) return match[2] || '';
+		}
+		return undefined;
+	}
+	const since = Date.parse(req.headers['if-modified-since'] || '');
+	return entry.cacheable && !isNaN(since) && entry.lastModified.getTime() <= since ? null : undefined;
+}
+
+function serveFile(req, res, filePath, stat, { search = '', mayBeImmutable = false, cors = true } = {}) {
+	const ext = path.extname(filePath);
+	const type = MIME[ext] || 'application/octet-stream';
+	if (stat.size > ASSET_MAX_FILE) {
+		res.writeHead(200, { 'content-type': type, 'cache-control': 'no-store', ...(cors ? { 'access-control-allow-origin': '*' } : {}) });
+		fs.createReadStream(filePath).pipe(res);
+		return;
+	}
+	loadAsset(filePath, stat).then(async entry => {
+		const compressible = COMPRESSIBLE.has(ext);
+		const hash = /^\?([0-9a-f]{8})$/.exec(search);
+		const immutable = mayBeImmutable && entry.cacheable && hash && entry.md5.startsWith(hash[1]) && indexAssetPaths.has(filePath);
+		const headers = { 'cache-control': immutable ? IMMUTABLE : 'no-store' };
+		if (cors) headers['access-control-allow-origin'] = '*';
+		if (compressible) headers['vary'] = 'Accept-Encoding';
+		let enc = compressible && entry.cacheable && entry.raw.length >= 256 ? acceptedEncoding(req.headers['accept-encoding']) : null;
+		if (enc && entry.enc[enc] === null) enc = null;
+		if (entry.cacheable) headers['last-modified'] = entry.lastModified.toUTCString();
+		const held = heldEncoding(req, entry);
+		const compressing = held === '' && enc && entry.enc[enc] === undefined;
+		if (held === null || held === (enc || '') || compressing) {
+			if (compressing) compressAsset(entry, enc);
+			if (immutable && held !== 'br' && held !== 'gzip' && enc) headers['cache-control'] = 'no-store';
+			headers['etag'] = `"${entry.md5}${held === null ? (enc ? '-' + enc : '') : held ? '-' + held : ''}"`;
+			res.writeHead(304, headers);
+			res.end();
+			return;
+		}
+		let body = entry.raw;
+		if (enc) {
+			const encoded = await compressedSoon(entry, enc);
+			if (encoded) {
+				body = encoded;
+			} else {
+				if (entry.enc[enc] !== null) headers['cache-control'] = 'no-store';
+				enc = null;
+			}
+		}
+		headers['etag'] = `"${entry.md5}${enc ? '-' + enc : ''}"`;
+		headers['content-type'] = type;
+		if (enc) headers['content-encoding'] = enc;
+		headers['content-length'] = body.length;
+		res.writeHead(200, headers);
+		res.end(body);
+	}).catch(() => {
+		if (res.headersSent) { res.destroy(); return; }
+		res.writeHead(500, { 'content-type': 'text/plain', 'cache-control': 'no-store' });
+		res.end('read error');
+	});
+}
+
+function resolveStaticPath(rel) {
 	let baseDir = STATIC_DIR;
 	// The replay viewer's own bundles live in the replay tree, not the play client's.
 	if (/^\/js\/(replays(-battle|-index)?|utils)\.js(\.map)?$/.test(rel)) baseDir = REPLAY_STATIC_DIR;
 	const filePath = path.join(baseDir, rel);
 	// prevent path traversal outside STATIC_DIR
-	if (!filePath.startsWith(baseDir)) {
-		res.writeHead(403); res.end('forbidden'); return;
+	if (filePath !== baseDir && !filePath.startsWith(baseDir + path.sep)) return null;
+	return filePath;
+}
+
+const CACHEBUSTED_URL = /((?:src|href)=")((?:\/\/([^/"]+))?(\/[^"?#]*))\?[0-9a-f]{8}"/g;
+
+async function refreshCachebusters(html, host) {
+	const ownHost = String(host || '').toLowerCase().replace(/:\d+$/, '');
+	const isOwn = urlHost => urlHost === undefined || urlHost.toLowerCase() === ownHost;
+	const hashes = new Map();
+	for (const m of html.matchAll(CACHEBUSTED_URL)) {
+		if (isOwn(m[3]) && !hashes.has(m[4])) hashes.set(m[4], null);
 	}
-	fs.stat(filePath, (err, stat) => {
-		if (err || !stat.isFile()) {
-			if (!path.extname(rel)) { serveStatic(req, res, '/'); return; }
-			res.writeHead(404, { 'content-type': 'text/plain' });
-			res.end('404 Not Found');
-			return;
-		}
-		const headers = {
-			'content-type': MIME[path.extname(filePath)] || 'application/octet-stream',
-			'cache-control': 'no-store',
-			'access-control-allow-origin': '*',
-		};
-		if (isIndex) {
-			fs.readFile(filePath, 'utf8', (e, html) => {
-				if (e) { res.writeHead(500); res.end('read error'); return; }
-				html = html.replace(/\/\/localhost\//g, '/');
-				html = html.replace(/config\/config\.js\?/g, `config/config.js?cb=${START_TOKEN}&`);
-				res.writeHead(200, headers);
-				res.end(html);
-			});
-			return;
-		}
-		res.writeHead(200, headers);
-		fs.createReadStream(filePath).pipe(res);
+	await Promise.all([...hashes.keys()].map(async urlPath => {
+		try {
+			const filePath = resolveStaticPath(decodeURIComponent(urlPath));
+			if (!filePath || /\.php$/i.test(filePath)) return;
+			const stat = await fs.promises.stat(filePath);
+			if (!stat.isFile() || stat.size > ASSET_MAX_FILE) return;
+			const entry = await loadAsset(filePath, stat);
+			hashes.set(urlPath, entry.md5.slice(0, 8));
+			if (entry.cacheable) indexAssetPaths.add(filePath);
+		} catch {}
+	}));
+	return html.replace(CACHEBUSTED_URL, (all, attr, url, urlHost, urlPath) => {
+		const hash = isOwn(urlHost) && hashes.get(urlPath);
+		return hash ? `${attr}${url}?${hash}"` : all;
 	});
 }
 
-function serveAvatar(res, pathname) {
+function serveIndexPage(req, res, filePath, headers) {
+	fs.readFile(filePath, 'utf8', async (e, html) => {
+		if (e) { res.writeHead(500); res.end('read error'); return; }
+		html = html.replace(/\/\/localhost\//g, '/');
+		html = html.replace(/config\/config\.js\?/g, `config/config.js?cb=${START_TOKEN}&`);
+		try {
+			html = await refreshCachebusters(html, req.headers.host);
+		} catch {}
+		let body = Buffer.from(html);
+		const enc = acceptedEncoding(req.headers['accept-encoding']);
+		if (enc === 'br') body = zlib.brotliCompressSync(body, { params: { [zlib.constants.BROTLI_PARAM_QUALITY]: 5 } });
+		else if (enc === 'gzip') body = zlib.gzipSync(body, { level: 6 });
+		res.writeHead(200, { ...headers, 'vary': 'Accept-Encoding', ...(enc ? { 'content-encoding': enc } : {}), 'content-length': body.length });
+		res.end(body);
+	});
+}
+
+async function warmAssets(retry) {
+	const urlPaths = retry || new Set(['/showdex/main.js']);
+	for (const page of retry ? [] : ['caches/index-old.html', 'caches/index-new.html']) {
+		try {
+			const html = await fs.promises.readFile(path.join(STATIC_DIR, page), 'utf8');
+			for (const m of html.matchAll(/(?:src|href)="(?:\/\/[^/"]+)?(\/[^"?#]+)[?"]/g)) urlPaths.add(m[1]);
+		} catch {}
+	}
+	const started = Date.now();
+	const fresh = new Set();
+	let count = 0;
+	for (const urlPath of urlPaths) {
+		try {
+			const filePath = resolveStaticPath(decodeURIComponent(urlPath));
+			if (!filePath || /\.php$/i.test(filePath)) continue;
+			const stat = await fs.promises.stat(filePath);
+			if (!stat.isFile() || stat.size > ASSET_MAX_FILE) continue;
+			const entry = await loadAsset(filePath, stat);
+			if (!entry.cacheable) { fresh.add(urlPath); continue; }
+			if (COMPRESSIBLE.has(path.extname(filePath)) && entry.raw.length >= 256) await compressAsset(entry, 'br');
+			count++;
+		} catch {}
+	}
+	console.log(`[assets] warmed ${count} files in ${Date.now() - started} ms; cache holds ${(assetCacheBytes / 1048576).toFixed(1)} MB`);
+	if (fresh.size && !retry) setTimeout(() => void warmAssets(fresh), ASSET_SETTLE_MS + 500);
+}
+
+function serveStatic(req, res, pathname, page, search) {
+	let rel = decodeURIComponent(pathname);
+	const builtIndex = BUILT_INDEX.get(path.join(STATIC_DIR, rel));
+	const isIndex = page !== undefined || rel === '/' || rel === '/index.html' || !!builtIndex;
+	if (builtIndex) rel = builtIndex;
+	else if (isIndex) rel = indexPageFor(page !== undefined ? page : rel, req.headers.cookie);
+	else if (rel.endsWith('/')) rel += 'index.html';
+	const filePath = resolveStaticPath(rel);
+	if (!filePath) {
+		res.writeHead(403); res.end('forbidden'); return;
+	}
+	if (/\.php$/i.test(filePath)) {
+		res.writeHead(404, { 'content-type': 'text/plain', 'cache-control': 'no-store' });
+		res.end('404 Not Found');
+		return;
+	}
+	fs.stat(filePath, (err, stat) => {
+		if (err || !stat.isFile()) {
+			if (!path.extname(rel)) { serveStatic(req, res, '/', rel); return; }
+			res.writeHead(404, { 'content-type': 'text/plain', 'cache-control': 'no-store' });
+			res.end('404 Not Found');
+			return;
+		}
+		if (isIndex) {
+			serveIndexPage(req, res, filePath, {
+				'content-type': MIME[path.extname(filePath)] || 'application/octet-stream',
+				'cache-control': 'no-store',
+				'access-control-allow-origin': '*',
+			});
+			return;
+		}
+		serveFile(req, res, filePath, stat, { search, mayBeImmutable: !filePath.startsWith(path.join(STATIC_DIR, 'config') + path.sep) });
+	});
+}
+
+function cleanCookies(req, res) {
+	const host = (req.headers.host || '').toLowerCase().replace(/:\d+$/, '');
+	const domains = [''];
+	if (host.length <= 253 && /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(host)) {
+		for (const domain of new Set([host, host.split('.').slice(-2).join('.')])) {
+			domains.push('; Domain=' + domain, '; Domain=.' + domain);
+		}
+	}
+	const names = new Set();
+	for (const pair of (req.headers.cookie || '').split(';')) {
+		const eq = pair.indexOf('=');
+		if (eq < 0) continue;
+		const name = pair.slice(0, eq).trim();
+		if (pair.slice(eq + 1).trim().length > 3000 && /^[!#$%&'*+.^_`|~0-9A-Za-z-]+$/.test(name)) names.add(name);
+	}
+	const setCookie = [];
+	for (const name of names) {
+		const secure = /^__(?:secure|host)-/i.test(name) ? '; Secure' : '';
+		for (const domain of domains) {
+			setCookie.push(name + '=; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; Path=/' + domain + secure);
+		}
+	}
+	const headers = { 'content-type': 'application/javascript; charset=utf-8', 'cache-control': 'no-store' };
+	if (setCookie.length) headers['set-cookie'] = setCookie;
+	res.writeHead(200, headers);
+	res.end(names.size ? 'alert("You had a cookie which was too big to handle and had to be deleted. If you had cookie settings, they may have been deleted.")' : '');
+}
+
+function serveAvatar(req, res, pathname) {
 	const name = decodeURIComponent(pathname.slice('/avatars/'.length));
 	const filePath = path.join(AVATARS_DIR, name);
-	if (!filePath.startsWith(AVATARS_DIR) || !name) {
+	if (!filePath.startsWith(AVATARS_DIR + path.sep) || !name) {
 		res.writeHead(403); res.end('forbidden'); return;
 	}
 	fs.stat(filePath, (err, stat) => {
@@ -211,11 +520,7 @@ function serveAvatar(res, pathname) {
 			res.end('404 Not Found');
 			return;
 		}
-		res.writeHead(200, {
-			'content-type': MIME[path.extname(filePath)] || 'application/octet-stream',
-			'cache-control': 'no-store',
-		});
-		fs.createReadStream(filePath).pipe(res);
+		serveFile(req, res, filePath, stat, { cors: false });
 	});
 }
 
@@ -314,7 +619,7 @@ function parseReplayMeta(fullid, logHead, mtimeMs) {
 			meta.formatid = toID(meta.format);
 		} else if (line.startsWith('|t:|') && meta.uploadtime === Math.floor(mtimeMs / 1000)) {
 			const t = Number(line.slice(4));
-			if (t) meta.uploadtime = t;
+			if (Number.isSafeInteger(t) && t > 0 && t < 1e11) meta.uploadtime = t;
 		} else if (line === '|start' || line.startsWith('|turn|')) {
 			break;
 		}
@@ -800,7 +1105,7 @@ function serveTeamgen(req, res, reqUrl) {
 	});
 }
 
-const server = http.createServer((req, res) => {
+function handleRequest(req, res) {
 	const reqUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
 	const host = (req.headers.host || '').toLowerCase().split(':')[0];
 	const replayHost = host.startsWith('replay.');
@@ -813,25 +1118,39 @@ const server = http.createServer((req, res) => {
 		// Damage calculator lives at /calc/ (static dir play.pokemonshowdown.com/calc)
 		res.writeHead(301, { location: '/calc/' + (reqUrl.search || '') });
 		res.end();
+	} else if (reqUrl.pathname === '/js/oldclient/clean-cookies.php' && (req.method === 'GET' || req.method === 'HEAD')) {
+		cleanCookies(req, res);
 	} else if (isLoginPath(reqUrl.pathname)) {
 		proxyLogin(req, res, reqUrl);
 	} else if (reqUrl.pathname.startsWith('/showdown')) {
 		proxyGame(req, res, reqUrl);
 	} else if (reqUrl.pathname.startsWith('/avatars/')) {
-		serveAvatar(res, reqUrl.pathname);
+		serveAvatar(req, res, reqUrl.pathname);
 	} else if (replayHost) {
 		const seg = decodeURIComponent(reqUrl.pathname).replace(/^\/+/, '');
 		if (!seg || /^[a-z0-9-]+(\.(log|json|html))?$/i.test(seg)) {
 			serveReplay(req, res, reqUrl, true);
 		} else {
-			serveStatic(req, res, reqUrl.pathname);
+			serveStatic(req, res, reqUrl.pathname, undefined, reqUrl.search);
 		}
 	} else if (reqUrl.pathname === '/replays' || reqUrl.pathname.startsWith('/replays/')) {
 		serveReplay(req, res, reqUrl, false);
 	} else if (reqUrl.pathname === '/teamgen') {
 		serveTeamgen(req, res, reqUrl);
 	} else {
-		serveStatic(req, res, reqUrl.pathname);
+		serveStatic(req, res, reqUrl.pathname, undefined, reqUrl.search);
+	}
+}
+
+const server = http.createServer((req, res) => {
+	try {
+		handleRequest(req, res);
+	} catch (err) {
+		const badInput = err instanceof URIError || ['ERR_INVALID_URL', 'ERR_INVALID_ARG_VALUE', 'ERR_INVALID_ARG_TYPE'].includes(err && err.code);
+		if (!badInput) console.error('[request]', req.method, req.url, err && err.message);
+		if (res.headersSent) { res.destroy(); return; }
+		res.writeHead(badInput ? 400 : 500, { 'content-type': 'text/plain', 'cache-control': 'no-store' });
+		res.end(badInput ? '400 Bad Request' : '500 Internal Server Error');
 	}
 });
 
@@ -839,7 +1158,13 @@ const server = http.createServer((req, res) => {
 const MAX_WS_PROXIES = 1000;
 let activeWsProxies = 0;
 server.on('upgrade', (req, socket, head) => {
-	const reqUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+	let reqUrl;
+	try {
+		reqUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+	} catch {
+		socket.destroy();
+		return;
+	}
 	if (!reqUrl.pathname.startsWith('/showdown')) { socket.destroy(); return; }
 	if (activeWsProxies >= MAX_WS_PROXIES) { socket.destroy(); return; }
 	activeWsProxies++;
@@ -877,4 +1202,5 @@ server.listen(PORT, '127.0.0.1', () => {
 	console.log(`  login proxy: /action.php -> ${LOGIN_ORIGIN}/action.php`);
 	console.log(`  game proxy:  /showdown -> ${GAME_HOST}:${GAME_PORT}`);
 	console.log(`  avatars dir: ${AVATARS_DIR} (served at /avatars/)`);
+	if (process.env.PHNN_ASSET_WARM !== '0') warmAssets();
 });

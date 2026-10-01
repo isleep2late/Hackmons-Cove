@@ -144,4 +144,19 @@ https://psim.us/dev
 
 	<script defer src="/js/client-endload.js?"></script>
 
+	<script>
+	(function(){
+		function loadShowdex(){
+			if(!window.PS||typeof window.PS.join!=='function'||!window.Dex||typeof window.Dex.forGen!=='function'){return setTimeout(loadShowdex,100);}
+			if(document.getElementById('showdex-script-main')){return;}
+			var s=document.createElement('script');
+			s.id='showdex-script-main';
+			s.src='/showdex/main.js';
+			s.async=true;
+			document.body.appendChild(s);
+		}
+		if(document.readyState==='complete'){loadShowdex();}else{window.addEventListener('load',loadShowdex);}
+	})();
+	</script>
+
 </body></html>

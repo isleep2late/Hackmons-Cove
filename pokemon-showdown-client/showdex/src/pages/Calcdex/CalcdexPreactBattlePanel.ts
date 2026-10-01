@@ -13,7 +13,12 @@ import { calcdexSlice } from '@showdex/redux/store';
 import { tRef } from '@showdex/utils/app';
 import { nonEmptyObject } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import { detectPreactHost } from '@showdex/utils/host';
+import {
+  detectPreactHost,
+  injectPreactBattleControls,
+  isCompactPreactToggle,
+  removeNamedPreactChild,
+} from '@showdex/utils/host';
 import { BootdexPreactAdapter as Adapter } from '../Bootdex/BootdexPreactAdapter';
 import { preact } from '../Bootdex/BootdexPreactBootstrappable';
 import { type CalcdexBootstrappable } from './CalcdexBootstrappable';
@@ -23,20 +28,9 @@ import styles from './Calcdex.module.scss';
 
 const PSBattleRoom = detectPreactHost(window) ? window.BattleRoom : null;
 const PSBattlePanel = detectPreactHost(window) ? window.BattlePanel : null;
+const PSTimerButton = detectPreactHost(window) ? window.TimerButton : null;
 
 const l = logger('@showdex/pages/Calcdex/CalcdexPreactBattlePanel');
-
-// make this a util, maybe? o_O
-const findNamedIndex = (
-  children: Showdown.Preact.ComponentChildren,
-  name: string,
-): number => preact?.toChildArray(children).findIndex((c) => (
-  typeof c === 'string'
-    ? c === name
-    : typeof c?.type === 'string'
-      ? c.type === name
-      : c?.type?.name === name
-));
 
 export class CalcdexPreactBattleRoom extends PSBattleRoom {
   public static readonly scope = l.scope;
@@ -191,7 +185,7 @@ export class CalcdexPreactBattlePanel extends PSBattlePanel<CalcdexPreactBattleR
     // the CalcdexPreactBattleRoom loads before the CalcdexPanelRoom, typically when the first command received
     // from the server is to '/join' the CalcdexPreactBattleRoom; however, it's also entirely possible Showdex
     // couldn't swap out Showdown's Battle classes in time (e.g., Battle, BattleRequest, Side), so at that point oof
-    if (!this.battle?.calcdexInit) {
+    if (!this.battle?.calcdexInit && typeof this.battle?.runCalcdex === 'function') {
       this.battle.runCalcdex();
     }
 
@@ -241,7 +235,7 @@ export class CalcdexPreactBattlePanel extends PSBattlePanel<CalcdexPreactBattleR
     $existingMeta.attr('content', nextContent);
   }
 
-  protected renderToggleButton(style?: React.CSSProperties): Showdown.Preact.VNode {
+  protected renderToggleButton(style?: React.CSSProperties, compact?: boolean): Showdown.Preact.VNode {
     const { overlayVisible } = this.battleState || {};
 
     if (!this.battle?.calcdexAsOverlay) {
@@ -268,11 +262,12 @@ export class CalcdexPreactBattlePanel extends PSBattlePanel<CalcdexPreactBattleR
       },
       name: 'toggleCalcdexOverlay',
       'data-cmd': '/calcdex overlay toggle',
+      ...(compact && { title: toggleButtonLabel, 'aria-label': toggleButtonLabel }),
       disabled: !this.battle?.calcdexInit,
     }, ...[
       preact.h('i', { class: cx('fa', `fa-${toggleButtonIcon}`), 'aria-hidden': true }),
-      preact.h('span', null, toggleButtonLabel),
-    ]);
+      !compact && preact.h('span', null, toggleButtonLabel),
+    ].filter(Boolean));
   }
 
   protected renderCalcdexOverlay(): Showdown.Preact.VNode {
@@ -363,21 +358,13 @@ export class CalcdexPreactBattlePanel extends PSBattlePanel<CalcdexPreactBattleR
     return controls;
   }
 
-  // in the Showdown 'preact' rewrite, there are 2 battle panel layouts: one for room.width < 700 & the other for >= 700;
-  // instead of using the `float` CSS prop (as the 'classic' Backbone.js client host does), the rewrite absolutely positions
-  // "floaty" buttons, including the <TimerButton>, which may not exist, such as when you're spectating; since we want
-  // to position the Calcdex overlay button in a similar fashion to the 'classic' host, we'll look for these buttons,
-  // wrap them in a <div> w/ the same absolute positioning & add the original buttons into it + our Calcdex button
   public override render() {
     const { room } = this.props;
     const { overlayVisible } = this.battleState || {};
 
     const panel = super.render();
 
-    // both layouts are wrapped in a <PSPanelWrapper>, which renders all of its props.children[] into a <div>
-    // (also note: panel.props.children wouldn't be an array if it was only rendering a single child, which if we're expecting
-    // the proper virtual DOM for this BattlePanel, wouldn't be the case! [we're expecting lots of children, i.e., an array])
-    if (!this.battle?.calcdexAsOverlay) {
+    if (!this.battle?.calcdexAsOverlay || !panel?.props) {
       return panel;
     }
 
@@ -385,162 +372,46 @@ export class CalcdexPreactBattlePanel extends PSBattlePanel<CalcdexPreactBattleR
     // otherwise some weird shenanigans may occur (when push()'d), like the <Calcdex>'s children[] being rendered inside
     // the .battle-controls-container instead & the <div> housing the <Calcdex> being empty; this requires two presses
     // of the toggle button for the <Calcdex> to visually appear again ... LOL
-    // (suspecting this has something to do w/ Preact's indexing thingymabobers since what we're doing here to inject
-    // VNode's is definitely of the sussy variety)
     panel.props.children = [
       this.renderCalcdexOverlay(),
       ...(Array.isArray(panel.props.children) ? panel.props.children : [panel.props.children]),
     ].filter(Boolean);
 
-    // both layouts also render a ChatLog, ChatTextEntry & ChatUserList; since we're unable to modify the styling of them
-    // (as their rendered container `style` props aren't exposed [tho some have the `class` name prop, like ChatLog]),
-    // we'll just temporarily yeet them from this render() tick hehe lolol
-    // (also we're still dealing in Preact virtual DOM nodes, so we can't use some jQuery $() magic here like in 'classic')
     if (overlayVisible) {
-      // note: <ChatLog> will render a <div> in a <div>
-      /* const chatLogIndex = findNamedIndex(panel.props.children, 'ChatLog');
-      // const chatLog = panel.props.children[chatLogIndex] as Showdown.Preact.VNode;
-
-      if (chatLogIndex > -1) {
-        panel.props.children.splice(chatLogIndex, 1);
-      } */
-
-      const chatEntryIndex = findNamedIndex(panel.props.children, 'ChatTextEntry');
-
-      if (chatEntryIndex > -1) {
-        panel.props.children.splice(chatEntryIndex, 1);
-      }
-
-      /* const chatUserIndex = findNamedIndex(panel.props.children, 'ChatUserList');
-
-      if (chatUserIndex > -1) {
-        panel.props.children.splice(chatUserIndex, 1);
-      } */
-
-      // panel.props.children.push(this.renderCalcdexOverlay());
+      removeNamedPreactChild(panel, 'ChatTextEntry', 2);
     }
 
     this.lockMobileZoom();
 
-    // for the mobile layout (i.e., room.width < 700), we'll insert the Calcdex button to the right of the "Battle options"
-    // button, which sits right beneath the <BattleDiv> (i.e., <div> containing all the pretty sprites & animations)
-    // (note: the <TimerButton>, if rendered, is absolutely positioned top-right-ish above the <BattleDiv>)
-    if (room?.width < 700) {
-      // looking for:
-      // <button data-href="battleoptions" ...>Battle options</button>
-      const optionsButtonIndex = panel.props.children.findIndex((c) => (
-        typeof c !== 'string' // since children[] is of type (string | VNode)[]
-          && c?.props?.['data-href'] === 'battleoptions'
-      ));
+    const { kickingInactive, totalTimeLeft } = this.battle;
+    const longTimer = typeof kickingInactive === 'number' && !!kickingInactive && !!totalTimeLeft;
 
-      if (optionsButtonIndex < 0) {
-        return panel;
-      }
-
-      // note: the `style` prop may or may not be hydrated into an inline CSS string from its JSX object variant,
-      // depending on how it's originally defined, e.g.:
-      // props = { ..., style: { position: 'absolute', right: '75px', top: this.battleHeight } } (OR)
-      // props = { ..., style: 'position: absolute;right: 75px;top: 247px;' }
-      // (but for now, since I'm lazy, I'm just gunna assume it's a React.CSSProperties object [i.e., the former] lol)
-      const optionsButton = panel.props.children[optionsButtonIndex] as Showdown.Preact.VNode;
-      const { style: optionsButtonStyle } = optionsButton.props as Record<'style', React.CSSProperties | string>;
-
-      // we're essentially moving its inlined CSS to the parent <div> container that will take its place
-      delete (optionsButton.props as Record<'style', React.CSSProperties>).style;
-
-      panel.props.children[optionsButtonIndex] = preact.h('div', {
+    injectPreactBattleControls(panel, {
+      ended: this.battle.ended,
+      battleHeight: this.battleHeight,
+      timerType: PSTimerButton,
+      toggle: (spot, timer) => this.renderToggleButton(null, isCompactPreactToggle(
+        spot,
+        timer,
+        longTimer,
+        spot === 'battle-controls' ? Math.round((this.battleHeight * 16) / 9) : room?.width,
+      )),
+      renderTimer: (timer) => preact.h(CalcdexPreactBattleTimerButton, {
+        ...(timer.props as Record<string, unknown>),
+        room,
+      }),
+      renderContainer: (spot, style, children) => preact.h('div', {
         style: {
-          position: 'absolute',
-          top: this.battleHeight,
-          ...(typeof optionsButtonStyle === 'string' ? null : optionsButtonStyle),
-          right: 10, // overriding the `right: 75px` lol
+          ...style,
           display: 'flex',
           alignItems: 'center',
           columnGap: 6,
         },
         'data-showdex': 'calcdex',
         'data-calcdex': 'overlay-controls',
-        'data-calcdex-controls': 'battle-options',
-      }, ...[
-        optionsButton,
-        this.renderToggleButton(),
-      ]);
-
-      return panel;
-    }
-
-    // as per panel-battle.tsx, this renders this.renderAfterBattleControls() for the battle controls
-    if (this.battle.ended) {
-      return panel;
-    }
-
-    // for the desktop layout (i.e., room.width >= 700), if the <TimerButton> exists, we'll insert the Calcdex button to
-    // the right of it; otherwise, we'll insert the Calcdex button where the <TimerButton> would've been
-    // (note: we'll find these nested inside the panel.props.children[]'s <div class="battle-controls-container">
-    // <div class="battle-controls" ...><!-- ... in here ... --></div></div>)
-    const battleControlsContainer = panel.props.children.find((c) => (
-      typeof c !== 'string'
-        && (c?.props as Record<'class', string>)?.class === 'battle-controls-container'
-    )) as Showdown.Preact.VNode;
-
-    if (!battleControlsContainer?.type) {
-      return panel;
-    }
-
-    if (!Array.isArray(battleControlsContainer.props?.children)) {
-      battleControlsContainer.props.children = [battleControlsContainer.props.children];
-    }
-
-    battleControlsContainer.props.children = battleControlsContainer.props.children.filter(Boolean);
-
-    const battleControls = battleControlsContainer.props.children.find((c) => (
-      typeof c !== 'string'
-        && (c?.props as Record<'class', string>)?.class === 'battle-controls'
-    )) as Showdown.Preact.VNode;
-
-    if (!battleControls?.type) {
-      return panel;
-    }
-
-    if (!Array.isArray(battleControls.props.children)) {
-      battleControls.props.children = [battleControls.props.children];
-    }
-
-    // there may be some sneaky nulls amongst the children[], which would produce an invalid findNamedIndex()
-    // since -- in my testing, at least -- the preact.toChildArray() used in that aforementioned helper func
-    // basically does filter(Boolean); without that, you could accidentally mutate the wrong VNode!! :o
-    battleControls.props.children = battleControls.props.children.filter(Boolean);
-
-    // note: timerButton will be undefined if timerButtonIndex is -1
-    const timerButtonIndex = findNamedIndex(battleControls.props.children, 'TimerButton');
-    // const timerButton = battleControls.props.children[timerButtonIndex] as Showdown.Preact.VNode;
-
-    if (timerButtonIndex > -1) {
-      // delete (timerButton.props as Record<'style', React.CSSProperties>).style;
-      battleControls.props.children.splice(timerButtonIndex, 1);
-    }
-
-    const wrappedOverlayControls = preact.h('div', {
-      style: {
-        position: 'absolute',
-        top: 2,
-        right: 10,
-        display: 'flex',
-        alignItems: 'center',
-        columnGap: 6,
-      },
-      'data-showdex': 'calcdex',
-      'data-calcdex': 'overlay-controls',
-      'data-calcdex-controls': 'battle-timer',
-    }, ...[
-      preact.h(CalcdexPreactBattleTimerButton, { room }),
-      this.renderToggleButton(),
-    ].filter(Boolean));
-
-    battleControls.props.children = [
-      wrappedOverlayControls,
-      ...battleControls.props.children,
-    ];
+        'data-calcdex-controls': spot === 'battle-options' ? 'battle-options' : 'battle-timer',
+      }, ...children),
+    });
 
     return panel;
   }

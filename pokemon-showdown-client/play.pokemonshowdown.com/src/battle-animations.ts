@@ -654,7 +654,8 @@ export class BattleScene implements BattleSceneStub {
 	getSidebarHTML(side: Side, posStr: string): string {
 		let noShow = this.battle.hardcoreMode && this.battle.gen < 7;
 
-		let speciesOverage = this.battle.speciesClause ? Infinity : Math.max(side.pokemon.length - side.totalPokemon, 0);
+		let speciesOverage = this.battle.speciesClause && !side.pasted ?
+			Infinity : Math.max(side.pokemon.length - side.totalPokemon, 0);
 		const sidebarIcons: (
 			['pokemon' | 'pokemon-illusion', number] | ['unrevealed' | 'empty' | 'pseudo-zoroark', null]
 		)[] = [];
