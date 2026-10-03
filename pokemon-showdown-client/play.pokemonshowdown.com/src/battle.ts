@@ -3613,6 +3613,22 @@ export class Battle {
 			if (this.tier.includes('No Nerfs') && this.gen === 9) {
 				this.dex = Dex.mod('gen9phnn' as ID);
 			}
+			const tierFormat = toID(this.tier).replace(/^gen\d+/, '');
+			if (this.gen === 1 && tierFormat === 'disguises') {
+				this.dex = Dex.mod('gen1phnn' as ID);
+			}
+			if (this.gen === 1 && tierFormat === 'disguisesenglish') {
+				this.dex = Dex.mod('gen1phnneng' as ID);
+			}
+			if (this.gen === 2 && tierFormat === 'statusesgoldsilver') {
+				this.dex = Dex.mod('gen2gs' as ID);
+			}
+			if (this.gen === 2 && tierFormat.includes('spaceworld')) {
+				this.dex = Dex.mod('gen2spaceworld' as ID);
+			}
+			if (this.gen === 3 && (tierFormat === 'bhaaa' || tierFormat === 'anyability')) {
+				this.dex = Dex.mod('gen3phnn' as ID);
+			}
 			this.log(args);
 			break;
 		}

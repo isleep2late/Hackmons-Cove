@@ -53,7 +53,7 @@ function moveDiff(modDex, stockDex) {
 		if (m.category && (!s.exists || m.category !== s.category)) entry.category = m.category;
 		if (m.overrideDefensiveStat && m.overrideDefensiveStat !== (s.exists && s.overrideDefensiveStat)) entry.overrideDefensiveStat = m.overrideDefensiveStat;
 		if (m.overrideOffensiveStat && m.overrideOffensiveStat !== (s.exists && s.overrideOffensiveStat)) entry.overrideOffensiveStat = m.overrideOffensiveStat;
-		if (m.ignoreImmunity && !(s.exists && s.ignoreImmunity)) entry.ignoreImmunity = true;
+		if (m.ignoreImmunity && !(s.exists && s.ignoreImmunity)) entry.ignoreImmunity = m.ignoreImmunity === true ? true : { ...m.ignoreImmunity };
 		if (Object.keys(entry).length) out[id] = entry;
 	}
 	return out;

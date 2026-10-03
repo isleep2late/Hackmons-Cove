@@ -1401,6 +1401,7 @@ export class Move implements Effect {
 	readonly flags: Readonly<MoveFlags>;
 	readonly critRatio: number;
 	readonly damage?: number | 'level' | false | null;
+	readonly ignoreImmunity: boolean | { readonly [typeName: string]: boolean };
 
 	readonly desc: string;
 	readonly shortDesc: string;
@@ -1443,6 +1444,7 @@ export class Move implements Effect {
 		this.flags = data.flags || {};
 		this.critRatio = data.critRatio === 0 ? 0 : (data.critRatio || 1);
 		this.damage = data.damage;
+		this.ignoreImmunity = data.ignoreImmunity !== undefined ? data.ignoreImmunity : this.category === 'Status';
 
 		// TODO: move to text.js
 		this.desc = data.desc;

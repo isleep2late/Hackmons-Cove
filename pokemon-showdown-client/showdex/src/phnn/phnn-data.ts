@@ -106,7 +106,9 @@ export default {
 				"basePower": 40
 			},
 			"superfang": {
-				"ignoreImmunity": true
+				"ignoreImmunity": {
+					"Normal": true
+				}
 			},
 			"seismictoss": {
 				"ignoreImmunity": true

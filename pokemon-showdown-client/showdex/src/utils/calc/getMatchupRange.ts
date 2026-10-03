@@ -3,6 +3,16 @@ import { logger } from '@showdex/utils/debug';
 
 const l = logger('@showdex/utils/calc/getMatchupRange()');
 
+const getDamageTotals = (result: Result): [min: number, max: number] => {
+  try {
+    const [min, max] = result.range();
+
+    return [Number(min) || 0, Number(max) || 0];
+  } catch {
+    return [0, 0];
+  }
+};
+
 /**
  * Extracts the damage range from the `result.desc()`.
  *
@@ -46,6 +56,17 @@ export const getMatchupRange = (
 
   if (!extractedRange) {
     return null;
+  }
+
+  const [minDamage, maxDamage] = getDamageTotals(result);
+  const [, minShown, maxShown] = /^([\d.]+)\s-\s([\d.]+)%$/.exec(extractedRange) || [];
+
+  if (maxDamage > 0 && Number(maxShown) === 0) {
+    return `${minDamage > 0 ? '0.1' : '0'} - 0.1%`;
+  }
+
+  if (minDamage > 0 && Number(minShown) === 0) {
+    return `0.1 - ${maxShown}%`;
   }
 
   // e.g., '0 - 0%' -> 'N/A'

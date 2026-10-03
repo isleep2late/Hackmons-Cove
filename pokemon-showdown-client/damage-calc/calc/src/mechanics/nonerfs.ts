@@ -47,6 +47,7 @@ import {
   getStabMod,
   getStellarStabMod,
 } from './util';
+import {halfHPDamage, psywaveRolls, undynamaxedHP} from './fixed-damage';
 
 export function calculateNoNerfs(
   gen: Generation,
@@ -386,36 +387,26 @@ export function calculateNoNerfs(
       field.defenderSide.isForesight;
   const isRingTarget =
     defender.hasItem('Ring Target') && !defender.hasAbility('Klutz');
-  const type1Effectiveness = getMoveEffectiveness(
-    gen,
-    move,
-    defender.types[0],
-    isGhostRevealed,
-    field.isGravity,
-    isRingTarget
-  );
-  const type2Effectiveness = defender.types[1]
-    ? getMoveEffectiveness(
+  const ignoresImmunity = move.named('Seismic Toss', 'Night Shade', 'Sonic Boom', 'Counter') ||
+    (move.named('Super Fang') && move.hasType('Normal'));
+  const effectivenessInto = (type: TypeName) => {
+    const effectiveness = getMoveEffectiveness(
       gen,
       move,
-      defender.types[1],
-      isGhostRevealed,
-      field.isGravity,
-      isRingTarget
-    )
-    : 1;
-
-  let typeEffectiveness = type1Effectiveness * type2Effectiveness;
-
-  if (defender.teraType && defender.teraType !== 'Stellar') {
-    typeEffectiveness = getMoveEffectiveness(
-      gen,
-      move,
-      defender.teraType,
+      type,
       isGhostRevealed,
       field.isGravity,
       isRingTarget
     );
+    return ignoresImmunity && effectiveness === 0 ? 1 : effectiveness;
+  };
+  const type1Effectiveness = effectivenessInto(defender.types[0]);
+  const type2Effectiveness = defender.types[1] ? effectivenessInto(defender.types[1]) : 1;
+
+  let typeEffectiveness = type1Effectiveness * type2Effectiveness;
+
+  if (defender.teraType && defender.teraType !== 'Stellar') {
+    typeEffectiveness = effectivenessInto(defender.teraType);
   }
 
   // Shadow is FLAT: 2x into anything that is not Shadow, 0.5x into anything that is, no matter how
@@ -441,17 +432,6 @@ export function calculateNoNerfs(
 
   if (typeEffectiveness === 0 && move.named('Thousand Arrows')) {
     typeEffectiveness = 1;
-  }
-
-  if (move.named('Seismic Toss', 'Night Shade', 'Sonic Boom')) {
-    const fixed = move.named('Sonic Boom') ? 20 : attacker.level;
-    if (attacker.hasAbility('Parental Bond')) {
-      result.damage = [fixed, fixed];
-      desc.attackerAbility = attacker.ability;
-    } else {
-      result.damage = fixed;
-    }
-    return result;
   }
 
   if (typeEffectiveness === 0) {
@@ -570,9 +550,21 @@ export function calculateNoNerfs(
     return result;
   }
 
-  if (move.named('Nature\'s Madness')) {
-    const lostHP = field.defenderSide.isProtected ? 0 : Math.floor(defender.curHP() / 2);
-    result.damage = lostHP;
+  if (move.named('Super Fang', 'Nature\'s Madness', 'Ruination')) {
+    const parentalBond = attacker.hasAbility('Parental Bond');
+    result.damage = halfHPDamage(defender.curHP(), parentalBond, undynamaxedHP(defender));
+    if (parentalBond) desc.attackerAbility = attacker.ability;
+    return result;
+  }
+
+  if (move.named('Psywave')) {
+    const rolls = psywaveRolls('nonerfs', attacker.level);
+    if (attacker.hasAbility('Parental Bond')) {
+      result.damage = [rolls, rolls.slice()];
+      desc.attackerAbility = attacker.ability;
+    } else {
+      result.damage = rolls;
+    }
     return result;
   }
 
@@ -701,8 +693,9 @@ export function calculateNoNerfs(
   }
 
   const damage = [];
+  const childScale = attacker.hasAbility('Parental Bond (Child)') ? 2 : 1;
   for (let i = 0; i < 16; i++) {
-    damage[i] =
+    damage[i] = childScale *
       getFinalDamage(baseDamage, i, typeEffectiveness, applyBurn, stabMod, finalMod, protect);
   }
 
@@ -1740,7 +1733,7 @@ function calculateBaseDamageSMSSSV(
   }
 
   if (attacker.hasAbility('Parental Bond (Child)')) {
-    baseDamage = pokeRound(NN_OF(baseDamage * 2048) / 4096);
+    baseDamage = pokeRound(NN_OF(baseDamage * 1024) / 4096);
   }
 
   const isMegaSol = attacker.hasAbility('Mega Sol');

@@ -282,6 +282,7 @@ const TIER_SET_LABELS = {
 const MIN_TIER_POOL = 18;
 const MIN_PRIME_POOL = 8;
 const MAX_ATTEMPTS = 20;
+const LGPE_MAX_AVS = 200;
 
 let smogonSets = null;
 function loadSmogonSets() {
@@ -514,12 +515,12 @@ function blamesBody(problems, species, probe) {
 }
 
 const speciesProbeCache = new Map();
-function speciesUsable(species, fdex, ruleTable, ctx) {
+function speciesUsable(species, fdex, ruleTable, ctx, probeMoves) {
 	if (!species || !species.exists) return false;
 	if (!ctx || !ctx.validator) return true;
 	const key = ctx.fullid + '|' + species.id;
 	if (speciesProbeCache.has(key)) return speciesProbeCache.get(key);
-	const probe = probeSetFor(species, [PROBE_MOVE]);
+	const probe = probeSetFor(species, probeMoves && probeMoves.length ? probeMoves : [PROBE_MOVE]);
 	const problems = probeProblems(ctx.validator, probe);
 	const ok = problems !== null && !blamesBody(problems, species, probe);
 	speciesProbeCache.set(key, ok);
@@ -700,19 +701,28 @@ function evoStage(fdex, species) {
 	return again ? 'LC' : 'NFE';
 }
 
+function stageAllowed(fdex, ruleTable, species) {
+	const wantStage = ruleTable.has('firststageonly') ? 'LC' :
+		ruleTable.has('middlestageonly') ? 'MC' : null;
+	if (wantStage && evoStage(fdex, species) !== wantStage) return false;
+	if (ruleTable.has('littlecup')) {
+		if (!species.nfe) return false;
+		if (species.prevo && fdex.species.get(species.prevo).gen <= fdex.gen) return false;
+	}
+	return true;
+}
+
 const speciesPoolCache = new Map();
 function speciesPool(fdex, ruleTable, fullid) {
 	if (speciesPoolCache.has(fullid)) return speciesPoolCache.get(fullid);
 	const pool = [];
 	const boosted = ruleTable.has('totemaura');
-	const wantStage = ruleTable.has('firststageonly') ? 'LC' :
-		ruleTable.has('middlestageonly') ? 'MC' : null;
 	for (const species of fdex.species.all()) {
 		if (!species.exists || !species.baseStats) continue;
 		if (species.isNonstandard && species.isNonstandard !== 'Past' && species.isNonstandard !== 'Unobtainable') continue;
 		if (ruleTable.check('pokemon:' + species.id) === 'banned') continue;
 		if (ruleTable.check('basepokemon:' + toId(species.baseSpecies)) === 'banned') continue;
-		if (wantStage && evoStage(fdex, species) !== wantStage) continue;
+		if (!stageAllowed(fdex, ruleTable, species)) continue;
 		pool.push({ species, bst: bstOf(species, boosted) });
 	}
 	pool.sort((a, b) => b.bst - a.bst);
@@ -1378,7 +1388,9 @@ function upgradeHackmonsSet(set, fdex, ruleTable, usedAbilities, ctx) {
 function itemAllowed(name, fdex, ruleTable) {
 	const item = fdex.items.get(name);
 	if (!item.exists || item.gen > fdex.gen || item.isNonstandard) return false;
-	if (ruleTable.check('item:' + toId(name)) === 'banned') return false;
+	const verdict = ruleTable.check('item:' + toId(name));
+	if (verdict === 'banned') return false;
+	if (verdict !== '' && ruleTable.check('tag:allitems')) return false;
 	return true;
 }
 
@@ -1502,14 +1514,12 @@ function bodyUsable(sp, fdex, ruleTable, ctx) {
 }
 
 function legalBodies(names, fdex, ruleTable, ctx, team, self) {
-	const wantStage = ruleTable.has('firststageonly') ? 'LC' :
-		ruleTable.has('middlestageonly') ? 'MC' : null;
 	const taken = ruleTable.has('speciesclause') ?
 		new Set((team || []).filter(s => s && s !== self).map(s => toId(s.species || ''))) : null;
 	return names
 		.map(n => fdex.species.get(n))
 		.filter(sp => !(taken && taken.has(toId(sp.name))) &&
-			(!wantStage || evoStage(fdex, sp) === wantStage) &&
+			stageAllowed(fdex, ruleTable, sp) &&
 			bodyUsable(sp, fdex, ruleTable, ctx));
 }
 
@@ -1603,8 +1613,6 @@ function imposterBulk(sp, fdex, ruleTable) {
 
 function imposterCandidates(bodies, fdex, ruleTable, ctx, taken) {
 	const alphaLegal = imposterAlphasLegal(fdex, ruleTable);
-	const wantStage = ruleTable.has('firststageonly') ? 'LC' :
-		ruleTable.has('middlestageonly') ? 'MC' : null;
 	// never trade a body's working item away for the doubling: an -Alpha forme carries no evolution
 	// line of its own, so Eviolite stops functioning on it
 	const alphaOf = n => {
@@ -1622,7 +1630,7 @@ function imposterCandidates(bodies, fdex, ruleTable, ctx, taken) {
 		.filter((n, i, arr) => arr.indexOf(n) === i)
 		.map(n => fdex.species.get(n))
 		.filter(sp => !(taken && taken.has(toId(sp.name))) &&
-			(!wantStage || evoStage(fdex, sp) === wantStage) &&
+			stageAllowed(fdex, ruleTable, sp) &&
 			bodyUsable(sp, fdex, ruleTable, ctx))
 		.map(sp => ({ sp, hp: imposterBulk(sp, fdex, ruleTable) }))
 		.sort((a, b) => b.hp - a.hp);
@@ -1797,7 +1805,13 @@ function reshape(team, baseid, gen, rulesText, ruleTable, fdex, ctx, gate) {
 		delete set.level;
 		if (gen < 9) delete set.teraType;
 		if (gen === 1 || isLetsGo) delete set.item;
-		if (isLetsGo) delete set.evs;
+		if (isLetsGo) {
+			if (ruleTable.has('lgpenormalrules') || baseid.includes('customdisguise')) {
+				delete set.evs;
+			} else {
+				set.evs = { hp: LGPE_MAX_AVS, atk: LGPE_MAX_AVS, def: LGPE_MAX_AVS, spa: LGPE_MAX_AVS, spd: LGPE_MAX_AVS, spe: LGPE_MAX_AVS };
+			}
+		}
 		if (isHackmons && !baseid.includes('letsgo')) upgradeHackmonsSet(set, fdex, ruleTable, usedAbilities, ctx);
 		if (ruleTable.has('itemclause') && set.item && !requiredItemFor(set, fdex, ruleTable)) {
 			if (usedItems.has(toId(set.item))) {
@@ -1833,6 +1847,270 @@ function reshape(team, baseid, gen, rulesText, ruleTable, fdex, ctx, gate) {
 	for (const set of team) {
 		if (isLetsGo) continue;
 		applyStatLimits(set, fdex, ruleTable);
+	}
+	return team;
+}
+
+const SW_FIXED_DAMAGE = { seismictoss: 80, nightshade: 80 };
+const SW_SKIP_MOVES = new Set(['explosion', 'selfdestruct', 'hiddenpower', 'sketch', 'struggle', 'dreameater', 'snore', 'focusenergy', 'mimic', 'transform', 'metronome', 'mirrormove', 'conversion', 'conversion2', 'splash', 'teleport']);
+const SW_STATUS_MOVES = ['Spore', 'Sleep Powder', 'Lovely Kiss', 'Hypnosis', 'Sing', 'Thunder Wave', 'Glare', 'Stun Spore', 'Toxic', 'Leech Seed', 'Confuse Ray'];
+const SW_RECOVERY_MOVES = ['Recover', 'Soft-Boiled', 'Milk Drink', 'Moonlight', 'Morning Sun', 'Synthesis', 'Rest'];
+const SW_SETUP_MOVES = {
+	physical: ['Swords Dance', 'Belly Drum', 'Agility', 'Meditate', 'Sharpen'],
+	special: ['Amnesia', 'Growth', 'Agility'],
+};
+const SW_UTILITY_MOVES = ['Substitute', 'Reflect', 'Light Screen', 'Spikes', 'Rapid Spin', 'Leech Seed', 'Encore', 'Baton Pass', 'Haze', 'Whirlwind', 'Roar', 'Protect', 'Pain Split'];
+const SW_FALLBACK_MOVES = ['Barrier', 'Acid Armor', 'Swagger', 'Screech', 'Mean Look', 'Endure', 'Supersonic', 'Disable'];
+const SW_POOL_WINDOW = 50;
+
+function isSpaceWorldSynth(fdex, baseid) {
+	return toId(fdex.currentMod || '') === 'spaceworld' && !isHackmonsTarget(baseid);
+}
+
+const swMoveCache = new Map();
+function swUsableMove(id, fdex, ruleTable, fullid) {
+	const key = fullid + '|' + id;
+	if (swMoveCache.has(key)) return swMoveCache.get(key);
+	const move = fdex.moves.get(id);
+	let ok = move.exists && !SW_SKIP_MOVES.has(move.id) && !/^nomove/.test(move.id);
+	if (ok && move.ohko && ruleTable.has('ohkoclause')) ok = false;
+	if (ok && move.boosts && move.boosts.evasion > 0 && ruleTable.has('evasionmovesclause')) ok = false;
+	if (ok && !moveAllowed(move.name, fdex, ruleTable, null)) ok = false;
+	const out = ok ? move : null;
+	swMoveCache.set(key, out);
+	return out;
+}
+
+const swLearnableCache = new Map();
+function swLearnable(species, fdex, ruleTable, ctx) {
+	const obtainable = ruleTable.has('obtainablemoves');
+	const key = ctx.fullid + '|' + (obtainable ? species.id : '*');
+	if (swLearnableCache.has(key)) return swLearnableCache.get(key);
+	const ids = new Set();
+	if (obtainable) {
+		const level = ruleTable.maxLevel || 100;
+		const tmOnly = ruleTable.has('tmclause');
+		for (const entry of fdex.species.getFullLearnset(species.id)) {
+			for (const moveid in entry.learnset) {
+				const ok = entry.learnset[moveid].some(src => {
+					if (!/^[12]/.test(src)) return false;
+					if (tmOnly && src === '2M') return false;
+					if (src.charAt(1) === 'L' && parseInt(src.slice(2)) > level) return false;
+					return true;
+				});
+				if (ok) ids.add(moveid);
+			}
+		}
+	} else {
+		for (const move of fdex.moves.all()) {
+			if (move.exists && !move.isNonstandard && move.gen <= fdex.gen) ids.add(move.id);
+		}
+	}
+	const out = [];
+	for (const id of ids) {
+		const move = swUsableMove(id, fdex, ruleTable, ctx.fullid);
+		if (move) out.push(move);
+	}
+	swLearnableCache.set(key, out);
+	return out;
+}
+
+function swAttackScore(move, species, fdex) {
+	const fixed = SW_FIXED_DAMAGE[move.id];
+	if (fixed) return fixed;
+	if (move.category === 'Status' || !move.basePower) return 0;
+	let power = move.basePower;
+	if (move.multihit) power *= Array.isArray(move.multihit) ? (move.multihit[0] + move.multihit[1]) / 2 : move.multihit;
+	const accuracy = move.accuracy === true ? 100 : move.accuracy;
+	let score = power * accuracy / 100;
+	if (move.flags && move.flags.charge) score *= 0.5;
+	if (move.self && move.self.volatileStatus === 'mustrecharge') score *= 0.65;
+	if (move.self && move.self.volatileStatus === 'lockedmove') score *= 0.85;
+	if (move.recoil) score *= 0.9;
+	if (species.types.includes(move.type)) score *= 1.5;
+	const bs = species.baseStats;
+	score *= (move.category === 'Physical' ? bs.atk : bs.spa) / 100;
+	return score;
+}
+
+function swTypeMultiplier(move, defType, fdex) {
+	if (SW_FIXED_DAMAGE[move.id]) return 1;
+	if (!fdex.getImmunity(move.type, defType)) return 0;
+	return Math.pow(2, fdex.getEffectiveness(move.type, defType));
+}
+
+function swCoverageGain(move, chosen, fdex, defTypes) {
+	let gain = 0;
+	for (const def of defTypes) {
+		const before = chosen.reduce((m, c) => Math.max(m, swTypeMultiplier(c, def, fdex)), 0);
+		const after = swTypeMultiplier(move, def, fdex);
+		if (after > before) gain += (before < 1 && after >= 1 ? 1 : 0) + (after > 1 && before <= 1 ? 0.5 : 0);
+	}
+	return gain;
+}
+
+function swPickTop(ranked, spread) {
+	if (!ranked.length) return null;
+	const top = ranked.slice(0, Math.max(1, spread));
+	return top[Math.floor(Math.random() * top.length)];
+}
+
+const SW_SLEEP_LIMIT = 1;
+const SW_TOXIC_LIMIT = 2;
+const SW_STATUS_CHANCE = 0.7;
+
+function swPickNamed(list, learnable, used, spread = 2, skip = null) {
+	const have = new Map(learnable.map(m => [m.id, m]));
+	const opts = list.map(n => have.get(toId(n))).filter(m => m && !used.has(m.id) && !(skip && skip(m)));
+	return opts.length ? opts[Math.floor(Math.random() * Math.min(opts.length, spread))] : null;
+}
+
+function swBuildSet(species, fdex, ruleTable, ctx, typeBoosters, teamState = { sleepers: 0, toxic: 0 }) {
+	const blocked = id => ctx.blocks.moves.has(species.id + '|' + id);
+	const learnable = swLearnable(species, fdex, ruleTable, ctx).filter(m => !blocked(m.id));
+	const attacks = learnable
+		.map(m => ({ m, score: swAttackScore(m, species, fdex) }))
+		.filter(e => e.score >= 30)
+		.sort((a, b) => b.score - a.score);
+	if (!attacks.length) return null;
+	const defTypes = fdex.types.all().filter(t => !t.isNonstandard).map(t => t.name);
+	const chosen = [];
+	const used = new Set();
+	const take = move => {
+		if (!move || used.has(move.id) || chosen.length >= 4) return false;
+		chosen.push(move);
+		used.add(move.id);
+		return true;
+	};
+	for (const type of species.types) {
+		const stab = attacks.filter(e => e.m.type === type && !used.has(e.m.id));
+		const best = stab[0];
+		if (best && (!chosen.length || best.score >= attacks[0].score * 0.55)) {
+			take(swPickTop(stab.filter(e => e.score >= best.score * 0.85), 2).m);
+		}
+	}
+	if (!chosen.length) take(attacks[0].m);
+	const bs = species.baseStats;
+	const bulky = bs.hp + bs.def + bs.spd >= 270;
+	const wantAttacks = Math.random() < 0.4 ? 3 : 2;
+	while (chosen.filter(m => m.category !== 'Status').length < wantAttacks) {
+		const ranked = attacks
+			.filter(e => !used.has(e.m.id) && !chosen.some(c => c.type === e.m.type))
+			.map(e => ({ m: e.m, value: e.score * (1 + swCoverageGain(e.m, chosen, fdex, defTypes)) }))
+			.sort((a, b) => b.value - a.value);
+		const pick = swPickTop(ranked, 2);
+		if (!pick || !take(pick.m)) break;
+	}
+	const scaled = chosen.filter(m => m.category !== 'Status' && !SW_FIXED_DAMAGE[m.id]);
+	const physical = scaled.filter(m => m.category === 'Physical').length;
+	const special = scaled.length - physical;
+	const role = physical === special ? (bs.atk >= bs.spa ? 'physical' : 'special') :
+		physical > special ? 'physical' : 'special';
+	const extras = [SW_STATUS_MOVES];
+	if (bulky && Math.random() < 0.6) extras.push(SW_RECOVERY_MOVES);
+	extras.push(SW_SETUP_MOVES[role]);
+	if (!bulky) extras.push(SW_RECOVERY_MOVES);
+	extras.push(SW_UTILITY_MOVES, SW_FALLBACK_MOVES);
+	const sleepFull = teamState.sleepers >= SW_SLEEP_LIMIT;
+	const toxicFull = (teamState.toxic || 0) >= SW_TOXIC_LIMIT;
+	const skipMove = m => (sleepFull && m.status === 'slp') || (toxicFull && m.id === 'toxic');
+	for (const list of extras) {
+		if (chosen.length >= 4) break;
+		if (list === SW_STATUS_MOVES && Math.random() >= SW_STATUS_CHANCE) continue;
+		const spread = list === SW_STATUS_MOVES ? list.length : 2;
+		take(swPickNamed(list, learnable, used, spread, skipMove));
+	}
+	for (const e of attacks) {
+		if (chosen.length >= 4) break;
+		if (!chosen.some(c => c.type === e.m.type)) take(e.m);
+	}
+	for (const e of attacks) {
+		if (chosen.length >= 4) break;
+		take(e.m);
+	}
+	if (chosen.some(m => m.status === 'slp')) teamState.sleepers++;
+	if (chosen.some(m => m.id === 'toxic')) teamState.toxic = (teamState.toxic || 0) + 1;
+	const set = {
+		name: species.name, species: species.name, ability: '', item: '', gender: '',
+		moves: chosen.map(m => m.name), nature: '',
+		evs: { hp: 252, atk: 252, def: 252, spa: 252, spd: 252, spe: 252 },
+		ivs: Object.assign({}, MAXED_IVS),
+	};
+	const mainType = chosen.find(m => m.category !== 'Status' && species.types.includes(m.type));
+	const booster = mainType && typeBoosters[mainType.type];
+	if (booster) set.item = booster;
+	return set;
+}
+
+const swBoosterCache = new Map();
+function swTypeBoosters(fdex, ruleTable, fullid) {
+	if (swBoosterCache.has(fullid)) return swBoosterCache.get(fullid);
+	const out = {};
+	const types = fdex.types.all().map(t => t.name);
+	for (const item of fdex.items.all()) {
+		if (typeof item.onBasePower !== 'function' || !itemAllowed(item.name, fdex, ruleTable)) continue;
+		for (const type of types) {
+			let boosted = false;
+			try {
+				boosted = item.onBasePower.call({ chainModify: () => 0 }, 100, {}, {}, { type, category: 'Physical' }) > 100;
+			} catch (e) {
+				boosted = false;
+			}
+			if (boosted && !out[type]) out[type] = item.name;
+		}
+	}
+	swBoosterCache.set(fullid, out);
+	return out;
+}
+
+const swPoolCache = new Map();
+function swSpeciesPool(fdex, ruleTable, ctx) {
+	if (swPoolCache.has(ctx.fullid)) return swPoolCache.get(ctx.fullid);
+	const pool = [];
+	const formatsData = fdex.data.FormatsData || {};
+	for (const id of Object.keys(fdex.data.Pokedex)) {
+		if (formatsData[id] && formatsData[id].isNonstandard) continue;
+		const species = fdex.species.get(id);
+		if (!species.exists || !species.baseStats || species.isNonstandard) continue;
+		if (ruleTable.check('pokemon:' + species.id) === 'banned') continue;
+		if (ruleTable.check('basepokemon:' + toId(species.baseSpecies)) === 'banned') continue;
+		const attacking = swLearnable(species, fdex, ruleTable, ctx)
+			.filter(m => swAttackScore(m, species, fdex) >= 30);
+		if (attacking.length < 2) continue;
+		pool.push({ species, probe: [attacking[0].name] });
+	}
+	pool.sort((a, b) => bstOf(b.species, false) - bstOf(a.species, false));
+	swPoolCache.set(ctx.fullid, pool);
+	return pool;
+}
+
+function buildSpaceWorldTeam(fdex, ruleTable, ctx, teamSize) {
+	const pool = swSpeciesPool(fdex, ruleTable, ctx);
+	const live = pool
+		.map(entry => ({ entry, bst: bstOf(entry.species, false), roll: Math.random() }))
+		.sort((a, b) => b.bst - a.bst || a.roll - b.roll);
+	const boosters = swTypeBoosters(fdex, ruleTable, ctx.fullid);
+	const team = [];
+	const bases = new Set();
+	const teamState = { sleepers: 0, toxic: 0 };
+	for (let guard = 0; team.length < teamSize && live.length && guard < 1000; guard++) {
+		let window = Math.min(live.length, SW_POOL_WINDOW);
+		while (window < live.length && live[window].bst === live[window - 1].bst) window++;
+		const idx = Math.floor(Math.pow(Math.random(), 1.5) * window);
+		const { entry } = live[idx];
+		const { species, probe } = entry;
+		if (!speciesUsable(species, fdex, ruleTable, ctx, probe)) {
+			live.splice(idx, 1);
+			const at = pool.indexOf(entry);
+			if (at >= 0) pool.splice(at, 1);
+			continue;
+		}
+		const base = toId(species.baseSpecies || species.name);
+		if (bases.has(base) || ctx.blocks.species.has(species.id)) continue;
+		const set = swBuildSet(species, fdex, ruleTable, ctx, boosters, teamState);
+		if (!set) continue;
+		bases.add(base);
+		team.push(set);
 	}
 	return team;
 }
@@ -1903,10 +2181,14 @@ function generateTeam(formatid) {
 
 	const gen = genOf(baseid, format);
 	const fdex = Dex.forFormat(validator.format);
-	if (ruleTable.has('littlecup') && !hasGenerator(baseid)) {
+	const isMono = ruleTable.has('sametypeclause');
+	const synthesize = isHackmonsTarget(baseid) && gen >= 3 && !isMono &&
+		!baseid.includes('metronome') && !baseid.includes('letsgo');
+	const swSynth = isSpaceWorldSynth(fdex, baseid);
+	if (ruleTable.has('littlecup') && !hasGenerator(baseid) && !synthesize) {
 		return { error: 'Little Cup formats have no team generator yet. Try another format.' };
 	}
-	const source = hasGenerator(baseid) ? baseid : sourceFor(baseid, format);
+	const source = swSynth ? 'spaceworld' : hasGenerator(baseid) ? baseid : sourceFor(baseid, format);
 	if (!source) return { error: 'No team generator is available for this format.' };
 
 	// Custom Disguises really does allow 24 Pokemon and 24 moves each. Use the headroom, but stop well
@@ -1915,10 +2197,7 @@ function generateTeam(formatid) {
 	const roomFor = Math.max(1, Math.min(sizeCap, ruleTable.maxTeamSize || 6));
 	const teamSize = roomFor > 6 ? 6 + Math.floor(Math.random() * (roomFor - 5)) : roomFor;
 	const teraOpts = gen >= 9 ? teraOptionsFor(fullid, fdex, ruleTable, validator) : [];
-	const isMono = ruleTable.has('sametypeclause');
-	const synthesize = isHackmonsTarget(baseid) && gen >= 3 && !isMono &&
-		!baseid.includes('metronome') && !baseid.includes('letsgo');
-	const gate = synthesize ? null : tierGate(fdex, ruleTable, tierPolicyFor(baseid), fullid);
+	const gate = synthesize || swSynth ? null : tierGate(fdex, ruleTable, tierPolicyFor(baseid), fullid);
 	let team = null;
 	let problems = null;
 	// what this build has watched the validator refuse; see learnFromProblems
@@ -1928,7 +2207,9 @@ function generateTeam(formatid) {
 	for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
 		let pool;
 		try {
-			if (synthesize) {
+			if (swSynth) {
+				pool = buildSpaceWorldTeam(fdex, ruleTable, ctx, teamSize);
+			} else if (synthesize) {
 				const sPool = speciesPool(fdex, ruleTable, fullid);
 				const allowDupes = !ruleTable.has('speciesclause') && !ruleTable.has('formeclause');
 				const picked = sampleSpecies(sPool, fdex, ruleTable, ctx, teamSize, allowDupes, gen <= 7 ? SINGLETON_BASES : null);
@@ -1951,7 +2232,7 @@ function generateTeam(formatid) {
 			return { error: `Generator failed: ${('' + e.message).slice(0, 200)}` };
 		}
 		if (!pool || !pool.length) return { error: 'The team generator produced nothing for this format.' };
-		if (!team || isMono || synthesize) {
+		if (!team || isMono || synthesize || swSynth) {
 			team = pool.slice(0, teamSize);
 		} else {
 			const badIdx = new Set();
@@ -1971,7 +2252,7 @@ function generateTeam(formatid) {
 				}
 			}
 		}
-		if (!synthesize || ruleTable.has('speciesclause') || ruleTable.has('formeclause')) {
+		if (!swSynth && (!synthesize || ruleTable.has('speciesclause') || ruleTable.has('formeclause'))) {
 			const seen = new Set();
 			team = team.filter(set => {
 				const sid = baseSpeciesId(set);
@@ -1987,7 +2268,7 @@ function generateTeam(formatid) {
 				team.push(extra);
 			}
 		}
-		reshape(team, baseid, gen, rulesText, ruleTable, fdex, ctx, gate);
+		if (!swSynth) reshape(team, baseid, gen, rulesText, ruleTable, fdex, ctx, gate);
 		try {
 			problems = validator.validateTeam(JSON.parse(JSON.stringify(team))) || [];
 		} catch (e) {

@@ -4,7 +4,18 @@ import phnnData from './phnn-data';
 
 const toPhnnId = (text: string): string => String(text || '').toLowerCase().replace(/[^a-z0-9]+/g, '');
 
-const PHNN_TYPELESS_MOVES = ['seismictoss', 'nightshade', 'sonicboom', 'counter', 'bide'];
+const PHNN_GEN1_IGNORE_IMMUNITY_MOVES = [
+  'superfang', 'seismictoss', 'nightshade', 'sonicboom', 'dragonrage', 'psywave', 'counter', 'bide',
+];
+
+const PHNN_BIDE_IGNORES_IMMUNITY_KEYS = ['gen4', 'gen9phnn', 'spaceworld'];
+
+const PHNN_SW_TYPELESS_MOVES = ['flail', 'reversal'];
+
+export const PHNN_CHART_TYPES = [
+  'Normal', 'Fighting', 'Flying', 'Poison', 'Ground', 'Rock', 'Bug', 'Ghost', 'Steel', 'Fire', 'Water',
+  'Grass', 'Electric', 'Psychic', 'Ice', 'Dragon', 'Dark', 'Fairy', '???', 'Shadow', 'Stellar', 'Bird',
+];
 
 const PLATE_TYPES: Record<string, string> = {
   flameplate: 'Fire',
@@ -35,16 +46,12 @@ export const detectPhnnKey = (format: string): PhnnKey | null => {
 
   const f = format.toLowerCase();
 
-  const genMatch = f.match(/gen(\d+)/);
+  const genMatch = f.match(/gen(\d)/);
   const gen = genMatch ? Number(genMatch[1]) : 9;
 
   // fork mods first, most specific wins
   if (f.includes('spaceworld')) {
     return ('spaceworld' in phnnData ? 'spaceworld' : null) as PhnnKey | null;
-  }
-
-  if (f.includes('customdisguises')) {
-    return ('gen9customdisguises' in phnnData ? 'gen9customdisguises' : null) as PhnnKey | null;
   }
 
   if (f.includes('champions')) {
@@ -168,7 +175,7 @@ export const getPhnnMoveOverrides = (
     }
   }
 
-  if (PHNN_TYPELESS_MOVES.includes(id)) {
+  if (key === 'spaceworld' && PHNN_SW_TYPELESS_MOVES.includes(id)) {
     out.type = '???';
   }
 
@@ -176,6 +183,67 @@ export const getPhnnMoveOverrides = (
     const bit = (value: number): number => Math.floor(((Number(value) || 0) % 4) / 2);
     const power = bit(ivs.atk) + 2 * bit(ivs.def) + 4 * bit(ivs.spe) + 8 * bit(ivs.spa) + 16 * bit(ivs.spd) + 32 * bit(ivs.hp);
     out.basePower = Math.floor((power * 40) / 63 + 30);
+  }
+
+  return out;
+};
+
+export type PhnnImmunityBypass = true | Readonly<Record<string, boolean>>;
+
+export const getPhnnIgnoreImmunity = (
+  format: string,
+  moveName: string,
+): PhnnImmunityBypass | null => {
+  const key = detectPhnnKey(format);
+
+  if (!key || !moveName) {
+    return null;
+  }
+
+  const id = toPhnnId(moveName);
+  const move = (phnnData[key].moves as Record<string, { ignoreImmunity?: PhnnImmunityBypass }>)[id];
+
+  if (move?.ignoreImmunity) {
+    return move.ignoreImmunity;
+  }
+
+  if (phnnData[key].gen === 1 && PHNN_GEN1_IGNORE_IMMUNITY_MOVES.includes(id)) {
+    return true;
+  }
+
+  if (id === 'bide' && PHNN_BIDE_IGNORES_IMMUNITY_KEYS.includes(key)) {
+    return true;
+  }
+
+  return null;
+};
+
+export const buildPhnnImmunityBypassChart = (
+  chart: Record<string, Record<string, number>>,
+  bypass: PhnnImmunityBypass,
+  stockEffectiveness: (attackType: string, defenseType: string) => number,
+): Record<string, Record<string, number>> => {
+  const out: Record<string, Record<string, number>> = { ...(chart || {}) };
+
+  if (!bypass) {
+    return out;
+  }
+
+  for (const attackType of PHNN_CHART_TYPES) {
+    if (bypass !== true && !bypass[attackType]) {
+      continue;
+    }
+
+    for (const defenseType of PHNN_CHART_TYPES) {
+      const row = out[attackType];
+      const value = row && Object.prototype.hasOwnProperty.call(row, defenseType)
+        ? row[defenseType]
+        : stockEffectiveness(attackType, defenseType);
+
+      if (value === 0) {
+        out[attackType] = { ...(row || {}), [defenseType]: 1 };
+      }
+    }
   }
 
   return out;
@@ -424,15 +492,29 @@ export const isPhnnKamehamehaMove = (moveName: string): boolean => (
   toPhnnId(moveName) === 'kamehameha'
 );
 
+const phnnToxicTick = (divisor: number) => (counter: number, maxHp: number): number => (
+  Math.max(1, Math.floor(maxHp / divisor)) * counter
+);
+
+export const getPhnnToxicTick = (key: PhnnKey | null): ((counter: number, maxHp: number) => number) | undefined => {
+  if (key === 'spaceworld') {
+    return phnnToxicTick(8);
+  }
+
+  return key === 'gen2' || key === 'gen2gs' ? phnnToxicTick(16) : undefined;
+};
+
 export const setPhnnCalcContext = (format: string): void => {
   const key = detectPhnnKey(format);
 
   (globalThis as Record<string, unknown>).__phnnCalc = key
     ? {
       typeChart: getPhnnTypeChart(format) || {},
-      parentalBond: true,
+      parentalBond: key === 'gen9phnn',
       shadowMoves: PHNN_SHADOW_MOVE_IDS,
-      critModifier: 2,
+      critModifier: key === 'gen9phnn' ? 2 : undefined,
+      noTrappingDamage: key === 'spaceworld',
+      toxicTick: getPhnnToxicTick(key),
     }
     : null;
 };
@@ -484,12 +566,6 @@ const phnnBoostedStat = (stat: number, stage: number): number => {
  *
  * The `phnn` mod overrides this to a coin flip - `randomChance(1, 2)` in
  * data/mods/phnn/conditions.ts - where standard Showdown uses `randomChance(33, 100)`.
- *
- * Deliberately keyed off the format id rather than detectPhnnKey(). Every one of the eight
- * `mod: 'phnn'` formats in config/formats.ts is gen 9 and carries "nonerfs" in its id, but they do
- * NOT all resolve to the gen9phnn data key - gen9nonerfscustomdisguises resolves to
- * gen9customdisguises, and would have been given the wrong chance. The mod, not the type chart, is
- * what decides this.
  */
 export const getPhnnConfusionSelfHitChance = (format: string): number => {
   const f = String(format || '').toLowerCase();

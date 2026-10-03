@@ -1987,6 +1987,7 @@ export class BattleTooltips {
 
 		if (hardcoreMode && (move.category === 'Status' || dex.gen < 7)) return null;
 		if (move.id === 'struggle' && dex.gen > 1) return 1;
+		if ((move.id === 'futuresight' || move.id === 'doomdesire') && dex.gen <= 4) return 1;
 
 		let inflictsStatus = null;
 		let inflictsEffect = null;
@@ -2006,10 +2007,13 @@ export class BattleTooltips {
 		// Gen 3 type-immunity abilities don't affect status moves
 		if (category === 'Status' && dex.gen <= 3) otherFactor = 1;
 
+		const ignoresTypeImmunity = move.id !== 'futuresight' && (move.ignoreImmunity === true ||
+			!!(move.ignoreImmunity && move.ignoreImmunity[attackType]));
 		let factor = 1;
 		if (!otherFactor && (targetAbility === "Levitate" || targetAbility === "Eelevate")) {
 			otherFactor = 1;
-			if (!target.isGrounded() && move.id !== 'thousandarrows' && !hardcoreMode) {
+			if (!target.isGrounded() && move.id !== 'thousandarrows' && !(ignoresTypeImmunity && attackType === 'Ground') &&
+				!hardcoreMode) {
 				factor = 0; // Levitate acts as a type-based immunity (doesn't affect most status moves)
 			}
 		}
@@ -2041,6 +2045,9 @@ export class BattleTooltips {
 					factor = 1;
 					break;
 				}
+				if (ignoresTypeImmunity && !inverse && !(
+					dex.gen === 1 && attackType === 'Normal' && targetType === 'Ghost' && (move.id === 'wrap' || move.id === 'bind')
+				)) continue;
 				// Inverse replaces immunities with weaknesses. This has to
 				// be coded here, else it won't calculate secondary type's
 				// effectiveness. It sets a resistance to be consistent with
@@ -2059,7 +2066,9 @@ export class BattleTooltips {
 		}
 
 		// Air Balloon etc. Levitate is already handled but there are a few that aren't
-		if (category !== 'Status' && attackType === 'Ground' && factor && !target.isGrounded()) otherFactor = 0;
+		if (category !== 'Status' && attackType === 'Ground' && factor && !target.isGrounded() && !ignoresTypeImmunity) {
+			otherFactor = 0;
+		}
 		if (this.battle.hasPseudoWeather('Misty Terrain') && target.isGrounded() && inflictsStatus) {
 			return 0;
 		}
@@ -2106,7 +2115,18 @@ export class BattleTooltips {
 				if (dex.gen !== 1) return 0;
 				if (inflictsStatus !== 'par' && inflictsStatus !== 'slp' && inflictsEffect !== 'confusion') return 0;
 			}
+			if (dex.modid === 'gen2spaceworld' && inflictsStatus) {
+				let typeMod = 0;
+				for (const targetType of targetTypes) {
+					const taken = dex.types.get(targetType).damageTaken?.[attackType];
+					if (taken === Dex.IMMUNE) return 0;
+					if (taken === 1) typeMod++;
+					if (taken === 2) typeMod--;
+				}
+				if (typeMod < 0) return 0;
+			}
 			if (move.id === 'thunderwave') return factor * otherFactor === 0 ? 0 : null;
+			if (factor === 0 && !ignoresTypeImmunity) return 0;
 			return otherFactor === 0 ? 0 : null;
 		}
 
@@ -2117,7 +2137,8 @@ export class BattleTooltips {
 			move.id === 'comeuppance' || move.id === 'counter' || move.id === 'mirrorcoat' || move.id === 'metalburst' ||
 			// special
 			move.id === 'endeavor' || move.id === 'bide' || move.id === 'ruination' || move.id === 'superfang' ||
-			move.id === 'finalgambit' || move.id === 'guardianofalola' || move.id === 'naturesmadness' || move.id === 'psywave'
+			move.id === 'finalgambit' || move.id === 'guardianofalola' || move.id === 'naturesmadness' || move.id === 'psywave' ||
+			(dex.modid === 'gen2spaceworld' && (move.id === 'flail' || move.id === 'reversal'))
 		) {
 			if (hardcoreMode) return null;
 			return factor * otherFactor === 0 ? 0 : 1;
@@ -2197,6 +2218,13 @@ export class BattleTooltips {
 		if (move.id === 'toxic' && this.battle.gen >= 6 && this.pokemonHasType(pokemon, 'Poison')) {
 			value.set(0, "Poison type");
 			return value;
+		}
+		if (move.id === 'swift' && this.battle.dex.modid === 'gen1phnn') {
+			const foe = target || pokemon?.side?.foe?.active.find(active => active && !active.fainted);
+			if (!foe?.volatiles['substitute']) {
+				value.set(0, "unless the target has a substitute");
+				return value;
+			}
 		}
 		if (move.id === 'blizzard' && this.battle.gen >= 4) {
 			value.weatherModify(0, 'Hail');

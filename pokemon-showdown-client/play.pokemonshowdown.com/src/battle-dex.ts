@@ -1911,6 +1911,12 @@ class ModdedDex {
 					data = { ...data, ...table.overrideTypeChart[id] };
 				}
 			}
+			if (this.modid !== `gen${this.gen}` && data.exists !== false) {
+				const modTypeChart = window.BattleTeambuilderTable[this.modid]?.overrideTypeChart;
+				if (modTypeChart && id in modTypeChart) {
+					data = { ...data, ...modTypeChart[id] };
+				}
+			}
 
 			this.cache.Types[id] = data;
 			return data;

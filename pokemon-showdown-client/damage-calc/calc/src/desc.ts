@@ -6,6 +6,7 @@ import {type Damage, damageRange, multiDamageRange} from './result';
 import {error} from './util';
 // NOTE: This needs to come last to simplify bundling
 import {isGrounded} from './mechanics/util';
+import {halfHPDamage, psywaveRolls, undynamaxedHP} from './mechanics/fixed-damage';
 
 export interface RawDesc {
   HPEVs?: string;
@@ -275,6 +276,12 @@ export function getKOChance(
     error(err, 'damage[0] must be a number.');
     return {chance: 0, n: 0, text: ''};
   }
+  if (
+    damage[damage.length - 1] === 0 && move.named('Psywave') && (gen.num === 1 || gen.num === 11) &&
+    !psywaveRolls(gen.num === 1 ? 'gen1' : 'spaceworld', attacker.level).length
+  ) {
+    return {chance: 0, n: 0, text: 'fails, the game freezes at this level'};
+  }
   if (damage[damage.length - 1] === 0) {
     error(err, 'damage[damage.length - 1] === 0.');
     return {chance: 0, n: 0, text: ''};
@@ -374,12 +381,34 @@ export function getKOChance(
     return {chance, n, text};
   }
 
+  if (move.named('Super Fang', 'Nature\'s Madness', 'Ruination', 'Guardian of Alola')) {
+    const parentalBond = typeof damageObj !== 'number' && damageObj.length === 2 &&
+      typeof damageObj[0] === 'number' && typeof damageObj[1] === 'number';
+    const maxUses = move.named('Guardian of Alola') ? 1 : 9;
+    const toBaseHP = undynamaxedHP(defender);
+    let hp = defender.curHP() - hazards.damage;
+    for (let n = 1; n <= maxUses; n++) {
+      const hit = move.named('Guardian of Alola')
+        ? (hazards.damage ? Math.floor((hp * 3) / 4) : damage[0])
+        : halfHPDamage(hp, parentalBond, toBaseHP);
+      hp -= typeof hit === 'number' ? hit : hit[0] + hit[1];
+      if (hp <= 0) return KOChance(n === 1 ? 1 : 0, 1, n);
+      const toxicDamage = toxicCounter > 0
+        ? toxicTick(gen.num, toxicCounter + n - 1, defender.maxHP())
+        : 0;
+      hp = Math.min(defender.maxHP(), hp + eot.damage - toxicDamage);
+      if (hp <= 0) return KOChance(0, 1, n);
+    }
+    return {chance: 0, n: 0, text: ''};
+  }
+
   if ((move.timesUsed === 1 && move.timesUsedWithMetronome === 1) || move.isZ) {
     const chance = computeKOChance(
       damage, defender.curHP() - hazards.damage, 0, 1, 1, defender.maxHP(), 0
     );
     const chanceWithEot = computeKOChance(
-      damage, defender.curHP() - hazards.damage, eot.damage, 1, 1, defender.maxHP(), toxicCounter
+      damage, defender.curHP() - hazards.damage, eot.damage, 1, 1, defender.maxHP(), toxicCounter,
+      gen.num
     );
 
     // checks if either chance is greater than 0
@@ -387,20 +416,22 @@ export function getKOChance(
 
     for (let i = 2; i <= 4; i++) {
       const chance = computeKOChance(
-        damage, defender.curHP() - hazards.damage, eot.damage, i, 1, defender.maxHP(), toxicCounter
+        damage, defender.curHP() - hazards.damage, eot.damage, i, 1, defender.maxHP(), toxicCounter,
+        gen.num
       );
       if (chance > 0) return KOChance(0, chance, i);
     }
 
     for (let i = 5; i <= 9; i++) {
       if (
-        predictTotal(damage[0], eot.damage, i, 1, toxicCounter, defender.maxHP(), gen.num === 11 ? 8 : 16) >=
+        predictTotal(damage[0], eot.damage, i, 1, toxicCounter, defender.maxHP(), gen.num) >=
         defender.curHP() - hazards.damage
       ) {
         return KOChance(0, 1, i);
       } else if (
-        predictTotal(damage[damage.length - 1], eot.damage, i, 1, toxicCounter, defender.maxHP(), gen.num === 11 ? 8 : 16) >=
-        defender.curHP() - hazards.damage
+        predictTotal(
+          damage[damage.length - 1], eot.damage, i, 1, toxicCounter, defender.maxHP(), gen.num
+        ) >= defender.curHP() - hazards.damage
       ) {
         // possible but no concrete chance
         return KOChance(undefined, undefined, i);
@@ -413,7 +444,8 @@ export function getKOChance(
       move.hits || 1,
       move.timesUsed || 1,
       defender.maxHP(),
-      toxicCounter
+      toxicCounter,
+      gen.num
     );
     if (chance > 0) return KOChance(0, chance, move.timesUsed, chance === 1);
 
@@ -424,7 +456,7 @@ export function getKOChance(
       move.timesUsed,
       toxicCounter,
       defender.maxHP(),
-      gen.num === 11 ? 8 : 16
+      gen.num
     ) >=
       defender.curHP() - hazards.damage
     ) {
@@ -437,7 +469,7 @@ export function getKOChance(
         move.timesUsed,
         toxicCounter,
         defender.maxHP(),
-        gen.num === 11 ? 8 : 16
+        gen.num
       ) >=
       defender.curHP() - hazards.damage
     ) {
@@ -718,7 +750,7 @@ function getEndOfTurn(
 
   if (
     !defender.hasAbility('Magic Guard') && TRAPPING.includes(move.name) &&
-    (gen.num === 0 || gen.num > 1)
+    (gen.num === 0 || (gen.num > 1 && gen.num !== 11))
   ) {
     if (attacker.hasItem('Binding Band')) {
       damage -= gen.num > 5 ? Math.floor(defender.maxHP() / 6) : Math.floor(defender.maxHP() / 8);
@@ -767,6 +799,12 @@ function getEndOfTurn(
   return {damage, texts};
 }
 
+function toxicTick(genNum: number, counter: number, maxHP: number) {
+  if (genNum === 11) return Math.max(1, Math.floor(maxHP / 8)) * counter;
+  if (genNum === 2) return Math.max(1, Math.floor(maxHP / 16)) * counter;
+  return Math.floor((counter * maxHP) / 16);
+}
+
 function computeKOChance(
   damage: number[],
   hp: number,
@@ -774,11 +812,12 @@ function computeKOChance(
   hits: number,
   timesUsed: number,
   maxHP: number,
-  toxicCounter: number
+  toxicCounter: number,
+  genNum = 0
 ) {
   let toxicDamage = 0;
   if (toxicCounter > 0) {
-    toxicDamage = Math.floor((toxicCounter * maxHP) / 16);
+    toxicDamage = toxicTick(genNum, toxicCounter, maxHP);
     toxicCounter++;
   }
   const n = damage.length;
@@ -807,7 +846,8 @@ function computeKOChance(
         hits - 1,
         timesUsed,
         maxHP,
-        toxicCounter
+        toxicCounter,
+        genNum
       );
     } else {
       c = lastc;
@@ -830,7 +870,7 @@ function predictTotal(
   timesUsed: number,
   toxicCounter: number,
   maxHP: number,
-  toxicDivisor = 16
+  genNum = 0
 ) {
   let toxicDamage = 0;
   // hits - 1 is used in this for loop, as well as in the total = ...  calcs later
@@ -842,9 +882,9 @@ function predictTotal(
   let lastTurnEot = eot;
   if (toxicCounter > 0) {
     for (let i = 0; i < hits - 1; i++) {
-      toxicDamage += Math.floor(((toxicCounter + i) * maxHP) / toxicDivisor);
+      toxicDamage += toxicTick(genNum, toxicCounter + i, maxHP);
     }
-    lastTurnEot -= Math.floor(((toxicCounter + (hits - 1)) * maxHP) / toxicDivisor);
+    lastTurnEot -= toxicTick(genNum, toxicCounter + (hits - 1), maxHP);
   }
   let total = 0;
   if (hits > 1 && timesUsed === 1) {

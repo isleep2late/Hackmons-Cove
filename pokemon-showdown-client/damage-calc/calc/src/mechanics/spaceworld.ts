@@ -5,6 +5,12 @@ import type {Move} from '../move';
 import type {Pokemon} from '../pokemon';
 import {Result} from '../result';
 import {computeFinalStats, getMoveEffectiveness, handleFixedDamageMoves} from './util';
+import {halfHPDamage, psywaveRolls, sw97FlailPower} from './fixed-damage';
+
+const SW_IGNORES_IMMUNITY = [
+  'Super Fang', 'Seismic Toss', 'Night Shade', 'Sonic Boom', 'Dragon Rage', 'Psywave',
+  'Flail', 'Reversal', 'Counter', 'Wrap', 'Bind',
+];
 
 
 const SW_ITEM_BOOSTS: {[item: string]: TypeName} = {
@@ -92,13 +98,16 @@ export function calculateSpaceWorld(
     }
   }
 
-  const typeless = move.type === '???';
-  const type1Effectiveness = typeless
-    ? 1
-    : getMoveEffectiveness(gen, move, firstDefenderType, field.defenderSide.isForesight);
+  const typeless = move.type === '???' || move.named('Flail', 'Reversal');
+  const ignoresImmunity = move.named(...SW_IGNORES_IMMUNITY);
+  const effectivenessInto = (type: TypeName) => {
+    const effectiveness = getMoveEffectiveness(gen, move, type, field.defenderSide.isForesight);
+    return ignoresImmunity && effectiveness === 0 ? 1 : effectiveness;
+  };
+  const type1Effectiveness = typeless ? 1 : effectivenessInto(firstDefenderType);
   const type2Effectiveness = typeless || !secondDefenderType
     ? 1
-    : getMoveEffectiveness(gen, move, secondDefenderType, field.defenderSide.isForesight);
+    : effectivenessInto(secondDefenderType);
   const typeEffectiveness = type1Effectiveness * type2Effectiveness;
 
   if (typeEffectiveness === 0) {
@@ -108,6 +117,17 @@ export function calculateSpaceWorld(
   const fixedDamage = handleFixedDamageMoves(attacker, move);
   if (fixedDamage) {
     result.damage = fixedDamage;
+    return result;
+  }
+
+  if (move.named('Super Fang')) {
+    result.damage = halfHPDamage(defender.curHP());
+    return result;
+  }
+
+  if (move.named('Psywave')) {
+    const rolls = psywaveRolls('spaceworld', attacker.level);
+    if (rolls.length) result.damage = rolls;
     return result;
   }
 
@@ -127,8 +147,7 @@ export function calculateSpaceWorld(
 
   if (move.named('Flail', 'Reversal')) {
     move.isCrit = false;
-    const p = Math.floor((48 * attacker.curHP()) / attacker.maxHP());
-    move.bp = p <= 1 ? 200 : p <= 4 ? 150 : p <= 9 ? 100 : p <= 16 ? 80 : p <= 32 ? 40 : 20;
+    move.bp = sw97FlailPower(attacker.curHP(), attacker.maxHP());
     desc.moveBP = move.bp;
   }
 
@@ -183,17 +202,18 @@ export function calculateSpaceWorld(
     df = Math.max(1, Math.floor(df / 2));
   }
 
+  const itemBoostType = attacker.item && SW_ITEM_BOOSTS[attacker.item];
+  const itemBoosted = !!itemBoostType && move.hasType(itemBoostType);
+  if (itemBoosted) desc.attackerItem = attacker.item;
+  const boostedPower = (bp: number) => (itemBoosted ? Math.floor(bp * 1.2) : bp);
+
   let baseDamage = Math.floor(
-    Math.floor((Math.floor((2 * lv) / 5 + 2) * Math.max(1, at) * move.bp) / Math.max(1, df)) / 50
+    Math.floor(
+      (Math.floor((2 * lv) / 5 + 2) * Math.max(1, at) * boostedPower(move.bp)) / Math.max(1, df)
+    ) / 50
   );
 
-  const itemBoostType = attacker.item && SW_ITEM_BOOSTS[attacker.item];
-  if (itemBoostType && move.hasType(itemBoostType)) {
-    baseDamage = Math.floor(baseDamage * 1.2);
-    desc.attackerItem = attacker.item;
-  }
-
-  baseDamage = Math.min(997, baseDamage) + 2;
+  baseDamage = Math.max(1, Math.min(997, baseDamage)) + 2;
 
   if ((field.hasWeather('Sun') && move.hasType('Fire')) ||
       (field.hasWeather('Rain') && move.hasType('Water'))) {
@@ -233,13 +253,10 @@ export function calculateSpaceWorld(
         const bp = 60 * hit;
         let hitBase = Math.floor(
           Math.floor(
-            (Math.floor((2 * lv) / 5 + 2) * Math.max(1, at) * bp) / Math.max(1, df)
+            (Math.floor((2 * lv) / 5 + 2) * Math.max(1, at) * boostedPower(bp)) / Math.max(1, df)
           ) / 50
         );
-        if (itemBoostType && move.hasType(itemBoostType)) {
-          hitBase = Math.floor(hitBase * 1.2);
-        }
-        hitBase = Math.min(997, hitBase) + 2;
+        hitBase = Math.max(1, Math.min(997, hitBase)) + 2;
         if ((field.hasWeather('Sun') && move.hasType('Fire')) ||
             (field.hasWeather('Rain') && move.hasType('Water'))) {
           hitBase = Math.floor(hitBase * 1.5);

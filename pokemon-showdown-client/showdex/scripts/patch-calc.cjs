@@ -22,8 +22,19 @@ const PATCHES = [
 	},
 	{
 		file: 'gen789.js',
-		find: '    if (attacker.hasAbility(\'Parental Bond (Child)\')) {\n        baseDamage = (0, util_2.pokeRound)((0, util_2.OF32)(baseDamage * 1024) / 4096);\n    }',
-		replace: '    if (attacker.hasAbility(\'Parental Bond (Child)\')) {\n        baseDamage = (0, util_2.pokeRound)((0, util_2.OF32)(baseDamage * (((typeof globalThis !== \'undefined\') && globalThis.__phnnCalc && globalThis.__phnnCalc.parentalBond) ? 2048 : 1024)) / 4096);\n    }',
+		find: `    const damage = [];
+    for (let i = 0; i < 16; i++) {
+        damage[i] =
+            (0, util_2.getFinalDamage)(baseDamage, i, typeEffectiveness, applyBurn, stabMod, finalMod, protect);
+    }
+    result.damage = childDamage ? [damage, childDamage] : damage;`,
+		replace: `    const damage = [];
+    const __phnnChildScale = (attacker.hasAbility('Parental Bond (Child)') && (typeof globalThis !== 'undefined') && globalThis.__phnnCalc && globalThis.__phnnCalc.parentalBond) ? 2 : 1;
+    for (let i = 0; i < 16; i++) {
+        damage[i] = __phnnChildScale *
+            (0, util_2.getFinalDamage)(baseDamage, i, typeEffectiveness, applyBurn, stabMod, finalMod, protect);
+    }
+    result.damage = childDamage ? [damage, childDamage] : damage;`,
 	},
 	{
 		file: 'gen789.js',
@@ -56,6 +67,43 @@ const PATCHES = [
         dfMods.push(6144);
     }
     return dfMods;`,
+	},
+	{
+		file: 'gen12.js',
+		find: `        move.bp = p <= 1 ? 200 : p <= 4 ? 150 : p <= 9 ? 100 : p <= 16 ? 80 : p <= 32 ? 40 : 20;
+        desc.moveBP = move.bp;`,
+		replace: `        move.bp = p <= 1 ? 200 : p <= 4 ? 150 : p <= 9 ? 100 : p <= 16 ? 80 : p <= 32 ? 40 : 20;
+        if ((typeof globalThis !== 'undefined') && globalThis.__phnnCalc && typeof globalThis.__phnnCalc.flailPower === 'function') {
+            move.bp = globalThis.__phnnCalc.flailPower(attacker.curHP(), attacker.maxHP());
+        }
+        desc.moveBP = move.bp;`,
+	},
+	{
+		file: 'gen12.js',
+		find: '    baseDamage = Math.min(997, baseDamage) + 2;',
+		replace: '    baseDamage = (gen.num === 2 ? Math.max(1, Math.min(997, baseDamage)) : Math.min(997, baseDamage)) + 2;',
+	},
+	{
+		file: '../desc.js',
+		find: `    if (!defender.hasAbility('Magic Guard') && TRAPPING.includes(move.name) &&
+        (gen.num === 0 || gen.num > 1)) {`,
+		replace: `    if (!defender.hasAbility('Magic Guard') && TRAPPING.includes(move.name) &&
+        (gen.num === 0 || gen.num > 1) && !((typeof globalThis !== 'undefined') && globalThis.__phnnCalc && globalThis.__phnnCalc.noTrappingDamage)) {`,
+	},
+	{
+		file: '../desc.js',
+		find: '        toxicDamage = Math.floor((toxicCounter * maxHP) / 16);',
+		replace: "        toxicDamage = (((typeof globalThis !== 'undefined') && globalThis.__phnnCalc && globalThis.__phnnCalc.toxicTick) ? globalThis.__phnnCalc.toxicTick(toxicCounter, maxHP) : Math.floor((toxicCounter * maxHP) / 16));",
+	},
+	{
+		file: '../desc.js',
+		find: '            toxicDamage += Math.floor(((toxicCounter + i) * maxHP) / 16);',
+		replace: "            toxicDamage += (((typeof globalThis !== 'undefined') && globalThis.__phnnCalc && globalThis.__phnnCalc.toxicTick) ? globalThis.__phnnCalc.toxicTick((toxicCounter + i), maxHP) : Math.floor(((toxicCounter + i) * maxHP) / 16));",
+	},
+	{
+		file: '../desc.js',
+		find: '        lastTurnEot -= Math.floor(((toxicCounter + (hits - 1)) * maxHP) / 16);',
+		replace: "        lastTurnEot -= (((typeof globalThis !== 'undefined') && globalThis.__phnnCalc && globalThis.__phnnCalc.toxicTick) ? globalThis.__phnnCalc.toxicTick((toxicCounter + (hits - 1)), maxHP) : Math.floor(((toxicCounter + (hits - 1)) * maxHP) / 16));",
 	},
 ];
 

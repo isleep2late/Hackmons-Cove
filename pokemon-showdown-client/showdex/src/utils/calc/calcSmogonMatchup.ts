@@ -9,13 +9,21 @@ import {
   type MoveName,
   type Pokemon as SmogonPokemon,
   type ShowdexCalcMods,
-  calculate,
 } from '@smogon/calc';
 import { type ShowdexSettings } from '@showdex/interfaces/app';
 import { type CalcdexBattleState, type CalcdexPlayerKey, CalcdexPlayerKeys as AllPlayerKeys } from '@showdex/interfaces/calc';
 import { formatId } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import { detectDisguiseFormat, isPhnnKamehamehaMove, isPhnnShadowDamagingMove, isPhnnTypingKnown, phnnShadowChartValue, phnnShadowState, setPhnnCalcContext } from '@showdex/phnn';
+import {
+  detectDisguiseFormat,
+  isPhnnKamehamehaMove,
+  isPhnnShadowDamagingMove,
+  isPhnnTypingKnown,
+  phnnShadowChartValue,
+  phnnShadowState,
+  setPhnnCalcContext,
+} from '@showdex/phnn';
+import { calculatePhnnMatchup, getPhnnHpRange, isPhnnDisguiseKnownDamage } from '@showdex/phnn/fixedDamage';
 import { getGenDexForFormat } from '@showdex/utils/dex';
 import { createSmogonField } from './createSmogonField';
 import { createSmogonMove } from './createSmogonMove';
@@ -207,7 +215,7 @@ export const calcSmogonMatchup = (
     return matchup;
   }
 
-  if (detectDisguiseFormat(format)) {
+  if (detectDisguiseFormat(format) && !isPhnnDisguiseKnownDamage(format, playerMove, opponentPokemon?.source)) {
     matchup.damageRange = '???';
     return matchup;
   }
@@ -299,14 +307,32 @@ export const calcSmogonMatchup = (
   }
 
   try {
-    const result = calculate(
+    const { result, outcome: fixedOutcome } = calculatePhnnMatchup(
+      format,
       dex,
       matchup.attacker,
       matchup.defender,
       matchup.move,
       smogonField,
       showdexMods,
+      {
+        attacker: getPhnnHpRange(format, playerPokemon, matchup.attacker?.maxHP(true)),
+        defender: getPhnnHpRange(format, opponentPokemon, matchup.defender?.maxHP(true)),
+      },
     );
+
+    if (fixedOutcome === 'unknown') {
+      matchup.damageRange = '???';
+
+      return matchup;
+    }
+
+    if (fixedOutcome === 'fails') {
+      matchup.damageRange = 'N/A';
+      matchup.koChance = 'fails';
+
+      return matchup;
+    }
 
     // a known immunity (Wonder Guard, Levitate, a type immunity...) zeroes the roll, and result.desc()
     // throws on that -- report it plainly instead of letting the catch swallow the whole matchup

@@ -6,6 +6,7 @@ import type {Move} from '../move';
 import type {Pokemon} from '../pokemon';
 import {Result} from '../result';
 import {computeFinalStats, getMoveEffectiveness, handleFixedDamageMoves} from './util';
+import {halfHPDamage, psywaveRolls} from './fixed-damage';
 
 export function calculateRBYGSC(
   gen: Generation,
@@ -45,6 +46,15 @@ export function calculateRBYGSC(
     const fixedDamage = handleFixedDamageMoves(attacker, move);
     if (fixedDamage) {
       result.damage = fixedDamage;
+      return result;
+    }
+    if (move.named('Super Fang')) {
+      result.damage = halfHPDamage(defender.curHP());
+      return result;
+    }
+    if (move.named('Psywave')) {
+      const rolls = psywaveRolls('gen1', attacker.level);
+      if (rolls.length) result.damage = rolls;
       return result;
     }
   }
@@ -96,6 +106,14 @@ export function calculateRBYGSC(
     const fixedDamage = handleFixedDamageMoves(attacker, move);
     if (fixedDamage) {
       result.damage = fixedDamage;
+      return result;
+    }
+    if (move.named('Super Fang')) {
+      result.damage = halfHPDamage(defender.curHP());
+      return result;
+    }
+    if (move.named('Psywave')) {
+      result.damage = psywaveRolls('gen2', attacker.level);
       return result;
     }
   }
@@ -225,7 +243,7 @@ export function calculateRBYGSC(
     desc.attackerItem = attacker.item;
   }
 
-  baseDamage = Math.min(997, baseDamage) + 2;
+  baseDamage = Math.max(gen.num === 2 ? 1 : 0, Math.min(997, baseDamage)) + 2;
 
   if ((field.hasWeather('Sun') && move.hasType('Fire')) ||
       (field.hasWeather('Rain') && move.hasType('Water'))) {

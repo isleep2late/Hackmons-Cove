@@ -1279,7 +1279,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 	];
 	// Descs omitted (they're all compiled into data/text/*)
 	const overrideMoveKeys = [
-		'accuracy', 'basePower', 'category', 'flags', 'gen', 'isNonstandard', 'pp', 'priority', 'target', 'type',
+		'accuracy', 'basePower', 'category', 'flags', 'gen', 'ignoreImmunity', 'isNonstandard', 'pp', 'priority', 'target', 'type',
 	];
 	const overrideAbilityKeys = ['flags', 'isNonstandard', 'rating'];
 	const overrideItemKeys = ['fling', 'isNonstandard', 'naturalGift'];
@@ -1506,6 +1506,16 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 					if (!overrideItemData[id]) overrideItemData[id] = {};
 					overrideItemData[id][key] = modEntry[key];
 				}
+			}
+		}
+
+		const overrideTypeChart = {};
+		BattleTeambuilderTable[clientId].overrideTypeChart = overrideTypeChart;
+		for (const id in modData.TypeChart) {
+			const modEntry = modData.TypeChart[id];
+			const parentEntry = parentDex.data.TypeChart[id];
+			if (JSON.stringify(modEntry) !== JSON.stringify(parentEntry)) {
+				overrideTypeChart[id] = modEntry;
 			}
 		}
 	}

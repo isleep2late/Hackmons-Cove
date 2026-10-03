@@ -1593,7 +1593,7 @@ Storage.exportFolder = function (folder) {
 	}
 	return buf;
 };
-Storage.exportTeam = function (team, hidestats) {
+Storage.exportTeam = function (team, hidestats, shownature) {
 	if (!team) return "";
 	if (typeof team === 'string') {
 		if (team.indexOf('\n') >= 0) return team;
@@ -1691,9 +1691,11 @@ Storage.exportTeam = function (team, hidestats) {
 			if (!first) {
 				text += "  \n";
 			}
-			if (curSet.nature) {
-				text += '' + curSet.nature + ' Nature' + "  \n";
-			}
+		}
+		if ((!hidestats || shownature) && curSet.nature) {
+			text += '' + curSet.nature + ' Nature' + "  \n";
+		}
+		if (!hidestats) {
 			var first = true;
 			if (curSet.ivs) {
 				var defaultIvs = true;

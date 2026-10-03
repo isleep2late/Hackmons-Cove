@@ -1569,6 +1569,28 @@
 					this.$chat.append('<div class="notice">' + bStamp + '<a href="' + app.root + id + '" class="ilink">' + battletype + ' started between <strong style="' + BattleLog.hashColor(toUserid(name)) + '">' + BattleLog.escapeHTML(name) + '</strong> and <strong style="' + BattleLog.hashColor(toUserid(name2)) + '">' + BattleLog.escapeHTML(name2) + '</strong>.</a>' + bMeta + '</div>');
 					break;
 
+				case 'bpw':
+					var bpwOld = row[1] || '';
+					var bpwNew = row[2] || '';
+					if (!/^[a-z0-9-]+$/.test(bpwOld) || !/^[a-z0-9-]+$/.test(bpwNew)) break;
+					var bpwPw = /-([a-z0-9]+)pw$/.exec(bpwNew);
+					var bpwShowMeta = this.id === 'battlelog';
+					this.$chat.find('a.ilink').filter(function () {
+						return $(this).attr('href') === app.root + bpwOld;
+					}).each(function () {
+						var $link = $(this);
+						$link.attr('href', app.root + bpwNew).attr('title', bpwNew);
+						var $meta = $link.siblings('small.battlelog-meta');
+						if (!bpwPw) {
+							$meta.remove();
+						} else if ($meta.length) {
+							$meta.text('(password: ' + bpwPw[1] + ')');
+						} else if (bpwShowMeta) {
+							$link.after(' <small class="battlelog-meta">(password: ' + BattleLog.escapeHTML(bpwPw[1]) + ')</small>');
+						}
+					});
+					break;
+
 				case 'j':
 				case 'join':
 				case 'J':
