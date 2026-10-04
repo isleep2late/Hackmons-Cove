@@ -515,8 +515,15 @@ function blamesBody(problems, species, probe) {
 }
 
 const speciesProbeCache = new Map();
+function gmaxMeaningful(species, fdex) {
+	if (!/-Gmax$/.test(species.name)) return true;
+	if (toId(fdex.currentMod || '') === 'phnn') return true;
+	return fdex.gen === 8 && species.isNonstandard !== 'Future';
+}
+
 function speciesUsable(species, fdex, ruleTable, ctx, probeMoves) {
 	if (!species || !species.exists) return false;
+	if (!gmaxMeaningful(species, fdex)) return false;
 	if (!ctx || !ctx.validator) return true;
 	const key = ctx.fullid + '|' + species.id;
 	if (speciesProbeCache.has(key)) return speciesProbeCache.get(key);
@@ -720,6 +727,7 @@ function speciesPool(fdex, ruleTable, fullid) {
 	for (const species of fdex.species.all()) {
 		if (!species.exists || !species.baseStats) continue;
 		if (species.isNonstandard && species.isNonstandard !== 'Past' && species.isNonstandard !== 'Unobtainable') continue;
+		if (!gmaxMeaningful(species, fdex)) continue;
 		if (ruleTable.check('pokemon:' + species.id) === 'banned') continue;
 		if (ruleTable.check('basepokemon:' + toId(species.baseSpecies)) === 'banned') continue;
 		if (!stageAllowed(fdex, ruleTable, species)) continue;
@@ -1507,6 +1515,7 @@ function effectiveSpeed(sp) {
 // used by all of them.
 function bodyUsable(sp, fdex, ruleTable, ctx) {
 	if (!sp || !sp.exists) return false;
+	if (sp.isNonstandard === 'Future') return false;
 	if (ruleTable.check('pokemon:' + sp.id) === 'banned') return false;
 	if (ruleTable.check('basepokemon:' + toId(sp.baseSpecies)) === 'banned') return false;
 	if (ctx && ctx.blocks && ctx.blocks.species.has(sp.id)) return false;
