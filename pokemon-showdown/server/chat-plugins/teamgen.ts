@@ -1,8 +1,8 @@
 import { Net, Utils } from '../../lib';
 
-const TEAMGEN_TIMEOUT = 45 * 1000;
+const TEAMGEN_TIMEOUT = 60 * 1000;
 
-function teamgenUrl(): string | null {
+export function teamgenUrl(): string | null {
 	if (Config.teamgenurl) return Config.teamgenurl;
 	if (!Config.replayuploadurl) return null;
 	try {
@@ -12,10 +12,6 @@ function teamgenUrl(): string | null {
 	}
 }
 
-function canGenerateTeam(user: User, room: Room | null) {
-	return room ? room.auth.atLeast(user, '+') : Users.globalAuth.atLeast(user, '+');
-}
-
 function teamBox(formatName: string, team: PokemonSet[], dex: ModdedDex) {
 	const sets = team.map(set => {
 		set.moves = set.moves.map(move => dex.moves.get(move).name);
@@ -23,7 +19,7 @@ function teamBox(formatName: string, team: PokemonSet[], dex: ModdedDex) {
 		const label = Utils.escapeHTML(set.name || set.species);
 		return `<details class="details"><summary>${label}</summary>${Utils.escapeHTML(Teams.exportSet(set))}<br /></details>`;
 	}).join('');
-	return `<strong>Team for ${Utils.escapeHTML(formatName)}</strong>:${sets}`;
+	return `<strong>Team for ${formatName}</strong>:${sets}`;
 }
 
 async function fetchGeneratedTeam(formatid: string): Promise<PokemonSet[]> {
@@ -33,14 +29,14 @@ async function fetchGeneratedTeam(formatid: string): Promise<PokemonSet[]> {
 	try {
 		raw = await Net(url).get({ query: { format: formatid }, timeout: TEAMGEN_TIMEOUT });
 	} catch (err: any) {
-		raw = err?.body || '';
-		if (!raw) throw new Chat.ErrorMessage(`The team generator could not be reached. Try again in a moment.`);
+		throw new Chat.ErrorMessage(`The team generator could not be reached. Try again in a moment.`);
+		throw new Error('Team generator [async] crashed or unreachable');
 	}
 	let data: AnyObject;
 	try {
 		data = JSON.parse(raw);
 	} catch {
-		throw new Chat.ErrorMessage(`The team generator sent back something unreadable. Try again in a moment.`);
+		throw new Chat.ErrorMessage(`The team generator sent malformed data. Try again in a moment.`);
 	}
 	if (data.error || !data.team) {
 		throw new Chat.ErrorMessage(`Couldn't build a team: ${data.error || 'the generator returned no team.'}`);
@@ -51,23 +47,22 @@ async function fetchGeneratedTeam(formatid: string): Promise<PokemonSet[]> {
 }
 
 export const commands: Chat.ChatCommands = {
-	genteam: 'generateteam',
-	buildteam: 'generateteam',
-	async generateteam(target, room, user) {
-		if (!canGenerateTeam(user, room)) {
-			throw new Chat.ErrorMessage(`/${this.cmd} - Access denied: requires + (voice) or higher.`);
-		}
-		this.runBroadcast(true);
+	async buildteam(target, room, user) {
+		this.checkCan('lock');
+		
+		if (!target) return this.parse('/help buildteam');
+		
+		if (!this.runBroadcast()) return;
 
-		if (!target.trim()) return this.parse('/help generateteam');
 		const format = Dex.formats.get(target);
-		if (format.effectType !== 'Format') throw new Chat.ErrorMessage(`"${target}" is not a recognized format.`);
+		if (!format.exists) throw new Chat.ErrorMessage(`"${target}" is not a recognized format.`);
+		if (format.team) throw new Chat.ErrorMessage(`${format} uses randomized teams. To build a team for it, use /genteam.`);
 		const dex = Dex.forFormat(format);
 
-		const team = format.team ? Teams.getGenerator(format).getTeam() : await fetchGeneratedTeam(format.id);
+		const team = await fetchGeneratedTeam(format.id);
 		this.sendReplyBox(teamBox(format.name, team, dex));
 	},
-	generateteamhelp: [
-		`/genteam [format] - Generates a team for the given format, random or bring-your-own. Also /buildteam. Use !genteam to show it to the room. Requires: + % @ # ~`,
+	buildteamhelp: [
+		`/buildteam [format] - Generates a team for the given format using the Teambuilder Team Generator. % @ # ~`,
 	],
 };
