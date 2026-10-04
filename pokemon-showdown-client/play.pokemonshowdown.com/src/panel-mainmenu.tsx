@@ -29,6 +29,7 @@ export type RoomInfo = {
 export class MainMenuRoom extends PSRoom {
 	override readonly classType: string = 'mainmenu';
 	listeners: Record<string, ((response: any) => void)[] | null> = {};
+	roomauthJoinedFor = '';
 	userdetailsCache: {
 		[userid: string]: {
 			userid: ID,
@@ -147,6 +148,18 @@ export class MainMenuRoom extends PSRoom {
 			void Dex.loadTextData().then(() => PS.updateTranslatedText());
 			PS.user.setName(fullName, named, avatar);
 			PS.teams.loadRemoteTeams();
+			if (named && this.roomauthJoinedFor !== PS.user.userid) {
+				this.roomauthJoinedFor = PS.user.userid;
+				void this.makeQuery('roomauth').then(response => {
+					let added = false;
+					for (const roomid of response?.rooms || []) {
+						if (typeof roomid !== 'string' || !roomid || PS.rooms[roomid]) continue;
+						PS.addRoom({ id: roomid as RoomID, autofocus: false });
+						added = true;
+					}
+					if (added) PS.update();
+				});
+			}
 			return true;
 		} case 'updatechallenges': {
 			const [, challengesBuf] = args;
