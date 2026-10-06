@@ -201,7 +201,8 @@ export const Scripts: ModdedBattleScriptsData = {
 			}
 			return hitResults;
 		},
-		calcRecoilDamage(damageDealt, move) {
+		calcRecoilDamage(damageDealt, move, pokemon) {
+			if (move.id === 'chloroblast') return Math.round(pokemon.maxhp / 2);
 			return this.battle.clampIntRange(Math.floor(damageDealt * move.recoil![0] / move.recoil![1]), 1);
 		},
 	},

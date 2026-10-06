@@ -12,7 +12,7 @@ import type { SecondaryEffect, MoveEventMethods } from './dex-moves';
 
 export interface EventMethods {
 	onDamagingHit?: (this: Battle, damage: number, target: Pokemon, source: Pokemon, move: ActiveMove) => void;
-	onEmergencyExit?: (this: Battle, pokemon: Pokemon) => void;
+	onEmergencyExit?: (this: Battle, originalHp: number, pokemon: Pokemon) => void;
 	onAfterEachBoost?: (this: Battle, boost: SparseBoostsTable, target: Pokemon, source: Pokemon, effect: Effect) => void;
 	onAfterHit?: MoveEventMethods['onAfterHit'];
 	onAfterMega?: (this: Battle, pokemon: Pokemon) => void;
@@ -678,10 +678,10 @@ export class DexConditions {
 		let found;
 		if (id.startsWith('item:')) {
 			const item = this.dex.items.getByID(id.slice(5) as ID);
-			condition = { ...item, id: 'item:' + item.id as ID } as any as Condition;
+			condition = { ...item, id: 'item:' + item.id as ID, noCopy: true, toString: () => item.name } as any as Condition;
 		} else if (id.startsWith('ability:')) {
 			const ability = this.dex.abilities.getByID(id.slice(8) as ID);
-			condition = { ...ability, id: 'ability:' + ability.id as ID } as any as Condition;
+			condition = { ...ability, id: 'ability:' + ability.id as ID, noCopy: true, toString: () => ability.name } as any as Condition;
 		} else if (this.dex.data.Rulesets.hasOwnProperty(id)) {
 			condition = this.dex.formats.get(id) as any as Condition;
 			// formats can't be frozen if they don't have a ruleTable

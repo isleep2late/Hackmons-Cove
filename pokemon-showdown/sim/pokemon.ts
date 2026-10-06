@@ -904,16 +904,21 @@ export class Pokemon {
 		return { targets, pressureTargets };
 	}
 
-	ignoringAbility() {
+	ignoringAbility(abilityid?: string) {
 		if (this.battle.gen >= 5 && !this.isActive) return true;
+		const ability = abilityid ?
+			this.battle.dex.abilities.getByID(toID(abilityid.startsWith('ability:') ? abilityid.slice(8) : abilityid)) :
+			this.getAbility();
 
 		// Certain Abilities won't activate while Transformed, even if they ordinarily couldn't be suppressed (e.g. Disguise)
-		if (this.getAbility().flags['notransform'] && this.transformed) return true;
-		if (this.getAbility().flags['cantsuppress']) return false;
+		if (ability.flags['notransform'] && this.transformed) return true;
+		if (ability.flags['cantsuppress']) return false;
 		if (this.volatiles['gastroacid']) return true;
 
 		// Check if any active pokemon have the ability Neutralizing Gas
-		if (this.hasItem('Ability Shield') || this.ability === ('neutralizinggas' as ID)) return false;
+		if ((this.item === 'abilityshield' || this.volatiles['item:abilityshield']) &&
+			!this.ignoringItem(false, 'abilityshield')) return false;
+		if (this.ability === ('neutralizinggas' as ID)) return false;
 		for (const pokemon of this.battle.getAllActive()) {
 			// can't use hasAbility because it would lead to infinite recursion
 			if (pokemon.ability === ('neutralizinggas' as ID) && !pokemon.volatiles['gastroacid'] &&
@@ -925,13 +930,15 @@ export class Pokemon {
 		return false;
 	}
 
-	ignoringItem(isFling = false) {
-		if (this.getItem().isPrimalOrb) return false;
+	ignoringItem(isFling = false, itemid?: string) {
+		const item = itemid ? this.battle.dex.items.getByID(toID(itemid.startsWith('item:') ? itemid.slice(5) : itemid)) :
+			this.getItem();
+		if (item.isPrimalOrb) return false;
 		if (this.battle.gen >= 5 && !this.isActive) return true;
 		if (this.volatiles['embargo'] || this.battle.field.pseudoWeather['magicroom']) return true;
 		// check Fling first to avoid infinite recursion
 		if (isFling) return this.battle.gen >= 5 && this.hasAbility('klutz');
-		return !this.getItem().ignoreKlutz && this.hasAbility('klutz');
+		return !item.ignoreKlutz && this.hasAbility('klutz');
 	}
 
 	deductPP(move: string | Move, amount?: number | null, target?: Pokemon | null | false) {
@@ -1869,13 +1876,14 @@ export class Pokemon {
 	}
 
 	eatItem(force?: boolean, source?: Pokemon, sourceEffect?: Effect) {
-		if (!this.item) return false;
-		if ((!this.hp && this.item !== 'jabocaberry' && this.item !== 'rowapberry') || !this.isActive) return false;
-
 		if (!sourceEffect && this.battle.effect) sourceEffect = this.battle.effect;
+		const extraId = sourceEffect?.effectType === 'Item' && sourceEffect.id.startsWith('item:') ? sourceEffect.id : '';
+		if (extraId ? !this.volatiles[extraId] : !this.item) return false;
+		const item = extraId ? this.battle.dex.items.getByID(extraId.slice(5) as ID) : this.getItem();
+		if ((!this.hp && item.id !== 'jabocaberry' && item.id !== 'rowapberry') || !this.isActive) return false;
+
 		if (!source && this.battle.event?.target) source = this.battle.event.target;
-		const item = this.getItem();
-		if (sourceEffect?.effectType === 'Item' && this.item !== sourceEffect.id && source === this) {
+		if (!extraId && sourceEffect?.effectType === 'Item' && this.item !== sourceEffect.id && source === this) {
 			// if an item is telling us to eat it but we aren't holding it, we probably shouldn't eat what we are holding
 			return false;
 		}
@@ -1885,7 +1893,7 @@ export class Pokemon {
 		) {
 			this.battle.add('-enditem', this, item, '[eat]');
 
-			this.battle.singleEvent('Eat', item, this.itemState, this, source, sourceEffect);
+			this.battle.singleEvent('Eat', item, extraId ? this.volatiles[extraId] : this.itemState, this, source, sourceEffect);
 			this.battle.runEvent('EatItem', this, source, sourceEffect, item);
 
 			if (RESTORATIVE_BERRIES.has(item.id)) {
@@ -1900,11 +1908,15 @@ export class Pokemon {
 				this.pendingStaleness = undefined;
 			}
 
+			this.usedItemThisTurn = true;
+			this.ateBerry = true;
+			if (extraId) {
+				this.loseExtraItem(extraId);
+				return true;
+			}
 			this.lastItem = this.item;
 			this.item = '';
 			this.battle.clearEffectState(this.itemState);
-			this.usedItemThisTurn = true;
-			this.ateBerry = true;
 			this.battle.runEvent('AfterUseItem', this, null, null, item);
 			return true;
 		}
@@ -1912,13 +1924,14 @@ export class Pokemon {
 	}
 
 	useItem(source?: Pokemon, sourceEffect?: Effect) {
-		if ((!this.hp && !this.getItem().isGem) || !this.isActive) return false;
-		if (!this.item) return false;
-
 		if (!sourceEffect && this.battle.effect) sourceEffect = this.battle.effect;
+		const extraId = sourceEffect?.effectType === 'Item' && sourceEffect.id.startsWith('item:') ? sourceEffect.id : '';
+		const item = extraId ? this.battle.dex.items.getByID(extraId.slice(5) as ID) : this.getItem();
+		if ((!this.hp && !item.isGem) || !this.isActive) return false;
+		if (extraId ? !this.volatiles[extraId] : !this.item) return false;
+
 		if (!source && this.battle.event?.target) source = this.battle.event.target;
-		const item = this.getItem();
-		if (sourceEffect?.effectType === 'Item' && this.item !== sourceEffect.id && source === this) {
+		if (!extraId && sourceEffect?.effectType === 'Item' && this.item !== sourceEffect.id && source === this) {
 			// if an item is telling us to eat it but we aren't holding it, we probably shouldn't eat what we are holding
 			return false;
 		}
@@ -1939,12 +1952,16 @@ export class Pokemon {
 				this.battle.boost(item.boosts, this, source, item);
 			}
 
-			this.battle.singleEvent('Use', item, this.itemState, this, source, sourceEffect);
+			this.battle.singleEvent('Use', item, extraId ? this.volatiles[extraId] : this.itemState, this, source, sourceEffect);
 
+			this.usedItemThisTurn = true;
+			if (extraId) {
+				this.loseExtraItem(extraId);
+				return true;
+			}
 			this.lastItem = this.item;
 			this.item = '';
 			this.battle.clearEffectState(this.itemState);
-			this.usedItemThisTurn = true;
 			this.battle.runEvent('AfterUseItem', this, null, null, item);
 			return true;
 		}
@@ -2002,7 +2019,13 @@ export class Pokemon {
 		}
 		const itemid = toID(item);
 		if (this.item !== itemid && !this.volatiles['item:' + itemid]) return false;
-		return !this.ignoringItem();
+		return !this.ignoringItem(false, itemid);
+	}
+
+	loseExtraItem(effectid: string) {
+		delete this.volatiles[effectid];
+		if (!this.m.usedExtraItems) this.m.usedExtraItems = [];
+		if (!this.m.usedExtraItems.includes(effectid)) this.m.usedExtraItems.push(effectid);
 	}
 
 	clearItem() {
@@ -2060,7 +2083,7 @@ export class Pokemon {
 		}
 		const abilityid = toID(ability);
 		if (this.ability !== abilityid && !this.volatiles['ability:' + abilityid]) return false;
-		return !this.ignoringAbility();
+		return !this.ignoringAbility(abilityid);
 	}
 
 	clearAbility() {
@@ -2254,14 +2277,13 @@ export class Pokemon {
 		if ('gravity' in this.battle.field.pseudoWeather) return true;
 		if ('ingrain' in this.volatiles && this.battle.gen >= 4) return true;
 		if ('smackdown' in this.volatiles) return true;
-		const item = (this.ignoringItem() ? '' : this.item);
-		if (item === 'ironball') return true;
+		if (this.hasItem('ironball')) return true;
 		// If a Fire/Flying type uses Burn Up and Roost, it becomes ???/Flying-type, but it's still grounded.
 		if (!negateImmunity && this.hasType('Flying') && !(this.hasType('???') && 'roost' in this.volatiles)) return false;
 		if (this.hasAbility(['levitate', 'eelevate']) && !this.battle.suppressingAbility(this)) return null;
 		if ('magnetrise' in this.volatiles) return false;
 		if ('telekinesis' in this.volatiles) return false;
-		return item !== 'airballoon';
+		return !this.hasItem('airballoon');
 	}
 
 	isSemiInvulnerable() {

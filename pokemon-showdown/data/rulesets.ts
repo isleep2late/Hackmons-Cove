@@ -325,6 +325,7 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 					const extraItem = this.dex.items.get(itemName);
 					if (!extraItem.exists || extraItem.id === pokemon.item) continue;
 					const effect = 'item:' + extraItem.id;
+					if (pokemon.m.usedExtraItems?.includes(effect)) continue;
 					delete pokemon.volatiles[effect];
 					pokemon.addVolatile(effect);
 				}

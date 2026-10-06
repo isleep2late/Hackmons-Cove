@@ -288,7 +288,7 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 				this.effectState.target.removeVolatile('focussash');
 			},
 			onEnd(target) {
-				if (this.effectState.activated) target.useItem();
+				if (this.effectState.activated) target.useItem(undefined, this.effectState.sourceEffect);
 			},
 		},
 		shortDesc: "If holder is at full HP, it survives every hit of that one move with 1 HP. Single use.",

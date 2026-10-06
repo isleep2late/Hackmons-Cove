@@ -417,13 +417,12 @@ export const Scripts: ModdedBattleScriptsData = {
 				if (this.battle.gen < 5) {
 					this.battle.runEvent('DamagingHit', damagedTargets, pokemon, move, damagedDamage);
 				}
-				if (pokemon.hp && pokemon.hp <= pokemon.maxhp / 2 && pokemonOriginalHP > pokemon.maxhp / 2) {
-					this.battle.runEvent('EmergencyExit', pokemon);
-				}
+				this.battle.runEvent('EmergencyExit', pokemon, undefined, undefined, pokemonOriginalHP);
 			}
 
 			return [damage, targets];
 		},
+		// Sheer Force doesn't suppress AfterMoveSecondary events: Berserk, Pickpocket, Emergency Exit, Eject Button, etc.
 		// Parental Bond shouldn't announce hit count if it only hits once
 		hitStepMoveHitLoop(targets, pokemon, move) {
 			let damage: (number | boolean | undefined)[] = [];
@@ -540,7 +539,7 @@ export const Scripts: ModdedBattleScriptsData = {
 					this.battle.damage(Math.round(pokemon.maxhp / 2), pokemon, pokemon, this.dex.conditions.get(move.id), true);
 					move.mindBlownRecoil = false;
 					if (pokemon.hp <= pokemon.maxhp / 2 && hpBeforeRecoil > pokemon.maxhp / 2) {
-						this.battle.runEvent('EmergencyExit', pokemon, pokemon);
+						this.battle.runEvent('EmergencyExit', pokemon, pokemon, undefined, hpBeforeRecoil);
 					}
 				}
 				this.battle.eachEvent('Update');
@@ -562,7 +561,7 @@ export const Scripts: ModdedBattleScriptsData = {
 				const hpBeforeRecoil = pokemon.hp;
 				this.battle.damage(this.calcRecoilDamage(move.totalDamage, move, pokemon), pokemon, pokemon, 'recoil');
 				if (pokemon.hp <= pokemon.maxhp / 2 && hpBeforeRecoil > pokemon.maxhp / 2) {
-					this.battle.runEvent('EmergencyExit', pokemon, pokemon);
+					this.battle.runEvent('EmergencyExit', pokemon, pokemon, undefined, hpBeforeRecoil);
 				}
 			}
 
@@ -576,7 +575,7 @@ export const Scripts: ModdedBattleScriptsData = {
 				}
 				this.battle.directDamage(recoilDamage, pokemon, pokemon, { id: 'strugglerecoil' } as Condition);
 				if (pokemon.hp <= pokemon.maxhp / 2 && hpBeforeRecoil > pokemon.maxhp / 2) {
-					this.battle.runEvent('EmergencyExit', pokemon, pokemon);
+					this.battle.runEvent('EmergencyExit', pokemon, pokemon, undefined, hpBeforeRecoil);
 				}
 			}
 
@@ -602,27 +601,17 @@ export const Scripts: ModdedBattleScriptsData = {
 
 			this.afterMoveSecondaryEvent(targetsCopy.filter(val => !!val), pokemon, move);
 
-			if (!(move.hasSheerForce && pokemon.hasAbility('sheerforce'))) {
-				for (const [i, d] of damage.entries()) {
-					// There are no multihit spread moves, so it's safe to use move.totalDamage for multihit moves
-					// The previous check was for `move.multihit`, but that fails for Dragon Darts
-					const curDamage = targets.length === 1 ? move.totalDamage : d;
-					if (typeof curDamage === 'number' && targets[i].hp) {
-						const targetHPBeforeDamage = (targets[i].hurtThisTurn || 0) + curDamage;
-						if (targets[i].hp <= targets[i].maxhp / 2 && targetHPBeforeDamage > targets[i].maxhp / 2) {
-							this.battle.runEvent('EmergencyExit', targets[i], pokemon);
-						}
-					}
+			for (const [i, d] of damage.entries()) {
+				// There are no multihit spread moves, so it's safe to use move.totalDamage for multihit moves
+				// The previous check was for `move.multihit`, but that fails for Dragon Darts
+				const curDamage = targets.length === 1 ? move.totalDamage : d;
+				if (typeof curDamage === 'number' && targets[i].hp) {
+					const targetHPBeforeDamage = (targets[i].hurtThisTurn || 0) + curDamage;
+					this.battle.runEvent('EmergencyExit', targets[i], pokemon, undefined, targetHPBeforeDamage);
 				}
 			}
 
 			return damage;
-		},
-		// Sheer Force doesn't suppress AfterMoveSecondary events: Berserk, Pickpocket, Eject Button, etc.
-		afterMoveSecondaryEvent(targets, pokemon, move) {
-			this.battle.singleEvent('AfterMoveSecondary', move, null, targets[0], pokemon, move);
-			this.battle.runEvent('AfterMoveSecondary', targets, pokemon, move);
-			return undefined;
 		},
 	},
 };
