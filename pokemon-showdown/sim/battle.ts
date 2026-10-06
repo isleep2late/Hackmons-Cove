@@ -106,6 +106,74 @@ type Part = string | number | boolean | Pokemon | Side | Effect | Move | null | 
 // An individual Side's request state is encapsulated in its `activeRequest` field.
 export type RequestState = 'teampreview' | 'move' | 'switch' | '';
 
+interface VolatileLookup {
+	effect: Condition;
+	names: number[] | null;
+}
+
+interface VolatileScan {
+	volatiles: AnyObject;
+	ids: string[];
+	lookups: VolatileLookup[];
+}
+
+const volatileLookups = new WeakMap<object, Map<string, VolatileLookup>>();
+const effectPropertyIndexes = new Map<string, number>();
+let volatileScans: Map<Pokemon, VolatileScan> | null = null;
+let volatileScansActive = false;
+
+function getVolatileLookup(conditions: ModdedDex['conditions'], lookups: Map<string, VolatileLookup>, id: string) {
+	const effect = conditions.getByID(id as ID);
+	let names: number[] | null = null;
+	if (Object.isFrozen(effect)) {
+		names = [];
+		for (let obj: object | null = effect; obj; obj = Object.getPrototypeOf(obj)) {
+			for (const name of Object.getOwnPropertyNames(obj)) {
+				if ((effect as any)[name] === undefined) continue;
+				let index = effectPropertyIndexes.get(name);
+				if (index === undefined) {
+					index = effectPropertyIndexes.size;
+					effectPropertyIndexes.set(name, index);
+				}
+				while (names.length <= (index >> 5)) names.push(0);
+				names[index >> 5] |= 1 << (index & 31);
+			}
+		}
+	}
+	const lookup = { effect, names };
+	lookups.set(id, lookup);
+	return lookup;
+}
+
+function hasEffectProperty(names: number[], index: number | undefined) {
+	return index !== undefined && (index >> 5) < names.length && (names[index >> 5] & (1 << (index & 31))) !== 0;
+}
+
+const EMPTY_VOLATILE_SCAN: VolatileScan = { volatiles: {}, ids: [], lookups: [] };
+
+function getVolatileScan(conditions: ModdedDex['conditions'], pokemon: Pokemon) {
+	const volatiles = pokemon.volatiles;
+	let scan = volatileScans?.get(pokemon);
+	if (scan && scan.volatiles === volatiles) return scan;
+	scan = undefined;
+	let lookups: Map<string, VolatileLookup> | undefined;
+	for (const id in volatiles) {
+		if (!scan || !lookups) {
+			scan = { volatiles, ids: [], lookups: [] };
+			lookups = volatileLookups.get(conditions);
+			if (!lookups) {
+				lookups = new Map();
+				volatileLookups.set(conditions, lookups);
+			}
+		}
+		scan.ids.push(id);
+		scan.lookups.push(lookups.get(id) || getVolatileLookup(conditions, lookups, id));
+	}
+	if (!scan) return EMPTY_VOLATILE_SCAN;
+	if (volatileScansActive && scan.ids.length > 8) (volatileScans ||= new Map()).set(pokemon, scan);
+	return scan;
+}
+
 export class Battle {
 	readonly id: ID;
 	readonly debugMode: boolean;
@@ -363,8 +431,12 @@ export class Battle {
 	}
 
 	suppressingAbility(target?: Pokemon) {
-		return this.activePokemon && this.activePokemon.isActive && (this.activePokemon !== target || this.gen < 8) &&
-			this.activeMove && this.activeMove.ignoreAbility && !target?.hasItem('Ability Shield');
+		return this.activePokemon?.isActive && (this.activePokemon !== target || this.gen < 8) &&
+			this.activeMove?.ignoreAbility && !target?.hasItem('Ability Shield');
+	}
+
+	suppressingSecondaries() {
+		return this.activeMove?.hasSheerForce && this.activePokemon?.hasAbility('sheerforce');
 	}
 
 	setActiveMove(move?: ActiveMove | null, pokemon?: Pokemon | null, target?: Pokemon | null) {
@@ -605,11 +677,12 @@ export class Battle {
 			return relayVar;
 		}
 		if (eventid !== 'Start' && eventid !== 'TakeItem' && eventid !== 'SetAbility' && effect.effectType === 'Item' &&
-			(target instanceof Pokemon) && target.ignoringItem()) {
+			(target instanceof Pokemon) && target.ignoringItem(false, effect.id.startsWith('item:') ? effect.id : undefined)
+		) {
 			this.debug(eventid + ' handler suppressed by Embargo, Klutz or Magic Room');
 			return relayVar;
 		}
-		if (eventid !== 'End' && effect.effectType === 'Ability' && (target instanceof Pokemon) && target.ignoringAbility()) {
+		if (eventid !== 'End' && effect.effectType === 'Ability' && (target instanceof Pokemon) && target.ignoringAbility(effect.id)) {
 			this.debug(eventid + ' handler suppressed by Gastro Acid or Neutralizing Gas');
 			return relayVar;
 		}
@@ -774,7 +847,15 @@ export class Battle {
 		if (!target) target = this;
 		let effectSource = null;
 		if (source instanceof Pokemon) effectSource = source;
-		const handlers = this.findEventHandlers(target, eventid, effectSource);
+		const scansWereActive = volatileScansActive;
+		volatileScansActive = true;
+		let handlers: EventListener[];
+		try {
+			handlers = this.findEventHandlers(target, eventid, effectSource);
+		} finally {
+			volatileScansActive = scansWereActive;
+			if (!scansWereActive) volatileScans = null;
+		}
 		if (onEffect) {
 			if (!sourceEffect) throw new Error("onEffect passed without an effect");
 			const callback = (sourceEffect as any)[`on${eventid}`];
@@ -872,14 +953,15 @@ export class Battle {
 				}
 			}
 			if (eventid !== 'Start' && eventid !== 'SwitchIn' && eventid !== 'TakeItem' &&
-				effect.effectType === 'Item' && (effectHolder instanceof Pokemon) && effectHolder.ignoringItem()) {
+				effect.effectType === 'Item' && (effectHolder instanceof Pokemon) &&
+				effectHolder.ignoringItem(false, effect.id.startsWith('item:') ? effect.id : undefined)) {
 				if (eventid !== 'Update') {
 					this.debug(eventid + ' handler suppressed by Embargo, Klutz or Magic Room');
 				}
 				continue;
 			} else if (
 				eventid !== 'End' && effect.effectType === 'Ability' &&
-				(effectHolder instanceof Pokemon) && effectHolder.ignoringAbility()
+				(effectHolder instanceof Pokemon) && effectHolder.ignoringAbility(effect.id)
 			) {
 				if (eventid !== 'Update') {
 					this.debug(eventid + ' handler suppressed by Gastro Acid or Neutralizing Gas');
@@ -1104,10 +1186,20 @@ export class Battle {
 				effect: status, callback, state: pokemon.statusState, end: pokemon.clearStatus, effectHolder: pokemon,
 			}, callbackName));
 		}
-		for (const id in pokemon.volatiles) {
-			const volatileState = pokemon.volatiles[id];
-			const volatile = this.dex.conditions.getByID(id as ID);
-			callback = this.getCallback(pokemon, volatile, callbackName);
+		const filter = this.getCallback === Battle.prototype.getCallback;
+		const scan = getVolatileScan(this.dex.conditions, pokemon);
+		const nameIndex = scan.ids.length ? effectPropertyIndexes.get(callbackName) : undefined;
+		const startIndex = scan.ids.length && callbackName === 'onSwitchIn' ? effectPropertyIndexes.get('onStart') : undefined;
+		for (let i = 0; i < scan.ids.length; i++) {
+			const volatile = scan.lookups[i].effect;
+			const names = filter ? scan.lookups[i].names : null;
+			if (names && !hasEffectProperty(names, nameIndex) && !hasEffectProperty(names, startIndex)) {
+				if (!getKey) continue;
+				callback = undefined;
+			} else {
+				callback = this.getCallback(pokemon, volatile, callbackName);
+			}
+			const volatileState = pokemon.volatiles[scan.ids[i]];
 			if (callback !== undefined || (getKey && volatileState[getKey])) {
 				handlers.push(this.resolvePriority({
 					effect: volatile, callback, state: volatileState, end: pokemon.removeVolatile, effectHolder: pokemon,
@@ -1681,7 +1773,7 @@ export class Battle {
 
 		const dynamaxEnding: Pokemon[] = [];
 		for (const pokemon of this.getAllActive()) {
-			if (pokemon.volatiles['dynamax']?.turns === 3) {
+			if (pokemon.volatiles['dynamax']?.turns <= 0) {
 				dynamaxEnding.push(pokemon);
 			}
 		}
@@ -3049,6 +3141,7 @@ export class Battle {
 						for (const itemName of pokemon.set.phItems.split('/')) {
 							const extraItem = this.dex.items.get(itemName);
 							if (!extraItem.exists || extraItem.id === pokemon.item) continue;
+							if (pokemon.m.usedExtraItems?.includes('item:' + extraItem.id)) continue;
 							pokemon.addVolatile('item:' + extraItem.id);
 						}
 					}
@@ -3177,7 +3270,7 @@ export class Battle {
 			this.add('');
 			this.clearActiveMove(true);
 			this.updateSpeed();
-			residualPokemon = this.getAllActive().map(pokemon => [pokemon, pokemon.getUndynamaxedHP()] as const);
+			residualPokemon = this.getAllActive().map(pokemon => [pokemon, pokemon.hp] as const);
 			this.fieldEvent('Residual');
 			if (!this.ended) this.add('upkeep');
 			break;
@@ -3225,18 +3318,12 @@ export class Battle {
 		if (this.gen >= 5 && action.choice !== 'start') {
 			this.eachEvent('Update');
 			for (const [pokemon, originalHP] of residualPokemon) {
-				const maxhp = pokemon.getUndynamaxedHP(pokemon.maxhp);
-				if (pokemon.hp && pokemon.getUndynamaxedHP() <= maxhp / 2 && originalHP > maxhp / 2) {
-					this.runEvent('EmergencyExit', pokemon);
-				}
+				this.runEvent('EmergencyExit', pokemon, undefined, undefined, originalHP);
 			}
 		}
 
 		if (action.choice === 'runSwitch') {
-			const pokemon = action.pokemon;
-			if (pokemon.hp && pokemon.hp <= pokemon.maxhp / 2 && pokemonOriginalHP! > pokemon.maxhp / 2) {
-				this.runEvent('EmergencyExit', pokemon);
-			}
+			this.runEvent('EmergencyExit', action.pokemon, undefined, undefined, pokemonOriginalHP!);
 		}
 
 		const switches = this.sides.map(

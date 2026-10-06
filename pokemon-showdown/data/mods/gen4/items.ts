@@ -182,7 +182,7 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 				}
 			},
 			onAfterMoveSecondary(target) {
-				if (this.effectState.activated) target.useItem();
+				if (this.effectState.activated) target.useItem(undefined, this.effectState.sourceEffect);
 				target.removeVolatile('focussash');
 			},
 		},

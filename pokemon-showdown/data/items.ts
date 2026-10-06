@@ -196,6 +196,10 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 		// airborneness implemented in sim/pokemon.js:Pokemon#isGrounded
 		onDamagingHit(damage, target, source, move) {
 			this.add('-enditem', target, 'Air Balloon');
+			if (this.effect.id.startsWith('item:')) {
+				target.loseExtraItem(this.effect.id);
+				return;
+			}
 			target.item = '';
 			this.clearEffectState(target.itemState);
 			this.runEvent('AfterUseItem', target, null, null, this.dex.items.get('airballoon'));
@@ -204,6 +208,10 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 			this.debug('effect: ' + effect.id);
 			if (effect.effectType === 'Move') {
 				this.add('-enditem', target, 'Air Balloon');
+				if (this.effect.id.startsWith('item:')) {
+					target.loseExtraItem(this.effect.id);
+					return;
+				}
 				target.item = '';
 				this.clearEffectState(target.itemState);
 				this.runEvent('AfterUseItem', target, null, null, this.dex.items.get('airballoon'));
@@ -6135,6 +6143,11 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 		},
 		onHit(target, source, move) {
 			if (source && source !== target && !source.item && move && this.checkMoveMakesContact(move, source, target)) {
+				if (this.effect.id.startsWith('item:')) {
+					target.loseExtraItem(this.effect.id);
+					source.setItem('stickybarb');
+					return;
+				}
 				const barb = target.takeItem();
 				if (!barb) return; // Gen 4 Multitype
 				source.setItem(barb);

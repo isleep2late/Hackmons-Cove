@@ -144,7 +144,7 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 		onDamage(damage, target, source, effect) {
 			this.effectState.checkedAngerShell = !(
 				effect.effectType === "Move" && !effect.multihit &&
-				!(effect.hasSheerForce && source.hasAbility('sheerforce'))
+				!this.suppressingSecondaries()
 			);
 		},
 		onTryEatItem(item) {
@@ -415,7 +415,7 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 		onDamage(damage, target, source, effect) {
 			this.effectState.checkedBerserk = !(
 				effect.effectType === "Move" && !effect.multihit &&
-				!(effect.hasSheerForce && source.hasAbility('sheerforce'))
+				!this.suppressingSecondaries()
 			);
 		},
 		onTryEatItem(item) {
@@ -1248,7 +1248,8 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 		num: 302,
 	},
 	emergencyexit: {
-		onEmergencyExit(target) {
+		onEmergencyExit(originalHp, target) {
+			if (!target.hp || target.hp > target.maxhp / 2 || originalHp <= target.maxhp / 2) return;
 			if (!this.canSwitch(target.side) || target.forceSwitchFlag || target.switchFlag) return;
 			for (const side of this.sides) {
 				for (const active of side.active) {
@@ -4621,9 +4622,8 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 	},
 	stickyhold: {
 		onTakeItem(item, pokemon, source) {
-			if (!this.activeMove) throw new Error("Battle.activeMove is null");
 			if (!pokemon.hp || pokemon.item === 'stickybarb') return;
-			if ((source && source !== pokemon) || this.activeMove.id === 'knockoff') {
+			if ((source && source !== pokemon) || this.activeMove?.id === 'knockoff') {
 				this.add('-activate', pokemon, 'ability: Sticky Hold');
 				return false;
 			}
@@ -5492,7 +5492,8 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 		num: 73,
 	},
 	wimpout: {
-		onEmergencyExit(target) {
+		onEmergencyExit(originalHp, target) {
+			if (!target.hp || target.hp > target.maxhp / 2 || originalHp <= target.maxhp / 2) return;
 			if (!this.canSwitch(target.side) || target.forceSwitchFlag || target.switchFlag) return;
 			for (const side of this.sides) {
 				for (const active of side.active) {
