@@ -145,14 +145,17 @@ async function updateserver(context: Chat.CommandContext, codePath: string) {
 }
 
 async function launchRestartProcess(context: Chat.CommandContext) {
+	const args = ['pokemon-showdown', 'start'];
+	const portArg = process.argv.find(arg => /^[0-9]+$/.test(arg));
+	if (portArg) args.push(portArg);
 	try {
-		const child = child_process.spawn(process.execPath, ['pokemon-showdown', 'start'], {
+		const child = child_process.spawn(process.execPath, args, {
 			cwd: FS.ROOT_PATH,
 			detached: true,
 			stdio: ['ignore', 'ignore', 'ignore'],
 		});
 		child.unref();
-		context.stafflog(`Queued auto-restart with ${process.execPath} pokemon-showdown start in ${FS.ROOT_PATH}`);
+		context.stafflog(`Queued auto-restart with ${process.execPath} ${args.join(' ')} in ${FS.ROOT_PATH}`);
 	} catch (err: any) {
 		context.stafflog(`Failed to queue auto-restart: ${err?.message || String(err)}`);
 		throw new Chat.ErrorMessage("The auto-restart process could not be started.");
@@ -162,14 +165,14 @@ async function launchRestartProcess(context: Chat.CommandContext) {
 export async function killServer(context: Chat.CommandContext, target: string, room: Room, user: User, options: { autoRestart?: boolean } = {}) {
 	let noSave = toID(target) === 'nosave';
 	if (!Config.usepostgres) noSave = true;
+	const force = toID(target) === 'force';
 
-	if (Rooms.global.lockdown !== true && noSave) {
-		if (user.avatar !== 'iforgetwhyimhere.png') {
-		throw new Chat.ErrorMessage("For safety reasons, using /kill without saving battles can only be done during lockdown."); }
+	if (Rooms.global.lockdown !== true && noSave && !force) {
+		throw new Chat.ErrorMessage(`For safety reasons, using /${context.cmd} without saving battles can only be done during lockdown. Use /${context.cmd} force to override.`);
 	}
 
 	if (Monitor.updateServerLock) {
-		throw new Chat.ErrorMessage("Wait for /updateserver to finish before using /kill.");
+		throw new Chat.ErrorMessage(`Wait for /updateserver to finish before using /${context.cmd}.`);
 	}
 
 	if (options.autoRestart) {
@@ -198,7 +201,7 @@ export async function killServer(context: Chat.CommandContext, target: string, r
 		process.exit();
 	}
 
-	logRoom.roomlog(`${user.name} used ${options.autoRestart ? '/restartserver' : '/kill'}`);
+	logRoom.roomlog(`${user.name} used ${options.autoRestart ? '/restartserver' : '/kill'}${force ? ' force' : ''}`);
 
 	void logRoom.log.roomlogStream.writeEnd().then(() => {
 		process.exit();
@@ -1367,13 +1370,14 @@ export const commands: Chat.ChatCommands = {
 	},
 
 	async kill(target, room, user) {
-		this.canUseConsole;
+		this.canUseConsole();
 		// @ts-expect-error
 		await killServer(this, target, room, user);
 	},
 	killhelp: [
 		`/kill - kills the server. Use the argument \`nosave\` to prevent the saving of battles.`,
-		` If this argument is used, the server must be in lockdown. Requires: ~`,
+		` If this argument is used, the server must be in lockdown. Requires: console access`,
+		`/kill force - kills the server outside lockdown without saving battles. Requires: console access`,
 	],
 
 	loadbanlist(target, room, user, connection) {

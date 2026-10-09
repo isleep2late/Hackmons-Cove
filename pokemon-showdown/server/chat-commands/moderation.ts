@@ -242,15 +242,14 @@ export const commands: Chat.ChatCommands = {
 				nextSymbol in Config.groups && oldSymbol in Config.groups &&
 				nextGroup.rank < Config.groups[oldSymbol].rank
 			) {
-				if (targetUser && room.users[targetUser.id] && !nextGroup.modlog) {
-				if (oldSymbol === '\u2800') {
+				if (targetUser && room.users[targetUser.id] && !nextGroup.modlog && oldSymbol === '\u2800') {
 					// if the user can't see the demotion message (i.e. rank < %), it is shown in the chat
 					targetUser.send(`>${room.roomid}\n(You were demoted to Room ${nextGroupName} by ${user.name}.)`);
 				}
 				this.privateModAction(`${name} was demoted to Room ${nextGroupName} by ${user.name}.`);
 				this.modlog(`ROOM${nextGroupName.toUpperCase()}`, userid, '(demote)');
 				shouldPopup?.popup(`You were demoted to Room ${nextGroupName} by ${user.name} in ${room.roomid}.`);
-			} } else if (nextSymbol === '#') {
+			} else if (nextSymbol === '#') {
 				this.addModAction(`${name} was promoted to ${nextGroupName} by ${user.name}.`);
 				const logRoom = Rooms.get(room.settings.isPrivate === true ? 'upperstaff' : 'staff');
 				logRoom?.addByUser(user, `<<${room.roomid}>> ${name} was appointed Room Owner by ${user.name}.`);

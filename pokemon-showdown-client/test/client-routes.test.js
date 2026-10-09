@@ -39,6 +39,8 @@ describe('old and new client routes', () => {
 	let staticDir;
 	let replaysDir;
 	let avatarsRoot;
+	let tokenDir;
+	let replayToken;
 
 	before(async () => {
 		staticDir = fs.mkdtempSync(path.join(os.tmpdir(), 'phnn-client-routes-'));
@@ -68,12 +70,15 @@ describe('old and new client routes', () => {
 		fs.mkdirSync(path.join(avatarsRoot, 'avatars'));
 		fs.writeFileSync(path.join(avatarsRoot, 'avatars/a.png'), 'PNG');
 		fs.writeFileSync(path.join(avatarsRoot, 'avatars.json'), 'SIBLING SECRET');
+		tokenDir = fs.mkdtempSync(path.join(os.tmpdir(), 'phnn-client-routes-token-'));
+		replayToken = crypto.randomBytes(32).toString('hex');
+		fs.writeFileSync(path.join(tokenDir, 'replay-upload-token'), replayToken + '\n', { mode: 0o600 });
 		const port = await freePort();
 		child = spawn(process.execPath, [frontServer], {
 			env: {
 				...process.env, PHNN_CLIENT_PORT: String(port), PHNN_GAME_PORT: String(await freePort()), PHNN_STATIC_DIR: staticDir,
 				PHNN_REPLAYS_DIR: replaysDir, PHNN_LOGIN_ORIGIN: 'https://127.0.0.1', PHNN_AVATARS_DIR: path.join(avatarsRoot, 'avatars'),
-				PHNN_ASSET_SETTLE_MS: String(SETTLE_MS),
+				PHNN_ASSET_SETTLE_MS: String(SETTLE_MS), PHNN_REPLAY_TOKEN_FILE: path.join(tokenDir, 'replay-upload-token'),
 			},
 			stdio: ['ignore', 'pipe', 'pipe'],
 		});
@@ -100,6 +105,7 @@ describe('old and new client routes', () => {
 		if (staticDir) fs.rmSync(staticDir + '-sibling', { recursive: true, force: true });
 		if (avatarsRoot) fs.rmSync(avatarsRoot, { recursive: true, force: true });
 		if (replaysDir) fs.rmSync(replaysDir, { recursive: true, force: true });
+		if (tokenDir) fs.rmSync(tokenDir, { recursive: true, force: true });
 	});
 
 	function request(pathname, { method = 'GET', headers = {}, body } = {}) {
@@ -264,11 +270,73 @@ describe('old and new client routes', () => {
 			const res = await request(p, {
 				method: 'POST',
 				headers: { 'content-type': 'application/x-www-form-urlencoded' },
-				body: new URLSearchParams({ act: 'uploadreplay', id, log: '|tier|Route Test' }).toString(),
+				body: new URLSearchParams({ act: 'uploadreplay', id, log: '|tier|Route Test', token: replayToken }).toString(),
 			});
 			assert.equal(res.body, 'success:' + id, p);
 			assert.ok(fs.existsSync(path.join(replaysDir, id + '.log')), p);
 		}
+	});
+
+	it('says at startup that the replay key loaded, without printing it', () => {
+		assert.ok(serverOut.includes('replay uploads: key loaded'), serverOut);
+		assert.ok(!serverOut.includes(replayToken));
+	});
+
+	it('refuses a replay upload without the right key', async () => {
+		const wrongKey = crypto.randomBytes(32).toString('hex');
+		for (const [label, extra, id] of [
+			['no key', {}, 'gen9keytest-1'], ['empty key', { token: '' }, 'gen9keytest-2'],
+			['wrong key', { token: wrongKey }, 'gen9keytest-3'], ['short key', { token: replayToken.slice(0, 10) }, 'gen9keytest-4'],
+		]) {
+			const res = await request('/action.php', {
+				method: 'POST',
+				headers: { 'content-type': 'application/x-www-form-urlencoded', 'cf-connecting-ip': '198.51.100.21' },
+				body: new URLSearchParams({ act: 'uploadreplay', id, log: '|tier|Key Test', ...extra }).toString(),
+			});
+			assert.equal(res.status, 403, label);
+			assert.equal(res.body, 'not authorized', label);
+			assert.ok(!fs.existsSync(path.join(replaysDir, id + '.log')), label);
+		}
+	});
+
+	it('answers a replay upload that is not a POST with 405 and never forwards it', async () => {
+		const form = new URLSearchParams({ act: 'uploadreplay', id: 'gen9methodtest-1', log: '|tier|Method Test', token: replayToken }).toString();
+		for (const [label, p, opts] of [
+			['GET with a body', '/action.php', { method: 'GET', body: form, headers: { 'content-type': 'application/x-www-form-urlencoded', 'content-length': String(Buffer.byteLength(form)) } }],
+			['GET with a query', '/action.php?' + form, { method: 'GET' }],
+			['PUT', '/~~showdown/action.php', { method: 'PUT', body: form, headers: { 'content-type': 'application/x-www-form-urlencoded' } }],
+			['DELETE', '/action.php?' + form, { method: 'DELETE' }],
+		]) {
+			const res = await request(p, opts);
+			assert.equal(res.status, 405, label);
+			assert.equal(res.headers['allow'], 'POST', label);
+			assert.equal(res.body, 'method not allowed', label);
+		}
+		assert.ok(!fs.existsSync(path.join(replaysDir, 'gen9methodtest-1.log')));
+	});
+
+	it('never rate-limits uploads that carry the key, only keyless ones', async () => {
+		const upload = (id, extra) => request('/action.php', {
+			method: 'POST',
+			headers: { 'content-type': 'application/x-www-form-urlencoded', 'cf-connecting-ip': '198.51.100.22' },
+			body: new URLSearchParams({ act: 'uploadreplay', id, log: '|tier|Rate Test', ...extra }).toString(),
+		});
+		for (let i = 0; i < 35; i++) {
+			const res = await upload(`gen9ratetest-${i}`, { token: replayToken });
+			assert.equal(res.body, `success:gen9ratetest-${i}`, `keyed upload ${i}`);
+		}
+		for (let i = 0; i < 30; i++) {
+			const res = await upload(`gen9ratetest-nokey-${i}`, {});
+			assert.equal(res.status, 403, `keyless upload ${i}`);
+			assert.equal(res.body, 'not authorized', `keyless upload ${i}`);
+		}
+		for (const extra of [{}, { token: 'x'.repeat(64) }]) {
+			const res = await upload('gen9ratetest-nokey-last', extra);
+			assert.equal(res.status, 429);
+			assert.equal(res.body, 'too many uploads');
+		}
+		const keyed = await upload('gen9ratetest-after', { token: replayToken });
+		assert.equal(keyed.body, 'success:gen9ratetest-after');
 	});
 
 	it('answers a malformed path or Host header with 400 instead of hanging', async () => {
@@ -491,11 +559,158 @@ describe('old and new client routes', () => {
 		const res = await request('/action.php', {
 			method: 'POST',
 			headers: { 'content-type': 'application/x-www-form-urlencoded' },
-			body: new URLSearchParams({ act: 'uploadreplay', id, log: '|t:|-9000000000000000\n|player|p1|A|1\n|tier|Route Test\n|start' }).toString(),
+			body: new URLSearchParams({ act: 'uploadreplay', id, log: '|t:|-9000000000000000\n|player|p1|A|1\n|tier|Route Test\n|start', token: replayToken }).toString(),
 		});
 		assert.equal(res.body, 'success:' + id);
 		const list = await request('/replays/');
 		assert.equal(list.status, 200);
 		assert.ok(list.body.includes(id));
+	});
+});
+
+describe('replay upload key file', () => {
+	let keyDir;
+	const started = [];
+
+	before(() => {
+		keyDir = fs.mkdtempSync(path.join(os.tmpdir(), 'phnn-replay-key-'));
+		fs.mkdirSync(path.join(keyDir, 'static'));
+	});
+
+	after(() => {
+		for (const proc of started) proc.kill('SIGTERM');
+		if (keyDir) fs.rmSync(keyDir, { recursive: true, force: true });
+	});
+
+	async function startFront(keyFile) {
+		const port = await freePort();
+		const proc = spawn(process.execPath, [frontServer], {
+			env: {
+				...process.env, PHNN_CLIENT_PORT: String(port), PHNN_GAME_PORT: String(await freePort()),
+				PHNN_STATIC_DIR: path.join(keyDir, 'static'), PHNN_REPLAYS_DIR: path.join(keyDir, 'replays'),
+				PHNN_LOGIN_ORIGIN: 'https://127.0.0.1', PHNN_ASSET_WARM: '0', PHNN_REPLAY_TOKEN_FILE: keyFile,
+			},
+			stdio: ['ignore', 'pipe', 'pipe'],
+		});
+		started.push(proc);
+		const out = await new Promise((resolve, reject) => {
+			let text = '';
+			const timer = setTimeout(() => reject(new Error(`front server never came up; got: ${text}`)), 30000);
+			proc.stdout.on('data', chunk => {
+				text += chunk;
+				if (/replay uploads: [^\n]*\n/.test(text)) {
+					clearTimeout(timer);
+					resolve(text);
+				}
+			});
+			proc.on('exit', code => { clearTimeout(timer); reject(new Error(`front server exited with ${code}: ${text}`)); });
+		});
+		const upload = (id, token) => new Promise((resolve, reject) => {
+			const form = new URLSearchParams({ act: 'uploadreplay', id, log: '|tier|Key File Test', token }).toString();
+			const req = http.request(`http://127.0.0.1:${port}/action.php`, {
+				method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' },
+			}, res => {
+				let data = '';
+				res.setEncoding('utf8');
+				res.on('data', chunk => { data += chunk; });
+				res.on('end', () => resolve({ status: res.statusCode, body: data }));
+			});
+			req.on('error', reject);
+			req.end(form);
+		});
+		const stop = () => new Promise(resolve => {
+			if (proc.exitCode !== null) return resolve();
+			proc.once('exit', () => resolve());
+			proc.kill('SIGTERM');
+		});
+		return { out, upload, stop };
+	}
+
+	function keyIn(keyFile) {
+		const key = fs.readFileSync(keyFile, 'utf8').trim();
+		assert.match(key, /^[0-9a-f]{64}$/);
+		assert.equal(fs.statSync(keyFile).mode & 0o777, 0o600);
+		assert.deepEqual(fs.readdirSync(path.dirname(keyFile)), [path.basename(keyFile)]);
+		return key;
+	}
+
+	it('creates a missing key file, mode 600, and uses it', async () => {
+		fs.mkdirSync(path.join(keyDir, 'missing'));
+		const keyFile = path.join(keyDir, 'missing', 'replay-upload-token');
+		const front = await startFront(keyFile);
+		try {
+			assert.ok(front.out.includes('replay uploads: key loaded'), front.out);
+			const key = keyIn(keyFile);
+			assert.ok(!front.out.includes(key));
+			assert.equal((await front.upload('gen9keyfiletest-1', key)).body, 'success:gen9keyfiletest-1');
+		} finally {
+			await front.stop();
+		}
+	});
+
+	it('replaces an empty key file instead of running without a key', async () => {
+		fs.mkdirSync(path.join(keyDir, 'empty'));
+		const keyFile = path.join(keyDir, 'empty', 'replay-upload-token');
+		fs.writeFileSync(keyFile, ' \n', { mode: 0o600 });
+		const front = await startFront(keyFile);
+		try {
+			assert.ok(front.out.includes('replay uploads: key loaded'), front.out);
+			const key = keyIn(keyFile);
+			assert.equal((await front.upload('gen9keyfiletest-2', key)).body, 'success:gen9keyfiletest-2');
+			assert.equal((await front.upload('gen9keyfiletest-3', '')).status, 403);
+		} finally {
+			await front.stop();
+		}
+	});
+
+	it('keeps an existing key across restarts', async () => {
+		const keyFile = path.join(keyDir, 'missing', 'replay-upload-token');
+		const was = fs.statSync(keyFile);
+		const key = fs.readFileSync(keyFile, 'utf8').trim();
+		const front = await startFront(keyFile);
+		try {
+			assert.ok(front.out.includes('replay uploads: key loaded'), front.out);
+			assert.equal(fs.readFileSync(keyFile, 'utf8').trim(), key);
+			assert.equal(fs.statSync(keyFile).ino, was.ino);
+			assert.equal(fs.statSync(keyFile).mtimeMs, was.mtimeMs);
+			assert.equal((await front.upload('gen9keyfiletest-4', key)).body, 'success:gen9keyfiletest-4');
+		} finally {
+			await front.stop();
+		}
+	});
+
+	it('says replay uploads are disabled when no key can be read or made', async () => {
+		const noDirFile = path.join(keyDir, 'nodir', 'replay-upload-token');
+		const front = await startFront(noDirFile);
+		try {
+			assert.ok(front.out.includes(`replay uploads: DISABLED, no readable key at ${noDirFile}`), front.out);
+			assert.ok(!fs.existsSync(path.dirname(noDirFile)));
+			const res = await front.upload('gen9keyfiletest-5', '');
+			assert.equal(res.status, 403);
+			assert.equal(res.body, 'not authorized');
+		} finally {
+			await front.stop();
+		}
+	});
+
+	it('leaves an unreadable key file alone and says uploads are disabled', { skip: process.getuid && process.getuid() === 0 ? 'root can read any file' : false }, async () => {
+		fs.mkdirSync(path.join(keyDir, 'unreadable'));
+		const keyFile = path.join(keyDir, 'unreadable', 'replay-upload-token');
+		fs.writeFileSync(keyFile, 'a'.repeat(64) + '\n', { mode: 0o600 });
+		fs.chmodSync(keyFile, 0o000);
+		const was = fs.statSync(keyFile);
+		const front = await startFront(keyFile);
+		try {
+			assert.ok(front.out.includes(`replay uploads: DISABLED, no readable key at ${keyFile}`), front.out);
+			const now = fs.statSync(keyFile);
+			assert.equal(now.ino, was.ino);
+			assert.equal(now.size, was.size);
+			assert.equal(now.mtimeMs, was.mtimeMs);
+			assert.deepEqual(fs.readdirSync(path.dirname(keyFile)), [path.basename(keyFile)]);
+			assert.equal((await front.upload('gen9keyfiletest-6', 'a'.repeat(64))).status, 403);
+		} finally {
+			await front.stop();
+			fs.chmodSync(keyFile, 0o600);
+		}
 	});
 });

@@ -22,11 +22,19 @@
  * turn this on. When it is unset, GameRoom#uploadReplay keeps upstream behaviour.
  */
 
-import { Net } from '../lib';
+import { FS, Net } from '../lib';
 
 /** The store refuses logs over 1MB; fail early rather than burning the upload. */
 const MAX_REPLAY_LOG = 1024 * 1024;
 const UPLOAD_TIMEOUT = 30000;
+
+export function replayUploadToken(): string {
+	try {
+		return FS(process.env.PHNN_REPLAY_TOKEN_FILE || 'config/replay-upload-token').readIfExistsSync().trim();
+	} catch {
+		return '';
+	}
+}
 
 export interface ReplayUploadRequest {
 	/** endpoint, normally Config.replayuploadurl */
@@ -69,6 +77,9 @@ export function describeReplayUploadFailure(raw: string): string {
 		return "The replay server is rate-limiting uploads right now. Try again in a minute.";
 	case 'error saving replay':
 		return "The replay server couldn't write this replay to disk. Tell an administrator.";
+	case 'not authorized':
+		return "The replay server didn't accept this server's upload key, so this replay can't be uploaded. " +
+			"Tell an administrator.";
 	}
 	return `The replay server rejected this replay: ${summarizeUnknownError(body)}`;
 }
@@ -128,6 +139,7 @@ export async function uploadReplayToStore(request: ReplayUploadRequest): Promise
 				log: request.log,
 				password: request.password || '',
 				serverid: request.serverid || '',
+				token: replayUploadToken(),
 			},
 			timeout: UPLOAD_TIMEOUT,
 		});
@@ -135,7 +147,12 @@ export async function uploadReplayToStore(request: ReplayUploadRequest): Promise
 		// Net throws HttpError for a non-2xx; its body is the store's own message, so a 413
 		// ('replay too large') or 429 ('too many uploads') still gets its specific text.
 		const errorBody = typeof err?.body === 'string' && err.body.trim() ? err.body : null;
-		if (errorBody) return { error: describeReplayUploadFailure(errorBody) };
+		if (errorBody) {
+			if (typeof Monitor !== 'undefined') {
+				Monitor.log(`[replay-upload] ${request.id} rejected: ${errorBody.trim().slice(0, 512)}`);
+			}
+			return { error: describeReplayUploadFailure(errorBody) };
+		}
 		return { error: `Couldn't reach the replay server: ${summarizeUnknownError(err?.message || '')}` };
 	}
 

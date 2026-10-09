@@ -47,6 +47,43 @@ const AVATARS_DIR = path.resolve(__dirname, process.env.PHNN_AVATARS_DIR || '../
 const GAME_HOST = process.env.PHNN_GAME_HOST || 'localhost';
 const GAME_PORT = Number(process.env.PHNN_GAME_PORT || 8000);
 const REPLAYS_DIR = process.env.PHNN_REPLAYS_DIR || '/mnt/hdd2/showdown-replays';
+const REPLAY_TOKEN_FILE = path.resolve(__dirname, process.env.PHNN_REPLAY_TOKEN_FILE || '../../pokemon-showdown/config/replay-upload-token');
+const REPLAY_TOKEN = loadReplayToken();
+
+function loadReplayToken() {
+	let existing = null;
+	try {
+		existing = fs.readFileSync(REPLAY_TOKEN_FILE, 'utf8').trim();
+	} catch (err) {
+		if (!err || err.code !== 'ENOENT') return '';
+	}
+	if (existing) return existing;
+	const tmp = `${REPLAY_TOKEN_FILE}.${process.pid}.${crypto.randomBytes(6).toString('hex')}.tmp`;
+	try {
+		fs.writeFileSync(tmp, crypto.randomBytes(32).toString('hex') + '\n', { mode: 0o600, flag: 'wx' });
+		if (existing === null) {
+			try {
+				fs.linkSync(tmp, REPLAY_TOKEN_FILE);
+			} catch {}
+		} else {
+			fs.renameSync(tmp, REPLAY_TOKEN_FILE);
+		}
+	} catch {}
+	try {
+		fs.rmSync(tmp, { force: true });
+	} catch {}
+	try {
+		return fs.readFileSync(REPLAY_TOKEN_FILE, 'utf8').trim();
+	} catch {
+		return '';
+	}
+}
+
+function replayTokenOk(given) {
+	const expected = Buffer.from(REPLAY_TOKEN);
+	const actual = Buffer.from(given || '');
+	return expected.length > 0 && actual.length === expected.length && crypto.timingSafeEqual(actual, expected);
+}
 const OAUTH_HOST = (process.env.PHNN_OAUTH_HOST || 'play.hackmons.com').toLowerCase();
 
 const MIME = {
@@ -93,10 +130,20 @@ function proxyLogin(req, res, reqUrl) {
 	req.on('end', () => {
 		if (aborted) return;
 		const body = Buffer.concat(chunks);
+		let params = null;
 		try {
-			const params = new URLSearchParams(body.toString('utf8'));
-			if (params.get('act') === 'uploadreplay') { saveReplay(params, res, req); return; }
+			params = new URLSearchParams(body.toString('utf8'));
 		} catch (e) {}
+		const bodyAct = params ? params.get('act') : null;
+		if (req.method !== 'POST' && (bodyAct === 'uploadreplay' || reqUrl.searchParams.get('act') === 'uploadreplay')) {
+			res.writeHead(405, { 'content-type': 'text/plain', 'allow': 'POST' });
+			res.end('method not allowed');
+			return;
+		}
+		if (bodyAct === 'uploadreplay') {
+			saveReplay(params, res, req);
+			return;
+		}
 		const headers = {
 			'content-type': req.headers['content-type'] || 'application/x-www-form-urlencoded',
 			'user-agent': req.headers['user-agent'] || 'phnn-client',
@@ -544,9 +591,14 @@ function replayRateOk(ip) {
 
 function saveReplay(params, res, req) {
 	const ip = (req && (req.headers['cf-connecting-ip'] || req.socket?.remoteAddress)) || 'unknown';
-	if (!replayRateOk(ip)) {
-		res.writeHead(429, { 'content-type': 'text/plain' });
-		res.end('too many uploads');
+	if (!replayTokenOk(params.get('token'))) {
+		if (!replayRateOk(ip)) {
+			res.writeHead(429, { 'content-type': 'text/plain' });
+			res.end('too many uploads');
+			return;
+		}
+		res.writeHead(403, { 'content-type': 'text/plain' });
+		res.end('not authorized');
 		return;
 	}
 	const id = (params.get('id') || '').toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/^[a-z0-9]+-(?=gen\d)/, '').slice(0, 60);
@@ -1202,5 +1254,6 @@ server.listen(PORT, '127.0.0.1', () => {
 	console.log(`  login proxy: /action.php -> ${LOGIN_ORIGIN}/action.php`);
 	console.log(`  game proxy:  /showdown -> ${GAME_HOST}:${GAME_PORT}`);
 	console.log(`  avatars dir: ${AVATARS_DIR} (served at /avatars/)`);
+	console.log(REPLAY_TOKEN ? '  replay uploads: key loaded' : `  replay uploads: DISABLED, no readable key at ${REPLAY_TOKEN_FILE}`);
 	if (process.env.PHNN_ASSET_WARM !== '0') warmAssets();
 });

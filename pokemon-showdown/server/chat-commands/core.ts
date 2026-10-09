@@ -1099,7 +1099,7 @@ export const commands: Chat.ChatCommands = {
 		if (!room.game.forfeit) {
 			throw new Chat.ErrorMessage(this.TL`This kind of game can't be forfeited.`);
 		}
-		room.game.forfeit(user);
+		room.game.forfeit(user, room.bestOf ? ' forfeited the series.' : ' forfeited.');
 	},
 	forfeithelp: [
 		`/forfeit - Forfeits your currently active game, if it supports that.`,
@@ -1206,6 +1206,9 @@ export const commands: Chat.ChatCommands = {
 
 		if (!player) {
 			throw new Chat.ErrorMessage(`This battle does not support having players in ${slot}`);
+		}
+		if (player.eliminated) {
+			throw new Chat.ErrorMessage(this.TL`The player in slot ${slot} has already been eliminated.`);
 		}
 		if (!targetUser) {
 			battle.sendInviteForm(connection);
@@ -1444,7 +1447,7 @@ export const commands: Chat.ChatCommands = {
 	forcetie: 'forcewin',
 	forcewin(target, room, user, connection, cmd) {
 		room = this.requireRoom();
-		if (!isUpperStaff) return;
+		if (!isUpperStaff(user)) this.checkCan('forcewin');
 		if (
 			!room.battle &&
 			!(room.game && typeof (room.game as any).tie === 'function' && typeof (room.game as any).win === 'function')
@@ -1482,12 +1485,6 @@ export const commands: Chat.ChatCommands = {
 				this.popupReply(this.TL`This server requires you to be rank ${groupName} or higher to search for a battle.`);
 				return false;
 			}
-			let custom;
-			const virtual = Ladders.virtualFormats[toID(target)];
-			if (virtual) {
-				target = virtual.format;
-				custom = virtual.custom;
-			}
 			const ladder = Ladders(target);
 			if (!user.registered && Config.forceregisterelo && await ladder.getRating(user.id) >= Config.forceregisterelo) {
 				user.send(
@@ -1496,7 +1493,7 @@ export const commands: Chat.ChatCommands = {
 				return false;
 			}
 			Chat.runHandlers('onLadderSearch', user, connection, ladder.formatid as ID);
-			return ladder.searchBattle(user, connection, custom);
+			return ladder.searchBattle(user, connection);
 		}
 		return Ladders.cancelSearches(user);
 	},

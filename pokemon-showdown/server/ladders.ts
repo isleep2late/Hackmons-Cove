@@ -8,9 +8,12 @@
  * @license MIT
  */
 
-const LadderStore: typeof import('./ladders-remote').LadderStore = (
-	typeof Config === 'object' && Config.remoteladder ? require('./ladders-remote') : require('./ladders-local')
-).LadderStore;
+import { LadderStore as RemoteLadderStore } from './ladders-remote';
+import { LadderStore as LocalLadderStore } from './ladders-local';
+
+const LadderStore: typeof RemoteLadderStore = (
+	typeof Config === 'object' && Config.remoteladder ? RemoteLadderStore : LocalLadderStore
+);
 
 const SECONDS = 1000;
 const PERIODIC_MATCH_INTERVAL = 60 * SECONDS;
@@ -18,10 +21,25 @@ const PERIODIC_MATCH_INTERVAL = 60 * SECONDS;
 import type { ChallengeType } from './room-battle';
 import { BattleReady, BattleChallenge, GameChallenge, BattleInvite, challenges } from './ladders-challenges';
 
+export interface LadderRating {
+	elo: number;
+	oldelo?: number | string;
+	gxe?: number;
+	rpr?: number;
+	rprd?: number;
+	formatid?: string;
+	username?: string;
+	sigma?: number | string;
+	rpsigma?: number | string;
+	isBot?: boolean;
+}
+
+export type LadderUpdate = [score: number, p1rating: LadderRating | null, p2rating: LadderRating | null];
+
 export interface VirtualFormat {
 	format: ID;
 	name: string;
-	custom: string;
+	custom: 'suspect';
 }
 
 /**
@@ -39,8 +57,15 @@ const searches = new Map<string, {
  * attempting to make a match with looser restrictions until one can be made.
  */
 class Ladder extends LadderStore {
+	readonly virtualCustom?: 'suspect';
+	constructor(formatid: string) {
+		const virtual = Ladders.virtualFormats[toID(formatid)];
+		super(virtual?.format || formatid);
+		this.virtualCustom = virtual?.custom;
+	}
+
 	async prepBattle(
-		connection: Connection, challengeType: ChallengeType, team: string | null = null, isRated = false, custom?: string
+		connection: Connection, challengeType: ChallengeType, team: string | null = null, isRated = false
 	) {
 		// all validation for a battle goes through here
 		const user = connection.user;
@@ -67,7 +92,11 @@ class Ladder extends LadderStore {
 			return null;
 		}
 
-		if (user.isUserBot && custom === 'suspect') {
+		if (this.virtualCustom && (challengeType === 'challenge' || challengeType === 'tour')) {
+			connection.popup(`Virtual formats can only be used for ladder searches.`);
+			return null;
+		}
+		if (user.isUserBot && this.virtualCustom === 'suspect') {
 			connection.popup(
 				`Bots are not allowed to queue for suspect tests.\n\n` +
 				`If you feel this designation is in error, please contact staff by typing /helpticket in chat.`
@@ -151,7 +180,7 @@ class Ladder extends LadderStore {
 		const settings = { ...user.battleSettings, team: valResult.slice(1) };
 		user.battleSettings.inviteOnly = false;
 		user.battleSettings.hidden = false;
-		return new BattleReady(userid, this.formatid, settings, rating, challengeType, custom);
+		return new BattleReady(userid, this.formatid, settings, rating, challengeType, this.virtualCustom);
 	}
 
 	static getChallenging(userid: ID) {
@@ -324,7 +353,7 @@ class Ladder extends LadderStore {
 	 * Validates a user's team and fetches their rating for a given format
 	 * before creating a search for a battle.
 	 */
-	async searchBattle(user: User, connection: Connection, custom?: string) {
+	async searchBattle(user: User, connection: Connection) {
 		if (!user.connected) return;
 
 		const format = Dex.formats.get(this.formatid);
@@ -335,7 +364,7 @@ class Ladder extends LadderStore {
 
 		const oldUserid = user.id;
 		const search = await this.prepBattle(
-			connection, format.rated ? 'rated' : 'unrated', null, format.rated !== false, custom
+			connection, format.rated ? 'rated' : 'unrated', null, format.rated !== false
 		);
 
 		if (oldUserid !== user.id) return;
@@ -373,7 +402,7 @@ class Ladder extends LadderStore {
 		for (const [search, user] of matches) {
 			const bots = users.filter(x => x.isUserBot && x.id !== user.id);
 			if (search.custom === 'suspect' && bots.length) return false;
-			if (Config.forcedprefixes.some((p: any) => user.id.startsWith(p.prefix)) && bots.length) return false;
+			if (Config.forcedprefixes?.some((p: any) => user.id.startsWith(p.prefix)) && bots.length) return false;
 		}
 
 		// search must be within range
