@@ -75,7 +75,7 @@ export const Sockets = new class {
 			// Autoconfigure when running in cloud environments.
 			try {
 				const cloudenv = (require as any)('cloud-env');
-				bindAddress = cloudenv.get('IP', bindAddress);
+				bindAddress = cloudenv.get('IP', bindAddress ?? Config.bindaddress);
 				port = cloudenv.get('PORT', port);
 			} catch {}
 		}

@@ -157,5 +157,5 @@ export const translations: TranslationCatalog = {
 	"unlocked": null,
 	"friended": null,
 	"This isn't a battle room.": null,
-
+	"The player in slot {SLOT} has already been eliminated.": null,
 };

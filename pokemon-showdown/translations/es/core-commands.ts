@@ -156,5 +156,5 @@ export const translations: TranslationCatalog = {
 	"unlocked": null, // NEEDS TRANSLATION
 	"friended": null, // NEEDS TRANSLATION
 	"This isn't a battle room.": null, // NEEDS TRANSLATION
-
+	"The player in slot {SLOT} has already been eliminated.": null, // NEEDS TRANSLATION
 };

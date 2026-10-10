@@ -141,6 +141,23 @@ sim really uploads, and reports failures in words) and
 scratch port and drives the real uploader against it). Neither can check the deployed
 `config.js`, because it is not in git — that is the one step this has to be trusted on.
 
+**The upload key.** The front server only saves an upload that carries the shared key in
+`pokemon-showdown/config/replay-upload-token` (gitignored; never paste its contents
+anywhere). The front server creates it, 64 random hex characters with mode 600, on its
+first start if it is missing or empty, and prints `replay uploads: key loaded` or
+`replay uploads: DISABLED, no readable key at <path>` at startup (never the key itself).
+Both processes have to be able to read it, as the same user. The front server reads it
+once at startup, so restart the front after replacing the key; the game server re-reads it
+on every upload and needs no restart. `PHNN_REPLAY_TOKEN_FILE` overrides the path; if it is
+used, set it to the same absolute path for both processes. A popup saying the replay server
+"didn't accept this server's upload key" (the store answered `not authorized`; the game
+server also logs `[replay-upload] <id> rejected: not authorized`) means the two hold
+different keys. Uploads with the right key are never rate-limited; keyless or wrong-key
+ones share a 30-per-10-minutes limit per IP and then get `too many uploads`, and anything
+but a POST gets 405. When deploying a change to this, restarting the game server first is
+safe; restarting the front first breaks uploads from a game server that predates the key
+until that game server restarts too.
+
 ## Login behaviour
 
 First login on play.hackmons.com asks for PS username+password (the proxy can't

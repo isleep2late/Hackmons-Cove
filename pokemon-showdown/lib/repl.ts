@@ -162,7 +162,11 @@ export const Repl = new class {
 			server.listen(pathname, () => {
 				try {
 					fs.chmodSync(pathname, Config.replsocketmode || 0o600);
-				} catch {}
+				} catch (err) {
+					console.error(`Could not start REPL server "${filename}": chmod failed: ${err}`);
+					server.close();
+					return;
+				}
 				Repl.socketPathnames.add(pathname);
 			});
 

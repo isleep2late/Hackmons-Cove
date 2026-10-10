@@ -14,7 +14,11 @@
  */
 
 const assert = require('assert').strict;
+const crypto = require('crypto');
+const fs = require('fs');
 const http = require('http');
+const os = require('os');
+const path = require('path');
 
 const { makeUser } = require('../users-utils');
 
@@ -37,6 +41,7 @@ class FakeReplayStore {
 					id: params.get('id'),
 					log: params.get('log'),
 					password: params.get('password'),
+					token: params.get('token'),
 				};
 				this.requests.push(request);
 				if (this.forcedResponse !== null) {
@@ -79,6 +84,10 @@ describe('Replay upload', () => {
 	let storeUrl;
 	let oldUploadUrl;
 	let oldReplaysRoute;
+	let oldTokenEnv;
+	let tokenDir;
+	let tokenFile;
+	let token;
 
 	before(async () => {
 		store = new FakeReplayStore();
@@ -87,11 +96,23 @@ describe('Replay upload', () => {
 		oldReplaysRoute = Config.routes.replays;
 		Config.replayuploadurl = storeUrl;
 		Config.routes.replays = 'replay.example.com';
+		tokenDir = fs.mkdtempSync(path.join(os.tmpdir(), 'phnn-replay-upload-token-'));
+		tokenFile = path.join(tokenDir, 'replay-upload-token');
+		token = crypto.randomBytes(32).toString('hex');
+		fs.writeFileSync(tokenFile, `${token}\n`, { mode: 0o600 });
+		oldTokenEnv = process.env.PHNN_REPLAY_TOKEN_FILE;
+		process.env.PHNN_REPLAY_TOKEN_FILE = tokenFile;
 	});
 
 	after(async () => {
 		Config.replayuploadurl = oldUploadUrl;
 		Config.routes.replays = oldReplaysRoute;
+		if (oldTokenEnv === undefined) {
+			delete process.env.PHNN_REPLAY_TOKEN_FILE;
+		} else {
+			process.env.PHNN_REPLAY_TOKEN_FILE = oldTokenEnv;
+		}
+		fs.rmSync(tokenDir, { recursive: true, force: true });
 		await store.close();
 	});
 
@@ -163,6 +184,40 @@ describe('Replay upload', () => {
 		);
 		assert(!popup.includes('undefined'), `popup contained an undefined replay id: ${popup}`);
 		assert.equal(room.battle.replaySaved, true);
+	});
+
+	it('sends the upload key from PHNN_REPLAY_TOKEN_FILE', async () => {
+		const { p1, connection } = makeBattle();
+
+		await Chat.parse('/savereplay', room, p1, connection);
+
+		assert.equal(store.requests.length, 1, `store got ${store.requests.length} uploads, expected 1`);
+		assert.equal(store.requests[0].token, token, 'the upload did not carry the key from PHNN_REPLAY_TOKEN_FILE');
+	});
+
+	it('says the upload key was refused when the store answers 403 not authorized', async () => {
+		const { p1, connection } = makeBattle();
+		store.forcedStatus = 403;
+		store.forcedResponse = 'not authorized';
+		const logged = [];
+		const monitor = global.Monitor;
+		const oldLog = monitor.log;
+		monitor.log = text => { logged.push(text); };
+		try {
+			await Chat.parse('/savereplay', room, p1, connection);
+		} finally {
+			monitor.log = oldLog;
+		}
+
+		const [popup] = popups();
+		assert(popup, `no popup was sent; got ${JSON.stringify(sent)}`);
+		assert(popup.includes('upload key'), `popup did not mention the upload key: ${popup}`);
+		assert(!popup.includes(token), `popup leaked the upload key: ${popup}`);
+		assert.equal(room.battle.replaySaved, false, 'a refused upload was recorded as saved');
+		assert(
+			logged.some(line => line.startsWith('[replay-upload] ') && line.endsWith(' rejected: not authorized')),
+			`the store's answer was not logged for an admin: ${JSON.stringify(logged)}`
+		);
 	});
 
 	it('reports a rejection in words, not as a raw response body', async () => {

@@ -16,6 +16,7 @@
 
 const assert = require('assert').strict;
 const { spawn } = require('child_process');
+const crypto = require('crypto');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
@@ -47,6 +48,9 @@ describe('replay store upload', { skip: simPresent ? false : 'no sibling pokemon
 	let actionUrl;
 	let replayDir;
 	let uploader;
+	let tokenDir;
+	let tokenFile;
+	let oldTokenEnv;
 
 	before(async () => {
 		assert(
@@ -56,6 +60,11 @@ describe('replay store upload', { skip: simPresent ? false : 'no sibling pokemon
 		uploader = require(uploaderPath);
 
 		replayDir = fs.mkdtempSync(path.join(os.tmpdir(), 'phnn-replay-gate-'));
+		tokenDir = fs.mkdtempSync(path.join(os.tmpdir(), 'phnn-replay-gate-token-'));
+		tokenFile = path.join(tokenDir, 'replay-upload-token');
+		fs.writeFileSync(tokenFile, crypto.randomBytes(32).toString('hex') + '\n', { mode: 0o600 });
+		oldTokenEnv = process.env.PHNN_REPLAY_TOKEN_FILE;
+		process.env.PHNN_REPLAY_TOKEN_FILE = tokenFile;
 		// The front server needs a concrete port (it prints PHNN_CLIENT_PORT verbatim, so
 		// letting it bind :0 leaves us with no way to find out what it got). Borrow one from
 		// the OS and hand it straight over, so a running beta/prod front server can't collide.
@@ -66,6 +75,7 @@ describe('replay store upload', { skip: simPresent ? false : 'no sibling pokemon
 				PHNN_CLIENT_PORT: String(port),
 				PHNN_GAME_PORT: String(await freePort()),
 				PHNN_REPLAYS_DIR: replayDir,
+				PHNN_REPLAY_TOKEN_FILE: tokenFile,
 			},
 			stdio: ['ignore', 'pipe', 'pipe'],
 		});
@@ -90,6 +100,9 @@ describe('replay store upload', { skip: simPresent ? false : 'no sibling pokemon
 	after(() => {
 		if (child) child.kill('SIGTERM');
 		if (replayDir) fs.rmSync(replayDir, { recursive: true, force: true });
+		if (oldTokenEnv === undefined) delete process.env.PHNN_REPLAY_TOKEN_FILE;
+		else process.env.PHNN_REPLAY_TOKEN_FILE = oldTokenEnv;
+		if (tokenDir) fs.rmSync(tokenDir, { recursive: true, force: true });
 	});
 
 	const battleLog = [
@@ -138,6 +151,22 @@ describe('replay store upload', { skip: simPresent ? false : 'no sibling pokemon
 		const listing = await (await fetch(`${baseUrl}/replays/search`)).text();
 		assert(!listing.includes(privateId), 'a password-protected replay showed up in the public listing');
 		assert(listing.includes(publicId), 'the public replay is missing from the public listing');
+	});
+
+	it('is refused, in words, when the two halves hold different keys', async () => {
+		const otherFile = path.join(tokenDir, 'other-key');
+		fs.writeFileSync(otherFile, crypto.randomBytes(32).toString('hex') + '\n', { mode: 0o600 });
+		const id = `gen9balancedhackmons-${Date.now() + 4}`;
+		process.env.PHNN_REPLAY_TOKEN_FILE = otherFile;
+		let result;
+		try {
+			result = await uploader.uploadReplayToStore({ url: actionUrl, id, log: battleLog });
+		} finally {
+			process.env.PHNN_REPLAY_TOKEN_FILE = tokenFile;
+		}
+		assert(result.error, 'an upload with the wrong key was accepted');
+		assert(/upload key/.test(result.error), result.error);
+		assert(!fs.existsSync(path.join(replayDir, `${id}.log`)), 'an upload with the wrong key was written');
 	});
 
 	it('turns every store rejection into a sentence a player can act on', async () => {
