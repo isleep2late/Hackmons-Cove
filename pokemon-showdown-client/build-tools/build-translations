@@ -14,6 +14,10 @@ const OUTPUT_PATH = path.resolve(ROOT_PATH, 'play.pokemonshowdown.com/data/text'
 
 /** Mods the client ships data for (see build-indexes) */
 const CLIENT_MODS = ['gen3rs', 'gen3frlg', 'gen5bw1', 'gen7letsgo', 'gen8bdsp', 'gen9ssb', 'champions'];
+const FORK_CLIENT_MODS = [
+	['gen9phnn', 'phnn'], ['gen1phnn', 'gen1phnn'], ['gen1phnneng', 'gen1phnneng'],
+	['gen2gs', 'gen2gs'], ['gen2spaceworld', 'spaceworld'], ['gen3phnn', 'gen3phnn'],
+];
 
 function es3stringify(obj) {
 	const buf = JSON.stringify(obj);
@@ -36,15 +40,17 @@ function getLanguages() {
 }
 
 function addModText(Dex, text) {
-	for (const mod of CLIENT_MODS) {
-		const modData = Dex.mod(mod).data;
+	for (const [clientMod, serverMod] of [...CLIENT_MODS.map(mod => [mod, mod]), ...FORK_CLIENT_MODS]) {
+		const modData = Dex.mod(serverMod).data;
 		for (const table of ['Moves', 'Abilities', 'Items']) {
 			for (const id in modData[table]) {
 				const { desc, shortDesc } = modData[table][id];
 				if (!desc && !shortDesc) continue;
+				const base = Dex.data[table][id];
+				if (base && base.desc === desc && base.shortDesc === shortDesc) continue;
 				text[table][id] = {
 					...text[table][id],
-					[mod]: { desc: desc || shortDesc, shortDesc: shortDesc || desc },
+					[clientMod]: { desc: desc || shortDesc, shortDesc: shortDesc || desc },
 				};
 			}
 		}

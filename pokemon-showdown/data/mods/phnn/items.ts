@@ -405,4 +405,90 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 		shortDesc: "Restores 1/2 max HP at 1/2 max HP or less; confuses if -Def Nature. Single use.",
 		desc: "Restores 1/2 of the holder's maximum HP when it falls to 1/2 of its maximum HP or less, combining the Generation 3 trigger point with the Generation 7 heal amount. Confuses the holder if its Nature lowers Defense. Single use.",
 	},
+	aloraichiumz: {
+		inherit: true,
+		itemUser: undefined,
+		shortDesc: "If held by a Pokemon with Thunderbolt, it can use Stoked Sparksurfer.",
+	},
+	decidiumz: {
+		inherit: true,
+		itemUser: undefined,
+		shortDesc: "If held by a Pokemon with Spirit Shackle, it can use Sinister Arrow Raid.",
+	},
+	eeviumz: {
+		inherit: true,
+		itemUser: undefined,
+		shortDesc: "If held by a Pokemon with Last Resort, it can use Extreme Evoboost.",
+	},
+	inciniumz: {
+		inherit: true,
+		itemUser: undefined,
+		shortDesc: "If held by a Pokemon with Darkest Lariat, it can use Malicious Moonsault.",
+	},
+	kommoniumz: {
+		inherit: true,
+		itemUser: undefined,
+		shortDesc: "If held by a Pokemon with Clanging Scales, it can use Clangorous Soulblaze.",
+	},
+	lunaliumz: {
+		inherit: true,
+		itemUser: undefined,
+		shortDesc: "If held by a Pokemon with Moongeist Beam, it can use Menacing Moonraze Maelstrom.",
+	},
+	lycaniumz: {
+		inherit: true,
+		itemUser: undefined,
+		shortDesc: "If held by a Pokemon with Stone Edge, it can use Splintered Stormshards.",
+	},
+	marshadiumz: {
+		inherit: true,
+		itemUser: undefined,
+		shortDesc: "If held by a Pokemon with Spectral Thief, it can use Soul-Stealing 7-Star Strike.",
+	},
+	mewniumz: {
+		inherit: true,
+		itemUser: undefined,
+		shortDesc: "If held by a Pokemon with Psychic, it can use Genesis Supernova.",
+	},
+	mimikiumz: {
+		inherit: true,
+		itemUser: undefined,
+		shortDesc: "If held by a Pokemon with Play Rough, it can use Let's Snuggle Forever.",
+	},
+	pikaniumz: {
+		inherit: true,
+		itemUser: undefined,
+		shortDesc: "If held by a Pokemon with Volt Tackle, it can use Catastropika.",
+	},
+	pikashuniumz: {
+		inherit: true,
+		itemUser: undefined,
+		shortDesc: "If held by a Pokemon with Thunderbolt, it can use 10,000,000 Volt Thunderbolt.",
+	},
+	primariumz: {
+		inherit: true,
+		itemUser: undefined,
+		shortDesc: "If held by a Pokemon with Sparkling Aria, it can use Oceanic Operetta.",
+	},
+	snorliumz: {
+		inherit: true,
+		itemUser: undefined,
+		shortDesc: "If held by a Pokemon with Giga Impact, it can use Pulverizing Pancake.",
+	},
+	solganiumz: {
+		inherit: true,
+		itemUser: undefined,
+		shortDesc: "If held by a Pokemon with Sunsteel Strike, it can use Searing Sunraze Smash.",
+	},
+	tapuniumz: {
+		inherit: true,
+		itemUser: undefined,
+		shortDesc: "If held by a Pokemon with Nature's Madness, it can use Guardian of Alola.",
+	},
+	ultranecroziumz: {
+		inherit: true,
+		itemUser: undefined,
+		shortDesc: "Any holder with Photon Geyser: Light That Burns the Sky. Necrozma-DM/DW: Ultra Burst.",
+		desc: "If held by a Pokemon with Photon Geyser, it can use Light That Burns the Sky. If held by Dusk Mane or Dawn Wings Necrozma, it can also Ultra Burst into Ultra Necrozma.",
+	},
 };

@@ -211,6 +211,10 @@ export const FormatsData: import('../../../sim/dex-species').ModdedSpeciesFormat
 		isNonstandard: null,
 		tier: "OU",
 	},
+	shibirefugu: {
+		isNonstandard: null,
+		tier: "OU",
+	},
 	mizuuo: {
 		isNonstandard: null,
 		tier: "OU",

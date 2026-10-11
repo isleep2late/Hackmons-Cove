@@ -918,7 +918,9 @@ export const commands: Chat.ChatCommands = {
 							details[TL`Z-Crystal`] = TL(zCrystal);
 							if (zCrystal.itemUser) {
 								details[TL("User", "pokemon")] = zCrystal.itemUser.join(", ");
-								details[TL`Required move`] = TL(dex.items.get(zCrystal.zMoveFrom));
+							}
+							if (zCrystal.zMoveFrom) {
+								details[TL`Required move`] = TL(dex.moves.get(zCrystal.zMoveFrom));
 							}
 						} else {
 							details[TL`Z-Effect`] = TL`None`;

@@ -797,7 +797,7 @@ abstract class BattleTypedSearch<T extends SearchType> {
 		if (format.includes('spaceworldcustomdisguises') && this.dex.gen === 2) {
 			this.dex = Dex.mod('gen2spaceworld' as ID);
 		}
-		if (format === 'anyability' && this.dex.gen === 3) {
+		if ((format === 'bhaaa' || format === 'anyability') && this.dex.gen === 3) {
 			this.dex = Dex.mod('gen3phnn' as ID);
 		}
 		if (format.startsWith('vgc')) {
@@ -1811,7 +1811,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		case 'aquajet':
 			return !moves.includes('jetpunch');
 		case 'aurawheel':
-			return species.baseSpecies === 'Morpeko';
+			return species.baseSpecies === 'Morpeko' || dex.modid === 'gen9phnn';
 		case 'axekick':
 			return !moves.includes('highjumpkick');
 		case 'barrier':
@@ -1828,7 +1828,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		case 'dazzlinggleam':
 			return !moves.includes('alluringvoice') || this.formatType?.includes('doubles');
 		case 'darkvoid':
-			return dex.gen < 7;
+			return dex.gen < 7 || dex.modid === 'gen9phnn';
 		case 'dualwingbeat':
 			return abilityid === 'technician' || !moves.includes('drillpeck');
 		case 'electroshot':
@@ -1866,7 +1866,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		case 'hiddenpowerpsychic':
 			return species.baseSpecies === 'Unown';
 		case 'hyperspacefury':
-			return species.id === 'hoopaunbound';
+			return species.id === 'hoopaunbound' || dex.modid === 'gen9phnn';
 		case 'hypnosis':
 			return (dex.gen < 4 && !moves.includes('sleeppowder')) || (dex.gen > 6 && abilityid === 'baddreams');
 		case 'icepunch':
