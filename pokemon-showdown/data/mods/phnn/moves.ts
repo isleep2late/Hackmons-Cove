@@ -486,6 +486,42 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		shortDesc: "Puts the foe(s) to sleep. Usable by any Pokemon.",
 		desc: "Causes the target to fall asleep. This move can be used successfully by any Pokemon, as in Generations 4-6.",
 	},
+	hyperspacefury: {
+		inherit: true,
+		onTry: undefined,
+		shortDesc: "Lowers user's Def by 1; breaks protect. Any Pokemon.",
+		desc: "Lowers the user's Defense by 1 stage. This move can be used successfully by any Pokemon, not only Hoopa Unbound. If this move is successful, it breaks through the target's Baneful Bunker, Burning Bulwark, Detect, King's Shield, Obstruct, Protect, Silk Trap, or Spiky Shield for this turn, allowing other Pokemon to attack the target normally. If the target's side is protected by Crafty Shield, Mat Block, Quick Guard, or Wide Guard, that protection is also broken for this turn and other Pokemon may attack the target's side normally. Max Guard still blocks it.",
+	},
+	aurawheel: {
+		inherit: true,
+		onTry: undefined,
+		shortDesc: "100% +1 Spe. Electric; Dark if Morpeko-Hangry. Any Pokemon.",
+		desc: "Has a 100% chance to raise the user's Speed by 1 stage. This move is Electric type, or Dark type if the user is a Morpeko in Hangry Mode. This move can be used successfully by any Pokemon, not only Morpeko.",
+	},
+	sketch: {
+		inherit: true,
+		onHit(target, source) {
+			const move = target.lastMove;
+			if (source.transformed || !move || source.moves.includes(move.id)) return false;
+			if (move.flags['nosketch']) return false;
+			const sketchIndex = source.moves.indexOf('sketch');
+			if (sketchIndex < 0) return false;
+			const sketchedMove = {
+				move: move.name,
+				id: move.id,
+				pp: move.pp,
+				maxpp: move.pp,
+				target: move.target,
+				disabled: false,
+				used: false,
+			};
+			source.moveSlots[sketchIndex] = sketchedMove;
+			source.baseMoveSlots[sketchIndex] = sketchedMove;
+			this.add('-activate', source, 'move: Sketch', move.name);
+		},
+		shortDesc: "Permanently copies the last move target used.",
+		desc: "This move is permanently replaced by the last move used by the target. The copied move has its full base PP, without PP Ups. Signature moves can be copied, including Dark Void, Hyperspace Fury, Polar Flare, Revival Blessing, Tera Starstorm, the Torque moves, Z-Moves, Max and G-Max Moves, and Shadow moves; a Z-powered status move is copied as its base move. Fails if the target has not made a move, if the user has Transformed, or if the move is Sketch, Struggle, or any move the user knows.",
+	},
 	allyswitch: {
 		inherit: true,
 		onPrepareHit: undefined,
@@ -864,8 +900,11 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		onBasePower(basePower, attacker, defender, move) {
 			return this.chainModify(2);
 		},
-		onAfterMove(pokemon) {
-			if (!pokemon.hp) return;
+		onUseMoveMessage(pokemon, target, move) {
+			(move as any).phnnSelfDestructArmed = true;
+		},
+		onAfterMove(pokemon, target, move) {
+			if (!(move as any).phnnSelfDestructArmed || !pokemon.hp) return;
 			const chip = pokemon.hp <= 255 ? pokemon.hp : pokemon.hp % 256;
 			if (chip) this.directDamage(chip, pokemon);
 			if (!pokemon.hp) return;
@@ -883,8 +922,11 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		onBasePower(basePower, attacker, defender, move) {
 			return this.chainModify(2);
 		},
-		onAfterMove(pokemon) {
-			if (!pokemon.hp) return;
+		onUseMoveMessage(pokemon, target, move) {
+			(move as any).phnnSelfDestructArmed = true;
+		},
+		onAfterMove(pokemon, target, move) {
+			if (!(move as any).phnnSelfDestructArmed || !pokemon.hp) return;
 			const chip = pokemon.hp <= 255 ? pokemon.hp : pokemon.hp % 256;
 			if (chip) this.directDamage(chip, pokemon);
 			if (!pokemon.hp) return;

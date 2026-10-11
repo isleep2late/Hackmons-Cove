@@ -39,6 +39,15 @@ export const Scripts: ModdedBattleScriptsData = {
 			}
 		}
 
+		for (const id of [
+			'darkvoid', 'hyperspacefury', 'revivalblessing', 'terastarstorm',
+			'blazingtorque', 'combattorque', 'magicaltorque', 'noxioustorque', 'wickedtorque', 'polarflare',
+		]) {
+			const flags = { ...this.data.Moves[id].flags };
+			delete flags.nosketch;
+			this.modData('Moves', id).flags = flags;
+		}
+
 	},
 
 	spreadDamage(damage: any, targetArray: any = null, source: any = null, effect: any = null, instafaint = false) {

@@ -1447,7 +1447,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 			tiers: baseTable.tiers,
 			items: baseTable.items,
 			formatSlices: baseTable.formatSlices,
-			overrideTier: {},
+			overrideTier: modDex.gen === 9 ? {} : { ...baseTable.overrideTier },
 		};
 
 		const overrideSpeciesData = {};
