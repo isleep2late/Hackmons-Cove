@@ -15,7 +15,7 @@ import { Teams } from './teams';
 import { PRNG } from './prng';
 import { type RuleTable } from './dex-formats';
 
-const EXISTENCE_TAGS = ['past', 'future', 'lgpe', 'unobtainable', 'cap', 'custom', 'demo', 'glitch', 'glitchgen1', 'glitchgen2', 'glitchgen3', 'nonexistent'];
+const EXISTENCE_TAGS = ['past', 'future', 'lgpe', 'legends', 'unobtainable', 'cap', 'custom', 'demo', 'glitch', 'glitchgen1', 'glitchgen2', 'glitchgen3', 'nonexistent'];
 
 /**
  * Describes a possible way to get a pokemon. Is not exhaustive!
@@ -469,7 +469,7 @@ export class TeamValidator {
 			}
 		}
 
-		for (const [rule, source, limit, bans] of ruleTable.complexTeamBans) {
+		for (const [rule, source, limit, bans] of ruleTable.complexTeamBans.values()) {
 			let count = 0;
 			for (const ban of bans) {
 				if (teamHas[ban] > 0) {
@@ -1333,7 +1333,7 @@ export class TeamValidator {
 				}
 			}
 		}
-		for (const [rule, source, limit, bans] of ruleTable.complexBans) {
+		for (const [rule, source, limit, bans] of ruleTable.complexBans.values()) {
 			let count = 0;
 			for (const ban of bans) {
 				if (setHas[ban]) count++;
@@ -2181,6 +2181,9 @@ export class TeamValidator {
 			}
 			if (thing.isNonstandard === 'LGPE') {
 				return `${displayName} does not exist in this game, only in Let's Go Pikachu/Eevee.`;
+			}
+			if (thing.isNonstandard === 'Legends') {
+				return `${displayName} does not exist in this game, only in Pokémon Legends: Arceus/Z-A.`;
 			}
 			return `${displayName} does not exist in this game.`;
 		}

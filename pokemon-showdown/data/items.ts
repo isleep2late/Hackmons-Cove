@@ -513,6 +513,12 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 		num: 544,
 		gen: 5,
 	},
+	blackaugurite: {
+		name: "Black Augurite",
+		num: 1691,
+		gen: 8,
+		isNonstandard: "Legends",
+	},
 	blackbelt: {
 		name: "Black Belt",
 		spritenum: 32,
@@ -560,6 +566,12 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 		},
 		num: 281,
 		gen: 4,
+	},
+	blankplate: {
+		name: "Blank Plate",
+		num: 1780,
+		gen: 8,
+		isNonstandard: "Legends",
 	},
 	blastoisinite: {
 		name: "Blastoisinite",
@@ -3370,6 +3382,12 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 		num: 234,
 		gen: 2,
 	},
+	legendplate: {
+		name: "Legend Plate",
+		num: 1828,
+		gen: 8,
+		isNonstandard: "Legends",
+	},
 	leppaberry: {
 		name: "Leppa Berry",
 		spritenum: 244,
@@ -4514,6 +4532,12 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 		onEat() { },
 		num: 193,
 		gen: 4,
+	},
+	peatblock: {
+		name: "Peat Block",
+		num: 1692,
+		gen: 8,
+		isNonstandard: "Legends",
 	},
 	pechaberry: {
 		name: "Pecha Berry",
