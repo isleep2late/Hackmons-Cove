@@ -16,6 +16,15 @@ import { RoomSections } from './room-settings';
 const ONLINE_SYMBOL = ` \u25C9 `;
 const OFFLINE_SYMBOL = ` \u25CC `;
 
+export function validateMediaURL(link: string) {
+	if (link.includes('data:image/png;base64')) {
+		throw new Chat.ErrorMessage('Please provide an actual link (you probably copied the URL wrong?).');
+	}
+	if (!/^https?:\/\//i.test(link)) {
+		throw new Chat.ErrorMessage('Invalid URL. URL must start with http: or https:.');
+	}
+}
+
 interface DexResources {
 	url: string;
 	resources: { resource_name: string, url: string }[];
@@ -788,7 +797,7 @@ export const commands: Chat.ChatCommands = {
 								evos.push(`${name} (level-up holding ${evo.evoItem}${condition})`);
 								break;
 							case 'useItem':
-								evos.push(`${name} (${evo.evoItem})`);
+								evos.push(`${name} (${evo.evoItem}${condition})`);
 								break;
 							case 'levelMove':
 								evos.push(`${name} (level-up with ${evo.evoMove}${condition})`);
@@ -2711,11 +2720,9 @@ export const commands: Chat.ChatCommands = {
 		let [link, comment] = this.splitOne(target);
 		if (!/^https?:\/\//.test(link)) link = `https://${link}`;
 		link = encodeURI(link);
+		validateMediaURL(link);
 		let dimensions;
 		if (!/^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)(\/|$)/i.test(link)) {
-			if (link.includes('data:image/png;base64')) {
-				throw new Chat.ErrorMessage('Please provide an actual link (you probably copied the URL wrong?).');
-			}
 			try {
 				dimensions = await Chat.fitImage(link);
 			} catch {
@@ -2840,6 +2847,7 @@ export const commands: Chat.ChatCommands = {
 			}
 		}
 
+		validateMediaURL(link);
 		this.runBroadcast();
 		let buf;
 		if (YouTube.linkRegex.test(link)) {
@@ -2858,9 +2866,6 @@ export const commands: Chat.ChatCommands = {
 				} else if (/^https?:\/\/(.*)\.(mp3|wav)\b(\?|$)/i.test(link)) { // audio
 					buf = Utils.html`<audio src="${link}" controls=""></audio>`;
 				}
-			}
-			if (link.includes('data:image/png;base64')) {
-				throw new Chat.ErrorMessage('Please provide an actual link (you probably copied it wrong?).');
 			}
 			if (!buf) { // fall back on image
 				try {

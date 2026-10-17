@@ -191,6 +191,9 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 	legendplate: {
 		name: "Legend Plate",
 		spritenum: 610,
+		fling: {
+			basePower: 90,
+		},
 		onTakeItem(item, pokemon, source) {
 			if ((source && source.baseSpecies.num === 493) || pokemon.baseSpecies.num === 493) {
 				return false;
