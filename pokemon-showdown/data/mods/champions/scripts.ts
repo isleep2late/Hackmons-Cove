@@ -104,7 +104,12 @@ export const Scripts: ModdedBattleScriptsData = {
 					this.battle.add('-formechange', this, this.illusion ? this.illusion.species.name : species.name, message);
 				}
 			}
-			if (isPermanent && (!source || !['disguise', 'iceface'].includes(source.id))) {
+			if (isPermanent && this.set.phAbilities && source?.id.startsWith('ability:')) {
+				if (!['disguise', 'iceface'].includes(source.id.slice(8))) {
+					const ability = species.abilities[abilitySlot] || species.abilities['0'];
+					this.setExtraAbility(source.id, this.battle.dex.abilities.get(ability), null, true);
+				}
+			} else if (isPermanent && (!source || !['disguise', 'iceface'].includes(source.id))) {
 				if (this.illusion && source) {
 					// Tera forme by Ogerpon or Terapagos breaks the Illusion
 					this.ability = ''; // Don't allow Illusion to wear off
@@ -534,14 +539,6 @@ export const Scripts: ModdedBattleScriptsData = {
 					// Total damage dealt is accumulated for the purposes of recoil (Parental Bond).
 					move.totalDamage += damage[i];
 				}
-				if (move.mindBlownRecoil) {
-					const hpBeforeRecoil = pokemon.hp;
-					this.battle.damage(Math.round(pokemon.maxhp / 2), pokemon, pokemon, this.dex.conditions.get(move.id), true);
-					move.mindBlownRecoil = false;
-					if (pokemon.hp <= pokemon.maxhp / 2 && hpBeforeRecoil > pokemon.maxhp / 2) {
-						this.battle.runEvent('EmergencyExit', pokemon, pokemon, undefined, hpBeforeRecoil);
-					}
-				}
 				this.battle.eachEvent('Update');
 				if (!pokemon.hp && targets.length === 1) {
 					hit++; // report the correct number of hits for multihit moves
@@ -551,32 +548,16 @@ export const Scripts: ModdedBattleScriptsData = {
 			// hit is 1 higher than the actual hit count
 			if (hit === 1) return damage.fill(false);
 			if (nullDamage) damage.fill(false);
-			this.battle.faintMessages(false, false, !pokemon.hp);
+			this.battle.resolveFaints({ checkWin: !pokemon.hp });
 			if (move.multihit && typeof move.smartTarget !== 'boolean' &&
 				!(move.hit === 1 && move.multihitType === 'parentalbond')) {
 				this.battle.add('-hitcount', targets[0], hit - 1);
 			}
 
-			if ((move.recoil || move.id === 'chloroblast') && move.totalDamage) {
-				const hpBeforeRecoil = pokemon.hp;
-				this.battle.damage(this.calcRecoilDamage(move.totalDamage, move, pokemon), pokemon, pokemon, 'recoil');
-				if (pokemon.hp <= pokemon.maxhp / 2 && hpBeforeRecoil > pokemon.maxhp / 2) {
-					this.battle.runEvent('EmergencyExit', pokemon, pokemon, undefined, hpBeforeRecoil);
-				}
-			}
-
-			if (move.struggleRecoil) {
-				const hpBeforeRecoil = pokemon.hp;
-				let recoilDamage;
-				if (this.dex.gen >= 5) {
-					recoilDamage = this.battle.clampIntRange(Math.round(pokemon.baseMaxhp / 4), 1);
-				} else {
-					recoilDamage = this.battle.clampIntRange(this.battle.trunc(pokemon.maxhp / 4), 1);
-				}
-				this.battle.directDamage(recoilDamage, pokemon, pokemon, { id: 'strugglerecoil' } as Condition);
-				if (pokemon.hp <= pokemon.maxhp / 2 && hpBeforeRecoil > pokemon.maxhp / 2) {
-					this.battle.runEvent('EmergencyExit', pokemon, pokemon, undefined, hpBeforeRecoil);
-				}
+			if (move.totalDamage) {
+				this.applyRecoilDamage(move.totalDamage, move, pokemon);
+			} else if (move.struggleRecoil || move.mindBlownRecoil) {
+				this.applyRecoilDamage(0, move, pokemon);
 			}
 
 			// smartTarget messes up targetsCopy, but smartTarget should in theory ensure that targets will never fail, anyway

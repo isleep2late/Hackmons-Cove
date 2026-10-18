@@ -1313,6 +1313,14 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 			},
 		},
 	},
+	spiderweb: {
+		inherit: true,
+		shortDesc: "Target can't switch out until it leaves the field.",
+		desc: "Prevents the target from switching out. The target can still leave the field by using Baton Pass, and the replacement remains trapped. The effect ends when the trapped Pokemon leaves the field any other way (such as fainting); the user switching out or fainting does not end it. Fails if the target is already trapped.",
+		onHit(target, source, move) {
+			return target.addVolatile('trapped', source, move);
+		},
+	},
 	haze: {
 		inherit: true,
 		shortDesc: "Resets both actives' stat stages; also cures the target's status.",
@@ -1327,9 +1335,15 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 					pokemon.removeVolatile(vol);
 				}
 			}
-			if (target.status) target.cureStatus();
-			if (source.status === 'tox') {
-				source.setStatus('psn');
+			target.cureStatus();
+			if (source.status === 'tox' && !source.setStatus('psn')) {
+				source.status = 'psn' as ID;
+				this.add('-status', source, 'psn');
+			}
+			if (source.m.extraStatuses?.includes('tox')) {
+				source.removeVolatile('multistatustox');
+				source.m.extraStatuses = source.m.extraStatuses.map((id: string) => (id === 'tox' ? 'psn' : id));
+				source.addVolatile('multistatuspsn');
 			}
 		},
 	},
@@ -1433,6 +1447,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 				}
 				if (move.recoil) {
 					this.damage(this.actions.calcRecoilDamage(damage, move, source), source, target, 'recoil');
+				} else if (damage) {
+					this.actions.applyRecoilDamage(damage, move, source);
 				}
 				if (move.drain) {
 					this.heal(Math.ceil(damage * move.drain[0] / move.drain[1]), source, target, 'drain');
@@ -1552,6 +1568,11 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	meanlook: {
 		inherit: true,
 		isNonstandard: "Future",
+		shortDesc: "Target can't switch out until it leaves the field.",
+		desc: "Prevents the target from switching out. The target can still leave the field by using Baton Pass, and the replacement remains trapped. The effect ends when the trapped Pokemon leaves the field any other way (such as fainting); the user switching out or fainting does not end it. Fails if the target is already trapped.",
+		onHit(target, source, move) {
+			return target.addVolatile('trapped', source, move);
+		},
 	},
 	megahorn: {
 		inherit: true,

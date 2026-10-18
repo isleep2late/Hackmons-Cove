@@ -471,7 +471,7 @@ class FormatDropdownPanel extends PSRoomPanel {
 		let curColumnNum = 0;
 		let curColumn: FormatSection[] = [];
 		const columns = [curColumn];
-		const searchID = toID(this.search);
+		const searchID = toID(this.search) === 'phnn' ? 'gen9nonerfs' as ID : toID(this.search);
 		for (const format of formats) {
 			if (searchID && !toID(format.name).includes(searchID)) {
 				continue;
