@@ -357,7 +357,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 			for (const pokemon of this.getAllActive()) {
 				pokemon.clearBoosts();
 				if (pokemon !== source) {
-					if (['frz', 'slp'].includes(pokemon.status)) {
+					if (['frz', 'slp'].includes(pokemon.status) || pokemon.m.extraStatuses?.includes('frz')) {
 						pokemon.side.lastSelectedMove = 'cannotmove' as ID;
 						pokemon.side.lastEnemySelectedMove = 'cannotmove' as ID;
 						if (this.queue.willMove(pokemon)) {
@@ -366,8 +366,14 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 					}
 					pokemon.cureStatus(true);
 				}
-				if (pokemon.status === 'tox') {
-					pokemon.setStatus('psn', null, null, true);
+				if (pokemon.status === 'tox' && !pokemon.setStatus('psn', null, null, true)) {
+					pokemon.status = 'psn' as ID;
+					this.add('-status', pokemon, 'psn');
+				}
+				if (pokemon.m.extraStatuses?.includes('tox')) {
+					pokemon.removeVolatile('multistatustox');
+					pokemon.m.extraStatuses = pokemon.m.extraStatuses.map((id: string) => (id === 'tox' ? 'psn' : id));
+					pokemon.addVolatile('multistatuspsn');
 				}
 				pokemon.updateSpeed();
 				// should only clear a specific set of volatiles
@@ -848,9 +854,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 				}
 				// Drain/recoil/secondary effect confusion do not happen if the substitute breaks
 				if (target.volatiles['substitute']) {
-					if (move.recoil) {
-						this.damage(this.clampIntRange(Math.floor(uncappedDamage * move.recoil[0] / move.recoil[1]), 1),
-							source, target, 'recoil');
+					if (uncappedDamage) {
+						this.actions.applyRecoilDamage(uncappedDamage, move, source);
 					}
 					if (move.drain) {
 						const amount = this.clampIntRange(Math.floor(uncappedDamage * move.drain[0] / move.drain[1]), 1);

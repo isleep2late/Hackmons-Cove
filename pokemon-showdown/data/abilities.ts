@@ -94,11 +94,11 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 			((this.effect as any).onStart as (p: Pokemon) => void).call(this, pokemon);
 		},
 		onStart(pokemon) {
-			pokemon.abilityState.ending = false; // Clear the ending flag
+			(pokemon.set.phAbilities ? this.effectState : pokemon.abilityState).ending = false; // Clear the ending flag
 			this.eachEvent('WeatherChange', this.effect);
 		},
 		onEnd(pokemon) {
-			pokemon.abilityState.ending = true;
+			(pokemon.set.phAbilities ? this.effectState : pokemon.abilityState).ending = true;
 			this.eachEvent('WeatherChange', this.effect);
 		},
 		suppressWeather: true,
@@ -261,7 +261,7 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 			return !this.effectState.unnerved;
 		},
 		onSourceAfterFaint(length, target, source, effect) {
-			if (effect && effect.effectType === 'Move') {
+			if (effect?.effectType === 'Move') {
 				this.boost({ atk: length }, source, source, this.dex.abilities.get('chillingneigh'));
 			}
 		},
@@ -285,7 +285,7 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 			return !this.effectState.unnerved;
 		},
 		onSourceAfterFaint(length, target, source, effect) {
-			if (effect && effect.effectType === 'Move') {
+			if (effect?.effectType === 'Move') {
 				this.boost({ spa: length }, source, source, this.dex.abilities.get('grimneigh'));
 			}
 		},
@@ -401,7 +401,7 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 	},
 	beastboost: {
 		onSourceAfterFaint(length, target, source, effect) {
-			if (effect && effect.effectType === 'Move') {
+			if (effect?.effectType === 'Move') {
 				const bestStat = source.getBestStat(true, true);
 				this.boost({ [bestStat]: length }, source);
 			}
@@ -500,7 +500,7 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 	},
 	chillingneigh: {
 		onSourceAfterFaint(length, target, source, effect) {
-			if (effect && effect.effectType === 'Move') {
+			if (effect?.effectType === 'Move') {
 				this.boost({ atk: length }, source);
 			}
 		},
@@ -547,11 +547,11 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 			((this.effect as any).onStart as (p: Pokemon) => void).call(this, pokemon);
 		},
 		onStart(pokemon) {
-			pokemon.abilityState.ending = false; // Clear the ending flag
+			(pokemon.set.phAbilities ? this.effectState : pokemon.abilityState).ending = false; // Clear the ending flag
 			this.eachEvent('WeatherChange', this.effect);
 		},
 		onEnd(pokemon) {
-			pokemon.abilityState.ending = true;
+			(pokemon.set.phAbilities ? this.effectState : pokemon.abilityState).ending = true;
 			this.eachEvent('WeatherChange', this.effect);
 		},
 		suppressWeather: true,
@@ -574,7 +574,7 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 				if (target.side.active.length === 2 && target.position === 1) {
 					// Curse Glitch
 					const action = this.queue.willMove(target);
-					if (action && action.move.id === 'curse') {
+					if (action?.move.id === 'curse') {
 						action.targetLoc = -1;
 					}
 				}
@@ -677,7 +677,7 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 	},
 	contrary: {
 		onChangeBoost(boost, target, source, effect) {
-			if (effect && effect.id === 'zpower') return;
+			if (effect?.id === 'zpower') return;
 			let i: BoostID;
 			for (i in boost) {
 				boost[i]! *= -1;
@@ -817,7 +817,7 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 			}
 		},
 		onAnyDamage(damage, target, source, effect) {
-			if (effect && effect.name === 'Aftermath') {
+			if (effect?.name === 'Aftermath') {
 				return false;
 			}
 		},
@@ -1077,7 +1077,7 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 	},
 	drizzle: {
 		onStart(source) {
-			if (source.species.id === 'kyogre' && source.item === 'blueorb') return;
+			if (source.species.id === 'kyogre' && source.hasItem('blueorb')) return;
 			this.field.setWeather('raindance');
 		},
 		flags: {},
@@ -1087,7 +1087,7 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 	},
 	drought: {
 		onStart(source) {
-			if (source.species.id === 'groudon' && source.item === 'redorb') return;
+			if (source.species.id === 'groudon' && source.hasItem('redorb')) return;
 			this.field.setWeather('sunnyday');
 		},
 		flags: {},
@@ -1147,7 +1147,7 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 	eelevate: {
 		isNonstandard: "Future",
 		onSourceAfterFaint(length, target, source, effect) {
-			if (effect && effect.effectType === 'Move') {
+			if (effect?.effectType === 'Move') {
 				const bestStat = source.getBestStat(true, true);
 				this.boost({ [bestStat]: length }, source);
 			}
@@ -1716,7 +1716,7 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 	},
 	grimneigh: {
 		onSourceAfterFaint(length, target, source, effect) {
-			if (effect && effect.effectType === 'Move') {
+			if (effect?.effectType === 'Move') {
 				this.boost({ spa: length }, source);
 			}
 		},
@@ -1847,7 +1847,7 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 			}
 		},
 		onDamage(damage, target, source, effect) {
-			if (effect && effect.id === 'brn') {
+			if (effect?.id === 'brn') {
 				return damage / 2;
 			}
 		},
@@ -2079,7 +2079,12 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 				this.debug('illusion cleared');
 				pokemon.illusion = null;
 				const details = pokemon.getUpdatedDetails();
-				this.add('replace', pokemon, details);
+				const disguiseDetails = pokemon.getDisguiseDetails();
+				if (disguiseDetails) {
+					this.addSplit(pokemon.side.id, ['replace', pokemon, details], ['replace', pokemon, disguiseDetails]);
+				} else {
+					this.add('replace', pokemon, details);
+				}
 				this.add('-end', pokemon, 'Illusion');
 				if (this.ruleTable.has('illusionlevelmod')) {
 					this.hint("Illusion Level Mod is active, so this Pok\u00e9mon's true level was hidden.", true);
@@ -2283,6 +2288,7 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 		// Item suppression implemented in Pokemon.ignoringItem() within sim/pokemon.js
 		onStart(pokemon) {
 			this.singleEvent('End', pokemon.getItem(), pokemon.itemState, pokemon);
+			pokemon.endExtras('item');
 		},
 		flags: {},
 		name: "Klutz",
@@ -2392,7 +2398,7 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 				return;
 			}
 			if (this.checkMoveMakesContact(move, source, target, !source.isAlly(target))) {
-				source.setAbility('lingeringaroma', target);
+				source.setAbility('lingeringaroma', target, target.set.phAbilities ? this.dex.abilities.get('lingeringaroma') : null);
 			}
 		},
 		flags: {},
@@ -2749,7 +2755,7 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 	},
 	moxie: {
 		onSourceAfterFaint(length, target, source, effect) {
-			if (effect && effect.effectType === 'Move') {
+			if (effect?.effectType === 'Move') {
 				this.boost({ atk: length }, source);
 			}
 		},
@@ -2784,7 +2790,7 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 				return;
 			}
 			if (this.checkMoveMakesContact(move, source, target, !source.isAlly(target))) {
-				source.setAbility('mummy', target);
+				source.setAbility('mummy', target, target.set.phAbilities ? this.dex.abilities.get('mummy') : null);
 			}
 		},
 		flags: {},
@@ -2908,7 +2914,7 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 		onSwitchInPriority: 2,
 		onSwitchIn(pokemon) {
 			this.add('-ability', pokemon, 'Neutralizing Gas');
-			pokemon.abilityState.ending = false;
+			this.effectState.ending = false;
 			const strongWeathers = ['desolateland', 'primordialsea', 'deltastream'];
 			for (const target of this.getAllActive()) {
 				if (target.hasItem('Ability Shield')) {
@@ -2929,6 +2935,12 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 				if (strongWeathers.includes(target.getAbility().id)) {
 					this.singleEvent('End', this.dex.abilities.get(target.getAbility().id), target.abilityState, target, pokemon, 'neutralizinggas');
 				}
+				for (const id of strongWeathers) {
+					const extraState = target.volatiles['ability:' + id];
+					if (extraState && target.ignoringAbility('ability:' + id)) {
+						this.singleEvent('End', this.dex.abilities.get(id), extraState, target, pokemon, 'neutralizinggas');
+					}
+				}
 			}
 		},
 		onEnd(source) {
@@ -2946,12 +2958,21 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 			// (If you're tackling this, do note extreme weathers have the same issue)
 
 			// Mark this pokemon's ability as ending so Pokemon#ignoringAbility skips it
-			if (source.abilityState.ending) return;
-			source.abilityState.ending = true;
+			if (this.effectState.ending) return;
+			this.effectState.ending = true;
 			const sortedActive = this.getAllActive();
 			this.speedSort(sortedActive);
+			const restartOwn = !!source.set.phAbilities && !!source.hp && !source.beingCalledBack;
 			for (const pokemon of sortedActive) {
-				if (pokemon !== source) {
+				if ((pokemon !== source || restartOwn) && !pokemon.hasItem('abilityshield')) {
+					for (const id of Object.keys(pokemon.volatiles)) {
+						if (!id.startsWith('ability:') || !pokemon.volatiles[id] || pokemon.volatiles[id] === this.effectState) continue;
+						if (this.dex.abilities.get(id.slice(8)).flags['cantsuppress']) continue;
+						this.singleEvent('Start', this.dex.conditions.getByID(id as ID), pokemon.volatiles[id], pokemon);
+						if (id === 'ability:gluttony') pokemon.abilityState.gluttony = false;
+					}
+				}
+				if (pokemon !== source || (restartOwn && pokemon.abilityState !== this.effectState)) {
 					if (pokemon.getAbility().flags['cantsuppress']) continue; // does not interact with e.g Ice Face, Zen Mode
 					if (pokemon.hasItem('abilityshield')) continue; // don't restart abilities that weren't suppressed
 
@@ -3403,6 +3424,10 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 			if (!this.effectState.target.hp) return;
 			const ability = target.getAbility();
 			if (ability.flags['noreceiver'] || ability.id === 'noability') return;
+			if (this.effectState.target.set.phAbilities && this.effect.id.startsWith('ability:')) {
+				this.effectState.target.setExtraAbility(this.effect.id, ability, target);
+				return;
+			}
 			this.effectState.target.setAbility(ability, target);
 		},
 		flags: { failroleplay: 1, noreceiver: 1, noentrain: 1, notrace: 1 },
@@ -3790,6 +3815,10 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 			if (!this.effectState.target.hp) return;
 			const ability = target.getAbility();
 			if (ability.flags['noreceiver'] || ability.id === 'noability') return;
+			if (this.effectState.target.set.phAbilities && this.effect.id.startsWith('ability:')) {
+				this.effectState.target.setExtraAbility(this.effect.id, ability, target);
+				return;
+			}
 			this.effectState.target.setAbility(ability, target);
 		},
 		flags: { failroleplay: 1, noreceiver: 1, noentrain: 1, notrace: 1 },
@@ -4284,7 +4313,7 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 	},
 	simple: {
 		onChangeBoost(boost, target, source, effect) {
-			if (effect && effect.id === 'zpower') return;
+			if (effect?.id === 'zpower') return;
 			let i: BoostID;
 			for (i in boost) {
 				boost[i]! *= 2;
@@ -4679,7 +4708,7 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 		},
 		onDamagePriority: -30,
 		onDamage(damage, target, source, effect) {
-			if (target.hp === target.maxhp && damage >= target.hp && effect && effect.effectType === 'Move') {
+			if (target.hp === target.maxhp && damage >= target.hp && effect?.effectType === 'Move') {
 				this.add('-ability', target, 'Sturdy');
 				return target.hp - 1;
 			}
@@ -4858,7 +4887,7 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 	synchronize: {
 		onAfterSetStatus(status, target, source, effect) {
 			if (!source || source === target) return;
-			if (effect && effect.id === 'toxicspikes') return;
+			if (effect?.id === 'toxicspikes') return;
 			if (status.id === 'slp' || status.id === 'frz') return;
 			this.add('-activate', target, 'ability: Synchronize');
 			// Hack to make status-prevention abilities think Synchronize is a status move
@@ -4966,7 +4995,7 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 		onSwitchInPriority: 2,
 		onSwitchIn(pokemon) {
 			if (pokemon.baseSpecies.baseSpecies !== 'Terapagos') return;
-			if (pokemon.species.forme !== 'Terastal') {
+			if (pokemon.species.forme !== 'Terastal' && !pokemon.terastallized) {
 				this.add('-activate', pokemon, 'ability: Tera Shift');
 				pokemon.formeChange('Terapagos-Terastal', this.effect, true);
 			}
@@ -5143,6 +5172,10 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 
 			const target = this.sample(possibleTargets);
 			const ability = target.getAbility();
+			if (this.effect.id.startsWith('ability:')) {
+				pokemon.setExtraAbility(this.effect.id, ability, target);
+				return;
+			}
 			pokemon.setAbility(ability, target);
 		},
 		flags: { failroleplay: 1, noreceiver: 1, noentrain: 1, notrace: 1 },
@@ -5354,7 +5387,9 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 	},
 	wanderingspirit: {
 		onDamagingHit(damage, target, source, move) {
-			if (this.checkMoveMakesContact(move, source, target)) this.skillSwap(source, target);
+			if (this.checkMoveMakesContact(move, source, target)) {
+				this.skillSwap(source, target, target.set.phAbilities && this.effect.id.startsWith('ability:') ? this.effect.id : '');
+			}
 		},
 		flags: {},
 		name: "Wandering Spirit",
@@ -5648,7 +5683,7 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 	// CAP
 	mountaineer: {
 		onDamage(damage, target, source, effect) {
-			if (effect && effect.id === 'stealthrock') {
+			if (effect?.id === 'stealthrock') {
 				return false;
 			}
 		},

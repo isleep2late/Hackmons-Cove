@@ -15,5 +15,5 @@
 #
 # Format: <subtree prefix> <40-char upstream sha>   (one per line, '#' comments ignored)
 
-pokemon-showdown 7244fe8e28fa8bc4d0809ae30d183c608b62bb2b
-pokemon-showdown-client 74056bbbb55d6ce15f9dd254186b94a51fe94b14
+pokemon-showdown 7b02eb39878f4b486f658a752b38c161379bd352
+pokemon-showdown-client ab4b77b8f3a5712e8fbe03ce106ef2b70a874fdb

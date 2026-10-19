@@ -5,11 +5,11 @@ const common = require('./../../common');
 
 describe('Rotation Battles', () => {
 	it('should allow rotating a side Pokemon to the center and executing the corresponding move slot', () => {
-		const battle = common.createBattle({ gameType: 'rotation' }, [
+		const battle = common.createBattle({ formatid: 'gen9customgame@@@Gametype = Rotation' }, [
 			[
 				{ species: "Mew", ability: 'synchronize', moves: ['pound'] },
 				{ species: "Celebi", ability: 'naturalcure', moves: ['psychic'] },
-				{ species: "Jirachi", ability: 'serenegrace', moves: ['ironhead'] },
+				{ species: "Jirachi", ability: 'serenegrace', moves: ['psychic', 'ironhead'] },
 			],
 			[
 				{ species: "Tyranitar", ability: 'sandstream', moves: ['stoneedge'] },
@@ -18,52 +18,62 @@ describe('Rotation Battles', () => {
 			],
 		]);
 
-		// Mew is slot 0 (left), Celebi is slot 1 (center), Jirachi is slot 2 (right).
-		// Machamp is slot 1 (center) for p2.
-		// p1 chooses to shift slot 0 (Mew) to the center. Since we are using the Triples UI,
-		// p1 inputs 'shift' for Mew, and chooses moves for the other two.
-		// The move slot selected for the center Pokemon (Celebi) determines the move slot used by the new center (Mew).
-		battle.makeChoices('shift, move 1, move 1', 'move 1, move 1, move 1');
+		battle.makeChoices('rotate left move 2', 'move 1');
 
-		// Mew should have swapped positions with Celebi. Mew is now in slot 1 (center).
-		assert.equal(battle.p1.active[1].species.name, 'Mew');
-		assert.equal(battle.p1.active[0].species.name, 'Celebi');
+		assert.equal(battle.p1.active[0].species.name, 'Jirachi');
+		assert.equal(battle.p1.pokemon[1].species.name, 'Mew');
 
-		// Only the center Pokemon (Mew and Machamp) should have attacked.
-		// Machamp should have taken damage from Mew's Pound.
-		assert.notEqual(battle.p2.active[1].hp, battle.p2.active[1].maxhp);
+		assert.equal(battle.p1.active[0].lastMove.id, 'ironhead');
+		assert.notEqual(battle.p2.active[0].hp, battle.p2.active[0].maxhp);
 
-		// Celebi (on the side) should not have attacked or taken damage, and should be at full HP.
-		assert.equal(battle.p1.active[0].hp, battle.p1.active[0].maxhp);
+		assert.equal(battle.p1.pokemon[1].lastMove, null);
+		assert.equal(battle.p1.pokemon[1].hp, battle.p1.pokemon[1].maxhp);
 	});
 
 	it('should disable abilities and status residual damage on side Pokemon', () => {
-		const battle = common.createBattle({ gameType: 'rotation' }, [
+		const battle = common.createBattle({ formatid: 'gen9customgame@@@Gametype = Rotation' }, [
 			[
-				{ species: "Mew", ability: 'synchronize', moves: ['pound'] },
-				{ species: "Celebi", ability: 'naturalcure', moves: ['psychic'] },
-				{ species: "Jirachi", ability: 'serenegrace', moves: ['ironhead'] },
+				{ species: "Mew", ability: 'moody', moves: ['pound'] },
+				{ species: "Celebi", ability: 'drizzle', moves: ['psychic'] },
+				{ species: "Jirachi", ability: 'serenegrace', moves: ['psychic'] },
 			],
 			[
 				{ species: "Tyranitar", ability: 'sandstream', moves: ['stoneedge'] },
-				{ species: "Machamp", ability: 'noguard', moves: ['submission'] },
-				{ species: "Gengar", ability: 'cursedbody', moves: ['shadowball'] },
+				{ species: "Machamp", ability: 'intimidate', moves: ['submission'] },
+				{ species: "Gengar", ability: 'moody', moves: ['shadowball'] },
 			],
 		]);
 
-		// Poison Celebi (center Pokemon) in round 1, then rotate it to the side.
-		battle.p1.active[1].setStatus('psn');
-		assert.equal(battle.p1.active[1].status, 'psn');
+		assert.equal(battle.field.weather, 'sandstorm');
+		assert.false(battle.log.some(line => line.includes('ability: Drizzle')), 'A side Drizzle should not activate');
+		assert.equal(battle.p1.active[0].boosts.atk, 0, 'A side Intimidate should not activate');
 
-		// Rotate Celebi to the side (slot 0) by shifting Mew (slot 0) to the center
-		battle.makeChoices('shift, move 1, move 1', 'move 1, move 1, move 1');
+		battle.p1.active[0].setStatus('psn');
+		assert.equal(battle.p1.active[0].status, 'psn');
 
-		const poisonedCelebi = battle.p1.active[0];
-		assert.equal(poisonedCelebi.species.name, 'Celebi');
-		assert.equal(poisonedCelebi.status, 'psn');
+		battle.makeChoices('rotate left move 1', 'move 1');
 
-		// Celebi is on the side slot. Its HP after the end of the turn should not have decreased from poison damage.
-		const maxHP = poisonedCelebi.maxhp;
-		assert.equal(poisonedCelebi.hp, maxHP);
+		const poisonedMew = battle.p1.pokemon[1];
+		assert.equal(poisonedMew.species.name, 'Mew');
+		assert.equal(poisonedMew.status, 'psn');
+
+		const maxHP = poisonedMew.maxhp;
+		assert.equal(poisonedMew.hp, maxHP);
+
+		const sideMoody = [poisonedMew, battle.p2.pokemon[2]];
+		const assertSideMoodyInactive = () => {
+			for (const pokemon of sideMoody) {
+				assert.equal(pokemon.ability, 'moody');
+				assert.notEqual(pokemon.position, 0);
+				assert(Object.values(pokemon.boosts).every(boost => boost === 0), 'A side Moody should not activate');
+			}
+		};
+		assertSideMoodyInactive();
+
+		battle.makeChoices('move 1', 'move 1');
+		assert.equal(battle.turn, 3);
+		assertSideMoodyInactive();
+		assert.equal(poisonedMew.hp, maxHP);
+		assert.equal(battle.field.weather, 'sandstorm');
 	});
 });

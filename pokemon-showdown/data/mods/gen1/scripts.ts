@@ -327,7 +327,7 @@ export const Scripts: ModdedBattleScriptsData = {
 			}
 
 			if (sourceEffect) attrs += `|[from] ${this.battle.dex.conditions.get(sourceEffect).name}`;
-			this.battle.addMove('move', pokemon, move.name, `${target}${attrs}`);
+			this.battle.addMove('move', pokemon, move.name, `${target!}${attrs}`);
 
 			if (!this.battle.singleEvent('Try', move, null, pokemon, target, move)) {
 				return true;
@@ -605,6 +605,7 @@ export const Scripts: ModdedBattleScriptsData = {
 				}
 				if ((damage || damage === 0) && !target.fainted) {
 					damage = this.battle.damage(damage, target, pokemon, move);
+					if (damage) this.applyRecoilDamage(damage, move, pokemon);
 					if (!(damage || damage === 0)) return false;
 					didSomething = true;
 				} else if (damage === false && typeof hitResult === 'undefined') {
@@ -737,8 +738,9 @@ export const Scripts: ModdedBattleScriptsData = {
 					}
 				}
 			}
-			if (move.selfSwitch && pokemon.hp) {
-				pokemon.switchFlag = move.selfSwitch === true ? true : this.dex.toID(move.selfSwitch);
+			if (move.selfSwitch && pokemon.hp && !pokemon.volatiles['commanded'] &&
+				(this.battle.canSwitch(pokemon.side) || move.id === 'revivalblessing')) {
+				pokemon.switchFlag = move.id;
 			}
 
 			return damage;
@@ -789,7 +791,7 @@ export const Scripts: ModdedBattleScriptsData = {
 			}
 
 			// Let's check if we are in middle of a partial trap sequence to return the previous damage.
-			if (source.volatiles['partialtrappinglock'] && (target === source.volatiles['partialtrappinglock'].locked)) {
+			if (target === source.volatiles['partialtrappinglock']?.locked) {
 				return source.volatiles['partialtrappinglock'].damage;
 			}
 
@@ -989,14 +991,15 @@ export const Scripts: ModdedBattleScriptsData = {
 				if (boostResult) {
 					success = true;
 					let msg = '-boost';
-					if (boost[i]! < 0) {
+					let amount = boost[i]!;
+					if (amount < 0) {
 						msg = '-unboost';
-						boost[i] = -boost[i]!;
+						amount = -amount;
 					}
 					if (!effect || effect.effectType === 'Move') {
-						this.add(msg, target, i, boost[i]);
+						this.add(msg, target, i, amount);
 					} else {
-						this.add(msg, target, i, boost[i], '[from] ' + effect.fullname);
+						this.add(msg, target, i, amount, '[from] ' + effect.fullname);
 					}
 					this.runEvent('AfterEachBoost', target, source, effect, currentBoost);
 				}
@@ -1004,15 +1007,16 @@ export const Scripts: ModdedBattleScriptsData = {
 				if (boostResult === 0) {
 					let msg = '-boost';
 					let secondmsg = '-unboost';
-					if (boost[i]! < 0) {
+					let amount = boost[i]!;
+					if (amount < 0) {
 						msg = '-unboost';
 						secondmsg = '-boost';
-						boost[i] = -boost[i]!;
+						amount = -amount;
 					}
 					if (!effect || effect.effectType === 'Move') {
-						this.add(msg, target, i, boost[i]);
+						this.add(msg, target, i, amount);
 					} else {
-						this.add(msg, target, i, boost[i], '[from] ' + effect.fullname);
+						this.add(msg, target, i, amount, '[from] ' + effect.fullname);
 					}
 					this.add(secondmsg, target, i, 1);
 					if (msg === '-boost') {

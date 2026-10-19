@@ -495,6 +495,8 @@ export const Scripts: ModdedBattleScriptsData = {
 
 			if (move.recoil && move.totalDamage) {
 				this.battle.damage(this.calcRecoilDamage(move.totalDamage, move, pokemon), pokemon, target, 'recoil');
+			} else if (move.totalDamage || (move.totalDamage === 0 && move.mindBlownRecoil)) {
+				this.applyRecoilDamage(move.totalDamage, move, pokemon);
 			}
 			return damage;
 		},

@@ -939,7 +939,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 		flags: { contact: 1, protect: 1, mirror: 1, metronome: 1 },
 		hasCrashDamage: true,
 		onMoveFail(target, source, move) {
-			this.damage(source.baseMaxhp / 2, source, source, this.dex.conditions.get('High Jump Kick'));
+			this.damage(source.baseMaxhp / 2, source, source, this.dex.conditions.get('Axe Kick'));
 		},
 		secondary: {
 			chance: 30,
@@ -1107,7 +1107,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 		},
 		self: {
 			onHit(source) {
-				source.skipBeforeSwitchOutEventFlag = true;
+				source.skipPursuit = true;
 			},
 		},
 		selfSwitch: 'copyvolatile',
@@ -1286,7 +1286,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 			},
 			onDamagePriority: -101,
 			onDamage(damage, target, source, move) {
-				if (!move || move.effectType !== 'Move' || !source) return;
+				if (move?.effectType !== 'Move' || !source) return;
 				this.effectState.totalDamage += damage;
 				this.effectState.lastDamageSource = source;
 			},
@@ -2444,6 +2444,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 		pp: 5,
 		priority: 0,
 		flags: { protect: 1, mirror: 1, metronome: 1 },
+		chloroblastRecoil: true,
 		// Recoil implemented in battle-actions.ts
 		target: "normal",
 		type: "Grass",
@@ -3498,7 +3499,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 				this.add('-singlemove', pokemon, 'Destiny Bond');
 			},
 			onFaint(target, source, effect) {
-				if (!source || !effect || target.isAlly(source)) return;
+				if (!source?.hp || !effect || target.isAlly(source)) return;
 				if (effect.effectType === 'Move' && !effect.flags['futuremove']) {
 					if (source.volatiles['dynamax']) {
 						this.add('-hint', "Dynamaxed Pokémon are immune to Destiny Bond.");
@@ -3656,7 +3657,10 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 		flags: { protect: 1, reflectable: 1, mirror: 1, bypasssub: 1, metronome: 1 },
 		volatileStatus: 'disable',
 		onTryHit(target) {
-			if (!target.lastMove || target.lastMove.isZOrMaxPowered || target.lastMove.isMax || target.lastMove.id === 'struggle') {
+			if (
+				target.lastMove === null || target.lastMove.isZOrMaxPowered ||
+				target.lastMove.isMax || target.lastMove.id === 'struggle'
+			) {
 				return false;
 			}
 		},
@@ -4692,6 +4696,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 			onStart(pokemon) {
 				this.add('-start', pokemon, 'Embargo');
 				this.singleEvent('End', pokemon.getItem(), pokemon.itemState, pokemon);
+				pokemon.endExtras('item');
 			},
 			// Item suppression implemented in Pokemon.ignoringItem() within sim/pokemon.js
 			onResidualOrder: 21,
@@ -6448,6 +6453,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 				if (pokemon.hasItem('Ability Shield')) return false;
 				this.add('-endability', pokemon);
 				this.singleEvent('End', pokemon.getAbility(), pokemon.abilityState, pokemon, pokemon, 'gastroacid');
+				pokemon.endExtras('ability', pokemon, 'gastroacid');
 			},
 			onCopy(pokemon) {
 				if (pokemon.getAbility().flags['cantsuppress']) pokemon.removeVolatile('gastroacid');
@@ -7896,7 +7902,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 				this.add('-singlemove', pokemon, 'Grudge');
 			},
 			onFaint(target, source, effect) {
-				if (!source || source.fainted || !effect) return;
+				if (!source?.hp || !effect) return;
 				if (effect.effectType === 'Move' && !effect.flags['futuremove'] && source.lastMove) {
 					let move: Move = source.lastMove;
 					if (move.isMax && move.baseMove) move = this.dex.moves.get(move.baseMove);
@@ -9269,8 +9275,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 		onAfterMove(source, target, move) {
 			const iceballData = source.volatiles["iceball"];
 			if (
-				iceballData &&
-				iceballData.hitCount === 5 &&
+				iceballData?.hitCount === 5 &&
 				iceballData.contactHitCount < 5
 				// this conditions can only be met in gen7 and gen8dlc1
 				// see `disguise` and `iceface` abilities in the resp mod folders
@@ -9289,7 +9294,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 				this.effectState.contactHitCount = 0;
 			},
 			onResidual(target) {
-				if (target.lastMove && target.lastMove.id === 'struggle') {
+				if (target.lastMove?.id === 'struggle') {
 					// don't lock
 					delete target.volatiles['iceball'];
 				}
@@ -10778,6 +10783,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 				}
 				for (const mon of this.getAllActive()) {
 					this.singleEvent('End', mon.getItem(), mon.itemState, mon);
+					mon.endExtras('item');
 				}
 			},
 			onFieldRestart(target, source) {
@@ -11884,14 +11890,9 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 		priority: 0,
 		flags: { protect: 1, mirror: 1 },
 		mindBlownRecoil: true,
-		onAfterMove(pokemon, target, move) {
-			if (move.mindBlownRecoil && !move.multihit) {
-				const hpBeforeRecoil = pokemon.hp;
-				this.damage(Math.round(pokemon.maxhp / 2), pokemon, pokemon, this.dex.conditions.get('Mind Blown'), true);
-				if (pokemon.hp <= pokemon.maxhp / 2 && hpBeforeRecoil > pokemon.maxhp / 2) {
-					this.runEvent('EmergencyExit', pokemon, pokemon, undefined, hpBeforeRecoil);
-				}
-			}
+		onMoveFail(target, source, move) {
+			if (move.multihit) return;
+			this.damage(Math.round(source.maxhp / 2), source, source, this.dex.conditions.get('Mind Blown'));
 		},
 		target: "allAdjacent",
 		type: "Fire",
@@ -13267,7 +13268,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 			},
 			onResidualOrder: 24,
 			onResidual(pokemon) {
-				const duration = pokemon.volatiles['perishsong'].duration;
+				const duration = pokemon.volatiles['perishsong'].duration!;
 				this.add('-start', pokemon, `perish${duration}`);
 			},
 		},
@@ -14385,51 +14386,51 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 		pp: 20,
 		priority: 0,
 		flags: { contact: 1, protect: 1, mirror: 1, metronome: 1 },
-		beforeTurnCallback(pokemon) {
-			for (const target of pokemon.foes()) {
-				target.addVolatile('pursuit');
-				const data = target.volatiles['pursuit'];
-				if (!data.sources) {
-					data.sources = [];
-				}
-				data.sources.push(pokemon);
-			}
+		beforeTurnCallback(pokemon, target) {
+			pokemon.addVolatile('pursuit', pokemon, this.dex.getActiveMove('pursuit'));
 		},
 		onModifyMove(move, source, target) {
-			if (target?.beingCalledBack || target?.switchFlag) move.accuracy = true;
+			if (target?.beingCalledBack || target?.switchFlag) {
+				move.accuracy = true;
+				move.tracksTarget = true;
+			}
 		},
 		condition: {
 			duration: 1,
-			onBeforeSwitchOut(pokemon) {
+			onFoeBeforeSwitchOut(pokemon) {
+				const source: Pokemon = this.effectState.source;
 				this.debug('Pursuit start');
-				let alreadyAdded = false;
-				pokemon.removeVolatile('destinybond');
-				for (const source of this.effectState.sources) {
-					if (!source.isAdjacent(pokemon) || !this.queue.cancelMove(source) || !source.hp) continue;
-					if (!alreadyAdded) {
-						this.add('-activate', pokemon, 'move: Pursuit');
-						alreadyAdded = true;
-					}
-					// Run through each action in queue to check if the Pursuit user is supposed to Mega Evolve this turn.
-					// If it is, then Mega Evolve before moving.
-					if (source.canMegaEvo || source.canUltraBurst || source.canTerastallize) {
-						for (const [actionIndex, action] of this.queue.entries()) {
-							if (action.pokemon === source) {
-								if (action.choice === 'megaEvo') {
-									this.actions.runMegaEvo(source);
-								} else if (action.choice === 'terastallize') {
-									// Also a "forme" change that happens before moves, though only possible in NatDex
-									this.actions.terastallize(source);
-								} else {
-									continue;
-								}
-								this.queue.list.splice(actionIndex, 1);
-								break;
+				if (
+					!source.isAdjacent(pokemon) || !source.hp ||
+					(source.volatiles['encore'] && source.volatiles['encore'].move !== 'pursuit') ||
+					!this.queue.cancelMove(source)
+				) {
+					return;
+				}
+				if (!pokemon.pursuitActivated) {
+					this.add('-activate', pokemon, 'move: Pursuit');
+					pokemon.pursuitActivated = true;
+				}
+				// Run through each action in queue to check if the Pursuit user is supposed to Mega Evolve this turn.
+				// If it is, then Mega Evolve before moving.
+				if (source.canMegaEvo || source.canUltraBurst || source.canTerastallize) {
+					for (const [actionIndex, action] of this.queue.entries()) {
+						if (action.pokemon === source) {
+							if (action.choice === 'megaEvo') {
+								this.actions.runMegaEvo(source);
+							} else if (action.choice === 'terastallize') {
+								// Also a "forme" change that happens before moves, though only possible in NatDex
+								this.actions.terastallize(source);
+							} else {
+								continue;
 							}
+							this.queue.list.splice(actionIndex, 1);
+							break;
 						}
 					}
-					this.actions.runMove('pursuit', source, source.getLocOf(pokemon));
 				}
+				pokemon.removeVolatile('destinybond');
+				this.actions.runMove('pursuit', source, source.getLocOf(pokemon), { sourceEffect: this.effectState.sourceEffect });
 			},
 		},
 		target: "normal",
@@ -15414,8 +15415,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 		onAfterMove(source, target, move) {
 			const rolloutData = source.volatiles["rollout"];
 			if (
-				rolloutData &&
-				rolloutData.hitCount === 5 &&
+				rolloutData?.hitCount === 5 &&
 				rolloutData.contactHitCount < 5
 				// this conditions can only be met in gen7 and gen8dlc1
 				// see `disguise` and `iceface` abilities in the resp mod folders
@@ -15433,7 +15433,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 				this.effectState.contactHitCount = 0;
 			},
 			onResidual(target) {
-				if (target.lastMove && target.lastMove.id === 'struggle') {
+				if (target.lastMove?.id === 'struggle') {
 					// don't lock
 					delete target.volatiles['rollout'];
 				}
@@ -16205,7 +16205,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 		},
 		self: {
 			onHit(source) {
-				source.skipBeforeSwitchOutEventFlag = true;
+				source.skipPursuit = true;
 			},
 		},
 		selfSwitch: 'shedtail',
@@ -16716,7 +16716,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 			}
 		},
 		onMoveFail(target, source) {
-			if (source.volatiles['twoturnmove'] && source.volatiles['twoturnmove'].duration === 1) {
+			if (source.volatiles['twoturnmove']?.duration === 1) {
 				source.removeVolatile('skydrop');
 				source.removeVolatile('twoturnmove');
 				if (target === this.effectState.target) {
@@ -17901,14 +17901,9 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 		priority: 0,
 		flags: { protect: 1, mirror: 1 },
 		mindBlownRecoil: true,
-		onAfterMove(pokemon, target, move) {
-			if (move.mindBlownRecoil && !move.multihit) {
-				const hpBeforeRecoil = pokemon.hp;
-				this.damage(Math.round(pokemon.maxhp / 2), pokemon, pokemon, this.dex.conditions.get('Steel Beam'), true);
-				if (pokemon.hp <= pokemon.maxhp / 2 && hpBeforeRecoil > pokemon.maxhp / 2) {
-					this.runEvent('EmergencyExit', pokemon, pokemon, undefined, hpBeforeRecoil);
-				}
-			}
+		onMoveFail(target, source, move) {
+			if (move.multihit) return;
+			this.damage(Math.round(source.maxhp / 2), source, source, this.dex.conditions.get('Steel Beam'));
 		},
 		target: "normal",
 		type: "Steel",
@@ -18382,8 +18377,8 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 				} else {
 					this.add('-activate', target, 'move: Substitute', '[damage]');
 				}
-				if (move.recoil || move.id === 'chloroblast') {
-					this.damage(this.actions.calcRecoilDamage(damage, move, source), source, target, 'recoil');
+				if (damage) {
+					this.actions.applyRecoilDamage(damage, move, source);
 				}
 				if (move.drain) {
 					this.heal(Math.ceil(damage * move.drain[0] / move.drain[1]), source, target, 'drain');
@@ -19950,7 +19945,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 			if (target.side.active.length === 2 && target.position === 1) {
 				// Curse Glitch
 				const action = this.queue.willMove(target);
-				if (action && action.move.id === 'curse') {
+				if (action?.move.id === 'curse') {
 					action.targetLoc = -1;
 				}
 			}
@@ -20246,9 +20241,9 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 			const activeTeam = target.side.activeTeam();
 			const foeActiveTeam = target.side.foe.activeTeam();
 			for (const [i, allyActive] of activeTeam.entries()) {
-				if (allyActive && allyActive.status === 'slp') allyActive.cureStatus();
+				if (allyActive?.status === 'slp') allyActive.cureStatus();
 				const foeActive = foeActiveTeam[i];
-				if (foeActive && foeActive.status === 'slp') foeActive.cureStatus();
+				if (foeActive?.status === 'slp') foeActive.cureStatus();
 			}
 		},
 		condition: {
@@ -20261,7 +20256,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 					target.removeVolatile('uproar');
 					return;
 				}
-				if (target.lastMove && target.lastMove.id === 'struggle') {
+				if (target.lastMove?.id === 'struggle') {
 					// don't lock
 					delete target.volatiles['uproar'];
 				}
@@ -20956,7 +20951,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 			onResidualOrder: 4,
 			onResidual(target: Pokemon) {
 				if (this.getOverflowedTurnCount() <= this.effectState.startingTurn) return;
-				target.side.removeSlotCondition(this.getAtSlot(this.effectState.sourceSlot), 'wish');
+				target.side.removeSlotCondition(target, 'wish');
 			},
 			onEnd(target) {
 				if (target && !target.fainted) {

@@ -162,8 +162,29 @@ export class Pokemon {
 	 */
 	switchFlag: ID | boolean;
 	forceSwitchFlag: boolean;
-	skipBeforeSwitchOutEventFlag: boolean;
-	draggedIn: number | null;
+	/**
+	 * Set on the target trying to switch out if Pursuit activates.
+	 * Prevents duplicate activation messages and makes sure the target
+	 * still switches before checking for winners if Destiny Bond
+	 * KOs the Pursuit user in Gen 2-4.
+	 *
+	 * Not cleared by fainting or clearVolatile. Cleared on its replacement's
+	 * switchIn, whether or not a Pursuit KO made you choose a new replacement.
+	 * Also cleared by runPursuitActivation if the switch was canceled, e.g. when
+	 * Emergency Exit cancels U-turn.
+	 */
+	pursuitActivated: boolean;
+	/**
+	 * Set by Baton Pass and Shed Tail to avoid Pursuit.
+	 * Also set on the target trying to switch out during `BeforeSwitchOut`
+	 * to prevent the event from running twice during U-turn switches.
+	 *
+	 * Not cleared by fainting or clearVolatile. Cleared on its replacement's
+	 * switchIn, whether or not a Pursuit KO made you choose a new replacement.
+	 * Also cleared by runPursuitActivation if the switch was canceled, e.g. when
+	 * Emergency Exit cancels U-turn.
+	 */
+	skipPursuit: boolean;
 	newlySwitched: boolean;
 	beingCalledBack: boolean;
 
@@ -480,8 +501,8 @@ export class Pokemon {
 
 		this.switchFlag = false;
 		this.forceSwitchFlag = false;
-		this.skipBeforeSwitchOutEventFlag = false;
-		this.draggedIn = null;
+		this.pursuitActivated = false;
+		this.skipPursuit = false;
 		this.newlySwitched = false;
 		this.beingCalledBack = false;
 
@@ -583,18 +604,21 @@ export class Pokemon {
 			);
 		}
 		if (this.terastallized) details += `, tera:${this.terastallized}`;
-		let sharedDetails = details;
-		if (this.set.disguise && !this.illusion) {
-			const disguise = this.battle.dex.species.get(this.set.disguise);
-			if (disguise.exists) {
-				sharedDetails = disguise.name +
-					(this.level === 100 ? '' : `, L${this.level}`) +
-					(this.gender === '' ? '' : `, ${this.gender}`) +
-					(this.set.shiny ? ', shiny' : '');
-			}
-		}
+		const sharedDetails = this.getDisguiseDetails() || details;
 		return { side: health.side, secret: `${details}|${health.secret}`, shared: `${sharedDetails}|${health.shared}` };
 	};
+
+	getDisguiseDetails() {
+		const apparent = this.illusion || this;
+		if (!apparent.set.disguise) return '';
+		const disguise = this.battle.dex.species.get(apparent.set.disguise);
+		if (!disguise.exists) return '';
+		const level = this.illusion && !this.battle.ruleTable.has('illusionlevelmod') ? this.level : apparent.level;
+		return disguise.name +
+			(level === 100 ? '' : `, L${level}`) +
+			(apparent.gender === '' ? '' : `, ${apparent.gender}`) +
+			(apparent.set.shiny ? ', shiny' : '');
+	}
 
 	updateSpeed() {
 		this.speed = this.getActionSpeed();
@@ -918,11 +942,17 @@ export class Pokemon {
 		// Check if any active pokemon have the ability Neutralizing Gas
 		if ((this.item === 'abilityshield' || this.volatiles['item:abilityshield']) &&
 			!this.ignoringItem(false, 'abilityshield')) return false;
-		if (this.ability === ('neutralizinggas' as ID)) return false;
+		if (this.ability === ('neutralizinggas' as ID) && !this.set.phAbilities) return false;
+		if (ability.id === 'neutralizinggas' && this.set.phAbilities) return false;
 		for (const pokemon of this.battle.getAllActive()) {
 			// can't use hasAbility because it would lead to infinite recursion
 			if (pokemon.ability === ('neutralizinggas' as ID) && !pokemon.volatiles['gastroacid'] &&
 				!pokemon.transformed && !pokemon.abilityState.ending && !this.volatiles['commanding']) {
+				return true;
+			}
+			const extraGas = pokemon.set.phAbilities ? pokemon.volatiles['ability:neutralizinggas'] : null;
+			if (extraGas && !pokemon.volatiles['gastroacid'] &&
+				!pokemon.transformed && !extraGas.ending && !this.volatiles['commanding']) {
 				return true;
 			}
 		}
@@ -1578,7 +1608,17 @@ export class Pokemon {
 				this.battle.add('-formechange', this, this.illusion ? this.illusion.species.name : species.name, message);
 			}
 		}
-		if (isPermanent && (!source || !['disguise', 'iceface'].includes(source.id))) {
+		if (isPermanent && this.set.phAbilities && source?.id.startsWith('ability:')) {
+			if (!['disguise', 'iceface'].includes(source.id.slice(8))) {
+				const ability = species.abilities[abilitySlot] || species.abilities['0'];
+				this.setExtraAbility(source.id, this.battle.dex.abilities.get(ability), null, true);
+			}
+		} else if (isPermanent && !source && this.set.phAbilities && species.name === 'Terapagos-Stellar' &&
+			this.volatiles['ability:terashell'] &&
+			(this.ability !== 'terashell' || this.m.extraBaseAbilities?.['terashift'] === 'terashell')) {
+			const ability = species.abilities[abilitySlot] || species.abilities['0'];
+			this.setExtraAbility('ability:terashell', this.battle.dex.abilities.get(ability), null, true);
+		} else if (isPermanent && (!source || !['disguise', 'iceface'].includes(source.id))) {
 			if (this.illusion && source) {
 				// Tera forme by Ogerpon or Terapagos breaks the Illusion
 				this.ability = ''; // Don't allow Illusion to wear off
@@ -1938,7 +1978,7 @@ export class Pokemon {
 		if (this.battle.runEvent('UseItem', this, null, null, item)) {
 			switch (item.id) {
 			case 'redcard':
-				this.battle.add('-enditem', this, item, `[of] ${source}`);
+				this.battle.add('-enditem', this, item, `[of] ${source!}`);
 				break;
 			default:
 				if (item.isGem) {
@@ -2022,6 +2062,21 @@ export class Pokemon {
 		return !this.ignoringItem(false, itemid);
 	}
 
+	endExtras(kind?: 'ability' | 'item', source: Pokemon | null = null, sourceEffect: string | null = null) {
+		if (!this.set.phAbilities && !this.set.phItems) return;
+		for (const id of Object.keys(this.volatiles)) {
+			if (!this.volatiles[id] || !/^(ability|item):/.test(id)) continue;
+			if (kind && !(kind === 'ability' ? id.startsWith('ability:') && this.ignoringAbility(id) :
+				id.startsWith('item:') && this.ignoringItem(false, id))) continue;
+			this.battle.singleEvent('End', this.battle.dex.conditions.getByID(id as ID), this.volatiles[id], this, source, sourceEffect);
+		}
+	}
+
+	isDormantExtra(effectid: string) {
+		if (effectid === 'ability:' + this.ability) return !!this.set.phAbilities;
+		return effectid === 'item:' + this.item && !!this.set.phItems;
+	}
+
 	loseExtraItem(effectid: string) {
 		delete this.volatiles[effectid];
 		if (!this.m.usedExtraItems) this.m.usedExtraItems = [];
@@ -2069,7 +2124,42 @@ export class Pokemon {
 			(!isTransform || oldAbility.id !== ability.id || this.battle.gen <= 4)) {
 			this.battle.singleEvent('Start', ability, this.abilityState, this, source);
 		}
+		if (oldAbility.id !== ability.id) this.restartExtraAbility(oldAbility.id, source);
 		return oldAbility.id;
+	}
+
+	setExtraAbility(effectid: string, ability: Ability, source: Pokemon | null, isFromFormeChange = false) {
+		if (!this.hp) return;
+		if (!isFromFormeChange) {
+			if (ability.flags['cantsuppress']) return;
+			if (!this.battle.runEvent('SetAbility', this, source, this.battle.effect, ability)) return;
+		}
+		const oldAbility = this.battle.dex.abilities.getByID(effectid.slice(8) as ID);
+		if (!isFromFormeChange) {
+			this.removeVolatile(effectid);
+			this.battle.add('-ability', this, ability.name, oldAbility.name, `[from] ${oldAbility.fullname}`, `[of] ${source}`);
+		} else {
+			if (!this.m.extraBaseAbilities) this.m.extraBaseAbilities = {};
+			const slot = Object.keys(this.m.extraBaseAbilities)
+				.find(id => this.m.extraBaseAbilities[id] === oldAbility.id) || oldAbility.id;
+			this.m.extraBaseAbilities[slot] = ability.id;
+			if (!this.set.phAbilities?.split('/').map(toID)
+				.some(id => id !== slot && (this.m.extraBaseAbilities[id] || id) === oldAbility.id)) {
+				this.removeVolatile(effectid);
+			}
+		}
+		const newid = 'ability:' + ability.id;
+		if (!ability.id || this.volatiles[newid]) return;
+		this.volatiles[newid] = this.battle.initEffectState({ id: newid as ID, target: this });
+		if (this.battle.gen > 3) {
+			this.battle.singleEvent('Start', this.battle.dex.conditions.getByID(newid as ID), this.volatiles[newid], this, source);
+		}
+	}
+
+	restartExtraAbility(abilityid: ID, source?: Pokemon | null) {
+		const effectid = 'ability:' + abilityid;
+		if (!this.set.phAbilities || !abilityid || !this.volatiles[effectid] || this.battle.gen <= 3) return;
+		this.battle.singleEvent('Start', this.battle.dex.conditions.getByID(effectid as ID), this.volatiles[effectid], this, source);
 	}
 
 	getAbility() {
@@ -2294,7 +2384,7 @@ export class Pokemon {
 	isSkyDropped() {
 		if (this.volatiles['skydrop']) return true;
 		for (const foeActive of this.side.foe.active) {
-			if (foeActive.volatiles['skydrop'] && foeActive.volatiles['skydrop'].source === this) {
+			if (foeActive.volatiles['skydrop']?.source === this) {
 				return true;
 			}
 		}

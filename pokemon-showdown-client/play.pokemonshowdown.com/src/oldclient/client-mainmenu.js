@@ -1711,6 +1711,7 @@
 		renderFormats: function () {
 			var data = this.data;
 			var curFormat = data.format;
+			var search = toID(this.search) === 'phnn' ? 'gen9nonerfs' : toID(this.search);
 			var bufs = [];
 			var curBuf = 0;
 			if (this.selectType === 'watch' && !this.search) {
@@ -1725,7 +1726,7 @@
 					continue;
 				}
 				if (!this.shouldDisplayFormat(format)) continue;
-				if (this.search && !i.includes(toID(this.search))) {
+				if (this.search && !i.includes(search)) {
 					continue;
 				}
 				// <i class="fa fa-star"></i>
@@ -1741,7 +1742,7 @@
 			for (var i in BattleFormats) {
 				var format = BattleFormats[i];
 				if (!this.shouldDisplayFormat(format)) continue;
-				if (this.search && !format.id.includes(toID(this.search))) continue;
+				if (this.search && !format.id.includes(search)) continue;
 				if (this.starred[i]) continue; // only show it in the starred section
 
 				if (format.section && format.section !== curSection) {

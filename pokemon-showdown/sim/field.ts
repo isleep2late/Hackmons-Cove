@@ -43,7 +43,7 @@ export class Field {
 		if (source === 'debug') source = this.battle.sides[0].active[0];
 
 		if (this.weather === status.id) {
-			if (sourceEffect && sourceEffect.effectType === 'Ability') {
+			if (sourceEffect?.effectType === 'Ability') {
 				if (this.battle.gen > 5 || this.weatherState.duration === 0) {
 					return false;
 				}
@@ -57,7 +57,7 @@ export class Field {
 				if (result === false) {
 					if ((sourceEffect as Move)?.weather) {
 						this.battle.add('-fail', source, sourceEffect, '[from] ' + this.weather);
-					} else if (sourceEffect && sourceEffect.effectType === 'Ability') {
+					} else if (sourceEffect?.effectType === 'Ability') {
 						this.battle.add('-ability', source, sourceEffect, '[from] ' + this.weather, '[fail]');
 					}
 				}
@@ -109,6 +109,14 @@ export class Field {
 				if (pokemon && !pokemon.fainted && !pokemon.ignoringAbility() &&
 					pokemon.getAbility().suppressWeather && !pokemon.abilityState.ending) {
 					return true;
+				}
+				if (pokemon && !pokemon.fainted && pokemon.set.phAbilities) {
+					for (const id in pokemon.volatiles) {
+						if (id.startsWith('ability:') && this.battle.dex.abilities.get(id.slice(8)).suppressWeather &&
+							!pokemon.ignoringAbility(id) && !pokemon.volatiles[id].ending) {
+							return true;
+						}
+					}
 				}
 			}
 		}
