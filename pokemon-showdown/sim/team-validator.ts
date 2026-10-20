@@ -16,6 +16,10 @@ import { PRNG } from './prng';
 import { type RuleTable } from './dex-formats';
 
 const EXISTENCE_TAGS = ['past', 'future', 'lgpe', 'legends', 'unobtainable', 'cap', 'custom', 'demo', 'glitch', 'glitchgen1', 'glitchgen2', 'glitchgen3', 'nonexistent'];
+const isCapContent = (thing: Species | Item | Move | Ability) => (
+	thing.effectType === 'Pokemon' ? Dex.species.get(thing.id) : thing.effectType === 'Item' ? Dex.items.get(thing.id) :
+	thing.effectType === 'Move' ? Dex.moves.get(thing.id) : Dex.abilities.get(thing.id)
+).isNonstandard === 'CAP';
 
 /**
  * Describes a possible way to get a pokemon. Is not exhaustive!
@@ -651,6 +655,12 @@ export class TeamValidator {
 				problems.push(`${set.name || set.species} has a starting status, which is not allowed in this format.`);
 			}
 		}
+		const disguiseCap = set.disguise && dex.species.get(set.disguise);
+		if (disguiseCap && (ruleTable.has('disguisemod') || ruleTable.has('spaceworlddisguisemod')) &&
+			ruleTable.has('-tag:cap') && isCapContent(disguiseCap) && !ruleTable.has(`+pokemon:${disguiseCap.id}`) &&
+			!ruleTable.has(`+basepokemon:${toID(disguiseCap.baseSpecies)}`)) {
+			problems.push(`${set.name || set.species} can't disguise as ${set.disguise}: it is made up for Smogon CAP and does not exist in this game.`);
+		}
 		if (set.disguise && ruleTable.has('spaceworlddisguisemod')) {
 			const disguiseSpecies = dex.species.get(set.disguise);
 			if (!disguiseSpecies.exists || disguiseSpecies.forme || disguiseSpecies.isNonstandard) {
@@ -845,6 +855,8 @@ export class TeamValidator {
 				const extraAbility = dex.abilities.get(part.trim());
 				if (!extraAbility.exists || extraAbility.id === 'noability') {
 					problems.push(`${name} has an invalid extra ability "${part.trim()}".`);
+				} else if (ruleTable.has('-tag:cap') && isCapContent(extraAbility) && !ruleTable.has(`+ability:${extraAbility.id}`)) {
+					problems.push(`${name}'s extra ability ${extraAbility.name} is made up for Smogon CAP and does not exist in this game.`);
 				} else if (extraAbility.name !== ability.name && !extraNames.includes(extraAbility.name)) {
 					extraNames.push(extraAbility.name);
 				}
@@ -859,6 +871,8 @@ export class TeamValidator {
 				const extraItem = dex.items.get(part.trim());
 				if (!extraItem.exists) {
 					problems.push(`${name} has an invalid extra item "${part.trim()}".`);
+				} else if (ruleTable.has('-tag:cap') && isCapContent(extraItem) && !ruleTable.has(`+item:${extraItem.id}`)) {
+					problems.push(`${name}'s extra item ${extraItem.name} is made up for Smogon CAP and does not exist in this game.`);
 				} else if (extraItem.name !== item.name && !extraItemNames.includes(extraItem.name)) {
 					extraItemNames.push(extraItem.name);
 				}
@@ -2135,6 +2149,8 @@ export class TeamValidator {
 		// complicated in terms of what trumps it. We don't want e.g.
 		// +Mythical to unban Shaymin in Gen 1, for instance.
 		let nonexistentCheck = Tags.nonexistent.genericFilter!(thing) && ruleTable.check('nonexistent', setHas);
+		const capProblem = ruleTable.has('-tag:cap') && isCapContent(thing) ?
+			`${displayName} is made up for Smogon CAP and does not exist in this game.` : undefined;
 
 		for (const [type, match] of ruleTable.tagRules) {
 			if (type === '*') continue;
@@ -2144,7 +2160,7 @@ export class TeamValidator {
 			if (type === '+') {
 				// We want rules like +CAP or +Past to trump -Nonexistent, but most tags shouldn't.
 				if (!existenceTag && nonexistentCheck) continue;
-				return null;
+				return capProblem || null;
 			}
 			if (existenceTag) {
 				// for a nicer error message
@@ -2188,8 +2204,8 @@ export class TeamValidator {
 			}
 			return `${displayName} does not exist in this game.`;
 		}
-		if (nonexistentCheck === '') return null;
-		return undefined;
+		if (nonexistentCheck === '') return capProblem || null;
+		return capProblem;
 	}
 
 	checkItem(set: PokemonSet, item: Item, setHas: { [k: string]: true }) {
@@ -2298,14 +2314,17 @@ export class TeamValidator {
 		if (banReason) {
 			return `${set.name}'s ability ${ability.name} is not in the list of allowed abilities.`;
 		}
+		const capProblem = ruleTable.has('-tag:cap') && isCapContent(ability) ?
+			`${set.name}'s ability ${ability.name} is made up for Smogon CAP and does not exist in this game.` : null;
 
 		// obtainability
 		if (ability.isNonstandard) {
 			banReason = ruleTable.check('tag:' + toID(ability.isNonstandard));
 			if (banReason) {
+				if (capProblem && !(this.format as any).upstreamCapAbilityMessage) return capProblem;
 				return `${set.name}'s ability ${ability.name} is tagged ${ability.isNonstandard}, which is ${banReason}.`;
 			}
-			if (banReason === '') return null;
+			if (banReason === '') return capProblem;
 
 			banReason = ruleTable.check('nonexistent', setHas);
 			if (banReason) {
@@ -2314,10 +2333,10 @@ export class TeamValidator {
 				}
 				return `${set.name}'s ability ${ability.name} does not exist in this game.`;
 			}
-			if (banReason === '') return null;
+			if (banReason === '') return capProblem;
 		}
 
-		return null;
+		return capProblem;
 	}
 
 	checkNature(set: PokemonSet, nature: Nature, setHas: { [k: string]: true }) {

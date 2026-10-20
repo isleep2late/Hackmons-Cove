@@ -3578,6 +3578,7 @@
 						if (!abid || abid === 'noability') continue;
 						if (BattleAbilities[abid].exists === false) continue;
 						if (BattleAbilities[abid].isNonstandard === 'Custom' && !phCustomAbilitiesOk) continue;
+						if (BattleAbilities[abid].num < 0 && BattleAbilities[abid].num > -500 && !window.PhnnAllowCAP) continue;
 						var abilOptName = BattleAbilities[abid].name || abid;
 						if (abilOptName) abilityNames.push(abilOptName);
 					}
@@ -3593,6 +3594,7 @@
 						for (var itid in BattleItems) {
 							if (!itid || BattleItems[itid].isPokeball) continue;
 							if (BattleItems[itid].exists === false) continue;
+							if (BattleItems[itid].num < 0 && BattleItems[itid].num > -500 && !window.PhnnAllowCAP) continue;
 							var itemOptName = BattleItems[itid].name || itid;
 							if (itemOptName) itemNames.push(itemOptName);
 						}
@@ -3641,7 +3643,7 @@
 						for (var dexid in BattlePokedex) {
 							var dsp = Dex.species.get(dexid);
 							if (isCustomDisguise) {
-								if (dsp.exists) disguiseMons.push(dsp);
+								if (dsp.exists && (window.PhnnAllowCAP || !(dsp.num < 0 && dsp.num > -500))) disguiseMons.push(dsp);
 							} else if (isGen1Disguises) {
 								if (dsp.exists && dsp.num >= 0 && dsp.num <= 151 && !dsp.forme) disguiseMons.push(dsp);
 							} else if (dsp.exists && dsp.num >= 1 && !dsp.forme) {
