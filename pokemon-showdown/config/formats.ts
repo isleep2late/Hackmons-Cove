@@ -562,6 +562,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: false,
 		challengeShow: false,
 		ruleset: ['-Nonexistent', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 255', 'Disguise Mod'],
+		banlist: ['CAP'],
 	},
 	{
 		name: "[Gen 3] Disguises",
@@ -570,6 +571,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: false,
 		challengeShow: false,
 		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 255', 'Disguise Mod'],
+		banlist: ['CAP'],
 	},
 	{
 		name: "[Gen 4] Disguises",
@@ -578,6 +580,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: false,
 		challengeShow: false,
 		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 255', 'Disguise Mod'],
+		banlist: ['CAP'],
 	},
 	{
 		name: "[Gen 5] Disguises",
@@ -586,6 +589,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: false,
 		challengeShow: false,
 		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 255', 'Disguise Mod'],
+		banlist: ['CAP'],
 	},
 	{
 		name: "[Gen 6] Disguises",
@@ -594,6 +598,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: false,
 		challengeShow: false,
 		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 255', 'Disguise Mod'],
+		banlist: ['CAP'],
 	},
 	{
 		name: "[Gen 7] Disguises",
@@ -602,6 +607,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: false,
 		challengeShow: false,
 		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 255', 'Disguise Mod'],
+		banlist: ['CAP'],
 	},
 	{
 		name: "[Gen 7 Let's Go] Disguises",
@@ -610,6 +616,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: false,
 		challengeShow: false,
 		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 255', 'Disguise Mod'],
+		banlist: ['CAP'],
 	},
 	{
 		name: "[Gen 8] Disguises",
@@ -619,6 +626,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		challengeShow: false,
 		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 255', 'Disguise Mod'],
 		unbanlist: ['Past', 'Unobtainable'],
+		banlist: ['CAP'],
 	},
 	{
 		name: "[Gen 8 BDSP] Disguises",
@@ -628,6 +636,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		challengeShow: false,
 		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 255', 'Disguise Mod'],
 		unbanlist: ['Past', 'Unobtainable'],
+		banlist: ['CAP'],
 	},
 	{
 		name: "[Gen 9] Disguises",
@@ -637,6 +646,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		challengeShow: false,
 		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 255', 'Disguise Mod'],
 		unbanlist: ['Past', 'Unobtainable'],
+		banlist: ['CAP'],
 	},
 	{
 		name: "[Gen 9 Champions] Disguises",
@@ -646,6 +656,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		challengeShow: false,
 		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 255', 'Disguise Mod', 'EV Limit = 192', 'EV Limits = Atk 0-32 / Def 0-32 / SpA 0-32 / SpD 0-32 / Spe 0-32 / HP 0-32'],
 		unbanlist: ['Past', 'Unobtainable'],
+		banlist: ['CAP'],
 	},
 	{
 		name: "[Gen 9 No Nerfs] Disguises",
@@ -655,6 +666,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		challengeShow: false,
 		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 255', 'Disguise Mod'],
 		unbanlist: ['Past', 'Unobtainable'],
+		banlist: ['CAP'],
 	},
 	{
 		name: "[Gen 1] Statuses",
@@ -756,6 +768,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		challengeShow: false,
 		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 255', 'Prestatus'],
 		unbanlist: ['Past', 'Unobtainable'],
+		banlist: ['CAP'],
 	},
 	{
 		name: "[Gen 1] 255 Pure Hackmons",
@@ -847,6 +860,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		challengeShow: false,
 		ruleset: ['-Nonexistent', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 255'],
 		unbanlist: ['Past', 'Unobtainable'],
+		banlist: ['CAP'],
 	},
 	{
 		name: "[Gen 8] 255 Pure Hackmons Unified",
@@ -992,7 +1006,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'gen1phnn',
 		//searchShow: false,
 		ruleset: ['-Nonexistent', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 255', 'Disguise Mod', 'No Move Exclusivity', 'Crit Level Overflow'],
-		banlist: ['No Move'],
+		banlist: ['CAP', 'No Move'],
 	},
 	{
 		name: "[Gen 1] Disguises (English)",
@@ -1001,7 +1015,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: false,
 		challengeShow: false,
 		ruleset: ['-Nonexistent', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Max Level = 255', 'Default Level = 255', 'Disguise Mod', 'No Move Exclusivity', 'Crit Level Overflow'],
-		banlist: ['No Move'],
+		banlist: ['CAP', 'No Move'],
 	},
 	{
 		name: "[Gen 1] OU",
@@ -1076,6 +1090,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		searchShow: false,
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause', 'Team Preview', 'Data Preview', 'Prestatus', 'Totem Aura', 'Little Cup'],
+		banlist: ['CAP'],
 	},
 	{
 		name: "[Gen 5] Pure Hackmons No Nerfs",
@@ -1676,7 +1691,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Desync Clause Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 9999', 'Disguise Mod', 'Totem Aura'],
 		unbanlist: ['No Move', 'No Move-2', 'No Move-SW', 'Demo', 'Glitch Gen 3'],
-		banlist: ['Glitch Gen 1', 'Glitch Gen 2'],
+		banlist: ['CAP', 'Glitch Gen 1', 'Glitch Gen 2'],
 	},
 	{
 		name: "[Gen 2] Custom Disguises",
@@ -1685,7 +1700,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Desync Clause Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 9999', 'Disguise Mod', 'Totem Aura'],
 		unbanlist: ['No Move', 'No Move-2', 'No Move-SW', 'Demo', 'Glitch Gen 2'],
-		banlist: ['Glitch Gen 1', 'Glitch Gen 3', 'Decamark', '? (00FC)', '- (019C)'],
+		banlist: ['CAP', 'Glitch Gen 1', 'Glitch Gen 3', 'Decamark', '? (00FC)', '- (019C)'],
 	},
 	{
 		name: "[Gen 2] SpaceWorld Custom Disguises",
@@ -1695,7 +1710,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Desync Clause Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 9999', 'Disguise Mod', 'Totem Aura'],
 		unbanlist: ['No Move', 'No Move-2', 'No Move-SW', 'Demo'],
-		banlist: ['Glitch', 'Decamark', '? (00FC)', '- (019C)'],
+		banlist: ['CAP', 'Glitch', 'Decamark', '? (00FC)', '- (019C)'],
 	},
 	{
 		name: "[Gen 1] Custom Disguises",
@@ -1704,7 +1719,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Desync Clause Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 9999', 'Disguise Mod', 'Totem Aura', 'No Move Exclusivity'],
 		unbanlist: ['No Move', 'Glitch Gen 1'],
-		banlist: ['Glitch Gen 2', 'Glitch Gen 3', '????? (GS 00)', '????? (GS FC)', '????? (GS FE)', '????? (GS FF)', '????? (Crystal 00)', '????? (Crystal FC)', '????? (Crystal FE)', '????? (Crystal FF)', 'Decamark', '? (00FC)', '- (019C)'],
+		banlist: ['CAP', 'Glitch Gen 2', 'Glitch Gen 3', '????? (GS 00)', '????? (GS FC)', '????? (GS FE)', '????? (GS FF)', '????? (Crystal 00)', '????? (Crystal FC)', '????? (Crystal FE)', '????? (Crystal FF)', 'Decamark', '? (00FC)', '- (019C)'],
 	},
 	{
 		name: "[Gen 9] Custom Game",
@@ -1767,6 +1782,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		debug: true,
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Desync Clause Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100'],
+		banlist: ['CAP'],
 	},
 	{
 		name: "[Gen 2] Custom Game",
@@ -1775,6 +1791,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		debug: true,
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100'],
+		banlist: ['CAP'],
 	},
 	{
 		name: "[Gen 1] Custom Game",
@@ -1783,6 +1800,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		debug: true,
 		battle: {trunc: Math.trunc},
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100'],
+		banlist: ['CAP'],
 	},
 	{
 		name: "[Gen 9] OM Mashup",
@@ -1795,6 +1813,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 			'Tier Shift Mod', 'Revelationmons Mod', 'Re-Evolution Mod', 'Broken Record Mod',
 			'Force of the Fallen Mod', 'Category Swap Mod', 'Godly Gift Mod', 'Bad \'n Boosted Mod', 'Data Preview',
 		],
+		banlist: ['CAP'],
 	},
 ];
 
