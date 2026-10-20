@@ -29,6 +29,25 @@ declare const BattleSearchIndex: [ID, SearchType, number?, number?][];
 declare const BattleSearchIndexOffset: any;
 declare const BattleTeambuilderTable: any;
 
+function isHiddenCap(row: SearchRow) {
+	const table = ({
+		pokemon: 'BattlePokedex', move: 'BattleMovedex', item: 'BattleItems', ability: 'BattleAbilities',
+	} as { [k: string]: string })[row[0]];
+	const num = table && (window as any)[table]?.[row[1]]?.num;
+	return num < 0 && num > -500;
+}
+
+function withoutCap(rows: SearchRow[]) {
+	if ((window as any).PhnnAllowCAP) return rows;
+	return rows.filter((row, i) => {
+		if (isHiddenCap(row)) return false;
+		if (row[0] !== 'header') return true;
+		let next = i + 1;
+		while (next < rows.length && rows[next][0] !== 'header' && isHiddenCap(rows[next])) next++;
+		return next === i + 1 || (next < rows.length && rows[next][0] !== 'header');
+	});
+}
+
 /**
  * Backend for search UIs.
  */
@@ -135,7 +154,7 @@ export class DexSearch {
 				this.results = [...this.prependResults, ...this.results];
 			}
 		} else {
-			this.results = this.textSearch(query);
+			this.results = withoutCap(this.textSearch(query));
 			if (this.typedSearch?.sortRow) {
 				if (this.sortCol && !['type', 'ability', 'category'].includes(this.sortCol)) {
 					if (!this.typedSearch.illegalReasons) this.typedSearch.getResults();
@@ -605,6 +624,7 @@ export class DexSearch {
 				}
 				break;
 			case 'ability':
+				if (!(window as any).PhnnAllowCAP && isHiddenCap(['ability', fId])) break;
 				let ability = Dex.abilities.get(fId).name;
 				const abilityName = TL(Dex.abilities.get(fId));
 				buf.push(['header', TL`${abilityName} Pokémon`]);
@@ -988,7 +1008,7 @@ abstract class BattleTypedSearch<T extends SearchType> {
 		if (illegalResults?.length) {
 			results = [...results, ['header', TL`Illegal results`], ...illegalResults];
 		}
-		return results;
+		return withoutCap(results);
 	}
 	protected firstLearnsetid(speciesid: ID) {
 		let table = BattleTeambuilderTable;
