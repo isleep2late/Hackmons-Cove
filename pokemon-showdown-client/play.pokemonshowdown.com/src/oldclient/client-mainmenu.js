@@ -143,7 +143,8 @@
 			'click .datasearch': 'clickDatasearchResults',
 			'click button.formatselect': 'selectFormat',
 			'click button.teamselect': 'selectTeam',
-			'click button[name=partnersubmit]': 'selectTeammate'
+			'click button[name=partnersubmit]': 'selectTeammate',
+			'click input[name=allowbots]': 'toggleBots'
 		},
 		initialize: function () {
 			this.$el.addClass('scrollable');
@@ -169,8 +170,10 @@
 				buf += '<p><label class="label">Team:</label>' + this.renderTeams() + '</p>';
 				buf += '<p><label class="label" name="partner" style="display:none">';
 				buf += 'Partner:<br />';
+				var settings = Storage.prefs('serversettings') || {};
 				buf += '<input class="partnerselect" /><button name="partnersubmit">Invite</button></label></p>';
 
+				buf += '<p><label class="checkbox"><input type="checkbox" name="allowbots" ' + (settings.allowLadderBots ? 'checked' : '') + ' /> <abbr>Allow matching into bots on the ladder</abbr></label></p>';
 				buf += '<p><button class="button mainmenu1 big" name="search"><strong>Battle!</strong><br /><small>Find a random opponent</small></button></p>';
 				buf += '<p style="margin-top:-4px"><button type="button" class="button' + (this.phnnFormatNeedsTeam(this.curFormat) ? '' : ' disabled') + '" name="phnnGenerateTeam" style="width:100%"' + (this.phnnFormatNeedsTeam(this.curFormat) ? '' : ' disabled') + '><i class="fa fa-magic"></i> Generate a team for this format</button></p></form></div>';
 			}
@@ -425,6 +428,15 @@
 			if (!partner.length) return;
 			app.send('/requestpartner ' + partner + ',' + this.curFormat);
 			input.value = "";
+		},
+
+		toggleBots: function (e) {
+			var settings = Storage.prefs('serversettings');
+			var value = !settings.allowLadderBots;
+			settings.allowLadderBots = value;
+			Storage.prefs('serversettings', settings);
+			app.send(value ? '/noreply /allowbots' : '/noreply /blockbots');
+			$('[name=allowbots]').prop('checked', value).trigger('change');
 		},
 
 		openPM: function (name, dontFocus) {
