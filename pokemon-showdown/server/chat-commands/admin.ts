@@ -1349,9 +1349,15 @@ export const commands: Chat.ChatCommands = {
 			this.popupReply(error?.message || res?.actionerror);
 			return null;
 		}
-		if (res.success) return this.popupReply(`User ${bot} successfully registered as ${owner}'s bot.`);
+		if (res.success) {
+			// sometimes they don't log out after getting registered, so this needs to be set
+			const botUser = Users.get(bot);
+			if (botUser) botUser.isUserBot = true;
+			return this.popupReply(`User ${bot} successfully registered as ${owner}'s bot.`);
+		}
 		return this.popupReply(`Registration for ${bot} and ${owner} failed without an error message. Try again later.`);
 	},
+	setbothelp: [`/setbot [owner], [bot] - Registers the [bot] account as a bot belonging to [owner]. Requires: ~`],
 
 	remainingbattles() {
 		this.checkCan('lockdown');
@@ -1521,7 +1527,12 @@ export const commands: Chat.ChatCommands = {
 		// whatever dist/ already held, reporting DONE over stale code.
 		// execPath is the interpreter running this very process, so it cannot
 		// drift from the server's own version however the PATH is set up.
+		if (Monitor.rebuildLock) {
+			throw new Chat.ErrorMessage(`Wait for the current rebuild to finish before rebuilding.`);
+		}
+		Monitor.rebuildLock = true;
 		const [, , stderr] = await bash(`${process.execPath} ./build`, this);
+		Monitor.rebuildLock = false;
 		if (stderr) {
 			throw new Chat.ErrorMessage(`Crash while rebuilding: ${stderr}`);
 		}
