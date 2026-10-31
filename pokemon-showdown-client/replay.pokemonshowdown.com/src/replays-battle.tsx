@@ -10,36 +10,6 @@ import type { ID } from '../../play.pokemonshowdown.com/src/battle-dex';
 declare const Config: any;
 declare function toID(input: string): string;
 
-function showAd(id: string) {
-	// @ts-expect-error no clue how to declare this one
-	window.top.__vm_add = window.top.__vm_add || [];
-
-	// this is a x-browser way to make sure content has loaded.
-
-	(success => {
-		if (window.document.readyState !== "loading") {
-			success();
-		} else {
-			window.document.addEventListener("DOMContentLoaded", () => {
-				success();
-			});
-		}
-	})(() => {
-		const placement = document.createElement("div");
-		placement.setAttribute("class", "vm-placement");
-		if (window.innerWidth > 1000) {
-			// load desktop placement
-			placement.setAttribute("data-id", "6452680c0b35755a3f09b59b");
-		} else {
-			// load mobile placement
-			placement.setAttribute("data-id", "645268557bc7b571c2f06f62");
-		}
-		document.querySelector("#" + id)!.appendChild(placement);
-		// @ts-expect-error no clue how to declare this one
-		window.top.__vm_add.push(placement);
-	});
-}
-
 export class BattleDiv extends preact.Component {
 	override shouldComponentUpdate() {
 		return false;
@@ -80,7 +50,6 @@ export class BattlePanel extends preact.Component<{ id: string, user: PSReplays[
 	autofocusTurnView: 'select' | 'end' | null = null;
 	override componentDidMount() {
 		this.loadBattle(this.props.id);
-		showAd('LeaderboardBTF');
 		window.onkeydown = this.keyPressed;
 	}
 	override componentWillReceiveProps(nextProps: this['props']) {
@@ -656,7 +625,6 @@ export class BattlePanel extends preact.Component<{ id: string, user: PSReplays[
 				<BattleDiv />
 				<BattleLogDiv />
 				{this.renderControls()}
-				<div id="LeaderboardBTF"></div>
 			</div>
 		</div>;
 	}

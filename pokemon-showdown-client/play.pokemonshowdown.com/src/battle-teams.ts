@@ -95,7 +95,7 @@ export const Teams = new class {
 			buf += `|${this.packName(set.item)}`;
 
 			// ability
-			buf += `|${this.packName(set.ability)}`;
+			buf += `|${this.packName(set.ability || 'No Ability')}`;
 
 			// moves
 			buf += '|' + set.moves.map(this.packName).join(',');
@@ -399,6 +399,7 @@ export const Teams = new class {
 	 */
 	exportSet(set: Teams.PokemonSet, dex: ModdedDex = Dex) {
 		const newFormat = false;
+		const ability = set.ability || 'No Ability';
 		let text = '';
 
 		// core
@@ -419,8 +420,8 @@ export const Teams = new class {
 			text += `\n`;
 		} else if (set.phAbilities) {
 			text += `Abilities: ${[set.ability || 'No Ability', ...set.phAbilities.split('/')].join(' / ')}\n`;
-		} else if (set.ability && set.ability !== 'No Ability') {
-			text += `Ability: ${set.ability}\n`;
+		} else if (toID(ability) !== 'noability' || (dex.gen >= 3 && dex.modid !== 'gen7letsgo')) {
+			text += `Ability: ${ability}\n`;
 		}
 		if (!newFormat && set.phItems) {
 			text += `Items: ${[set.item || '(none)', ...set.phItems.split('/')].join(' / ')}\n`;
