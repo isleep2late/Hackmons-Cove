@@ -65,3 +65,13 @@ This repository contains code from the Pokemon Showdown! server repository, clie
 ## License
 
 This project is a modification of Pokémon Showdown and Showdex. It is not to be provided as a singular package, and is licensed under multiple licenses, including AGPL-3.0 and the MIT License. More details can be found in each module. Pokémon and all related properties are (c) The Pokemon Company / Nintendo / Creatures Inc. / GAME FREAK inc.
+
+___
+
+The chief cybersecurity officer of this repository goes by the name Jon (aka isleep2late) and can be reached at tirelessgolem@gmail.com
+
+This open-source project involves 4 dependencies:
+https://github.com/smogon/pokemon-showdown
+https://github.com/smogon/pokemon-showdown-client
+https://github.com/smogon/damage-calc
+https://github.com/doshidak/showdex
