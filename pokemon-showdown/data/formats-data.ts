@@ -3236,7 +3236,7 @@ export const FormatsData: import('../sim/dex-species').SpeciesFormatsDataTable =
 	basculegionf: {
 		tier: "RU",
 		doublesTier: "DUU",
-		natDexTier: "RU",
+		natDexTier: "RUBL",
 	},
 	sandile: {
 		tier: "LC",
