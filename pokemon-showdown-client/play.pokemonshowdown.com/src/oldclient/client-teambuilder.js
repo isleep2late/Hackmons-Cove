@@ -1461,7 +1461,7 @@
 							buf += '<span class="detailcell"><label>HP Type</label>' + (set.hpType || 'Dark') + '</span>';
 						}
 						// Hidden Power isn't in normal Gen 8
-					} else {
+					} else if (!(this.curTeam.dex && this.curTeam.dex.modid === 'gen2spaceworld')) {
 						buf += '<span class="detailcell"><label>HP Type</label>' + (set.hpType || 'Dark') + '</span>';
 					}
 				}
@@ -2129,7 +2129,7 @@
 				var species = Dex.species.get(res.species);
 
 				buf += '<div class="result" data-id="' + i + '">';
-				buf += '<div class="section"><span class="icon" style="' + Dex.getPokemonIcon(species.name) + '"></span>';
+				buf += '<div class="section"><span class="icon" style="' + Dex.getPokemonIcon(species.name, false, this.curTeam && this.curTeam.dex && this.curTeam.dex.modid) + '"></span>';
 				buf += '<span class="species">' + (species.name === species.baseSpecies ? BattleLog.escapeHTML(species.name) : (BattleLog.escapeHTML(species.baseSpecies) + '-<small>' + BattleLog.escapeHTML(species.name.substr(species.baseSpecies.length + 1)) + '</small>')) + '</span></div>';
 				buf += '<div class="section"><span class="ability-item">' + (BattleLog.escapeHTML(res.ability) || '<i>No ability</i>') + '<br />' + (BattleLog.escapeHTML(res.item) || '<i>No item</i>') + '</span></div>';
 				buf += '<div class="section no-border">';
@@ -2392,7 +2392,8 @@
 			i = +($(button).closest('li').attr('value'));
 			app.addPopup(MoveSetPopup, {
 				i: i,
-				team: this.curSetList
+				team: this.curSetList,
+				mod: this.curTeam && this.curTeam.dex && this.curTeam.dex.modid
 			});
 		},
 		deleteSet: function (i, button) {
@@ -2492,7 +2493,7 @@
 			}
 			for (var i = start; i < end; i++) {
 				var set = this.curSetList[i];
-				var pokemonicon = '<span class="picon pokemonicon-' + i + '" style="' + Dex.getPokemonIcon(set) + '"></span>';
+				var pokemonicon = '<span class="picon pokemonicon-' + i + '" style="' + Dex.getPokemonIcon(set, false, this.curTeam.dex && this.curTeam.dex.modid) + '"></span>';
 				if (!set.species) {
 					buf += '<button disabled class="addpokemon" aria-label="Add Pok&eacute;mon"><i class="fa fa-plus"></i></button> ';
 					isAdd = true;
@@ -2515,7 +2516,7 @@
 				.attr('style', Dex.getTeambuilderSprite(set, this.curTeam.dex))
 				.toggleClass('pixelated', !!Dex.getTeambuilderSpriteData(set, this.curTeam.dex).pixelated);
 
-			this.$('.pokemonicon-' + this.curSetLoc).css('background', Dex.getPokemonIcon(set).substr(11));
+			this.$('.pokemonicon-' + this.curSetLoc).css('background', Dex.getPokemonIcon(set, false, this.curTeam.dex && this.curTeam.dex.modid).substr(11));
 
 			var item = this.curTeam.dex.items.get(set.item);
 			if (item.id) {
@@ -3064,6 +3065,10 @@
 					for (var i in stats) {
 						if (set.ivs[i] === undefined || isNaN(set.ivs[i])) set.ivs[i] = 31;
 						var val = '' + Math.floor(set.ivs[i] / 2);
+						if (i === 'hp' && this.isSpaceWorldDex()) {
+							buf += '<div><input type="number" name="iv-hp" value="' + this.sw97HpDV(set) + '" class="textbox inputform numform" min="0" max="26" step="1" disabled title="In the SpaceWorld demo the HP DV is 16 &times; (Atk DV odd) + 8 &times; (Def DV odd) + (Spe DV odd) + (Spc DV odd), from 0 to 26." /></div>';
+							continue;
+						}
 						buf += '<div><input type="number" name="iv-' + i + '" value="' + BattleLog.escapeHTML(val) + '" class="textbox inputform numform" min="0" max="15" step="1" /></div>';
 					}
 					buf += '</div>';
@@ -3293,6 +3298,7 @@
 				if (set.ivs[stat] !== val) {
 					set.ivs[stat] = val;
 					this.updateIVs();
+					if (this.isSpaceWorldDex()) this.$chart.find('input[name=iv-hp]').val(this.sw97HpDV(set));
 					this.updateStatGraph();
 				}
 			}
@@ -3309,6 +3315,7 @@
 				}
 			}
 			if (!hasHiddenPower) return;
+			var isSpaceWorldDex = !!(this.curTeam.dex && this.curTeam.dex.modid === 'gen2spaceworld');
 			var hpTypes = ['Fighting', 'Flying', 'Poison', 'Ground', 'Rock', 'Bug', 'Ghost', 'Steel', 'Fire', 'Water', 'Grass', 'Electric', 'Psychic', 'Ice', 'Dragon', 'Dark'];
 			var hpType;
 			if (this.curTeam.gen <= 2) {
@@ -3319,7 +3326,7 @@
 				var spcDV = Math.floor(set.ivs.spa / 2);
 				hpType = hpTypes[4 * (atkDV % 4) + (defDV % 4)];
 				var expectedHpDV = (atkDV % 2) * 8 + (defDV % 2) * 4 + (speDV % 2) * 2 + (spcDV % 2);
-				if (expectedHpDV !== hpDV) {
+				if (expectedHpDV !== hpDV && !isSpaceWorldDex) {
 					set.ivs.hp = expectedHpDV * 2;
 					if (set.ivs.hp === 30) set.ivs.hp = 31;
 					this.$chart.find('input[name=iv-hp]').val(expectedHpDV);
@@ -3335,6 +3342,7 @@
 				}
 				hpType = hpTypes[Math.floor(hpTypeX * 15 / 63)];
 			}
+			if (isSpaceWorldDex) return;
 			for (var i = 0; i < set.moves.length; i++) {
 				if (toID(set.moves[i]).slice(0, 11) === 'hiddenpower') {
 					set.moves[i] = "Hidden Power " + hpType;
@@ -4693,6 +4701,18 @@
 			}
 			return { hp: hp, other: other };
 		},
+		isSpaceWorldDex: function () {
+			return !!(this.curTeam && this.curTeam.dex && this.curTeam.dex.modid === 'gen2spaceworld');
+		},
+		sw97HpDV: function (set) {
+			var ivs = (set && set.ivs) || {};
+			var dv = function (stat) {
+				var iv = ivs[stat];
+				if (typeof iv !== 'number' || isNaN(iv)) iv = 31;
+				return Math.floor(iv / 2) & 1;
+			};
+			return 16 * dv('atk') + 8 * dv('def') + dv('spe') + dv('spa');
+		},
 		getStat: function (stat, set, evOverride, natureOverride) {
 			var usesStatPoints = this.curTeam.format.includes('champions');
 			var supportsEVs = !this.curTeam.format.includes('letsgo') && !usesStatPoints;
@@ -4729,6 +4749,7 @@
 			}
 			var iv = (set.ivs[stat] || 0);
 			if (this.curTeam.gen <= 2) iv &= 30;
+			if (stat === 'hp' && this.isSpaceWorldDex()) iv = 2 * this.sw97HpDV(set);
 			var ev = set.evs[stat];
 			if (evOverride !== undefined) ev = evOverride;
 			if (ev === undefined) ev = (this.curTeam.gen > 2 ? 0 : 252);
@@ -4742,7 +4763,8 @@
 				if (speciesBaseStat === 1) return 1;
 				if (usesStatPoints) return baseStat + ev + 75;
 				if (!supportsEVs) return Math.floor(Math.floor(2 * baseStat + iv + 100) * set.level / 100 + 10) + (supportsAVs ? ev : 0);
-				return Math.floor(Math.floor(2 * baseStat + iv + Math.floor(ev / 4) + 100) * set.level / 100 + 10);
+				var hp = Math.floor(Math.floor(2 * baseStat + iv + Math.floor(ev / 4) + 100) * set.level / 100 + 10);
+				return this.isSpaceWorldDex() ? Math.min(999, hp) : hp;
 			}
 			var val = Math.floor(Math.floor(2 * baseStat + iv + Math.floor(ev / 4)) * set.level / 100 + 5);
 			if (usesStatPoints) {
@@ -4861,7 +4883,7 @@
 				if (i !== data.i && i !== data.i + 1) {
 					buf += '<li><button name="moveHere" value="' + i + '" class="option"><i class="fa fa-arrow-right"></i> Move here</button></li>';
 				}
-				buf += '<li' + (i === data.i ? ' style="opacity:.3"' : ' style="opacity:.6"') + '><span class="picon" style="display:inline-block;vertical-align:middle;' + Dex.getPokemonIcon(set) + '"></span> ' + BattleLog.escapeHTML(set.name || set.species) + '</li>';
+				buf += '<li' + (i === data.i ? ' style="opacity:.3"' : ' style="opacity:.6"') + '><span class="picon" style="display:inline-block;vertical-align:middle;' + Dex.getPokemonIcon(set, false, data.mod) + '"></span> ' + BattleLog.escapeHTML(set.name || set.species) + '</li>';
 			}
 			if (i !== data.i && i !== data.i + 1) {
 				buf += '<li><button name="moveHere" value="' + i + '" class="option"><i class="fa fa-arrow-right"></i> Move here</button></li>';

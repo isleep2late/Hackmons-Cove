@@ -14,6 +14,8 @@ import {
   type Weather,
 } from '@smogon/calc';
 import { PokemonBoosterAbilities } from '@showdex/consts/dex';
+import { detectPhnnKey } from '@showdex/phnn';
+import { getPhnnSwStreaks } from '@showdex/phnn/swStreaks';
 import {
   type CalcdexBattleState,
   type CalcdexPlayerKey,
@@ -909,6 +911,10 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
         });
       }
 
+      if (detectPhnnKey(battleState.format) === 'spaceworld') {
+        syncedPokemon.phnnSwStreaks = getPhnnSwStreaks(battle.stepQueue, playerKey, clientPokemon.name);
+      }
+
       // add the pokemon to the player's Calcdex state (if not maxed already)
       if (!matchedPokemon) {
         // first check if we got Zoroark'd (i.e., Illusion)
@@ -1461,6 +1467,7 @@ export const syncBattle = createAsyncThunk<CalcdexBattleState, SyncBattlePayload
           battleState.gen,
           playerState,
           battle[playerKey],
+          battleState.format,
         ),
       };
     }

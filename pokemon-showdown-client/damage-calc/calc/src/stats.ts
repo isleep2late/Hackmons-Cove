@@ -93,6 +93,15 @@ export const Stats = new (class {
     );
   }
 
+  getSW97HPDV(ivs: {atk: number; def: number; spe: number; spc: number}) {
+    return (
+      (this.IVToDV(ivs.atk) % 2) * 16 +
+      (this.IVToDV(ivs.def) % 2) * 8 +
+      (this.IVToDV(ivs.spe) % 2) +
+      (this.IVToDV(ivs.spc) % 2)
+    );
+  }
+
   IVToDV(iv: number) {
     return Math.floor(iv / 2);
   }
@@ -129,6 +138,9 @@ export const Stats = new (class {
   ) {
     if (gen.num < 0 || gen.num > 11) throw new Error(`Invalid generation ${gen.num}`);
     if (gen.num === 0) return this.calcStatChampions(gen.natures, stat, base, ev, nature);
+    if (gen.num === 11 && stat === 'hp') {
+      return Math.min(999, this.calcStatRBY(stat, base, iv, ev, level));
+    }
     if (gen.num < 3 || gen.num === 11) return this.calcStatRBY(stat, base, iv, ev, level);
     return this.calcStatADV(gen.natures, stat, base, iv, ev, level, nature);
   }

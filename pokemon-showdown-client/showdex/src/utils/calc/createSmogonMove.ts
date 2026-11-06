@@ -7,7 +7,8 @@ import {
 import { MOVES } from '@smogon/calc/dist/data/moves';
 import { type CalcdexBattleField, type CalcdexMoveOverride, type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { clamp } from '@showdex/utils/core';
-import { getPhnnGmaxMoveOverride, getPhnnMoveOverrides } from '@showdex/phnn';
+import { detectPhnnKey, getPhnnGmaxMoveOverride, getPhnnMoveOverrides } from '@showdex/phnn';
+import { getPhnnSwTimesUsed } from '@showdex/phnn/swStreaks';
 import {
   detectGenFromFormat,
   determineCriticalHit,
@@ -83,6 +84,14 @@ export const createSmogonMove = (
     // for moves that always crit, we need to make sure the crit doesn't apply when Z/Max'd
     isCrit: determineCriticalHit(pokemon, moveName, { format }),
   };
+
+  const phnnSwTimesUsed = detectPhnnKey(format) === 'spaceworld'
+    ? getPhnnSwTimesUsed(pokemon.phnnSwStreaks, moveName)
+    : 0;
+
+  if (phnnSwTimesUsed) {
+    options.timesUsed = phnnSwTimesUsed;
+  }
 
   const defaultOverrides = getMoveOverrideDefaults(format, pokemon, moveName, opponentPokemon, field);
   const overrides: SmogonMoveOverrides = { ...determineMoveTargets(format, pokemon, moveName) };

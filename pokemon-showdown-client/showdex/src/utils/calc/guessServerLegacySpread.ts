@@ -4,6 +4,8 @@ import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/interfa
 import { env, nonEmptyObject } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/dex';
+import { detectPhnnKey } from '@showdex/phnn';
+import { getPhnnSw97HpDv } from '@showdex/phnn/spaceworld';
 import { calcLegacyHpIv, convertLegacyDvToIv } from './convertLegacyStats';
 import { calcPokemonStat } from './calcPokemonStat';
 
@@ -160,14 +162,17 @@ export const guessServerLegacySpread = (
   // attempt to calculate the HP stat whether the IVs are available or not
   guessedSpread.ivs.hp = calcLegacyHpIv(guessedSpread.ivs);
 
-  calculatedStats.hp = calcPokemonStat(
+  const sw97 = typeof format === 'string' && detectPhnnKey(format) === 'spaceworld';
+  const guessedHp = calcPokemonStat(
     gen,
     'hp',
     baseStats.hp,
-    guessedSpread.ivs.hp,
+    sw97 ? 2 * getPhnnSw97HpDv(guessedSpread.ivs) : guessedSpread.ivs.hp,
     guessedSpread.evs.hp,
     pokemon.level,
   );
+
+  calculatedStats.hp = sw97 ? Math.min(999, guessedHp) : guessedHp;
 
   if (__DEV__) {
     logs.push([

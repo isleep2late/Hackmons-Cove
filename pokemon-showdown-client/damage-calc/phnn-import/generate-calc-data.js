@@ -202,17 +202,11 @@ for (const [id, d] of Object.entries(swd.moves)) {
 // The UI expects a '(No Move)' pseudo-entry in every gen's move table.
 swMoves['(No Move)'] = {bp: 0, category: 'Status', type: 'Normal'};
 
-// Per-type Hidden Power entries (the demo computes type/power from DVs; the
-// UI uses named per-type entries like the stock GSC data).
-const SW_SPECIAL_TYPES = ['Water', 'Grass', 'Fire', 'Ice', 'Electric', 'Psychic', 'Dragon', 'Dark'];
-delete swMoves['Hidden Power'];
-for (const hpType of ['Bug', 'Dark', 'Dragon', 'Electric', 'Fighting', 'Fire', 'Flying', 'Ghost',
-  'Grass', 'Ground', 'Ice', 'Poison', 'Psychic', 'Rock', 'Steel', 'Water']) {
-  swMoves[`Hidden Power ${hpType}`] = {
-    bp: 70, type: hpType,
-    category: SW_SPECIAL_TYPES.includes(hpType) ? 'Special' : 'Physical',
-  };
+for (const name of Object.keys(swMoves)) {
+  if (name.startsWith('Hidden Power')) delete swMoves[name];
 }
+swMoves['Hidden Power'] = {bp: 78, type: '???', category: 'Physical'};
+if (swMoves['Present']) swMoves['Present'].bp = 40;
 
 const swItems = [];
 for (const [id, d] of Object.entries(swd.items)) {

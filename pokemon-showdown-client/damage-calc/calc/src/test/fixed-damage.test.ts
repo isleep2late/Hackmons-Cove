@@ -22,7 +22,7 @@ function run(
 
 describe('fixed damage moves', () => {
   test('SpaceWorld fixed-damage moves ignore immunity', () => {
-    expect(run(11, 'Super Fang', 'Gengar').damage).toBe(130);
+    expect(run(11, 'Super Fang', 'Gengar').damage).toBe(141);
     expect(run(11, 'Seismic Toss', 'Gengar').damage).toBe(100);
     expect(run(11, 'Night Shade', 'Snorlax').damage).toBe(100);
     expect(run(11, 'Sonic Boom', 'Gengar').damage).toBe(20);
@@ -35,9 +35,9 @@ describe('fixed damage moves', () => {
     const at = (hp: number, move: string, foe: string) =>
       run(11, move, foe, {evs, curHP: hp}, {evs}).damage;
     const foes = ['Gengar', 'Golem', 'Snorlax'];
-    expect(foes.map(foe => at(215, 'Flail', foe))).toEqual([22, 14, 21]);
-    expect(foes.map(foe => at(65, 'Reversal', foe))).toEqual([82, 51, 78]);
-    expect(foes.map(foe => at(13, 'Flail', foe))).toEqual([153, 94, 145]);
+    expect(foes.map(foe => at(229, 'Flail', foe))).toEqual([22, 14, 21]);
+    expect(foes.map(foe => at(70, 'Reversal', foe))).toEqual([82, 51, 78]);
+    expect(foes.map(foe => at(14, 'Flail', foe))).toEqual([153, 94, 145]);
   });
 
   test('half-HP moves report the uses needed to KO', () => {
@@ -73,7 +73,7 @@ describe('fixed damage moves', () => {
 
   test('badly poisoned KO counts follow each server\'s toxic damage', () => {
     const cases: Array<[number, string, string, number | undefined, number]> = [
-      [11, 'Dragon Rage', 'Snorlax', undefined, 3],
+      [11, 'Dragon Rage', 'Snorlax', undefined, 4],
       [11, 'Dragon Rage', 'Cloyster', undefined, 3],
       [11, 'Sonic Boom', 'Snorlax', undefined, 4],
       [11, 'Seismic Toss', 'Snorlax', undefined, 3],
@@ -106,7 +106,7 @@ describe('fixed damage moves', () => {
   test('half-HP KO counts start from the HP left after entry hazards', () => {
     const spikes = new Field({defenderSide: {spikes: 1}});
     const rocks = new Field({defenderSide: {isSR: true}});
-    expect(run(11, 'Super Fang', 'Snorlax', {}, {curHP: 60}, spikes).kochance().text)
+    expect(run(11, 'Super Fang', 'Snorlax', {}, {curHP: 63}, spikes).kochance().text)
       .toBe('guaranteed 3HKO after 1 layer of Spikes');
     expect(run(11, 'Super Fang', 'Snorlax', {}, {curHP: 200}, spikes).kochance().text)
       .toBe('guaranteed 9HKO after 1 layer of Spikes');

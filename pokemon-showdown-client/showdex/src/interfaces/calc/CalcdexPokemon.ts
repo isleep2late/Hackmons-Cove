@@ -638,6 +638,8 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    */
   stellarMoveMap?: Partial<Record<Showdown.TypeName, MoveName>>;
 
+  phnnSwStreaks?: { furyCutter: number; rollout: number };
+
   /**
    * Whether to show editing controls for overriding moves.
    *

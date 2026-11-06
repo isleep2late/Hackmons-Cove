@@ -101,6 +101,14 @@ export class BattleFormat implements FormatData {
 			this.isLetsGo || this.isChampions
 		) this.defaultLevel = 50;
 		if (id.includes('lc')) this.defaultLevel = 5;
+		if (this.gen === 2 && id.includes('spaceworld')) {
+			this.mod = 'gen2spaceworld' as ID;
+			if (id.includes('customdisguises')) {
+				this.defaultLevel = 9999;
+			} else if (id.includes('disguises') || id.includes('statuses')) {
+				this.defaultLevel = 255;
+			}
+		}
 		if (data) Object.assign(this, data);
 	}
 }

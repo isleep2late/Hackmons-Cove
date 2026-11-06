@@ -1,5 +1,6 @@
 import { type GenerationNum } from '@smogon/calc';
 import { type CalcdexPlayer, type CalcdexPlayerSide } from '@showdex/interfaces/calc';
+import { hasPhnnPokemonScreens } from '@showdex/phnn';
 import { formatId } from '@showdex/utils/core';
 // import { logger } from '@showdex/utils/debug';
 import { countSideRuinAbilities } from './countSideRuinAbilities';
@@ -25,6 +26,7 @@ export const sanitizePlayerSide = (
   gen: GenerationNum,
   player: Partial<CalcdexPlayer>,
   battleSide?: Showdown.Side,
+  format?: string,
 ): CalcdexPlayerSide => {
   // const {
   //   // active: activePokemon,
@@ -80,8 +82,8 @@ export const sanitizePlayerSide = (
     cannonade: sideConditionNames.includes('gmaxcannonade'),
     volcalith: sideConditionNames.includes('gmaxvolcalith'),
 
-    isReflect: (gen === 1 ? volatileNames : sideConditionNames).includes('reflect'),
-    isLightScreen: (gen === 1 ? volatileNames : sideConditionNames).includes('lightscreen'),
+    isReflect: (hasPhnnPokemonScreens(gen, format) ? volatileNames : sideConditionNames).includes('reflect'),
+    isLightScreen: (hasPhnnPokemonScreens(gen, format) ? volatileNames : sideConditionNames).includes('lightscreen'),
     isAuroraVeil: sideConditionNames.includes('auroraveil'),
     isProtected: volatileNames.includes('protect'),
 

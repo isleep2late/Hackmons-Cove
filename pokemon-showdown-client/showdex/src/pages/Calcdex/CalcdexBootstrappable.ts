@@ -191,6 +191,7 @@ export const MixinCalcdexBootstrappable = <
               this.battle.gen as GenerationNum,
               prev[playerKey],
               player,
+              battleId.split('-').find((p) => detectGenFromFormat(p)),
             ),
           };
 

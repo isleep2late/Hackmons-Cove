@@ -66,3 +66,13 @@ export function sw97FlailPower(hp: number, maxHP: number) {
   if (ratio <= 32) return 40;
   return 20;
 }
+
+export function sw97HiddenPowerBP(ivs: {atk: number; def: number; spe: number; spa: number}) {
+  const dv = (iv: number) => Math.floor((Number(iv) || 0) / 2) & 15;
+  const atk = dv(ivs.atk);
+  const def = dv(ivs.def);
+  const spe = dv(ivs.spe);
+  const spc = dv(ivs.spa);
+  const power = 5 * ((spc >> 3) + 2 * (spe >> 3) + 4 * (def >> 3) + 8 * (atk >> 3)) + (spc % 4);
+  return Math.max(1, Math.min(78, power));
+}

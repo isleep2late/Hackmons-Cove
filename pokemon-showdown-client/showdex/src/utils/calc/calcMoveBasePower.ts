@@ -1,6 +1,7 @@
 import { type AbilityName, type GenerationNum, type MoveName } from '@smogon/calc';
 import { PokemonDenormalizedMoves, PokemonMoveSkinAbilities } from '@showdex/consts/dex';
 import { type CalcdexPokemon } from '@showdex/interfaces/calc';
+import { detectPhnnKey, getPhnnMoveOverrides } from '@showdex/phnn';
 import { clamp } from '@showdex/utils/core';
 import { detectGenFromFormat, detectLegacyGen, getDexForFormat } from '@showdex/utils/dex';
 import { calcHiddenPower } from './calcHiddenPower';
@@ -132,7 +133,11 @@ export const calcMoveBasePower = (
 
   // update (2024/07/18): ...except for Triple Kick in gen 2, where we'll continue to use the hack from before
   // (note: calcMoveHitBasePowers() will return an empty array in this very specific instance)
-  if (move === 'Triple Kick' as MoveName && detectLegacyGen(gen)) {
+  const phnnSpaceWorld = typeof format === 'string' && detectPhnnKey(format) === 'spaceworld';
+
+  if (move === 'Triple Kick' as MoveName && phnnSpaceWorld) {
+    basePower = Number(getPhnnMoveOverrides(format, move).basePower) || basePower;
+  } else if (move === 'Triple Kick' as MoveName && detectLegacyGen(gen)) {
     basePower = moveHits === 2 ? 15 : moveHits === 3 ? 20 : 10;
   }
 

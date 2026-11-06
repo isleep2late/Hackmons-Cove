@@ -3164,6 +3164,12 @@ export class Battle {
 			case 'quickclaw':
 				poke.item = 'Quick Claw';
 				break;
+			case 'quickneedle':
+				poke.item = 'Quick Needle';
+				break;
+			case 'focusorb':
+				poke.item = 'Focus Orb';
+				break;
 			case 'abilityshield':
 				poke.item = 'Ability Shield';
 				break;
@@ -3625,6 +3631,7 @@ export class Battle {
 			}
 			if (this.gen === 2 && tierFormat.includes('spaceworld')) {
 				this.dex = Dex.mod('gen2spaceworld' as ID);
+				this.scene.mod = 'gen2spaceworld';
 			}
 			if (this.gen === 3 && (tierFormat === 'bhaaa' || tierFormat === 'anyability')) {
 				this.dex = Dex.mod('gen3phnn' as ID);

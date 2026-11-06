@@ -25,8 +25,10 @@ import {
   buildPhnnMinConfusionPatch,
   calcPhnnPokemonConfusion,
   detectMaxEvsFormat,
+  detectPhnnKey,
   getMaxStatEv,
 } from '@showdex/phnn';
+import { getPhnnSw97HpDv } from '@showdex/phnn/spaceworld';
 import { getDefaultSpreadValue, legalLockedFormat } from '@showdex/utils/dex';
 import { useRandomUuid } from '@showdex/utils/hooks';
 import { detectStatBoostDelta, formatStatBoost } from '@showdex/utils/ui';
@@ -429,8 +431,9 @@ export const PokeStats = ({
             const statLabel = t(`pokedex:stats.${statName}.1`, statName.toUpperCase());
 
             const iv = pokemon?.ivs?.[stat] || 0;
-            const value = legacy ? convertIvToLegacyDv(iv) : iv;
-            const maxValue = legacy ? 15 : 31;
+            const sw97Hp = stat === 'hp' && !!format && detectPhnnKey(format) === 'spaceworld';
+            const value = sw97Hp ? getPhnnSw97HpDv(pokemon?.ivs) : (legacy ? convertIvToLegacyDv(iv) : iv);
+            const maxValue = sw97Hp ? 26 : (legacy ? 15 : 31);
 
             const pristine = !missingIvs && pristineSpreadValue('iv', iv);
             const disabled = !pokemon?.speciesForme

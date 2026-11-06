@@ -78,8 +78,8 @@ describe('[Gen 2] SpaceWorld', () => {
 			assert.equal(species.get('Pidgeotto').prevo, '');
 			assert.equal(species.get('Raichu').prevo, '');
 			assert.equal(species.get('Bayleef').prevo, '');
-			assert.equal(species.get('Twohead').prevo, 'Spinarak');
-			assert.equal(species.get('Twohead').evoLevel, 23);
+			assert.equal(species.get('Ariados').prevo, 'Spinarak');
+			assert.equal(species.get('Ariados').evoLevel, 23);
 			assert.equal(species.get('Girafarig').prevo, 'Twinz');
 			assert.equal(species.get('Vulpix').evoLevel, 13);
 			assert.deepEqual(species.get('Pinsir').evos, ['Plux']);
