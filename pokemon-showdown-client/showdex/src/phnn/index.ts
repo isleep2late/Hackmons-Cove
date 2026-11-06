@@ -1,6 +1,7 @@
 import { type MoveName } from '@smogon/calc';
 import { getDexForFormat, getMaxMove } from '@showdex/utils/dex';
 import phnnData from './phnn-data';
+import { calculatePhnnSpaceWorld, getPhnnSw97HiddenPower } from './spaceworld';
 
 const toPhnnId = (text: string): string => String(text || '').toLowerCase().replace(/[^a-z0-9]+/g, '');
 
@@ -177,6 +178,16 @@ export const getPhnnMoveOverrides = (
 
   if (key === 'spaceworld' && PHNN_SW_TYPELESS_MOVES.includes(id)) {
     out.type = '???';
+  }
+
+  if (key === 'spaceworld' && id.startsWith('hiddenpower')) {
+    out.type = '???';
+    out.category = 'Physical';
+    out.basePower = getPhnnSw97HiddenPower(ivs);
+  }
+
+  if (key === 'spaceworld' && id === 'present') {
+    out.basePower = 40;
   }
 
   if (ivs && id.startsWith('hiddenpower') && key !== 'spaceworld') {
@@ -504,6 +515,10 @@ export const getPhnnToxicTick = (key: PhnnKey | null): ((counter: number, maxHp:
   return key === 'gen2' || key === 'gen2gs' ? phnnToxicTick(16) : undefined;
 };
 
+export const hasPhnnPokemonScreens = (gen: number, format?: string): boolean => (
+  gen === 1 || (!!format && detectPhnnKey(format) === 'spaceworld')
+);
+
 export const setPhnnCalcContext = (format: string): void => {
   const key = detectPhnnKey(format);
 
@@ -515,6 +530,7 @@ export const setPhnnCalcContext = (format: string): void => {
       critModifier: key === 'gen9phnn' ? 2 : undefined,
       noTrappingDamage: key === 'spaceworld',
       toxicTick: getPhnnToxicTick(key),
+      spaceworld: key === 'spaceworld' ? calculatePhnnSpaceWorld : undefined,
     }
     : null;
 };

@@ -13,6 +13,7 @@ export class BattleSceneStub {
 	timeOffset = NaN;
 	interruptionCount = NaN;
 	messagebarOpen = false;
+	mod = '';
 	log: BattleLog = { add: (args: Args, kwargs?: KWArgs) => {} } as any;
 	$frame?: JQuery;
 

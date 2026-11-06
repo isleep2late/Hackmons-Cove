@@ -4,6 +4,7 @@ export const Aliases: import('../sim/dex').AliasesTable = {
 	disguises: "[Gen 1] Disguises",
 	mnmcg: "[Gen 9] Mix and Mega Pure Hackmons",
 	shadowscarf: "Shadow Cloak",
+	"5yencoin": "Five Yen Coin",
 	questionscarf: "Broken Disk",
 	emax: "Eternatus-Eternamax",
 

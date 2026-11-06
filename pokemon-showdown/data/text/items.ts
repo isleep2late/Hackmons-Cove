@@ -700,6 +700,12 @@ export const ItemsText: { [id: IDEntry]: ItemText } = {
 
 		activate: "  {POKEMON} hung on using its Focus Band!",
 	},
+	focusorb: {
+		name: "Focus Orb",
+		shortDesc: "SpaceWorld '97 proto-Focus Band: 30/256 chance to survive a KO hit with 1 HP.",
+
+		activate: "  {POKEMON} hung on using its Focus Orb!",
+	},
 	focussash: {
 		name: "Focus Sash",
 		shortDesc: "If holder's HP is full, will survive an attack that would KO it with 1 HP. Single use.",
@@ -1598,6 +1604,12 @@ export const ItemsText: { [id: IDEntry]: ItemText } = {
 		},
 
 		activate: "  {POKEMON} can act faster than normal, thanks to its Quick Claw!",
+	},
+	quickneedle: {
+		name: "Quick Needle",
+		shortDesc: "SpaceWorld '97 proto-Quick Claw: 30/256 chance to move first in its priority bracket.",
+
+		activate: "  {POKEMON} can act faster than normal, thanks to its Quick Needle!",
 	},
 	quickpowder: {
 		name: "Quick Powder",

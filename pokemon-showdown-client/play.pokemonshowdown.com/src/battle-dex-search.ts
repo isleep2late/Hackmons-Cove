@@ -538,6 +538,8 @@ export class DexSearch {
 
 			// some aliases are substrings
 			if (queryAlias === id && query !== id) continue;
+			if (typeIndex === 4 && this.typedSearch?.dex.modid === 'gen2spaceworld' &&
+				id !== 'hiddenpower' && id.startsWith('hiddenpower')) continue;
 
 			if (searchType && searchTypeIndex !== typeIndex) {
 				// This is a filter, set it as an instafilter candidate
@@ -714,6 +716,7 @@ abstract class BattleTypedSearch<T extends SearchType> {
 		'nfe' | 'ssdlc1' | 'ssdlc1doubles' | 'predlc' | 'predlcdoubles' | 'svdlc1' | 'svdlc1doubles' | 'stadium' | 'lc' |
 		'champions' | 'natdexchampions' | null = null;
 	isDoubles = false;
+	spaceWorldStandard = false;
 
 	/**
 	 * Cached copy of what the results list would be with only base filters
@@ -812,7 +815,8 @@ abstract class BattleTypedSearch<T extends SearchType> {
 		}
 		if ((format === 'spaceworldou' || format === 'spaceworldubers') && this.dex.gen === 2) {
 			this.dex = Dex.mod('gen2spaceworld' as ID);
-			format = 'ubers' as ID;
+			this.spaceWorldStandard = true;
+			format = (format === 'spaceworldou' ? 'ou' : 'ubers') as ID;
 		}
 		if (format === 'spaceworldbricks' && this.dex.gen === 2) {
 			this.dex = Dex.mod('gen2spaceworld' as ID);
@@ -932,6 +936,15 @@ abstract class BattleTypedSearch<T extends SearchType> {
 					const isNoNerfs = this.format.includes('nonerfs') || this.format.includes('phnn') || this.format.includes('unified');
 					const allowMissingno = isOpenCustom || isNoNerfs ||
 						this.format === 'disguises' || this.format === 'disguisesenglish';
+					if (isOpenCustom && this.searchType === 'move' && this.dex.modid === 'gen2spaceworld') {
+						const swMove = this.dex.moves.get(id);
+						if (!swMove.exists || swMove.gen > 2 || swMove.isNonstandard === 'Glitch' ||
+							(id !== 'hiddenpower' && id.startsWith('hiddenpower'))) {
+							this.baseIllegalResults.push([this.searchType, id as ID]);
+							this.illegalReasons[id] = 'Illegal';
+							continue;
+						}
+					}
 					if (isOpenCustom) {
 						// Fork-only abilities carry isNonstandard 'Custom' and exist only in the phnn mod, so an
 						// open-custom format on any other mod must not offer them (the server rejects them).
@@ -1019,6 +1032,7 @@ abstract class BattleTypedSearch<T extends SearchType> {
 		if (this.formatType === 'frlg') table = table['gen3frlg'];
 		if (this.formatType === 'champions') table = table['champions'];
 		if (this.formatType === 'natdexchampions') table = table['natdexchampions'];
+		if (this.usesSpaceWorldLearnsets()) table = table['gen2spaceworld'];
 		if (speciesid in table.learnsets) return speciesid;
 		const species = this.dex.species.get(speciesid);
 		if (!species.exists) return '' as ID;
@@ -1030,7 +1044,11 @@ abstract class BattleTypedSearch<T extends SearchType> {
 		if (baseLearnsetid in table.learnsets) return baseLearnsetid;
 		return '' as ID;
 	}
+	protected usesSpaceWorldLearnsets() {
+		return this.dex.modid === 'gen2spaceworld' && !!BattleTeambuilderTable['gen2spaceworld']?.learnsets;
+	}
 	protected nextLearnsetid(learnsetid: ID, speciesid: ID, checkingMoves = false) {
+		if (this.usesSpaceWorldLearnsets()) return '' as ID;
 		if (learnsetid === 'lycanrocdusk' || (speciesid === 'rockruff' && learnsetid === 'rockruff')) {
 			return 'rockruffdusk' as ID;
 		}
@@ -1098,6 +1116,7 @@ abstract class BattleTypedSearch<T extends SearchType> {
 			if (this.formatType === 'frlg') table = table['gen3frlg'];
 			if (this.formatType === 'champions') table = table['champions'];
 			if (this.formatType === 'natdexchampions') table = table['natdexchampions'];
+			if (this.usesSpaceWorldLearnsets()) table = table['gen2spaceworld'];
 			let learnset = table.learnsets[learnsetid];
 			const eggMovesOnly = this.eggMovesOnly(learnsetid, speciesid);
 			if (learnset && (moveid in learnset) && (!this.format.startsWith('tradebacks') ? learnset[moveid].includes(genChar) :
@@ -1393,6 +1412,10 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 				...tierSet.slice(slices.DUU),
 			];
 		}
+		if (this.spaceWorldStandard && table.bannedSpecies) {
+			tierSet = tierSet.filter(([type, id]) => type !== 'pokemon' || !(id in table.bannedSpecies));
+			tierSet = tierSet.filter(([type], i) => type !== 'header' || (i + 1 < tierSet.length && tierSet[i + 1][0] !== 'header'));
+		}
 		const customBanlists = [
 			'1v1', '2v2doubles', 'lcuu', 'freeforall', 'ubersuu', 'almostanyability', 'balancedhackmons', 'godlygift', 'mixandmega', 'sharedpower', 'stabmons',
 			'12switch', '350cup', 'alphabetcup', 'badnboosted', 'battlefields', 'biomechmons', 'camomons', 'categoryswap', 'categoryswap',
@@ -1684,6 +1707,7 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 		);
 	}
 	getBaseResults(): SearchRow[] {
+		if (this.spaceWorldStandard) return [];
 		if (!this.species) return this.getDefaultResults();
 		const speciesName = this.dex.species.get(this.species).name;
 		const results = this.getDefaultResults();
@@ -1720,7 +1744,8 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 	}
 	override defaultFilter(results: SearchRow[]) {
 		if (this.species && !this.dex.species.get(this.species).nfe) {
-			results.splice(results.findIndex(row => row[1] === 'eviolite'), 1);
+			const evioliteIndex = results.findIndex(row => row[1] === 'eviolite');
+			if (evioliteIndex >= 0) results.splice(evioliteIndex, 1);
 			return results;
 		}
 		return results;
@@ -2038,7 +2063,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		const dex = this.dex;
 		let species = dex.species.get(this.species);
 		const format = this.format;
-		const isHackmons = ((format.includes('hackmons') || format.includes('phnn')) || format.includes('bh') || format.includes('anyability') || format.includes('unified') || format.includes('disguise') || format.includes('statuses') || format.includes('nolimit') || format.includes('nonerfs') || format.includes('customgame') || format.includes('bricks') || this.dex.modid === 'gen2spaceworld');
+		const isHackmons = ((format.includes('hackmons') || format.includes('phnn')) || format.includes('bh') || format.includes('anyability') || format.includes('unified') || format.includes('disguise') || format.includes('statuses') || format.includes('nolimit') || format.includes('nonerfs') || format.includes('customgame') || format.includes('bricks'));
 		const isPHNN = format.includes('nonerfs') || format.includes('phnn');
 		const phnnMaxMoves = ['maxguard', 'gmaxdrumsolo', 'gmaxfireball', 'gmaxhydrosnipe'];
 		const isSTABmons = (format.includes('stabmons') || format === 'staaabmons');
@@ -2063,6 +2088,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		if (this.formatType?.startsWith('ssdlc1')) lsetTable = lsetTable['gen8dlc1'];
 		if (this.formatType?.startsWith('predlc')) lsetTable = lsetTable['gen9predlc'];
 		if (this.formatType?.startsWith('svdlc1')) lsetTable = lsetTable['gen9dlc1'];
+		if (this.usesSpaceWorldLearnsets()) lsetTable = lsetTable['gen2spaceworld'];
 		while (learnsetid) {
 			let learnset = lsetTable.learnsets[learnsetid];
 			if (learnset) {
@@ -2109,7 +2135,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 					if (moves.includes(moveid)) continue;
 					moves.push(moveid);
 					if (moveid === 'sketch') sketch = true;
-					if (moveid === 'hiddenpower') {
+					if (moveid === 'hiddenpower' && dex.modid !== 'gen2spaceworld') {
 						moves.push(
 							'hiddenpowerbug', 'hiddenpowerdark', 'hiddenpowerdragon', 'hiddenpowerelectric', 'hiddenpowerfighting', 'hiddenpowerfire', 'hiddenpowerflying', 'hiddenpowerghost', 'hiddenpowergrass', 'hiddenpowerground', 'hiddenpowerice', 'hiddenpowerpoison', 'hiddenpowerpsychic', 'hiddenpowerrock', 'hiddenpowersteel', 'hiddenpowerwater'
 						);
@@ -2127,6 +2153,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 				if (isGlitchedMon && (id === 'chatter' || id === 'struggle')) continue;
 				const move = dex.moves.get(id);
 				if (move.gen > dex.gen || !move.exists) continue;
+				if (dex.modid === 'gen2spaceworld' && id !== 'hiddenpower' && id.startsWith('hiddenpower')) continue;
 				if (move.type === 'Shadow' && !dex.modid.includes('phnn')) continue;
 				if (sketch) {
 					if (move.flags['nosketch'] || move.isMax || move.isZ) continue;
@@ -2146,15 +2173,17 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 						const allowsCustom = isPHNN || format.includes('customgame') || format.includes('customdisguise');
 						let visible = allowsCustom;
 						if (move.isNonstandard === 'Glitch' && !isPHNN && move.gen !== dex.gen) visible = false;
-						if (!visible && move.id === 'nomove' && format.includes('disguises')) visible = true;
+						if (!visible && move.id === 'nomove' && format.includes('disguises') && dex.modid !== 'gen2spaceworld') visible = true;
 						if (!visible && move.id === 'nomove2' && format.includes('statuses')) visible = true;
-						if (!visible && move.id === 'nomovesw' && dex.modid === 'gen2spaceworld' && (format.includes('statuses') || format.includes('disguise'))) visible = true;
 						if (!visible) continue;
 					}
 					moves.push(move.id);
 				}
 			}
 		}
+		const swBannedMoves = dex.modid === 'gen2spaceworld' ?
+			BattleTeambuilderTable['gen2spaceworld']?.formatBannedMoves?.[format] : null;
+		if (swBannedMoves) moves = moves.filter(id => !(id in swBannedMoves));
 		if (this.formatType === 'metronome') moves = ['metronome'];
 		if (isSTABmons) {
 			for (let id in this.getTable()) {

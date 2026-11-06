@@ -82,14 +82,13 @@ export class Pokemon implements State.Pokemon {
     this.boosts = Pokemon.withDefault(gen, options.boosts, 0, false);
 
     if ((gen.num > 0 && gen.num < 3) || gen.num === 11) {
-      this.ivs.hp = Stats.DVToIV(
-        Stats.getHPDV({
-          atk: this.ivs.atk,
-          def: this.ivs.def,
-          spe: this.ivs.spe,
-          spc: this.ivs.spa,
-        })
-      );
+      const dvs = {
+        atk: this.ivs.atk,
+        def: this.ivs.def,
+        spe: this.ivs.spe,
+        spc: this.ivs.spa,
+      };
+      this.ivs.hp = Stats.DVToIV(gen.num === 11 ? Stats.getSW97HPDV(dvs) : Stats.getHPDV(dvs));
     }
 
     this.rawStats = {} as I.StatsTable;

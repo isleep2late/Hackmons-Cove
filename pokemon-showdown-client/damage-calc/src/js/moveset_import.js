@@ -244,6 +244,7 @@ function getMoves(currentPoke, rows, x) {
 			if (rows[x][0] === "-") {
 				movesFound = true;
 				move = rows[x].slice(2).replace("[", "").replace("]", "").trim().replace(/\s+/g, " ");
+				if (gen === 11 && /^Hidden Power\b/.test(move)) move = "Hidden Power";
 				moves.push(move);
 			} else if (movesFound === true) {
 				break;

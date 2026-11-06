@@ -1,4 +1,7 @@
 const SW97_NO_HIT_CHECK = ['bide', 'counter', 'sketch', 'haze'];
+const SW97_HAZE_END: { [k: string]: string } = {
+	mist: 'Mist', focusenergy: 'move: Focus Energy', leechseed: 'move: Leech Seed',
+};
 const SW97_STATUS_WITH_POWER = [
 	'leechseed', 'metronome', 'nightmare', 'naildown', 'mudslap', 'spikes', 'sandstorm', 'painsplit', 'pursuit',
 ];
@@ -18,6 +21,45 @@ function sw97FlailPower(pokemon: Pokemon) {
 	if (ratio <= 16) return 80;
 	if (ratio <= 32) return 40;
 	return 20;
+}
+
+function sw97SetCounterMove(pokemon: Pokemon, id: string) {
+	const foe = pokemon.side.foe.active[0];
+	pokemon.m.sw97CounterMove = {
+		id, user: pokemon.previouslySwitchedIn, foe, foeSwitch: foe?.previouslySwitchedIn,
+	};
+}
+
+function sw97LastCounterMove(pokemon: Pokemon): string {
+	const counter = pokemon.m.sw97CounterMove;
+	const foe = pokemon.side.foe.active[0];
+	if (!counter || counter.user !== pokemon.previouslySwitchedIn || counter.foe !== foe ||
+		counter.foeSwitch !== foe?.previouslySwitchedIn) {
+		return '';
+	}
+	return counter.id;
+}
+
+const SW97_DISABLE_TICK_ORDER: { [k: string]: number } = { onAnyBeforeMovePriority: 7 };
+
+function sw97HealFails(pokemon: Pokemon) {
+	if (pokemon.hp >= pokemon.maxhp) return true;
+	return (pokemon.maxhp - pokemon.hp) % 256 === 255 && (pokemon.hp >> 8) < (pokemon.maxhp >> 8);
+}
+
+function sw97HealTry(this: Battle, source: Pokemon) {
+	if (!sw97HealFails(source)) return;
+	this.add('-fail', source);
+	return null;
+}
+
+function sw97KeepToxicBit(pokemon: Pokemon, counter: number) {
+	pokemon.addVolatile('swtoxic');
+	if (pokemon.volatiles['swtoxic']) pokemon.volatiles['swtoxic'].counter = counter;
+}
+
+function sw97TurnLost(battle: Battle, pokemon: Pokemon) {
+	return pokemon.m.sw97TurnLost === battle.turn;
 }
 
 function sw97HitsFoe(battle: Battle, pokemon: Pokemon, move: ActiveMove) {
@@ -63,7 +105,14 @@ function sw97HitsFoe(battle: Battle, pokemon: Pokemon, move: ActiveMove) {
 export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	attract: {
 		inherit: true,
+		shortDesc: "Infatuates a foe of the other gender; genderless counts as female.",
+		desc: "Causes the target to become infatuated, making it unable to attack 50% of the time. It never misses on accuracy or evasion. Fails if both Pokemon count as the same gender, the target is using Fly or Dig, or the target is already infatuated. The demo treats genderless Pokemon as female. It goes through Protect and substitutes, and the infatuation lasts until the infatuated Pokemon leaves the field, even if the user switches out first. Baton Pass passes the infatuation to the replacement.",
+		accuracy: true,
 		pp: 10,
+		flags: { reflectable: 1, mirror: 1, bypasssub: 1, metronome: 1 },
+		onTryImmunity(target, source) {
+			return (target.gender === 'M') !== (source.gender === 'M');
+		},
 	},
 	conversion2: {
 		inherit: true,
@@ -204,21 +253,61 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	metronome: {
 		inherit: true,
+		shortDesc: "Picks a random move other than Metronome.",
+		desc: "A random move is selected for use, other than Metronome itself. Unlike the final games, any other move can be called, including Counter, Protect, Sketch, Sleep Talk, Struggle, and moves the user already knows. It can also call one of the demo's three unused move slots, which do nothing.",
 		onTry(source, target, move) {
 			if (!sw97HitsFoe(this, source, move)) return null;
+		},
+		onHit(pokemon) {
+			const moves = [...new Set(this.dex.moves.all()
+				.filter(move => !move.isNonstandard && move.id !== 'metronome').map(move => move.id))];
+			const roll = this.random(moves.length + 3);
+			if (roll >= moves.length) {
+				sw97SetCounterMove(pokemon, 'sw97unused');
+				this.add('-nothing');
+				return;
+			}
+			sw97SetCounterMove(pokemon, moves[roll]);
+			this.actions.useMove(moves[roll], pokemon);
 		},
 	},
 	mirrormove: {
 		inherit: true,
+		shortDesc: "User uses the target's last used move against it.",
+		desc: "The user uses the last move used by the target. Fails if the target's last move was Mirror Move, or if the target has not used a move since either Pokemon entered the field, or if the target spent its last turn asleep or frozen. Unlike the final games, the user may copy a move it already knows, and Metronome, Mimic, Sketch, Sleep Talk, and Transform can be copied; after Metronome, Sleep Talk, or Mirror Move, the move they called is copied, and copying one of Metronome's empty move slots does nothing.",
 		onTry(source, target, move) {
 			if (!sw97HitsFoe(this, source, move)) return null;
+		},
+		onHit(pokemon) {
+			const foe = pokemon.side.foe.active[0];
+			const counter = foe?.m.sw97CounterMove;
+			if (!counter || counter.user !== foe.previouslySwitchedIn || counter.foe !== pokemon ||
+				counter.foeSwitch !== pokemon.previouslySwitchedIn || counter.id === 'mirrormove') {
+				return false;
+			}
+			sw97SetCounterMove(pokemon, counter.id);
+			if (counter.id === 'sw97unused') {
+				this.add('-nothing');
+				return;
+			}
+			this.actions.useMove(counter.id, pokemon);
 		},
 	},
 	sleeptalk: {
 		inherit: true,
+		shortDesc: "User must be asleep. Uses another known move.",
+		desc: "One of the user's known moves, besides this move, is selected for use at random. Fails if the user is not asleep or has only one move. Unlike the final games, the selected move can be a disabled move, Bide, or a two-turn move.",
 		onTry(source, target, move) {
 			if (!sw97HitsFoe(this, source, move)) return null;
 			return source.status === 'slp';
+		},
+		onHit(pokemon) {
+			if (!pokemon.moveSlots[1]) return false;
+			const moves = pokemon.moveSlots.map(slot => slot.id).filter(id => id && id !== 'sleeptalk');
+			if (!moves.length) return false;
+			const moveid = this.sample(moves);
+			sw97SetCounterMove(pokemon, moveid);
+			this.actions.useMove(moveid, pokemon);
 		},
 	},
 	bide: {
@@ -284,15 +373,31 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		flags: { mirror: 1, metronome: 1 },
 		condition: {
 			inherit: true,
+			noCopy: false,
+			onAfterMoveSelf(pokemon) {
+				this.damage(pokemon.baseMaxhp / 4);
+			},
 			onAfterSwitchInSelf(pokemon) {
-				if (pokemon.status === 'slp') this.damage(pokemon.baseMaxhp / 4);
+				this.damage(pokemon.baseMaxhp / 4);
 			},
 		},
 	},
 	outrage: {
 		inherit: true,
+		shortDesc: "Lasts 3-4 turns. Confuses the user afterwards.",
+		desc: "The user attacks on three or four turns in a row, then becomes confused for one or two turns, even under Safeguard. The hits after the first skip the accuracy check, so they cannot miss and they hit through Protect, Fly and Dig. A turn lost to sleep, freeze, flinching or a partial-trapping move does not count, and the rampage carries on afterward; full paralysis, a confusion self-hit or infatuation ends it without confusion.",
 		basePower: 90,
 		pp: 10,
+	},
+	thrash: {
+		inherit: true,
+		shortDesc: "Lasts 3-4 turns. Confuses the user afterwards.",
+		desc: "The user attacks on three or four turns in a row, then becomes confused for one or two turns, even under Safeguard. The hits after the first skip the accuracy check, so they cannot miss and they hit through Protect, Fly and Dig. A turn lost to sleep, freeze, flinching or a partial-trapping move does not count, and the rampage carries on afterward; full paralysis, a confusion self-hit or infatuation ends it without confusion.",
+	},
+	petaldance: {
+		inherit: true,
+		shortDesc: "Lasts 3-4 turns. Confuses the user afterwards.",
+		desc: "The user attacks on three or four turns in a row, then becomes confused for one or two turns, even under Safeguard. The hits after the first skip the accuracy check, so they cannot miss and they hit through Protect, Fly and Dig. A turn lost to sleep, freeze, flinching or a partial-trapping move does not count, and the rampage carries on afterward; full paralysis, a confusion self-hit or infatuation ends it without confusion.",
 	},
 	powdersnow: {
 		inherit: true,
@@ -353,6 +458,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		desc: "Until the end of the foe's next action, if the user faints due to an attack by the foe, the foe also faints. The user's own actions do not end the effect, so it can carry into the next turn.",
 		condition: {
 			inherit: true,
+			noCopy: false,
 			onBeforeMove: undefined,
 			onMoveAborted: undefined,
 			onFoeAfterMoveSelf() {
@@ -383,6 +489,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	raindance: {
 		inherit: true,
+		shortDesc: "For 5 turns, Water moves deal 2x and Fire moves 0.5x.",
+		desc: "For 5 turns, the weather becomes Rain, even if the current weather is Rain. The damage of Water-type attacks is doubled and the damage of Fire-type attacks is halved during the effect, applied before STAB and type effectiveness.",
 		pp: 10,
 		onTry(source, target, move) {
 			if (!sw97HitsFoe(this, source, move)) return null;
@@ -399,16 +507,78 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		desc: "This attack charges on the first turn and executes on the second. It does not have a high critical hit ratio in the demo's engine.",
 		accuracy: 75,
 	},
+	skullbash: {
+		inherit: true,
+		shortDesc: "Charges turn 1. Hits turn 2.",
+		desc: "This attack charges on the first turn and executes on the second. Unlike the final games, it does not raise the user's Defense while charging.",
+		onTryMove(attacker, defender, move) {
+			if (attacker.removeVolatile(move.id)) {
+				return;
+			}
+			this.add('-prepare', attacker, move.name);
+			if (!this.runEvent('ChargeMove', attacker, defender, move)) {
+				return;
+			}
+			attacker.addVolatile('twoturnmove', defender);
+			return null;
+		},
+	},
+	stomp: {
+		inherit: true,
+		shortDesc: "30% chance to make the target flinch.",
+		desc: "Has a 30% chance to make the target flinch. Unlike the final games, its power is not doubled against a target that used Minimize.",
+		flags: { contact: 1, protect: 1, mirror: 1, metronome: 1 },
+	},
+	minimize: {
+		inherit: true,
+		shortDesc: "Raises the user's evasiveness by 1.",
+		desc: "Raises the user's evasiveness by 1 stage. Unlike the final games, it has no other effect: Stomp does not deal extra damage to the user afterwards.",
+		volatileStatus: undefined,
+		condition: undefined,
+	},
+	defensecurl: {
+		inherit: true,
+		shortDesc: "Raises the user's Defense by 1.",
+		desc: "Raises the user's Defense by 1 stage. Unlike the final games, it has no other effect: it does not boost Rollout.",
+		volatileStatus: undefined,
+		condition: undefined,
+	},
 	rest: {
 		inherit: true,
-		onTry: undefined, // no inherit
+		shortDesc: "User sleeps 1 turn and restores HP and status. Buggy HP check.",
+		desc: "The user falls asleep and restores all of its HP, replacing any other non-volatile status condition. Its sleep counter is set to 2, so it loses its next turn and wakes up and acts on the turn after. A badly poisoned user keeps the badly-poisoned flag, so if it is poisoned again before it switches out it is badly poisoned, with the damage counter carrying on. If the user is already asleep, for example when Sleep Talk calls this move, its sleep counter is reset to 2 and it still restores all of its HP. Fails if the user is at full HP. Because of the demo's HP check bug, it also fails when the user's HP is exactly 255 or 511 below its maximum and the high byte of its HP is lower than that of its maximum HP.",
+		onTry: sw97HealTry,
 		onHit(target, source, move) {
-			const result = target.setStatus('slp', source, move);
-			if (!result) return result;
+			if (target.status === 'slp') {
+				this.add('-status', target, 'slp', '[from] move: Rest');
+			} else {
+				const toxic = target.status === 'tox' ? (target.statusState.counter || 0) : undefined;
+				const result = target.setStatus('slp', source, move);
+				if (!result) return result;
+				if (toxic !== undefined) sw97KeepToxicBit(target, toxic);
+			}
 			target.statusState.time = 2;
 			target.statusState.startTime = 2;
 			this.heal(target.maxhp); // Aesthetic only as the healing happens after you fall asleep in-game
 		},
+	},
+	recover: {
+		inherit: true,
+		shortDesc: "Heals the user by 50% of its max HP. Buggy HP check.",
+		desc: "The user restores 1/2 of its maximum HP. Fails if the user is at full HP. Because of the demo's HP check bug, it also fails when the user's HP is exactly 255 or 511 below its maximum and the high byte of its HP is lower than that of its maximum HP.",
+		onTry: sw97HealTry,
+	},
+	softboiled: {
+		inherit: true,
+		shortDesc: "Heals the user by 50% of its max HP. Buggy HP check.",
+		desc: "The user restores 1/2 of its maximum HP. Fails if the user is at full HP. Because of the demo's HP check bug, it also fails when the user's HP is exactly 255 or 511 below its maximum and the high byte of its HP is lower than that of its maximum HP.",
+		onTry: sw97HealTry,
+	},
+	milkdrink: {
+		inherit: true,
+		shortDesc: "Heals the user by 50% of its max HP. Buggy HP check.",
+		desc: "The user restores 1/2 of its maximum HP. Fails if the user is at full HP. Because of the demo's HP check bug, it also fails when the user's HP is exactly 255 or 511 below its maximum and the high byte of its HP is lower than that of its maximum HP.",
+		onTry: sw97HealTry,
 	},
 	reversal: {
 		inherit: true,
@@ -478,9 +648,15 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	safeguard: {
 		inherit: true,
+		shortDesc: "For 5 turns, protects user's party from major status. Not confusion.",
+		desc: "For 5 turns, the user and its party members cannot have non-volatile status conditions inflicted on them by the opponent. Unlike the final games, it does not prevent confusion from moves, and a rampage move still confuses its user when it ends.",
 		pp: 10,
 		onTry(source, target, move) {
 			if (!sw97HitsFoe(this, source, move)) return null;
+		},
+		condition: {
+			inherit: true,
+			onTryAddVolatile: undefined,
 		},
 	},
 	sandstorm: {
@@ -522,23 +698,67 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	struggle: {
 		inherit: true,
-		shortDesc: "User loses 1/2 the HP lost by the target. Ghosts are immune.",
-		desc: "Deals Normal-type damage, so Ghost-types are immune and Rock- and Steel-types resist it. If this move is successful, the user takes recoil equal to 1/2 the HP lost by the target, but not less than 1 HP. Automatically used if no other move can be selected.",
+		shortDesc: "Normal-type. User loses 1/2 the HP lost by the target.",
+		desc: "A Normal-type attack: it gets the same-type bonus for Normal-type users, type effectiveness applies, and Ghost-types are immune, in which case the user takes no recoil. If this move is successful, the user takes recoil equal to 1/2 the HP lost by the target, or 1/2 of the full damage dealt if it hits a substitute, but not less than 1 HP. Automatically used if no other move can be selected.",
 		pp: 0,
 		recoil: [1, 2],
 		struggleRecoil: false,
 		ignoreImmunity: false,
+		onModifyMove(move, pokemon) {
+			this.add('-activate', pokemon, 'move: Struggle');
+		},
 	},
 	hyperbeam: {
 		inherit: true,
 		shortDesc: "User cannot move next turn, unless this move KOes the target.",
-		desc: "If this move is successful, the user must recharge on the following turn - unless it knocks the target out, in which case no recharge is needed. A partial-trapping move used against the recharging Pokemon also cancels the recharge, even if it misses.",
-		onAfterMove(source, target) {
+		desc: "If this move is successful, the user must recharge on the following turn - unless it knocks the target out, in which case no recharge is needed. The recharge is cancelled if the user is hit by the first hit of a partial-trapping move, by Bite, Bone Club, Headbutt, Hyper Fang, Low Kick, Rock Slide, Rolling Kick, Stomp or Sacred Fire (whether or not it flinches), or by a move boosted by the foe's King's Rock, unless the hit lands on its substitute; it is also cancelled when a sleep move puts the recharging user to sleep, which such a move then cannot fail to do unless the user already has a status or a substitute, or resists the move's type. If the recharge is cancelled before the user has recharged that turn, it uses Hyper Beam again instead, unless it flinched or fell asleep.",
+		onAfterMove: undefined,
+		onAfterMoveSecondary(target, source, move) {
 			if (target && !target.hp) {
 				delete source.volatiles['mustrecharge'];
 			} else if (source.volatiles['mustrecharge']) {
+				source.m.sw97HyperBeamCaller = move.sourceEffect || '';
 				this.add('-mustrecharge', source);
 			}
+		},
+	},
+	disable: {
+		inherit: true,
+		shortDesc: "Disables the target's last move for 0-7 of its move attempts.",
+		desc: "The target's last used move is disabled. A counter from 1 to 8 is set at random and drops by 1 each time the target tries to move, counted only on turns where it is not stopped first by sleep, freezing, a partial-trapping move, flinching or recharging; when it reaches 0 the move is usable again on that attempt, so the move stays blocked for 0 to 7 attempts. Fails if the target is already disabled, has not used a move since either Pokemon entered the field, spent its last turn asleep or frozen, last used Struggle, or that move has no PP left. Goes through substitutes.",
+		onTryHit: undefined,
+		condition: {
+			inherit: true,
+			noCopy: false,
+			duration: undefined,
+			durationCallback: undefined,
+			onStart(pokemon) {
+				const id = sw97LastCounterMove(pokemon);
+				const moveSlot = id ? pokemon.getMoveData(id) : null;
+				if (!moveSlot || id === 'struggle' || !moveSlot.pp) return false;
+				this.effectState.move = id;
+				this.effectState.slot = pokemon.moveSlots.indexOf(moveSlot);
+				this.effectState.counter = this.random(1, 9);
+				this.add('-start', pokemon, 'Disable', moveSlot.move);
+			},
+			...SW97_DISABLE_TICK_ORDER,
+			onAnyBeforeMove(pokemon) {
+				if (pokemon !== this.effectState.target) return;
+				this.effectState.counter--;
+				if (this.effectState.counter <= 0) pokemon.removeVolatile('disable');
+			},
+			onBeforeMovePriority: 1.5,
+			onBeforeMove(attacker, defender, move) {
+				if (move.id === this.effectState.move) {
+					this.add('cant', attacker, 'Disable', move);
+					return false;
+				}
+			},
+			onDisableMove(pokemon) {
+				const moveSlot = pokemon.moveSlots[this.effectState.slot];
+				if (moveSlot) pokemon.disableMove(moveSlot.id);
+			},
+			onMoveAborted: undefined,
 		},
 	},
 	explosion: {
@@ -555,6 +775,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	sunnyday: {
 		inherit: true,
+		shortDesc: "For 5 turns, Fire moves deal 2x and Water moves 0.5x.",
+		desc: "For 5 turns, the weather becomes Sun, even if the current weather is Sun. The damage of Fire-type attacks is doubled and the damage of Water-type attacks is halved during the effect, applied before STAB and type effectiveness.",
 		pp: 10,
 		onTry(source, target, move) {
 			if (!sw97HitsFoe(this, source, move)) return null;
@@ -563,8 +785,11 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	swagger: {
 		inherit: true,
+		shortDesc: "Raises the target's Attack by 2 and confuses it.",
+		desc: "Raises the target's Attack by 2 stages, then confuses it. The target is confused even if its Attack cannot rise any further; the confusion has a 1/256 chance to fail, like the demo's other 100% effects. Safeguard does not prevent the confusion. A substitute does not stop the Attack raise, only the confusion.",
 		accuracy: 100,
 		pp: 10,
+		onTryHit: undefined,
 	},
 	synthesis: {
 		inherit: true,
@@ -602,14 +827,12 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	triplekick: {
 		inherit: true,
-		shortDesc: "Hits 1-3 times; power is 60, then 120, then 180.",
-		desc: "Hits one to three times, at random. Power is 60 for the first hit, 120 for the second, and 180 for the third. Accuracy is checked only once.",
+		shortDesc: "Hits 1-3 times; hit 2 deals 2x, hit 3 deals 3x damage.",
+		desc: "Hits one to three times, at random. Power is always 60; the second hit deals double and the third triple the base damage, applied before weather, STAB and type effectiveness and after the demo's 997 damage cap. If the user has a substitute, the second and third hits each deal four times the base damage instead. Accuracy is checked only once.",
 		accuracy: 100,
 		basePower: 60,
 		multihit: [1,3],
-		basePowerCallback(pokemon, target, move) {
-			return 60 * move.hit;
-		},
+		basePowerCallback: undefined,
 	},
 	twister: {
 		inherit: true,
@@ -690,28 +913,47 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	rollout: {
 		inherit: true,
+		shortDesc: "Damage doubles with each hit. Repeats for 5 turns.",
+		desc: "If this move is successful, the user is locked into this move and cannot make another move until it misses, 5 turns have passed, or the attack cannot be used. Its damage doubles with each successful hit, up to 16 times on the fifth hit; the doubling is applied after STAB and type effectiveness, ignores the demo's 997 damage cap, and saturates at 65535. Unlike the final games, Defense Curl does not boost it. A turn lost to sleep, freeze, flinching or a partial-trapping move does not end it.",
 		accuracy: 78.5,
 		pp: 10,
+		basePowerCallback(pokemon, target, move) {
+			const rolloutData = pokemon.volatiles['rollout'];
+			if (rolloutData && pokemon.status !== 'slp') {
+				rolloutData.hitCount++;
+				rolloutData.contactHitCount++;
+				if (rolloutData.hitCount < 5) {
+					rolloutData.duration = 2;
+				}
+			}
+			return move.basePower;
+		},
+		condition: {
+			inherit: true,
+			onMoveAborted(pokemon) {
+				if (sw97TurnLost(this, pokemon)) this.effectState.duration!++;
+			},
+		},
 	},
 	furycutter: {
 		inherit: true,
 		accuracy: 100,
 		basePower: 25,
 		type: "Bug",
-		shortDesc: "Power doubles with each consecutive hit, uncapped (25/50/100/200/...).",
-		desc: "Power doubles with each successful consecutive use, with no cap (25, 50, 100, 200, and so on, saturating at 65535). The demo's counter has no limit, unlike the final game's 160 cap - the decomp marks this as a bug, and this format keeps it.",
-		basePowerCallback(pokemon, target, move) {
-			const multiplier = pokemon.volatiles['furycutter']?.multiplier || 1;
-			return Math.min(25 * multiplier, 65535);
-		},
+		shortDesc: "Damage doubles with each consecutive hit, uncapped.",
+		desc: "Its damage doubles with each successful consecutive use, with no cap (1x, 2x, 4x, 8x, and so on); the doubling is applied after STAB and type effectiveness, ignores the demo's 997 damage cap, and saturates at 65535. A miss resets it, and so does choosing any other move. The demo's counter has no limit, unlike the final game's cap - the decomp marks this as a bug, and this format keeps it. A turn lost to sleep, freeze, flinching or a partial-trapping move does not break the streak when Fury Cutter was the move chosen that turn.",
+		basePowerCallback: undefined,
 		condition: {
 			duration: 2,
 			onStart() {
-				this.effectState.multiplier = 1;
+				this.effectState.count = 1;
 			},
 			onRestart() {
-				this.effectState.multiplier *= 2;
+				this.effectState.count++;
 				this.effectState.duration = 2;
+			},
+			onMoveAborted(pokemon, target, move) {
+				if (move.id === 'furycutter' && sw97TurnLost(this, pokemon)) this.effectState.duration!++;
 			},
 		},
 	},
@@ -979,15 +1221,20 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	rapidspin: {
 		inherit: true,
 		shortDesc: "Frees the user from partial-trapping moves; usable while trapped.",
-		desc: "If this move is successful, the effects of partial-trapping moves end for the user. It is the only move that can be used while trapped. It does not remove Leech Seed or Spikes.",
+		desc: "If this move hits, the user is released from the foe's partial-trapping move, even if the hit lands on the foe's substitute. It is the only move that can be used while trapped. It does not free the user if it fails to affect a Ghost-type trapper. It does not remove Leech Seed or Spikes.",
 		pp: 10,
+		onAfterHit: undefined,
+		onAfterSubDamage: undefined,
 		self: {
 			onHit(pokemon) {
-				if (pokemon.removeVolatile('partiallytrapped')) {
-					this.add('-end', pokemon, 'partiallytrapped');
-				}
+				const trapped = pokemon.volatiles['partiallytrapped'];
+				const freed = pokemon.foes().some(foe => foe.volatiles['partialtrappinglock']?.locked === pokemon);
+				if (freed && trapped) trapped.spun = true;
 				for (const foe of pokemon.foes()) {
 					foe.removeVolatile('partialtrappinglock');
+				}
+				if (pokemon.volatiles['partiallytrapped']) {
+					pokemon.removeVolatile('partiallytrapped');
 				}
 			},
 		},
@@ -1065,6 +1312,10 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		category: "Special",
 		type: "Water",
 		priority: 0,
+		flags: { protect: 1, mirror: 1, metronome: 1 },
+		volatileStatus: undefined,
+		pseudoWeather: undefined,
+		condition: undefined,
 		target: "normal",
 	},
 	strongarm: {
@@ -1144,7 +1395,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	wrap: {
 		inherit: true,
 		shortDesc: "Traps the target for 2-5 turns; it can only use Rapid Spin meanwhile.",
-		desc: "The user attacks for two to five turns in a row (37.5% chance each for 2 or 3 turns, 12.5% chance each for 4 or 5); while trapped, the target cannot use any move except Rapid Spin (Gen 1-style trapping) and takes no end-of-turn damage. Follow-up hits do not check accuracy or use PP, and each recalculates damage and can be a critical hit. The trap ends the moment the final hit lands, if either Pokemon leaves the field, if the target uses Rapid Spin, or if the user is prevented from attacking (by full paralysis, confusion, or infatuation); the target can act normally from then on, including on that very turn. If the first hit lands on a Pokemon recharging from Hyper Beam, the recharge turn is skipped; a missed use does not skip it. This move can also hit Ghost-types.",
+		desc: "The user attacks for two to five turns in a row (37.5% chance each for 2 or 3 turns, 12.5% chance each for 4 or 5); while trapped, the target cannot use any move except Rapid Spin (Gen 1-style trapping) and takes no end-of-turn damage. Follow-up hits do not check accuracy or use PP, and each recalculates damage and can be a critical hit. The trap ends the moment the final hit lands, if either Pokemon leaves the field, if the target uses Rapid Spin, or if the user is prevented from attacking (by full paralysis, confusion, or infatuation); the target can act normally from then on, including on that very turn. If the first hit lands on a Pokemon recharging from Hyper Beam, the recharge turn is skipped; a missed use does not skip it. A Ghost-type is still trapped but takes no damage from any of its hits, unless Foresight has been used on it.",
 		accuracy: 85,
 		ignoreImmunity: true,
 		self: {
@@ -1154,7 +1405,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	bind: {
 		inherit: true,
 		shortDesc: "Traps the target for 2-5 turns; it can only use Rapid Spin meanwhile.",
-		desc: "The user attacks for two to five turns in a row (37.5% chance each for 2 or 3 turns, 12.5% chance each for 4 or 5); while trapped, the target cannot use any move except Rapid Spin (Gen 1-style trapping) and takes no end-of-turn damage. Follow-up hits do not check accuracy or use PP, and each recalculates damage and can be a critical hit. The trap ends the moment the final hit lands, if either Pokemon leaves the field, if the target uses Rapid Spin, or if the user is prevented from attacking (by full paralysis, confusion, or infatuation); the target can act normally from then on, including on that very turn. If the first hit lands on a Pokemon recharging from Hyper Beam, the recharge turn is skipped; a missed use does not skip it. This move can also hit Ghost-types.",
+		desc: "The user attacks for two to five turns in a row (37.5% chance each for 2 or 3 turns, 12.5% chance each for 4 or 5); while trapped, the target cannot use any move except Rapid Spin (Gen 1-style trapping) and takes no end-of-turn damage. Follow-up hits do not check accuracy or use PP, and each recalculates damage and can be a critical hit. The trap ends the moment the final hit lands, if either Pokemon leaves the field, if the target uses Rapid Spin, or if the user is prevented from attacking (by full paralysis, confusion, or infatuation); the target can act normally from then on, including on that very turn. If the first hit lands on a Pokemon recharging from Hyper Beam, the recharge turn is skipped; a missed use does not skip it. A Ghost-type is still trapped but takes no damage from any of its hits, unless Foresight has been used on it.",
 		ignoreImmunity: true,
 		self: {
 			volatileStatus: 'partialtrappinglock',
@@ -1165,6 +1416,41 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		shortDesc: "No additional effect.",
 		desc: "No additional effect.",
 		secondary: null,
+	},
+	barrage: {
+		inherit: true,
+		shortDesc: "Hits 2-5 times in one turn, about 1/4 each.",
+		desc: "Hits two to five times, each about equally likely: two or three hits 64.5/256 each, four or five hits 63.5/256 each. If one of the hits breaks the target's substitute, it will take damage for the remaining hits.",
+	},
+	cometpunch: {
+		inherit: true,
+		shortDesc: "Hits 2-5 times in one turn, about 1/4 each.",
+		desc: "Hits two to five times, each about equally likely: two or three hits 64.5/256 each, four or five hits 63.5/256 each. If one of the hits breaks the target's substitute, it will take damage for the remaining hits.",
+	},
+	doubleslap: {
+		inherit: true,
+		shortDesc: "Hits 2-5 times in one turn, about 1/4 each.",
+		desc: "Hits two to five times, each about equally likely: two or three hits 64.5/256 each, four or five hits 63.5/256 each. If one of the hits breaks the target's substitute, it will take damage for the remaining hits.",
+	},
+	furyattack: {
+		inherit: true,
+		shortDesc: "Hits 2-5 times in one turn, about 1/4 each.",
+		desc: "Hits two to five times, each about equally likely: two or three hits 64.5/256 each, four or five hits 63.5/256 each. If one of the hits breaks the target's substitute, it will take damage for the remaining hits.",
+	},
+	furyswipes: {
+		inherit: true,
+		shortDesc: "Hits 2-5 times in one turn, about 1/4 each.",
+		desc: "Hits two to five times, each about equally likely: two or three hits 64.5/256 each, four or five hits 63.5/256 each. If one of the hits breaks the target's substitute, it will take damage for the remaining hits.",
+	},
+	pinmissile: {
+		inherit: true,
+		shortDesc: "Hits 2-5 times in one turn, about 1/4 each.",
+		desc: "Hits two to five times, each about equally likely: two or three hits 64.5/256 each, four or five hits 63.5/256 each. If one of the hits breaks the target's substitute, it will take damage for the remaining hits.",
+	},
+	spikecannon: {
+		inherit: true,
+		shortDesc: "Hits 2-5 times in one turn, about 1/4 each.",
+		desc: "Hits two to five times, each about equally likely: two or three hits 64.5/256 each, four or five hits 63.5/256 each. If one of the hits breaks the target's substitute, it will take damage for the remaining hits.",
 	},
 	twineedle: {
 		inherit: true,
@@ -1271,12 +1557,54 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	},
 	batonpass: {
 		inherit: true,
+		shortDesc: "User switches, passing stat changes and all volatile effects.",
+		desc: "The user is replaced with another Pokemon in its party. The demo never resets the user's battle flags on a Baton Pass, so the replacement receives all of them: stat stage changes, confusion, infatuation, Curse, Nightmare (which then hurts it every turn, asleep or not, until it wakes up), Focus Energy, Foresight, Leech Seed, Lock-On (Mind Reader), Mist, Perish Song, Reflect (Light Screen), the trapper or trapped effects of Mean Look (Spider Web), a substitute with its remaining HP, Protect (Detect), Endure and Destiny Bond while they last, Disable (the move in the same move slot cannot be selected and the disabled move fails if used) and Encore. Baton Pass also stays the last move used, so a passed Encore forces the replacement to use Baton Pass, taking PP from the move in the slot the user chose Baton Pass from. If the user was badly poisoned, a poisoned replacement becomes badly poisoned and its damage counter carries on from the user's; any other replacement keeps the badly-poisoned flag, so if it is poisoned later it is badly poisoned with the counter carrying on, unless Haze or a normal switch clears the flag first. If the user was transformed, the replacement's PP use is not saved and its PP is restored when it leaves the field.",
 		pp: 10,
 		self: {volatileStatus: 'swbatonboost'},
 	},
 	encore: {
 		inherit: true,
+		shortDesc: "From next turn, the target repeats its last move for 2-5 turns.",
+		desc: "Starting with the target's next move choice, it is forced to repeat its last move for 2 to 5 turns; the move it already chose this turn is not replaced. Struggle, Mirror Move and Encore itself can be encored. Fails if the target has not used a move since either Pokemon entered the field, spent its last turn asleep or frozen, or is already encored. The effect ends early if the encored move runs out of PP or the target spends a turn asleep or frozen. A Pokemon brought in by Baton Pass counts Baton Pass as its last move, and Baton Pass passes Encore itself.",
 		pp: 10,
+		flags: { protect: 1, mirror: 1, bypasssub: 1, metronome: 1 },
+		condition: {
+			inherit: true,
+			noCopy: false,
+			onStart(target) {
+				const forced = sw97LastCounterMove(target);
+				if (!forced || forced === 'sw97unused') return false;
+				const slotMove = target.m.sw97SlotMove && target.hasMove(target.m.sw97SlotMove) ? target.m.sw97SlotMove : forced;
+				if (!target.hasMove(slotMove) && forced !== 'struggle') return false;
+				this.effectState.move = slotMove;
+				this.effectState.forced = forced;
+				this.effectState.startTurn = this.turn;
+				this.add('-start', target, 'Encore');
+			},
+			onOverrideAction(pokemon, target, move) {
+				if (this.turn === this.effectState.startTurn) return;
+				const forced = this.effectState.forced;
+				if (forced !== this.effectState.move && pokemon.hasMove(this.effectState.move)) {
+					pokemon.m.sw97PPCaller = this.effectState.move;
+				}
+				if (move.id !== forced) return forced;
+			},
+			onResidual(target) {
+				const latest = sw97LastCounterMove(target);
+				if (latest && latest !== 'sw97unused') {
+					const slot = target.m.sw97SlotMove && target.hasMove(target.m.sw97SlotMove) ? target.m.sw97SlotMove : latest;
+					if (target.hasMove(slot) || latest === 'struggle') {
+						this.effectState.forced = latest;
+						this.effectState.move = slot;
+					}
+				}
+				const moveSlot = target.getMoveData(this.effectState.move);
+				if ((this.effectState.forced !== 'struggle' && (!moveSlot || moveSlot.pp <= 0)) ||
+					!sw97LastCounterMove(target)) {
+					target.removeVolatile('encore');
+				}
+			},
+		},
 	},
 	solarbeam: {
 		inherit: true,
@@ -1324,18 +1652,25 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	haze: {
 		inherit: true,
 		shortDesc: "Resets both actives' stat stages; also cures the target's status.",
-		desc: "Resets the stat stages of the user and the target to 0 and removes confusion, Disable, Mist, Focus Energy, Leech Seed, and the effects of Reflect and Light Screen from both. The target is also cured of its non-volatile status condition, and if the user is badly poisoned it becomes regular poison.",
+		desc: "Resets the stat stages of the user and the target to 0 and removes confusion, Disable, Mist, Focus Energy, Leech Seed, and the effects of Reflect and Light Screen from both. The target is also cured of its non-volatile status condition, and if the user is badly poisoned it becomes regular poison. A target woken up or thawed this way loses its move that turn if it had not moved yet. Both lose the badly-poisoned flag, but a target woken up this way keeps its Nightmare and keeps taking Nightmare damage every turn.",
 		target: "normal",
 		onHit(target, source) {
 			this.add('-activate', source, 'move: Haze');
 			for (const pokemon of [source, target]) {
 				pokemon.clearBoosts();
 				this.add('-clearboost', pokemon);
-				for (const vol of ['confusion', 'disable', 'mist', 'focusenergy', 'leechseed', 'swreflect']) {
-					pokemon.removeVolatile(vol);
+				for (const vol of ['confusion', 'disable', 'mist', 'focusenergy', 'leechseed', 'swreflect', 'swtoxic']) {
+					if (pokemon.removeVolatile(vol) && SW97_HAZE_END[vol]) {
+						this.add('-end', pokemon, SW97_HAZE_END[vol], '[silent]');
+					}
 				}
 			}
-			target.cureStatus();
+			const skipsTurn = ['slp', 'frz'].includes(target.status) && !!this.queue.willMove(target);
+			if (target.status && target.hp) {
+				this.add('-curestatus', target, target.status, '[msg]');
+				target.setStatus('');
+			}
+			if (skipsTurn) this.queue.cancelMove(target);
 			if (source.status === 'tox' && !source.setStatus('psn')) {
 				source.status = 'psn' as ID;
 				this.add('-status', source, 'psn');
@@ -1350,7 +1685,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	reflect: {
 		num: 115,
 		shortDesc: "Doubles user's Defense vs physical moves until it leaves the field.",
-		desc: "While active, the user's Defense is doubled against physical-type moves (and against its own confusion self-hits). Critical hits ignore this effect. Personal to the user with no turn limit: it lasts until the user leaves the field or is hit by Haze. Fails if the user already has this effect.",
+		desc: "While active, the user's Defense is doubled against physical-type moves (and against its own confusion self-hits). Critical hits ignore this effect. Personal to the user with no turn limit: it lasts until the user leaves the field or is hit by Haze, and Baton Pass passes it to the replacement. Fails if the user already has this effect.",
 		accuracy: true,
 		basePower: 0,
 		category: "Status",
@@ -1369,7 +1704,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	lightscreen: {
 		num: 113,
 		shortDesc: "Works like the demo's Reflect: doubles Defense vs physical moves.",
-		desc: "Identical to the demo's Reflect: while active, the user's Defense is doubled against physical-type moves. It does not reduce special damage at all. Personal to the user with no turn limit; it ends when the user leaves the field or is hit by Haze, and it does not stack with Reflect.",
+		desc: "Identical to the demo's Reflect: while active, the user's Defense is doubled against physical-type moves. It does not reduce special damage at all. Personal to the user with no turn limit; it ends when the user leaves the field or is hit by Haze, Baton Pass passes it to the replacement, and it does not stack with Reflect.",
 		accuracy: true,
 		basePower: 0,
 		category: "Status",
@@ -1388,7 +1723,7 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	substitute: {
 		inherit: true,
 		shortDesc: "1/4 max HP substitute; paralysis and Leech Seed pierce it.",
-		desc: "The user takes 1/4 of its maximum HP, rounded down, to create a substitute. It can be made with exactly 1/4 HP remaining, causing the user to faint. The substitute blocks most status moves, stat-lowering moves, confusion, and Lock-On effects, but paralysis-inducing moves and Leech Seed go through it. Creating a substitute frees the user from partial-trapping moves.",
+		desc: "The user takes 1/4 of its maximum HP, rounded down, to create a substitute. It can be made with exactly 1/4 HP remaining, causing the user to faint. The substitute blocks most status moves, stat-lowering moves, confusion, and Lock-On effects, but paralysis-inducing moves and Leech Seed go through it, and Swagger still raises Attack through it without confusing. It does not free the user from a partial-trapping move. It breaks only when a hit deals more damage than it has HP left, so a substitute brought to exactly 0 HP stays up until the next damaging hit. Recoil and draining moves that hit the substitute use the full damage dealt, even if it is more than the substitute had left.",
 		onTryHit(target) {
 			const cost = Math.floor(target.maxhp / 4);
 			if (target.volatiles['substitute']) {
@@ -1404,7 +1739,6 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 			onStart(target) {
 				this.add('-start', target, 'Substitute');
 				this.effectState.hp = Math.floor(target.maxhp / 4);
-				delete target.volatiles['partiallytrapped'];
 			},
 			onTryPrimaryHit(target, source, move) {
 				if (target === source || move.flags['bypasssub'] || move.infiltrates) {
@@ -1412,8 +1746,8 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 				}
 				if (move.category === 'Status') {
 					const blockedStatus = !!move.status && move.status !== 'par';
-					const blockedOther = (!!move.boosts && !move.secondaries) || move.volatileStatus === 'confusion' ||
-						['lockon', 'mindreader', 'nightmare', 'detect'].includes(move.id);
+					const blockedOther = move.id !== 'swagger' && ((!!move.boosts && !move.secondaries) ||
+						move.volatileStatus === 'confusion' || ['lockon', 'mindreader', 'nightmare', 'detect'].includes(move.id));
 					if (blockedStatus || blockedOther) {
 						this.add('-fail', source);
 						this.attrLastMove('[still]');
@@ -1432,26 +1766,28 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 					return damage;
 				}
 				this.lastDamage = damage;
+				const fullDamage = damage;
 				if (target.volatiles['bide']) {
 					target.volatiles['bide'].totalDamage = Math.min(target.volatiles['bide'].totalDamage + damage, 0xffff);
 				}
-				if (damage > target.volatiles['substitute'].hp) {
+				const broken = damage > target.volatiles['substitute'].hp;
+				if (broken) {
 					damage = target.volatiles['substitute'].hp as number;
 				}
 				target.volatiles['substitute'].hp -= damage;
 				source.lastDamage = damage;
-				if (target.volatiles['substitute'].hp <= 0) {
+				if (broken) {
 					target.removeVolatile('substitute');
 				} else {
 					this.add('-activate', target, 'move: Substitute', '[damage]');
 				}
 				if (move.recoil) {
-					this.damage(this.actions.calcRecoilDamage(damage, move, source), source, target, 'recoil');
-				} else if (damage) {
-					this.actions.applyRecoilDamage(damage, move, source);
+					this.damage(this.actions.calcRecoilDamage(fullDamage, move, source), source, target, 'recoil');
+				} else if (fullDamage) {
+					this.actions.applyRecoilDamage(fullDamage, move, source);
 				}
 				if (move.drain) {
-					this.heal(Math.ceil(damage * move.drain[0] / move.drain[1]), source, target, 'drain');
+					this.heal(Math.max(1, Math.floor(fullDamage * move.drain[0] / move.drain[1])), source, target, 'drain');
 				}
 				this.singleEvent('AfterSubDamage', move, null, target, source, move, damage);
 				this.runEvent('AfterSubDamage', target, source, move, damage);
@@ -1510,6 +1846,16 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	bellchime: {
 		inherit: true,
 		isNonstandard: null,
+		shortDesc: "Cures the user's status condition and Nightmare.",
+		desc: "The SpaceWorld 1997 demo's prototype of Heal Bell: it cures the user's own status condition and ends its Nightmare, but does not affect the rest of the party. Fails if the user has no status condition, even if it has a Nightmare. A badly poisoned user is cured but keeps the badly-poisoned flag, so if it is poisoned again before it switches out it is badly poisoned, with the damage counter carrying on.",
+		onHit(pokemon) {
+			if (!pokemon.status) return false;
+			const toxic = pokemon.status === 'tox' ? (pokemon.statusState.counter || 0) : undefined;
+			this.add('-curestatus', pokemon, pokemon.status, '[msg]');
+			pokemon.setStatus('');
+			if (pokemon.removeVolatile('nightmare')) this.add('-end', pokemon, 'Nightmare');
+			if (toxic !== undefined) sw97KeepToxicBit(pokemon, toxic);
+		},
 	},
 	tempt: {
 		inherit: true,

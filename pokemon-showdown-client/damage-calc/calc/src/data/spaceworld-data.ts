@@ -6575,7 +6575,7 @@ export const SW_MOVES: any = {
     target: "allAdjacentFoes"
   },
   Present: {
-    bp: 50,
+    bp: 40,
     type: "Normal",
     category: "Physical"
   },
@@ -6740,11 +6740,6 @@ export const SW_MOVES: any = {
   "Giga Drain": {
     bp: 60,
     type: "Grass",
-    category: "Special"
-  },
-  "Hidden Power Water": {
-    bp: 70,
-    type: "Water",
     category: "Special"
   },
   Bite: {
@@ -7949,79 +7944,9 @@ export const SW_MOVES: any = {
     category: "Status",
     type: "Normal"
   },
-  "Hidden Power Bug": {
-    bp: 70,
-    type: "Bug",
-    category: "Physical"
-  },
-  "Hidden Power Dark": {
-    bp: 70,
-    type: "Dark",
-    category: "Special"
-  },
-  "Hidden Power Dragon": {
-    bp: 70,
-    type: "Dragon",
-    category: "Special"
-  },
-  "Hidden Power Electric": {
-    bp: 70,
-    type: "Electric",
-    category: "Special"
-  },
-  "Hidden Power Fighting": {
-    bp: 70,
-    type: "Fighting",
-    category: "Physical"
-  },
-  "Hidden Power Fire": {
-    bp: 70,
-    type: "Fire",
-    category: "Special"
-  },
-  "Hidden Power Flying": {
-    bp: 70,
-    type: "Flying",
-    category: "Physical"
-  },
-  "Hidden Power Ghost": {
-    bp: 70,
-    type: "Ghost",
-    category: "Physical"
-  },
-  "Hidden Power Grass": {
-    bp: 70,
-    type: "Grass",
-    category: "Special"
-  },
-  "Hidden Power Ground": {
-    bp: 70,
-    type: "Ground",
-    category: "Physical"
-  },
-  "Hidden Power Ice": {
-    bp: 70,
-    type: "Ice",
-    category: "Special"
-  },
-  "Hidden Power Poison": {
-    bp: 70,
-    type: "Poison",
-    category: "Physical"
-  },
-  "Hidden Power Psychic": {
-    bp: 70,
-    type: "Psychic",
-    category: "Special"
-  },
-  "Hidden Power Rock": {
-    bp: 70,
-    type: "Rock",
-    category: "Physical"
-  },
-  "Hidden Power Steel": {
-    bp: 70,
-    type: "Steel",
+  "Hidden Power": {
+    bp: 78,
+    type: "???",
     category: "Physical"
   }
 };

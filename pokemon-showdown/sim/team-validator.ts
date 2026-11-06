@@ -642,6 +642,16 @@ export class TeamValidator {
 				problems.push(`${set.name || set.species} has custom PP Ups for ${move}, which is only allowed in Hackmons OM formats.`);
 			}
 		}
+		if (dex.currentMod === 'spaceworld') {
+			set.moves = set.moves.map(move => {
+				const parts = /^(.*?)(\s+\((?:\d+|inf)(?:\/\d+)?\))?$/i.exec(move);
+				if (!parts) return move;
+				const moveid = toID(parts[1]);
+				if (moveid === 'hiddenpower' || !moveid.startsWith('hiddenpower')) return move;
+				if (dex.moves.get(parts[1]).id !== 'hiddenpower') return move;
+				return `Hidden Power${parts[2] || ''}`;
+			});
+		}
 		if (!ruleTable.has('disguisemod')) {
 			if (set.phType) {
 				problems.push(ruleTable.has('spaceworlddisguisemod') ?
@@ -932,7 +942,7 @@ export class TeamValidator {
 		if (set.happiness !== undefined && isNaN(set.happiness)) {
 			problems.push(`${name} has an invalid happiness value.`);
 		}
-		if (set.hpType) {
+		if (set.hpType && dex.currentMod !== 'spaceworld') {
 			const type = dex.types.get(set.hpType);
 			if (!type.exists || ['normal', 'fairy', 'stellar'].includes(type.id) ||
 				(type.isNonstandard && ruleTable.has('obtainablemisc'))) {
@@ -1420,9 +1430,10 @@ export class TeamValidator {
 		if (useStatPoints && !maxedIVs) {
 			problems.push(`${name}'s IVs are not maxed out, but this format requires all IVs to be 31.`);
 		}
+		if (dex.currentMod === 'spaceworld') delete set.hpType;
 		for (const moveName of set.moves) {
 			const move = dex.moves.get(moveName);
-			if (move.id === 'hiddenpower' && move.type !== 'Normal') {
+			if (move.id === 'hiddenpower' && move.type !== 'Normal' && move.type !== '???') {
 				if (!set.hpType) {
 					set.hpType = move.type;
 				} else if (set.hpType !== move.type && ruleTable.has('obtainablemisc')) {
@@ -1494,6 +1505,7 @@ export class TeamValidator {
 				problems.push(`${name} has Hidden Power ${set.hpType}, but its IVs don't allow this even with (Bottle Cap) Hyper Training.`);
 			}
 		}
+		if (dex.currentMod === 'spaceworld' && set.hpType) set.hpType = '???';
 
 		if (dex.gen <= 2) {
 			// validate DVs
@@ -1505,7 +1517,7 @@ export class TeamValidator {
 			const expectedHpDV = (atkDV % 2) * 8 + (defDV % 2) * 4 + (speDV % 2) * 2 + (spcDV % 2);
 			if (ivs.hp === -1) ivs.hp = expectedHpDV * 2;
 			const hpDV = Math.floor(ivs.hp / 2);
-			if (expectedHpDV !== hpDV) {
+			if (expectedHpDV !== hpDV && dex.currentMod !== 'spaceworld') {
 				problems.push(`${name} has an HP DV of ${hpDV}, but its Atk, Def, Spe, and Spc DVs give it an HP DV of ${expectedHpDV}.`);
 			}
 			if (ivs.spa !== ivs.spd) {
@@ -1515,7 +1527,17 @@ export class TeamValidator {
 					ivs.spd = ivs.spa;
 				}
 			}
-			if (dex.gen > 1 && !species.gender) {
+			if (dex.gen > 1 && dex.currentMod === 'spaceworld') {
+				const ratioByte = species.gender === 'M' ? 0 : species.gender === 'F' ? 254 :
+					species.gender === 'N' || species.genderRatio.M === 0 ? 255 :
+					species.genderRatio.F === 0 ? 0 : Math.floor(species.genderRatio.F * 255);
+				const expectedGender = (ratioByte < atkDV * 16 + speDV ? 'M' : 'F');
+				if (!species.gender && set.gender && set.gender !== expectedGender) {
+					problems.push(`${name} is ${set.gender}, but its Atk and Spe DVs (${atkDV} and ${speDV}) make its gender ${expectedGender}.`);
+				} else {
+					set.gender = expectedGender;
+				}
+			} else if (dex.gen > 1 && !species.gender) {
 				// Gen 2 gender is calculated from the Atk DV.
 				// High Atk DV <-> M. The meaning of "high" depends on the gender ratio.
 				const genderThreshold = species.genderRatio.F * 16;
@@ -1537,7 +1559,11 @@ export class TeamValidator {
 					set.evs.atk = Math.min(set.evs.atk, 4 * (90 - set.ivs.atk) + set.evs.atk % 4);
 				}
 			}
-			if (dex.gen > 1) {
+			if (dex.gen > 1 && dex.currentMod === 'spaceworld') {
+				if (set.shiny && !(atkDV >= 10 && defDV >= 10 && speDV >= 10 && spcDV >= 10)) {
+					problems.push(`${name} is shiny, which does not match its DVs (in the SpaceWorld demo, its Atk, Def, Spe, and Spc DVs must all be at least 10).`);
+				}
+			} else if (dex.gen > 1) {
 				const expectedShiny = !!(defDV === 10 && speDV === 10 && spcDV === 10 && atkDV % 4 >= 2);
 				if (expectedShiny && !set.shiny) {
 					problems.push(`${name} is not shiny, which does not match its DVs.`);

@@ -7,10 +7,65 @@ const SW97_DAMAGE_AFTER_HIT_CHECK = new Set([
 	'furyswipes', 'bonemerang', 'bind', 'wrap', 'firespin', 'clamp', 'thrash', 'petaldance', 'outrage', 'triplekick',
 	'present',
 ]);
+const SW97_RAMPAGE = new Set(['thrash', 'petaldance', 'outrage']);
+const SW97_FLINCH_SCRIPT = new Set([
+	'bite', 'boneclub', 'headbutt', 'hyperfang', 'lowkick', 'rockslide', 'rollingkick', 'sacredfire', 'stomp',
+]);
+
+const SW97_RECALC_STATS: StatIDExceptHP[] = ['atk', 'def', 'spe', 'spa'];
+const SW97_BATTLE_STATS: StatIDExceptHP[] = ['atk', 'def', 'spa', 'spd', 'spe'];
+const SW97_STAGE_RATIOS: [number, number][] = [
+	[25, 100], [28, 100], [33, 100], [40, 100], [50, 100], [66, 100], [1, 1],
+	[15, 10], [2, 1], [25, 10], [3, 1], [35, 10], [4, 1],
+];
+
+function sw97StageStat(pokemon: Pokemon, stat: StatIDExceptHP) {
+	const stage = Math.max(-6, Math.min(6, pokemon.boosts[stat]));
+	const [num, den] = SW97_STAGE_RATIOS[stage + 6];
+	return Math.max(1, Math.min(999, Math.floor(pokemon.storedStats[stat] * num / den)));
+}
+
+function sw97ApplyPar(stats: { [k: string]: number }) {
+	stats.spe = Math.floor(stats.spe / 4) || 1;
+}
+
+function sw97ApplyBrn(stats: { [k: string]: number }) {
+	stats.atk = Math.floor(stats.atk / 2) || 1;
+}
+
+function sw97Stats(pokemon: Pokemon): { [k: string]: number } {
+	const current = pokemon.m.sw97Stats;
+	if (current && current.key === pokemon.previouslySwitchedIn) return current;
+	const baton = !!pokemon.volatiles['swbatonboost'];
+	const stats: { [k: string]: number } = { key: pokemon.previouslySwitchedIn };
+	for (const stat of SW97_BATTLE_STATS) {
+		stats[stat] = baton ? sw97StageStat(pokemon, stat) : pokemon.storedStats[stat];
+	}
+	if (!baton) {
+		if (pokemon.status === 'par') sw97ApplyPar(stats);
+		if (pokemon.status === 'brn') sw97ApplyBrn(stats);
+	}
+	pokemon.m.sw97Stats = stats;
+	return stats;
+}
+
+function sw97HpDV(ivs: Partial<StatsTable>) {
+	const dv = (stat: StatIDExceptHP) => Math.floor((ivs[stat] ?? 31) / 2) & 1;
+	return 16 * dv('atk') + 8 * dv('def') + dv('spe') + dv('spa');
+}
+
+function sw97GhostWrap(move: ActiveMove, target: Pokemon) {
+	return (move.id === 'wrap' || move.id === 'bind') && target.hasType('Ghost') && !target.volatiles['foresight'];
+}
 
 export const Scripts: ModdedBattleScriptsData = {
 	gen: 2,
 	inherit: 'gen2',
+	statModify(baseStats, set, statName) {
+		if (statName !== 'hp') return Object.getPrototypeOf(this).statModify.call(this, baseStats, set, statName);
+		const tr = this.trunc;
+		return Math.min(999, tr(tr(2 * baseStats.hp + 2 * sw97HpDV(set.ivs) + tr(set.evs.hp / 4) + 100) * set.level / 100 + 10));
+	},
 	pokemon: {
 		inherit: true,
 		trySetStatus(status: string | Condition, source: Pokemon | null = null, sourceEffect: Effect | null = null) {
@@ -45,33 +100,79 @@ export const Scripts: ModdedBattleScriptsData = {
 			// @ts-expect-error type checking prevents 'hp' from being passed, but we're paranoid
 			if (statName === 'hp') throw new Error("Please read `maxhp` directly");
 
-			let stat = this.storedStats[statName];
-
-			if (!unboosted && !(statName === 'spd' && !this.volatiles['swbatonboost'])) {
-				let boost = this.boosts[statName];
-				if (boost > 6) boost = 6;
-				if (boost < -6) boost = -6;
-				if (boost >= 0) {
-					const boostTable = [1, 1.5, 2, 2.5, 3, 3.5, 4];
-					stat = Math.floor(stat * boostTable[boost]);
-				} else {
-					const numerators = [100, 66, 50, 40, 33, 28, 25];
-					stat = Math.floor(stat * numerators[-boost] / 100);
+			const stat = unboosted ? this.storedStats[statName] : sw97Stats(this)[statName];
+			return this.battle.clampIntRange(stat, 1, 999);
+		},
+		boostBy(boost) {
+			let delta = 0;
+			let i: BoostID;
+			for (i in boost) {
+				delta = boost[i]!;
+				if (!delta) continue;
+				const recalc = (SW97_RECALC_STATS as string[]).includes(i);
+				const stats = sw97Stats(this);
+				if (recalc && stats[i] === (delta > 0 ? 999 : 1)) {
+					const capped = this.battle.clampIntRange(this.boosts[i] + delta, -6, 6);
+					if (capped !== this.boosts[i]) this.boosts[i] = capped - Math.sign(delta);
+					delta = 0;
+					continue;
+				}
+				this.boosts[i] += delta;
+				if (this.boosts[i] > 6) {
+					delta -= this.boosts[i] - 6;
+					this.boosts[i] = 6;
+				}
+				if (this.boosts[i] < -6) {
+					delta -= this.boosts[i] - (-6);
+					this.boosts[i] = -6;
+				}
+				if (!delta) continue;
+				if (recalc) stats[i] = sw97StageStat(this, i as StatIDExceptHP);
+				if (delta > 0) {
+					const foe = this.side.foe.active[0];
+					if (foe) {
+						const foeStats = sw97Stats(foe);
+						if (foe.status === 'par') sw97ApplyPar(foeStats);
+						if (foe.status === 'brn') sw97ApplyBrn(foeStats);
+					}
+				} else if (this.status === 'brn') {
+					sw97ApplyBrn(stats);
 				}
 			}
-
-			if (this.status === 'par' && statName === 'spe') {
-				stat = Math.floor(stat / 4);
+			return delta;
+		},
+		clearBoosts() {
+			Object.getPrototypeOf(this).clearBoosts.call(this);
+			const stats = sw97Stats(this);
+			for (const stat of SW97_BATTLE_STATS) stats[stat] = this.storedStats[stat];
+		},
+		setStatus(status, source, sourceEffect, ignoreImmunities) {
+			const stats = sw97Stats(this);
+			const prevStatus = this.status;
+			const result = Object.getPrototypeOf(this).setStatus.call(this, status, source, sourceEffect, ignoreImmunities);
+			if (this.status !== prevStatus) {
+				if (this.status === 'par') sw97ApplyPar(stats);
+				if (this.status === 'brn') sw97ApplyBrn(stats);
 			}
-
-			if (!unmodified) {
-				if (this.status === 'brn' && statName === 'atk') {
-					stat = Math.floor(stat / 2);
+			return result;
+		},
+		transformInto(pokemon, effect) {
+			const result = Object.getPrototypeOf(this).transformInto.call(this, pokemon, effect);
+			if (result) {
+				this.m.sw97Stats = { ...sw97Stats(pokemon), key: this.previouslySwitchedIn };
+			}
+			return result;
+		},
+		getMoves(lockedMove, restrictData) {
+			const moves = Object.getPrototypeOf(this).getMoves.call(this, lockedMove, restrictData);
+			const hpPowerCallback = this.battle.dex.moves.get('hiddenpower').basePowerCallback as
+				(this: Battle, pokemon: Pokemon) => number;
+			for (const moveData of moves) {
+				if (moveData.id === 'hiddenpower' && moveData.move.startsWith('Hidden Power ')) {
+					moveData.move = `Hidden Power ${this.hpType} ${hpPowerCallback.call(this.battle, this)}`;
 				}
 			}
-
-			stat = this.battle.clampIntRange(stat, 1, 999);
-			return stat;
+			return moves;
 		},
 	},
 	actions: {
@@ -79,6 +180,13 @@ export const Scripts: ModdedBattleScriptsData = {
 		runMove(moveOrMoveName, pokemon, targetLoc, options) {
 			let move = this.dex.getActiveMove(moveOrMoveName);
 			let target = this.battle.getTarget(pokemon, move, targetLoc);
+			if (move.id === 'recharge' && !pokemon.volatiles['mustrecharge']) {
+				move = this.dex.getActiveMove('hyperbeam');
+				target = this.battle.getRandomTarget(pokemon, move);
+				if (!pokemon.hasMove('hyperbeam') && pokemon.m.sw97HyperBeamCaller) {
+					pokemon.m.sw97PPCaller = pokemon.m.sw97HyperBeamCaller;
+				}
+			}
 			if (!options?.sourceEffect && move.id !== 'struggle') {
 				const changedMove = this.battle.runEvent('OverrideAction', pokemon, target, move);
 				if (changedMove && changedMove !== true) {
@@ -86,6 +194,8 @@ export const Scripts: ModdedBattleScriptsData = {
 					target = this.battle.getRandomTarget(pokemon, move);
 				}
 			}
+			const ppCaller: string | undefined = pokemon.m.sw97PPCaller;
+			delete pokemon.m.sw97PPCaller;
 			if (!target && target !== false) target = this.battle.getRandomTarget(pokemon, move);
 
 			this.battle.setActiveMove(move, pokemon, target);
@@ -97,6 +207,7 @@ export const Scripts: ModdedBattleScriptsData = {
 			}
 			const foeStanding = () => !!pokemon.side.foe.active[0]?.hp;
 			if (!this.battle.runEvent('BeforeMove', pokemon, target, move)) {
+				if (pokemon.status === 'slp' || pokemon.status === 'frz') delete pokemon.m.sw97CounterMove;
 				this.battle.runEvent('MoveAborted', pokemon, target, move);
 				this.battle.clearActiveMove(true);
 				if (foeStanding()) this.battle.runEvent('AfterMoveSelf', pokemon, target, move);
@@ -112,14 +223,21 @@ export const Scripts: ModdedBattleScriptsData = {
 			pokemon.lastDamage = 0;
 			const lockedMove = pokemon.getLockedMove() || pokemon.getSemiLockedMove();
 			if (!lockedMove) {
-				if (!pokemon.deductPP(move, null, target) && (move.id !== 'struggle')) {
+				const ppMove = ppCaller && pokemon.hasMove(ppCaller) ? ppCaller : move;
+				if (!pokemon.deductPP(ppMove, null, target) && (move.id !== 'struggle')) {
 					this.battle.add('cant', pokemon, 'nopp', move);
 					this.battle.clearActiveMove(true);
 					return;
 				}
 			}
 			pokemon.moveUsed(move);
-			this.battle.actions.useMove(move, pokemon, { target, sourceEffect: options?.sourceEffect });
+			const counterFoe = pokemon.side.foe.active[0];
+			pokemon.m.sw97CounterMove = {
+				id: move.id, user: pokemon.previouslySwitchedIn, foe: counterFoe, foeSwitch: counterFoe?.previouslySwitchedIn,
+			};
+			pokemon.m.sw97SlotMove = ppCaller && pokemon.hasMove(ppCaller) ? ppCaller : move.id;
+			const sourceEffect = (options?.sourceEffect || (ppCaller ? this.dex.moves.get(ppCaller) : null)) as Effect | null;
+			this.battle.actions.useMove(move, pokemon, { target, sourceEffect });
 			this.battle.singleEvent('AfterMove', move, null, pokemon, target, move);
 			if (!(pokemon.switchFlag && this.battle.canSwitch(pokemon.side)) && foeStanding()) {
 				this.battle.runEvent('AfterMoveSelf', pokemon, target, move);
@@ -166,7 +284,10 @@ export const Scripts: ModdedBattleScriptsData = {
 				let didSomething: boolean | number | null = false;
 				damage = this.getDamage(pokemon, target, moveData);
 
-				if ((damage || damage === 0) && !target.fainted) {
+				if (damage === 0 && !isSecondary && !isSelf && sw97GhostWrap(move, target)) {
+					this.battle.lastDamage = 0;
+					didSomething = true;
+				} else if ((damage || damage === 0) && !target.fainted) {
 					damage = this.battle.damage(damage, target, pokemon, move);
 					if (!(damage || damage === 0)) {
 						this.battle.debug('damage interrupted');
@@ -260,6 +381,12 @@ export const Scripts: ModdedBattleScriptsData = {
 				this.moveHit(pokemon, pokemon, move, moveData.self, isSecondary, true);
 			}
 			const secondaryTarget = target || subBroke;
+			if (
+				secondaryTarget?.hp && !isSecondary && !isSelf && (!move.multihit || move.lastHit) &&
+				(SW97_FLINCH_SCRIPT.has(move.id) || moveData.secondaries?.some(secondary => secondary.kingsrock))
+			) {
+				secondaryTarget.removeVolatile('mustrecharge');
+			}
 			if (secondaryTarget?.hp && moveData.secondaries && this.battle.runEvent('TrySecondaryHit', secondaryTarget, pokemon, moveData)) {
 				for (const secondary of moveData.secondaries) {
 					if (secondary.status && ['brn', 'frz'].includes(secondary.status) && secondaryTarget.hasType(move.type)) {
@@ -365,7 +492,15 @@ export const Scripts: ModdedBattleScriptsData = {
 				return this.moveHit(target, pokemon, move);
 			}
 
-			hitResult = this.battle.runEvent('Invulnerability', target, pokemon, move);
+			const rampageContinues = SW97_RAMPAGE.has(move.id) && !!pokemon.volatiles['lockedmove'];
+			const rechargeSleep = move.category === 'Status' && move.status === 'slp' && target !== pokemon &&
+				!!target.volatiles['mustrecharge'] && !target.status && !target.volatiles['substitute'] &&
+				(move.type === '???' || (this.dex.getImmunity(move.type, target.getTypes()) &&
+					this.dex.getEffectiveness(move.type, target.getTypes()) >= 0));
+			if (rechargeSleep) move.infiltrates = true;
+			const skipHitCheck = rampageContinues || rechargeSleep;
+
+			hitResult = skipHitCheck || this.battle.runEvent('Invulnerability', target, pokemon, move);
 			if (hitResult === false) {
 				this.battle.lastDamage = 0;
 				afterHitCheck();
@@ -389,7 +524,7 @@ export const Scripts: ModdedBattleScriptsData = {
 				return false;
 			}
 
-			hitResult = this.battle.runEvent('TryHit', target, pokemon, move);
+			hitResult = skipHitCheck || this.battle.runEvent('TryHit', target, pokemon, move);
 			if (!hitResult) {
 				if (target.volatiles['protect'] && move.flags['protect']) {
 					this.battle.lastDamage = 0;
@@ -405,7 +540,7 @@ export const Scripts: ModdedBattleScriptsData = {
 			}
 
 			let accuracy = move.accuracy;
-			if (move.alwaysHit) {
+			if (move.alwaysHit || skipHitCheck) {
 				accuracy = true;
 			} else {
 				accuracy = this.battle.runEvent('Accuracy', target, pokemon, move, accuracy);
@@ -435,7 +570,7 @@ export const Scripts: ModdedBattleScriptsData = {
 			}
 			accuracy = this.battle.runEvent('ModifyAccuracy', target, pokemon, move, accuracy);
 			if (accuracy !== true) accuracy = Math.max(accuracy, 0);
-			if (move.alwaysHit) {
+			if (move.alwaysHit || skipHitCheck) {
 				accuracy = true;
 			} else {
 				accuracy = this.battle.runEvent('Accuracy', target, pokemon, move, accuracy);
@@ -454,7 +589,8 @@ export const Scripts: ModdedBattleScriptsData = {
 				let hits = move.multihit;
 				if (Array.isArray(hits)) {
 					if (hits[0] === 2 && hits[1] === 5) {
-						hits = this.battle.sample([2, 2, 2, 3, 3, 3, 4, 5]);
+						const roll = this.battle.random(256);
+						hits = (roll < 2 ? roll : this.battle.random(4)) + 2;
 					} else {
 						hits = this.battle.random(hits[0], hits[1] + 1);
 					}
@@ -482,6 +618,7 @@ export const Scripts: ModdedBattleScriptsData = {
 			} else {
 				damage = this.moveHit(target, pokemon, move);
 				move.totalDamage = damage;
+				if (rechargeSleep && target.status === 'slp') target.removeVolatile('mustrecharge');
 			}
 			if (move.category !== 'Status') {
 				target.gotAttacked(move, damage, pokemon);
@@ -515,6 +652,11 @@ export const Scripts: ModdedBattleScriptsData = {
 
 			if (!target.runImmunity(move, true)) {
 				return false;
+			}
+
+			if (sw97GhostWrap(move, target)) {
+				if (!suppressMessages) this.battle.add('-immune', target);
+				return 0;
 			}
 
 			if (move.ohko) {
@@ -557,6 +699,7 @@ export const Scripts: ModdedBattleScriptsData = {
 				let critChance = source.baseStatsForSet().spe * 4;
 				for (let i = 1; i < counter; i++) critChance = Math.floor(critChance / 2);
 				critChance = Math.min(critChance, 255);
+				if (source.hasItem('sharpscythe')) critChance = Math.min(critChance + 30, 255);
 				isCrit = critChance > 0 ? this.battle.randomChance(critChance, 256) : false;
 			}
 
@@ -631,11 +774,15 @@ export const Scripts: ModdedBattleScriptsData = {
 			damage = this.battle.clampIntRange(damage, 1, 997);
 			damage += 2;
 
+			if (move.id === 'triplekick' && move.hit > 1) {
+				damage = Math.min(damage * (source.volatiles['substitute'] ? 4 : move.hit), 0xffff);
+			}
+
 			if (
 				(type === 'Water' && this.battle.field.isWeather('raindance')) ||
 				(type === 'Fire' && this.battle.field.isWeather('sunnyday'))
 			) {
-				damage = Math.floor(damage * 1.5);
+				damage *= 2;
 			} else if (
 				(type === 'Fire' && this.battle.field.isWeather('raindance')) ||
 				(type === 'Water' && this.battle.field.isWeather('sunnyday'))
@@ -662,6 +809,13 @@ export const Scripts: ModdedBattleScriptsData = {
 				if (totalTypeMod <= -2) {
 					damage = Math.floor(damage / 2);
 				}
+			}
+
+			let doublings = 0;
+			if (move.id === 'rollout') doublings = (source.volatiles['rollout']?.hitCount || 1) - 1;
+			if (move.id === 'furycutter') doublings = source.volatiles['furycutter']?.count || 0;
+			for (let i = 0; i < doublings && damage < 0xffff; i++) {
+				damage = Math.min(damage * 2, 0xffff);
 			}
 
 			if (!move.noDamageVariance && damage > 1) {

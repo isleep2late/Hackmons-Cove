@@ -1277,11 +1277,16 @@ Storage.packedTeamNames = function (buf) {
 	return team;
 };
 
-Storage.packedTeamIcons = function (buf) {
+Storage.teamIconModId = function (format) {
+	return /^gen2(statuses)?spaceworld/.test(toID(format)) ? 'gen2spaceworld' : undefined;
+};
+
+Storage.packedTeamIcons = function (buf, format) {
 	if (!buf) return '<em>(empty team)</em>';
 
+	var mod = Storage.teamIconModId(format);
 	return this.packedTeamNames(buf).map(function (species) {
-		return '<span class="picon" style="' + Dex.getPokemonIcon(species) + ';float:left;overflow:visible"><span style="font-size:0px">' + toID(species) + '</span></span>';
+		return '<span class="picon" style="' + Dex.getPokemonIcon(species, false, mod) + ';float:left;overflow:visible"><span style="font-size:0px">' + toID(species) + '</span></span>';
 	}).join('');
 };
 
@@ -1299,13 +1304,13 @@ Storage.getTeamIcons = function (team) {
 		if (Storage.activeSetList && (!tbRoom || tbRoom.curTeam === team)) {
 			team.team = Storage.packTeam(Storage.activeSetList);
 			if (tbRoom) {
-				return Storage.packedTeamIcons(team.team);
+				return Storage.packedTeamIcons(team.team, team.format);
 			}
 			Storage.activeSetList = null;
 		}
-		team.iconCache = Storage.packedTeamIcons(team.team);
+		team.iconCache = Storage.packedTeamIcons(team.team, team.format);
 	} else if (!team.iconCache) {
-		team.iconCache = Storage.packedTeamIcons(team.team);
+		team.iconCache = Storage.packedTeamIcons(team.team, team.format);
 	}
 	// the dex may not have loaded yet, in which case every icon resolves to the '?' placeholder;
 	// caching that would keep the placeholders forever, so recompute next time instead

@@ -70,6 +70,18 @@ const PATCHES = [
 	},
 	{
 		file: 'gen12.js',
+		find: `function calculateRBYGSC(gen, attacker, defender, move, field, mods) {
+    var _a;
+`,
+		replace: `function calculateRBYGSC(gen, attacker, defender, move, field, mods) {
+    var _a;
+    if ((typeof globalThis !== 'undefined') && globalThis.__phnnCalc && typeof globalThis.__phnnCalc.spaceworld === 'function') {
+        return globalThis.__phnnCalc.spaceworld(gen, attacker, defender, move, field, mods);
+    }
+`,
+	},
+	{
+		file: 'gen12.js',
 		find: `        move.bp = p <= 1 ? 200 : p <= 4 ? 150 : p <= 9 ? 100 : p <= 16 ? 80 : p <= 32 ? 40 : 20;
         desc.moveBP = move.bp;`,
 		replace: `        move.bp = p <= 1 ? 200 : p <= 4 ? 150 : p <= 9 ? 100 : p <= 16 ? 80 : p <= 32 ? 40 : 20;

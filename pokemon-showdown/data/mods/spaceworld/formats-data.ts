@@ -609,49 +609,64 @@ export const FormatsData: import('../../../sim/dex-species').ModdedSpeciesFormat
 		tier: "UU",
 	},
 	happa: {
-		tier: "NFE",
+		isNonstandard: "Unobtainable",
+		tier: "Illegal",
 	},
 	hanamogura: {
-		tier: "NFE",
+		isNonstandard: "Unobtainable",
+		tier: "Illegal",
 	},
 	hanaryu: {
-		tier: "UU",
+		isNonstandard: "Unobtainable",
+		tier: "Illegal",
 	},
 	bobo: {
-		tier: "Brick",
+		isNonstandard: "Unobtainable",
+		tier: "Illegal",
 	},
 	pachimee: {
-		tier: "Brick",
+		isNonstandard: "Unobtainable",
+		tier: "Illegal",
 	},
 	puku: {
-		tier: "NFE",
+		isNonstandard: "Unobtainable",
+		tier: "Illegal",
 	},
 	shibirefugu: {
-		tier: "Brick",
+		isNonstandard: "Unobtainable",
+		tier: "Illegal",
 	},
 	mizuuo: {
-		tier: "UU",
+		isNonstandard: "Unobtainable",
+		tier: "Illegal",
 	},
 	twohead: {
-		tier: "Brick",
+		isNonstandard: "Unobtainable",
+		tier: "Illegal",
 	},
 	sunny: {
-		tier: "Brick",
+		isNonstandard: "Unobtainable",
+		tier: "Illegal",
 	},
 	paon: {
-		tier: "Brick",
+		isNonstandard: "Unobtainable",
+		tier: "Illegal",
 	},
 	painter: {
-		tier: "Brick",
+		isNonstandard: "Unobtainable",
+		tier: "Illegal",
 	},
 	mitsuboshi: {
-		tier: "Brick",
+		isNonstandard: "Unobtainable",
+		tier: "Illegal",
 	},
 	gift: {
-		tier: "Brick",
+		isNonstandard: "Unobtainable",
+		tier: "Illegal",
 	},
 	tail: {
-		tier: "UU",
+		isNonstandard: "Unobtainable",
+		tier: "Illegal",
 	},
 	trifox: {
 		tier: "Brick",
@@ -799,8 +814,7 @@ export const FormatsData: import('../../../sim/dex-species').ModdedSpeciesFormat
 		tier: "Brick",
 	},
 	aipom: {
-		isNonstandard: "Unobtainable",
-		tier: "Illegal",
+		tier: "UU",
 	},
 	cyndaquil: {
 		isNonstandard: "Future",

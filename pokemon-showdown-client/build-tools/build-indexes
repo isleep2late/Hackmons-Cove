@@ -1469,7 +1469,8 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 			const modEntry = modDex.moves.get(id);
 			const parentEntry = parentDex.moves.get(id);
 			for (const key of overrideMoveKeys) {
-				if (key === 'category' && modDex.gen <= 3) continue;
+				if (key === 'category' && modDex.gen <= 3 &&
+					modEntry.category !== 'Status' && parentEntry.category !== 'Status') continue;
 				if (JSON.stringify(modEntry[key]) !== JSON.stringify(parentEntry[key])) {
 					if (!overrideMoveData[id]) overrideMoveData[id] = {};
 					overrideMoveData[id][key] = modEntry[key];
@@ -1626,6 +1627,45 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 				});
 				t.items.push(['header', 'SpaceWorld Items']);
 				for (const id of swBetaItems) t.items.push(id);
+				const { TeamValidator } = require('../caches/pokemon-showdown/dist/sim/team-validator');
+				const swValidator = TeamValidator.get('gen2spaceworldubers');
+				const swMoveIds = swModDex.moves.all().filter(m => m.exists && m.gen <= 2 && !m.isNonstandard).map(m => m.id);
+				const swEVs = { hp: 252, atk: 252, def: 252, spa: 252, spd: 252, spe: 252 };
+				const swValidate = (species, moves) => swValidator.validateSet({
+					species: species.name, name: 'X', moves, item: '', ability: '', evs: { ...swEVs }, level: 100,
+				}, {}) || [];
+				t.learnsets = {};
+				t.bannedSpecies = {};
+				for (const swSpecies of swModDex.species.all()) {
+					if (!swSpecies.exists || swSpecies.id !== toID(swSpecies.name)) continue;
+					if (!swTierOrder.includes(swSpecies.tier)) continue;
+					const noMoveProblems = swValidate(swSpecies, []);
+					const speciesProblems = noMoveProblems.filter(p => !p.includes('has no moves') && !p.includes('has forme'));
+					if (speciesProblems.length) {
+						t.bannedSpecies[swSpecies.id] = 1;
+						continue;
+					}
+					const baseline = new Set(noMoveProblems);
+					const learnset = {};
+					for (const moveid of swMoveIds) {
+						if (swValidate(swSpecies, [moveid]).every(p => baseline.has(p))) learnset[moveid] = '2';
+					}
+					t.learnsets[swSpecies.id] = learnset;
+				}
+				t.formatBannedMoves = {};
+				for (const [swFormat, swLevel] of [['spaceworldbricks', 100], ['spaceworlddisguises', 255]]) {
+					const formatValidator = TeamValidator.get(`gen2${swFormat}`);
+					const formatValidate = (species, moves) => formatValidator.validateSet({
+						species: species.name, name: 'X', moves, item: '', ability: '', evs: { ...swEVs }, level: swLevel,
+					}, {}) || [];
+					const probe = swModDex.species.all().find(s => s.exists && s.tier === 'Brick' && s.baseSpecies !== 'Unown');
+					const baseline = new Set(formatValidate(probe, []));
+					const banned = {};
+					for (const moveid of swMoveIds) {
+						if (!formatValidate(probe, [moveid]).every(p => baseline.has(p))) banned[moveid] = 1;
+					}
+					t.formatBannedMoves[swFormat] = banned;
+				}
 				continue;
 			}
 			t.tiers.push(['header', 'SpaceWorld Beta']);

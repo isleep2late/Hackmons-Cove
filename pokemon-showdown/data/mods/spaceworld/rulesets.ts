@@ -43,6 +43,16 @@ export const Rulesets: import('../../../sim/dex-formats').ModdedFormatDataTable 
 				if (learnsets.some(entry => entry.learnset[move.id]?.some(learnable))) continue;
 				problems.push(`${set.species} can't learn ${move.name} without the use of a TM in SW'97.`);
 			}
+			const hasSketch = learnsets.some(entry => entry.learnset.sketch);
+			const sketchByLevel = learnsets.some(entry => entry.learnset.sketch?.some(learnable));
+			if (hasSketch && !sketchByLevel) {
+				for (const name of set.moves || []) {
+					const move = this.dex.moves.get(name);
+					if (SW97_TM_HM_MOVES.has(move.id)) continue;
+					if (learnsets.some(entry => entry.learnset[move.id]?.some(learnable))) continue;
+					problems.push(`${set.species} can only get ${move.name} by Sketching through TM01 in SW'97.`);
+				}
+			}
 			return problems;
 		},
 	},

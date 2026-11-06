@@ -153,6 +153,25 @@ $(".sp .base, .sp .evs, .sp .ivs, .sp .sps").bind("keyup change", function () {
 $(".evs, .sps").bind('keyup change', function () {
 	totalEVs($(this).closest(".poke-info"));
 });
+function swHiddenPowerBP(pokeObj) {
+	if (typeof calc.sw97HiddenPowerBP !== "function") return 78;
+	var dv = function (stat) {
+		var value = parseInt(pokeObj.find("." + stat + " .dvs").val(), 10);
+		return isNaN(value) ? 15 : value;
+	};
+	return calc.sw97HiddenPowerBP({atk: dv("at") * 2, def: dv("df") * 2, spe: dv("sp") * 2, spa: dv("sa") * 2});
+}
+function syncSwHiddenPower(pokeObj) {
+	if (gen !== 11) return;
+	pokeObj.find(".move-selector").each(function () {
+		if ($(this).val() === "Hidden Power") {
+			$(this).parent().children(".move-bp").val(swHiddenPowerBP(pokeObj));
+		}
+	});
+}
+$(".ivs, .dvs").bind("keyup change", function () {
+	syncSwHiddenPower($(this).closest(".poke-info"));
+});
 $(".sl .base, .sl .evs").bind("keyup change", function () {
 	calcStat($(this).closest(".poke-info"), 'sl');
 });
@@ -205,6 +224,12 @@ function getForcedTeraType(pokemonName) {
 }
 
 function getHPDVs(poke) {
+	if (gen === 11) {
+		return (~~poke.find(".at .dvs").val() % 2) * 16 +
+			(~~poke.find(".df .dvs").val() % 2) * 8 +
+			(~~poke.find(".sp .dvs").val() % 2) +
+			(~~poke.find(".sa .dvs").val() % 2);
+	}
 	return (~~poke.find(".at .dvs").val() % 2) * 8 +
 (~~poke.find(".df .dvs").val() % 2) * 4 +
 (~~poke.find(".sp .dvs").val() % 2) * 2 +
@@ -484,6 +509,17 @@ $(".move-selector").change(function () {
 	var move = moves[moveName] || moves['(No Move)'];
 	var moveGroupObj = $(this).parent();
 	moveGroupObj.children(".move-bp").val(moveName === 'Present' ? 40 : move.bp);
+	if (gen === 11 && moveName === 'Present') {
+		if (!document.getElementById("sw-present-bp")) {
+			$("body").append('<datalist id="sw-present-bp"><option value="40"></option><option value="80"></option><option value="120"></option></datalist>');
+		}
+		moveGroupObj.children(".move-bp").attr("list", "sw-present-bp").attr("title", "Present: 40, 80 or 120 BP");
+	} else {
+		moveGroupObj.children(".move-bp").removeAttr("list").removeAttr("title");
+	}
+	if (gen === 11 && moveName === 'Hidden Power') {
+		moveGroupObj.children(".move-bp").val(swHiddenPowerBP($(this).closest(".poke-info")));
+	}
 	// If the selected move IS a Z-Move already, light the Z button up as an
 	// indicator and lock it (there is nothing to convert); restore it for
 	// regular moves.
@@ -512,7 +548,7 @@ $(".move-selector").change(function () {
 					pokeObj.find("." + legacyStat + " .dvs").val(hpIVs[stat] !== undefined ? calc.Stats.IVToDV(hpIVs[stat]) : 15);
 				}
 				if (gen < 3 || gen === 11) {
-					var hpDV = calc.Stats.getHPDV({
+					var hpDV = calc.Stats[gen === 11 ? "getSW97HPDV" : "getHPDV"]({
 						atk: pokeObj.find(".at .ivs").val(),
 						def: pokeObj.find(".df .ivs").val(),
 						spe: pokeObj.find(".sp .ivs").val(),
@@ -1076,7 +1112,7 @@ function correctHiddenPower(pokemon) {
 			pokemon.dvs[calc.Stats.shortForm(stat)] = calc.Stats.IVToDV(hpIVs[stat]);
 		}
 		if (gen < 3 || gen === 11) {
-			pokemon.dvs.hp = calc.Stats.getHPDV({
+			pokemon.dvs.hp = calc.Stats[gen === 11 ? "getSW97HPDV" : "getHPDV"]({
 				atk: pokemon.ivs.at || 31,
 				def: pokemon.ivs.df || 31,
 				spe: pokemon.ivs.sp || 31,
@@ -1448,6 +1484,9 @@ function calcStat(poke, StatID) {
 		ivs = 31;
 		evs = ~~stat.find(".sps").val();
 		if (StatID !== "hp") nature = poke.find(".nature").val();
+	} else if (gen === 11 && StatID === "hp") {
+		stat.find(".dvs").val(getHPDVs(poke));
+		ivs = getHPDVs(poke) * 2;
 	} else if (gen < 3 || gen === 11) {
 		ivs = ~~stat.find(".dvs").val() * 2;
 	} else {

@@ -2,6 +2,8 @@ import { type GenerationNum } from '@smogon/calc';
 import { PokemonInitialStats, PokemonStatNames } from '@showdex/consts/dex';
 import { type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { nonEmptyObject } from '@showdex/utils/core';
+import { detectPhnnKey } from '@showdex/phnn';
+import { getPhnnSw97HpDv } from '@showdex/phnn/spaceworld';
 import { detectLegacyGen, getDefaultSpreadValue } from '@showdex/utils/dex';
 import { calcPokemonStat } from './calcPokemonStat';
 
@@ -31,6 +33,14 @@ export const calcPokemonSpreadStats = (
   const legacy = detectLegacyGen(format);
   const defaultIv = getDefaultSpreadValue('iv', format);
   const defaultEv = getDefaultSpreadValue('ev', format);
+  const sw97HpIv = typeof format === 'string' && detectPhnnKey(format) === 'spaceworld'
+    ? 2 * getPhnnSw97HpDv({
+      atk: pokemon.ivs?.atk ?? defaultIv,
+      def: pokemon.ivs?.def ?? defaultIv,
+      spe: pokemon.ivs?.spe ?? defaultIv,
+      spa: pokemon.ivs?.spa ?? defaultIv,
+    })
+    : null;
 
   return PokemonStatNames.reduce((prev, stat) => {
     // update (2026/09/12): Transform copies the target's actual stats (Pokemon#transformInto() assigns the target's
@@ -57,15 +67,17 @@ export const calcPokemonSpreadStats = (
         : pokemon.baseStats
     )?.[stat] as number;
 
-    prev[stat] = calcPokemonStat(
+    const value = calcPokemonStat(
       format,
       stat,
       baseStat,
-      pokemon.ivs?.[stat] ?? defaultIv,
+      (stat === 'hp' && sw97HpIv !== null) ? sw97HpIv : (pokemon.ivs?.[stat] ?? defaultIv),
       pokemon.evs?.[stat] ?? defaultEv,
       (stat !== 'hp' && pokemon.transformedLevel) || (pokemon.level ?? 100),
       legacy ? undefined : pokemon.nature,
     );
+
+    prev[stat] = stat === 'hp' && sw97HpIv !== null ? Math.min(999, value) : value;
 
     return prev;
   }, { ...PokemonInitialStats });

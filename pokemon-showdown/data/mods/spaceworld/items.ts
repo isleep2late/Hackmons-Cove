@@ -3,6 +3,12 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 		inherit: true,
 		isNonstandard: "Future",
 	},
+	dragonscale: {
+		inherit: true,
+		shortDesc: "No held effect in SpaceWorld '97.",
+		desc: "No held effect in SpaceWorld '97: the demo gives Dragon Scale no held item effect.",
+		onModifyDamage() {},
+	},
 	bitterberry: {
 		inherit: true,
 		isNonstandard: "Future",
@@ -155,11 +161,24 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 		inherit: true,
 		isNonstandard: null,
 		shortDesc: "SpaceWorld '97 demo item: attacks against the holder lose 30/256 accuracy.",
+		desc: "SpaceWorld '97 demo item: 30 is subtracted from the 0-255 accuracy of attacks against the holder, after accuracy and evasion stages, down to a minimum of 0. For example, Thunder drops from 178/256 to 148/256.",
+		onModifyAccuracyPriority: -2,
+		onModifyAccuracy(accuracy) {
+			if (typeof accuracy !== 'number') return;
+			return Math.max(0, accuracy - 30);
+		},
 	},
 	quickneedle: {
 		inherit: true,
 		isNonstandard: null,
-		shortDesc: "SpaceWorld '97 proto-Quick Claw: 30/256 chance to move first in its priority bracket.",
+		shortDesc: "SpaceWorld '97 proto-Quick Claw: 30/256 chance to move first among moves of the same priority.",
+		desc: "SpaceWorld '97 proto-Quick Claw: 30/256 chance to move first among moves of the same priority, at any priority, so it also works when both Pokemon use a priority move or both use Counter.",
+		onFractionalPriority(priority, pokemon) {
+			if (this.randomChance(30, 256)) {
+				this.add('-activate', pokemon, 'item: Quick Needle');
+				return 0.1;
+			}
+		},
 	},
 	focusorb: {
 		inherit: true,
@@ -169,13 +188,20 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 	sharpscythe: {
 		inherit: true,
 		isNonstandard: null,
-		shortDesc: "SpaceWorld '97: No effect - the demo's crit formula ignores held items.",
-		desc: "SpaceWorld '97: Meant to raise the holder's critical hit ratio, but the demo engine's critical hit formula only considers base Speed, Focus Energy, and specific high-crit moves, so this item has no effect.",
+		shortDesc: "SpaceWorld '97: Adds 30/256 to the holder's critical hit chance.",
+		desc: "SpaceWorld '97: After the demo works out the holder's critical hit chance from its base Speed, Focus Energy and high-crit moves, it adds 30 to that chance out of 256, up to a maximum of 255/256.",
+		onModifyCritRatio: undefined,
 	},
 	apple: {
 		inherit: true,
 		isNonstandard: null,
-		shortDesc: "SpaceWorld '97 proto-Sitrus Berry: restores 50 HP when the holder falls to half HP. Single use.",
+		shortDesc: "SpaceWorld '97 proto-Sitrus Berry: restores 50 HP when the holder falls below half HP. Single use.",
+		desc: "SpaceWorld '97 proto-Sitrus Berry: restores 50 HP when the holder's HP falls below half of its maximum HP. Single use.",
+		onResidual(pokemon) {
+			if (pokemon.hp * 2 < pokemon.maxhp) {
+				pokemon.eatItem();
+			}
+		},
 	},
 	snakeskin: {
 		inherit: true,
@@ -438,6 +464,11 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 	firewing: {
 		inherit: true,
 		isNonstandard: null,
+		shortDesc: "SpaceWorld '97: At the start of a turn, raises holder's Sp. Atk by 1. Single use.",
+		desc: "SpaceWorld '97: At the start of the first turn the holder is on the field, the item is used up and the holder's Special Attack is raised by 1 stage.",
+		onBeforeTurn(pokemon) {
+			if (pokemon.useItem()) this.boost({ spa: 1 }, pokemon, pokemon);
+		},
 	},
 	confuseclaw: {
 		inherit: true,
@@ -446,6 +477,11 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 	detectorb: {
 		inherit: true,
 		isNonstandard: null,
+		shortDesc: "SpaceWorld '97: At the start of a turn, raises holder's evasion by 1. Single use.",
+		desc: "SpaceWorld '97: At the start of the first turn the holder is on the field, the item is used up and the holder's evasiveness is raised by 1 stage.",
+		onBeforeTurn(pokemon) {
+			if (pokemon.useItem()) this.boost({ evasion: 1 }, pokemon, pokemon);
+		},
 	},
 	lifetag: {
 		inherit: true,
@@ -506,6 +542,36 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 	poisonstone: {
 		inherit: true,
 		isNonstandard: null,
+	},
+	kingsrock: {
+		inherit: true,
+		shortDesc: "SpaceWorld '97: Plain attacks get a 30/256 flinch chance and end a recharge.",
+		desc: "SpaceWorld '97: The holder's attacks that use the demo's plain damage scripts (most attacks without a status, stat or flinch effect, plus Snore, multi-hit moves, Thrash, Rollout, Fury Cutter, Counter and fixed-damage moves) have a 30/256 chance to make the target flinch, rolled once per use (after a multi-hit move's last hit), even if the target is asleep or frozen. Each such hit that does not land on a substitute also ends the target's need to recharge from Hyper Beam, whether or not it flinches.",
+		onModifyMove(move) {
+			const affectedByKingsRock = [
+				'absorb', 'barrage', 'bide', 'bonemerang', 'bonelock', 'bounce', 'coinhurl', 'cometpunch', 'counter',
+				'crabhammer', 'crosscutter', 'cut', 'dig', 'dizzypunch', 'doubleslap', 'doubleedge', 'doublekick', 'dragonbreath',
+				'dragonrage', 'drillpeck', 'dynamicpunch', 'earthquake', 'eggbomb', 'explosion', 'feintattack', 'falseswipe',
+				'flail', 'flamewheel', 'fly', 'frustration', 'furyattack', 'furycutter', 'furyswipes', 'gigadrain', 'gust',
+				'hiddenpower', 'highjumpkick', 'hornattack', 'hydropump', 'irontail', 'jumpkick', 'karatechop', 'leechlife',
+				'machpunch', 'magnitude', 'megadrain', 'megakick', 'megapunch', 'nightshade', 'octazooka', 'outrage', 'payday',
+				'peck', 'petaldance', 'pinmissile', 'pound', 'powdersnow', 'present', 'psywave', 'quickattack', 'rage',
+				'rapidspin', 'razorleaf', 'razorwind', 'return', 'reversal', 'rockhead', 'rockthrow', 'rollout', 'scratch',
+				'seismictoss', 'selfdestruct', 'skullbash', 'skyattack', 'slam', 'slash', 'sludgebomb', 'snore', 'solarbeam',
+				'sonicboom', 'spikecannon', 'steelwing', 'strength', 'strongarm', 'struggle', 'submission', 'superfang', 'surf',
+				'swift', 'tackle', 'takedown', 'thief', 'thrash', 'triplekick', 'triattack', 'twineedle', 'twister', 'uproot',
+				'visegrip', 'vinewhip', 'vitalthrow', 'waterfall', 'watergun', 'watersport', 'whirlpool', 'windride',
+				'wingattack',
+			];
+			if (affectedByKingsRock.includes(move.id)) {
+				if (!move.secondaries) move.secondaries = [];
+				move.secondaries.push({
+					chance: 12,
+					volatileStatus: 'flinch',
+					kingsrock: true,
+				});
+			}
+		},
 	},
 	leftovers: {
 		name: "Leftovers",

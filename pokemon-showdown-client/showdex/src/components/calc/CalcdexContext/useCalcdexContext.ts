@@ -24,6 +24,7 @@ import {
   type CalcdexPokemonPreset,
   CalcdexPlayerKeys as AllPlayerKeys,
 } from '@showdex/interfaces/calc';
+import { hasPhnnPokemonScreens } from '@showdex/phnn';
 import { saveHonkdex } from '@showdex/redux/actions';
 import { calcdexSlice, useDispatch } from '@showdex/redux/store';
 import {
@@ -1470,8 +1471,8 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
       const prevPlayer = pkey === sourceKey ? sourcePlayer : destPlayer;
       const player: CalcdexPlayer = { ...prevPlayer, ...playersPayload[pkey] };
 
-      if (state.gen === 1) {
-        const sanitized = sanitizePlayerSide(state.gen, player);
+      if (hasPhnnPokemonScreens(state.gen, state.format)) {
+        const sanitized = sanitizePlayerSide(state.gen, player, undefined, state.format);
 
         playersPayload[pkey].side = {
           ...prevPlayer.side,
@@ -1801,10 +1802,12 @@ export const useCalcdexContext = (): CalcdexContextConsumables => {
     playerPayload.side = clonePlayerSide(player.side);
 
     // note: in gen 1, field conditions (i.e., only Reflect & Light Screen) are volatiles applied to the Pokemon itself
-    if (state.gen === 1) {
+    if (hasPhnnPokemonScreens(state.gen, state.format)) {
       const sanitized = sanitizePlayerSide(
         state.gen,
         player,
+        undefined,
+        state.format,
       );
 
       playerPayload.side.isReflect = sanitized.isReflect;

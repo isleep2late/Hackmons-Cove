@@ -2400,7 +2400,24 @@ export class BattleTooltips {
 		if (move.id === 'facade' && !['', 'slp', 'frz'].includes(pokemon.status)) {
 			value.modify(2, 'Facade + status');
 		}
-		if (move.id === 'flail' || move.id === 'reversal') {
+		if ((move.id === 'flail' || move.id === 'reversal') && this.battle.dex.modid === 'gen2spaceworld') {
+			const product = pokemon.hp * 48;
+			let dividend = product;
+			let divisor = pokemon.maxhp;
+			if (pokemon.maxhp >= 256) {
+				dividend = (product & 0xff0000) | ((product & 0xffff) >> 2);
+				divisor = (pokemon.maxhp >> 2) & 0xff;
+			}
+			const ratio = divisor ? Math.floor(dividend / divisor) & 0xff : 0xff;
+			let basePower;
+			if (ratio <= 1) basePower = 200;
+			else if (ratio <= 4) basePower = 150;
+			else if (ratio <= 9) basePower = 100;
+			else if (ratio <= 16) basePower = 80;
+			else if (ratio <= 32) basePower = 40;
+			else basePower = 20;
+			value.set(basePower);
+		} else if (move.id === 'flail' || move.id === 'reversal') {
 			let multiplier;
 			let ratios;
 			if (this.battle.gen > 4) {
@@ -3651,6 +3668,10 @@ export class BattleStatGuesser {
 		let iv = set.ivs?.[stat];
 		if (typeof iv !== 'number') iv = 31;
 		if (this.dex.gen <= 2) iv &= 30;
+		if (stat === 'hp' && this.formatid.includes('spaceworld')) {
+			const dv = (s: Dex.StatNameExceptHP) => Math.floor((set.ivs?.[s] ?? 31) / 2) & 1;
+			iv = 2 * (16 * dv('atk') + 8 * dv('def') + dv('spe') + dv('spa'));
+		}
 
 		let ev = set.evs?.[stat];
 		if (typeof ev !== 'number') ev = (this.dex.gen > 2 ? 0 : 252);
@@ -3660,7 +3681,8 @@ export class BattleStatGuesser {
 			if (baseStat === 1) return 1;
 			if (this.useStatPoints) return baseStat + ev + 75;
 			if (this.supportsAVs) return ~~(~~(2 * baseStat + iv + 100) * level / 100 + 10) + (ev || 0);
-			return ~~(~~(2 * baseStat + iv + ~~(ev / 4) + 100) * level / 100 + 10);
+			const hp = ~~(~~(2 * baseStat + iv + ~~(ev / 4) + 100) * level / 100 + 10);
+			return this.formatid.includes('spaceworld') ? Math.min(999, hp) : hp;
 		}
 		let val = ~~(~~(2 * baseStat + iv + ~~(ev / 4)) * level / 100 + 5);
 		if (this.useStatPoints) {

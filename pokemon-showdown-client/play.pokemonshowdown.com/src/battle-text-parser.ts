@@ -1012,6 +1012,13 @@ export class BattleTextParser {
 			if (templateId === 'start' && kwArgs.from?.startsWith('item:')) {
 				templateId += 'FromItem';
 			}
+			if (templateId === 'start' && this.gen >= 2 && (id === 'reflect' || id === 'lightscreen')) {
+				const gen = this.gen;
+				this.gen = 1;
+				const armorTemplate = this.template('start', 'move: Reflect');
+				this.gen = gen;
+				return line1 + this.render(armorTemplate, { POKEMON: this.pokemon(pokemon) });
+			}
 			const template = this.template(templateId, kwArgs.from, effect);
 			return line1 + this.render(template, {
 				POKEMON: this.pokemon(pokemon),
@@ -1321,8 +1328,8 @@ export class BattleTextParser {
 
 			let line1 = this.maybeAbility(effect, pokemon);
 
-			if (id === 'lockon' || id === 'mindreader') {
-				const template = this.template('start', effect);
+			if (id === 'lockon' || id === 'mindreader' || (id === 'detect' && kwArgs.of)) {
+				const template = this.template('start', id === 'detect' ? 'move: Lock-On' : effect);
 				return line1 + this.render(template, {
 					POKEMON: this.pokemon(kwArgs.of), SOURCE: this.pokemon(pokemon),
 				});
@@ -1390,6 +1397,9 @@ export class BattleTextParser {
 
 		case '-damage': {
 			let [, pokemon, , percentage] = args;
+			if (kwArgs.from === 'sandstormed') {
+				return this.render(this.template('damage', 'Sandstorm'), { POKEMON: this.pokemon(pokemon) });
+			}
 			let template = this.template('damage', kwArgs.from, 'NODEFAULT');
 			const line1 = this.maybeAbility(kwArgs.from, kwArgs.of || pokemon);
 			const id = BattleTextParser.effectId(kwArgs.from);

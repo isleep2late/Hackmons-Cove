@@ -469,6 +469,7 @@ export class TeamEditorState extends PSModel {
 	};
 	hpTypeMatters(set: Dex.PokemonSet): boolean {
 		if (this.gen < 2) return false;
+		if (this.dex.modid === 'gen2spaceworld') return false;
 		if (this.gen > 7) return false;
 		for (const move of set.moves) {
 			const moveid = toID(move);
@@ -637,6 +638,15 @@ export class TeamEditorState extends PSModel {
 			return null;
 		}
 	}
+	sw97HpDV(set: Dex.PokemonSet): number | null {
+		if (this.dex.modid !== 'gen2spaceworld') return null;
+		const defaults = this.defaultIVs(set);
+		const dv = (stat: Dex.StatNameExceptHP) => {
+			const iv = set.ivs?.[stat];
+			return (typeof iv === 'number' ? Math.floor(iv / 2) : defaults[stat]) & 1;
+		};
+		return 16 * dv('atk') + 8 * dv('def') + dv('spe') + dv('spa');
+	}
 	getStat(stat: StatName, set: Dex.PokemonSet, ivOverride: number, evOverride?: number, natureOverride?: number) {
 		// do this after setting set.evs because it's assumed to exist
 		// after getStat is run
@@ -646,14 +656,16 @@ export class TeamEditorState extends PSModel {
 		const level = set.level || this.format.defaultLevel;
 
 		const baseStat = species.baseStats[stat];
-		const iv = ivOverride;
+		const sw97HpDV = stat === 'hp' ? this.sw97HpDV(set) : null;
+		const iv = sw97HpDV === null ? ivOverride : 2 * sw97HpDV;
 		let ev = evOverride ?? set.evs?.[stat] ?? (this.gen > 2 ? 0 : 252);
 		if (this.format.isChampions) ev *= 8;
 
 		if (stat === 'hp') {
 			if (baseStat === 1) return 1;
 			if (this.format.isLetsGo) return Math.trunc(Math.trunc(2 * baseStat + iv + 100) * level / 100 + 10) + ev;
-			return Math.trunc(Math.trunc(2 * baseStat + iv + Math.trunc(ev / 4) + 100) * level / 100 + 10);
+			const hp = Math.trunc(Math.trunc(2 * baseStat + iv + Math.trunc(ev / 4) + 100) * level / 100 + 10);
+			return sw97HpDV === null ? hp : Math.min(999, hp);
 		}
 		let val = Math.trunc(Math.trunc(2 * baseStat + iv + Math.trunc(ev / 4)) * level / 100 + 5);
 		if (this.format.isLetsGo) {
@@ -3530,8 +3542,9 @@ class StatForm extends preact.Component<{
 			this.plus = null;
 			this.minus = null;
 		}
+		const sw97HpDV = this.props.editor.sw97HpDV(set);
 		for (const statID of Dex.statNames) {
-			const iv = this.ivToDv(set.ivs?.[statID]);
+			const iv = statID === 'hp' && sw97HpDV !== null ? `${sw97HpDV}` : this.ivToDv(set.ivs?.[statID]);
 			if (skipID !== `ev-${statID}`) this.setInput(`ev-${statID}`, this.getEVText(statID));
 			if (skipID !== `iv-${statID}`) this.setInput(`iv-${statID}`, iv);
 		}
@@ -3795,6 +3808,7 @@ class StatForm extends preact.Component<{
 			remaining ||= null;
 		}
 		const defaultIVs = editor.defaultIVs(set);
+		const sw97HpDV = editor.sw97HpDV(set);
 
 		return <div class={`set-stats-form${narrow ? ' tiny-layout' : ''}`} role="dialog" aria-label={TL`Stats`}>
 			<div class="resultheader"><h3>{TL`EVs, IVs, and nature`}</h3></div>
@@ -3826,7 +3840,9 @@ class StatForm extends preact.Component<{
 							onInput={this.changeEV} onChange={this.changeEV}
 						/></td>
 						{!editor.format.isChampions && <td><input
-							name={`iv-${statID}`} min={0} max={useIVs ? 31 : 15} placeholder={`${defaultIVs[statID]}`}
+							name={`iv-${statID}`} min={0} max={useIVs ? 31 : statID === 'hp' && sw97HpDV !== null ? 26 : 15}
+							placeholder={`${statID === 'hp' && sw97HpDV !== null ? sw97HpDV : defaultIVs[statID]}`}
+							disabled={statID === 'hp' && sw97HpDV !== null}
 							style={narrow ? "width:22px" : "width:40px"} type={narrow ? 'text' : 'number'} inputMode="numeric"
 							class="textbox default-placeholder stat-input" onInput={this.changeIV}
 							onChange={this.changeIV} onKeyDown={this.keyDownStatInput}
@@ -4076,7 +4092,8 @@ class DetailsForm extends preact.Component<{
 						)}
 					</p>
 				)}
-				{((!editor.format.isLetsGo && editor.gen === 7) || editor.format.isNatDex || species.baseSpecies === 'Unown') && <p>
+				{((!editor.format.isLetsGo && editor.gen === 7) || editor.format.isNatDex ||
+					(species.baseSpecies === 'Unown' && editor.dex.modid !== 'gen2spaceworld')) && <p>
 					<label class="label">{TL.label(TL`Hidden Power Type`)}<select
 						name="hptype" class="select" onChange={this.changeHPType} value={editor.getHPType(set)}
 					>

@@ -514,7 +514,7 @@ const SW97_SPRITE_SIZES: {[id: string]: number} = {
 	psyducksw: 80, puddi: 80, puku: 80, raichusw: 112, raikousw: 112, rapidashsw: 112,
 	raticatesw: 96, rattatasw: 80, remoraidsw: 80, rhydonsw: 112, rhyhornsw: 112, rinring: 80,
 	sandshrewsw: 80, sandslashsw: 96, scizorsw: 112, scythersw: 112, seadrasw: 96, seakingsw: 112,
-	seelsw: 96, shelldersw: 80, skarmorysw: 112, skiploomsw: 96, slowbrosw: 112, slowkingsw: 112,
+	seelsw: 96, shelldersw: 80, shibirefugu: 112, skarmorysw: 112, skiploomsw: 96, slowbrosw: 112, slowkingsw: 112,
 	slowpokesw: 80, smoochumsw: 80, sneaselsw: 80, snorlaxsw: 112, snubbullsw: 96, spearowsw: 80,
 	spinaraksw: 80, squirtlesw: 80, starmiesw: 96, staryusw: 96, steelixsw: 112, suicunesw: 112,
 	sunmola1: 80, sunny: 96, tail: 80, tangel: 80, tangelasw: 96, taurossw: 112,
@@ -524,6 +524,19 @@ const SW97_SPRITE_SIZES: {[id: string]: number} = {
 	vulpixsw: 96, wartortlesw: 96, warwolf: 112, weedlesw: 80, weepinbellsw: 96, weezingsw: 112,
 	wigglytuffsw: 96, wolfman: 80, xatusw: 96, zapdossw: 112, zubatsw: 80,
 };
+
+const SW97_FINAL_NAME_ART: { [id: string]: string } = {
+	chikorita: 'happa', bayleef: 'hanamogura', meganium: 'hanaryu', noctowl: 'bobo', mareep: 'pachimee',
+	qwilfish: 'puku', quagsire: 'mizuuo', ariados: 'twohead', sunflora: 'sunny', phanpy: 'paon',
+	smeargle: 'painter', ledian: 'mitsuboshi', delibird: 'gift', aipom: 'tail',
+};
+
+function sw97ArtId(id: string, mod?: string) {
+	if (mod !== 'gen2spaceworld') return id;
+	if (SW97_SPRITE_SIZES[id + 'sw']) return id + 'sw';
+	if (SW97_FINAL_NAME_ART[id]) return SW97_FINAL_NAME_ART[id];
+	return id;
+}
 
 const GLITCH_SPRITE_SIZES: {[id: string]: number} = {
 	'00fc': 96, '019c': 96, '3trainerpok': 112, '44hy': 112, '44ybf': 112, '44yf8': 112,
@@ -1166,9 +1179,8 @@ export const Dex = new class implements ModdedDex {
 			hakamoototem: { fw: 120, fh: 120, fpx: false },
 			wishiwashitotem: { fw: 120, fh: 120, fpx: false },
 		};
-		let sw97Id = species.id;
-		if (options.mod === 'gen2spaceworld' && SW97_SPRITE_SIZES[species.id + 'sw']) sw97Id = species.id + 'sw';
-		if (SW97_SPRITE_SIZES[sw97Id]) {
+		const sw97Id = sw97ArtId(species.id, options.mod);
+		if (SW97_SPRITE_SIZES[sw97Id] && !(options.shiny && sw97Id !== species.id)) {
 			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
 			const host = window.Config ? Config.routes.client : 'beta.hackmons.com';
 			const useBack = !isFront;
@@ -1318,7 +1330,7 @@ export const Dex = new class implements ModdedDex {
 		}
 
 		// Mod Cries
-		if (options.mod) {
+		if (options.mod && options.mod !== 'gen2spaceworld') {
 			spriteData.cryurl = `sprites/${options.mod}/audio/${toID(species.baseSpecies)}`;
 			spriteData.cryurl += '.mp3';
 		}
@@ -1415,7 +1427,7 @@ export const Dex = new class implements ModdedDex {
 		return num;
 	}
 
-	getPokemonIcon(pokemon: string | Pokemon | ServerPokemon | Dex.PokemonSet | null, facingLeft?: boolean) {
+	getPokemonIcon(pokemon: string | Pokemon | ServerPokemon | Dex.PokemonSet | null, facingLeft?: boolean, mod?: string) {
 		if (pokemon === 'pokeball') {
 			return `background:transparent url(${Dex.resourcePrefix}sprites/pokemonicons-pokeball-sheet.png) no-repeat scroll -0px 4px`;
 		} else if (pokemon === 'pokeball-statused') {
@@ -1427,6 +1439,7 @@ export const Dex = new class implements ModdedDex {
 		}
 
 		let id = toID(pokemon);
+		if (!mod && pokemon && typeof pokemon === 'object') mod = (pokemon as any).side?.battle?.dex?.modid;
 		if (!pokemon || typeof pokemon === 'string') pokemon = null;
 		// @ts-expect-error safe, but too lazy to cast
 		if (pokemon?.speciesForme) id = toID(pokemon.speciesForme);
@@ -1441,10 +1454,11 @@ export const Dex = new class implements ModdedDex {
 			arceusshadow: 2, arceusquestion: 2, lugiashadow: 2, mewtwoshadow: 2, mewtwoshadowmegax: 2, mewtwoarmored: 1, jynxmega: 1,
 			pokestarspirit: 1,
 		};
-		if (SW97_SPRITE_SIZES[id]) {
+		const sw97IconId = sw97ArtId(id, mod);
+		if (SW97_SPRITE_SIZES[sw97IconId]) {
 			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
 			const host = window.Config ? Config.routes.client : 'beta.hackmons.com';
-			return `background:transparent url(${protocol}//${host}/sprites/sw97/${id}-icon.png) no-repeat scroll center/contain;image-rendering:pixelated`;
+			return `background:transparent url(${protocol}//${host}/sprites/sw97/${sw97IconId}-icon.png) no-repeat scroll center/contain;image-rendering:pixelated`;
 		}
 		if (GLITCH_SPRITE_SIZES[id]) {
 			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
@@ -1491,9 +1505,8 @@ export const Dex = new class implements ModdedDex {
 		const phnnLocalSpriteIds: {[id: string]: number} = {
 			arceusshadow: 1, arceusquestion: 1, mewtwoshadow: 1, mewtwoshadowmegax: 1, mewtwoarmored: 1, lugiashadow: 1, hakamoototem: 1, wishiwashitotem: 1, jynxmega: 1,
 		};
-		let tbSw97Id = species.id;
-		if (dex.modid === 'gen2spaceworld' && SW97_SPRITE_SIZES[species.id + 'sw']) tbSw97Id = species.id + 'sw';
-		if (SW97_SPRITE_SIZES[tbSw97Id]) {
+		const tbSw97Id = sw97ArtId(species.id, dex.modid);
+		if (SW97_SPRITE_SIZES[tbSw97Id] && !(pokemon.shiny && tbSw97Id !== species.id)) {
 			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
 			const host = window.Config ? Config.routes.client : 'beta.hackmons.com';
 			const size = SW97_SPRITE_SIZES[tbSw97Id];
@@ -1763,6 +1776,12 @@ class ModdedDex {
 				const table = window.BattleTeambuilderTable[this.modid];
 				if (id in table.overrideMoveData) {
 					Object.assign(data, table.overrideMoveData[id]);
+				}
+				if (this.modid === 'gen2spaceworld' && id !== 'hiddenpower' && id.startsWith('hiddenpower') &&
+					table.overrideMoveData.hiddenpower) {
+					const hpOverride = { ...table.overrideMoveData.hiddenpower };
+					delete hpOverride.basePower;
+					Object.assign(data, hpOverride);
 				}
 			}
 			if (this.gen <= 3 && data.category !== 'Status' && data.type !== 'Shadow') {
