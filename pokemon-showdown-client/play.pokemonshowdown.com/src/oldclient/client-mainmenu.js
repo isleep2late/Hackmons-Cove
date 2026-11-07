@@ -37,7 +37,6 @@
 			{ id: 'gen9nonerfsstatuses', name: 'No Nerfs' },
 			{ id: 'gen2ou', name: 'Gen 2 OU' },
 			{ id: 'gen2ubers', name: 'Gen 2 Ubers' },
-			{ id: 'gen2spaceworldou', name: 'SpaceWorld OU' },
 			{ id: 'gen2spaceworldubers', name: 'SpaceWorld Ubers' },
 			{ id: 'gen2spaceworldbricks', name: 'SpaceWorld Bricks' },
 		] },

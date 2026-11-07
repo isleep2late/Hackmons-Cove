@@ -969,7 +969,6 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		desc: "Standard OU played on the 1997 SpaceWorld demo's Pokemon, learnsets, and battle engine (no hackmons modding). Banned: the Ubers Mewtwo and Mew, Smeargle (its only move, Sketch, does nothing in link battles), all held items, Explosion, Self-Destruct, Dig, Fly, OHKO and evasion-raising moves, and moves a Pokemon could only learn from one of the demo's own TMs or HMs (Gen 1 TM and HM moves brought over through the Time Capsule are allowed). Ho-Oh, Sneasel, Togepi, and Leafeo are unavailable. Species, Sleep, and Freeze clauses apply, and PP Ups are only allowed where the Pokemon could have brought them from Gen 1. Pokemon the demo also lists under a beta name use their final name (for example Aipom, not Tail).",
 		mod: 'spaceworld',
 		searchShow: false,
-		challengeShow: false,
 		ruleset: ['Standard'],
 		banlist: ['Uber', 'All Items', 'Explosion', 'Self-Destruct']
 	},

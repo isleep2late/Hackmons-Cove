@@ -428,6 +428,7 @@ var SETDEX_RBY = {
   },
   "Mr. Mime": {
     "NU Support": {"moves":["Thunder Wave","Psychic","Thunderbolt","Seismic Toss"]},
+    "NU Standard": {"moves":["Psychic","Thunderbolt","Seismic Toss","Thunder Wave"]},
     "Tradebacks OU Hypnosis": {"moves":["Hypnosis","Thunderbolt","Psychic","Seismic Toss"]}
   },
   "Scyther": {
@@ -450,7 +451,6 @@ var SETDEX_RBY = {
   "Pinsir": {
     "OU Swords Dance": {"moves":["Swords Dance","Hyper Beam","Slash","Submission"]},
     "PU Swords Dance": {"moves":["Swords Dance","Slash","Hyper Beam","Seismic Toss"]},
-    "ZU Swords Dance": {"moves":["Swords Dance","Hyper Beam","Slash","Submission"]},
     "UU Showdown Usage": {"moves":["Swords Dance","Hyper Beam","Seismic Toss","Body Slam"]},
     "Tradebacks OU Showdown Usage": {"moves":["Bind","Hyper Beam","Swords Dance","Slash"]}
   },
@@ -483,8 +483,7 @@ var SETDEX_RBY = {
   "Vaporeon": {
     "NU Defensive": {"moves":["Surf","Body Slam","Blizzard","Rest"]},
     "NU Acid Armor": {"moves":["Surf","Acid Armor","Body Slam","Rest"]},
-    "Tradebacks OU Growth": {"moves":["Growth","Surf","Acid Armor","Rest"]},
-    "OU Showdown Usage": {"moves":["Rest","Surf","Ice Beam","Sand Attack"]}
+    "Tradebacks OU Growth": {"moves":["Growth","Surf","Acid Armor","Rest"]}
   },
   "Jolteon": {
     "OU Offensive": {"moves":["Thunder Wave","Thunderbolt","Double Kick","Rest"]},
