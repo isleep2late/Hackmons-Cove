@@ -296,6 +296,12 @@ export default {
 				"type": "Shadow",
 				"category": "Status",
 				"ignoreImmunity": true
+			},
+			"fog": {
+				"basePower": 0,
+				"type": "Normal",
+				"category": "Status",
+				"ignoreImmunity": true
 			}
 		},
 		"typeChart": {
@@ -775,6 +781,9 @@ export default {
 				"onBasePower": "modified"
 			},
 			"Shade Warning": {
+				"added": true
+			},
+			"Fog Machine": {
 				"added": true
 			},
 			"Wonder Guard": {
