@@ -1506,6 +1506,9 @@ export class Battle {
 			} else if (isExtremeWeather) {
 				this.weatherTimeLeft = 0;
 				this.weatherMinTimeLeft = 0;
+			} else if (weather === 'fog') {
+				this.weatherTimeLeft = 5;
+				this.weatherMinTimeLeft = 0;
 			} else {
 				this.weatherTimeLeft = (this.gen <= 3 ? 5 : 8);
 				this.weatherMinTimeLeft = (this.gen <= 3 ? 0 : 5);

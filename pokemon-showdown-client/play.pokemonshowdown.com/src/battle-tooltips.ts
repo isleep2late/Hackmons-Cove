@@ -146,6 +146,12 @@ export class ModifiableValue {
 	}
 }
 
+const CUSTOM_ATES: [string, Dex.TypeName][] = [
+	['Pesticize', 'Bug'], ['Umbranize', 'Dark'], ['Carbonize', 'Fire'], ['Specterize', 'Ghost'], ['Fertilize', 'Grass'],
+	['Terranate', 'Ground'], ['Aggregate', 'Rock'], ['Ferronize', 'Steel'], ['Hydrate', 'Water'], ['Pugilize', 'Fighting'],
+	['Contaminate', 'Poison'], ['Prophetize', 'Psychic'], ['Vantanate', 'Shadow'], ['Anomalize', '???'],
+];
+
 export class BattleTooltips {
 	battle: Battle;
 
@@ -1871,6 +1877,9 @@ export class BattleTooltips {
 					if (value.abilityModify(0, 'Galvanize')) moveType = 'Electric';
 					if (value.abilityModify(0, 'Pixilate')) moveType = 'Fairy';
 					if (value.abilityModify(0, 'Refrigerate')) moveType = 'Ice';
+					for (const [ability, type] of CUSTOM_ATES) {
+						if (value.abilityModify(0, ability)) moveType = type;
+					}
 				}
 				if (value.abilityModify(0, 'Normalize')) moveType = 'Normal';
 			}
@@ -2269,6 +2278,10 @@ export class BattleTooltips {
 			accuracyModifiers.push(6840);
 			value.modify(5 / 3, "Gravity");
 		}
+		if (value.tryWeather('Fog')) {
+			accuracyModifiers.push(2457);
+			value.modify(3 / 5, "Fog");
+		}
 
 		for (const active of pokemon.side.active) {
 			if (!active || active.fainted) continue;
@@ -2662,6 +2675,7 @@ export class BattleTooltips {
 				value.abilityModify(1.2, "Galvanize");
 				value.abilityModify(this.battle.gen > 6 ? 1.2 : 1.3, "Pixilate");
 				value.abilityModify(this.battle.gen > 6 ? 1.2 : 1.3, "Refrigerate");
+				for (const [ability] of CUSTOM_ATES) value.abilityModify(1.3, ability);
 			}
 			if (this.battle.gen > 6) {
 				value.abilityModify(1.2, "Normalize");

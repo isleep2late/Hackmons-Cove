@@ -3584,7 +3584,8 @@
 					for (var abid in BattleAbilities) {
 						if (!abid || abid === 'noability') continue;
 						if (BattleAbilities[abid].exists === false) continue;
-						if (BattleAbilities[abid].isNonstandard === 'Custom' && !phCustomAbilitiesOk) continue;
+						if (BattleAbilities[abid].phnnOnly && !phCustomAbilitiesOk) continue;
+						if (abid === 'fogmachine' && this.curTeam.format !== 'gen9nonerfscustomdisguises') continue;
 						if (BattleAbilities[abid].num < 0 && BattleAbilities[abid].num > -500 && !window.PhnnAllowCAP) continue;
 						var abilOptName = BattleAbilities[abid].name || abid;
 						if (abilOptName) abilityNames.push(abilOptName);

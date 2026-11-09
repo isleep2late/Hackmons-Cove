@@ -19606,6 +19606,30 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 		type: "Electric",
 		contestType: "Cool",
 	},
+	thunderstorm: {
+		num: 0,
+		gen: 2,
+		accuracy: true,
+		basePower: 0,
+		category: "Status",
+		isNonstandard: "Custom",
+		name: "Thunderstorm",
+		shortDesc: "5 turns: Rain Dance and Electric Terrain at once.",
+		desc: "Starts Rain Dance and Electric Terrain together, each for 5 turns (rain lasts 8 if the user holds Damp Rock, the terrain 8 with Terrain Extender). If one of them is already active or cannot start, the other still starts; fails only if neither does. Custom Disguises only.",
+		pp: 5,
+		priority: 0,
+		flags: {},
+		onHitField(target, source) {
+			const rain = this.field.setWeather('raindance', source);
+			const terrain = this.field.setTerrain('electricterrain', source);
+			if (!rain && !terrain) return false;
+		},
+		secondary: null,
+		target: "all",
+		type: "Electric",
+		zMove: { boost: { spe: 1 } },
+		contestType: "Cool",
+	},
 	thunderwave: {
 		num: 86,
 		accuracy: 90,

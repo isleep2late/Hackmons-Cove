@@ -137,4 +137,23 @@ export const PokemonMoveSkinAbilities: Record<AbilityName, Showdown.TypeName> = 
   Normalize: 'Normal',
   Pixilate: 'Fairy',
   Refrigerate: 'Ice',
+  Pesticize: 'Bug',
+  Umbranize: 'Dark',
+  Carbonize: 'Fire',
+  Specterize: 'Ghost',
+  Fertilize: 'Grass',
+  Terranate: 'Ground',
+  Aggregate: 'Rock',
+  Ferronize: 'Steel',
+  Hydrate: 'Water',
+  Pugilize: 'Fighting',
+  Contaminate: 'Poison',
+  Prophetize: 'Psychic',
+  Vantanate: 'Shadow',
+  Anomalize: '???',
 } as Record<AbilityName, Showdown.TypeName>;
+
+export const PhnnCustomDisguisesAteAbilities: AbilityName[] = [
+  'Pesticize', 'Umbranize', 'Carbonize', 'Specterize', 'Fertilize', 'Terranate', 'Aggregate',
+  'Ferronize', 'Hydrate', 'Pugilize', 'Contaminate', 'Prophetize', 'Vantanate', 'Anomalize',
+] as AbilityName[];

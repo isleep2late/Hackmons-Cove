@@ -24,6 +24,11 @@ export const AbilitiesText: { [id: IDEntry]: AbilityText } = {
 
 		damage: "  {POKEMON} was hurt!",
 	},
+	aggregate: {
+		name: "Aggregate",
+		desc: "This Pokemon's Normal-type moves become Rock-type moves and have their power multiplied by 1.3. In Generation 3 the move's category follows its new type. Custom Disguises only.",
+		shortDesc: "This Pokemon's Normal-type moves become Rock type and have 1.3x power.",
+	},
 	airlock: {
 		name: "Air Lock",
 		shortDesc: "While this Pokemon is active, the effects of weather conditions are disabled.",
@@ -50,6 +55,11 @@ export const AbilitiesText: { [id: IDEntry]: AbilityText } = {
 		name: "Anger Shell",
 		desc: "When this Pokemon has more than 1/2 its maximum HP and takes damage from an attack bringing it to 1/2 or less of its maximum HP, its Attack, Special Attack, and Speed are raised by 1 stage, and its Defense and Special Defense are lowered by 1 stage. This effect applies after all hits from a multi-hit move. This effect is prevented if the move had a secondary effect removed by the Sheer Force Ability.",
 		shortDesc: "At 1/2 or less of this Pokemon's max HP: +1 Atk, Sp. Atk, Spe, and -1 Def, Sp. Def.",
+	},
+	anomalize: {
+		name: "Anomalize",
+		desc: "This Pokemon's Normal-type moves become ???-type moves and have their power multiplied by 1.3. In Generation 3 the move becomes physical. While the user is Dynamaxed its moves stay Normal and become Max Strike. Custom Disguises only.",
+		shortDesc: "This Pokemon's Normal-type moves become ??? type and have 1.3x power.",
 	},
 	anticipation: {
 		name: "Anticipation",
@@ -191,6 +201,11 @@ export const AbilitiesText: { [id: IDEntry]: AbilityText } = {
 		name: "Bulletproof",
 		shortDesc: "This Pokemon is immune to bullet moves.",
 	},
+	carbonize: {
+		name: "Carbonize",
+		desc: "This Pokemon's Normal-type moves become Fire-type moves and have their power multiplied by 1.3. In Generation 3 the move's category follows its new type. Custom Disguises only.",
+		shortDesc: "This Pokemon's Normal-type moves become Fire type and have 1.3x power.",
+	},
 	cheekpouch: {
 		name: "Cheek Pouch",
 		desc: "If this Pokemon eats a held Berry, it restores 1/3 of its maximum HP, rounded down, in addition to the Berry's effect. This effect can also activate after the effects of Bug Bite, Fling, Pluck, Stuff Cheeks, and Teatime if the eaten Berry had an effect on this Pokemon.",
@@ -252,6 +267,11 @@ export const AbilitiesText: { [id: IDEntry]: AbilityText } = {
 	compoundeyes: {
 		name: "Compound Eyes",
 		shortDesc: "This Pokemon's moves have their accuracy multiplied by 1.3.",
+	},
+	contaminate: {
+		name: "Contaminate",
+		desc: "This Pokemon's Normal-type moves become Poison-type moves and have their power multiplied by 1.3. In Generation 3 the move's category follows its new type. Custom Disguises only.",
+		shortDesc: "This Pokemon's Normal-type moves become Poison type and have 1.3x power.",
 	},
 	contrary: {
 		name: "Contrary",
@@ -482,6 +502,16 @@ export const AbilitiesText: { [id: IDEntry]: AbilityText } = {
 
 		start: "  {POKEMON} is radiating a fairy aura!",
 	},
+	ferronize: {
+		name: "Ferronize",
+		desc: "This Pokemon's Normal-type moves become Steel-type moves and have their power multiplied by 1.3. In Generation 3 the move's category follows its new type. Custom Disguises only.",
+		shortDesc: "This Pokemon's Normal-type moves become Steel type and have 1.3x power.",
+	},
+	fertilize: {
+		name: "Fertilize",
+		desc: "This Pokemon's Normal-type moves become Grass-type moves and have their power multiplied by 1.3. In Generation 3 the move's category follows its new type. Custom Disguises only.",
+		shortDesc: "This Pokemon's Normal-type moves become Grass type and have 1.3x power.",
+	},
 	filter: {
 		name: "Filter",
 		shortDesc: "This Pokemon receives 3/4 damage from supereffective attacks.",
@@ -706,6 +736,11 @@ export const AbilitiesText: { [id: IDEntry]: AbilityText } = {
 		name: "Hustle",
 		desc: "This Pokemon's Attack is multiplied by 1.5 and the accuracy of its physical attacks is multiplied by 0.8.",
 		shortDesc: "This Pokemon's Attack is 1.5× and accuracy of its physical attacks is 0.8×.",
+	},
+	hydrate: {
+		name: "Hydrate",
+		desc: "This Pokemon's Normal-type moves become Water-type moves and have their power multiplied by 1.3. In Generation 3 the move's category follows its new type. Custom Disguises only.",
+		shortDesc: "This Pokemon's Normal-type moves become Water type and have 1.3x power.",
 	},
 	hydration: {
 		name: "Hydration",
@@ -1246,6 +1281,11 @@ export const AbilitiesText: { [id: IDEntry]: AbilityText } = {
 
 		start: "  Both Pok\u00E9mon will faint in three turns!",
 	},
+	pesticize: {
+		name: "Pesticize",
+		desc: "This Pokemon's Normal-type moves become Bug-type moves and have their power multiplied by 1.3. In Generation 3 the move's category follows its new type. Custom Disguises only.",
+		shortDesc: "This Pokemon's Normal-type moves become Bug type and have 1.3x power.",
+	},
 	pickpocket: {
 		name: "Pickpocket",
 		desc: "If this Pokemon has no item and is hit by a contact move, it steals the attacker's item. This effect applies after all hits from a multi-hit move. This effect is prevented if the move had a secondary effect removed by the Sheer Force Ability.",
@@ -1382,6 +1422,11 @@ export const AbilitiesText: { [id: IDEntry]: AbilityText } = {
 		name: "Propeller Tail",
 		shortDesc: "This Pokemon's moves cannot be redirected to a different target by any effect.",
 	},
+	prophetize: {
+		name: "Prophetize",
+		desc: "This Pokemon's Normal-type moves become Psychic-type moves and have their power multiplied by 1.3. In Generation 3 the move's category follows its new type. Custom Disguises only.",
+		shortDesc: "This Pokemon's Normal-type moves become Psychic type and have 1.3x power.",
+	},
 	protean: {
 		name: "Protean",
 		desc: "This Pokemon's type changes to match the type of the move it is about to use. This effect comes after all effects that change a move's type. This effect can only happen once per switch-in, and only if this Pokemon is not Terastallized.",
@@ -1404,6 +1449,11 @@ export const AbilitiesText: { [id: IDEntry]: AbilityText } = {
 	psychicsurge: {
 		name: "Psychic Surge",
 		shortDesc: "On switch-in, this Pokemon summons Psychic Terrain.",
+	},
+	pugilize: {
+		name: "Pugilize",
+		desc: "This Pokemon's Normal-type moves become Fighting-type moves and have their power multiplied by 1.3. In Generation 3 the move's category follows its new type. Custom Disguises only.",
+		shortDesc: "This Pokemon's Normal-type moves become Fighting type and have 1.3x power.",
 	},
 	punkrock: {
 		name: "Punk Rock",
@@ -1780,6 +1830,11 @@ export const AbilitiesText: { [id: IDEntry]: AbilityText } = {
 			shortDesc: "This Pokemon is immune to sound-based moves, including Heal Bell.",
 		},
 	},
+	specterize: {
+		name: "Specterize",
+		desc: "This Pokemon's Normal-type moves become Ghost-type moves and have their power multiplied by 1.3. In Generation 3 the move's category follows its new type. Custom Disguises only.",
+		shortDesc: "This Pokemon's Normal-type moves become Ghost type and have 1.3x power.",
+	},
 	speedboost: {
 		name: "Speed Boost",
 		desc: "This Pokemon's Speed is raised by 1 stage at the end of each full turn it has been on the field.",
@@ -2037,6 +2092,11 @@ export const AbilitiesText: { [id: IDEntry]: AbilityText } = {
 
 		start: "  {POKEMON} is radiating a bursting aura!",
 	},
+	terranate: {
+		name: "Terranate",
+		desc: "This Pokemon's Normal-type moves become Ground-type moves and have their power multiplied by 1.3. In Generation 3 the move's category follows its new type. Custom Disguises only.",
+		shortDesc: "This Pokemon's Normal-type moves become Ground type and have 1.3x power.",
+	},
 	thermalexchange: {
 		name: "Thermal Exchange",
 		desc: "This Pokemon's Attack is raised 1 stage after it is damaged by a Fire-type move. This Pokemon cannot be burned. Gaining this Ability while burned cures it.",
@@ -2153,6 +2213,11 @@ export const AbilitiesText: { [id: IDEntry]: AbilityText } = {
 
 		start: "  {POKEMON} is radiating a blazing aura!",
 	},
+	umbranize: {
+		name: "Umbranize",
+		desc: "This Pokemon's Normal-type moves become Dark-type moves and have their power multiplied by 1.3. In Generation 3 the move's category follows its new type. Custom Disguises only.",
+		shortDesc: "This Pokemon's Normal-type moves become Dark type and have 1.3x power.",
+	},
 	unaware: {
 		name: "Unaware",
 		desc: "This Pokemon ignores other Pokemon's Attack, Special Attack, and accuracy stat stages when taking damage, and ignores other Pokemon's Defense, Special Defense, and evasiveness stat stages when dealing damage.",
@@ -2176,6 +2241,11 @@ export const AbilitiesText: { [id: IDEntry]: AbilityText } = {
 		champions: {
 			shortDesc: "This Pokemon's contact moves ignore a target's protection and deal 1/4 the usual damage.",
 		},
+	},
+	vantanate: {
+		name: "Vantanate",
+		desc: "This Pokemon's Normal-type moves become Shadow-type moves and have their power multiplied by 1.3. In Generation 3 the move becomes physical. While the user is Dynamaxed its moves stay Normal and become Max Strike. Custom Disguises only.",
+		shortDesc: "This Pokemon's Normal-type moves become Shadow type and have 1.3x power.",
 	},
 	vesselofruin: {
 		name: "Vessel of Ruin",

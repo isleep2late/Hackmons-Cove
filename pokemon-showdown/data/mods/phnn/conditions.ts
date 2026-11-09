@@ -220,6 +220,31 @@ export const Conditions: import('../../../sim/dex-conditions').ModdedConditionDa
 			this.add('-weather', 'none');
 		},
 	},
+	fog: {
+		name: 'Fog',
+		effectType: 'Weather',
+		duration: 5,
+		onFieldStart(field, source, effect) {
+			if (effect?.effectType === 'Ability') {
+				this.effectState.duration = 0;
+				this.add('-weather', 'Fog', '[from] ability: ' + effect.name, `[of] ${source}`);
+			} else {
+				this.add('-weather', 'Fog');
+			}
+		},
+		onModifyAccuracy(accuracy) {
+			if (typeof accuracy !== 'number') return;
+			return this.chainModify([3, 5]);
+		},
+		onFieldResidualOrder: 1,
+		onFieldResidual() {
+			this.add('-weather', 'Fog', '[upkeep]');
+			this.eachEvent('Weather');
+		},
+		onFieldEnd() {
+			this.add('-weather', 'none');
+		},
+	},
 	wildmight: {
 		name: 'Wild Might',
 		onStart(pokemon) {

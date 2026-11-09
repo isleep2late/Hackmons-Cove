@@ -1,5 +1,5 @@
 import { type AbilityName, type GenerationNum, type MoveName } from '@smogon/calc';
-import { PokemonDenormalizedMoves, PokemonMoveSkinAbilities } from '@showdex/consts/dex';
+import { PhnnCustomDisguisesAteAbilities, PokemonDenormalizedMoves, PokemonMoveSkinAbilities } from '@showdex/consts/dex';
 import { type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { detectPhnnKey, getPhnnMoveOverrides } from '@showdex/phnn';
 import { clamp } from '@showdex/utils/core';
@@ -172,6 +172,10 @@ export const calcMoveBasePower = (
       // Galvanize was introduced in gen 7
       if (ability === 'Galvanize' as AbilityName && gen > 6) {
         basePowerMods.push(1.2);
+      }
+
+      if (PhnnCustomDisguisesAteAbilities.includes(ability) && gen > 2) {
+        basePowerMods.push(1.3);
       }
     }
 

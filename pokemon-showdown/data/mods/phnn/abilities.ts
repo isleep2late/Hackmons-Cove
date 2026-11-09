@@ -349,6 +349,19 @@ export const Abilities: import('../../../sim/dex-abilities').ModdedAbilityDataTa
 		shortDesc: "On switch-in, this Pokemon summons permanent Shadow Sky.",
 		desc: "On switch-in, this Pokemon summons Shadow Sky. The Shadow Sky does not end on its own (Gen 5 behavior, rather than the 5-turn limit of Gen 6+).",
 	},
+	fogmachine: {
+		isNonstandard: "Custom",
+		onStart(source) {
+			this.field.setWeather('fog');
+		},
+		flags: {},
+		name: "Fog Machine",
+		rating: 3,
+		num: 0,
+		gen: 9,
+		shortDesc: "On switch-in, this Pokemon summons permanent Fog.",
+		desc: "On switch-in, this Pokemon summons Fog, which multiplies the accuracy of every move that can miss, except OHKO moves, by 3/5. The fog does not end on its own, like the other weather abilities in No Nerfs. [Gen 9 No Nerfs] Custom Disguises only.",
+	},
 	arenatrap: {
 		inherit: true,
 		onFoeTrapPokemon(pokemon) {

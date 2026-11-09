@@ -1,4 +1,17 @@
 export const Abilities: import('../../../sim/dex-abilities').ModdedAbilityDataTable = {
+	aggregate: {
+		inherit: true,
+		onModifyTypePriority: undefined,
+		onModifyType: undefined,
+		onModifyMove(move) {
+			if (move.type !== 'Normal' || move.category === 'Status') return;
+			if (['hiddenpower', 'weatherball', 'struggle'].includes(move.id)) return;
+			move.type = 'Rock';
+			move.typeChangerBoosted = this.effect;
+			const specialTypes = ['Fire', 'Water', 'Grass', 'Ice', 'Electric', 'Dark', 'Psychic', 'Dragon'];
+			move.category = specialTypes.includes(move.type) ? 'Special' : 'Physical';
+		},
+	},
 	airlock: {
 		inherit: true,
 		onSwitchInPriority: 4,
@@ -7,6 +20,32 @@ export const Abilities: import('../../../sim/dex-abilities').ModdedAbilityDataTa
 		},
 		onSwitchIn: undefined, // no inherit
 	},
+	anomalize: {
+		inherit: true,
+		onModifyTypePriority: undefined,
+		onModifyType: undefined,
+		onModifyMove(move) {
+			if (move.type !== 'Normal' || move.category === 'Status') return;
+			if (['hiddenpower', 'weatherball', 'struggle'].includes(move.id)) return;
+			move.type = '???';
+			move.typeChangerBoosted = this.effect;
+			const specialTypes = ['Fire', 'Water', 'Grass', 'Ice', 'Electric', 'Dark', 'Psychic', 'Dragon'];
+			move.category = specialTypes.includes(move.type) ? 'Special' : 'Physical';
+		},
+	},
+	carbonize: {
+		inherit: true,
+		onModifyTypePriority: undefined,
+		onModifyType: undefined,
+		onModifyMove(move) {
+			if (move.type !== 'Normal' || move.category === 'Status') return;
+			if (['hiddenpower', 'weatherball', 'struggle'].includes(move.id)) return;
+			move.type = 'Fire';
+			move.typeChangerBoosted = this.effect;
+			const specialTypes = ['Fire', 'Water', 'Grass', 'Ice', 'Electric', 'Dark', 'Psychic', 'Dragon'];
+			move.category = specialTypes.includes(move.type) ? 'Special' : 'Physical';
+		},
+	},
 	cloudnine: {
 		inherit: true,
 		onSwitchInPriority: 4,
@@ -14,6 +53,19 @@ export const Abilities: import('../../../sim/dex-abilities').ModdedAbilityDataTa
 			((this.effect as any).onStart as (p: Pokemon) => void).call(this, pokemon);
 		},
 		onSwitchIn: undefined, // no inherit
+	},
+	contaminate: {
+		inherit: true,
+		onModifyTypePriority: undefined,
+		onModifyType: undefined,
+		onModifyMove(move) {
+			if (move.type !== 'Normal' || move.category === 'Status') return;
+			if (['hiddenpower', 'weatherball', 'struggle'].includes(move.id)) return;
+			move.type = 'Poison';
+			move.typeChangerBoosted = this.effect;
+			const specialTypes = ['Fire', 'Water', 'Grass', 'Ice', 'Electric', 'Dark', 'Psychic', 'Dragon'];
+			move.category = specialTypes.includes(move.type) ? 'Special' : 'Physical';
+		},
 	},
 	cutecharm: {
 		inherit: true,
@@ -48,6 +100,32 @@ export const Abilities: import('../../../sim/dex-abilities').ModdedAbilityDataTa
 				const status = this.sample(['slp', 'par', 'psn']);
 				source.trySetStatus(status, target);
 			}
+		},
+	},
+	ferronize: {
+		inherit: true,
+		onModifyTypePriority: undefined,
+		onModifyType: undefined,
+		onModifyMove(move) {
+			if (move.type !== 'Normal' || move.category === 'Status') return;
+			if (['hiddenpower', 'weatherball', 'struggle'].includes(move.id)) return;
+			move.type = 'Steel';
+			move.typeChangerBoosted = this.effect;
+			const specialTypes = ['Fire', 'Water', 'Grass', 'Ice', 'Electric', 'Dark', 'Psychic', 'Dragon'];
+			move.category = specialTypes.includes(move.type) ? 'Special' : 'Physical';
+		},
+	},
+	fertilize: {
+		inherit: true,
+		onModifyTypePriority: undefined,
+		onModifyType: undefined,
+		onModifyMove(move) {
+			if (move.type !== 'Normal' || move.category === 'Status') return;
+			if (['hiddenpower', 'weatherball', 'struggle'].includes(move.id)) return;
+			move.type = 'Grass';
+			move.typeChangerBoosted = this.effect;
+			const specialTypes = ['Fire', 'Water', 'Grass', 'Ice', 'Electric', 'Dark', 'Psychic', 'Dragon'];
+			move.category = specialTypes.includes(move.type) ? 'Special' : 'Physical';
 		},
 	},
 	flamebody: {
@@ -93,6 +171,19 @@ export const Abilities: import('../../../sim/dex-abilities').ModdedAbilityDataTa
 			if (physicalTypes.includes(move.type) && typeof accuracy === 'number') {
 				return this.chainModify([3277, 4096]);
 			}
+		},
+	},
+	hydrate: {
+		inherit: true,
+		onModifyTypePriority: undefined,
+		onModifyType: undefined,
+		onModifyMove(move) {
+			if (move.type !== 'Normal' || move.category === 'Status') return;
+			if (['hiddenpower', 'weatherball', 'struggle'].includes(move.id)) return;
+			move.type = 'Water';
+			move.typeChangerBoosted = this.effect;
+			const specialTypes = ['Fire', 'Water', 'Grass', 'Ice', 'Electric', 'Dark', 'Psychic', 'Dragon'];
+			move.category = specialTypes.includes(move.type) ? 'Special' : 'Physical';
 		},
 	},
 	intimidate: {
@@ -160,6 +251,19 @@ export const Abilities: import('../../../sim/dex-abilities').ModdedAbilityDataTa
 			}
 		},
 	},
+	pesticize: {
+		inherit: true,
+		onModifyTypePriority: undefined,
+		onModifyType: undefined,
+		onModifyMove(move) {
+			if (move.type !== 'Normal' || move.category === 'Status') return;
+			if (['hiddenpower', 'weatherball', 'struggle'].includes(move.id)) return;
+			move.type = 'Bug';
+			move.typeChangerBoosted = this.effect;
+			const specialTypes = ['Fire', 'Water', 'Grass', 'Ice', 'Electric', 'Dark', 'Psychic', 'Dragon'];
+			move.category = specialTypes.includes(move.type) ? 'Special' : 'Physical';
+		},
+	},
 	plus: {
 		inherit: true,
 		onModifySpA(spa, pokemon) {
@@ -184,6 +288,32 @@ export const Abilities: import('../../../sim/dex-abilities').ModdedAbilityDataTa
 		inherit: true,
 		onStart(pokemon) {
 			this.addSplit(pokemon.side.id, ['-ability', pokemon, 'Pressure', '[silent]']);
+		},
+	},
+	prophetize: {
+		inherit: true,
+		onModifyTypePriority: undefined,
+		onModifyType: undefined,
+		onModifyMove(move) {
+			if (move.type !== 'Normal' || move.category === 'Status') return;
+			if (['hiddenpower', 'weatherball', 'struggle'].includes(move.id)) return;
+			move.type = 'Psychic';
+			move.typeChangerBoosted = this.effect;
+			const specialTypes = ['Fire', 'Water', 'Grass', 'Ice', 'Electric', 'Dark', 'Psychic', 'Dragon'];
+			move.category = specialTypes.includes(move.type) ? 'Special' : 'Physical';
+		},
+	},
+	pugilize: {
+		inherit: true,
+		onModifyTypePriority: undefined,
+		onModifyType: undefined,
+		onModifyMove(move) {
+			if (move.type !== 'Normal' || move.category === 'Status') return;
+			if (['hiddenpower', 'weatherball', 'struggle'].includes(move.id)) return;
+			move.type = 'Fighting';
+			move.typeChangerBoosted = this.effect;
+			const specialTypes = ['Fire', 'Water', 'Grass', 'Ice', 'Electric', 'Dark', 'Psychic', 'Dragon'];
+			move.category = specialTypes.includes(move.type) ? 'Special' : 'Physical';
 		},
 	},
 	raindish: {
@@ -219,6 +349,19 @@ export const Abilities: import('../../../sim/dex-abilities').ModdedAbilityDataTa
 			pokemon.trapped = true;
 		},
 	},
+	specterize: {
+		inherit: true,
+		onModifyTypePriority: undefined,
+		onModifyType: undefined,
+		onModifyMove(move) {
+			if (move.type !== 'Normal' || move.category === 'Status') return;
+			if (['hiddenpower', 'weatherball', 'struggle'].includes(move.id)) return;
+			move.type = 'Ghost';
+			move.typeChangerBoosted = this.effect;
+			const specialTypes = ['Fire', 'Water', 'Grass', 'Ice', 'Electric', 'Dark', 'Psychic', 'Dragon'];
+			move.category = specialTypes.includes(move.type) ? 'Special' : 'Physical';
+		},
+	},
 	static: {
 		inherit: true,
 		onDamagingHit(damage, target, source, move) {
@@ -227,6 +370,19 @@ export const Abilities: import('../../../sim/dex-abilities').ModdedAbilityDataTa
 					source.trySetStatus('par', target);
 				}
 			}
+		},
+	},
+	terranate: {
+		inherit: true,
+		onModifyTypePriority: undefined,
+		onModifyType: undefined,
+		onModifyMove(move) {
+			if (move.type !== 'Normal' || move.category === 'Status') return;
+			if (['hiddenpower', 'weatherball', 'struggle'].includes(move.id)) return;
+			move.type = 'Ground';
+			move.typeChangerBoosted = this.effect;
+			const specialTypes = ['Fire', 'Water', 'Grass', 'Ice', 'Electric', 'Dark', 'Psychic', 'Dragon'];
+			move.category = specialTypes.includes(move.type) ? 'Special' : 'Physical';
 		},
 	},
 	trace: {
@@ -265,6 +421,32 @@ export const Abilities: import('../../../sim/dex-abilities').ModdedAbilityDataTa
 			} else {
 				pokemon.removeVolatile('truant');
 			}
+		},
+	},
+	umbranize: {
+		inherit: true,
+		onModifyTypePriority: undefined,
+		onModifyType: undefined,
+		onModifyMove(move) {
+			if (move.type !== 'Normal' || move.category === 'Status') return;
+			if (['hiddenpower', 'weatherball', 'struggle'].includes(move.id)) return;
+			move.type = 'Dark';
+			move.typeChangerBoosted = this.effect;
+			const specialTypes = ['Fire', 'Water', 'Grass', 'Ice', 'Electric', 'Dark', 'Psychic', 'Dragon'];
+			move.category = specialTypes.includes(move.type) ? 'Special' : 'Physical';
+		},
+	},
+	vantanate: {
+		inherit: true,
+		onModifyTypePriority: undefined,
+		onModifyType: undefined,
+		onModifyMove(move) {
+			if (move.type !== 'Normal' || move.category === 'Status') return;
+			if (['hiddenpower', 'weatherball', 'struggle'].includes(move.id)) return;
+			move.type = 'Shadow';
+			move.typeChangerBoosted = this.effect;
+			const specialTypes = ['Fire', 'Water', 'Grass', 'Ice', 'Electric', 'Dark', 'Psychic', 'Dragon'];
+			move.category = specialTypes.includes(move.type) ? 'Special' : 'Physical';
 		},
 	},
 	voltabsorb: {
