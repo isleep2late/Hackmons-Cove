@@ -844,6 +844,43 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 			}
 		},
 	},
+	customdisguisesexclusives: {
+		effectType: 'ValidatorRule',
+		name: 'Custom Disguises Exclusives',
+		desc: "The -ate abilities for every type and Thunderstorm are legal only in Custom Disguises; Fog and Fog Machine only in [Gen 9 No Nerfs] Custom Disguises.",
+		onValidateSet(set, format) {
+			const cdAbilities = [
+				'pesticize', 'umbranize', 'carbonize', 'specterize', 'fertilize', 'terranate', 'aggregate',
+				'ferronize', 'hydrate', 'pugilize', 'contaminate', 'prophetize', 'vantanate', 'anomalize',
+			];
+			const cdMoves = ['thunderstorm'];
+			const nnCdAbilities = ['fogmachine'];
+			const nnCdMoves = ['fog'];
+			const isCD = format.id.includes('customdisguises');
+			const isNNCD = format.id.startsWith('gen9nonerfscustomdisguises');
+			const abilities = [set.ability, ...(set.phAbilities || '').split('/')].map(a => this.dex.toID(a)).filter(Boolean);
+			const moves = (set.moves || []).map(m => this.dex.toID(m));
+			const problems: string[] = [];
+			const name = set.name || set.species;
+			for (const id of abilities) {
+				if ((cdAbilities.includes(id) && !isCD) || (nnCdAbilities.includes(id) && !isNNCD)) {
+					const where = cdAbilities.includes(id) ? 'Custom Disguises' : '[Gen 9 No Nerfs] Custom Disguises';
+					problems.push(`${name}'s ability ${this.dex.abilities.get(id).name} is only allowed in ${where}.`);
+				}
+			}
+			for (const id of moves) {
+				if (cdMoves.includes(id) && isCD && this.dex.gen < 2) {
+					problems.push(`${name}'s move ${this.dex.moves.get(id).name} does not exist in Gen 1, which has no weather.`);
+					continue;
+				}
+				if ((cdMoves.includes(id) && !isCD) || (nnCdMoves.includes(id) && !isNNCD)) {
+					const where = cdMoves.includes(id) ? 'Custom Disguises' : '[Gen 9 No Nerfs] Custom Disguises';
+					problems.push(`${name}'s move ${this.dex.moves.get(id).name} is only allowed in ${where}.`);
+				}
+			}
+			return problems;
+		},
+	},
 	hoennpokedex: {
 		effectType: 'ValidatorRule',
 		name: 'Hoenn Pokedex',

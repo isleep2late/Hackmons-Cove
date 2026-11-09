@@ -1212,7 +1212,6 @@ export const Aliases: import('../sim/dex').AliasesTable = {
 	eweb: "Electroweb",
 	faintattack: "Feint Attack",
 	fimp: "First Impression",
-	fog: "Defog",
 	glacial: "Glacial Lance",
 	glance: "Glacial Lance",
 	glide: "Grassy Glide",

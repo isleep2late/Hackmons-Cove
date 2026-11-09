@@ -1600,6 +1600,7 @@ export class Ability implements Effect {
 	readonly rating: number;
 	readonly flags: AbilityFlags;
 	readonly isNonstandard: boolean;
+	readonly phnnOnly: boolean;
 
 	constructor(id: ID, name: string, data: any) {
 		if (!data || typeof data !== 'object') data = {};
@@ -1614,6 +1615,7 @@ export class Ability implements Effect {
 		this.rating = data.rating || 1;
 		this.flags = data.flags || {};
 		this.isNonstandard = !!data.isNonstandard;
+		this.phnnOnly = !!data.phnnOnly;
 		if (!this.gen) {
 			if (this.num >= 234) {
 				this.gen = 8;

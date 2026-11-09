@@ -687,6 +687,19 @@ export class DexSearch {
 	}
 }
 
+const CUSTOM_DISGUISES_ONLY = [
+	'pesticize', 'umbranize', 'carbonize', 'specterize', 'fertilize', 'terranate', 'aggregate',
+	'ferronize', 'hydrate', 'pugilize', 'contaminate', 'prophetize', 'vantanate', 'anomalize', 'thunderstorm',
+];
+const NO_NERFS_CUSTOM_DISGUISES_ONLY = ['fog', 'fogmachine'];
+function isCustomDisguisesExclusiveBlocked(format: string, id: string, gen: number) {
+	if (CUSTOM_DISGUISES_ONLY.includes(id)) {
+		return !format.includes('customdisguises') || (id === 'thunderstorm' && gen < 2);
+	}
+	if (NO_NERFS_CUSTOM_DISGUISES_ONLY.includes(id)) return format !== 'nonerfscustomdisguises';
+	return false;
+}
+
 abstract class BattleTypedSearch<T extends SearchType> {
 	searchType: T;
 	/**
@@ -934,6 +947,12 @@ abstract class BattleTypedSearch<T extends SearchType> {
 				if (!(id in legalityFilter)) {
 					const isOpenCustom = this.format.includes('customdisguises') || this.format.includes('customgame');
 					const isNoNerfs = this.format.includes('nonerfs') || this.format.includes('phnn') || this.format.includes('unified');
+					if ((this.searchType === 'ability' || this.searchType === 'move') &&
+						isCustomDisguisesExclusiveBlocked(this.format, id, this.dex.gen)) {
+						this.baseIllegalResults.push([this.searchType, id as ID]);
+						this.illegalReasons[id] = 'Illegal';
+						continue;
+					}
 					const allowMissingno = isOpenCustom || isNoNerfs ||
 						this.format === 'disguises' || this.format === 'disguisesenglish';
 					if (isOpenCustom && this.searchType === 'move' && this.dex.modid === 'gen2spaceworld') {
@@ -948,7 +967,7 @@ abstract class BattleTypedSearch<T extends SearchType> {
 					if (isOpenCustom) {
 						// Fork-only abilities carry isNonstandard 'Custom' and exist only in the phnn mod, so an
 						// open-custom format on any other mod must not offer them (the server rejects them).
-						if (this.searchType === 'ability' && !isNoNerfs && (this.getTable() as any)[id]?.isNonstandard === 'Custom') {
+						if (this.searchType === 'ability' && !isNoNerfs && this.dex.abilities.get(id).phnnOnly) {
 							this.baseIllegalResults.push([this.searchType, id as ID]);
 							this.illegalReasons[id] = 'Illegal';
 							continue;
@@ -1607,6 +1626,7 @@ class BattleAbilitySearch extends BattleTypedSearch<'ability'> {
 			for (let i in this.getTable()) {
 				const ability = dex.abilities.get(i);
 				if (ability.isNonstandard) continue;
+				if (isCustomDisguisesExclusiveBlocked(format, ability.id, dex.gen)) continue;
 				if (ability.gen > dex.gen) continue;
 				abilities.push(ability.id);
 			}
@@ -2175,6 +2195,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 						if (move.isNonstandard === 'Glitch' && !isPHNN && move.gen !== dex.gen) visible = false;
 						if (!visible && move.id === 'nomove' && format.includes('disguises') && dex.modid !== 'gen2spaceworld') visible = true;
 						if (!visible && move.id === 'nomove2' && format.includes('statuses')) visible = true;
+						if (isCustomDisguisesExclusiveBlocked(format, move.id, dex.gen)) visible = false;
 						if (!visible) continue;
 					}
 					moves.push(move.id);

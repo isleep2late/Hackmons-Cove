@@ -1879,6 +1879,7 @@ process.stdout.write("Building `data/moves,items,abilities,typechart,learnsets.j
 				rating: ab.rating,
 				flags: ab.flags,
 				isNonstandard: 'Custom',
+				phnnOnly: true,
 				desc: ab.desc || ab.shortDesc || '',
 				shortDesc: ab.shortDesc || ab.desc || '',
 			};

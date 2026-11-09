@@ -1544,12 +1544,13 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 			case 'hail':
 			case 'snowscape':
 			case 'shadowsky':
+			case 'fog':
 				move.basePower *= 2;
 				break;
 			}
 		},
 		shortDesc: "Power doubles and type varies in each weather; ???-type in Shadow Sky.",
-		desc: "Power doubles if a weather condition other than Delta Stream is active, and this move's type changes to match. Ice type during Snow, Water type during Primordial Sea or Rain Dance, Rock type during Sandstorm, Fire type during Desolate Land or Sunny Day, and ??? type during Shadow Sky. If the user is holding Utility Umbrella and uses Weather Ball during Primordial Sea, Rain Dance, Desolate Land, or Sunny Day, this move remains Normal type and does not double in power.",
+		desc: "Power doubles if a weather condition other than Delta Stream is active, and this move's type changes to match. Ice type during Snow, Water type during Primordial Sea or Rain Dance, Rock type during Sandstorm, Fire type during Desolate Land or Sunny Day, and ??? type during Shadow Sky. During Fog it doubles in power but stays Normal type. If the user is holding Utility Umbrella and uses Weather Ball during Primordial Sea, Rain Dance, Desolate Land, or Sunny Day, this move remains Normal type and does not double in power.",
 	},
 	shadowrush: {
 		gen: 3,
@@ -1899,6 +1900,52 @@ export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 		secondary: undefined,
 		target: "all",
 		type: "Shadow",
+	},
+	fog: {
+		num: 0,
+		gen: 4,
+		accuracy: true,
+		basePower: 0,
+		category: "Status",
+		isNonstandard: "Custom",
+		name: "Fog",
+		shortDesc: "5 turns: moves that check accuracy have 3/5 accuracy.",
+		desc: "For 5 turns, the weather becomes Fog, the deep fog of Generation 4. The accuracy of every move that can miss, except OHKO moves, is multiplied by 3/5, for both sides. Weather Ball doubles in power but stays Normal type, and Defog clears the fog, even while Cloud Nine or Air Lock suppresses it. [Gen 9 No Nerfs] Custom Disguises only.",
+		pp: 5,
+		priority: 0,
+		flags: {},
+		weather: 'fog',
+		secondary: null,
+		target: "all",
+		type: "Normal",
+		contestType: "Beautiful",
+	},
+	defog: {
+		inherit: true,
+		onHit(target, source, move) {
+			let success = false;
+			if (!target.volatiles['substitute'] || move.infiltrates) success = !!this.boost({ evasion: -1 });
+			const removeAll = ['spikes', 'toxicspikes', 'stealthrock', 'stickyweb', 'gmaxsteelsurge'];
+			const removeTarget = ['reflect', 'lightscreen', 'auroraveil', 'safeguard', 'mist', ...removeAll];
+			for (const targetCondition of removeTarget) {
+				if (target.side.removeSideCondition(targetCondition)) {
+					if (!removeAll.includes(targetCondition)) continue;
+					this.add('-sideend', target.side, this.dex.conditions.get(targetCondition).name, '[from] move: Defog', `[of] ${source}`);
+					success = true;
+				}
+			}
+			for (const sideCondition of removeAll) {
+				if (source.side.removeSideCondition(sideCondition)) {
+					this.add('-sideend', source.side, this.dex.conditions.get(sideCondition).name, '[from] move: Defog', `[of] ${source}`);
+					success = true;
+				}
+			}
+			this.field.clearTerrain();
+			if (this.field.weather === 'fog' && this.field.clearWeather()) success = true;
+			return success;
+		},
+		shortDesc: "-1 evasion; ends user and target hazards/terrain, and Fog.",
+		desc: "Lowers the target's evasiveness by 1 stage. If this move is successful and whether or not the target's evasiveness was affected, the effects of Reflect, Light Screen, Aurora Veil, Safeguard, Mist, Spikes, Toxic Spikes, Stealth Rock, and Sticky Web end for the target's side, and the effects of Spikes, Toxic Spikes, Stealth Rock, and Sticky Web end for the user's side. Ends the effects of Electric, Grassy, Misty, and Psychic Terrain, and clears Fog as in Generation 4. Ignores a target's substitute, although a substitute will still block the lowering of evasiveness.",
 	},
 	attract: {
 		inherit: true,

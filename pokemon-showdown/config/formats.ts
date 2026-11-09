@@ -1824,3 +1824,10 @@ if (overlayDir) {
 		console.error(`PHNN_BETA_CONTENT formats overlay failed: ${err}`);
 	}
 }
+
+const formatNames = new Set(Formats.map(format => 'name' in format ? format.name : ''));
+for (const format of Formats) {
+	if (!('name' in format)) continue;
+	if (format.ruleset?.some(rule => formatNames.has(rule))) continue;
+	(format as { ruleset?: string[] }).ruleset = [...(format.ruleset || []), 'Custom Disguises Exclusives'];
+}
