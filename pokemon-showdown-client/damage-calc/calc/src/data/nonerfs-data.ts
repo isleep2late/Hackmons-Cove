@@ -6803,6 +6803,44 @@ export const NN_SPECIES_NEW: any = {
     },
     baseSpecies: "Salazzle"
   },
+  "Silvally-Question": {
+    types: [
+      "???"
+    ],
+    bs: {
+      hp: 95,
+      at: 95,
+      df: 95,
+      sa: 95,
+      sd: 95,
+      sp: 95
+    },
+    weightkg: 100.5,
+    gender: "N",
+    abilities: {
+      "0": "RKS System"
+    },
+    baseSpecies: "Silvally"
+  },
+  "Silvally-Shadow": {
+    types: [
+      "Shadow"
+    ],
+    bs: {
+      hp: 95,
+      at: 95,
+      df: 95,
+      sa: 95,
+      sd: 95,
+      sp: 95
+    },
+    weightkg: 100.5,
+    gender: "N",
+    abilities: {
+      "0": "RKS System"
+    },
+    baseSpecies: "Silvally"
+  },
   "Minior-Orange": {
     types: [
       "Rock",
@@ -14005,6 +14043,9 @@ export const NN_MOVES_PATCH: any = {
       3
     ]
   },
+  Defog: {
+    category: "Status"
+  },
   Acupressure: {
     category: "Status"
   },
@@ -14060,9 +14101,6 @@ export const NN_MOVES_PATCH: any = {
     category: "Status"
   },
   "Defend Order": {
-    category: "Status"
-  },
-  Defog: {
     category: "Status"
   },
   "Dragon Cheer": {
@@ -14637,6 +14675,11 @@ export const NN_MOVES_NEW: any = {
     type: "Shadow",
     category: "Status"
   },
+  Fog: {
+    bp: 0,
+    type: "Normal",
+    category: "Status"
+  },
   "Floaty Fall": {
     bp: 90,
     type: "Flying",
@@ -14669,6 +14712,11 @@ export const NN_MOVES_NEW: any = {
     target: "allAdjacentFoes",
     zp: 175,
     maxPower: 130
+  },
+  Thunderstorm: {
+    bp: 0,
+    type: "Electric",
+    category: "Status"
   },
   "Veevee Volley": {
     bp: 0,
@@ -15165,9 +15213,11 @@ export const NN_MOVES_NEW: any = {
 };
 
 export const NN_ITEMS_EXTRA: string[] = [
+  "5 Yen Coin",
   "Apple",
   "Attack Needle",
   "Big Leaf",
+  "Black Augurite",
   "Black Feather",
   "Blank Plate",
   "Broken Disk",
@@ -15194,6 +15244,7 @@ export const NN_ITEMS_EXTRA: string[] = [
   "Heart Stone",
   "Ice Fang",
   "Ice Wing",
+  "Infinity Extender",
   "Invisible Wall",
   "Jiggling Balloon",
   "Jynxite",
@@ -15204,14 +15255,17 @@ export const NN_ITEMS_EXTRA: string[] = [
   "Migraine Seed",
   "Mom's Love",
   "Mystic Petal",
+  "Peat Block",
   "Poison Fang",
   "Poison Stone",
   "Power Bracer SW",
   "Pretty Tail",
   "Questinium Z",
   "Question Mark Plate",
+  "Question Memory",
   "Quick Needle",
   "Shadow Cloak",
+  "Shadow Memory",
   "Shadow Plate",
   "Shadow Synergy Stone",
   "Shadowinium Z",

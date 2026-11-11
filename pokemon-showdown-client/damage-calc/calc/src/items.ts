@@ -423,6 +423,7 @@ export function getTechnoBlast(item: string) {
 }
 
 export function getMultiAttack(item: string) {
+  if (item === 'Question Memory') return '???' as TypeName;
   if (item.includes('Memory')) {
     return item.substring(0, item.indexOf(' ')) as TypeName;
   }

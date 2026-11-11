@@ -488,6 +488,8 @@ export class Pokemon implements PokemonDetails, PokemonHealth {
 			for (const volatile of volatilesToRemove) {
 				delete this.volatiles[volatile];
 			}
+		} else if (copySource === 'illusion' && this.volatiles.typechange?.[2]) {
+			delete this.volatiles.typechange;
 		}
 		// Shed Tail doesn't need special handling because the source already has
 		// its volatiles except Substitute cleared in switchOut.
@@ -1158,6 +1160,7 @@ export class Battle {
 	pseudoWeather = [] as WeatherState[];
 	weatherTimeLeft = 0;
 	weatherMinTimeLeft = 0;
+	infiniteFieldPending = false;
 	/**
 	 * The side from which perspective we're viewing. Should be identical to
 	 * `nearSide` except in multi battles, where `nearSide` is always the first
@@ -2705,7 +2708,7 @@ export class Battle {
 						poke.moddedType = types.split('/') as Dex.TypeName[];
 					}
 					poke.removeVolatile('typeadd' as ID);
-					poke.addVolatile('typechange' as ID, types);
+					poke.addVolatile('typechange' as ID, types, !!kwArgs.silent && !kwArgs.from);
 					if (!kwArgs.silent) {
 						this.scene.typeAnim(poke, types);
 					}
@@ -3042,6 +3045,10 @@ export class Battle {
 			let target = this.getPokemon(args[3]);
 			this.activateAbility(poke, effect);
 			switch (effect.id) {
+			case 'infinityextender':
+				poke.item = effect.name;
+				this.infiniteFieldPending = true;
+				break;
 			case 'poltergeist':
 				poke.item = kwArgs.item;
 				poke.itemEffect = 'disturbed';
@@ -3188,6 +3195,11 @@ export class Battle {
 			let side = this.getSide(args[1]);
 			let effect = Dex.getEffect(args[2]);
 			side.addSideCondition(effect, !!kwArgs.persistent);
+			if (this.infiniteFieldPending && side.sideConditions[effect.id]) {
+				side.sideConditions[effect.id][2] = 0;
+				side.sideConditions[effect.id][3] = 0;
+				this.infiniteFieldPending = false;
+			}
 
 			switch (effect.id) {
 			case 'tailwind':
@@ -3234,6 +3246,11 @@ export class Battle {
 				kwArgs.from = this.weather;
 			}
 			this.changeWeather(effect.name, poke, !!kwArgs.upkeep, ability);
+			if (this.infiniteFieldPending && !kwArgs.upkeep && this.weather) {
+				this.weatherTimeLeft = 0;
+				this.weatherMinTimeLeft = 0;
+				this.infiniteFieldPending = false;
+			}
 			this.log(args, kwArgs);
 			break;
 		}
@@ -3255,6 +3272,11 @@ export class Battle {
 				if (this.gen > 6) maxTimeLeft = 8;
 			}
 			if (kwArgs.persistent) minTimeLeft += 2;
+			if (this.infiniteFieldPending) {
+				minTimeLeft = 0;
+				maxTimeLeft = 0;
+				this.infiniteFieldPending = false;
+			}
 			this.addPseudoWeather(effect.name, minTimeLeft, maxTimeLeft);
 
 			switch (effect.id) {
@@ -3596,6 +3618,7 @@ export class Battle {
 			break;
 		}
 		case 'turn': {
+			this.infiniteFieldPending = false;
 			this.setTurn(parseInt(args[1], 10));
 			this.log(args);
 			break;

@@ -847,13 +847,15 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 	customdisguisesexclusives: {
 		effectType: 'ValidatorRule',
 		name: 'Custom Disguises Exclusives',
-		desc: "The -ate abilities for every type and Thunderstorm are legal only in Custom Disguises; Fog and Fog Machine only in [Gen 9 No Nerfs] Custom Disguises.",
+		desc: "The -ate abilities for every type, Thunderstorm, Infinity Extender, Question Memory, Shadow Memory, Silvally-Question and Silvally-Shadow are legal only in Custom Disguises; Fog and Fog Machine only in [Gen 9 No Nerfs] Custom Disguises.",
 		onValidateSet(set, format) {
 			const cdAbilities = [
 				'pesticize', 'umbranize', 'carbonize', 'specterize', 'fertilize', 'terranate', 'aggregate',
 				'ferronize', 'hydrate', 'pugilize', 'contaminate', 'prophetize', 'vantanate', 'anomalize',
 			];
 			const cdMoves = ['thunderstorm'];
+			const cdItems = ['infinityextender', 'questionmemory', 'shadowmemory'];
+			const cdSpecies = ['silvallyquestion', 'silvallyshadow'];
 			const nnCdAbilities = ['fogmachine'];
 			const nnCdMoves = ['fog'];
 			const isCD = format.id.includes('customdisguises');
@@ -862,6 +864,18 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 			const moves = (set.moves || []).map(m => this.dex.toID(m));
 			const problems: string[] = [];
 			const name = set.name || set.species;
+			const items = [set.item, ...(set.phItems || '').split('/')].map(i => this.dex.toID(i)).filter(Boolean);
+			for (const id of items) {
+				if (cdItems.includes(id) && !isCD) {
+					problems.push(`${name}'s item ${this.dex.items.get(id).name} is only allowed in Custom Disguises.`);
+				}
+			}
+			const speciesIds = [set.species, set.disguise].map(s => this.dex.toID(s)).filter(Boolean);
+			for (const id of speciesIds) {
+				if (cdSpecies.includes(id) && !isCD) {
+					problems.push(`${this.dex.species.get(id).name} is only allowed in Custom Disguises.`);
+				}
+			}
 			for (const id of abilities) {
 				if ((cdAbilities.includes(id) && !isCD) || (nnCdAbilities.includes(id) && !isNNCD)) {
 					const where = cdAbilities.includes(id) ? 'Custom Disguises' : '[Gen 9 No Nerfs] Custom Disguises';

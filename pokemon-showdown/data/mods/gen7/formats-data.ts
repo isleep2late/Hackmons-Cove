@@ -3363,6 +3363,14 @@ export const FormatsData: import('../../../sim/dex-species').ModdedSpeciesFormat
 		tier: "ZU",
 		doublesTier: "(DUU)",
 	},
+	silvallyquestion: {
+		isNonstandard: "Custom",
+		tier: "Illegal",
+	},
+	silvallyshadow: {
+		isNonstandard: "Custom",
+		tier: "Illegal",
+	},
 	minior: {
 		tier: "NU",
 		doublesTier: "(DUU)",

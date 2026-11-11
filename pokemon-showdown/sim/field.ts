@@ -9,6 +9,16 @@ import { State } from './state';
 import { type EffectState } from './pokemon';
 import { toID } from './dex';
 
+export function applyInfinityExtender(
+	battle: Battle, source: Pokemon | 'debug' | null | undefined, status: Condition, state: EffectState
+) {
+	if (!source || source === 'debug' || !state.duration || state.duration <= 2) return false;
+	if (!source.hasItem('infinityextender')) return false;
+	state.duration = 0;
+	battle.add('-activate', source, 'item: Infinity Extender');
+	return true;
+}
+
 export class Field {
 	readonly battle: Battle;
 	readonly id: ID;
@@ -79,6 +89,7 @@ export class Field {
 			if (!source) throw new Error(`setting weather without a source`);
 			this.weatherState.duration = status.durationCallback.call(this.battle, source, source, sourceEffect);
 		}
+		applyInfinityExtender(this.battle, source, status, this.weatherState);
 		if (!this.battle.singleEvent('FieldStart', status, this.weatherState, this, source, sourceEffect)) {
 			this.weather = prevWeather;
 			this.weatherState = prevWeatherState;
@@ -155,6 +166,7 @@ export class Field {
 		if (status.durationCallback) {
 			this.terrainState.duration = status.durationCallback.call(this.battle, source, source, sourceEffect);
 		}
+		applyInfinityExtender(this.battle, source, status, this.terrainState);
 		if (!this.battle.singleEvent('FieldStart', status, this.terrainState, this, source, sourceEffect)) {
 			this.terrain = prevTerrain;
 			this.terrainState = prevTerrainState;
@@ -215,6 +227,7 @@ export class Field {
 			if (!source) throw new Error(`setting fieldcond without a source`);
 			state.duration = status.durationCallback.call(this.battle, source, source, sourceEffect);
 		}
+		applyInfinityExtender(this.battle, source, status, state);
 		if (!this.battle.singleEvent('FieldStart', status, state, this, source, sourceEffect)) {
 			delete this.pseudoWeather[status.id];
 			return false;

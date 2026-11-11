@@ -978,6 +978,11 @@ export const ItemsText: { [id: IDEntry]: ItemText } = {
 		name: "Incinium Z",
 		shortDesc: "If held by an Incineroar with Darkest Lariat, it can use Malicious Moonsault.",
 	},
+	infinityextender: {
+		name: "Infinity Extender",
+		shortDesc: "Weather, terrain, rooms and side effects the holder starts never end.",
+		activate: "  {POKEMON}'s Infinity Extender made the effect last forever!",
+	},
 	insectplate: {
 		name: "Insect Plate",
 		shortDesc: "Holder's Bug-type attacks have 1.2× power. Judgment is Bug type.",
@@ -1592,6 +1597,10 @@ export const ItemsText: { [id: IDEntry]: ItemText } = {
 		name: "Qualot Berry",
 		shortDesc: "Cannot be eaten by the holder. No effect when eaten with Bug Bite or Pluck.",
 	},
+	questionmemory: {
+		name: "Question Memory",
+		shortDesc: "Holder's Multi-Attack is ??? type.",
+	},
 	quickball: {
 		name: "Quick Ball",
 		shortDesc: "A Poke Ball that provides a better catch rate at the start of a wild encounter.",
@@ -1803,6 +1812,10 @@ export const ItemsText: { [id: IDEntry]: ItemText } = {
 	sharpedonite: {
 		name: "Sharpedonite",
 		shortDesc: "If held by a Sharpedo, this item allows it to Mega Evolve in battle.",
+	},
+	shadowmemory: {
+		name: "Shadow Memory",
+		shortDesc: "Holder's Multi-Attack is Shadow type.",
 	},
 	shedshell: {
 		name: "Shed Shell",

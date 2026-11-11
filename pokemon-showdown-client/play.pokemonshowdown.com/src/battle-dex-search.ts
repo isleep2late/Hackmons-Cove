@@ -690,6 +690,7 @@ export class DexSearch {
 const CUSTOM_DISGUISES_ONLY = [
 	'pesticize', 'umbranize', 'carbonize', 'specterize', 'fertilize', 'terranate', 'aggregate',
 	'ferronize', 'hydrate', 'pugilize', 'contaminate', 'prophetize', 'vantanate', 'anomalize', 'thunderstorm',
+	'infinityextender', 'questionmemory', 'shadowmemory', 'silvallyquestion', 'silvallyshadow',
 ];
 const NO_NERFS_CUSTOM_DISGUISES_ONLY = ['fog', 'fogmachine'];
 function isCustomDisguisesExclusiveBlocked(format: string, id: string, gen: number) {
@@ -947,7 +948,7 @@ abstract class BattleTypedSearch<T extends SearchType> {
 				if (!(id in legalityFilter)) {
 					const isOpenCustom = this.format.includes('customdisguises') || this.format.includes('customgame');
 					const isNoNerfs = this.format.includes('nonerfs') || this.format.includes('phnn') || this.format.includes('unified');
-					if ((this.searchType === 'ability' || this.searchType === 'move') &&
+					if (['ability', 'move', 'item', 'pokemon'].includes(this.searchType) &&
 						isCustomDisguisesExclusiveBlocked(this.format, id, this.dex.gen)) {
 						this.baseIllegalResults.push([this.searchType, id as ID]);
 						this.illegalReasons[id] = 'Illegal';
@@ -1102,7 +1103,8 @@ abstract class BattleTypedSearch<T extends SearchType> {
 				return true;
 			}
 		}
-		if (this.formatType?.includes('natdex') && move.isNonstandard && move.isNonstandard !== 'Past') {
+		if (this.formatType?.includes('natdex') && move.isNonstandard &&
+			move.isNonstandard !== 'Past' && move.isNonstandard !== 'Unobtainable') {
 			return false;
 		}
 		const gen = this.dex.gen;
