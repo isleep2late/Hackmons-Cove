@@ -3047,6 +3047,13 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 		gen: 7,
 		isNonstandard: "Past",
 	},
+	infinityextender: {
+		name: "Infinity Extender",
+		spritenum: 345,
+		num: 0,
+		gen: 2,
+		isNonstandard: "Custom",
+	},
 	insectplate: {
 		name: "Insect Plate",
 		spritenum: 223,
@@ -5024,6 +5031,22 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 		num: 171,
 		gen: 3,
 	},
+	questionmemory: {
+		name: "Question Memory",
+		spritenum: 345,
+		onMemory: '???',
+		onTakeItem(item, pokemon, source) {
+			if ((source?.baseSpecies.num === 773) || pokemon.baseSpecies.num === 773) {
+				return false;
+			}
+			return true;
+		},
+		forcedForme: "Silvally-Question",
+		itemUser: ["Silvally-Question"],
+		num: 0,
+		gen: 7,
+		isNonstandard: "Custom",
+	},
 	quickball: {
 		name: "Quick Ball",
 		spritenum: 372,
@@ -5674,6 +5697,22 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 		num: 759,
 		gen: 6,
 		isNonstandard: "Past",
+	},
+	shadowmemory: {
+		name: "Shadow Memory",
+		spritenum: 345,
+		onMemory: 'Shadow',
+		onTakeItem(item, pokemon, source) {
+			if ((source?.baseSpecies.num === 773) || pokemon.baseSpecies.num === 773) {
+				return false;
+			}
+			return true;
+		},
+		forcedForme: "Silvally-Shadow",
+		itemUser: ["Silvally-Shadow"],
+		num: 0,
+		gen: 7,
+		isNonstandard: "Custom",
 	},
 	shedshell: {
 		name: "Shed Shell",

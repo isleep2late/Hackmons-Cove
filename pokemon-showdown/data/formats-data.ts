@@ -4578,6 +4578,14 @@ export const FormatsData: import('../sim/dex-species').SpeciesFormatsDataTable =
 		tier: "Illegal",
 		natDexTier: "RU",
 	},
+	silvallyquestion: {
+		isNonstandard: "Custom",
+		tier: "Illegal",
+	},
+	silvallyshadow: {
+		isNonstandard: "Custom",
+		tier: "Illegal",
+	},
 	minior: {
 		tier: "ZU",
 		doublesTier: "(DUU)",

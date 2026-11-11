@@ -1461,6 +1461,12 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 					overrideSpeciesData[id][key] = modEntry[key];
 				}
 			}
+			if ((modEntry.gender || '') !== (parentEntry.gender || '') ||
+				JSON.stringify(modEntry.genderRatio) !== JSON.stringify(parentEntry.genderRatio)) {
+				if (!overrideSpeciesData[id]) overrideSpeciesData[id] = {};
+				overrideSpeciesData[id].gender = modEntry.gender || '';
+				overrideSpeciesData[id].genderRatio = modEntry.genderRatio;
+			}
 		}
 
 		const overrideMoveData = {};

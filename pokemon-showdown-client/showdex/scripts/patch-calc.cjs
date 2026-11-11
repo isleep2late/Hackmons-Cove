@@ -117,6 +117,11 @@ const PATCHES = [
 		find: '        lastTurnEot -= Math.floor(((toxicCounter + (hits - 1)) * maxHP) / 16);',
 		replace: "        lastTurnEot -= (((typeof globalThis !== 'undefined') && globalThis.__phnnCalc && globalThis.__phnnCalc.toxicTick) ? globalThis.__phnnCalc.toxicTick((toxicCounter + (hits - 1)), maxHP) : Math.floor(((toxicCounter + (hits - 1)) * maxHP) / 16));",
 	},
+	{
+		file: '../items.js',
+		find: "function getMultiAttack(item) {\n    if (item.includes('Memory')) {",
+		replace: "function getMultiAttack(item) {\n    if (item === 'Question Memory') {\n        return '???';\n    }\n    if (item.includes('Memory')) {",
+	},
 ];
 
 let ok = true;
