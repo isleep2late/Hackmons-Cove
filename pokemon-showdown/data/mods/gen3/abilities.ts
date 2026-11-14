@@ -303,7 +303,7 @@ export const Abilities: import('../../../sim/dex-abilities').ModdedAbilityDataTa
 			move.category = specialTypes.includes(move.type) ? 'Special' : 'Physical';
 		},
 	},
-	pugilize: {
+	pulverize: {
 		inherit: true,
 		onModifyTypePriority: undefined,
 		onModifyType: undefined,

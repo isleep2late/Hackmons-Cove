@@ -1317,6 +1317,7 @@ export const Aliases: import('../sim/dex').AliasesTable = {
 	oceanic: "Oceanic Operetta",
 	oo: "Oceanic Operetta",
 	pp: "Pulverizing Pancake",
+	pugilize: "Pulverize",
 	pulverizing: "Pulverizing Pancake",
 	sar: "Sinister Arrow Raid",
 	sinister: "Sinister Arrow Raid",

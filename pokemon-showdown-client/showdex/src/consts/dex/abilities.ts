@@ -146,7 +146,7 @@ export const PokemonMoveSkinAbilities: Record<AbilityName, Showdown.TypeName> = 
   Aggregate: 'Rock',
   Ferronize: 'Steel',
   Hydrate: 'Water',
-  Pugilize: 'Fighting',
+  Pulverize: 'Fighting',
   Contaminate: 'Poison',
   Prophetize: 'Psychic',
   Vantanate: 'Shadow',
@@ -155,5 +155,5 @@ export const PokemonMoveSkinAbilities: Record<AbilityName, Showdown.TypeName> = 
 
 export const PhnnCustomDisguisesAteAbilities: AbilityName[] = [
   'Pesticize', 'Umbranize', 'Carbonize', 'Specterize', 'Fertilize', 'Terranate', 'Aggregate',
-  'Ferronize', 'Hydrate', 'Pugilize', 'Contaminate', 'Prophetize', 'Vantanate', 'Anomalize',
+  'Ferronize', 'Hydrate', 'Pulverize', 'Contaminate', 'Prophetize', 'Vantanate', 'Anomalize',
 ] as AbilityName[];

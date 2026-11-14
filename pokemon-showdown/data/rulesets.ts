@@ -851,7 +851,7 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 		onValidateSet(set, format) {
 			const cdAbilities = [
 				'pesticize', 'umbranize', 'carbonize', 'specterize', 'fertilize', 'terranate', 'aggregate',
-				'ferronize', 'hydrate', 'pugilize', 'contaminate', 'prophetize', 'vantanate', 'anomalize',
+				'ferronize', 'hydrate', 'pulverize', 'contaminate', 'prophetize', 'vantanate', 'anomalize',
 			];
 			const cdMoves = ['thunderstorm'];
 			const cdItems = ['infinityextender', 'questionmemory', 'shadowmemory'];
