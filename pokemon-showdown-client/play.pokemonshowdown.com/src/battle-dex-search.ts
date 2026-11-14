@@ -689,7 +689,7 @@ export class DexSearch {
 
 const CUSTOM_DISGUISES_ONLY = [
 	'pesticize', 'umbranize', 'carbonize', 'specterize', 'fertilize', 'terranate', 'aggregate',
-	'ferronize', 'hydrate', 'pugilize', 'contaminate', 'prophetize', 'vantanate', 'anomalize', 'thunderstorm',
+	'ferronize', 'hydrate', 'pulverize', 'contaminate', 'prophetize', 'vantanate', 'anomalize', 'thunderstorm',
 	'infinityextender', 'questionmemory', 'shadowmemory', 'silvallyquestion', 'silvallyshadow',
 ];
 const NO_NERFS_CUSTOM_DISGUISES_ONLY = ['fog', 'fogmachine'];

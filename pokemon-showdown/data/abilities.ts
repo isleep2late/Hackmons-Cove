@@ -3819,7 +3819,7 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 		rating: 4,
 		num: 227,
 	},
-	pugilize: {
+	pulverize: {
 		isNonstandard: "Custom",
 		onModifyTypePriority: -1,
 		onModifyType(move, pokemon) {
@@ -3837,7 +3837,7 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 			if (move.typeChangerBoosted === this.effect) return this.chainModify([5325, 4096]);
 		},
 		flags: {},
-		name: "Pugilize",
+		name: "Pulverize",
 		rating: 4,
 		num: 0,
 		gen: 3,

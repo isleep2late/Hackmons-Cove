@@ -148,7 +148,7 @@ export class ModifiableValue {
 
 const CUSTOM_ATES: [string, Dex.TypeName][] = [
 	['Pesticize', 'Bug'], ['Umbranize', 'Dark'], ['Carbonize', 'Fire'], ['Specterize', 'Ghost'], ['Fertilize', 'Grass'],
-	['Terranate', 'Ground'], ['Aggregate', 'Rock'], ['Ferronize', 'Steel'], ['Hydrate', 'Water'], ['Pugilize', 'Fighting'],
+	['Terranate', 'Ground'], ['Aggregate', 'Rock'], ['Ferronize', 'Steel'], ['Hydrate', 'Water'], ['Pulverize', 'Fighting'],
 	['Contaminate', 'Poison'], ['Prophetize', 'Psychic'], ['Vantanate', 'Shadow'], ['Anomalize', '???'],
 ];
 

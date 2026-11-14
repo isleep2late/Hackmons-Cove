@@ -1450,8 +1450,8 @@ export const AbilitiesText: { [id: IDEntry]: AbilityText } = {
 		name: "Psychic Surge",
 		shortDesc: "On switch-in, this Pokemon summons Psychic Terrain.",
 	},
-	pugilize: {
-		name: "Pugilize",
+	pulverize: {
+		name: "Pulverize",
 		desc: "This Pokemon's Normal-type moves become Fighting-type moves and have their power multiplied by 1.3. In Generation 3 the move's category follows its new type. Custom Disguises only.",
 		shortDesc: "This Pokemon's Normal-type moves become Fighting type and have 1.3x power.",
 	},
