@@ -14,6 +14,7 @@
  */
 
 import { isUpperStaff } from './admin';
+import { hackExists } from '../romhacks';
 import { Utils, ProcessManager } from '../../lib';
 import type { UserSettings } from '../users';
 import type { GlobalPermission, RoomPermission } from '../user-groups';
@@ -1666,7 +1667,19 @@ export const commands: Chat.ChatCommands = {
 		const format = originalFormat.effectType === 'Format' ? originalFormat : Dex.formats.get('Anything Goes');
 		if (format.effectType !== 'Format') return this.popupReply(this.TL`Please provide a valid format.`);
 
-		return TeamValidatorAsync.get(format.id).validateTeam(user.battleSettings.team, { user: user.id }).then(result => {
+		let validatorFormat: string = format.id;
+		if (format.id.startsWith('gen9romhacks') && target.includes('@@@')) {
+			try {
+				validatorFormat = Dex.formats.validate(target);
+			} catch (e: any) {
+				return this.popupReply(e.message);
+			}
+			const romHack = Dex.romHackOf(Dex.formats.get(validatorFormat));
+			if (romHack && !hackExists(romHack)) {
+				return this.popupReply(`That patch has not been uploaded to this server. Upload it in the teambuilder first.`);
+			}
+		}
+		return TeamValidatorAsync.get(validatorFormat).validateTeam(user.battleSettings.team, { user: user.id }).then(result => {
 			const matchMessage = (originalFormat === format ? "" : this.TL`The format '${originalFormat.name}' was not found.`);
 			if (result.startsWith('1')) {
 				connection.popup(`${(matchMessage ? matchMessage + "\n\n" : "")}${this.TL`Your team is valid for ${format.name}.`}`);

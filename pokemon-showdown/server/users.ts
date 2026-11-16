@@ -380,6 +380,7 @@ export class User extends Chat.MessageContext {
 
 	settings: UserSettings;
 
+	romHacks?: Set<string>;
 	battleSettings: {
 		team: string,
 		hidden: boolean,

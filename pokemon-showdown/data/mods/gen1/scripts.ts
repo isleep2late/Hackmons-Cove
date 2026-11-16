@@ -432,7 +432,9 @@ export const Scripts: ModdedBattleScriptsData = {
 
 			// Calculate true accuracy for gen 1, which uses 0-255.
 			// Gen 1 uses the same boost table for accuracy and evasiveness as every other stat
-			const boostTable = [25, 28, 33, 40, 50, 66, 100, 150, 200, 250, 300, 350, 400];
+			const hackMechanics = this.dex.romHack?.mechanics;
+			const boostTable = this.dex.romHack?.engine.accPercent ||
+				[25, 28, 33, 40, 50, 66, 100, 150, 200, 250, 300, 350, 400];
 			if (accuracy !== true) {
 				accuracy = Math.floor(accuracy * 255 / 100);
 				// Rage and Thrash/Petal Dance accuracy bug
@@ -457,7 +459,8 @@ export const Scripts: ModdedBattleScriptsData = {
 			// Moves that target the user do not suffer from the 1/256 miss chance.
 			if (move.target === 'self' && accuracy !== true) accuracy++;
 			// 1/256 chance of missing always, no matter what. Besides the aforementioned exceptions.
-			if (accuracy !== true && !this.battle.randomChance(accuracy, 256)) {
+			if (accuracy !== true && !(accuracy === 255 && hackMechanics?.miss1in256 === false) &&
+				!this.battle.randomChance(accuracy, 256)) {
 				this.battle.attrLastMove('[miss]');
 				this.battle.add('-miss', pokemon);
 				if (accuracy === 255) this.battle.hint("In Gen 1, moves with 100% accuracy can still miss 1/256 of the time.");
@@ -472,7 +475,8 @@ export const Scripts: ModdedBattleScriptsData = {
 					if (Array.isArray(hits)) {
 						// Yes, it's hardcoded... meh
 						if (hits[0] === 2 && hits[1] === 5) {
-							hits = this.battle.sample([2, 2, 2, 3, 3, 3, 4, 5]);
+							const hackSample = this.dex.romHack?.engine.multiHitSample;
+							hits = this.battle.sample(hackSample || [2, 2, 2, 3, 3, 3, 4, 5]);
 						} else {
 							hits = this.battle.random(hits[0], hits[1] + 1);
 						}
@@ -817,8 +821,9 @@ export const Scripts: ModdedBattleScriptsData = {
 			if (!isCrit) {
 				// In gen 1, the critical chance is based on speed.
 				// First, we get the base speed, divide it by 2 and floor it. This is our current crit chance.
-				let critChance = Math.floor((source.set.phBaseStats?.spe ??
+				const critBase = Math.floor((source.set.phBaseStats?.spe ??
 					this.dex.species.get(source.set.species).baseStats['spe']) / 2);
+				let critChance = critBase;
 
 				// Now we check for focus energy volatile.
 				if (source.volatiles['focusenergy']) {
@@ -841,8 +846,15 @@ export const Scripts: ModdedBattleScriptsData = {
 				// Last, we check deppending on ratio if the move critical hits or not.
 				// We compare our critical hit chance against a random number between 0 and 255.
 				// If the random number is lower, we get a critical hit. This means there is always a 1/255 chance of not hitting critically.
+				const hackCrit = this.dex.romHack?.mechanics.gen1Crit;
+				if (hackCrit && (move.critRatio === 1 || move.critRatio === 2)) {
+					const hackFactor = source.volatiles['focusenergy'] ?
+						hackCrit[move.critRatio === 2 ? 'focusEnergyHigh' : 'focusEnergy'] :
+						hackCrit[move.critRatio === 2 ? 'high' : 'normal'];
+					if (hackFactor !== undefined) critChance = Math.min(255, Math.floor(critBase * 2 * hackFactor));
+				}
 				if (critChance > 0) {
-					isCrit = this.battle.randomChance(critChance, 256);
+					isCrit = (hackCrit?.cap === 256 && critChance === 255) || this.battle.randomChance(critChance, 256);
 				}
 			}
 			if (isCrit) target.getMoveHitData(move).crit = true;
@@ -931,7 +943,7 @@ export const Scripts: ModdedBattleScriptsData = {
 
 			// STAB damage bonus, the "???" type never gets STAB
 			if (type !== '???' && source.hasType(type)) {
-				damage += Math.floor(damage / 2);
+				damage += Math.floor(damage * ((this.dex.romHack?.mechanics.stab ?? 1.5) - 1));
 			}
 
 			// Type effectiveness.
@@ -964,8 +976,9 @@ export const Scripts: ModdedBattleScriptsData = {
 
 			// Apply random factor if damage is greater than 1
 			if (damage > 1) {
-				damage *= this.battle.random(217, 256);
-				damage = Math.floor(damage / 255);
+				const hackRoll = this.dex.romHack?.mechanics.damageRoll;
+				damage *= hackRoll ? this.battle.random(hackRoll.min, hackRoll.max + 1) : this.battle.random(217, 256);
+				damage = Math.floor(damage / (hackRoll ? hackRoll.den : 255));
 			}
 
 			// And we are done.

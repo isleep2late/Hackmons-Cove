@@ -596,3 +596,10 @@ for (const abilities of ABILITIES) {
   }
   ABILITIES_BY_ID.push(map);
 }
+
+export const extendAbilities = ((Kind: typeof Ability) => (generation: number, names: string[]) => {
+  for (let i = 0; i < names.length; i++) {
+    const entry = new Kind(names[i]);
+    if (!ABILITIES_BY_ID[generation][entry.id]) ABILITIES_BY_ID[generation][entry.id] = entry;
+  }
+})(Ability);

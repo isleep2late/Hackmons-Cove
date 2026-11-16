@@ -343,6 +343,10 @@ export class ServerStream extends Streams.ObjectReadWriteStream<string> {
 			const staticServer = new StaticServer('./server/static');
 			const staticRequestHandler = (req: http.IncomingMessage, res: http.ServerResponse) => {
 				// console.log(`static rq: ${req.socket.remoteAddress}:${req.socket.remotePort} -> ${req.socket.localAddress}:${req.socket.localPort} - ${req.method} ${req.url} ${req.httpVersion} - ${req.rawHeaders.join('|')}`);
+				if (req.url?.startsWith('/romhacks/')) {
+					(require('./romhacks') as typeof import('./romhacks')).handleRequest(req, res);
+					return;
+				}
 				req.resume();
 				req.addListener('end', () => {
 					if (config.customhttpresponse?.(req, res)) {

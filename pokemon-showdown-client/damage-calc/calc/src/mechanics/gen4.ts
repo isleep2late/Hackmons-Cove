@@ -19,6 +19,8 @@ import {
   checkMultihitBoost,
   countBoosts,
   handleFixedDamageMoves,
+  enterHackMechanics, hackApply, hackModify, hackMultiplier, hackStabApply, hackStageStat,
+  hackItemApply, hackItemFloor, hackWeatherMultiplier, hackRollCount, hackRollValue, hackRollDen,
 } from './util';
 
 export function calculateDPP(
@@ -28,6 +30,7 @@ export function calculateDPP(
   move: Move,
   field: Field
 ) {
+  enterHackMechanics(gen);
   // #region Initial
 
   checkAirLock(attacker, field);
@@ -228,7 +231,7 @@ export function calculateDPP(
   );
 
   if (attacker.hasStatus('brn') && isPhysical && !attacker.hasAbility('Guts')) {
-    baseDamage = Math.floor(baseDamage * 0.5);
+    baseDamage = hackApply('burnAttack', baseDamage, Math.floor(baseDamage * 0.5));
     desc.isBurned = true;
   }
 
@@ -242,7 +245,7 @@ export function calculateDPP(
       stabMod = 2;
       desc.attackerAbility = attacker.ability;
     } else {
-      stabMod = 1.5;
+      stabMod = hackMultiplier('stab', 1.5);
     }
   }
 
@@ -281,9 +284,11 @@ export function calculateDPP(
   }
 
   const damage: number[] = [];
-  for (let i = 0; i < 16; i++) {
-    damage[i] = Math.floor((baseDamage * (85 + i)) / 100);
-    damage[i] = Math.floor(damage[i] * stabMod);
+  const rollCount = hackRollCount(16);
+  const rollDen = hackRollDen(100);
+  for (let i = 0; i < rollCount; i++) {
+    damage[i] = Math.floor((baseDamage * hackRollValue(i, 85)) / rollDen);
+    damage[i] = hackStabApply(damage[i], stabMod);
     damage[i] = Math.floor(damage[i] * type1Effectiveness);
     damage[i] = Math.floor(damage[i] * type2Effectiveness);
     damage[i] = Math.floor(damage[i] * filterMod);
@@ -320,16 +325,16 @@ export function calculateDPP(
         ) / defense
       );
       if (attacker.hasStatus('brn') && isPhysical && !attacker.hasAbility('Guts')) {
-        baseDamage = Math.floor(baseDamage * 0.5);
+        baseDamage = hackApply('burnAttack', baseDamage, Math.floor(baseDamage * 0.5));
         desc.isBurned = true;
       }
       baseDamage = calculateFinalModsDPP(baseDamage, attacker, move, field, desc, isCritical);
 
       const damageArray = [];
-      for (let i = 0; i < 16; i++) {
+      for (let i = 0; i < rollCount; i++) {
         let newFinalDamage = 0;
-        newFinalDamage = Math.floor((baseDamage * (85 + i)) / 100);
-        newFinalDamage = Math.floor(newFinalDamage * stabMod);
+        newFinalDamage = Math.floor((baseDamage * hackRollValue(i, 85)) / rollDen);
+        newFinalDamage = hackStabApply(newFinalDamage, stabMod);
         newFinalDamage = Math.floor(newFinalDamage * type1Effectiveness);
         newFinalDamage = Math.floor(newFinalDamage * type2Effectiveness);
         newFinalDamage = Math.floor(newFinalDamage * filterMod);
@@ -469,7 +474,7 @@ export function calculateBPModsDPP(
   const isPhysical = move.category === 'Physical';
   if ((attacker.hasItem('Muscle Band') && isPhysical) ||
       (attacker.hasItem('Wise Glasses') && !isPhysical)) {
-    basePower = Math.floor(basePower * 1.1);
+    basePower = hackItemApply(attacker.item, basePower, Math.floor(basePower * 1.1));
     desc.attackerItem = attacker.item;
   } else if (move.hasType(getItemBoostType(attacker.item)) ||
     (attacker.hasItem('Adamant Orb') &&
@@ -483,7 +488,7 @@ export function calculateBPModsDPP(
      move.hasType('Ghost', 'Dragon')) ||
     (move.named('Struggle') && getItemBoostType(attacker.item) === 'Normal')
   ) {
-    basePower = Math.floor(basePower * 1.2);
+    basePower = hackItemApply(attacker.item, basePower, Math.floor(basePower * 1.2));
     desc.attackerItem = attacker.item;
   }
 
@@ -691,7 +696,17 @@ function calculateFinalModsDPP(
     baseDamage = Math.floor((baseDamage * 3) / 4);
   }
 
-  if ((field.hasWeather('Sun') && move.hasType('Fire')) ||
+  const hackWeather = hackWeatherMultiplier(field.weather, move.type);
+  if (hackWeather !== undefined) {
+    if (hackWeather !== 1) {
+      baseDamage = hackModify(baseDamage, hackWeather);
+      desc.weather = field.weather;
+    }
+    if (move.named('Solar Beam') && field.hasWeather('Rain', 'Sand', 'Hail')) {
+      baseDamage = Math.floor(baseDamage * 0.5);
+      desc.weather = field.weather;
+    }
+  } else if ((field.hasWeather('Sun') && move.hasType('Fire')) ||
       (field.hasWeather('Rain') && move.hasType('Water'))) {
     baseDamage = Math.floor(baseDamage * 1.5);
     desc.weather = field.weather;
@@ -716,13 +731,13 @@ function calculateFinalModsDPP(
       baseDamage *= 3;
       desc.attackerAbility = attacker.ability;
     } else {
-      baseDamage *= 2;
+      baseDamage = hackApply('critMultiplier', baseDamage, baseDamage * 2);
     }
     desc.isCritical = isCritical;
   }
 
   if (attacker.hasItem('Life Orb')) {
-    baseDamage = Math.floor(baseDamage * 1.3);
+    baseDamage = hackItemFloor(attacker.item, baseDamage, Math.floor(baseDamage * 1.3));
     desc.attackerItem = attacker.item;
   }
 
@@ -731,6 +746,8 @@ function calculateFinalModsDPP(
 
 function getSimpleModifiedStat(stat: number, mod: number) {
   const simpleMod = Math.min(6, Math.max(-6, mod * 2));
+  const staged = hackStageStat(stat, simpleMod);
+  if (staged !== undefined) return staged;
   return simpleMod > 0
     ? Math.floor((stat * (2 + simpleMod)) / 2)
     : simpleMod < 0 ? Math.floor((stat * 2) / (2 - simpleMod)) : stat;

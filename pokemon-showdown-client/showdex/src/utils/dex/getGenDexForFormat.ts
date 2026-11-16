@@ -61,6 +61,6 @@ export const getGenDexForFormat = (
     num: gen,
     natures: getNaturesDex(),
     species,
-    types: getTypesDex(gen),
+    types: getTypesDex(gen, format),
   } as unknown as Generation;
 };

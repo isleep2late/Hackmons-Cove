@@ -50,7 +50,12 @@ import {
   writeClipboardText,
 } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
-import { hasNickname, legalLockedFormat, toggleableAbility } from '@showdex/utils/dex';
+import {
+  getRomHackProfile,
+  hasNickname,
+  legalLockedFormat,
+  toggleableAbility,
+} from '@showdex/utils/dex';
 import { useRandomUuid } from '@showdex/utils/hooks';
 import { openSmogonDex } from '@showdex/utils/host';
 import { capitalize } from '@showdex/utils/humanize';
@@ -729,6 +734,7 @@ export const PokeInfo = ({
               highlight={gen < 9 || format?.includes('champions') || !pokemon?.terastallized}
               highlightTypes={pokemon?.types}
               revealedTypes={pokemon?.types}
+              extraTypes={getRomHackProfile(format)?.newTypes as Showdown.TypeName[]}
               readOnly={!editableTypes}
               disabled={!pokemon?.speciesForme}
             />

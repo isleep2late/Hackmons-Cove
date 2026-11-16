@@ -340,6 +340,10 @@ export const calcSmogonMatchup = (
       ? (result.damage as (number | number[])[]).flat(Infinity as 1) as number[]
       : [result.damage as number];
 
+    if (matchup.move?.category === 'Status') {
+      return matchup;
+    }
+
     if (rolls.length && !rolls.some((n) => Number(n) > 0)) {
       matchup.damageRange = '0%';
       matchup.koChance = 'immune';

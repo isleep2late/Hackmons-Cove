@@ -2,7 +2,7 @@ import { type GenerationNum } from '@smogon/calc';
 import { PokemonBoostNames } from '@showdex/consts/dex';
 import { type CalcdexPokemon } from '@showdex/interfaces/calc';
 import { clamp } from '@showdex/utils/core';
-import { detectLegacyGen } from '@showdex/utils/dex';
+import { detectLegacyGen, getRomHackMechanics, readRomHackStages } from '@showdex/utils/dex';
 import { calcStatAutoBoosts } from './calcStatAutoBoosts';
 import { type CalcdexStatModRecorder, statModRecorder } from './statModRecorder';
 
@@ -31,7 +31,15 @@ export const calcBoostedStats = (
     ? [1, 100 / 66, 2, 2.5, 100 / 33, 100 / 28, 4]
     : [1, 1.5, 2, 2.5, 3, 3.5, 4];
 
+  const hackStages = readRomHackStages(getRomHackMechanics(format));
+
   const modifier = (stage: number) => {
+    const hackStage = hackStages?.[6 + clamp(-6, Math.trunc(stage), 6)];
+
+    if (hackStage) {
+      return hackStage[0] / hackStage[1];
+    }
+
     const index = clamp(0, Math.abs(stage), boostTable.length - 1);
     const value = boostTable[index] || 1;
 

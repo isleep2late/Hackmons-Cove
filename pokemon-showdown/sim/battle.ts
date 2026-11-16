@@ -1974,8 +1974,14 @@ export class Battle {
 				}
 			}
 		}
-		if (this.gen === 2) this.quickClawRoll = this.randomChance(60, 256);
-		if (this.gen === 3) this.quickClawRoll = this.randomChance(1, 5);
+		const hackClaw = this.dex.romHack?.mechanics.items?.quickclaw?.chance;
+		if (hackClaw && (this.gen === 2 || this.gen === 3)) {
+			this.quickClawRoll = this.randomChance(hackClaw[0], hackClaw[1]);
+		} else if (this.gen === 2) {
+			this.quickClawRoll = this.randomChance(60, 256);
+		} else if (this.gen === 3) {
+			this.quickClawRoll = this.randomChance(1, 5);
+		}
 
 		this.makeRequest('move');
 	}

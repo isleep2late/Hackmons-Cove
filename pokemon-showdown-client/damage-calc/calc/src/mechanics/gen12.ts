@@ -5,7 +5,11 @@ import type {Field} from '../field';
 import type {Move} from '../move';
 import type {Pokemon} from '../pokemon';
 import {Result} from '../result';
-import {computeFinalStats, getMoveEffectiveness, handleFixedDamageMoves} from './util';
+import {
+  computeFinalStats, getMoveEffectiveness, handleFixedDamageMoves, enterHackMechanics,
+  hackFloor, hackHasMultiplier, hackMultiplier, hackItemFloor, hackWeatherMultiplier,
+  hackRollCount, hackRollValue, hackRollDen,
+} from './util';
 import {halfHPDamage, psywaveRolls} from './fixed-damage';
 
 export function calculateRBYGSC(
@@ -15,6 +19,7 @@ export function calculateRBYGSC(
   move: Move,
   field: Field
 ) {
+  enterHackMechanics(gen);
   computeFinalStats(gen, attacker, defender, field, 'atk', 'def', 'spa', 'spd', 'spe');
 
   const desc: RawDesc = {
@@ -167,7 +172,7 @@ export function calculateRBYGSC(
     if (attacker.boosts[attackStat] !== 0) desc.attackBoost = attacker.boosts[attackStat];
     if (defender.boosts[defenseStat] !== 0) desc.defenseBoost = defender.boosts[defenseStat];
     if (isPhysical && attacker.hasStatus('brn')) {
-      at = Math.floor(at / 2);
+      at = hackFloor('burnAttack', at, Math.floor(at / 2));
       desc.isBurned = true;
     }
   }
@@ -222,7 +227,7 @@ export function calculateRBYGSC(
 
   // Gen 1 handles move.isCrit above by doubling level
   if (gen.num === 2 && move.isCrit) {
-    baseDamage *= 2;
+    baseDamage = hackFloor('critMultiplier', baseDamage, baseDamage * 2);
     desc.isCritical = true;
   }
 
@@ -239,13 +244,23 @@ export function calculateRBYGSC(
 
   if (move.hasType(itemBoostType) ||
     (move.named('Struggle') && itemBoostType === 'Normal')) {
-    baseDamage = Math.floor(baseDamage * 1.1);
+    baseDamage = hackItemFloor(attacker.item, baseDamage, Math.floor(baseDamage * 1.1));
     desc.attackerItem = attacker.item;
   }
 
   baseDamage = Math.max(gen.num === 2 ? 1 : 0, Math.min(997, baseDamage)) + 2;
 
-  if ((field.hasWeather('Sun') && move.hasType('Fire')) ||
+  const hackWeather = hackWeatherMultiplier(field.weather, move.type);
+  if (hackWeather !== undefined) {
+    if (hackWeather !== 1) {
+      baseDamage = Math.floor(baseDamage * hackWeather);
+      desc.weather = field.weather;
+    }
+    if (field.hasWeather('Rain') && move.named('Solar Beam')) {
+      baseDamage = Math.floor(baseDamage / 2);
+      desc.weather = field.weather;
+    }
+  } else if ((field.hasWeather('Sun') && move.hasType('Fire')) ||
       (field.hasWeather('Rain') && move.hasType('Water'))) {
     baseDamage = Math.floor(baseDamage * 1.5);
     desc.weather = field.weather;
@@ -258,7 +273,9 @@ export function calculateRBYGSC(
   }
 
   if (move.hasType(...attacker.types)) {
-    baseDamage = Math.floor(baseDamage * 1.5);
+    baseDamage = hackHasMultiplier('stab')
+      ? baseDamage + Math.floor(baseDamage * (hackMultiplier('stab', 1.5) - 1))
+      : Math.floor(baseDamage * 1.5);
   }
 
   if (gen.num === 1) {
@@ -275,14 +292,17 @@ export function calculateRBYGSC(
   }
 
   const damage = [];
-  for (let i = 217; i <= 255; i++) {
+  const rollCount = hackRollCount(39);
+  const rollDen = hackRollDen(255);
+  for (let i = 0; i < rollCount; i++) {
+    const roll = hackRollValue(i, 217);
     if (gen.num === 2) { // in gen 2 damage is always rounded up to 1. TODO ADD TESTS
-      damage[i - 217] = Math.max(1, Math.floor((baseDamage * i) / 255));
+      damage[i] = Math.max(1, Math.floor((baseDamage * roll) / rollDen));
     } else {
       if (baseDamage === 1) { // in gen 1 the random factor multiplication is skipped if damage = 1
-        damage[i - 217] = 1;
+        damage[i] = 1;
       } else {
-        damage[i - 217] = Math.floor((baseDamage * i) / 255);
+        damage[i] = Math.floor((baseDamage * roll) / rollDen);
       }
     }
   }
@@ -292,20 +312,21 @@ export function calculateRBYGSC(
     const damageMatrix = [damage];
     for (let times = 1; times < move.hits; times++) {
       const damage = [];
-      for (let damageMultiplier = 217; damageMultiplier <= 255; damageMultiplier++) {
+      for (let rollIndex = 0; rollIndex < rollCount; rollIndex++) {
+        const damageMultiplier = hackRollValue(rollIndex, 217);
         let newFinalDamage = 0;
         // in gen 2 damage is always rounded up to 1. TODO ADD TESTS
         if (gen.num === 2) {
-          newFinalDamage = Math.max(1, Math.floor((baseDamage * damageMultiplier) / 255));
+          newFinalDamage = Math.max(1, Math.floor((baseDamage * damageMultiplier) / rollDen));
         } else {
           // in gen 1 the random factor multiplication is skipped if damage = 1
           if (baseDamage === 1) {
             newFinalDamage = 1;
           } else {
-            newFinalDamage = Math.floor((baseDamage * damageMultiplier) / 255);
+            newFinalDamage = Math.floor((baseDamage * damageMultiplier) / rollDen);
           }
         }
-        damage[damageMultiplier - 217] = newFinalDamage;
+        damage[rollIndex] = newFinalDamage;
       }
       damageMatrix[times] = damage;
     }

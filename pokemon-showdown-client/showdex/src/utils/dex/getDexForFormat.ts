@@ -42,6 +42,12 @@ export const getDexForFormat = (format?: string | GenerationNum): Showdown.Modde
 
   const formatAsId = formatId(format);
 
+  const romHacks = (window as unknown as { RomHacks?: { modid?: string; active?: unknown; }; }).RomHacks;
+
+  if (formatAsId.includes('romhacks') && romHacks?.active && romHacks.modid) {
+    return Dex.mod(romHacks.modid as Parameters<typeof Dex.mod>[0]);
+  }
+
   if (formatAsId.includes('spaceworld')) {
     return Dex.mod('gen2spaceworld');
   }

@@ -126,9 +126,9 @@ export class PSSearchResults extends preact.Component<{
 			)}</span>`;
 		if (errorMessage) return `${buf}${errorMessage}</a></li>`;
 
-		buf += `<span class="col typecol">${pokemon.types.map(type =>
+		buf += `<span class="col typecol">${pokemon.types.map(type => (!Dex.hasTypeIcon(type) ? Dex.getTypeBadge(type) :
 			`<img src="${Dex.resourcePrefix}sprites/types/${type}.png" alt="${escapeHTML(TL.type[type] || type)}" height="14" width="32" class="pixelated" />`
-		).join('')}</span>`;
+		)).join('')}</span>`;
 
 		if (search.numAbilityCols) {
 			const ability0 = search.dex.text.get(search.dex.abilities.get(pokemon.abilities['0'])).name;
@@ -267,9 +267,11 @@ export class PSSearchResults extends preact.Component<{
 			pp = move.pp > 20 ? 20 : move.pp;
 			if (!move.noPPBoosts) pp = (pp / 5 + 1) * 4;
 		}
-		buf += `<span class="col typecol">` +
+		const moveTypeIcon = !Dex.hasTypeIcon(move.type) ? Dex.getTypeBadge(move.type) :
 			`<img src="${Dex.resourcePrefix}sprites/types/${encodeURIComponent(move.type)}.png" ` +
-			`alt="${escapeHTML(TL.type[move.type] || move.type)}" height="14" width="32" class="pixelated" />` +
+			`alt="${escapeHTML(TL.type[move.type] || move.type)}" height="14" width="32" class="pixelated" />`;
+		buf += `<span class="col typecol">` +
+			moveTypeIcon +
 			`<img src="${Dex.resourcePrefix}sprites/categories/${escapeHTML(move.category)}.png" ` +
 			`alt="${escapeHTML(TL.tag[toID(move.category)] || move.category)}" height="14" width="32" class="pixelated" />` +
 			`</span>` +
@@ -285,12 +287,14 @@ export class PSSearchResults extends preact.Component<{
 		const name = id.charAt(0).toUpperCase() + id.slice(1);
 		const displayName = TL.type[name] || name;
 		[matchStart, matchEnd] = getLocalizedMatch(displayName, name, matchStart, matchEnd);
+		const typeIcon = !Dex.hasTypeIcon(name) ? Dex.getTypeBadge(name) :
+			`<img src="${Dex.resourcePrefix}sprites/types/${encodeURIComponent(name)}.png" ` +
+			`alt="${escapeHTML(displayName)}" height="14" width="32" class="pixelated" />`;
 
 		return `<li class="result" value="${index}"><a href="${this.URL_ROOT}types/${id}" ` +
 			`data-target="push" data-entry="type|${escapeHTML(name)}">` +
 			`<span class="col namecol">${this.renderNameHTML(displayName, matchStart, matchEnd)}</span>` +
-			`<span class="col typecol"><img src="${Dex.resourcePrefix}sprites/types/${encodeURIComponent(name)}.png" ` +
-			`alt="${escapeHTML(displayName)}" height="14" width="32" class="pixelated" /></span>` +
+			`<span class="col typecol">${typeIcon}</span>` +
 			(errorMessage || '') +
 			`</a></li>`;
 	}

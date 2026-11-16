@@ -17,7 +17,7 @@ import type { ChatRoom } from "./panel-chat";
 import type { LadderFormatRoom } from "./panel-ladder";
 import type { RoomsRoom } from "./panel-rooms";
 import { TeamBox, type SelectType } from "./panel-teamdropdown";
-import { Dex, TL, toID, type ID } from "./battle-dex";
+import { Dex, RomHacks, TL, toID, type ID } from "./battle-dex";
 import type { Args } from "./battle-text-parser";
 import { BattleLog } from "./battle-log"; // optional
 
@@ -1022,7 +1022,13 @@ export class TeamForm extends preact.Component<{
 		format = this.addCustomRules(format, customRules);
 		PS.teams.loadTeam(team).then(success => {
 			if (!success) return;
-			(validate === 'validate' ? this.props.onValidate : this.props.onSubmit)?.(ev, format, team);
+			void RomHacks.prepareTeam(team ? team.key || team.name : '', format).then(problem => {
+				if (problem) {
+					PS.alert(problem, { parentElem: teamElement! });
+					return;
+				}
+				(validate === 'validate' ? this.props.onValidate : this.props.onSubmit)?.(ev, format, team);
+			});
 		});
 	};
 	toggleCustomRule = (ev: Event) => {

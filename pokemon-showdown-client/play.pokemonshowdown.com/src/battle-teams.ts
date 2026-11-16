@@ -109,7 +109,7 @@ export const Teams = new class {
 				evs = `|${set.evs['hp'] || ''},${set.evs['atk'] || ''},${set.evs['def'] || ''},` +
 					`${set.evs['spa'] || ''},${set.evs['spd'] || ''},${set.evs['spe'] || ''}`;
 			}
-			buf += evs === '|,,,,,' ? '|' : evs;
+			buf += evs === '|,,,,,' ? (set.evs?.['hp'] === 0 ? '|0' : '|') : evs;
 
 			// gender
 			buf += `|${set.gender || ''}`;

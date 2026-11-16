@@ -46,6 +46,7 @@ import {
   isQPActive,
   getStabMod,
   getStellarStabMod,
+  enterHackMechanics,
 } from './util';
 import {halfHPDamage, psywaveRolls, undynamaxedHP} from './fixed-damage';
 
@@ -56,6 +57,7 @@ export function calculateNoNerfs(
   move: Move,
   field: Field
 ) {
+  enterHackMechanics(gen);
   // #region Initial
 
   checkAirLock(attacker, field);
@@ -592,7 +594,7 @@ export function calculateNoNerfs(
   // #endregion
   // #region Base Power
 
-  const basePower = calculateBasePowerSMSSSV(
+  const basePower = calculateBasePowerNoNerfs(
     gen,
     attacker,
     defender,
@@ -607,19 +609,19 @@ export function calculateNoNerfs(
 
   // #endregion
   // #region (Special) Attack
-  const attack = calculateAttackSMSSSV(gen, attacker, defender, move, field, desc, isCritical);
+  const attack = calculateAttackNoNerfs(gen, attacker, defender, move, field, desc, isCritical);
   // #endregion
 
   // #region (Special) Defense
 
-  const defense = calculateDefenseSMSSSV(gen, attacker, defender, move, field, desc, isCritical);
+  const defense = calculateDefenseNoNerfs(gen, attacker, defender, move, field, desc, isCritical);
   const hitsPhysical = move.overrideDefensiveStat === 'def' || move.category === 'Physical';
   const defenseStat = hitsPhysical ? 'def' : 'spd';
 
   // #endregion
   // #region Damage
 
-  const baseDamage = calculateBaseDamageSMSSSV(
+  const baseDamage = calculateBaseDamageNoNerfs(
     gen,
     attacker,
     defender,
@@ -641,7 +643,7 @@ export function calculateNoNerfs(
     desc.attackerAbility = attacker.ability;
   }
 
-  if (hasTerrainSeed(defender) &&
+  if (hasTerrainSeedNoNerfs(defender) &&
     field.hasTerrain(defender.item!.substring(0, defender.item!.indexOf(' ')) as Terrain) &&
     SEED_BOOSTED_STAT[defender.item!] === defenseStat) {
     // Last condition applies so the calc doesn't show a seed where it wouldn't affect the outcome
@@ -658,7 +660,7 @@ export function calculateNoNerfs(
     !attacker.hasAbility('Guts') &&
     !move.named('Facade');
   desc.isBurned = applyBurn;
-  const finalMods = calculateFinalModsSMSSSV(
+  const finalMods = calculateFinalModsNoNerfs(
     gen,
     attacker,
     defender,
@@ -726,9 +728,9 @@ export function calculateNoNerfs(
     for (let times = 1; times < numAttacks; times++) {
       usedItems = checkMultihitBoost(gen, attacker, defender, move,
         field, desc, usedItems[0], usedItems[1]);
-      const newAttack = calculateAttackSMSSSV(gen, attacker, defender, move,
+      const newAttack = calculateAttackNoNerfs(gen, attacker, defender, move,
         field, desc, isCritical);
-      const newDefense = calculateDefenseSMSSSV(gen, attacker, defender, move,
+      const newDefense = calculateDefenseNoNerfs(gen, attacker, defender, move,
         field, desc, isCritical);
       // Check if lost -ate ability. Typing stays the same, only boost is lost
       // Cannot be regained during multihit move and no Normal moves with stat drawbacks
@@ -746,7 +748,7 @@ export function calculateNoNerfs(
         stabMod = getStellarStabMod(attacker, move, preStellarStabMod, times);
       }
 
-      const newBasePower = calculateBasePowerSMSSSV(
+      const newBasePower = calculateBasePowerNoNerfs(
         gen,
         attacker,
         defender,
@@ -756,7 +758,7 @@ export function calculateNoNerfs(
         desc,
         times + 1
       );
-      const newBaseDamage = calculateBaseDamageSMSSSV(
+      const newBaseDamage = calculateBaseDamageNoNerfs(
         gen,
         attacker,
         defender,
@@ -768,7 +770,7 @@ export function calculateNoNerfs(
         desc,
         isCritical
       );
-      const newFinalMods = calculateFinalModsSMSSSV(
+      const newFinalMods = calculateFinalModsNoNerfs(
         gen,
         attacker,
         defender,
@@ -807,7 +809,7 @@ export function calculateNoNerfs(
   return result;
 }
 
-export function calculateBasePowerSMSSSV(
+export function calculateBasePowerNoNerfs(
   gen: Generation,
   attacker: Pokemon,
   defender: Pokemon,
@@ -1036,7 +1038,7 @@ export function calculateBasePowerSMSSSV(
     // show z-move power in description
     desc.moveBP = move.bp;
   }
-  const bpMods = calculateBPModsSMSSSV(
+  const bpMods = calculateBPModsNoNerfs(
     gen,
     attacker,
     defender,
@@ -1064,7 +1066,7 @@ export function calculateBasePowerSMSSSV(
   return basePower;
 }
 
-export function calculateBPModsSMSSSV(
+export function calculateBPModsNoNerfs(
   gen: Generation,
   attacker: Pokemon,
   defender: Pokemon,
@@ -1348,7 +1350,7 @@ export function calculateBPModsSMSSSV(
   return bpMods;
 }
 
-export function calculateAttackSMSSSV(
+export function calculateAttackNoNerfs(
   gen: Generation,
   attacker: Pokemon,
   defender: Pokemon,
@@ -1393,12 +1395,12 @@ export function calculateAttackSMSSSV(
     attack = pokeRound((attack * 3) / 2);
     desc.attackerAbility = attacker.ability;
   }
-  const atMods = calculateAtModsSMSSSV(gen, attacker, defender, move, field, desc);
+  const atMods = calculateAtModsNoNerfs(gen, attacker, defender, move, field, desc);
   attack = NN_OF(Math.max(1, pokeRound((attack * chainMods(atMods, 410, 131072)) / 4096)));
   return attack;
 }
 
-export function calculateAtModsSMSSSV(
+export function calculateAtModsNoNerfs(
   gen: Generation,
   attacker: Pokemon,
   defender: Pokemon,
@@ -1563,7 +1565,7 @@ export function calculateAtModsSMSSSV(
   return atMods;
 }
 
-export function calculateDefenseSMSSSV(
+export function calculateDefenseNoNerfs(
   gen: Generation,
   attacker: Pokemon,
   defender: Pokemon,
@@ -1604,7 +1606,7 @@ export function calculateDefenseSMSSSV(
     desc.weather = field.weather;
   }
 
-  const dfMods = calculateDfModsSMSSSV(
+  const dfMods = calculateDfModsNoNerfs(
     gen,
     attacker,
     defender,
@@ -1618,7 +1620,7 @@ export function calculateDefenseSMSSSV(
   return NN_OF(Math.max(1, pokeRound((defense * chainMods(dfMods, 410, 131072)) / 4096)));
 }
 
-export function calculateDfModsSMSSSV(
+export function calculateDfModsNoNerfs(
   gen: Generation,
   attacker: Pokemon,
   defender: Pokemon,
@@ -1713,7 +1715,7 @@ export function calculateDfModsSMSSSV(
   return dfMods;
 }
 
-function calculateBaseDamageSMSSSV(
+function calculateBaseDamageNoNerfs(
   gen: Generation,
   attacker: Pokemon,
   defender: Pokemon,
@@ -1768,7 +1770,7 @@ function calculateBaseDamageSMSSSV(
   return baseDamage;
 }
 
-export function calculateFinalModsSMSSSV(
+export function calculateFinalModsNoNerfs(
   gen: Generation,
   attacker: Pokemon,
   defender: Pokemon,
@@ -1881,7 +1883,7 @@ export function calculateFinalModsSMSSSV(
   return finalMods;
 }
 
-function hasTerrainSeed(pokemon: Pokemon) {
+function hasTerrainSeedNoNerfs(pokemon: Pokemon) {
   return pokemon.hasItem('Electric Seed', 'Misty Seed', 'Grassy Seed', 'Psychic Seed');
 }
 

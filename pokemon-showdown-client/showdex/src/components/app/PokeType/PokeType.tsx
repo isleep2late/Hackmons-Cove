@@ -58,6 +58,11 @@ export const PokeType = ({
         `types.${formatId(type)}.${labelIndex + 1}`,
         PokemonTypeLabels[type]?.[labelIndex],
       )
+  ) || (
+    !!type
+      && type !== '???'
+      && !(type in PokemonTypeLabels)
+      && String(type).toUpperCase().slice(0, shouldAbbreviate ? (containerSize === 'sm' ? 4 : 3) : 6)
   ) || defaultLabel || '???';
 
   return (
@@ -66,6 +71,7 @@ export const PokeType = ({
         styles.container,
         !!colorScheme && styles[colorScheme],
         !!type && type !== '???' && styles[`type-${type.toLowerCase()}`],
+        !!type && type !== '???' && !(type in PokemonTypeLabels) && styles.customType,
         shouldAbbreviate && styles[containerSize],
         highlight && styles.highlight,
         teraTyping && styles.teraTyping,

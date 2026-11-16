@@ -8,7 +8,7 @@
 
 import preact from "../js/lib/preact";
 import { type Team, Config, PS } from "./client-main";
-import { Dex, type ModdedDex, toID, type ID, PSUtils, TL } from "./battle-dex";
+import { Dex, type ModdedDex, RomHacks, toID, type ID, PSUtils, TL } from "./battle-dex";
 import { Teams } from './battle-teams';
 import { DexSearch, type SearchRow, type SearchType } from "./battle-dex-search";
 import { PSSearchResults } from "./battle-searchresults";
@@ -88,6 +88,10 @@ export class TeamEditorState extends PSModel {
 		this.format = Dex.formats.get(format);
 		this.team.format = this.format.id;
 		this.dex = Dex.mod(this.format.mod);
+		if (RomHacks.isFormat(this.format.id)) {
+			RomHacks.load();
+			if (RomHacks.active) this.dex = Dex.mod(RomHacks.modid);
+		}
 		this.gen = this.dex.gen;
 	}
 
@@ -647,6 +651,10 @@ export class TeamEditorState extends PSModel {
 		};
 		return 16 * dv('atk') + 8 * dv('def') + dv('spe') + dv('spa');
 	}
+	hackBlankEVs(set: Dex.PokemonSet) {
+		if (this.gen <= 2 || !RomHacks.isFormat(this.format.id)) return false;
+		return set.evs?.hp !== 0 && !Dex.statNames.some(statID => set.evs?.[statID]);
+	}
 	getStat(stat: StatName, set: Dex.PokemonSet, ivOverride: number, evOverride?: number, natureOverride?: number) {
 		// do this after setting set.evs because it's assumed to exist
 		// after getStat is run
@@ -658,7 +666,7 @@ export class TeamEditorState extends PSModel {
 		const baseStat = species.baseStats[stat];
 		const sw97HpDV = stat === 'hp' ? this.sw97HpDV(set) : null;
 		const iv = sw97HpDV === null ? ivOverride : 2 * sw97HpDV;
-		let ev = evOverride ?? set.evs?.[stat] ?? (this.gen > 2 ? 0 : 252);
+		let ev = evOverride ?? (this.hackBlankEVs(set) ? 252 : set.evs?.[stat] ?? (this.gen > 2 ? 0 : 252));
 		if (this.format.isChampions) ev *= 8;
 
 		if (stat === 'hp') {
@@ -1895,7 +1903,7 @@ class TeamTextbox extends preact.Component<{
 
 						if (editor.narrow) {
 							return <div style={`top:${prevOffset + 1}px;left:5px;position:absolute;text-align:center;pointer-events:none`}>
-								<div><PSIcon pokemon={species.id} /></div>
+								<div><PSIcon pokemon={species.id} mod={editor.dex.modid} /></div>
 								{species.types.map(type => <div><PSIcon type={type} /></div>)}
 								<div><PSIcon item={set.item || null} /></div>
 							</div>;
@@ -2229,7 +2237,7 @@ class TeamEditorForm extends preact.Component<{
 						class={`button picontab${cur(i)}`} onClick={this.setFocus}
 						value={`set-${i}-${type}`}
 					>
-						<PSIcon pokemon={curSet} /><br />
+						<PSIcon pokemon={curSet} mod={editor.dex.modid} /><br />
 						{editor.getNickname(curSet)}
 					</button></li>)}
 					{editor.canAdd() && <li><button
@@ -2921,7 +2929,7 @@ class TeamEditorForm extends preact.Component<{
 	}
 	renderSet(set: Dex.PokemonSet | undefined, i: number) {
 		const { editor } = this.props;
-		const sprite = Dex.getTeambuilderSprite(set, editor.dex);
+		const sprite = Dex.getTeambuilderSprite(set, editor.dex, 0, 0, editor.narrow ? undefined : [318, 40]);
 		const spriteClass = set && Dex.getTeambuilderSpriteData(set, editor.dex).pixelated ? ' pixelated' : '';
 		if (!set) {
 			return <div class="set-form" data-set-index={i}>
@@ -3273,13 +3281,14 @@ class StatForm extends preact.Component<{
 	onChange: () => void,
 }> {
 	static renderStatGraph(set: Dex.PokemonSet, editor: TeamEditorState, evs?: boolean) {
-		const defaultEV = (editor.gen > 2 ? 0 : 252);
+		const hackBlank = editor.hackBlankEVs(set);
+		const defaultEV = (editor.gen > 2 && !hackBlank ? 0 : 252);
 		const ivs = editor.getIVs(set);
 		return Dex.statNames.map(statID => {
 			if (statID === 'spd' && editor.gen === 1) return null;
 
 			const stat = editor.getStat(statID, set, ivs[statID]);
-			let ev: number | string = set.evs ? (set.evs[statID] || 0) : defaultEV;
+			let ev: number | string = set.evs && !hackBlank ? (set.evs[statID] || 0) : defaultEV;
 			const maxStat = statID === 'hp' ?
 				Math.floor(176 * editor.format.defaultLevel / 25) + 10 :
 				Math.floor(247 * editor.format.defaultLevel / 50) + 5;
@@ -3588,7 +3597,8 @@ class StatForm extends preact.Component<{
 		const target = ev.currentTarget as HTMLInputElement;
 		const { editor, set } = this.props;
 		const statID = target.name.split('-')[1] as Dex.StatName;
-		const previousValue = set.evs?.[statID] ?? (editor.gen <= 2 && !set.evs ? 252 : 0);
+		const hackBlank = editor.hackBlankEVs(set);
+		const previousValue = hackBlank ? 252 : set.evs?.[statID] ?? (editor.gen <= 2 && !set.evs ? 252 : 0);
 		let value = Math.abs(parseInt(target.value));
 
 		if (isNaN(value)) {
@@ -3597,6 +3607,7 @@ class StatForm extends preact.Component<{
 			if (this.maxEVs() < 6 * 252 || this.props.editor.format.isLetsGo) {
 				set.evs ||= {};
 			} else {
+				if (hackBlank) set.evs = undefined;
 				set.evs ||= { hp: 252, atk: 252, def: 252, spa: 252, spd: 252, spe: 252 };
 			}
 			set.evs[statID] = value;
@@ -3769,7 +3780,8 @@ class StatForm extends preact.Component<{
 	};
 	maxEVs() {
 		const editor = this.props.editor;
-		const useCappedEVs = !editor.format.isLetsGo && editor.gen >= 3 && !editor.format.isChampions;
+		const useCappedEVs = !editor.format.isLetsGo && editor.gen >= 3 && !editor.format.isChampions &&
+			!RomHacks.isFormat(editor.format.id);
 		return editor.format.isChampions ? 66 : useCappedEVs ? 510 : Infinity;
 	}
 	override render() {
@@ -3783,7 +3795,8 @@ class StatForm extends preact.Component<{
 		// const useAVs = editor.format.isLetsGo && team.format.endsWith('norestrictions');
 		const maxEV = editor.format.isChampions ? 32 : useEVs ? 252 : 200;
 		const stepEV = useEVs ? 4 : 1;
-		const defaultEV = useEVs && editor.gen <= 2 && !set.evs ? maxEV : 0;
+		const hackBlank = editor.hackBlankEVs(set);
+		const defaultEV = useEVs && ((editor.gen <= 2 && !set.evs) || hackBlank) ? maxEV : 0;
 		const useIVs = editor.gen > 2;
 
 		// label column
@@ -3834,7 +3847,8 @@ class StatForm extends preact.Component<{
 							onInput={this.changeEV} onChange={this.changeEV} onKeyDown={this.keyDownStatInput}
 						/>{this.renderNatureButtons(statID)}</td>
 						<td><input
-							name={`evslider-${statID}`} value={set.evs?.[statID] ?? defaultEV} min="0" max={maxEV} step={stepEV}
+							name={`evslider-${statID}`} value={hackBlank ? defaultEV : set.evs?.[statID] ?? defaultEV}
+							min="0" max={maxEV} step={stepEV}
 							type="range" class="evslider" tabIndex={-1} aria-hidden
 							onPointerDown={this.startEVSliderDrag}
 							onInput={this.changeEV} onChange={this.changeEV}

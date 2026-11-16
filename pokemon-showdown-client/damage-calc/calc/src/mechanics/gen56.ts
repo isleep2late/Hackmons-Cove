@@ -36,6 +36,8 @@ import {
   isGrounded,
   OF16, OF32,
   pokeRound,
+  enterHackMechanics, hackMultiplier, hackModify, hackItemMod, hackWeatherMultiplier,
+  hackRollCount,
 } from './util';
 
 export function calculateBWXY(
@@ -45,6 +47,7 @@ export function calculateBWXY(
   move: Move,
   field: Field
 ) {
+  enterHackMechanics(gen);
   // #region Initial
 
   checkAirLock(attacker, field);
@@ -363,7 +366,7 @@ export function calculateBWXY(
   }
 
   const damage: number[] = [];
-  for (let i = 0; i < 16; i++) {
+  for (let i = 0; i < hackRollCount(16); i++) {
     damage[i] =
       getFinalDamage(baseDamage, i, typeEffectiveness, applyBurn, stabMod, finalMod);
   }
@@ -424,7 +427,7 @@ export function calculateBWXY(
       const newFinalMod = chainMods(newFinalMods, 41, 131072);
 
       const damageArray = [];
-      for (let i = 0; i < 16; i++) {
+      for (let i = 0; i < hackRollCount(16); i++) {
         const newFinalDamage = getFinalDamage(
           newBaseDamage,
           i,
@@ -700,13 +703,13 @@ export function calculateBPModsBWXY(
   }
 
   if (attacker.item && getItemBoostType(attacker.item) === move.type) {
-    bpMods.push(4915);
+    bpMods.push(hackItemMod(attacker.item, 4915));
     desc.attackerItem = attacker.item;
   } else if (
     (attacker.hasItem('Muscle Band') && move.category === 'Physical') ||
     (attacker.hasItem('Wise Glasses') && move.category === 'Special')
   ) {
-    bpMods.push(4505);
+    bpMods.push(hackItemMod(attacker.item, 4505));
     desc.attackerItem = attacker.item;
   } else if (
     (attacker.hasItem('Adamant Orb') &&
@@ -1053,7 +1056,13 @@ function calculateBaseDamageBWXY(
     baseDamage = pokeRound(OF32(baseDamage * 2048) / 4096);
   }
 
-  if ((field.hasWeather('Sun', 'Harsh Sunshine') && move.hasType('Fire')) ||
+  const hackWeather = hackWeatherMultiplier(field.weather, move.type);
+  if (hackWeather !== undefined) {
+    if (hackWeather !== 1) {
+      baseDamage = hackModify(baseDamage, hackWeather);
+      desc.weather = field.weather;
+    }
+  } else if ((field.hasWeather('Sun', 'Harsh Sunshine') && move.hasType('Fire')) ||
       (field.hasWeather('Rain', 'Heavy Rain') && move.hasType('Water'))) {
     baseDamage = pokeRound(OF32(baseDamage * 6144) / 4096);
     desc.weather = field.weather;
@@ -1066,7 +1075,9 @@ function calculateBaseDamageBWXY(
   }
 
   if (isCritical) {
-    baseDamage = Math.floor(OF32(baseDamage * (gen.num > 5 ? 1.5 : 2)));
+    baseDamage = Math.floor(
+      OF32(baseDamage * hackMultiplier('critMultiplier', gen.num > 5 ? 1.5 : 2))
+    );
     desc.isCritical = isCritical;
   }
 
@@ -1133,10 +1144,10 @@ function calculateFinalModsBWXY(
   }
 
   if (attacker.hasItem('Expert Belt') && typeEffectiveness > 1 && !move.isZ) {
-    finalMods.push(4915);
+    finalMods.push(hackItemMod(attacker.item, 4915));
     desc.attackerItem = attacker.item;
   } else if (attacker.hasItem('Life Orb')) {
-    finalMods.push(5324);
+    finalMods.push(hackItemMod(attacker.item, 5324));
     desc.attackerItem = attacker.item;
   }
 

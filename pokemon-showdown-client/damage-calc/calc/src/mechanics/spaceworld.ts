@@ -4,7 +4,9 @@ import type {Field} from '../field';
 import type {Move} from '../move';
 import type {Pokemon} from '../pokemon';
 import {Result} from '../result';
-import {computeFinalStats, getMoveEffectiveness, handleFixedDamageMoves} from './util';
+import {
+  computeFinalStats, getMoveEffectiveness, handleFixedDamageMoves, enterHackMechanics,
+} from './util';
 import {halfHPDamage, psywaveRolls, sw97FlailPower, sw97HiddenPowerBP} from './fixed-damage';
 
 const SW_IGNORES_IMMUNITY = [
@@ -62,6 +64,7 @@ export function calculateSpaceWorld(
   move: Move,
   field: Field
 ) {
+  enterHackMechanics(gen);
   computeFinalStats(gen, attacker, defender, field, 'atk', 'def', 'spa', 'spd', 'spe');
 
   const desc: RawDesc = {

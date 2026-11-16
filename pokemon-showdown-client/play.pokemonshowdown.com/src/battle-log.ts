@@ -1662,7 +1662,7 @@ export class BattleLog {
 						setAttrib('class', 'itemicon' + (className ? ' ' + className : ''));
 						unsanitizedStyle = Dex.getItemIcon(iconValue);
 					} else if (iconType === 'type') {
-						tagName = Dex.getTypeIcon(iconValue).slice(1, -3);
+						tagName = Dex.getTypeIcon(iconValue, false, true).slice(1, -3);
 					} else if (iconType === 'category') {
 						tagName = Dex.getCategoryIcon(iconValue).slice(1, -3);
 					}

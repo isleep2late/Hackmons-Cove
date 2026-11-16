@@ -38,6 +38,8 @@
 				}
 				var focusVersionMod = this.phnnVersionModId(this.curTeam.format);
 				if (focusVersionMod) this.curTeam.dex = Dex.mod(focusVersionMod);
+				RomHacks.load();
+				this.romHackDex();
 				Storage.activeSetList = this.curSetList;
 			}
 		},
@@ -52,6 +54,8 @@
 			// team changes
 			'change input.teamnameedit': 'teamNameChange',
 			'change input[name=phnncustomrules]': 'phnnCustomRulesChanged',
+			'change input[name=romhackfile]': 'romHackFileChanged',
+			'change select[name=romhackselect]': 'romHackSelected',
 			'click button.formatselect': 'selectFormat',
 			'click button.statmodtoggle': 'toggleStatMod',
 			'click button.basestatmodtoggle': 'toggleBaseStatMod',
@@ -129,6 +133,7 @@
 				this.curTeam.iconCache = '';
 				var team = this.curTeam;
 				this.curTeam = null;
+				RomHacks.builderSprites = false;
 				Storage.activeSetList = this.curSetList = null;
 				Storage.saveTeam(team);
 			} else {
@@ -199,7 +204,7 @@
 					this.loadTeam();
 					return this.updateTeamView();
 				}
-				this.ignoreEVLimits = (this.curTeam.gen < 3 ||
+				this.ignoreEVLimits = (this.curTeam.gen < 3 || RomHacks.isFormat(this.curTeam.format) ||
 					(((this.curTeam.format.includes('hackmons') || this.curTeam.format.includes('phnn')) || this.curTeam.format.includes('bh')) && (this.curTeam.gen !== 6 || this.curTeam.format.includes('nolimit'))) ||
 					this.curTeam.format.includes('metronomebattle'));
 				if (this.curSet) {
@@ -827,6 +832,8 @@
 			}
 			var selVersionMod = this.phnnVersionModId(this.curTeam.format);
 			if (selVersionMod) this.curTeam.dex = Dex.mod(selVersionMod);
+			RomHacks.load();
+			this.romHackDex();
 			Storage.activeSetList = this.curSetList = Storage.unpackTeam(this.curTeam.team);
 			this.curTeamIndex = i;
 			this.update();
@@ -1335,6 +1342,7 @@
 				if (exports.BattleFormats) {
 					buf += '<li class="format-select">';
 					buf += '<label class="label">Format:</label><button class="select formatselect teambuilderformatselect" name="format" value="' + this.curTeam.format + '">' + (isGenericFormat(this.curTeam.format) ? '<em>Select a format</em>' : BattleLog.escapeFormat(this.curTeam.format)) + '</button>';
+					buf += this.renderRomHackUpload();
 					buf += this.renderCdModeSelect();
 					buf += this.renderVersionSelect();
 					buf += this.renderStatModToggle();
@@ -1426,7 +1434,7 @@
 			buf += '<label>Nickname</label><input type="text" name="nickname" class="textbox" value="' + BattleLog.escapeHTML(set.name || '') + '" placeholder="' + BattleLog.escapeHTML(species.baseSpecies) + '" />';
 			buf += '</div>';
 			var spriteData = Dex.getTeambuilderSpriteData(set, this.curTeam.dex);
-			buf += '<div class="setchart' + (spriteData.pixelated ? ' pixelated' : '') + '" style="' + Dex.getTeambuilderSprite(set, this.curTeam.dex) + ';">';
+			buf += '<div class="setchart' + (spriteData.pixelated ? ' pixelated' : '') + '" style="' + Dex.getTeambuilderSprite(set, this.curTeam.dex, 0, 0, [122, 50]) + ';">';
 
 			// icon
 			buf += '<div class="setcol setcol-icon">';
@@ -1551,12 +1559,12 @@
 			buf += '<div class="setcol setcol-stats"><div class="setrow"><label>Stats</label><button class="textbox setstats" name="stats">';
 			buf += '<span class="statrow statrow-head"><label></label> <span class="statgraph"></span> <em>' + (isChampions ? 'Points' : !isLetsGo ? 'EV' : 'AV') + '</em></span>';
 			var stats = {};
-			var defaultEV = (this.curTeam.gen > 2 ? 0 : 252);
+			var defaultEV = this.defaultEVFor(set);
 			var statRefs = this.statbarRefs(set, baseFormat);
 			for (var j in BattleStatNames) {
 				if (j === 'spd' && this.curTeam.gen === 1) continue;
 				stats[j] = this.getStat(j, set);
-				var ev = (set.evs[j] === undefined ? defaultEV : set.evs[j]);
+				var ev = this.evFor(set, j);
 				var evBuf = '<em>' + (ev === defaultEV ? '' : ev) + '</em>';
 				if (BattleNatures[set.nature] && BattleNatures[set.nature].plus === j) {
 					evBuf += '<small>+</small>';
@@ -1781,6 +1789,11 @@
 				name = name.replace(/\[/g, '');
 				name = name.replace(/\]/g, '');
 			}
+			var boundHack = RomHacks.teamHack(this.curTeam.name);
+			if (boundHack && name !== this.curTeam.name) {
+				RomHacks.setTeamHack(name, boundHack);
+				RomHacks.setTeamHack(this.curTeam.name, '');
+			}
 			this.curTeam.name = name;
 			e.currentTarget.value = name;
 			this.save();
@@ -1852,6 +1865,8 @@
 			}
 			var cfVersionMod = this.phnnVersionModId(this.curTeam.format);
 			if (cfVersionMod) this.curTeam.dex = Dex.mod(cfVersionMod);
+			RomHacks.load();
+			this.romHackDex();
 			// LEAVING CUSTOM DISGUISES MUST DROP BASE STAT OVERRIDES FROM EVERY SET. The only other
 			// cleanup site is detailsChange, which fires for at most one set and only if the user
 			// happens to edit a Details field afterwards - so without this a team carried invisible
@@ -1906,6 +1921,99 @@
 			else return null;
 			var idx = format.indexOf(kw);
 			return { kw: kw, prefix: format.slice(0, idx), suffix: format.slice(idx + kwLen) };
+		},
+		romHackDex: function () {
+			var active = RomHacks.isFormat(this.curTeam.format) && !!RomHacks.active;
+			if (active) {
+				this.curTeam.dex = Dex.mod(RomHacks.modid);
+				this.curTeam.gen = this.curTeam.dex.gen;
+			}
+			RomHacks.builderSprites = active;
+		},
+		romHackBlankEVs: function (set) {
+			if (this.curTeam.gen <= 2 || !RomHacks.isFormat(this.curTeam.format)) return false;
+			var evs = (set && set.evs) || {};
+			if (evs.hp === 0) return false;
+			for (var stat in BattleStatNames) {
+				if (evs[stat]) return false;
+			}
+			return true;
+		},
+		defaultEVFor: function (set) {
+			return this.curTeam.gen <= 2 || this.romHackBlankEVs(set) ? 252 : 0;
+		},
+		evFor: function (set, stat) {
+			if (this.romHackBlankEVs(set)) return 252;
+			return set.evs[stat] === undefined ? this.defaultEVFor(set) : set.evs[stat];
+		},
+		renderRomHackUpload: function () {
+			if (!RomHacks.isFormat(this.curTeam.format)) return '';
+			RomHacks.load();
+			var romHackSelf = this;
+			RomHacks.syncTeam(this.curTeam.name, function () {
+				romHackSelf.focus();
+				romHackSelf.update();
+			});
+			var hack = RomHacks.active;
+			var buf = '<li class="format-select"><label class="label">ROM patch:</label>';
+			var list = RomHacks.list();
+			if (list.length) {
+				buf += '<select name="romhackselect" class="button">';
+				for (var i = 0; i < list.length; i++) {
+					buf += '<option value="' + BattleLog.escapeHTML(list[i].sha256) + '"' + (hack && hack.sha256 === list[i].sha256 ? ' selected' : '') + '>' + BattleLog.escapeHTML(RomHacks.optionLabel(list[i])) + '</option>';
+				}
+				buf += '</select> ';
+			}
+			buf += '<input type="file" name="romhackfile" accept=".bps,.ups,.ips,.xdelta,.vcdiff,.bsp" />';
+			buf += '<p><small>Upload the hack\'s patch file (.bps, .ups, .ips, .xdelta or .bsp) - never a ROM. EXPERIMENTAL: Game Boy, Game Boy Color, Game Boy Advance and DS hacks.</small></p>';
+			if (this.romHackError) buf += '<p class="message-error">' + BattleLog.escapeHTML(this.romHackError) + '</p>';
+			if (hack) {
+				buf += '<p><small>Loaded: <strong>' + BattleLog.escapeHTML(hack.name || 'ROM hack') + '</strong> on ' + BattleLog.escapeHTML(hack.baseGame) + ' - ' + hack.legal.species.length + ' Pok&eacute;mon, ' + hack.legal.moves.length + ' moves, ' + hack.legal.abilities.length + ' abilities, ' + hack.legal.items.length + ' items.<br />';
+				buf += 'SHA-256 <code>' + BattleLog.escapeHTML(hack.sha256) + '</code> - your opponent must upload the identical file.<br />';
+				buf += BattleLog.escapeHTML(hack.notes.join(' '));
+				var approximated = hack.approximated.moves.length + hack.approximated.abilities.length + hack.approximated.items.length;
+				if (approximated) buf += ' ' + hack.approximated.moves.length + ' new moves deal plain damage and ' + (hack.approximated.abilities.length + hack.approximated.items.length) + ' new abilities/items have no effect yet.';
+				buf += '</small></p>';
+				var mechanicsHTML = RomHacks.mechanicsHTML(hack);
+				if (mechanicsHTML) buf += '<div class="romhack-mechanics" style="font-size:8pt;margin:4px 0 8px">' + mechanicsHTML + '</div>';
+				if (!RomHacks.checked[hack.sha256]) {
+					RomHacks.revalidate(hack.sha256).then(function (changed) {
+						if (!changed) return;
+						romHackSelf.focus();
+						romHackSelf.update();
+					});
+				}
+			}
+			buf += '</li>';
+			return buf;
+		},
+		romHackFileChanged: function (e) {
+			var file = e.currentTarget.files && e.currentTarget.files[0];
+			if (!file) return;
+			var self = this;
+			this.romHackError = 'Reading the patch...';
+			this.update();
+			RomHacks.upload(file).then(function () {
+				self.romHackError = '';
+				RomHacks.setTeamHack(self.curTeam.name, RomHacks.active.sha256);
+				self.focus();
+				self.update();
+			}, function (err) {
+				self.romHackError = String(err && err.message || err);
+				self.update();
+			});
+		},
+		romHackSelected: function (e) {
+			var self = this;
+			RomHacks.activate(e.currentTarget.value).then(function () {
+				self.romHackError = '';
+				RomHacks.setTeamHack(self.curTeam.name, RomHacks.active.sha256);
+				self.focus();
+				self.update();
+			}, function (err) {
+				self.romHackError = String(err && err.message || err);
+				self.update();
+			});
 		},
 		renderCdModeSelect: function () {
 			var parsed = this.parseCdFormat(this.curTeam.format);
@@ -2512,10 +2620,10 @@
 			if (!set) return;
 
 			this.$('.setchart')
-				.attr('style', Dex.getTeambuilderSprite(set, this.curTeam.dex))
+				.attr('style', Dex.getTeambuilderSprite(set, this.curTeam.dex, 0, 0, [122, 50]))
 				.toggleClass('pixelated', !!Dex.getTeambuilderSpriteData(set, this.curTeam.dex).pixelated);
 
-			this.$('.pokemonicon-' + this.curSetLoc).css('background', Dex.getPokemonIcon(set, false, this.curTeam.dex && this.curTeam.dex.modid).substr(11));
+			this.$('.pokemonicon-' + this.curSetLoc).attr('style', Dex.getPokemonIcon(set, false, this.curTeam.dex && this.curTeam.dex.modid));
 
 			var item = this.curTeam.dex.items.get(set.item);
 			if (item.id) {
@@ -2543,11 +2651,11 @@
 
 			// stat cell
 			var buf = '<span class="statrow statrow-head"><label></label> <span class="statgraph"></span> <em>' + (usesStatPoints ? 'Points' : supportsEVs ? 'EV' : 'AV') + '</em></span>';
-			var defaultEV = (this.curTeam.gen > 2 ? 0 : 252);
+			var defaultEV = this.defaultEVFor(set);
 			for (var stat in stats) {
 				if (stat === 'spd' && this.curTeam.gen === 1) continue;
 				stats[stat] = this.getStat(stat, set);
-				var ev = (set.evs[stat] === undefined ? defaultEV : set.evs[stat]);
+				var ev = this.evFor(set, stat);
 				var evBuf = '<em>' + (ev === defaultEV ? '' : ev) + '</em>';
 				if (BattleNatures[set.nature] && BattleNatures[set.nature].plus === stat) {
 					evBuf += '<small>+</small>';
@@ -2586,11 +2694,12 @@
 				totalev += (set.evs[stat] || 0);
 			}
 
-			if (this.curTeam.gen > 2 && (usesStatPoints || supportsEVs)) buf += '<div><em>Remaining:</em></div>';
+			var noEVLimit = RomHacks.isFormat(this.curTeam.format);
+			if (this.curTeam.gen > 2 && (usesStatPoints || supportsEVs) && !noEVLimit) buf += '<div><em>Remaining:</em></div>';
 			this.$chart.find('.graphcol').html(buf);
 
 			if (this.curTeam.gen <= 2) return;
-			if (usesStatPoints || supportsEVs) {
+			if ((usesStatPoints || supportsEVs) && !noEVLimit) {
 				var maxEv = usesStatPoints ? 66 : 510;
 				if (totalev <= maxEv) {
 					var formula = usesStatPoints ? maxEv - totalev : (totalev > (maxEv - 2) ? 0 : (maxEv - 2) - totalev);
@@ -2791,7 +2900,7 @@
 			var fmt = this.curTeam.format;
 			var is252Format = (
 				(fmt.endsWith('hackmons') || fmt.includes('bh')) && this.curTeam.gen !== 6
-			) || fmt.includes('nonerfs') || fmt.includes('phnn') || fmt.includes('510') ||
+			) || RomHacks.isFormat(fmt) || fmt.includes('nonerfs') || fmt.includes('phnn') || fmt.includes('510') ||
 				fmt.includes('nolimit') || fmt.includes('disguise') || fmt.includes('statuses') ||
 				fmt.includes('anyability') || fmt.includes('unified') || fmt.includes('customgame');
 			if (is252Format && role !== '?') {
@@ -2847,7 +2956,8 @@
 			var usesStatPoints = baseFormat.includes('champions');
 			var supportsEVs = !baseFormat.includes('letsgo') && !usesStatPoints;
 			// var supportsAVs = !supportsEVs && baseFormat.endsWith('norestrictions');
-			var defaultEV = this.curTeam.gen <= 2 ? 252 : 0;
+			var defaultEV = this.defaultEVFor(set);
+			var noEVLimit = RomHacks.isFormat(this.curTeam.format);
 			var maxEV = usesStatPoints ? 32 : supportsEVs ? 252 : 200;
 			var stepEV = supportsEVs ? 4 : 1;
 			var isVGC = baseFormat.includes('battlespot') || baseFormat.includes('bss') ||
@@ -2898,7 +3008,7 @@
 				if (color > 360) color = 360;
 				buf += '<div><em><span style="width:' + Math.floor(width) + 'px;background:hsl(' + color + ',85%,45%);border-color:hsl(' + color + ',85%,35%)"></span></em></div>';
 			}
-			if (this.curTeam.gen > 2 && (usesStatPoints || supportsEVs)) buf += '<div><em>Remaining:</em></div>';
+			if (this.curTeam.gen > 2 && (usesStatPoints || supportsEVs) && !noEVLimit) buf += '<div><em>Remaining:</em></div>';
 			buf += '</div>';
 
 			buf += '<div class="col evcol"><div><strong>' + (supportsEVs ? 'EVs' : usesStatPoints ? 'Points' : 'AVs') + '</strong></div>';
@@ -2907,7 +3017,7 @@
 			this.minus = '';
 			for (var i in stats) {
 				var val;
-				val = '' + ((set.evs[i] === undefined ? defaultEV : set.evs[i]) || '');
+				val = '' + (this.evFor(set, i) || '');
 				if (nature.plus === i) {
 					val += '+';
 					this.plus = i;
@@ -2919,7 +3029,7 @@
 				buf += '<div><input type="text" name="stat-' + i + '" value="' + val + '" class="textbox inputform numform" /></div>';
 				totalev += (set.evs[i] || 0);
 			}
-			if (this.curTeam.gen > 2 && (usesStatPoints || supportsEVs)) {
+			if (this.curTeam.gen > 2 && (usesStatPoints || supportsEVs) && !noEVLimit) {
 				var maxTotalEVs = usesStatPoints ? 66 : 510;
 				if (totalev <= maxTotalEVs) {
 					var formula = usesStatPoints ? maxTotalEVs - totalev : (totalev > (maxTotalEVs - 2) ? 0 : (maxTotalEVs - 2) - totalev);
@@ -2933,7 +3043,7 @@
 			buf += '<div class="col evslidercol"><div></div>';
 			for (var i in stats) {
 				if (i === 'spd' && this.curTeam.gen === 1) continue;
-				buf += '<div><input type="range" name="evslider-' + i + '" value="' + BattleLog.escapeHTML(set.evs[i] === undefined ? '' + defaultEV : '' + set.evs[i]) + '" min="0" max="' + maxEV + '" step="' + stepEV + '" class="evslider" tabindex="-1" aria-hidden="true" /></div>';
+				buf += '<div><input type="range" name="evslider-' + i + '" value="' + BattleLog.escapeHTML('' + this.evFor(set, i)) + '" min="0" max="' + maxEV + '" step="' + stepEV + '" class="evslider" tabindex="-1" aria-hidden="true" /></div>';
 			}
 			buf += '</div>';
 
@@ -4750,9 +4860,8 @@
 			var iv = (set.ivs[stat] || 0);
 			if (this.curTeam.gen <= 2) iv &= 30;
 			if (stat === 'hp' && this.isSpaceWorldDex()) iv = 2 * this.sw97HpDV(set);
-			var ev = set.evs[stat];
+			var ev = this.evFor(set, stat);
 			if (evOverride !== undefined) ev = evOverride;
-			if (ev === undefined) ev = (this.curTeam.gen > 2 ? 0 : 252);
 
 			if (stat === 'hp') {
 				// Shedinja's 1 HP is a property of the SPECIES (the sim keys it off species.maxHP,
