@@ -86,15 +86,31 @@ The type chart is stored as the cells that differ from the parent generation's c
   plain damage with its power, type, accuracy and PP. A new ability or item does nothing in battle.
 - **IPS**: IPS offsets are 24 bits, so an IPS patch cannot change anything past 16 MB. Hacks of larger games need
   another patch format.
-- **IPS base game**: an IPS patch carries no checksum of its base game. For Game Boy games the base is the game whose
-  patched result has valid header and global checksums; if that hack then cannot be read, the upload is refused with
-  the reason and no other base is tried. Otherwise the base is chosen by fit (how the patch records line up with each
-  base, best four tried). A base is skipped as a wrong guess when the patch changes more than 4 KB of it, its Pokemon,
-  moves, abilities and items still read exactly like the clean game, no battle mechanic reads as changed, and fewer
-  than half of the battle-engine checks still read as stock. If no base is left the upload is refused. A patch that
-  changes 4 KB or less, or one that leaves the battle engine readable (text, graphics, maps), is accepted as it reads,
-  so a small patch can still be attributed to a sibling game. BPS and UPS patches name their base by checksum and are
-  safer.
+- **IPS base game**: an IPS patch carries no checksum of its base game, so the base has to be worked out, and an
+  upload is refused when it cannot be. Only Game Boy and Game Boy Advance bases are tried; an IPS patch of a DS game is
+  refused. An IPS patch with no records is refused, and a truncated one is reported as truncated.
+  - *Checksum*: for Game Boy games the base is the game whose patched result has valid header and global checksums,
+    provided the patch changed the global checksum. If that hack then cannot be read, the upload is refused with the
+    reason and no other base is tried.
+  - *Fit*: otherwise a base is a candidate only when no record of the patch begins or ends on a byte the base already
+    has (the joins between records that continue one another are not counted), the patched game differs from the base
+    and it can be read. Candidates whose Pokemon, moves, abilities, items, type chart or battle mechanics read
+    differently from their own clean base are kept; they must also build.
+  - *One answer*: one candidate has to win against every other. Two candidates count as the same answer when the
+    patched games are identical, or when they read the same data and their bases are versions of one game (fewer than
+    one byte in eight differs: Red and Blue, Gold and Silver, Ruby and Sapphire, revisions); the first by file name is
+    then taken and a note says so. Otherwise the bytes of the patch are compared at the places where the two bases
+    differ. Between versions of one game, a base wins when the patch repeats its bytes at least four times as often as
+    the other's, plus eight. Between unrelated games at least 256 such places are needed, and a base wins when it
+    leads by that margin and the patch repeats its bytes in more than one place of eight (unchanged bytes inside merged
+    records), or, over at least 2048 places, when the patch repeats its bytes in fewer than one place of 1024 while
+    repeating the other's at least eight times and in at most one place of eight (an exact diff of that base).
+  - *Nothing readable changed* (text, graphics, maps): accepted only when the unrelated bases average at least eight
+    record edges that equal their own bytes, the candidate wins against every other and at least half of the
+    battle-engine checks still read as stock.
+  - A small patch made with a hex editor, without a checksum fix, usually fits several games and is refused; Yellow
+    cannot be told from Red and Blue by a few changed stats. BPS and UPS patches name their base by checksum and are
+    always the safer upload.
 - **Expanded Generation 1 hacks** (more than 151 Pokemon or more than 190 index slots, such as Kanto Expansion Pak):
   read when the hack keeps the 10-byte name table, a one-byte index-to-Pokedex table (at most 255 slots) and 28-byte
   base stat records. The game cuts names at 10 letters, so a Pokemon whose official name is longer (Sandy Shocks as

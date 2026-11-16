@@ -5,7 +5,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import type * as http from 'http';
 import {
-	applyPatch, crc32, ipsBoundaryFit, ipsUnchangedBytes, readPatchInfo, requireVcdiffChecksum, MAX_TARGET_SIZE,
+	applyPatch, crc32, ipsBoundaryFit, ipsKeptBytes, ipsPairFit, readPatchInfo, requireVcdiffChecksum, MAX_TARGET_SIZE,
 } from './patch';
 import { buildHackDex, HACK_VERSION, type HackDex, type RawHack } from './build';
 import { Dex } from '../../sim/dex';
@@ -17,7 +17,7 @@ import { extractNDSSprites } from './sprites-nds';
 import { extractGBSprites } from './sprites-gb';
 import { isPrism } from './prism';
 import { extractPrismSprites } from './sprites-prism';
-import { requireSignatures } from './signatures';
+import { requireSignatures, signatureStamp } from './signatures';
 
 const ROOT = path.resolve(__dirname, '../../..');
 const STORE_DIR = path.join(ROOT, 'databases/romhacks');
@@ -47,9 +47,12 @@ const IMPORTS_PER_HOUR = 300;
 const MAX_INCOMING = 32;
 const BODY_MILLIS = 120000;
 const BODY_IDLE_MILLIS = 20000;
-const WRONG_GUESS_BYTES = 4096;
-const IPS_BASE_UNKNOWN = 'The base game of this IPS patch could not be determined: it does not read as a hack of any game ' +
-	'this server has. An IPS patch carries no checksum of its base game; if this hack has a BPS or UPS patch, use that instead.';
+const IPS_MIN_SAMPLE = 256;
+const IPS_MIN_MISSES = 8;
+const IPS_BASE_UNKNOWN = 'The base game of this IPS patch could not be determined. An IPS patch carries no checksum of ' +
+	'its base game, and this one fits no Game Boy or Game Boy Advance game this server has, or fits more than one ' +
+	'equally well. If this hack has a BPS or UPS patch, use that instead.';
+const IPS_EMPTY = 'This IPS patch changes nothing.';
 const STORE_FULL = 'This server cannot store more ROM hacks right now. Try again later.';
 
 const KNOWN_BASES: { [crc: string]: string } = {
@@ -68,7 +71,7 @@ const KNOWN_BASES: { [crc: string]: string } = {
 	'3358e30a': 'Pokemon Crystal (USA, 1.1)',
 };
 
-interface BaseRom { file: string; size: number; mtime: number; crc: number }
+interface BaseRom { file: string; size: number; mtime: number; crc: number; stock?: { key: string, digest: string } }
 let baseCache: BaseRom[] | null = null;
 
 function xdeltaTool(): string | null {
@@ -200,7 +203,7 @@ function recordUsage(sha256: string) {
 function listBases(): BaseRom[] {
 	let names: string[];
 	try {
-		names = fs.readdirSync(BASES_DIR);
+		names = fs.readdirSync(BASES_DIR).sort();
 	} catch {
 		return [];
 	}
@@ -227,13 +230,17 @@ function listBases(): BaseRom[] {
 		next.push(cached || { file, size: stat.size, mtime: stat.mtimeMs, crc: crc32(fs.readFileSync(file)) });
 	}
 	baseCache = next;
-	if (changed || next.length !== known.length) {
-		try {
-			fs.mkdirSync(STORE_DIR, { recursive: true });
-			fs.writeFileSync(BASE_CACHE, JSON.stringify(next));
-		} catch {}
-	}
+	if (changed || next.length !== known.length) saveBases();
 	return next;
+}
+
+function saveBases() {
+	try {
+		fs.mkdirSync(STORE_DIR, { recursive: true });
+		const tmp = `${BASE_CACHE}.${process.pid}.tmp`;
+		fs.writeFileSync(tmp, JSON.stringify(baseCache));
+		fs.renameSync(tmp, BASE_CACHE);
+	} catch {}
 }
 
 export function extractRom(rom: Buffer, base: Buffer | null): RawHack {
@@ -349,7 +356,8 @@ function gbChecksumBases<T extends { file: string, size: number }>(patch: Buffer
 			let changed = Math.abs(rom.length - clean.length);
 			const shared = Math.min(rom.length, clean.length);
 			for (let i = 0; i < shared; i++) if (rom[i] !== clean[i]) changed++;
-			if (changed) hits.push({ base, changed });
+			const fixed = [0x14d, 0x14e, 0x14f].some(at => rom[at] !== clean[at]);
+			if (changed && fixed) hits.push({ base, changed });
 		} catch {}
 	}
 	return hits.sort((a, b) => a.changed - b.changed).map(hit => hit.base);
@@ -359,19 +367,119 @@ function baseName(base: BaseRom): string {
 	return KNOWN_BASES[hex8(base.crc)] || 'a Game Boy game';
 }
 
-function wrongGuess(rom: Buffer, clean: Buffer, read: RawHack): boolean {
-	const shared = Math.min(rom.length, clean.length);
-	let changed = 0;
-	for (let i = 0; i < shared && changed <= WRONG_GUESS_BYTES; i++) if (rom[i] !== clean[i]) changed++;
-	if (changed <= WRONG_GUESS_BYTES) return false;
+function readData(raw: RawHack): string {
+	const changed = (raw.mechanics?.report || []).filter(entry => entry.status === 'changed').map(entry => entry.id);
+	return crypto.createHash('sha256').update(JSON.stringify([
+		raw.species, raw.moves, raw.abilities, raw.items, raw.itemPockets, raw.typeChart || [], changed,
+	])).digest('hex');
+}
+
+function stockData(base: BaseRom, clean: Buffer): string {
+	const key = `${HACK_VERSION}:${signatureStamp()}`;
+	if (base.stock?.key !== key) {
+		base.stock = { key, digest: readData(extractRom(clean, clean)) };
+		saveBases();
+	}
+	return base.stock.digest;
+}
+
+function engineLost(read: RawHack, clean: Buffer): boolean {
 	const same = (raw: RawHack) => (raw.mechanics?.report || []).filter(entry => entry.status === 'same').length;
 	const report = read.mechanics?.report || [];
-	if (report.some(entry => entry.status === 'changed') || (report.length && same(read) * 2 >= report.length)) return false;
-	const stock = extractRom(clean, clean);
-	const data = (raw: RawHack) => JSON.stringify([raw.species, raw.moves, raw.abilities, raw.items, raw.itemPockets]);
-	if (data(read) !== data(stock)) return false;
-	if (read.typeChart?.length && JSON.stringify(read.typeChart) !== JSON.stringify(stock.typeChart || [])) return false;
-	return same(read) * 2 < same(stock);
+	if (report.length && same(read) * 2 >= report.length) return false;
+	return same(read) * 2 < same(extractRom(clean, clean));
+}
+
+interface IpsFit {
+	base: BaseRom; clean: Buffer; raw: RawHack; rom: string; data: string; changed: boolean; kept: number;
+}
+
+function siblingBases(a: Buffer, b: Buffer): boolean {
+	if (a.length !== b.length) return false;
+	const limit = a.length >> 3;
+	let differing = 0;
+	for (let i = 0; i < a.length && differing < limit; i++) if (a[i] !== b[i]) differing++;
+	return differing < limit;
+}
+
+function readIps(patch: Buffer, bases: BaseRom[], sha256: string): RawHack {
+	if (!applyPatch(patch, Buffer.alloc(0)).length) throw new Error(IPS_EMPTY);
+	const small = bases.filter(b => b.size <= 32 * 1024 * 1024);
+	if (!small.length) throw new Error('This server has no base games to patch.');
+	let trustedError: Error | null = null;
+	for (const base of gbChecksumBases(patch, small)) {
+		try {
+			const clean = fs.readFileSync(base.file);
+			return extractRom(Buffer.from(applyPatch(patch, clean)), clean);
+		} catch (e: any) {
+			if (trustedError) continue;
+			const reason = String(e.message || 'the game could not be read').replace(/\.+$/, '');
+			trustedError = new Error(
+				`This patch is for ${baseName(base)}, but this hack's data could not be read: ${reason}. ` +
+				`It changes the game in a way this server does not understand yet.`
+			);
+		}
+	}
+	if (trustedError) throw trustedError;
+	const tried = small.map(base => {
+		const clean = fs.readFileSync(base.file);
+		return { base, clean, matches: ipsBoundaryFit(patch, clean).matches };
+	});
+	const fits: IpsFit[] = [];
+	for (const { base, clean, matches } of tried) {
+		if (matches) continue;
+		try {
+			const rom = Buffer.from(applyPatch(patch, clean));
+			if (rom.equals(clean)) continue;
+			const raw = extractRom(rom, clean);
+			const data = readData(raw);
+			const changed = data !== stockData(base, clean);
+			if (changed) buildHackDex(raw, sha256, 'ips');
+			fits.push({
+				base, clean, raw, rom: crypto.createHash('sha256').update(rom).digest('hex'), data, changed,
+				kept: ipsKeptBytes(patch, clean),
+			});
+		} catch {}
+	}
+	const siblings = new Map<string, boolean>();
+	const related = (a: Buffer, b: Buffer, key: string) => {
+		if (!siblings.has(key)) siblings.set(key, siblingBases(a, b));
+		return siblings.get(key)!;
+	};
+	const pairKey = (a: BaseRom, b: BaseRom) => (a.file < b.file ? `${a.file}\n${b.file}` : `${b.file}\n${a.file}`);
+	const same = (a: IpsFit, b: IpsFit) => (
+		a.rom === b.rom || (a.data === b.data && related(a.clean, b.clean, pairKey(a.base, b.base)))
+	);
+	const beats = (a: IpsFit, b: IpsFit) => {
+		const fit = ipsPairFit(patch, a.clean, b.clean);
+		const leads = fit.first >= fit.second * 4 + 8;
+		if (related(a.clean, b.clean, pairKey(a.base, b.base))) return leads;
+		if (fit.differing < IPS_MIN_SAMPLE) return false;
+		if (leads) return fit.first * 8 > fit.differing;
+		return fit.differing >= IPS_MIN_SAMPLE * 8 && fit.first * 1024 < fit.differing && fit.second >= 8 &&
+			fit.second * 8 <= fit.differing;
+	};
+	const changed = fits.filter(fit => fit.changed);
+	const pool = (changed.length ? changed : fits).sort((a, b) => b.kept - a.kept);
+	const best = pool.find(a => pool.every(b => a === b || beats(a, b))) ||
+		pool.find(a => pool.every(b => a === b || same(a, b) || beats(a, b)));
+	if (!best) throw new Error(IPS_BASE_UNKNOWN);
+	if (!best.changed) {
+		const others = tried.filter(other => (
+			other.base !== best.base && !related(best.clean, other.clean, pairKey(best.base, other.base))
+		));
+		const misses = others.reduce((sum, other) => sum + other.matches, 0);
+		if (misses < Math.max(others.length, 1) * IPS_MIN_MISSES || engineLost(best.raw, best.clean)) {
+			throw new Error(IPS_BASE_UNKNOWN);
+		}
+	}
+	if (pool.some(other => other !== best && other.rom !== best.rom && !beats(best, other))) {
+		best.raw.notes.push(
+			'This IPS patch fits more than one version of its base game equally well; it was read as ' +
+			`${KNOWN_BASES[hex8(best.base.crc)] || best.raw.baseGame}.`
+		);
+	}
+	return best.raw;
 }
 
 export function importPatch(patch: Buffer): HackDex {
@@ -438,45 +546,26 @@ export function importPatch(patch: Buffer): HackDex {
 			if (tool) fs.rmSync(tmp, { force: true });
 		}
 		if (!raw) throw lastError || new Error('This server has no base games to patch.');
+	} else if (info.format === 'ips') {
+		raw = readIps(patch, bases, sha256);
 	} else {
 		let lastError: Error | null = null;
-		const small = bases.filter(b => b.size <= 32 * 1024 * 1024);
-		const ranked = info.format === 'bsp' ? small.sort((a, b) => a.size - b.size) : small.map(base => {
-			const rom = fs.readFileSync(base.file);
-			return { base, edge: ipsBoundaryFit(patch, rom), same: ipsUnchangedBytes(patch, rom) };
-		}).sort((a, b) => a.edge.matches - b.edge.matches || b.edge.checked - a.edge.checked || a.same - b.same ||
-			a.base.size - b.base.size).slice(0, 4).map(entry => entry.base);
-		const ips = info.format === 'ips';
-		const trusted = ips ? gbChecksumBases(patch, small) : [];
-		let trustedError: Error | null = null;
 		const deadline = Date.now() + BSP_TOTAL_MILLIS;
-		for (const base of trusted.length ? trusted : ranked) {
+		for (const base of bases.filter(b => b.size <= 32 * 1024 * 1024).sort((a, b) => a.size - b.size)) {
 			const millis = deadline - Date.now();
-			if (info.format === 'bsp' && millis <= 0) {
+			if (millis <= 0) {
 				lastError = new Error('This BSP patch could not be applied: it takes too long to run.');
 				break;
 			}
 			try {
 				const clean = fs.readFileSync(base.file);
-				const rom = Buffer.from(applyPatch(patch, clean, { millis }));
-				const read = extractRom(rom, clean);
-				if (ips && !trusted.length && wrongGuess(rom, clean, read)) continue;
-				raw = read;
+				raw = extractRom(Buffer.from(applyPatch(patch, clean, { millis })), clean);
 				break;
 			} catch (e: any) {
 				lastError = e;
-				if (trusted.length && !trustedError) {
-					const reason = String(e.message || 'the game could not be read').replace(/\.+$/, '');
-					trustedError = new Error(
-						`This patch is for ${baseName(base)}, but this hack's data could not be read: ${reason}. ` +
-						`It changes the game in a way this server does not understand yet.`
-					);
-				}
 				if (/takes too long/.test(e.message)) break;
 			}
 		}
-		if (!raw && trustedError) throw trustedError;
-		if (!raw && ips && ranked.length) throw new Error(IPS_BASE_UNKNOWN);
 		if (!raw) throw lastError || new Error('This server has no base games to patch.');
 	}
 	const hack = buildHackDex(raw, sha256, info.format);

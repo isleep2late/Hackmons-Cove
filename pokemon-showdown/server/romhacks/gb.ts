@@ -215,6 +215,18 @@ export function findGen1Stats(rom: Buffer): number {
 	return -1;
 }
 
+export function findGen2Stats(rom: Buffer): number {
+	const anchored = rom.indexOf(signatureAnchor('bulbasaurEntryGen2'));
+	if (anchored >= 0 && rom[anchored + 32] === 2 && rom[anchored + 64] === 3) return anchored;
+	for (let at = 0; at + 32 * 250 < rom.length; at++) {
+		if (rom[at] !== 1 || rom[at + 32] !== 2 || rom[at + 64] !== 3) continue;
+		let count = 0;
+		while (rom[at + count * 32] === count + 1) count++;
+		if (count >= 200) return at;
+	}
+	return -1;
+}
+
 function findGen1Names(rom: Buffer): number {
 	const fits = (at: number) => {
 		let ended = false;
@@ -672,13 +684,17 @@ export function extractGB(rom: Buffer, base: Buffer | null = null): RawHack {
 	const typeNames = readTypeNames(rom);
 	const typeName = (id: number) => typeNames[id] || GEN1_TYPES[id] || '???';
 
-	const gen2Stats = rom.indexOf(signatureAnchor('bulbasaurEntryGen2'));
-	const isGen2 = gen2Stats >= 0 && rom[gen2Stats + 32] === 2 && rom[gen2Stats + 33] === 60;
-	const title = rom.toString('latin1', 0x134, 0x143).replace(/[^A-Za-z ]/g, ' ').trim();
+	const gen2Stats = findGen2Stats(rom);
+	const isGen2 = gen2Stats >= 0;
+	const title = rom.toString('latin1', 0x134, 0x143).replace(/[^A-Za-z :.!-]/g, ' ').trim();
 
 	const species: RawSpecies[] = [];
 	if (isGen2) {
-		const names = findText(rom, 'BULBASAUR@IVYSAUR@@@');
+		let names = findText(rom, 'BULBASAUR@IVYSAUR@@@');
+		if (names < 0) {
+			const second = findText(rom, 'IVYSAUR@@@VENUSAUR@@');
+			names = second >= 10 ? second - 10 : findGen1Names(rom);
+		}
 		if (names < 0) throw new Error('No Pokemon name table was found in this game.');
 		for (let i = 0; i < 255; i++) {
 			const name = decodeFixed(rom, names + i * 10, 10);

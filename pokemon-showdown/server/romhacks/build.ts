@@ -158,7 +158,7 @@ export function votePockets(
 	});
 }
 
-export const HACK_VERSION = 15;
+export const HACK_VERSION = 16;
 
 export interface HackDex {
 	version: number;
@@ -752,6 +752,16 @@ function isPlaceholder(name: string) {
 		/^(z-move \d+|placeholder|unused|bad egg|egg|max move \d+)$/i.test(name.trim());
 }
 
+const GEN1_DRAIN_EFFECT = 0x03;
+const GEN1_SWIFT_EFFECT = 0x11;
+const GEN1_SPECIAL_DOWN_SIDE_EFFECT = 0x47;
+const GEN1_SPECIAL_EFFECTS: { [effect: number]: number } = { 0x0d: 1, 0x35: 2, 0x15: -1, 0x3d: -2 };
+
+function oneSpecialDrop(secondary: AnyObject): boolean {
+	const stats = Object.keys(secondary.boosts || {});
+	return stats.length === 1 && (stats[0] === 'spa' || stats[0] === 'spd') && secondary.boosts[stats[0]] === -1;
+}
+
 const MOVE_ALIASES: { [id: string]: string } = {
 	dazzlegleam: 'dazzlinggleam', petalstorm: 'petalblizzard', '1000arrows': 'thousandarrows', '1000waves': 'thousandwaves',
 	spacehole: 'hyperspacehole', spacefury: 'hyperspacefury', cliffblades: 'precipiceblades', steampump: 'steameruption',
@@ -765,6 +775,7 @@ const MOVE_ALIASES: { [id: string]: string } = {
 	bleakicewind: 'bleakwindstorm', wildboltwind: 'wildboltstorm', sandsearwind: 'sandsearstorm', dolleyes: 'babydolleyes',
 	disarmcry: 'disarmingvoice', flowerguard: 'flowershield', darkhole: 'darkvoid', soupercellslam: 'supercellslam',
 	hijumpkick: 'highjumpkick', faintattack: 'feintattack', smellingsalt: 'smellingsalts', vicegrip: 'visegrip',
+	fakesurrendr: 'falsesurrender',
 };
 const ABILITY_ALIASES: { [id: string]: string } = {
 	neutralizegas: 'neutralizinggas', wanderingsoul: 'wanderingspirit', alchemicpower: 'powerofalchemy',
@@ -922,6 +933,7 @@ function buildHackDexFrom(
 		specialTypes = liveValues.category.specialTypes.map((name: string) => fixType(name));
 	}
 	const typeRule = raw.typeBasedCategories && base.gen <= 3;
+	const gen1Engine = raw.baseGen === 1 && !!raw.keepBaseEngine;
 	for (const rawMove of raw.moves) {
 		if (isPlaceholder(rawMove.name)) continue;
 		let move = base.moves.get(MOVE_ALIASES[toID(rawMove.name)] || rawMove.name);
@@ -937,12 +949,13 @@ function buildHackDexFrom(
 			legalMoves.add(move.id);
 			if (!hasData) continue;
 			const patch: AnyObject = {};
+			const effect = gen1Engine ? rawMove.effect : undefined;
 			const type = fixType(rawMove.type);
 			if (type !== move.type && move.id !== 'hiddenpower' && type !== '???') patch.type = type;
 			if (move.basePower > 1 && rawMove.basePower! > 1 && rawMove.basePower !== move.basePower) {
 				patch.basePower = rawMove.basePower;
 			}
-			const accuracy = rawMove.accuracy ? rawMove.accuracy : true;
+			const accuracy = rawMove.accuracy && effect !== GEN1_SWIFT_EFFECT ? rawMove.accuracy : true;
 			if (accuracy !== move.accuracy && move.accuracy !== true && !move.ohko) patch.accuracy = accuracy;
 			if (rawMove.pp && rawMove.pp !== move.pp) patch.pp = rawMove.pp;
 			if (rawMove.priority !== undefined && rawMove.priority !== move.priority && Math.abs(rawMove.priority) <= 7) {
@@ -960,6 +973,19 @@ function buildHackDexFrom(
 				typeof secondary.chance === 'number' && (!move.secondaries || move.secondaries.length === 1) &&
 				Math.abs(secondary.chance - chance) > 1e-9 && !hasFunction(secondary)) {
 				patch.secondary = { ...JSON.parse(JSON.stringify(secondary)), chance };
+			}
+			const special = effect === undefined ? 0 : GEN1_SPECIAL_EFFECTS[effect] || 0;
+			const oneSpecial = (boosts: AnyObject | null | undefined) => {
+				const stats = Object.keys(boosts || {});
+				return stats.length === 1 && (stats[0] === 'spa' || stats[0] === 'spd') && boosts![stats[0]] * special > 0;
+			};
+			if (special && oneSpecial(move.boosts)) patch.boosts = { spa: special, spd: special };
+			if (effect === GEN1_SPECIAL_DOWN_SIDE_EFFECT && secondary && oneSpecialDrop(secondary) && !hasFunction(secondary) &&
+				(!move.secondaries || move.secondaries.length === 1)) {
+				patch.secondary = { ...JSON.parse(JSON.stringify(patch.secondary || secondary)), boosts: { spa: -1, spd: -1 } };
+			}
+			if (effect === GEN1_DRAIN_EFFECT && move.category !== 'Status' && move.drain && move.drain.join() !== '1,2') {
+				patch.drain = [1, 2];
 			}
 			const critRatio = rawMove.critRatio;
 			if (sameSlot && Number.isInteger(critRatio) && critRatio! >= 1 && critRatio! <= 5 && !move.willCrit &&
@@ -982,7 +1008,7 @@ function buildHackDexFrom(
 			name,
 			type,
 			basePower,
-			accuracy: rawMove.accuracy || true,
+			accuracy: gen1Engine && rawMove.effect === GEN1_SWIFT_EFFECT ? true : rawMove.accuracy || true,
 			pp: rawMove.pp || 5,
 			priority: rawMove.priority || 0,
 			category,
