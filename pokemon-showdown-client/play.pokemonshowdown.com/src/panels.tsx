@@ -1735,12 +1735,12 @@ export class ReconnectTimer extends preact.Component {
 }
 
 export function PSIcon(
-	props: { pokemon: string | Pokemon | ServerPokemon | Dex.PokemonSet | null } |
+	props: { pokemon: string | Pokemon | ServerPokemon | Dex.PokemonSet | null, mod?: string } |
 		{ item: string | null } | { type: string, b?: boolean, new?: boolean, tera?: boolean } |
 		{ category: string } | { gender: string }
 ) {
 	if ('pokemon' in props) {
-		return <span class="picon" style={Dex.getPokemonIcon(props.pokemon)} />;
+		return <span class="picon" style={Dex.getPokemonIcon(props.pokemon, false, props.mod)} />;
 	}
 	if ('item' in props) {
 		return <span class="itemicon" style={Dex.getItemIcon(props.item)} />;
@@ -1748,6 +1748,16 @@ export function PSIcon(
 	if ('type' in props) {
 		const type = Dex.types.get(props.type);
 		const typeName = type.name || '???';
+		if (!Dex.hasTypeIcon(typeName)) {
+			if (props.new) {
+				return <span
+					class={`typeicon${props.tera ? ' tera' : ''}`}
+					style="background:#737b87;padding-left:4px;padding-right:4px;width:57px"
+					title={`${typeName} (type added by the ROM hack)`}
+				>{typeName}</span>;
+			}
+			return <span dangerouslySetInnerHTML={{ __html: Dex.getTypeBadge(typeName, props.b) }} />;
+		}
 		if (props.new) {
 			return <span class={`typeicon typeicon-${typeName}${props.tera ? ' tera' : ''}`}>{TL(type)}</span>;
 		}

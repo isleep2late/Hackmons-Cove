@@ -15,6 +15,8 @@ import {
   checkIntimidate,
   checkMultihitBoost,
   handleFixedDamageMoves,
+  enterHackMechanics, hackApply, hackModify, hackItemApply, hackWeatherMultiplier,
+  hackRollCount, hackRollValue, hackRollDen,
 } from './util';
 
 export function calculateADV(
@@ -24,6 +26,7 @@ export function calculateADV(
   move: Move,
   field: Field
 ) {
+  enterHackMechanics(gen);
   checkAirLock(attacker, field);
   checkAirLock(defender, field);
   checkForecast(attacker, field.weather);
@@ -162,8 +165,10 @@ export function calculateADV(
   baseDamage = Math.floor(baseDamage * type1Effectiveness);
   baseDamage = Math.floor(baseDamage * type2Effectiveness);
   const damage = [];
-  for (let i = 85; i <= 100; i++) {
-    damage[i - 85] = Math.max(1, Math.floor((baseDamage * i) / 100));
+  const rollCount = hackRollCount(16);
+  const rollDen = hackRollDen(100);
+  for (let i = 0; i < rollCount; i++) {
+    damage[i] = Math.max(1, Math.floor((baseDamage * hackRollValue(i, 85)) / rollDen));
   }
   result.damage = damage;
 
@@ -194,9 +199,10 @@ export function calculateADV(
       newBaseDmg = Math.floor(newBaseDmg * type2Effectiveness);
 
       const damage = [];
-      for (let i = 85; i <= 100; i++) {
-        const newFinalDamage = Math.max(1, Math.floor((newBaseDmg * i) / 100));
-        damage[i - 85] = newFinalDamage;
+      for (let i = 0; i < rollCount; i++) {
+        const newFinalDamage =
+          Math.max(1, Math.floor((newBaseDmg * hackRollValue(i, 85)) / rollDen));
+        damage[i] = newFinalDamage;
       }
       damageMatrix[times] = damage;
     }
@@ -293,10 +299,10 @@ export function calculateAttackADV(
 
   if (!attacker.hasItem('Sea Incense') && (move.hasType(getItemBoostType(attacker.item))) ||
     (move.named('Struggle') && getItemBoostType(attacker.item) === 'Normal')) {
-    at = Math.floor(at * 1.1);
+    at = hackItemApply(attacker.item, at, Math.floor(at * 1.1));
     desc.attackerItem = attacker.item;
   } else if (attacker.hasItem('Sea Incense') && move.hasType('Water')) {
-    at = Math.floor(at * 1.05);
+    at = hackItemApply(attacker.item, at, Math.floor(at * 1.05));
     desc.attackerItem = attacker.item;
   } else if (
     (isPhysical && attacker.hasItem('Choice Band')) ||
@@ -385,7 +391,7 @@ function calculateFinalModsADV(
 ) {
   const isPhysical = move.category === 'Physical';
   if (attacker.hasStatus('brn') && isPhysical && !attacker.hasAbility('Guts')) {
-    baseDamage = Math.floor(baseDamage / 2);
+    baseDamage = hackApply('burnAttack', baseDamage, Math.floor(baseDamage / 2));
     desc.isBurned = true;
   }
 
@@ -404,7 +410,17 @@ function calculateFinalModsADV(
     baseDamage = Math.floor(baseDamage / 2);
   }
 
-  if ((field.hasWeather('Sun') && move.hasType('Fire')) ||
+  const hackWeather = hackWeatherMultiplier(field.weather, move.type);
+  if (hackWeather !== undefined) {
+    if (hackWeather !== 1) {
+      baseDamage = hackModify(baseDamage, hackWeather);
+      desc.weather = field.weather;
+    }
+    if (move.named('Solar Beam') && field.hasWeather('Rain', 'Sand', 'Hail')) {
+      baseDamage = Math.floor(baseDamage / 2);
+      desc.weather = field.weather;
+    }
+  } else if ((field.hasWeather('Sun') && move.hasType('Fire')) ||
       (field.hasWeather('Rain') && move.hasType('Water'))) {
     baseDamage = Math.floor(baseDamage * 1.5);
     desc.weather = field.weather;
@@ -424,7 +440,7 @@ function calculateFinalModsADV(
 
   baseDamage = (move.category === 'Physical' ? Math.max(1, baseDamage) : baseDamage) + 2;
   if (isCritical) {
-    baseDamage *= 2;
+    baseDamage = hackApply('critMultiplier', baseDamage, baseDamage * 2);
     desc.isCritical = true;
   }
 
@@ -444,7 +460,7 @@ function calculateFinalModsADV(
   }
 
   if (move.hasType(...attacker.types)) {
-    baseDamage = Math.floor(baseDamage * 1.5);
+    baseDamage = hackApply('stab', baseDamage, Math.floor(baseDamage * 1.5));
   }
   return baseDamage;
 }

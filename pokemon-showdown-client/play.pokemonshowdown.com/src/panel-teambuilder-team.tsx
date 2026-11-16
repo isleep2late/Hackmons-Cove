@@ -5,9 +5,10 @@
  * @license AGPLv3
  */
 
+import preact from "../js/lib/preact";
 import { PS, PSRoom, type RoomOptions, type Team } from "./client-main";
 import { PSPanelWrapper, PSRoomPanel } from "./panels";
-import { TL, toID, type ID } from "./battle-dex";
+import { RomHacks, TL, toID, type ID } from "./battle-dex";
 import { BattleLog } from "./battle-log";
 import { TeamEditor, type TeamEditorState } from "./battle-team-editor";
 import { Net, PSLoginServer } from "./client-connection";
@@ -267,6 +268,11 @@ class TeamPanel extends PSRoomPanel<TeamRoom> {
 		PS.prefs.save();
 		this.forceUpdate();
 	};
+	handleRomHack = () => {
+		this.props.room.editor?.setFormat(this.props.room.team.format);
+		PS.teams.save();
+		this.forceUpdate();
+	};
 	handleChangeFormat = (ev: Event) => {
 		const dropdown = ev.currentTarget as HTMLButtonElement;
 		const room = this.props.room;
@@ -371,6 +377,7 @@ class TeamPanel extends PSRoomPanel<TeamRoom> {
 					</small>}
 				</label>
 			</div>
+			{RomHacks.isFormat(team.format) && <RomHackUpload onLoaded={this.handleRomHack} teamKey={team.key || team.name} />}
 			<TeamEditor
 				team={team} onChange={this.save} readOnly={!!team.teamid && !team.uploadedPackedTeam} resources={this.renderResources()}
 				narrow={room.width < 550}
@@ -575,3 +582,69 @@ class TeamStoragePanel extends PSRoomPanel {
 }
 
 PS.addRoomType(TeamPanel, TeamStoragePanel, ViewTeamPanel);
+
+class RomHackUpload extends preact.Component<{ onLoaded: () => void, teamKey: string }> {
+	error = '';
+	finish = (promise: Promise<unknown>) => {
+		promise.then(() => {
+			this.error = '';
+			if (RomHacks.active) RomHacks.setTeamHack(this.props.teamKey, RomHacks.active.sha256);
+			this.props.onLoaded();
+			this.forceUpdate();
+		}, (err: any) => {
+			this.error = String(err?.message || err);
+			this.forceUpdate();
+		});
+	};
+	handleFile = (ev: Event) => {
+		const file = (ev.currentTarget as HTMLInputElement).files?.[0];
+		if (!file) return;
+		this.error = 'Reading the patch...';
+		this.forceUpdate();
+		this.finish(RomHacks.upload(file));
+	};
+	handleSelect = (ev: Event) => {
+		this.finish(RomHacks.activate((ev.currentTarget as HTMLSelectElement).value));
+	};
+	override render() {
+		RomHacks.load();
+		RomHacks.syncTeam(this.props.teamKey, () => {
+			this.props.onLoaded();
+			this.forceUpdate();
+		});
+		const hack = RomHacks.active;
+		const list = RomHacks.list();
+		const approximated = hack ? hack.approximated.abilities.length + hack.approximated.items.length : 0;
+		const mechanicsHTML = hack ? RomHacks.mechanicsHTML(hack) : '';
+		if (hack && !RomHacks.checked[hack.sha256]) {
+			void RomHacks.revalidate(hack.sha256).then(changed => {
+				if (!changed) return;
+				this.props.onLoaded();
+				this.forceUpdate();
+			});
+		}
+		return <div class="infobox" style="margin:8px 0">
+			<strong>ROM patch:</strong> {}
+			{list.length > 0 && <select class="button" onChange={this.handleSelect}>
+				{list.map(entry => <option value={entry.sha256} selected={hack?.sha256 === entry.sha256}>
+					{RomHacks.optionLabel(entry)}
+				</option>)}
+			</select>} {}
+			<input type="file" accept=".bps,.ups,.ips,.xdelta,.vcdiff,.bsp" onChange={this.handleFile} />
+			<p><small>
+				Upload the hack's patch file (.bps, .ups, .ips, .xdelta or .bsp) - never a ROM. EXPERIMENTAL: Game Boy, Game Boy Color, Game Boy Advance and DS hacks.
+			</small></p>
+			{this.error && <p class="message-error">{this.error}</p>}
+			{hack && <p><small>
+				Loaded: <strong>{hack.name || 'ROM hack'}</strong> on {hack.baseGame} - {hack.legal.species.length} Pok&eacute;mon, {}
+				{hack.legal.moves.length} moves, {hack.legal.abilities.length} abilities, {hack.legal.items.length} items.<br />
+				SHA-256 <code>{hack.sha256}</code> - your opponent must upload the identical file.<br />
+				{hack.notes.join(' ')} {}
+				{hack.approximated.moves.length} new moves deal plain damage and {approximated} new abilities/items have no effect yet.
+			</small></p>}
+			{mechanicsHTML && <div
+				class="romhack-mechanics" style="font-size:8pt;margin:4px 0" dangerouslySetInnerHTML={{ __html: mechanicsHTML }}
+			/>}
+		</div>;
+	}
+}

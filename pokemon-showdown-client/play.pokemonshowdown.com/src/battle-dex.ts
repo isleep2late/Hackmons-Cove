@@ -1147,6 +1147,25 @@ export const Dex = new class implements ModdedDex {
 			const phnnDisguised = this.phnnDisguiseSpriteData(pokemon, isFront, options);
 			if (phnnDisguised) return phnnDisguised;
 		}
+		if (RomHacks.battleSprites) {
+			let hackId = '';
+			let hackShiny = options.shiny;
+			if (pokemon instanceof Pokemon) {
+				hackId = toID(pokemon.volatiles.transform?.[1]?.speciesForme || pokemon.volatiles.formechange?.[1] ||
+					pokemon.getSpeciesForme());
+				hackShiny = pokemon.shiny;
+			} else {
+				hackId = toID(typeof pokemon === 'string' ? pokemon : pokemon.id);
+			}
+			const hackUrl = RomHacks.sprite((isFront ? 'front' : 'back') + (hackShiny ? '-shiny' : ''), hackId);
+			if (hackUrl) {
+				const hackSize = ({ 56: 112, 64: 128, 80: 120, 96: 96 } as any)[RomHacks.active.sprites.size || 64] || 128;
+				return {
+					gen: 3, w: hackSize, h: hackSize, y: 0, url: hackUrl, pixelated: true, isFrontSprite: isFront,
+					cryurl: '', shiny: hackShiny,
+				};
+			}
+		}
 		const mechanicsGen = options.gen || 6;
 		let isDynamax = !!options.dynamax;
 		if (pokemon instanceof Pokemon) {
@@ -1450,6 +1469,15 @@ export const Dex = new class implements ModdedDex {
 			// @ts-expect-error safe, but too lazy to cast
 			id = toID(pokemon.volatiles.formechange[1]);
 		}
+		const hackIcons = RomHacks.battleSprites || RomHacks.builderSprites || (!!mod && mod === RomHacks.modid);
+		const hackFainted = (pokemon as any)?.fainted ? ';opacity:.3;filter:grayscale(100%) brightness(.5)' : '';
+		if (hackIcons && RomHacks.hasOverworld(id)) {
+			return `background:transparent url(${RomHacks.spriteUrl('overworld', id)}) no-repeat scroll center/32px 32px;image-rendering:pixelated${hackFainted}`;
+		}
+		const hackIconUrl = hackIcons ? RomHacks.sprite('front', id) : '';
+		if (hackIconUrl) {
+			return `background:transparent url(${hackIconUrl}) no-repeat scroll center;background-size:contain;image-rendering:pixelated${hackFainted}`;
+		}
 		const phnnIconIds: {[id: string]: number} = {
 			arceusshadow: 2, arceusquestion: 2, lugiashadow: 2, mewtwoshadow: 2, mewtwoshadowmegax: 2, mewtwoarmored: 1, jynxmega: 1,
 			pokestarspirit: 1,
@@ -1616,8 +1644,18 @@ export const Dex = new class implements ModdedDex {
 		return spriteData;
 	}
 
-	getTeambuilderSprite(pokemon: any, dex?: ModdedDex, xOffset = 0, yOffset = 0) {
+	getTeambuilderSprite(pokemon: any, dex?: ModdedDex, xOffset = 0, yOffset = 0, overworldAt?: [number, number]) {
 		if (!pokemon) return '';
+		if (dex && dex.modid === RomHacks.modid) {
+			const hackId = toID(pokemon.species || pokemon);
+			const hackUrl = RomHacks.sprite(pokemon.shiny ? 'front-shiny' : 'front', hackId);
+			if (hackUrl) {
+				if (overworldAt && RomHacks.hasOverworld(hackId)) {
+					return `background-image:url(${RomHacks.spriteUrl('overworld', hackId)}),url(${hackUrl});background-position:${overworldAt[0]}px ${overworldAt[1]}px,${10 + xOffset}px ${5 + yOffset}px;background-repeat:no-repeat;background-size:32px 32px,96px;image-rendering:pixelated;`;
+				}
+				return `background-image:url(${hackUrl});background-position:${10 + xOffset}px ${5 + yOffset}px;background-repeat:no-repeat;background-size:96px;image-rendering:pixelated;`;
+			}
+		}
 		const data = this.getTeambuilderSpriteData(pokemon, dex);
 		const shiny = (data.shiny ? '-shiny' : '');
 		const resize = (data.h ? `background-size:${data.h}px;` : '');
@@ -1628,6 +1666,10 @@ export const Dex = new class implements ModdedDex {
 
 	getItemIcon(item: any) {
 		let num = 0;
+		const hackItemId = toID(typeof item === 'string' ? item : item?.name);
+		if (hackItemId && (RomHacks.battleSprites || RomHacks.builderSprites) && RomHacks.hasSprite('items', hackItemId)) {
+			return `background:transparent url(${RomHacks.spriteUrl('item', hackItemId)}) no-repeat scroll center;background-size:contain;image-rendering:pixelated`;
+		}
 		if (typeof item === 'string' && window.BattleItems) item = window.BattleItems[toID(item)];
 		const phnnPlateIcons: {[id: string]: string} = { shadowplate: 'shadowplate-icon', questionmarkplate: 'questionmarkplate-icon', blankplate: 'blankplate-icon', legendplate: 'legendplate-icon', shadowiniumz: 'shadowiniumz', questiniumz: 'questiniumz', shadowcloak: 'shadowcloak', brokendisk: 'brokendisk', apple: 'apple', calmberry: 'calmberry', earth: 'earth', firetail: 'firetail', focusorb: 'focusorb', prettytail: 'prettytail', quickneedle: 'quickneedle', sharpscythe: 'sharpscythe', snakeskin: 'snakeskin', stimulusorb: 'stimulusorb', strangethread: 'strangethread', thundertail: 'thundertail', watertail: 'watertail' };
 		const phnnPlateId = phnnPlateIcons[toID(item?.name)];
@@ -1643,9 +1685,26 @@ export const Dex = new class implements ModdedDex {
 		return `background:transparent url(${Dex.resourcePrefix}sprites/itemicons-sheet.png?v1) no-repeat scroll -${left}px -${top}px`;
 	}
 
-	getTypeIcon(type: string | null, b?: boolean) { // b is just for utilichart.js
+	hasTypeIcon(type: string | null | undefined) {
+		const id = toID(type);
+		if (!id || id === 'bird') return true;
+		const chart = window.BattleTypeChart;
+		return !chart || Object.prototype.hasOwnProperty.call(chart, id);
+	}
+	getTypeBadge(type: string, b?: boolean) {
+		const name = String(type);
+		const label = BattleLog.escapeHTML(name.length > 6 ? name.slice(0, 6) : name);
+		const size = name.length > 5 ? 7 : 8;
+		return `<span class="typebadge${b ? ' b' : ''}" title="${BattleLog.escapeHTML(name)} (type added by the ROM hack)" ` +
+			`style="display:inline-block;box-sizing:border-box;width:32px;height:14px;border:1px solid #4a4f57;` +
+			`border-radius:3px;background:#737b87;color:#fff;font:bold ${size}px/12px Verdana,Arial,sans-serif;` +
+			`text-align:center;text-transform:uppercase;text-shadow:none;letter-spacing:0;vertical-align:middle;` +
+			`overflow:hidden;white-space:nowrap">${label}</span>`;
+	}
+	getTypeIcon(type: string | null, b?: boolean, imageOnly?: boolean) { // b is just for utilichart.js
 		type = this.types.get(type).name;
 		if (!type) type = '???';
+		if (!imageOnly && !this.hasTypeIcon(type)) return this.getTypeBadge(type, b);
 		let sanitizedType = type.replace(/\?/g, '%3f');
 		const alt = BattleLog.escapeHTML(TL.type[type] || type);
 		// Shadow is a fork-only type; its icon is not in upstream's sprite set, so it is served
@@ -1772,6 +1831,11 @@ class ModdedDex {
 					Object.assign(data, table.overrideMoveData[id]);
 				}
 			}
+			const hackMechanics = this.modid !== `gen${this.gen}` ?
+				window.BattleTeambuilderTable[this.modid].romHackMechanics : null;
+			if (hackMechanics && this.gen <= 3 && data.category !== 'Status' && data.type !== 'Shadow') {
+				data.category = Dex.getGen3Category(data.type);
+			}
 			if (this.modid !== `gen${this.gen}`) {
 				const table = window.BattleTeambuilderTable[this.modid];
 				if (id in table.overrideMoveData) {
@@ -1784,7 +1848,9 @@ class ModdedDex {
 					Object.assign(data, hpOverride);
 				}
 			}
-			if (this.gen <= 3 && data.category !== 'Status' && data.type !== 'Shadow') {
+			if (hackMechanics) {
+				RomHacks.rewriteMove(this.gen, hackMechanics, id, data);
+			} else if (this.gen <= 3 && data.category !== 'Status' && data.type !== 'Shadow') {
 				data.category = Dex.getGen3Category(data.type);
 			}
 
@@ -1864,6 +1930,7 @@ class ModdedDex {
 			}
 			const baseSpecies = Dex.species.get(originalId || name);
 			id = baseSpecies.id;
+			if (typeof id !== 'string') return Dex.species.get('');
 			if (this.cache.Species.hasOwnProperty(id)) return this.cache.Species[id];
 
 			let data = { ...baseSpecies };
@@ -1914,9 +1981,15 @@ class ModdedDex {
 			if (!names.length) return [];
 			const curNames = [...names];
 			// if (this.gen < 9) curNames.splice(curNames.indexOf('Stellar'), 1);
-			if (this.gen < 6) curNames.splice(curNames.indexOf('Fairy'), 1);
-			if (this.gen < 2) curNames.splice(curNames.indexOf('Dark'), 1);
-			if (this.gen < 2) curNames.splice(curNames.indexOf('Steel'), 1);
+			const modTypes: { [id: string]: { exists?: boolean, name?: string } } =
+				(this.modid !== `gen${this.gen}` && window.BattleTeambuilderTable[this.modid]?.overrideTypeChart) || {};
+			if (this.gen < 6 && !modTypes['fairy']?.exists) curNames.splice(curNames.indexOf('Fairy'), 1);
+			if (this.gen < 2 && !modTypes['dark']?.exists) curNames.splice(curNames.indexOf('Dark'), 1);
+			if (this.gen < 2 && !modTypes['steel']?.exists) curNames.splice(curNames.indexOf('Steel'), 1);
+			for (const id in modTypes) {
+				const added = modTypes[id].exists && modTypes[id].name as Dex.TypeName | undefined;
+				if (added && !curNames.includes(added)) curNames.push(added);
+			}
 			this.types.namesCache = curNames;
 			return curNames;
 		},
@@ -1939,9 +2012,9 @@ class ModdedDex {
 					data = { ...data, ...table.overrideTypeChart[id] };
 				}
 			}
-			if (this.modid !== `gen${this.gen}` && data.exists !== false) {
+			if (this.modid !== `gen${this.gen}`) {
 				const modTypeChart = window.BattleTeambuilderTable[this.modid]?.overrideTypeChart;
-				if (modTypeChart && id in modTypeChart) {
+				if (modTypeChart && id in modTypeChart && (data.exists !== false || modTypeChart[id].exists)) {
 					data = { ...data, ...modTypeChart[id] };
 				}
 			}
@@ -1964,6 +2037,617 @@ class ModdedDex {
 	}
 }
 
+export const RomHacks = new class {
+	active: any = null;
+	modid = '' as ID;
+	legal: { [type: string]: { [id: string]: 1 } } | null = null;
+	listeners: (() => void)[] = [];
+	loaded = false;
+	indexed: { [id: string]: 1 } = {};
+
+	battleSprites = false;
+	builderSprites = false;
+	hasSprite(type: 'pokemon' | 'icons' | 'items', id: string) {
+		const hack = this.active;
+		if (!hack?.sprites?.[type] || !hack.indices) return false;
+		return id in (type === 'items' ? hack.indices.items : hack.indices.species);
+	}
+	overworldMissing: { [key: string]: 1 } = {};
+	overworldProbed: { [key: string]: 1 } = {};
+	overworldListed: { sha256: string, ids: { [id: string]: 1 } } | null = null;
+	hasOverworld(id: string) {
+		const hack = this.active;
+		if (!hack?.sprites?.overworld || !hack.indices || !(id in hack.indices.species)) return false;
+		if (Array.isArray(hack.sprites.overworldIds)) {
+			if (this.overworldListed?.sha256 !== hack.sha256) {
+				const ids: { [id: string]: 1 } = {};
+				for (const listed of hack.sprites.overworldIds) ids[listed] = 1;
+				this.overworldListed = { sha256: hack.sha256, ids };
+			}
+			return id in this.overworldListed!.ids;
+		}
+		const key = `${hack.sha256}:${id}`;
+		if (this.overworldMissing[key]) return false;
+		if (!this.overworldProbed[key] && typeof Image !== 'undefined') {
+			this.overworldProbed[key] = 1;
+			const url = this.spriteUrl('overworld', id);
+			const probe = new Image();
+			probe.onerror = () => {
+				this.overworldMissing[key] = 1;
+				if (this.active?.sha256 === hack.sha256) this.dropOverworld(url, Dex.getPokemonIcon(id, false, this.modid));
+			};
+			probe.src = url;
+		}
+		return true;
+	}
+	dropOverworld(url: string, fallback: string) {
+		if (typeof document === 'undefined') return;
+		const nodes = document.querySelectorAll<HTMLElement>('[style*="/sprites/overworld/"]');
+		for (let i = 0; i < nodes.length; i++) {
+			const style = nodes[i].style;
+			const image = style.backgroundImage || '';
+			if (!image.includes(url) || image.includes(',')) continue;
+			for (const declaration of fallback.split(';')) {
+				const colon = declaration.indexOf(':');
+				if (colon > 0) style.setProperty(declaration.slice(0, colon).trim(), declaration.slice(colon + 1).trim());
+			}
+		}
+	}
+	spriteMissing: { [key: string]: 1 } = {};
+	spriteProbed: { [key: string]: 1 } = {};
+	sprite(kind: string, id: string): string {
+		const hack = this.active;
+		if (!hack?.sprites?.pokemon || !hack.indices || !(id in hack.indices.species)) return '';
+		const ids = [id];
+		const base = toID(Dex.species.get(id).baseSpecies);
+		if (base && base !== id && base in hack.indices.species) ids.push(base);
+		const kinds = kind.endsWith('-shiny') ? [kind, kind.slice(0, -6)] : [kind];
+		for (const tryKind of kinds) {
+			for (const tryId of ids) {
+				const key = `${hack.sha256}:${tryKind}:${tryId}`;
+				if (this.spriteMissing[key]) continue;
+				const url = this.spriteUrl(tryKind, tryId);
+				if (!this.spriteProbed[key]) this.probeSprite(key, url, tryKind, tryId);
+				return url;
+			}
+		}
+		return '';
+	}
+	probeSprite(key: string, url: string, kind: string, id: string) {
+		if (typeof Image === 'undefined') return;
+		this.spriteProbed[key] = 1;
+		const sha256 = this.active.sha256;
+		const probe = new Image();
+		probe.onerror = () => {
+			this.spriteMissing[key] = 1;
+			if (this.active?.sha256 === sha256) this.dropSprite(url, kind, id);
+		};
+		probe.src = url;
+	}
+	dropSprite(url: string, kind: string, id: string) {
+		if (typeof document === 'undefined') return;
+		const next = this.sprite(kind, id);
+		const isFront = kind.startsWith('front');
+		const shiny = kind.endsWith('-shiny');
+		const images = document.querySelectorAll<HTMLImageElement>(`img[src$="/sprites/${kind}/${id}.png"]`);
+		for (let i = 0; i < images.length; i++) {
+			if (images[i].getAttribute('src') !== url) continue;
+			images[i].src = next || Dex.getSpriteData(id, isFront, { gen: this.parentGen(this.active), shiny }).url;
+		}
+		const nodes = document.querySelectorAll<HTMLElement>(`[style*="/sprites/${kind}/${id}.png"]`);
+		for (let i = 0; i < nodes.length; i++) {
+			const style = nodes[i].style;
+			const image = style.backgroundImage || '';
+			if (!image.includes(url)) continue;
+			if (next) {
+				style.backgroundImage = image.split(url).join(next);
+				continue;
+			}
+			const fallback = style.backgroundSize === 'contain' ? Dex.getPokemonIcon(id, false, this.modid) :
+				Dex.getTeambuilderSprite({ species: id, shiny }, Dex.mod(this.modid));
+			style.removeProperty('background-size');
+			style.removeProperty('image-rendering');
+			for (const declaration of fallback.split(';')) {
+				const colon = declaration.indexOf(':');
+				if (colon > 0) style.setProperty(declaration.slice(0, colon).trim(), declaration.slice(colon + 1).trim());
+			}
+		}
+	}
+	useInBattle(sha256: string, battle: any): boolean {
+		if (!/^[0-9a-f]{64}$/.test(sha256)) return false;
+		const apply = () => {
+			battle.dex = Dex.mod(this.modid);
+			battle.romHack = this.active;
+			this.battleSprites = true;
+		};
+		const replay = () => {
+			if (!battle.p1 || this.active?.sha256 !== sha256) return;
+			apply();
+			if (battle.resetToCurrentTurn) battle.resetToCurrentTurn();
+		};
+		if (this.active?.sha256 === sha256) {
+			apply();
+			if (!this.checked[sha256]) {
+				void this.revalidate(sha256).then(changed => {
+					if (changed) replay();
+				});
+			}
+			return true;
+		}
+		this.activate(sha256).then(replay, () => {});
+		return false;
+	}
+	checked: { [sha256: string]: Promise<boolean> | undefined } = {};
+	revalidate(sha256: string): Promise<boolean> {
+		const pending = this.checked[sha256];
+		if (pending) return pending;
+		const run = async () => {
+			if (!this.trusted(sha256)) return false;
+			const response = await fetch(`${this.serverUrl()}/romhacks/${sha256}.json`, { cache: 'no-store' });
+			const fresh = await response.json();
+			if (!response.ok || fresh.error || fresh.sha256 !== sha256 || !fresh.indices) return false;
+			let cached: any = null;
+			try {
+				cached = JSON.parse(this.storageGet(`romhacks:data:${sha256}`) || 'null');
+			} catch {}
+			if (cached && cached.version === fresh.version) return false;
+			const known = this.list().find(entry => entry.sha256 === sha256);
+			fresh.name = cached?.name || known?.name || fresh.name;
+			if (this.active?.sha256 === sha256) {
+				this.install(fresh, true);
+			} else {
+				this.storageSet(`romhacks:data:${sha256}`, JSON.stringify(fresh));
+			}
+			return true;
+		};
+		const result = run().catch(() => false);
+		this.checked[sha256] = result;
+		return result;
+	}
+	isPart(value: any): value is [number, number] {
+		return Array.isArray(value) && value.length === 2 && Number.isInteger(value[0]) && Number.isInteger(value[1]) &&
+			value[0] >= 1 && value[0] <= value[1] && value[1] <= 0xFFFFFFFF;
+	}
+	isIdList(value: any): value is string[] {
+		return Array.isArray(value) && value.every(entry => typeof entry === 'string');
+	}
+	rewriteMove(gen: number, mechanics: any, id: string, data: any) {
+		const m = mechanics && typeof mechanics === 'object' ? mechanics : {};
+		if (this.isPart(m.healMoveFraction)) {
+			const stockHalf = Array.isArray(data.heal) && data.heal[0] === 1 && data.heal[1] === 2;
+			if (stockHalf && (gen > 1 || id === 'recover' || id === 'softboiled')) {
+				data.heal = [m.healMoveFraction[0], m.healMoveFraction[1]];
+			}
+		}
+		const fractions = m.recoilFractions;
+		if (fractions && typeof fractions === 'object' && Array.isArray(data.recoil) && (id !== 'struggle' || gen === 2)) {
+			const r = data.recoil;
+			const name = r[0] * 4 === r[1] ? 'quarter' : (r[0] === 33 && r[1] === 100) || r[0] * 3 === r[1] ? 'third' :
+				r[0] * 2 === r[1] ? 'half' : '';
+			if (name && this.isPart(fractions[name])) data.recoil = [fractions[name][0], fractions[name][1]];
+		}
+		if (gen === 1 && id === 'struggle' && this.isPart(m.struggleRecoil) && Array.isArray(data.recoil)) {
+			data.recoil = [m.struggleRecoil[0], m.struggleRecoil[1]];
+		}
+		const fixed = id === 'sonicboom' ? m.sonicBoomDamage : id === 'dragonrage' ? m.dragonRageDamage : undefined;
+		if (Number.isInteger(fixed) && fixed >= 1 && fixed <= 65535 && typeof data.damage === 'number') data.damage = fixed;
+		if (gen <= 2 && this.isIdList(m.highCritMoves) && data.category !== 'Status') {
+			if (m.highCritMoves.includes(id)) {
+				data.critRatio = gen === 1 ? 2 : 3;
+			} else if ((data.critRatio || 1) > 1) {
+				data.critRatio = 1;
+			}
+		}
+		const category = m.category;
+		if (gen <= 3 && category && typeof category === 'object' && data.category && data.category !== 'Status') {
+			const special = category.basis === 'type' && this.isIdList(category.specialTypes) ? category.specialTypes :
+				category.basis === 'move' && this.isIdList(category.specialMoves) ? category.specialMoves : null;
+			if (special) data.category = special.includes(category.basis === 'type' ? data.type : id) ? 'Special' : 'Physical';
+		}
+		return data;
+	}
+	escape(text: any) {
+		return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+	}
+	parentGen(hack: any) {
+		return parseInt(String(hack?.parentMod).slice(3), 10) || 9;
+	}
+	mechanicsSummary(hack: any): { notes: string[], unreadable: number, none: boolean } | null {
+		if (!hack || !Array.isArray(hack.mechanicsNotes)) return null;
+		const notes: string[] = [];
+		for (const note of hack.mechanicsNotes) {
+			if (typeof note === 'string' && note.trim()) notes.push(note.trim());
+		}
+		let unreadable = 0;
+		const listed = hack.mechanicsReport?.unreadable;
+		if (Array.isArray(listed)) {
+			for (const id of listed) {
+				if (typeof id === 'string' && !id.startsWith('info.')) unreadable++;
+			}
+		} else {
+			for (const note of notes) {
+				if (note.includes(' was changed by the hack but could not be read')) unreadable++;
+			}
+		}
+		const none = !unreadable && (!notes.length ||
+			(notes.length === 1 && notes[0].startsWith('No battle-engine changes were found')));
+		return { notes, unreadable, none };
+	}
+	mechanicsHTML(hack: any, inBattle?: boolean) {
+		const summary = this.mechanicsSummary(hack);
+		if (!summary) return '';
+		const gen = this.parentGen(hack);
+		const name = this.escape(hack.name || 'This ROM hack');
+		if (summary.none) {
+			if (inBattle) {
+				return `<div class="infobox"><small><strong>ROM hack rules:</strong> no engine changes were detected in ${name}; ` +
+					`Generation ${gen} rules apply.</small></div>`;
+			}
+			return `<strong>Mechanics changed by this hack:</strong> none - no engine changes were detected, ` +
+				`so Generation ${gen} rules apply.`;
+		}
+		const count = summary.notes.length;
+		let items = '';
+		const itemStyle = 'display:list-item;list-style:disc outside;margin:0 0 2px;padding:0';
+		for (const note of summary.notes) items += `<li style="${itemStyle}">${this.escape(note)}</li>`;
+		const list = `<ul style="margin:4px 0;padding-left:20px">${items}</ul>`;
+		let unread = '';
+		if (summary.unreadable) {
+			unread = `${summary.unreadable} change${summary.unreadable === 1 ? '' : 's'} could not be read; ` +
+				`the Generation ${gen} rule is used for ${summary.unreadable === 1 ? 'it' : 'those'}.`;
+		}
+		if (inBattle) {
+			return `<div class="infobox"><details class="details"><summary><small><strong>ROM hack rules:</strong> ${name} has ` +
+				`${count} battle mechanics note${count === 1 ? '' : 's'}` +
+				`${summary.unreadable ? ` (${summary.unreadable} could not be read)` : ''}` +
+				` - click to show</small></summary><small>${list}${unread}</small></details></div>`;
+		}
+		const heading = `<strong>Mechanics changed by this hack</strong> (${count})`;
+		const tail = unread ? `<em>${unread}</em>` : '';
+		if (count > 4) {
+			return `<details class="details"><summary>${heading} - click to show</summary>${list}${tail}</details>`;
+		}
+		return `${heading}:${list}${tail}`;
+	}
+	turnCount(value: any, fallback: number) {
+		return typeof value === 'number' && Math.floor(value) === value && value >= 0 && value < 1000 ? value : fallback;
+	}
+	weatherTurns(hack: any, weather: string, fromAbility: boolean): [number, number] | null {
+		const mechanics = hack?.mechanics;
+		const keys: any = { raindance: 'rain', sunnyday: 'sun', sandstorm: 'sand', hail: 'hail', snowscape: 'hail', snow: 'hail' };
+		const key = keys[weather];
+		if (!mechanics || typeof mechanics !== 'object' || !key) return null;
+		const gen = this.parentGen(hack);
+		let base = this.turnCount(mechanics.weatherTurns?.[key], 5);
+		const rock = gen >= 4 ? this.turnCount(mechanics.weatherRockTurns?.[key], 8) : 0;
+		if (fromAbility) {
+			const ability = this.turnCount(mechanics.abilityWeatherTurns, gen <= 5 ? 0 : -1);
+			if (ability === 0) return [0, 0];
+			if (ability > 0) base = ability;
+		}
+		if (!rock || rock === base) return [0, base];
+		return [Math.min(base, rock), Math.max(base, rock)];
+	}
+	screenTurns(hack: any, screen: string): [number, number] | null {
+		const mechanics = hack?.mechanics;
+		if (!mechanics || typeof mechanics !== 'object') return null;
+		const base = this.turnCount(mechanics.screenTurns?.[screen], 5);
+		if (screen !== 'reflect' && screen !== 'lightscreen') return [base, 0];
+		const clay = this.parentGen(hack) >= 4 ? this.turnCount(mechanics.screenClayTurns, 8) : 0;
+		if (!clay || clay === base) return [base, 0];
+		return [Math.min(base, clay), Math.max(base, clay)];
+	}
+	teamHack(teamKey: string): string {
+		try {
+			return JSON.parse(this.storageGet('romhacks:teams') || '{}')[teamKey] || '';
+		} catch {
+			return '';
+		}
+	}
+	setTeamHack(teamKey: string, sha256: string) {
+		let map: { [k: string]: string } = {};
+		try {
+			map = JSON.parse(this.storageGet('romhacks:teams') || '{}');
+		} catch {}
+		map[teamKey] = sha256;
+		this.storageSet('romhacks:teams', JSON.stringify(map));
+	}
+	switching = false;
+	syncTeam(teamKey: string, done: () => void) {
+		if (!teamKey) return;
+		const bound = this.teamHack(teamKey);
+		if (!bound) {
+			if (this.active) this.setTeamHack(teamKey, this.active.sha256);
+			return;
+		}
+		if (this.active?.sha256 === bound || this.switching) return;
+		this.switching = true;
+		this.activate(bound).then(() => {
+			this.switching = false;
+			done();
+		}, () => {
+			this.switching = false;
+		});
+	}
+	label(sha256: string) {
+		const known = this.list().find(entry => entry.sha256 === sha256);
+		return `${known?.name ? `${known.name} ` : ''}[${sha256.slice(0, 8)}]`;
+	}
+	optionLabel(entry: { sha256: string, name: string, baseGame: string }) {
+		const text = `${entry.name} (${entry.baseGame})`;
+		const twin = this.list().some(other => other.sha256 !== entry.sha256 && `${other.name} (${other.baseGame})` === text);
+		return twin ? `${text} [${entry.sha256.slice(0, 8)}]` : text;
+	}
+	formatHack(format: string) {
+		return /@@@.*\brom ?hack ?= ?([0-9a-f]{64})/i.exec(format)?.[1].toLowerCase() || '';
+	}
+	async prepareTeam(teamKey: string, format: string): Promise<string> {
+		if (!teamKey || !this.isFormat(format)) return '';
+		this.load();
+		const bound = this.teamHack(teamKey);
+		const wanted = this.formatHack(format);
+		if (wanted && bound && bound !== wanted) {
+			if (!this.list().some(entry => entry.sha256 === wanted && entry.proof)) return '';
+			return `This team was built for a different ROM hack (${this.label(bound)}) than this battle uses ` +
+				`(${this.label(wanted)}). Pick a team built for the battle's hack.`;
+		}
+		const needed = wanted || bound;
+		if (!needed || this.active?.sha256 === needed) return '';
+		try {
+			await this.activate(needed);
+		} catch (err: any) {
+			if (wanted) return '';
+			return `The ROM hack this team was built for (${this.label(bound)}) could not be loaded: ${err?.message || err}`;
+		}
+		return '';
+	}
+	spriteUrl(kind: string, id: string) {
+		return `${this.serverUrl()}/romhacks/${this.active.sha256}/sprites/${kind}/${id}.png`;
+	}
+	isFormat(format: string | null | undefined) {
+		return /^gen\d+romhacks/.test(format || '');
+	}
+	storageGet(key: string): string | null {
+		try {
+			return localStorage.getItem(key);
+		} catch {
+			return null;
+		}
+	}
+	storageSet(key: string, value: string) {
+		try {
+			localStorage.setItem(key, value);
+		} catch {}
+	}
+	list(): { sha256: string, name: string, baseGame: string, proof?: string }[] {
+		try {
+			return JSON.parse(this.storageGet('romhacks:list') || '[]');
+		} catch {
+			return [];
+		}
+	}
+	serverUrl() {
+		const server = window.PS?.server || window.Config?.server || window.Config?.defaultserver || {};
+		const host = server.host || location.hostname;
+		const https = server.protocol === 'https' || server.https || Number(server.port) === 443 ||
+			(server.protocol !== 'http' && location.protocol === 'https:');
+		const port = https ? (server.port || 443) : (server.httpport || server.port || 80);
+		return `${https ? 'https' : 'http'}://${host}:${port}`;
+	}
+	trusted(sha256: unknown) {
+		return typeof sha256 === 'string' && /^[0-9a-f]{64}$/.test(sha256) && !window.Config?.testclient;
+	}
+	forget(sha256: string) {
+		try {
+			localStorage.removeItem(`romhacks:data:${sha256}`);
+			if (localStorage.getItem('romhacks:active') === sha256) localStorage.removeItem('romhacks:active');
+		} catch {}
+	}
+	subscribe(listener: () => void) {
+		this.listeners.push(listener);
+	}
+	load() {
+		if (this.loaded || !window.BattleTeambuilderTable) return;
+		this.loaded = true;
+		const sha256 = this.storageGet('romhacks:active');
+		if (!sha256) return;
+		if (!this.trusted(sha256)) {
+			this.forget(sha256);
+			return;
+		}
+		const cached = this.storageGet(`romhacks:data:${sha256}`);
+		if (cached) {
+			try {
+				const hack = JSON.parse(cached);
+				if (hack.indices && hack.sha256 === sha256) {
+					this.install(hack);
+					return;
+				}
+			} catch {}
+			this.forget(sha256);
+		}
+		this.activate(sha256).catch(() => {});
+	}
+	async activate(sha256: string) {
+		if (!this.trusted(sha256)) throw new Error('This ROM hack could not be loaded.');
+		const cached = this.storageGet(`romhacks:data:${sha256}`);
+		let hack;
+		try {
+			if (cached) hack = JSON.parse(cached);
+		} catch {}
+		if (cached && (!hack?.indices || hack.sha256 !== sha256)) {
+			hack = null;
+			this.forget(sha256);
+		}
+		if (!hack) {
+			const response = await fetch(`${this.serverUrl()}/romhacks/${sha256}.json`, { cache: 'no-store' });
+			hack = await response.json();
+			if (!response.ok || hack.error) throw new Error(hack.error || 'This ROM hack could not be loaded.');
+			if (hack.sha256 !== sha256 || !hack.indices) throw new Error('The server answered for a different ROM hack.');
+			this.checked[sha256] = Promise.resolve(false);
+		}
+		const known = this.list().find(entry => entry.sha256 === sha256);
+		if (known && !hack.name) hack.name = known.name;
+		this.install(hack);
+		return hack;
+	}
+	async upload(file: File) {
+		const bytes = new Uint8Array(await file.arrayBuffer());
+		const magic = String.fromCharCode(bytes[0], bytes[1], bytes[2], bytes[3], bytes[4]);
+		const isXdelta = bytes[0] === 0xd6 && bytes[1] === 0xc3 && bytes[2] === 0xc4;
+		const isBsp = /\.bsp$/i.test(file.name);
+		if (!magic.startsWith('BPS1') && !magic.startsWith('UPS1') && magic !== 'PATCH' && !isXdelta && !isBsp) {
+			throw new Error('That is not an IPS, UPS, BPS, xdelta or BSP patch. Only patch files can be uploaded, never a ROM.');
+		}
+		if (bytes.length > 96 * 1024 * 1024) throw new Error('The patch is larger than 96 MB.');
+		if (window.Config?.testclient) throw new Error('ROM hacks cannot be used in the test client.');
+		const response = await fetch(`${this.serverUrl()}/romhacks/upload`, {
+			method: 'POST', headers: { 'Content-Type': 'application/octet-stream' }, body: bytes,
+		});
+		let hack;
+		try {
+			hack = await response.json();
+		} catch {
+			throw new Error('The server did not accept the patch.');
+		}
+		if (!response.ok || hack.error) throw new Error(hack.error || 'The server did not accept the patch.');
+		if (window.crypto?.subtle) {
+			const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', bytes));
+			let local = '';
+			for (let i = 0; i < digest.length; i++) local += `0${digest[i].toString(16)}`.slice(-2);
+			if (local !== hack.sha256) throw new Error('The server answered for a different patch file.');
+		}
+		hack.name = file.name.replace(/\.(bps|ups|ips|xdelta|vcdiff|bsp)$/i, '');
+		const list = this.list().filter(entry => entry.sha256 !== hack.sha256);
+		list.unshift({ sha256: hack.sha256, name: hack.name, baseGame: hack.baseGame, proof: hack.proof });
+		delete hack.proof;
+		this.checked[hack.sha256] = Promise.resolve(false);
+		this.storageSet('romhacks:list', JSON.stringify(list.slice(0, 20)));
+		this.install(hack);
+		return hack;
+	}
+	install(hack: any, replace?: boolean) {
+		const tables = window.BattleTeambuilderTable;
+		if (!tables) throw new Error('The teambuilder data is still loading.');
+		if (!this.trusted(hack?.sha256)) throw new Error('This ROM hack could not be loaded.');
+		const gen = parseInt(String(hack.parentMod).slice(3), 10) || 9;
+		const modid = `gen${gen}romhack${hack.sha256.slice(0, 12)}` as ID;
+		if (replace) {
+			delete tables[modid];
+			delete Dex.moddedDexes[modid];
+		}
+		if (!tables[modid]) {
+			const table: any = {
+				overrideSpeciesData: {}, overrideMoveData: {}, overrideAbilityData: {}, overrideItemData: {},
+				overrideTypeChart: {}, removeType: {}, overrideTier: {}, tiers: [], items: [], learnsets: {},
+			};
+			const fill = (target: any, source: any, type: string, extra: any) => {
+				const added: [ID, string][] = [];
+				for (const id in source) {
+					const entry = source[id];
+					if (entry.name) {
+						target[id] = { exists: true, id, ...extra, ...entry };
+						added.push([id as ID, type]);
+					} else {
+						target[id] = entry;
+					}
+				}
+				return added;
+			};
+			const added = [
+				...fill(table.overrideSpeciesData, hack.Pokedex, 'pokemon', { tier: 'OU' }),
+				...fill(table.overrideMoveData, hack.Moves, 'move', {}),
+				...fill(table.overrideAbilityData, hack.Abilities, 'ability', {}),
+				...fill(table.overrideItemData, hack.Items, 'item', {}),
+			];
+			for (const id in hack.TypeChart || {}) {
+				const entry = hack.TypeChart[id];
+				table.overrideTypeChart[id] = entry.name ?
+					{ exists: true, id, name: entry.name, damageTaken: entry.damageTaken } :
+					entry.isNonstandard === null ? { exists: true, damageTaken: entry.damageTaken } :
+					{ damageTaken: entry.damageTaken };
+			}
+			table.romHackMechanics = hack.mechanics && typeof hack.mechanics === 'object' ? hack.mechanics : {};
+			tables[modid] = table;
+			this.addToSearchIndex(added);
+		}
+		this.active = hack;
+		this.modid = modid;
+		this.overworldListed = null;
+		this.legal = {};
+		const types: [string, string][] = [['pokemon', 'species'], ['move', 'moves'], ['ability', 'abilities'], ['item', 'items']];
+		for (const [type, key] of types) {
+			const set: { [id: string]: 1 } = {};
+			for (const id of hack.legal[key]) set[id] = 1;
+			this.legal[type] = set;
+		}
+		this.storageSet('romhacks:active', hack.sha256);
+		this.storageSet(`romhacks:data:${hack.sha256}`, JSON.stringify(hack));
+		for (const listener of this.listeners) listener();
+	}
+	addToSearchIndex(added: [ID, string][]) {
+		const index: any[] = window.BattleSearchIndex;
+		const offsets: any[] = window.BattleSearchIndexOffset;
+		if (!index || !offsets) return;
+		const fresh = added.filter(([id]) => !this.indexed[id]).sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
+		if (!fresh.length) return;
+		const newIndex: any[] = [];
+		const newOffsets: any[] = [];
+		const moved: number[] = [];
+		let next = 0;
+		for (let i = 0; i < index.length; i++) {
+			while (next < fresh.length && fresh[next][0] < index[i][0]) {
+				newIndex.push([fresh[next][0], fresh[next][1]]);
+				newOffsets.push('');
+				next++;
+			}
+			moved[i] = newIndex.length;
+			newIndex.push(index[i]);
+			newOffsets.push(offsets[i]);
+		}
+		for (; next < fresh.length; next++) {
+			newIndex.push([fresh[next][0], fresh[next][1]]);
+			newOffsets.push('');
+		}
+		for (const entry of newIndex) {
+			if (entry.length > 2 && typeof entry[2] === 'number') entry[2] = moved[entry[2]];
+		}
+		index.splice(0, index.length, ...newIndex);
+		offsets.splice(0, offsets.length, ...newOffsets);
+		for (const [id] of fresh) this.indexed[id] = 1;
+	}
+	results(type: string): [string, ID][] {
+		if (!this.active || !this.legal?.[type]) return [];
+		const key = ({ pokemon: 'species', move: 'moves', ability: 'abilities', item: 'items' } as any)[type];
+		const label = ({ pokemon: 'Pokémon', move: 'moves', ability: 'abilities', item: 'items' } as any)[type];
+		const rows: [string, ID][] = [['header', `${this.active.name || 'ROM hack'} ${label}` as ID]];
+		for (const id of this.active.legal[key]) rows.push([type, id]);
+		return rows;
+	}
+	outgoing(message: string): { before: string[], message: string } {
+		const before: string[] = [];
+		if (!/\/(challenge|chall|search|vtm|accept|tour|utm)\b/.test(message)) return { before, message };
+		if (/\/accept\b/.test(message)) {
+			for (const entry of this.list()) {
+				if (entry.proof) before.push(`/romhack have, ${entry.sha256}, ${entry.proof}`);
+			}
+			return { before, message };
+		}
+		if (!this.active) return { before, message };
+		const rewritten = /\brom ?hack ?= ?[0-9a-f]{64}/i.test(message) ? message : message.replace(
+			/\b(gen\d+romhacks[a-z0-9]*)(?![a-z0-9])(\s*@@@\s*)?/,
+			(all, format, rules) => `${format}@@@ROM Hack = ${this.active.sha256}${rules ? ', ' : ''}`
+		);
+		const owned = this.list().find(entry => entry.sha256 === this.active.sha256);
+		if (rewritten !== message && owned?.proof) before.push(`/romhack have, ${owned.sha256}, ${owned.proof}`);
+		return { before, message: rewritten };
+	}
+};
+
+if (typeof window !== 'undefined') {
+	window.RomHacksOutgoing = (message: string) => RomHacks.outgoing(message);
+	window.RomHacks = RomHacks;
+}
 if (typeof require === 'function') {
 	// in Node
 	global.Dex = Dex;

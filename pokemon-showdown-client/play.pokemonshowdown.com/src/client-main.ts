@@ -14,7 +14,7 @@ import { PSModel, PSStreamModel } from './client-core';
 import type { PSRoomPanel, PSRouter } from './panels';
 import { ChatRoom } from './panel-chat';
 import type { MainMenuRoom } from './panel-mainmenu';
-import { Dex, TL, toID, type ID } from './battle-dex';
+import { Dex, RomHacks, TL, toID, type ID } from './battle-dex';
 import { BattleTextParser, type Args } from './battle-text-parser';
 import type { BattleRoom } from './panel-battle';
 import { Teams } from './battle-teams';
@@ -2451,6 +2451,9 @@ export const PS = new class extends PSModel {
 		room?.receiveBatch(batch);
 	}
 	send(msg: string, roomid?: RoomID) {
+		const romHackOut = RomHacks.outgoing(msg);
+		msg = romHackOut.message;
+		for (const before of romHackOut.before) this.connection?.send(`|${before}`);
 		const bracketRoomid = roomid ? `[${roomid}] ` : '';
 		console.log(`\u25b6\ufe0f ${bracketRoomid}%c${msg}`, "color: #776677");
 		if (!this.connection) {

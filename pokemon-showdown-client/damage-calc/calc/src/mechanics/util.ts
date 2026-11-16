@@ -35,6 +35,10 @@ export function isGrounded(pokemon: Pokemon, field: Field) {
 }
 
 export function getModifiedStat(stat: number, mod: number, gen?: Generation, noOverflow?: boolean) {
+  const staged = hackStageStat(stat, mod);
+  if (staged !== undefined) {
+    return gen && (gen.num === 1 || gen.num === 2) ? Math.min(999, Math.max(1, staged)) : staged;
+  }
   if (gen && (gen.num === 1 || gen.num === 2 || gen.num === 11)) {
     if (mod >= 0) {
       const pastGenBoostTable = [1, 1.5, 2, 2.5, 3, 3.5, 4];
@@ -130,7 +134,10 @@ export function getFinalSpeed(gen: Generation, pokemon: Pokemon, field: Field, s
   speed = OF32(pokeRound((speed * chainMods(speedMods, 410, 131172)) / 4096));
   if (pokemon.hasStatus('par') && !pokemon.hasAbility('Quick Feet')) {
     // gen.num = 0 means it's Pokemon Champions
-    speed = Math.floor(OF32(speed * (gen.num >= 7 || gen.num === 0 ? 50 : 25)) / 100);
+    const stockSpeed = Math.floor(OF32(speed * (gen.num >= 7 || gen.num === 0 ? 50 : 25)) / 100);
+    speed = hackHasMultiplier('paralysisSpeed')
+      ? Math.floor(OF32(speed * Math.round(hackMultiplier('paralysisSpeed', 1) * 100)) / 100)
+      : stockSpeed;
   }
 
   speed = Math.min(gen.num <= 2 ? 999 : 10000, speed);
@@ -544,13 +551,13 @@ export function getFinalDamage(
   finalMod: number,
   protect?: boolean
 ) {
-  let damageAmount = Math.floor(OF32(baseAmount * (85 + i)) / 100);
+  let damageAmount = Math.floor(OF32(baseAmount * hackRollValue(i, 85)) / hackRollDen(100));
   // If the stabMod would not accomplish anything we avoid applying it because it could cause
   // us to calculate damage overflow incorrectly (DaWoblefet)
   if (stabMod !== 4096) damageAmount = OF32(damageAmount * stabMod) / 4096;
   damageAmount = Math.floor(OF32(pokeRound(damageAmount) * effectiveness));
 
-  if (isBurned) damageAmount = Math.floor(damageAmount / 2);
+  if (isBurned) damageAmount = hackApply('burnAttack', damageAmount, Math.floor(damageAmount / 2));
   if (protect) damageAmount = pokeRound(OF32(damageAmount * 1024) / 4096);
   return OF16(pokeRound(Math.max(1, OF32(damageAmount * finalMod) / 4096)));
 }
@@ -605,20 +612,29 @@ export function getWeight(pokemon: Pokemon, desc: RawDesc, role: 'defender' | 'a
 
 export function getStabMod(pokemon: Pokemon, move: Move, desc: RawDesc) {
   let stabMod = 4096;
+  let originalStab = false;
   if (pokemon.hasOriginalType(move.type)) {
     stabMod += 2048;
+    originalStab = true;
   } else if (pokemon.hasAbility('Protean', 'Libero') && !pokemon.teraType) {
     stabMod += 2048;
+    originalStab = true;
     desc.attackerAbility = pokemon.ability;
   }
   const teraType = pokemon.teraType;
-  if (teraType === move.type && teraType !== 'Stellar') {
+  const teraStab = teraType === move.type && teraType !== 'Stellar';
+  if (teraStab) {
     stabMod += 2048;
     desc.attackerTera = teraType;
   }
-  if (pokemon.hasAbility('Adaptability') && pokemon.hasType(move.type)) {
+  const adaptable = pokemon.hasAbility('Adaptability') && pokemon.hasType(move.type);
+  if (adaptable) {
     stabMod += teraType && pokemon.hasOriginalType(teraType) ? 1024 : 2048;
     desc.attackerAbility = pokemon.ability;
+  }
+  if (hackHasMultiplier('stab') && (originalStab || teraStab)) {
+    stabMod = originalStab && teraStab ? 8192 : Math.floor(hackMultiplier('stab', 1.5) * 4096);
+    if (adaptable) stabMod = stabMod === 8192 ? 9216 : 8192;
   }
   return stabMod;
 }
@@ -706,4 +722,173 @@ export function OF16(n: number) {
 // 32-bit Overflow
 export function OF32(n: number) {
   return n > 4294967295 ? n % 4294967296 : n;
+}
+
+interface HackRolls {
+  values: number[];
+  den: number;
+}
+
+const HACK_STATE: {
+  gen: number;
+  mechanics: any;
+  live: any;
+  rolls: HackRolls | null;
+  stages: number[][] | null;
+  weather: any[] | null;
+} = {gen: -1, mechanics: null, live: null, rolls: null, stages: null, weather: null};
+
+function hackPositive(value: any, max: number) {
+  return typeof value === 'number' && isFinite(value) && value > 0 && value <= max;
+}
+
+function hackWhole(value: any) {
+  return typeof value === 'number' && isFinite(value) && Math.floor(value) === value;
+}
+
+function hackFraction(value: any) {
+  return Array.isArray(value) && value.length === 2 &&
+    typeof value[0] === 'number' && isFinite(value[0]) && value[0] >= 0 &&
+    hackPositive(value[1], 1e9);
+}
+
+function readHackRolls(roll: any): HackRolls | null {
+  if (!roll || !hackWhole(roll.min) || !hackWhole(roll.max) || !hackWhole(roll.den)) return null;
+  if (roll.min < 1 || roll.max < roll.min || roll.den < 1 || roll.max - roll.min > 255) return null;
+  const repeat = Math.ceil(16 / (roll.max - roll.min + 1));
+  const values: number[] = [];
+  for (let r = roll.min; r <= roll.max; r++) {
+    for (let k = 0; k < repeat; k++) values.push(r);
+  }
+  return {values, den: roll.den};
+}
+
+function readHackStages(table: any): number[][] | null {
+  if (!Array.isArray(table) || table.length !== 13) return null;
+  const stages: number[][] = [];
+  for (let i = 0; i < 13; i++) {
+    if (!hackFraction(table[i]) || table[i][0] <= 0) return null;
+    stages.push([table[i][0], table[i][1]]);
+  }
+  if (stages[6][0] !== stages[6][1]) return null;
+  return stages;
+}
+
+function readHackWeather(rows: any): any[] | null {
+  if (!Array.isArray(rows)) return null;
+  const list: any[] = [];
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    if (!row || (row.weather !== 'rain' && row.weather !== 'sun') || typeof row.type !== 'string' ||
+        !hackPositive(row.multiplier, 16)) {
+      return null;
+    }
+    list.push(row);
+  }
+  return list;
+}
+
+export function setHackMechanics(generation: number, mechanics: any) {
+  const usable = !!mechanics && typeof mechanics === 'object' && !Array.isArray(mechanics);
+  HACK_STATE.gen = usable ? generation : -1;
+  HACK_STATE.mechanics = usable ? mechanics : null;
+  HACK_STATE.live = null;
+  HACK_STATE.rolls = null;
+  HACK_STATE.stages = null;
+  HACK_STATE.weather = null;
+}
+
+export function enterHackMechanics(gen: Generation) {
+  const live = HACK_STATE.mechanics && HACK_STATE.gen === gen.num ? HACK_STATE.mechanics : null;
+  HACK_STATE.live = live;
+  HACK_STATE.rolls = live ? readHackRolls(live.damageRoll) : null;
+  HACK_STATE.stages = live ? readHackStages(live.statStages) : null;
+  HACK_STATE.weather = live ? readHackWeather(live.weatherMoveModifiers) : null;
+  return live;
+}
+
+export function hackMultiplier(key: string, stock: number) {
+  const value = HACK_STATE.live ? HACK_STATE.live[key] : undefined;
+  return hackPositive(value, 16) ? value as number : stock;
+}
+
+export function hackHasMultiplier(key: string) {
+  return !!HACK_STATE.live && hackPositive(HACK_STATE.live[key], 16);
+}
+
+export function hackModify(value: number, multiplier: number) {
+  const modifier = Math.floor(multiplier * 4096);
+  return Math.floor((OF32(value * modifier) + 2047) / 4096);
+}
+
+export function hackApply(key: string, value: number, stock: number) {
+  return hackHasMultiplier(key) ? hackModify(value, hackMultiplier(key, 1)) : stock;
+}
+
+export function hackFloor(key: string, value: number, stock: number) {
+  return hackHasMultiplier(key) ? Math.floor(value * hackMultiplier(key, 1)) : stock;
+}
+
+export function hackRollCount(stock: number) {
+  return HACK_STATE.rolls ? HACK_STATE.rolls.values.length : stock;
+}
+
+export function hackRollValue(i: number, stockMin: number) {
+  return HACK_STATE.rolls ? HACK_STATE.rolls.values[i] : stockMin + i;
+}
+
+export function hackRollDen(stock: number) {
+  return HACK_STATE.rolls ? HACK_STATE.rolls.den : stock;
+}
+
+export function hackStageStat(stat: number, mod: number): number | undefined {
+  const stages = HACK_STATE.stages;
+  if (!stages || !hackWhole(mod) || mod < -6 || mod > 6) return undefined;
+  return Math.floor((stat * stages[6 + mod][0]) / stages[6 + mod][1]);
+}
+
+export function hackItemBoost(item: string | undefined): number | undefined {
+  const items = HACK_STATE.live ? HACK_STATE.live.items : undefined;
+  const entry = items && typeof items === 'object' && item ? items[toID(item)] : undefined;
+  return entry && hackPositive(entry.powerBoost, 16) ? entry.powerBoost as number : undefined;
+}
+
+export function hackItemMod(item: string | undefined, stock: number) {
+  const boost = hackItemBoost(item);
+  return boost === undefined ? stock : Math.floor(boost * 4096);
+}
+
+export function hackItemApply(item: string | undefined, value: number, stock: number) {
+  const boost = hackItemBoost(item);
+  return boost === undefined ? stock : hackModify(value, boost);
+}
+
+export function hackItemFloor(item: string | undefined, value: number, stock: number) {
+  const boost = hackItemBoost(item);
+  return boost === undefined ? stock : Math.floor(value * boost);
+}
+
+export function hackWeatherMultiplier(
+  weather: string | undefined, type: string
+): number | undefined {
+  const rows = HACK_STATE.weather;
+  const key = weather === 'Sun' ? 'sun' : weather === 'Rain' ? 'rain' : '';
+  if (!rows || !key) return undefined;
+  for (let i = 0; i < rows.length; i++) {
+    if (rows[i].weather === key && rows[i].type === type) return rows[i].multiplier;
+  }
+  return 1;
+}
+
+export function hackHpFraction(path: string, maxHP: number, stock: number) {
+  let value: any = HACK_STATE.live;
+  const keys = path.split('.');
+  for (let i = 0; i < keys.length && value; i++) value = value[keys[i]];
+  if (!hackFraction(value) || value[0] <= 0) return stock;
+  return Math.floor((maxHP * value[0]) / value[1]);
+}
+
+export function hackStabApply(value: number, stabMod: number) {
+  return hackHasMultiplier('stab') && stabMod === hackMultiplier('stab', 0)
+    ? hackModify(value, stabMod) : Math.floor(value * stabMod);
 }

@@ -17,6 +17,7 @@ let html = fs.readFileSync(path.join(DIST, 'index.html'), 'utf8');
 html = html.replace(/<script[^>]*src="https?:\/\/[^"]*"[^>]*><\/script>/g, '');
 html = html.replace(/<script[^>]*src="\/\/[^"]*"[^>]*><\/script>/g, '');
 html = html.replace(/<script[^>]*>[^<]*gtag[\s\S]*?<\/script>/g, '');
+html = html.replace('<head>', '<head>\n<script>window.gtag = window.gtag || function () {};</script>');
 
 // Inline local stylesheets.
 html = html.replace(/<link[^>]*rel="stylesheet"[^>]*href="\.\/([^"?]+)(\?[^"]*)?"[^>]*\/?>/g,

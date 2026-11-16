@@ -338,6 +338,12 @@ export abstract class MessageContext {
 
 		const format = Dex.formats.get(formatOrMod);
 		if (format.effectType === 'Format' || allowRules && format.effectType === 'Rule') {
+			const romHack = Dex.romHackOf(format);
+			const context = this as any as CommandContext;
+			const inBattle = !!romHack && romHack === Dex.romHackOf(Dex.formats.get(context.room?.battle?.format || ''));
+			if (romHack && !inBattle && !context.user?.romHacks?.has(romHack)) {
+				return { dex: Dex.mod(format.mod), format, isMatch: true };
+			}
 			return { dex: Dex.forFormat(format), format, isMatch: true };
 		}
 

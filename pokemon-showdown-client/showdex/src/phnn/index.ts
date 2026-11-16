@@ -1,5 +1,14 @@
 import { type MoveName } from '@smogon/calc';
-import { getDexForFormat, getMaxMove } from '@showdex/utils/dex';
+import {
+  type RomHackRolls,
+  getDexForFormat,
+  getMaxMove,
+  getRomHackMechanics,
+  getRomHackProfile,
+  readRomHackFraction,
+  readRomHackRolls,
+  readRomHackStages,
+} from '@showdex/utils/dex';
 import phnnData from './phnn-data';
 import { calculatePhnnSpaceWorld, getPhnnSw97HiddenPower } from './spaceworld';
 
@@ -97,7 +106,7 @@ export const detectMaxEvsFormat = (format: string): boolean => {
     return true;
   }
 
-  if (f.includes('customgame')) {
+  if (f.includes('customgame') || f.includes('romhacks')) {
     return true;
   }
 
@@ -522,6 +531,8 @@ export const hasPhnnPokemonScreens = (gen: number, format?: string): boolean => 
 export const setPhnnCalcContext = (format: string): void => {
   const key = detectPhnnKey(format);
 
+  (globalThis as Record<string, unknown>).__phnnRomHack = getRomHackProfile(format);
+
   (globalThis as Record<string, unknown>).__phnnCalc = key
     ? {
       typeChart: getPhnnTypeChart(format) || {},
@@ -568,9 +579,13 @@ const phnnTrunc = (num: number, bits = 0): number => (
  * tempted to reuse a `stat * (1 / value)` helper: Math.floor(3 * (1 / 1.5)) is 1, while
  * Math.floor(3 / 1.5) is 2.
  */
-const phnnBoostedStat = (stat: number, stage: number): number => {
+const phnnBoostedStat = (stat: number, stage: number, stages?: [number, number][]): number => {
   const boostTable = [1, 1.5, 2, 2.5, 3, 3.5, 4];
   const boost = Math.max(-6, Math.min(6, Math.trunc(Number(stage) || 0)));
+
+  if (stages?.[6 + boost]) {
+    return Math.floor((stat * stages[6 + boost][0]) / stages[6 + boost][1]);
+  }
 
   return boost >= 0
     ? Math.floor(stat * boostTable[boost])
@@ -622,6 +637,8 @@ export const calcPhnnConfusionDamage = (input: {
   /** Confusion is always 40 in every gen this fork hosts; overridable for tests. */
   basePower?: number;
   selfHitChance?: number;
+  stages?: [number, number][];
+  damageRolls?: RomHackRolls;
 }): PhnnConfusionDamage | null => {
   const basePower = input?.basePower || 40;
   const level = Math.max(1, Math.trunc(input?.level || 100));
@@ -635,8 +652,8 @@ export const calcPhnnConfusionDamage = (input: {
     return null;
   }
 
-  const atk = phnnBoostedStat(rawAtk, input?.atkStage || 0);
-  const def = Math.max(1, phnnBoostedStat(rawDef, defStage || 0));
+  const atk = phnnBoostedStat(rawAtk, input?.atkStage || 0, input?.stages);
+  const def = Math.max(1, phnnBoostedStat(rawDef, defStage || 0, input?.stages));
 
   const levelFactor = phnnTrunc(((2 * level) / 5) + 2);
   const baseDamage = phnnTrunc(phnnTrunc(phnnTrunc(levelFactor * basePower * atk) / def) / 50) + 2;
@@ -648,8 +665,14 @@ export const calcPhnnConfusionDamage = (input: {
   // randomizer(): tr(tr(baseDamage * (100 - random(16))) / 100), so r runs 0..15.
   const rolls: number[] = [];
 
-  for (let r = 15; r >= 0; r--) {
-    rolls.push(Math.max(1, phnnTrunc(phnnTrunc(damage16 * (100 - r)) / 100)));
+  if (input?.damageRolls?.values?.length) {
+    input.damageRolls.values.forEach((value) => {
+      rolls.push(Math.max(1, phnnTrunc(phnnTrunc(damage16 * value) / input.damageRolls.den)));
+    });
+  } else {
+    for (let r = 15; r >= 0; r--) {
+      rolls.push(Math.max(1, phnnTrunc(phnnTrunc(damage16 * (100 - r)) / 100)));
+    }
   }
 
   const maxHp = Math.max(1, Math.trunc(input?.maxHp || 0));
@@ -716,8 +739,14 @@ export const calcPhnnPokemonConfusion = (
   // maxhp of 100 means the client is reporting PERCENTAGES rather than points, in which case the
   // spread HP is the real number.
   const maxHp = (pokemon.maxhp && pokemon.maxhp !== 100 ? pokemon.maxhp : 0) || stats.hp || 0;
+  const mechanics = getRomHackMechanics(format);
+  const hackPower = mechanics?.confusionSelfHitPower;
+  const hackChance = readRomHackFraction(mechanics?.confusionSelfHitChance);
 
   return calcPhnnConfusionDamage({
+    basePower: typeof hackPower === 'number' && hackPower > 0 && hackPower <= 65535 ? Math.trunc(hackPower) : undefined,
+    stages: readRomHackStages(mechanics),
+    damageRolls: readRomHackRolls(mechanics),
     level: pokemon.level,
     atk: stats.atk,
     def: stats.def,
@@ -727,7 +756,9 @@ export const calcPhnnPokemonConfusion = (
     spdStage: stage('spd'),
     maxHp,
     wonderRoom: !!field?.isWonderRoom,
-    selfHitChance: getPhnnConfusionSelfHitChance(format),
+    selfHitChance: hackChance && hackChance[0] <= hackChance[1]
+      ? Math.round((hackChance[0] * 1000) / hackChance[1]) / 10
+      : getPhnnConfusionSelfHitChance(format),
   });
 };
 

@@ -915,6 +915,13 @@ function toId() {
 		 * Send to sim server
 		 */
 		send: function (data, room) {
+			if (room !== true && window.RomHacksOutgoing) {
+				var romHackOut = window.RomHacksOutgoing(data);
+				data = romHackOut.message;
+				for (var romHackI = 0; romHackI < romHackOut.before.length; romHackI++) {
+					this.send('|' + romHackOut.before[romHackI], true);
+				}
+			}
 			if (room && room !== true) {
 				data = room + '|' + data;
 			} else if (room !== true) {

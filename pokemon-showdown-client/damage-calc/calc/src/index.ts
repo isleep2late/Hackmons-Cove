@@ -149,8 +149,11 @@ export {type State} from './state';
 
 export {ABILITIES} from './data/abilities';
 export {ITEMS, MEGA_STONES} from './data/items';
-export {MOVES} from './data/moves';
-export {SPECIES} from './data/species';
+export {MOVES, extendMoves} from './data/moves';
+export {SPECIES, extendSpecies} from './data/species';
+export {extendAbilities} from './data/abilities';
+export {extendItems} from './data/items';
 export {NATURES} from './data/natures';
-export {TYPE_CHART} from './data/types';
+export {TYPE_CHART, extendTypes} from './data/types';
 export {STATS, Stats} from './stats';
+export {setHackMechanics} from './mechanics/util';

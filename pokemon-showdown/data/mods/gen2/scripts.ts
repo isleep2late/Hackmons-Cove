@@ -19,7 +19,10 @@ export const Scripts: ModdedBattleScriptsData = {
 				let boost = this.boosts[statName];
 				if (boost > 6) boost = 6;
 				if (boost < -6) boost = -6;
-				if (boost >= 0) {
+				const hackStages = this.battle.dex.romHack?.mechanics.statStages;
+				if (hackStages) {
+					stat = Math.floor(stat * hackStages[boost + 6][0] / hackStages[boost + 6][1]);
+				} else if (boost >= 0) {
 					const boostTable = [1, 1.5, 2, 2.5, 3, 3.5, 4];
 					stat = Math.floor(stat * boostTable[boost]);
 				} else {
@@ -29,13 +32,13 @@ export const Scripts: ModdedBattleScriptsData = {
 			}
 
 			if (this.status === 'par' && statName === 'spe') {
-				stat = Math.floor(stat / 4);
+				stat = Math.floor(stat * (this.battle.dex.romHack?.mechanics.paralysisSpeed ?? 0.25));
 			}
 
 			if (!unmodified) {
 				// Burn attack drop is checked when you get the attack stat upon switch in and used until switch out.
 				if (this.status === 'brn' && statName === 'atk') {
-					stat = Math.floor(stat / 2);
+					stat = Math.floor(stat * (this.battle.dex.romHack?.mechanics.burnAttack ?? 0.5));
 				}
 			}
 
@@ -139,8 +142,9 @@ export const Scripts: ModdedBattleScriptsData = {
 			if (!move.selfSwitch && pokemon.side.foe.active[0].hp) this.battle.runEvent('AfterMoveSelf', pokemon, target, move);
 		},
 		tryMoveHit(target, pokemon, move) {
-			const positiveBoostTable = [1, 1.33, 1.66, 2, 2.33, 2.66, 3];
-			const negativeBoostTable = [1, 0.75, 0.6, 0.5, 0.43, 0.36, 0.33];
+			const hackEngine = this.dex.romHack?.engine;
+			const positiveBoostTable = hackEngine?.accUp || [1, 1.33, 1.66, 2, 2.33, 2.66, 3];
+			const negativeBoostTable = hackEngine?.accNeg || [1, 0.75, 0.6, 0.5, 0.43, 0.36, 0.33];
 			const doSelfDestruct = true;
 			let damage: number | false | undefined = 0;
 
@@ -258,7 +262,8 @@ export const Scripts: ModdedBattleScriptsData = {
 				let hits = move.multihit;
 				if (Array.isArray(hits)) {
 					if (hits[0] === 2 && hits[1] === 5) {
-						hits = this.battle.sample([2, 2, 2, 3, 3, 3, 4, 5]);
+						const hackSample = this.dex.romHack?.engine.multiHitSample;
+						hits = this.battle.sample(hackSample || [2, 2, 2, 3, 3, 3, 4, 5]);
 					} else {
 						hits = this.battle.random(hits[0], hits[1] + 1);
 					}
@@ -537,12 +542,15 @@ export const Scripts: ModdedBattleScriptsData = {
 
 			// Checking for the move's Critical Hit ratio
 			let critRatio = this.battle.runEvent('ModifyCritRatio', source, target, move, move.critRatio || 0);
-			critRatio = this.battle.clampIntRange(critRatio, 0, 5);
+			const hackCrit = this.dex.romHack?.mechanics.critChances;
+			critRatio = this.battle.clampIntRange(critRatio, 0, hackCrit ? hackCrit.length : 5);
 			const critMult = [0, 17, 32, 64, 85, 128];
 			let isCrit = move.willCrit || false;
 			if (typeof move.willCrit === 'undefined') {
 				if (critRatio) {
-					isCrit = this.battle.random(256) < critMult[critRatio];
+					const hackChance = hackCrit?.[critRatio - 1];
+					isCrit = hackChance ? this.battle.randomChance(hackChance[0], hackChance[1]) :
+						this.battle.random(256) < critMult[critRatio];
 				}
 			}
 
@@ -657,13 +665,23 @@ export const Scripts: ModdedBattleScriptsData = {
 			damage *= attack;
 			damage = Math.floor(damage / defense);
 			damage = Math.floor(damage / 50);
-			if (isCrit) damage *= 2;
+			if (isCrit) damage = Math.floor(damage * (this.dex.romHack?.mechanics.critMultiplier ?? 2));
 			damage = Math.floor(this.battle.runEvent('ModifyDamage', attacker, defender, move, damage));
 			damage = this.battle.clampIntRange(damage, 1, 997);
 			damage += 2;
 
 			// Weather modifiers
-			if (
+			const hackWeather = this.dex.romHack?.mechanics.weatherMoveModifiers;
+			if (hackWeather) {
+				const weather = this.battle.field.isWeather('raindance') ? 'rain' :
+					this.battle.field.isWeather('sunnyday') ? 'sun' : '';
+				const row = hackWeather.find(entry => entry.weather === weather && entry.type === type);
+				if (row) {
+					damage = Math.floor(damage * row.multiplier);
+				} else if (move.id === 'solarbeam' && weather === 'rain') {
+					damage = Math.floor(damage / 2);
+				}
+			} else if (
 				(type === 'Water' && this.battle.field.isWeather('raindance')) ||
 				(type === 'Fire' && this.battle.field.isWeather('sunnyday'))
 			) {
@@ -677,7 +695,7 @@ export const Scripts: ModdedBattleScriptsData = {
 
 			// STAB damage bonus, the "???" type never gets STAB
 			if (type !== '???' && source.hasType(type)) {
-				damage += Math.floor(damage / 2);
+				damage += Math.floor(damage * ((this.dex.romHack?.mechanics.stab ?? 1.5) - 1));
 			}
 
 			// Type effectiveness
@@ -701,8 +719,9 @@ export const Scripts: ModdedBattleScriptsData = {
 
 			// Apply random factor if damage is greater than 1, except for Flail and Reversal
 			if (!move.noDamageVariance && damage > 1) {
-				damage *= this.battle.random(217, 256);
-				damage = Math.floor(damage / 255);
+				const hackRoll = this.dex.romHack?.mechanics.damageRoll;
+				damage *= hackRoll ? this.battle.random(hackRoll.min, hackRoll.max + 1) : this.battle.random(217, 256);
+				damage = Math.floor(damage / (hackRoll ? hackRoll.den : 255));
 			}
 
 			// If damage is less than 1, we return 1

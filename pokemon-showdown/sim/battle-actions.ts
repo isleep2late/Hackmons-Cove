@@ -854,7 +854,10 @@ export class BattleActions {
 						const boosts = this.battle.runEvent('ModifyBoost', target, null, null, { ...target.boosts });
 						boost = this.battle.clampIntRange(boost - boosts['evasion'], -6, 6);
 					}
-					if (boost > 0) {
+					const hackStages = this.dex.romHack?.mechanics.accuracyStages;
+					if (hackStages) {
+						accuracy = this.battle.trunc(accuracy * hackStages[boost + 6][0] / hackStages[boost + 6][1]);
+					} else if (boost > 0) {
 						accuracy = this.battle.trunc(accuracy * (3 + boost) / 3);
 					} else if (boost < 0) {
 						accuracy = this.battle.trunc(accuracy * 3 / (3 - boost));
@@ -997,14 +1000,17 @@ export class BattleActions {
 		if (Array.isArray(targetHits)) {
 			// yes, it's hardcoded... meh
 			if (targetHits[0] === 2 && targetHits[1] === 5) {
+				const hackSample = this.dex.romHack?.engine.multiHitSample;
 				if (this.battle.gen >= 5) {
 					// 35-35-15-15 out of 100 for 2-3-4-5 hits
-					targetHits = this.battle.sample([2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 5, 5, 5]);
+					targetHits = this.battle.sample(
+						hackSample || [2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 5, 5, 5]
+					);
 					if (targetHits < 4 && pokemon.hasItem('loadeddice')) {
 						targetHits = 5 - this.battle.random(2);
 					}
 				} else {
-					targetHits = this.battle.sample([2, 2, 2, 3, 3, 3, 4, 5]);
+					targetHits = this.battle.sample(hackSample || [2, 2, 2, 3, 3, 3, 4, 5]);
 				}
 			} else {
 				targetHits = this.battle.random(targetHits[0], targetHits[1] + 1);
@@ -1043,7 +1049,9 @@ export class BattleActions {
 			// like this (Triple Kick)
 			if (target && move.multiaccuracy && hit > 1) {
 				let accuracy = move.accuracy;
-				const boostTable = [1, 4 / 3, 5 / 3, 2, 7 / 3, 8 / 3, 3];
+				const hackEngine = this.dex.romHack?.engine;
+				const boostTable = hackEngine?.accUp || [1, 4 / 3, 5 / 3, 2, 7 / 3, 8 / 3, 3];
+				const dropTable = hackEngine?.accDown || boostTable;
 				if (accuracy !== true) {
 					if (!move.ignoreAccuracy) {
 						const boosts = this.battle.runEvent('ModifyBoost', pokemon, null, null, { ...pokemon.boosts });
@@ -1051,14 +1059,14 @@ export class BattleActions {
 						if (boost > 0) {
 							accuracy *= boostTable[boost];
 						} else {
-							accuracy /= boostTable[-boost];
+							accuracy /= dropTable[-boost];
 						}
 					}
 					if (!move.ignoreEvasion) {
 						const boosts = this.battle.runEvent('ModifyBoost', target, null, null, { ...target.boosts });
 						const boost = this.battle.clampIntRange(boosts['evasion'], -6, 6);
 						if (boost > 0) {
-							accuracy /= boostTable[boost];
+							accuracy /= dropTable[boost];
 						} else if (boost < 0) {
 							accuracy *= boostTable[-boost];
 						}
@@ -1764,7 +1772,11 @@ export class BattleActions {
 
 		let critMult;
 		let critRatio = this.battle.runEvent('ModifyCritRatio', source, target, move, move.critRatio || 0);
-		if (this.battle.gen <= 5) {
+		const hackCrit = this.dex.romHack?.mechanics.critChances;
+		if (hackCrit) {
+			critRatio = this.battle.clampIntRange(critRatio, 0, hackCrit.length);
+			critMult = [0];
+		} else if (this.battle.gen <= 5) {
 			critRatio = this.battle.clampIntRange(critRatio, 0, 5);
 			critMult = [0, 16, 8, 4, 3, 2];
 		} else {
@@ -1780,7 +1792,9 @@ export class BattleActions {
 		moveHit.crit = move.willCrit || false;
 		if (move.willCrit === undefined) {
 			if (critRatio) {
-				moveHit.crit = this.battle.randomChance(1, critMult[critRatio]);
+				const hackChance = hackCrit?.[critRatio - 1];
+				moveHit.crit = hackChance ? this.battle.randomChance(hackChance[0], hackChance[1]) :
+					this.battle.randomChance(1, critMult[critRatio]);
 			}
 		}
 
@@ -1890,7 +1904,8 @@ export class BattleActions {
 		// crit - not a modifier
 		const isCrit = target.getMoveHitData(move).crit;
 		if (isCrit) {
-			baseDamage = tr(baseDamage * (move.critModifier || (this.battle.gen >= 6 ? 1.5 : 2)));
+			baseDamage = tr(baseDamage * (move.critModifier || this.dex.romHack?.mechanics.critMultiplier ||
+				(this.battle.gen >= 6 ? 1.5 : 2)));
 		}
 
 		// random factor - also not a modifier
@@ -1906,7 +1921,7 @@ export class BattleActions {
 
 			const isSTAB = move.forceSTAB || pokemon.hasType(type) || pokemon.getTypes(false, true).includes(type);
 			if (isSTAB) {
-				stab = 1.5;
+				stab = this.dex.romHack?.mechanics.stab ?? 1.5;
 			}
 
 			// The Stellar tera type makes this incredibly confusing
@@ -1957,7 +1972,7 @@ export class BattleActions {
 
 		if (pokemon.status === 'brn' && move.category === 'Physical' && !pokemon.hasAbility('guts')) {
 			if (this.battle.gen < 6 || move.id !== 'facade') {
-				baseDamage = this.battle.modify(baseDamage, 0.5);
+				baseDamage = this.battle.modify(baseDamage, this.dex.romHack?.mechanics.burnAttack ?? 0.5);
 			}
 		}
 

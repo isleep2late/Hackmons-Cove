@@ -673,8 +673,8 @@ $(".set-selector").change(function () {
 	clearStatOverrides($(this).closest(".poke-info"));
 	enforcePermanentGmax($(this).closest(".poke-info"));
 	var fullSetName = $(this).val();
-	var pokemonName = fullSetName.substring(0, fullSetName.indexOf(" ("));
-	var setName = fullSetName.substring(fullSetName.indexOf("(") + 1, fullSetName.lastIndexOf(")"));
+	var pokemonName = setSpeciesName(fullSetName);
+	var setName = fullSetName.substring(pokemonName.length + 2, fullSetName.lastIndexOf(")"));
 	var pokemon = pokedex[pokemonName];
 	if (pokemon) {
 		var pokeObj = $(this).closest(".poke-info");
@@ -942,7 +942,7 @@ function showFormes(formeObj, pokemonName, pokemon, baseFormeName) {
 
 function stellarButtonsVisibility(pokeObj, vis) {
 	var fullSetName = pokeObj.find("input.set-selector").val();
-	var pokemonName = fullSetName.substring(0, fullSetName.indexOf(" ("));
+	var pokemonName = setSpeciesName(fullSetName);
 	var moveObjs = [
 		pokeObj.find(".move1"),
 		pokeObj.find(".move2"),
@@ -1023,8 +1023,8 @@ $(".forme").change(function () {
 	var altForme = pokedex[$(this).val()],
 		container = $(this).closest(".info-group").siblings(),
 		fullSetName = container.find(".select2-chosen").first().text(),
-		pokemonName = fullSetName.substring(0, fullSetName.indexOf(" (")),
-		setName = fullSetName.substring(fullSetName.indexOf("(") + 1, fullSetName.lastIndexOf(")"));
+		pokemonName = setSpeciesName(fullSetName),
+		setName = fullSetName.substring(pokemonName.length + 2, fullSetName.lastIndexOf(")"));
 
 	$(this).parent().siblings().find(".type1").val(altForme.types[0]);
 	$(this).parent().siblings().find(".type2").val(altForme.types[1] ? altForme.types[1] : "");
@@ -1126,8 +1126,8 @@ function correctHiddenPower(pokemon) {
 
 function createPokemon(pokeInfo) {
 	if (typeof pokeInfo === "string") { // in this case, pokeInfo is the id of an individual setOptions value whose moveset's tier matches the selected tier(s)
-		var name = pokeInfo.substring(0, pokeInfo.indexOf(" ("));
-		var setName = pokeInfo.substring(pokeInfo.indexOf("(") + 1, pokeInfo.lastIndexOf(")"));
+		var name = setSpeciesName(pokeInfo);
+		var setName = pokeInfo.substring(name.length + 2, pokeInfo.lastIndexOf(")"));
 		var isRandoms = $("#randoms").prop("checked");
 		var isChampions = $("#champions").prop("checked");
 		var set = isRandoms ? setName.endswith("-Gmax") ? randdex[name + "-Gmax"] : randdex[name] : setdex[name][setName];
@@ -1194,7 +1194,7 @@ function createPokemon(pokeInfo) {
 		if (setName.indexOf("(") === -1) {
 			name = setName;
 		} else {
-			var pokemonName = setName.substring(0, setName.indexOf(" ("));
+			var pokemonName = setSpeciesName(setName);
 			var species = pokedex[pokemonName];
 			name = (species.otherFormes || (species.baseSpecies && species.baseSpecies !== pokemonName)) ? pokeInfo.find(".forme").val() : pokemonName;
 		}
@@ -1779,6 +1779,16 @@ function clearField() {
 	$("input:checkbox[name='terrain']").prop("checked", false);
 }
 
+function setSpeciesName(fullSetName) {
+	var text = String(fullSetName || "");
+	var at = text.indexOf(" (");
+	while (at !== -1) {
+		if (pokedex && pokedex[text.substring(0, at)]) return text.substring(0, at);
+		at = text.indexOf(" (", at + 1);
+	}
+	return text.substring(0, text.indexOf(" ("));
+}
+
 function getSetOptions(sets) {
 	var setsHolder = sets;
 	if (setsHolder === undefined) {
@@ -1855,7 +1865,8 @@ function getSelectOptions(arr, sort, defaultOption) {
 	}
 	var r = '';
 	for (var i = 0; i < arr.length; i++) {
-		r += '<option value="' + arr[i] + '" ' + (defaultOption === i ? 'selected' : '') + '>' + arr[i] + '</option>';
+		var text = String(arr[i]).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+		r += '<option value="' + text + '" ' + (defaultOption === i ? 'selected' : '') + '>' + text + '</option>';
 	}
 	return r;
 }

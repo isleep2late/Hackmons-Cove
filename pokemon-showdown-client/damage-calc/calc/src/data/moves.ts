@@ -5599,3 +5599,10 @@ for (const moves of MOVES) {
   MOVES_BY_ID.push(map);
   gen++;
 }
+
+export const extendMoves = ((Kind: typeof Move) => (generation: number, entries: {[name: string]: MoveData}) => {
+  for (const name in entries) {
+    const entry = new Kind(name, entries[name], generation);
+    MOVES_BY_ID[generation][entry.id] = entry;
+  }
+})(Move);

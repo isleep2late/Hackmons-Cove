@@ -5,7 +5,7 @@ import type {Pokemon} from './pokemon';
 import {type Damage, damageRange, multiDamageRange} from './result';
 import {error} from './util';
 // NOTE: This needs to come last to simplify bundling
-import {isGrounded} from './mechanics/util';
+import {isGrounded, enterHackMechanics, hackHpFraction} from './mechanics/util';
 import {halfHPDamage, psywaveRolls, undynamaxedHP} from './mechanics/fixed-damage';
 
 export interface RawDesc {
@@ -296,6 +296,7 @@ export function getKOChance(
   }
 
   const hazards = getHazards(gen, defender, field.defenderSide);
+  enterHackMechanics(gen);
   const eot = getEndOfTurn(gen, attacker, defender, move, field);
   const toxicCounter =
     defender.hasStatus('tox') && !defender.hasAbility('Magic Guard', 'Poison Heal')
@@ -641,7 +642,8 @@ function getEndOfTurn(
       !defender.hasAbility('Magic Guard', 'Overcoat', 'Sand Force', 'Sand Rush', 'Sand Veil') &&
       !defender.hasItem('Safety Goggles')
     ) {
-      damage -= Math.floor(defender.maxHP() / (gen.num === 2 ? 8 : 16));
+      damage -= hackHpFraction('sandDamage', defender.maxHP(),
+        Math.floor(defender.maxHP() / (gen.num === 2 ? 8 : 16)));
       texts.push('sandstorm damage');
     }
   } else if (field.hasWeather('Shadow Sky')) {
@@ -660,13 +662,14 @@ function getEndOfTurn(
       !defender.hasItem('Safety Goggles') &&
       field.hasWeather('Hail')
     ) {
-      damage -= Math.floor(defender.maxHP() / 16);
+      damage -= hackHpFraction('hailDamage', defender.maxHP(), Math.floor(defender.maxHP() / 16));
       texts.push('hail damage');
     }
   }
 
   if (defender.hasItem('Leftovers') && !loseItem && !healBlock && gen.num !== 11) {
-    damage += Math.floor(defender.maxHP() / 16);
+    damage += hackHpFraction('items.leftovers.healFraction', defender.maxHP(),
+      Math.floor(defender.maxHP() / 16));
     texts.push('Leftovers recovery');
   } else if (defender.hasItem('Black Sludge') && !loseItem) {
     if (defender.hasType('Poison')) {
@@ -687,13 +690,15 @@ function getEndOfTurn(
   if (field.defenderSide.isSeeded) {
     if (!defender.hasAbility('Magic Guard')) {
       // 1/16 in gen 1, 1/8 in gen 2 onwards
-      damage -= Math.floor(defender.maxHP() / (gen.num === 0 || gen.num >= 2 ? 8 : 16));
+      damage -= hackHpFraction('leechSeedDamage', defender.maxHP(),
+        Math.floor(defender.maxHP() / (gen.num === 0 || gen.num >= 2 ? 8 : 16)));
       texts.push('Leech Seed damage');
     }
   }
 
   if (field.attackerSide.isSeeded && !attacker.hasAbility('Magic Guard')) {
-    let recovery = Math.floor(attacker.maxHP() / (gen.num === 0 || gen.num >= 2 ? 8 : 16));
+    let recovery = hackHpFraction('leechSeedDamage', attacker.maxHP(),
+      Math.floor(attacker.maxHP() / (gen.num === 0 || gen.num >= 2 ? 8 : 16)));
     if (defender.hasItem('Big Root')) recovery = Math.trunc(recovery * 5324 / 4096);
     if (attacker.hasAbility('Liquid Ooze')) {
       damage -= recovery;
@@ -718,7 +723,8 @@ function getEndOfTurn(
         texts.push('Poison Heal');
       }
     } else if (!defender.hasAbility('Magic Guard')) {
-      damage -= Math.floor(defender.maxHP() / (gen.num === 1 ? 16 : 8));
+      damage -= hackHpFraction('poisonDamage', defender.maxHP(),
+        Math.floor(defender.maxHP() / (gen.num === 1 ? 16 : 8)));
       texts.push('poison damage');
     }
   } else if (defender.hasStatus('tox')) {
@@ -735,8 +741,8 @@ function getEndOfTurn(
       damage -= Math.floor(defender.maxHP() / (gen.num === 0 || gen.num > 6 ? 32 : 16));
       texts.push('reduced burn damage');
     } else if (!defender.hasAbility('Magic Guard')) {
-      damage -= Math.floor(defender.maxHP() /
-        ((gen.num < 2 || gen.num > 6) && gen.num !== 10 && gen.num !== 11 ? 16 : 8));
+      damage -= hackHpFraction('burnDamage', defender.maxHP(), Math.floor(defender.maxHP() /
+        ((gen.num < 2 || gen.num > 6) && gen.num !== 10 && gen.num !== 11 ? 16 : 8)));
       texts.push('burn damage');
     }
   } else if (
@@ -756,7 +762,8 @@ function getEndOfTurn(
       damage -= gen.num > 5 ? Math.floor(defender.maxHP() / 6) : Math.floor(defender.maxHP() / 8);
       texts.push('trapping damage');
     } else {
-      damage -= gen.num > 5 ? Math.floor(defender.maxHP() / 8) : Math.floor(defender.maxHP() / 16);
+      damage -= hackHpFraction('bindDamage', defender.maxHP(),
+        gen.num > 5 ? Math.floor(defender.maxHP() / 8) : Math.floor(defender.maxHP() / 16));
       texts.push('trapping damage');
     }
   }
@@ -801,8 +808,11 @@ function getEndOfTurn(
 
 function toxicTick(genNum: number, counter: number, maxHP: number) {
   if (genNum === 11) return Math.max(1, Math.floor(maxHP / 8)) * counter;
-  if (genNum === 2) return Math.max(1, Math.floor(maxHP / 16)) * counter;
-  return Math.floor((counter * maxHP) / 16);
+  if (genNum === 2) {
+    const stock = Math.max(1, Math.floor(maxHP / 16)) * counter;
+    return hackHpFraction('toxicStep', maxHP * counter, stock);
+  }
+  return hackHpFraction('toxicStep', counter * maxHP, Math.floor((counter * maxHP) / 16));
 }
 
 function computeKOChance(

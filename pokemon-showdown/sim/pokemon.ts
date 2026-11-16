@@ -650,7 +650,10 @@ export class Pokemon {
 		const boostTable = [1, 1.5, 2, 2.5, 3, 3.5, 4];
 		if (boost > 6) boost = 6;
 		if (boost < -6) boost = -6;
-		if (boost >= 0) {
+		const hackStages = this.battle.dex.romHack?.mechanics.statStages;
+		if (hackStages) {
+			stat = Math.floor(stat * hackStages[boost + 6][0] / hackStages[boost + 6][1]);
+		} else if (boost >= 0) {
 			stat = Math.floor(stat * boostTable[boost]);
 		} else {
 			stat = Math.floor(stat / boostTable[-boost]);
@@ -688,7 +691,10 @@ export class Pokemon {
 			const boostTable = [1, 1.5, 2, 2.5, 3, 3.5, 4];
 			if (boost > 6) boost = 6;
 			if (boost < -6) boost = -6;
-			if (boost >= 0) {
+			const hackStages = this.battle.dex.romHack?.mechanics.statStages;
+			if (hackStages) {
+				stat = Math.floor(stat * hackStages[boost + 6][0] / hackStages[boost + 6][1]);
+			} else if (boost >= 0) {
 				stat = Math.floor(stat * boostTable[boost]);
 			} else {
 				stat = Math.floor(stat / boostTable[-boost]);

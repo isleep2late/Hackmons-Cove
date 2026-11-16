@@ -31,7 +31,7 @@
 import { BattleSceneStub } from './battle-scene-stub';
 import { BattleLog } from './battle-log';
 import { BattleScene, type PokemonSprite, BattleStatusAnims } from './battle-animations';
-import { Dex, PSUtils, toID, toUserid, type ID, type ModdedDex } from './battle-dex';
+import { Dex, PSUtils, toID, toUserid, type ID, type ModdedDex, RomHacks } from './battle-dex';
 import { BattleTextParser, type Args, type KWArgs, type SideID } from './battle-text-parser';
 import { Teams } from './battle-teams';
 declare const app: { user: AnyObject, rooms: AnyObject, ignore?: AnyObject } | undefined;
@@ -752,22 +752,25 @@ export class Side {
 			this.battle.scene.addSideCondition(this.n, condition);
 			return;
 		}
+		const hackTurns = RomHacks.screenTurns(this.battle.romHack, condition);
 		// Side conditions work as: [effectName, levels, minDuration, maxDuration]
 		switch (condition) {
 		case 'auroraveil':
 			this.sideConditions[condition] = [effect.name, 1, 5, 8];
 			break;
 		case 'reflect':
-			this.sideConditions[condition] = [effect.name, 1, 5, this.battle.gen >= 4 ? 8 : 0];
+			this.sideConditions[condition] = hackTurns ? [effect.name, 1, hackTurns[0], hackTurns[1]] :
+				[effect.name, 1, 5, this.battle.gen >= 4 ? 8 : 0];
 			break;
 		case 'safeguard':
-			this.sideConditions[condition] = [effect.name, 1, persist ? 7 : 5, 0];
+			this.sideConditions[condition] = [effect.name, 1, persist ? 7 : hackTurns ? hackTurns[0] : 5, 0];
 			break;
 		case 'lightscreen':
-			this.sideConditions[condition] = [effect.name, 1, 5, this.battle.gen >= 4 ? 8 : 0];
+			this.sideConditions[condition] = hackTurns ? [effect.name, 1, hackTurns[0], hackTurns[1]] :
+				[effect.name, 1, 5, this.battle.gen >= 4 ? 8 : 0];
 			break;
 		case 'mist':
-			this.sideConditions[condition] = [effect.name, 1, 5, 0];
+			this.sideConditions[condition] = [effect.name, 1, hackTurns ? hackTurns[0] : 5, 0];
 			break;
 		case 'tailwind':
 			this.sideConditions[condition] = [effect.name, 1, this.battle.gen >= 5 ? persist ? 6 : 4 : persist ? 5 : 3, 0];
@@ -1161,6 +1164,7 @@ export class Battle {
 	weatherTimeLeft = 0;
 	weatherMinTimeLeft = 0;
 	infiniteFieldPending = false;
+	romHack: any = null;
 	/**
 	 * The side from which perspective we're viewing. Should be identical to
 	 * `nearSide` except in multi battles, where `nearSide` is always the first
@@ -1380,6 +1384,7 @@ export class Battle {
 		if (this.autoresize) {
 			window.removeEventListener('resize', this.onResize);
 		}
+		if (this.romHack || (!!RomHacks.modid && this.dex.modid === RomHacks.modid)) RomHacks.battleSprites = false;
 		this.scene.destroy();
 
 		for (let i = 0; i < this.sides.length; i++) {
@@ -1500,10 +1505,14 @@ export class Battle {
 		}
 		if (weather) {
 			let isExtremeWeather = (weather === 'deltastream' || weather === 'desolateland' || weather === 'primordialsea');
-			if (poke) {
-				if (ability) {
-					this.activateAbility(poke, ability.name);
-				}
+			const hackTurns = RomHacks.weatherTurns(this.romHack, weather, !!poke);
+			if (poke && ability) {
+				this.activateAbility(poke, ability.name);
+			}
+			if (hackTurns) {
+				this.weatherMinTimeLeft = hackTurns[0];
+				this.weatherTimeLeft = hackTurns[1];
+			} else if (poke) {
 				this.weatherTimeLeft = (this.gen <= 5 || isExtremeWeather) ? 0 : 8;
 				this.weatherMinTimeLeft = (this.gen <= 5 || isExtremeWeather) ? 0 : 5;
 			} else if (isExtremeWeather) {
@@ -3626,6 +3635,15 @@ export class Battle {
 		case 'tier': {
 			this.tier = args[1];
 			this.format = Dex.formats.get(this.tier);
+			RomHacks.battleSprites = false;
+			this.romHack = null;
+			if (RomHacks.isFormat(toID(this.tier))) {
+				RomHacks.load();
+				if (RomHacks.active) {
+					this.dex = Dex.mod(RomHacks.modid);
+					RomHacks.battleSprites = true;
+				}
+			}
 			if (this.tier.endsWith('Random Battle')) {
 				this.speciesClause = true;
 			}
@@ -3715,6 +3733,7 @@ export class Battle {
 		}
 		case 'rule': {
 			let ruleName = args[1].split(': ')[0];
+			const romHackReady = ruleName === 'ROM Hack' && RomHacks.useInBattle(args[1].split(': ')[1] || '', this);
 			if (ruleName === 'Species Clause') this.speciesClause = true;
 			if (ruleName === 'Blitz') {
 				this.messageFadeTime = 40;
@@ -3724,6 +3743,8 @@ export class Battle {
 			if (ruleName === 'HP Percentage Mod') this.hpPercentageMod = true;
 			this.rules[ruleName] = 1;
 			this.log(args);
+			const romHackNotice = romHackReady ? RomHacks.mechanicsHTML(this.romHack, true) : '';
+			if (romHackNotice) this.log(['html', romHackNotice]);
 			break;
 		}
 		case 'rated': {

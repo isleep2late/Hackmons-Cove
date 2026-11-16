@@ -842,3 +842,10 @@ for (const items of ITEMS) {
   ITEMS_BY_ID.push(map);
   gen++;
 }
+
+export const extendItems = ((Kind: typeof Item) => (generation: number, names: string[]) => {
+  for (let i = 0; i < names.length; i++) {
+    const entry = new Kind(names[i], generation);
+    if (!ITEMS_BY_ID[generation][entry.id]) ITEMS_BY_ID[generation][entry.id] = entry;
+  }
+})(Item);

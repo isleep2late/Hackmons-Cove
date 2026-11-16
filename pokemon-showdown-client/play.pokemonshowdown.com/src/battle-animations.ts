@@ -32,6 +32,11 @@ function phnnTypeIconSrc(type: string): string {
 	return `${prefix}sprites/types/${file}.png`;
 }
 
+function phnnTypeIconHTML(type: string): string {
+	if (!Dex.hasTypeIcon(type)) return Dex.getTypeBadge(type);
+	return `<img src="${phnnTypeIconSrc(type)}" alt="${BattleLog.escapeHTML(type)}" class="pixelated" />`;
+}
+
 /*
 
 Most of this file is: CC0 (public domain)
@@ -1450,9 +1455,7 @@ export class BattleScene implements BattleSceneStub {
 	}
 
 	typeAnim(pokemon: Pokemon, types: string) {
-		const result = BattleLog.escapeHTML(types).split('/').map(type =>
-			`<img src="${phnnTypeIconSrc(type)}" alt="${type}" class="pixelated" />`
-		).join(' ');
+		const result = types.split('/').map(type => phnnTypeIconHTML(type)).join(' ');
 		this.resultAnim(pokemon, result, 'neutral');
 	}
 	resultAnim(pokemon: Pokemon, result: string, type: 'bad' | 'good' | 'neutral' | Dex.StatusName) {
@@ -2910,12 +2913,12 @@ export class PokemonSprite extends Sprite {
 		} else if (pokemon.volatiles.typechange?.[1]) {
 			const types = pokemon.volatiles.typechange[1].split('/');
 			for (const type of types) {
-				status += '<img src="' + phnnTypeIconSrc(type) + '" alt="' + type + '" class="pixelated" /> ';
+				status += phnnTypeIconHTML(type) + ' ';
 			}
 		}
 		if (pokemon.volatiles.typeadd) {
 			const type = pokemon.volatiles.typeadd[1];
-			status += '+<img src="' + phnnTypeIconSrc(type) + '" alt="' + type + '" class="pixelated" /> ';
+			status += '+' + phnnTypeIconHTML(type) + ' ';
 		}
 		for (const stat in pokemon.boosts) {
 			if (pokemon.boosts[stat]) {

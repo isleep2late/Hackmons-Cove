@@ -92,6 +92,17 @@ class Ladder extends LadderStore {
 			return null;
 		}
 
+		const romHack = Ladder.romHackOf(this.formatid);
+		if (this.formatid.startsWith('gen9romhacks') && (!romHack || !user.romHacks?.has(romHack))) {
+			connection.popup(
+				romHack ?
+					`This battle uses the ROM patch ${romHack.slice(0, 12)}, which you have not uploaded. ` +
+					`Both players must upload the identical patch file in the teambuilder.` :
+					`ROM Hacks needs a patch: pick the format in the teambuilder and upload the hack's patch file first.`
+			);
+			return null;
+		}
+
 		if (this.virtualCustom && (challengeType === 'challenge' || challengeType === 'tour')) {
 			connection.popup(`Virtual formats can only be used for ladder searches.`);
 			return null;
@@ -170,10 +181,16 @@ class Ladder extends LadderStore {
 		}
 
 		if (!valResult.startsWith('1')) {
-			connection.popup(
-				`Your team was rejected for the following reasons:\n\n` +
-				`- ` + valResult.slice(1).replace(/\n/g, `\n- `)
-			);
+			let problems = valResult.slice(1);
+			let reason = `Your team was rejected for the following reasons:`;
+			if (romHack) {
+				problems = problems.replace(
+					/^"(.*)" is an invalid (move|item|ability)\.$/gm, (all, name, kind) => `The ${kind} "${name}" does not exist in this ROM hack.`
+				);
+				reason = `Your team does not fit the ROM patch ${romHack.slice(0, 12)} this battle uses. ` +
+					`If it was built for a different hack, pick a team built for this one.`;
+			}
+			connection.popup(`${reason}\n\n- ` + problems.replace(/\n/g, `\n- `));
 			return null;
 		}
 
@@ -190,6 +207,11 @@ class Ladder extends LadderStore {
 			user.isUserBot,
 			user.settings.allowLadderBots,
 		);
+	}
+
+	static romHackOf(formatid: string) {
+		if (!formatid.startsWith('gen9romhacks')) return '';
+		return /@@@.*\brom ?hack ?= ?([0-9a-f]{64})/i.exec(formatid)?.[1].toLowerCase() || '';
 	}
 
 	static getChallenging(userid: ID) {
@@ -270,6 +292,17 @@ class Ladder extends LadderStore {
 	}
 	static async acceptChallenge(connection: Connection, chall: BattleChallenge) {
 		const ladder = Ladders(chall.format);
+		const romHack = Ladder.romHackOf(chall.format);
+		if (romHack && !connection.user.romHacks?.has(romHack)) {
+			const challenger = Users.get(chall.from);
+			const mismatch = (other: string, missing: string) =>
+				`The battle with ${other} could not start because the two of you do not have the same ROM patch: ` +
+				`the challenge uses the patch ${romHack.slice(0, 12)}, which ${missing} not uploaded. ` +
+				`Both players must upload the identical patch file in the teambuilder. The challenge is still open.`;
+			connection.popup(mismatch(challenger?.name || chall.from, 'you have'));
+			challenger?.popup(mismatch(connection.user.name, `${connection.user.name} has`));
+			return;
+		}
 		const ready = await ladder.prepBattle(connection, 'challenge');
 		if (!ready) return;
 		if (Ladders.challenges.remove(chall)) {

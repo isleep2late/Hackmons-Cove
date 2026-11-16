@@ -34,7 +34,12 @@ export const detectGenFromFormat = (
     return defaultGen;
   }
 
-  const gen = parseInt(format.match(GenFormatRegex)[1], 10) || 0;
+  const romHacks = typeof window === 'undefined' ? null
+    : (window as unknown as { RomHacks?: { modid?: string; active?: unknown; }; }).RomHacks;
+  const hackGen = /^gen\d+romhacks/i.test(format) && romHacks?.active
+    ? parseInt(String(romHacks.modid).slice(3), 10) || 0
+    : 0;
+  const gen = hackGen || parseInt(format.match(GenFormatRegex)[1], 10) || 0;
 
   if (gen < 1) {
     return defaultGen;

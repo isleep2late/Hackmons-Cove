@@ -1246,9 +1246,15 @@
 					app.addPopupMessage("You need to go into the Teambuilder and build a team for this format.");
 					return;
 				}
-				app.sendTeam(team, function () {
-					target.disabled = true;
-					app.send(privacy + '/accept ' + userid);
+				RomHacks.prepareTeam(team ? team.name : '', format).then(function (problem) {
+					if (problem) {
+						app.addPopupMessage(problem);
+						return;
+					}
+					app.sendTeam(team, function () {
+						target.disabled = true;
+						app.send(privacy + '/accept ' + userid);
+					});
 				});
 			} else {
 				target.disabled = true;
@@ -1389,13 +1395,20 @@
 				return;
 			}
 
-			var buf = '<form class="battleform pending"><p>Challenging ' + BattleLog.escapeHTML(name) + '...</p>';
-			buf += '<p><label class="label">Format:</label>' + this.renderFormats(format, true) + '</p>';
-			buf += '<p class="buttonbar"><button name="cancelChallenge" class="button">Cancel</button></p></form>';
+			var self = this;
+			RomHacks.prepareTeam(team ? team.name : '', format).then(function (problem) {
+				if (problem) {
+					app.addPopupMessage(problem);
+					return;
+				}
+				var buf = '<form class="battleform pending"><p>Challenging ' + BattleLog.escapeHTML(name) + '...</p>';
+				buf += '<p><label class="label">Format:</label>' + self.renderFormats(format, true) + '</p>';
+				buf += '<p class="buttonbar"><button name="cancelChallenge" class="button">Cancel</button></p></form>';
 
-			$(target).closest('.challenge').html(buf);
-			app.sendTeam(team, function () {
-				app.send(privacy + '/challenge ' + userid + ', ' + format);
+				$(target).closest('.challenge').html(buf);
+				app.sendTeam(team, function () {
+					app.send(privacy + '/challenge ' + userid + ', ' + format);
+				});
 			});
 		},
 		cancelChallenge: function (i, target) {
@@ -1548,16 +1561,23 @@
 				return;
 			}
 
-			$formatButton.addClass('preselected')[0].disabled = true;
-			$teamButton.addClass('preselected')[0].disabled = true;
-			$searchForm.find('button.big').html('<strong><i class="fa fa-refresh fa-spin"></i> Connecting...</strong>').addClass('disabled');
-			$searchForm.append('<p class="cancel buttonbar"><button name="cancelSearch" class="button">Cancel</button></p>');
-
 			var self = this;
-			app.sendTeam(team, function () {
-				self.searchDelay = setTimeout(function () {
-					app.send(self.adjustPrivacy($privacyCheckbox.is(':checked')) + '/search ' + format);
-				}, 3000);
+			RomHacks.prepareTeam(team ? team.name : '', format).then(function (problem) {
+				if (problem) {
+					app.addPopupMessage(problem);
+					return;
+				}
+				if ($searchForm.find('.cancel').length) return;
+				$formatButton.addClass('preselected')[0].disabled = true;
+				$teamButton.addClass('preselected')[0].disabled = true;
+				$searchForm.find('button.big').html('<strong><i class="fa fa-refresh fa-spin"></i> Connecting...</strong>').addClass('disabled');
+				$searchForm.append('<p class="cancel buttonbar"><button name="cancelSearch" class="button">Cancel</button></p>');
+
+				app.sendTeam(team, function () {
+					self.searchDelay = setTimeout(function () {
+						app.send(self.adjustPrivacy($privacyCheckbox.is(':checked')) + '/search ' + format);
+					}, 3000);
+				});
 			});
 		},
 		cancelSearch: function () {
@@ -2101,6 +2121,8 @@
 		selectTeam: function (i) {
 			i = +i;
 			this.sourceEl.val(i).html(TeamPopup.renderTeam(i));
+			var romHackFormat = '' + (this.sourceEl.closest('form').find('button[name=format]').val() || '');
+			if (Storage.teams[i] && !RomHacks.formatHack(romHackFormat)) RomHacks.prepareTeam(Storage.teams[i].name, romHackFormat);
 			if (this.sourceEl[0].offsetParent.className === 'mainmenuwrapper') {
 				var formatid = this.sourceEl.closest('form').find('button[name=format]').val();
 				app.rooms[''].curTeamIndex = i;

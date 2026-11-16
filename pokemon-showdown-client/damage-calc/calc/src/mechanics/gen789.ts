@@ -47,6 +47,8 @@ import {
   isQPActive,
   getStabMod,
   getStellarStabMod,
+  enterHackMechanics, hackMultiplier, hackModify, hackItemMod, hackWeatherMultiplier,
+  hackRollCount,
 } from './util';
 
 export function calculateSMSSSV(
@@ -56,6 +58,7 @@ export function calculateSMSSSV(
   move: Move,
   field: Field
 ) {
+  enterHackMechanics(gen);
   // #region Initial
 
   checkAirLock(attacker, field);
@@ -670,7 +673,7 @@ export function calculateSMSSSV(
   }
 
   const damage = [];
-  for (let i = 0; i < 16; i++) {
+  for (let i = 0; i < hackRollCount(16); i++) {
     damage[i] =
       getFinalDamage(baseDamage, i, typeEffectiveness, applyBurn, stabMod, finalMod, protect);
   }
@@ -749,7 +752,7 @@ export function calculateSMSSSV(
       const newFinalMod = chainMods(newFinalMods, 41, 131072);
 
       const damageArray = [];
-      for (let i = 0; i < 16; i++) {
+      for (let i = 0; i < hackRollCount(16); i++) {
         const newFinalDamage = getFinalDamage(
           newBaseDamage,
           i,
@@ -1287,13 +1290,13 @@ export function calculateBPModsSMSSSV(
     (attacker.name.includes('Ogerpon-Hearthflame') && attacker.hasItem('Hearthflame Mask')) ||
     (attacker.name.includes('Ogerpon-Wellspring') && attacker.hasItem('Wellspring Mask'))
   ) {
-    bpMods.push(4915);
+    bpMods.push(hackItemMod(attacker.item, 4915));
     desc.attackerItem = attacker.item;
   } else if (
     (attacker.hasItem('Muscle Band') && move.category === 'Physical') ||
     (attacker.hasItem('Wise Glasses') && move.category === 'Special')
   ) {
-    bpMods.push(4505);
+    bpMods.push(hackItemMod(attacker.item, 4505));
     desc.attackerItem = attacker.item;
   } else if (attacker.hasItem('Punching Glove') && move.flags.punch) {
     bpMods.push(4506);
@@ -1671,7 +1674,14 @@ function calculateBaseDamageSMSSSV(
   }
 
   const isMegaSol = attacker.hasAbility('Mega Sol');
-  if (
+  const hackWeather = isMegaSol || move.named('Hydro Steam')
+    ? undefined : hackWeatherMultiplier(field.weather, move.type);
+  if (hackWeather !== undefined) {
+    if (hackWeather !== 1 && !defender.hasItem('Utility Umbrella')) {
+      baseDamage = hackModify(baseDamage, hackWeather);
+      desc.weather = field.weather;
+    }
+  } else if (
     (field.hasWeather('Sun') || isMegaSol) &&
       move.named('Hydro Steam') &&
       !attacker.hasItem('Utility Umbrella')
@@ -1695,7 +1705,7 @@ function calculateBaseDamageSMSSSV(
   }
 
   if (isCritical) {
-    baseDamage = Math.floor(OF32(baseDamage * 1.5));
+    baseDamage = Math.floor(OF32(baseDamage * hackMultiplier('critMultiplier', 1.5)));
     desc.isCritical = isCritical;
   }
 
@@ -1785,10 +1795,10 @@ export function calculateFinalModsSMSSSV(
   }
 
   if (attacker.hasItem('Expert Belt') && typeEffectiveness > 1 && !move.isZ) {
-    finalMods.push(4915);
+    finalMods.push(hackItemMod(attacker.item, 4915));
     desc.attackerItem = attacker.item;
   } else if (attacker.hasItem('Life Orb')) {
-    finalMods.push(5324);
+    finalMods.push(hackItemMod(attacker.item, 5324));
     desc.attackerItem = attacker.item;
   } else if (attacker.hasItem('Metronome') && move.timesUsedWithMetronome! >= 1) {
     const timesUsedWithMetronome = Math.floor(move.timesUsedWithMetronome!);

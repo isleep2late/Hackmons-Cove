@@ -21,6 +21,7 @@ $types: (
 
   colors: (
     unknown: #424242, // aka. the ??? type
+    custom: #5F7A8A,
     normal: #90905D,
     fighting: #81201B,
     flying: #8563EA,
@@ -288,8 +289,32 @@ $tera-edge: (
   }
 }
 
+.customType {
+  $custom-color: map.get($types, colors, custom);
+
+  &:not(.highlight) {
+    &.light .label {
+      color: color.alpha(color.shade($custom-color, map.get($types, adjustment, light)), map.get($label, label-opacity, default, light));
+    }
+
+    &.dark .label {
+      color: color.alpha(color.tint($custom-color, map.get($types, adjustment, dark)), map.get($label, label-opacity, default, dark));
+    }
+  }
+
+  &.highlight {
+    &.light .label {
+      background-color: color.alpha(color.shade($custom-color, map.get($types, adjustment, light)), map.get($label, background-opacity, highlight, light));
+    }
+
+    &.dark .label {
+      background-color: color.alpha($custom-color, map.get($label, background-opacity, highlight, dark));
+    }
+  }
+}
+
 @each $type, $color in map.get($types, colors) {
-  @if $type != unknown {
+  @if $type != unknown and $type != custom {
     $light-shade: map.get($types, adjustment, light);
     $dark-tint: map.get($types, adjustment, dark);
 

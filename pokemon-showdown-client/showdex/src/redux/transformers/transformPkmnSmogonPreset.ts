@@ -100,9 +100,13 @@ export const transformPkmnSmogonPreset = (
 
   if (output.item) {
     // e.g., output.item = 'Charizardite X' -> megaForme = 'Charizard-Mega-X'
-    const megaForme = dex.items.get(output.item)?.megaStone;
+    const megaStone = dex.items.get(output.item)?.megaStone as unknown;
+    const megaForme = typeof megaStone === 'string'
+      ? megaStone
+      : (megaStone as Record<string, string>)?.[output.speciesForme]
+        || (megaStone as Record<string, string>)?.[dex.species.get(output.speciesForme)?.baseSpecies];
 
-    if (megaForme && output.speciesForme !== megaForme) {
+    if (typeof megaForme === 'string' && megaForme && output.speciesForme !== megaForme) {
       output.speciesForme = megaForme;
     }
   }

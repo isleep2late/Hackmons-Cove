@@ -484,3 +484,16 @@ for (const typeChart of TYPE_CHART) {
   }
   TYPES_BY_ID.push(map);
 }
+
+export const extendTypes = ((Kind: typeof Type) => (generation: number, chart: TypeChart) => {
+  const map: {[id: string]: Type} = {};
+  for (const type in chart) {
+    const row: {[name: string]: number} = {};
+    const source = chart[type as I.TypeName] as {[name: string]: number};
+    for (const target in source) row[target] = source[target];
+    const entry = new Kind(type, row as TypeChart[I.TypeName]);
+    map[entry.id] = entry;
+  }
+  TYPES_BY_ID[generation] = map;
+  TYPE_CHART[generation] = chart;
+})(Type);

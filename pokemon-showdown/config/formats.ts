@@ -1721,6 +1721,15 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		banlist: ['CAP', 'Glitch Gen 2', 'Glitch Gen 3', '????? (GS 00)', '????? (GS FC)', '????? (GS FE)', '????? (GS FF)', '????? (Crystal 00)', '????? (Crystal FC)', '????? (Crystal FE)', '????? (Crystal FF)', 'Decamark', '? (00FC)', '- (019C)'],
 	},
 	{
+		name: "[Gen 9] ROM Hacks [EXPERIMENTAL]",
+		desc: "Custom Disguises with the Pokemon, moves, abilities and items of a ROM hack. Upload the hack's patch file in the teambuilder; you can only battle someone who uploaded the identical patch.",
+		mod: 'gen9',
+		searchShow: false,
+		battle: {trunc: Math.trunc},
+		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Max Team Size = 24', 'Max Move Count = 24', 'Max Level = 9999', 'Default Level = 100', 'Disguise Mod', 'Totem Aura', 'ROM Hack Legality'],
+		banlist: ['CAP'],
+	},
+	{
 		name: "[Gen 9] Custom Game",
 		mod: 'gen9',
 		searchShow: false,

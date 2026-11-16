@@ -40,12 +40,15 @@ import { DexText } from './dex-text';
 import { Format, DexFormats } from './dex-formats';
 import { Utils } from '../lib/utils';
 import { Tags } from '../data/tags';
+import { installRomHackMechanics, type RomHackEngineTables, type RomHackMechanics } from './romhack-mechanics';
 
 const BASE_MOD = 'gen9' as ID;
 const DATA_DIR = path.resolve(__dirname, '../data');
 const MODS_DIR = path.resolve(DATA_DIR, './mods');
 
 const dexes: { [mod: string]: ModdedDex } = Object.create(null);
+const MAX_ROMHACK_DEXES = 64;
+const romHackDexes = new Set<string>();
 
 const DATA_TYPES = [
 	'Abilities', 'Rulesets', 'FormatsData', 'Items', 'Learnsets', 'Moves',
@@ -116,6 +119,10 @@ export class ModdedDex {
 
 	gen = 0;
 	parentMod = '';
+	romHack: {
+		sha256: string, species: Set<string>, moves: Set<string>, abilities: Set<string>, items: Set<string>,
+		mechanics: RomHackMechanics, engine: RomHackEngineTables, unappliedMechanics: string[],
+	} | null = null;
 	modsLoaded = false;
 
 	dataCache: DexTableData | null;
@@ -169,7 +176,84 @@ export class ModdedDex {
 
 	mod(mod: string | undefined): ModdedDex {
 		if (!dexes['base'].modsLoaded) dexes['base'].includeMods();
+		if (mod?.startsWith('romhack')) {
+			if (!dexes[mod]) {
+				this.loadRomHack(mod);
+			} else if (romHackDexes.delete(mod)) {
+				romHackDexes.add(mod);
+			}
+		}
 		return dexes[mod || 'base'].includeData();
+	}
+
+	romHackOf(format: Format): string {
+		for (const rule of format.customRules || []) {
+			const match = /^rom ?hack ?= ?([0-9a-f]{64})$/i.exec(rule.trim());
+			if (match) return match[1].toLowerCase();
+		}
+		return '';
+	}
+
+	loadRomHack(mod: string) {
+		const sha256 = mod.slice(7);
+		if (!/^[0-9a-f]{64}$/.test(sha256)) throw new Error(`Invalid ROM hack id "${sha256}"`);
+		const file = path.resolve(__dirname, '../..', 'databases/romhacks', `${sha256}.json`);
+		let hack;
+		try {
+			hack = JSON.parse(fs.readFileSync(file, 'utf8'));
+		} catch {
+			throw new Error(`ROM hack ${sha256} has not been uploaded to this server.`);
+		}
+		try {
+			if (Date.now() - fs.statSync(file).mtimeMs > 60 * 60 * 1000) {
+				const now = new Date();
+				fs.utimesSync(file, now, now);
+			}
+		} catch {}
+		const parentDex = dexes[hack.parentMod] || dexes[BASE_MOD];
+		const parentData = parentDex.includeData().data;
+		const dex = new ModdedDex(mod);
+		const dataCache: AnyObject = {};
+		for (const dataType of DATA_TYPES) dataCache[dataType] = (parentData as AnyObject)[dataType];
+		for (const dataType of ['Pokedex', 'Moves', 'Abilities', 'Items', 'TypeChart'] as const) {
+			const table: AnyObject = { ...parentData[dataType] };
+			for (const id in hack[dataType] || {}) table[id] = { ...table[id], ...hack[dataType][id] };
+			dataCache[dataType] = table;
+		}
+		const formatsData: AnyObject = { ...parentData.FormatsData };
+		for (const id in hack.Pokedex) {
+			if (!formatsData[id]) formatsData[id] = { tier: 'OU', doublesTier: 'DOU', natDexTier: 'OU' };
+		}
+		dataCache.FormatsData = formatsData;
+		const installed = installRomHackMechanics(parentDex.gen, dataCache, hack.mechanics);
+		dex.parentMod = parentDex.currentMod;
+		dex.gen = parentDex.gen;
+		dex.dataCache = dataCache as DexTableData;
+		dex.romHack = {
+			sha256,
+			species: new Set(hack.legal.species),
+			moves: new Set(hack.legal.moves),
+			abilities: new Set(hack.legal.abilities),
+			items: new Set(hack.legal.items),
+			mechanics: installed.mechanics,
+			engine: installed.engine,
+			unappliedMechanics: installed.unapplied,
+		};
+		dexes[mod] = dex;
+		romHackDexes.add(mod);
+		for (const old of romHackDexes) {
+			if (romHackDexes.size <= MAX_ROMHACK_DEXES) break;
+			romHackDexes.delete(old);
+			delete dexes[old];
+		}
+	}
+
+	romHackMechanicsUnapplied(mechanics: RomHackMechanics, parentMod: string): string[] {
+		if (!dexes['base'].modsLoaded) dexes['base'].includeMods();
+		const parentDex = dexes[parentMod] || dexes[BASE_MOD];
+		const scratch: AnyObject = { ...parentDex.includeData().data };
+		for (const dataType of ['Moves', 'Abilities', 'Items'] as const) scratch[dataType] = { ...scratch[dataType] };
+		return installRomHackMechanics(parentDex.gen, scratch, mechanics).unapplied;
 	}
 
 	forGen(gen: number) {
@@ -179,7 +263,10 @@ export class ModdedDex {
 
 	forFormat(format: Format | string): ModdedDex {
 		if (!this.modsLoaded) this.includeMods();
-		const mod = this.formats.get(format).mod;
+		const resolved = this.formats.get(format);
+		const romHack = this.romHackOf(resolved);
+		if (romHack) return this.mod(`romhack${romHack}`);
+		const mod = resolved.mod;
 		return dexes[mod || BASE_MOD].includeData();
 	}
 

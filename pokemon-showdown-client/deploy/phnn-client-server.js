@@ -1174,7 +1174,7 @@ function handleRequest(req, res) {
 		cleanCookies(req, res);
 	} else if (isLoginPath(reqUrl.pathname)) {
 		proxyLogin(req, res, reqUrl);
-	} else if (reqUrl.pathname.startsWith('/showdown')) {
+	} else if (reqUrl.pathname.startsWith('/showdown') || reqUrl.pathname.startsWith('/romhacks/')) {
 		proxyGame(req, res, reqUrl);
 	} else if (reqUrl.pathname.startsWith('/avatars/')) {
 		serveAvatar(req, res, reqUrl.pathname);

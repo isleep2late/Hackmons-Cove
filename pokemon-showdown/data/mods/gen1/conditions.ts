@@ -151,7 +151,8 @@ export const Conditions: import('../../../sim/dex-conditions').ModdedConditionDa
 			this.add('-activate', pokemon, 'confusion');
 			if (!this.randomChance(128, 256)) {
 				const damage = Math.floor(Math.floor((
-					(Math.floor(2 * pokemon.level / 5) + 2) * pokemon.getStat('atk') * 40
+					(Math.floor(2 * pokemon.level / 5) + 2) * pokemon.getStat('atk') *
+					(this.dex.romHack?.mechanics.confusionSelfHitPower ?? 40)
 				) / pokemon.getStat('def', false)) / 50) + 2;
 				this.directDamage(damage, pokemon, target);
 				pokemon.removeVolatile('bide');

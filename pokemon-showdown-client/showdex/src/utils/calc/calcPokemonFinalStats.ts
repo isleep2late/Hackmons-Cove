@@ -9,7 +9,9 @@ import {
   detectGenFromFormat,
   detectLegacyGen,
   getDexForFormat,
+  getRomHackMechanics,
   notFullyEvolved,
+  readRomHackMultiplier,
   shouldIgnoreItem,
 } from '@showdex/utils/dex';
 import { calcBoostedStats } from './calcBoostedStats';
@@ -127,7 +129,7 @@ export const calcPokemonFinalStats = (
   if (status) {
     // 50% ATK reduction when burned (all gens... probably)
     if (status === 'brn' && (legacy || ability !== 'guts')) {
-      record.apply('atk', 0.5, 'nonvolatiles', 'Burn');
+      record.apply('atk', readRomHackMultiplier(getRomHackMechanics(format), 'burnAttack') ?? 0.5, 'nonvolatiles', 'Burn');
     }
 
     // 50% ATK boost w/ non-volatile status condition due to "Guts" (gen 3+)
@@ -137,7 +139,12 @@ export const calcPokemonFinalStats = (
 
     // 75% SPE reduction when paralyzed for gens 1-6, otherwise, 50% SPE reduction
     if (status === 'par' && (legacy || ability !== 'quickfeet')) {
-      record.apply('spe', gen < 7 ? 0.25 : 0.5, 'nonvolatiles', 'Paralysis');
+      record.apply(
+        'spe',
+        readRomHackMultiplier(getRomHackMechanics(format), 'paralysisSpeed') ?? (gen < 7 ? 0.25 : 0.5),
+        'nonvolatiles',
+        'Paralysis',
+      );
     }
 
     // 50% SPE boost w/ non-volatile status condition due to "Quick Feet" (gen 4+)

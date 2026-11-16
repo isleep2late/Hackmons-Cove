@@ -32,6 +32,7 @@ import {
   OF16, OF32,
   pokeRound,
   getStabMod,
+  enterHackMechanics,
 } from './util';
 
 export function calculateChampions(
@@ -41,6 +42,7 @@ export function calculateChampions(
   move: Move,
   field: Field
 ) {
+  enterHackMechanics(gen);
   // #region Initial
 
   checkForecast(attacker, field.weather);

@@ -40,6 +40,7 @@ export interface PokeTypeFieldProps<
   highlightTypes?: Showdown.TypeName[];
   revealedTypes?: Showdown.TypeName[];
   typeUsages?: CalcdexPokemonUsageAlt<Showdown.TypeName>[];
+  extraTypes?: Showdown.TypeName[];
   readOnly?: boolean;
   disabled?: boolean;
 }
@@ -64,6 +65,7 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
   highlightTypes,
   revealedTypes,
   typeUsages,
+  extraTypes,
   input,
   readOnly,
   disabled,
@@ -153,7 +155,9 @@ export const PokeTypeField = React.forwardRef<ButtonElement, PokeTypeFieldProps>
 
   const flatTypeUsages = flattenAlts(typeUsages);
 
-  const allTypes = PokemonTypes.filter((tp) => (
+  const hackTypes = (extraTypes || []).filter((tp) => !PokemonTypes.includes(tp));
+
+  const allTypes = PokemonTypes.concat(hackTypes).filter((tp) => (
     !!tp
       && tp !== '???'
       && (teraTyping || tp !== 'Stellar')

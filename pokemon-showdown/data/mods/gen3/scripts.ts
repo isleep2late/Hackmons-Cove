@@ -57,7 +57,7 @@ export const Scripts: ModdedBattleScriptsData = {
 
 			// Burn
 			if (pokemon.status === 'brn' && baseDamage && move.category === 'Physical' && !pokemon.hasAbility('guts')) {
-				baseDamage = this.battle.modify(baseDamage, 0.5);
+				baseDamage = this.battle.modify(baseDamage, this.dex.romHack?.mechanics.burnAttack ?? 0.5);
 			}
 
 			// Other modifiers (Reflect/Light Screen/etc)
@@ -83,7 +83,8 @@ export const Scripts: ModdedBattleScriptsData = {
 
 			const isCrit = target.getMoveHitData(move).crit;
 			if (isCrit) {
-				baseDamage = this.battle.modify(baseDamage, move.critModifier || 2);
+				const hackCritMultiplier = this.dex.romHack?.mechanics.critMultiplier;
+				baseDamage = this.battle.modify(baseDamage, move.critModifier || hackCritMultiplier || 2);
 			}
 
 			// Mod 2 (Damage is floored after all multipliers are in)
@@ -97,7 +98,7 @@ export const Scripts: ModdedBattleScriptsData = {
 			if (type !== '???') {
 				let stab: number | [number, number] = 1;
 				if (move.forceSTAB || pokemon.hasType(type)) {
-					stab = 1.5;
+					stab = this.dex.romHack?.mechanics.stab ?? 1.5;
 				}
 				stab = this.battle.runEvent('ModifySTAB', pokemon, target, move, stab);
 				baseDamage = this.battle.modify(baseDamage, stab);
@@ -339,7 +340,9 @@ export const Scripts: ModdedBattleScriptsData = {
 				}
 			}
 
-			const boostTable = [1, 4 / 3, 5 / 3, 2, 7 / 3, 8 / 3, 3];
+			const hackEngine = this.dex.romHack?.engine;
+			const boostTable = hackEngine?.accUp || [1, 4 / 3, 5 / 3, 2, 7 / 3, 8 / 3, 3];
+			const dropTable = hackEngine?.accDown || boostTable;
 
 			// calculate true accuracy
 			let accuracy = move.accuracy;
@@ -352,14 +355,14 @@ export const Scripts: ModdedBattleScriptsData = {
 					if (boost > 0) {
 						accuracy *= boostTable[boost];
 					} else {
-						accuracy /= boostTable[-boost];
+						accuracy /= dropTable[-boost];
 					}
 				}
 				if (!move.ignoreEvasion) {
 					boosts = this.battle.runEvent('ModifyBoost', target, null, null, { ...target.boosts });
 					boost = this.battle.clampIntRange(boosts['evasion'], -6, 6);
 					if (boost > 0) {
-						accuracy /= boostTable[boost];
+						accuracy /= dropTable[boost];
 					} else if (boost < 0) {
 						accuracy *= boostTable[-boost];
 					}
@@ -417,7 +420,8 @@ export const Scripts: ModdedBattleScriptsData = {
 				if (Array.isArray(hits)) {
 					// yes, it's hardcoded... meh
 					if (hits[0] === 2 && hits[1] === 5) {
-						hits = this.battle.sample([2, 2, 2, 3, 3, 3, 4, 5]);
+						const hackSample = this.dex.romHack?.engine.multiHitSample;
+						hits = this.battle.sample(hackSample || [2, 2, 2, 3, 3, 3, 4, 5]);
 					} else {
 						hits = this.battle.random(hits[0], hits[1] + 1);
 					}
@@ -442,14 +446,14 @@ export const Scripts: ModdedBattleScriptsData = {
 								if (boost > 0) {
 									accuracy *= boostTable[boost];
 								} else {
-									accuracy /= boostTable[-boost];
+									accuracy /= dropTable[-boost];
 								}
 							}
 							if (!move.ignoreEvasion) {
 								boosts = this.battle.runEvent('ModifyBoost', target, null, null, { ...target.boosts });
 								boost = this.battle.clampIntRange(boosts['evasion'], -6, 6);
 								if (boost > 0) {
-									accuracy /= boostTable[boost];
+									accuracy /= dropTable[boost];
 								} else if (boost < 0) {
 									accuracy *= boostTable[-boost];
 								}

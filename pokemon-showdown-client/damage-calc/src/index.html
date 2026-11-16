@@ -67,6 +67,10 @@
             <input class="gen visually-hidden" type="radio" name="gen" value="10" id="gen10" checked="checked" /><label class="btn btn-small btn-mid" for="gen10" title="Pure Hackmons: No Nerfs">No Nerfs</label>
             <input class="gen visually-hidden" type="radio" name="gen" value="11" id="gen11" /><label class="btn btn-small btn-right" for="gen11" title="SpaceWorld '97 demo engine">SW '97</label>
         </span>
+        <span class="romhackSelection" style="display:none" title="Use the Pok&eacute;mon, moves, abilities and items of a ROM hack you uploaded in the teambuilder.">
+            <select id="romhack"><option value="">ROM hack: none</option></select>
+            <span id="romhack-note"></span>
+        </span>
         <span class="notationSelection" aria-labelledby="selectNotationInstruction" role="radiogroup" title="Select the output notation.">
             <span class="visually-hidden" id="selectNotationInstruction">Select the output notation.</span>
             <input class="notation visually-hidden" type="radio" name="notation" id="pixels" value="px" /><label class="btn btn-small btn-left" for="pixels">48th</label>
@@ -1740,6 +1744,7 @@
     <script type="text/javascript" src="./js/shared_controls.js?"></script>
     <script type="text/javascript" src="./js/index_randoms_controls.js?"></script>
     <script type="text/javascript" src="./js/moveset_import.js?"></script>
+    <script type="text/javascript" src="./js/romhack.js?"></script>
 </div>
 <!-- END WRAPPER -->
 

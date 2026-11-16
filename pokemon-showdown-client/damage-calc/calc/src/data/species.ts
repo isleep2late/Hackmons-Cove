@@ -10888,3 +10888,10 @@ for (const species of SPECIES) {
   SPECIES_BY_ID.push(map);
   gen++;
 }
+
+export const extendSpecies = ((Kind: typeof Specie) => (generation: number, entries: {[name: string]: SpeciesData}) => {
+  for (const name in entries) {
+    const entry = new Kind(name, entries[name]);
+    SPECIES_BY_ID[generation][entry.id] = entry;
+  }
+})(Specie);

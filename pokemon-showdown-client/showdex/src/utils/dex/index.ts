@@ -24,6 +24,7 @@ export * from './getMegaFormeForItem';
 export * from './getNatureForStats';
 export * from './getNaturesDex';
 export * from './getPokemonLearnset';
+export * from './getRomHackProfile';
 export * from './getTypesDex';
 export * from './getWeatherConditions';
 export * from './getZMove';

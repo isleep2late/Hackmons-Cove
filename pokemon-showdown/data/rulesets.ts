@@ -319,6 +319,72 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 			}
 		},
 	},
+	romhack: {
+		effectType: 'Rule',
+		name: 'ROM Hack',
+		desc: "Plays with the data of an uploaded ROM patch. Usage: ROM Hack = [SHA-256 of the patch file].",
+		hasValue: true,
+		onValidateRule(value) {
+			if (!/^[0-9a-f]{64}$/.test(value.trim().toLowerCase())) {
+				throw new Error(`Invalid ROM Hack "${value}"; it must be the SHA-256 of an uploaded patch file.`);
+			}
+		},
+		onBegin() {
+			if (!this.dex.romHack) return;
+			this.add('rule', `ROM Hack: ${this.dex.romHack.sha256}`);
+			for (const pokemon of this.getAllPokemon()) {
+				const innates: string[] = (pokemon.baseSpecies as AnyObject).innates || [];
+				const listed = (pokemon.set.phAbilities || '').split('/').filter(Boolean);
+				for (const name of innates) {
+					const ability = this.dex.abilities.get(name);
+					if (!ability.exists || ability.num >= 20000 || ability.id === pokemon.ability) continue;
+					if (!listed.some(other => this.toID(other) === ability.id)) listed.push(ability.name);
+				}
+				if (listed.length) pokemon.set.phAbilities = listed.join('/');
+			}
+		},
+	},
+	romhacklegality: {
+		effectType: 'ValidatorRule',
+		name: 'ROM Hack Legality',
+		desc: "Only Pok&eacute;mon, moves, abilities and items that exist in the uploaded ROM hack can be used.",
+		onValidateTeam() {
+			if (!this.dex.romHack) {
+				return [`This format needs a ROM patch: upload one in the teambuilder, then challenge someone who uploaded the same patch.`];
+			}
+		},
+		onValidateSet(set) {
+			const hack = this.dex.romHack;
+			if (!hack) return;
+			const problems: string[] = [];
+			const extras = set as AnyObject;
+			const species = this.dex.species.get(set.species);
+			if (!hack.species.has(species.id)) problems.push(`${species.name} does not exist in this ROM hack.`);
+			const disguise = extras.disguise ? this.dex.species.get(extras.disguise) : null;
+			if (disguise?.exists && !hack.species.has(disguise.id)) {
+				problems.push(`${disguise.name} does not exist in this ROM hack.`);
+			}
+			for (const name of [set.ability, ...(Array.isArray(extras.phAbilities) ? extras.phAbilities : [])]) {
+				const ability = this.dex.abilities.get(name);
+				if (this.dex.gen >= 3 && ability.id && ability.id !== 'noability' && !hack.abilities.has(ability.id)) {
+					problems.push(`${species.name}'s ability ${ability.name} does not exist in this ROM hack.`);
+				}
+			}
+			for (const name of [set.item, ...(Array.isArray(extras.phItems) ? extras.phItems : [])]) {
+				const item = this.dex.items.get(name);
+				if (this.dex.gen >= 2 && item.id && !hack.items.has(item.id)) {
+					problems.push(`${species.name}'s item ${item.name} does not exist in this ROM hack.`);
+				}
+			}
+			for (const name of set.moves || []) {
+				const move = this.dex.moves.get(name);
+				if (move.id && !hack.moves.has(move.id)) {
+					problems.push(`${species.name}'s move ${move.name} does not exist in this ROM hack.`);
+				}
+			}
+			return problems;
+		},
+	},
 	gametype: {
 		effectType: 'Rule',
 		name: 'Gametype',
