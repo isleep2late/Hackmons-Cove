@@ -47,6 +47,9 @@ const IMPORTS_PER_HOUR = 300;
 const MAX_INCOMING = 32;
 const BODY_MILLIS = 120000;
 const BODY_IDLE_MILLIS = 20000;
+const WRONG_GUESS_BYTES = 4096;
+const IPS_BASE_UNKNOWN = 'The base game of this IPS patch could not be determined: it does not read as a hack of any game ' +
+	'this server has. An IPS patch carries no checksum of its base game; if this hack has a BPS or UPS patch, use that instead.';
 const STORE_FULL = 'This server cannot store more ROM hacks right now. Try again later.';
 
 const KNOWN_BASES: { [crc: string]: string } = {
@@ -352,6 +355,25 @@ function gbChecksumBases<T extends { file: string, size: number }>(patch: Buffer
 	return hits.sort((a, b) => a.changed - b.changed).map(hit => hit.base);
 }
 
+function baseName(base: BaseRom): string {
+	return KNOWN_BASES[hex8(base.crc)] || 'a Game Boy game';
+}
+
+function wrongGuess(rom: Buffer, clean: Buffer, read: RawHack): boolean {
+	const shared = Math.min(rom.length, clean.length);
+	let changed = 0;
+	for (let i = 0; i < shared && changed <= WRONG_GUESS_BYTES; i++) if (rom[i] !== clean[i]) changed++;
+	if (changed <= WRONG_GUESS_BYTES) return false;
+	const same = (raw: RawHack) => (raw.mechanics?.report || []).filter(entry => entry.status === 'same').length;
+	const report = read.mechanics?.report || [];
+	if (report.some(entry => entry.status === 'changed') || (report.length && same(read) * 2 >= report.length)) return false;
+	const stock = extractRom(clean, clean);
+	const data = (raw: RawHack) => JSON.stringify([raw.species, raw.moves, raw.abilities, raw.items, raw.itemPockets]);
+	if (data(read) !== data(stock)) return false;
+	if (read.typeChart?.length && JSON.stringify(read.typeChart) !== JSON.stringify(stock.typeChart || [])) return false;
+	return same(read) * 2 < same(stock);
+}
+
 export function importPatch(patch: Buffer): HackDex {
 	if (patch.length > MAX_PATCH_SIZE) throw new Error('The patch is larger than 96 MB.');
 	const info = readPatchInfo(patch);
@@ -424,11 +446,11 @@ export function importPatch(patch: Buffer): HackDex {
 			return { base, edge: ipsBoundaryFit(patch, rom), same: ipsUnchangedBytes(patch, rom) };
 		}).sort((a, b) => a.edge.matches - b.edge.matches || b.edge.checked - a.edge.checked || a.same - b.same ||
 			a.base.size - b.base.size).slice(0, 4).map(entry => entry.base);
-		const candidates = info.format === 'ips' ? gbChecksumBases(patch, small).concat(ranked).filter(
-			(base, i, list) => list.indexOf(base) === i
-		) : ranked;
+		const ips = info.format === 'ips';
+		const trusted = ips ? gbChecksumBases(patch, small) : [];
+		let trustedError: Error | null = null;
 		const deadline = Date.now() + BSP_TOTAL_MILLIS;
-		for (const base of candidates) {
+		for (const base of trusted.length ? trusted : ranked) {
 			const millis = deadline - Date.now();
 			if (info.format === 'bsp' && millis <= 0) {
 				lastError = new Error('This BSP patch could not be applied: it takes too long to run.');
@@ -436,13 +458,25 @@ export function importPatch(patch: Buffer): HackDex {
 			}
 			try {
 				const clean = fs.readFileSync(base.file);
-				raw = extractRom(Buffer.from(applyPatch(patch, clean, { millis })), clean);
+				const rom = Buffer.from(applyPatch(patch, clean, { millis }));
+				const read = extractRom(rom, clean);
+				if (ips && !trusted.length && wrongGuess(rom, clean, read)) continue;
+				raw = read;
 				break;
 			} catch (e: any) {
 				lastError = e;
+				if (trusted.length && !trustedError) {
+					const reason = String(e.message || 'the game could not be read').replace(/\.+$/, '');
+					trustedError = new Error(
+						`This patch is for ${baseName(base)}, but this hack's data could not be read: ${reason}. ` +
+						`It changes the game in a way this server does not understand yet.`
+					);
+				}
 				if (/takes too long/.test(e.message)) break;
 			}
 		}
+		if (!raw && trustedError) throw trustedError;
+		if (!raw && ips && ranked.length) throw new Error(IPS_BASE_UNKNOWN);
 		if (!raw) throw lastError || new Error('This server has no base games to patch.');
 	}
 	const hack = buildHackDex(raw, sha256, info.format);

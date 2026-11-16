@@ -251,6 +251,57 @@ export function findGen1Order(rom: Buffer): number {
 	return -1;
 }
 
+export function findGen1OrderSized(rom: Buffer, names: number): number {
+	let count = 0;
+	while (count < 255 && decodeFixed(rom, names + count * 10, 10) !== null) count++;
+	if (count < 100 || rom.length < count) return -1;
+	const tally = new Uint32Array(256);
+	const tied: number[] = [];
+	let repeats = 0;
+	let fewest = 3;
+	for (let end = 0; end < rom.length; end++) {
+		const added = rom[end];
+		if (tally[added]++ && added) repeats++;
+		if (end >= count) {
+			const dropped = rom[end - count];
+			if (--tally[dropped] && dropped) repeats--;
+		}
+		if (end < count - 1 || repeats > fewest || (repeats === fewest && tied.length >= 16)) continue;
+		const distinct = count - tally[0] - repeats;
+		if (distinct < 100) continue;
+		let stray = false;
+		for (let value = 255; value > distinct && !stray; value--) stray = tally[value] > 0;
+		if (stray) continue;
+		if (repeats < fewest) tied.length = 0;
+		fewest = repeats;
+		tied.push(end - count + 1);
+	}
+	if (tied.length < 2) return tied.length ? tied[0] : -1;
+	let best = -1;
+	let bestClashes = Infinity;
+	for (const at of tied) {
+		const empty = new Set<string>();
+		const filled = new Set<string>();
+		for (let i = 0; i < count; i++) (rom[at + i] ? filled : empty).add(decodeFixed(rom, names + i * 10, 10)!);
+		let clashes = 0;
+		for (const name of empty) if (filled.has(name)) clashes++;
+		if (clashes < bestClashes) {
+			bestClashes = clashes;
+			best = at;
+		}
+	}
+	return best;
+}
+
+export function findGen1OrderByNames(rom: Buffer): number {
+	const stock = findText(rom, 'RHYDON@@@@KANGASKHAN');
+	if (stock >= 0) return findGen1OrderSized(rom, stock);
+	const usual = findGen1Order(rom);
+	if (usual >= 0) return usual;
+	const names = findGen1Names(rom);
+	return names < 0 ? -1 : findGen1OrderSized(rom, names);
+}
+
 function findMoveRecords(rom: Buffer, stride: number, count: number): number {
 	let found = -1;
 	for (let at = 0; at + count * stride <= rom.length; at++) {
@@ -649,8 +700,14 @@ export function extractGB(rom: Buffer, base: Buffer | null = null): RawHack {
 		if (names < 0) {
 			names = findGen1Names(rom);
 			order = findGen1Order(rom);
+			if (order < 0 && names >= 0) order = findGen1OrderSized(rom, names);
 			stats = findGen1Stats(rom);
 			if (stats < 0) names = -1;
+		} else if (order < 0) {
+			order = findGen1OrderSized(rom, names);
+			if (stats < 0) stats = findGen1Stats(rom);
+		} else if (stats < 0) {
+			stats = findGen1Stats(rom);
 		}
 		if (names < 0 || order < 0) throw new Error('No Pokemon name table was found in this game.');
 		if (stats < 0 || rom[stats + 28] !== 2) notes.push('Base stats were not found; stats and types are taken from the official games.');

@@ -86,6 +86,20 @@ The type chart is stored as the cells that differ from the parent generation's c
   plain damage with its power, type, accuracy and PP. A new ability or item does nothing in battle.
 - **IPS**: IPS offsets are 24 bits, so an IPS patch cannot change anything past 16 MB. Hacks of larger games need
   another patch format.
+- **IPS base game**: an IPS patch carries no checksum of its base game. For Game Boy games the base is the game whose
+  patched result has valid header and global checksums; if that hack then cannot be read, the upload is refused with
+  the reason and no other base is tried. Otherwise the base is chosen by fit (how the patch records line up with each
+  base, best four tried). A base is skipped as a wrong guess when the patch changes more than 4 KB of it, its Pokemon,
+  moves, abilities and items still read exactly like the clean game, no battle mechanic reads as changed, and fewer
+  than half of the battle-engine checks still read as stock. If no base is left the upload is refused. A patch that
+  changes 4 KB or less, or one that leaves the battle engine readable (text, graphics, maps), is accepted as it reads,
+  so a small patch can still be attributed to a sibling game. BPS and UPS patches name their base by checksum and are
+  safer.
+- **Expanded Generation 1 hacks** (more than 151 Pokemon or more than 190 index slots, such as Kanto Expansion Pak):
+  read when the hack keeps the 10-byte name table, a one-byte index-to-Pokedex table (at most 255 slots) and 28-byte
+  base stat records. The game cuts names at 10 letters, so a Pokemon whose official name is longer (Sandy Shocks as
+  "SANDY SHOX") is imported as a new Pokemon under the game's spelling. Regional forms carry the same name as the
+  original and are matched to the official forme by stats and types.
 - **DS hacks with the Fairy type** stay on their own generation's engine (Generation 4 or 5) with the ROM's type chart.
   They are not moved to a later generation. This is one constant, `DS_FAIRY_KEEPS_BASE_ENGINE` in `nds.ts`.
 - **Edited formes**: a forme the hack changed is mapped to the nearest official forme.

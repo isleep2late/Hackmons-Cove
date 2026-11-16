@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { png, type SpriteIndices } from './sprites-gen3';
-import { findGen1Order, findGen1Stats } from './gb';
+import { findGen1Order, findGen1OrderByNames, findGen1Stats } from './gb';
 import { signatureAnchor } from './signatures';
 
 function reverseBits(b: number) {
@@ -207,8 +207,8 @@ function extractGen1Sprites(rom: Buffer, indices: SpriteIndices, outDir: string)
 	let stats = rom.indexOf(signatureAnchor('bulbasaurEntryGen1'));
 	let order = rom.indexOf(signatureAnchor('pokedexOrderGen1'));
 	if (stats < 0 || order < 0) {
+		order = order < 0 ? findGen1OrderByNames(rom) : findGen1Order(rom);
 		stats = findGen1Stats(rom);
-		order = findGen1Order(rom);
 	}
 	if (stats < 0 || order < 0 || rom[stats + 28] !== 2) return result;
 	const internal: { [dex: number]: number } = {};
