@@ -991,7 +991,9 @@ function enforceTypeCoverage(set, role, fdex, ruleTable, ctx, forced) {
 	// coverage hole would open the ability hole enforceAbilityConsistency just closed
 	const need = ABILITY_NEEDS[toId(set.ability || '')];
 	const keeper = need ? (set.moves || []).find(m => moveMatches(m, need, fdex)) : null;
-	const preferLocked = (forced || []).concat(keeper ? [keeper] : []);
+	const wgShadow = toId(set.ability || '') === 'wonderguard' && !types.includes('Shadow') ?
+		(set.moves || []).filter(m => fdex.moves.get(('' + m).split(' (')[0]).type === 'Shadow') : [];
+	const preferLocked = (forced || []).concat(keeper ? [keeper] : [], wgShadow);
 	// Candidates are scored on the moveset that would RESULT, not on the holes they would plug. That
 	// distinction is the whole thing: when every slot is already spoken for, adding coverage means
 	// dropping the move that was doing the damage, so a candidate can close the hole it was picked
@@ -1019,7 +1021,7 @@ function enforceTypeCoverage(set, role, fdex, ruleTable, ctx, forced) {
 			if (!walls.some(t => moveHitsType(mv, t, fdex))) continue;
 			// an archetype's flavour moves yield to the damage guarantee, but only after every slot it
 			// did not claim has already been tried
-			const moves = trial(name, preferLocked) || trial(name, keeper ? [keeper] : []);
+			const moves = trial(name, preferLocked) || trial(name, (keeper ? [keeper] : []).concat(wgShadow));
 			if (!moves) continue;
 			const left = coverageWalls(moves, fdex, targets).length;
 			if (!best || left < best.left) best = { moves, left };
