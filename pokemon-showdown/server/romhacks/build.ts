@@ -158,7 +158,7 @@ export function votePockets(
 	});
 }
 
-export const HACK_VERSION = 14;
+export const HACK_VERSION = 15;
 
 export interface HackDex {
 	version: number;

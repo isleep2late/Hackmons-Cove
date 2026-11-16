@@ -145,6 +145,36 @@ export function ipsUnchangedBytes(patch: Uint8Array, source: Uint8Array): number
 	}
 }
 
+export function ipsBoundaryFit(patch: Uint8Array, source: Uint8Array): { matches: number, checked: number } {
+	let matches = 0;
+	let checked = 0;
+	let i = 5;
+	const at = (offset: number, value: number) => {
+		if (offset >= source.length) return;
+		checked++;
+		if (source[offset] === value) matches++;
+	};
+	for (let records = 0; records < 4000000 && i + 5 <= patch.length; records++) {
+		if (patch[i] === 0x45 && patch[i + 1] === 0x4f && patch[i + 2] === 0x46) break;
+		const offset = (patch[i] << 16) | (patch[i + 1] << 8) | patch[i + 2];
+		const len = (patch[i + 3] << 8) | patch[i + 4];
+		i += 5;
+		if (len) {
+			if (i + len > patch.length) break;
+			at(offset, patch[i]);
+			if (len > 1) at(offset + len - 1, patch[i + len - 1]);
+			i += len;
+		} else {
+			if (i + 3 > patch.length) break;
+			const runLen = (patch[i] << 8) | patch[i + 1];
+			at(offset, patch[i + 2]);
+			if (runLen > 1) at(offset + runLen - 1, patch[i + 2]);
+			i += 3;
+		}
+	}
+	return { matches, checked };
+}
+
 function applyUps(patch: Uint8Array, source: Uint8Array, info: PatchInfo): Uint8Array {
 	const pos = { i: 4 };
 	readVlv(patch, pos);

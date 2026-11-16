@@ -5,7 +5,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import type * as http from 'http';
 import {
-	applyPatch, crc32, ipsUnchangedBytes, readPatchInfo, requireVcdiffChecksum, MAX_TARGET_SIZE,
+	applyPatch, crc32, ipsBoundaryFit, ipsUnchangedBytes, readPatchInfo, requireVcdiffChecksum, MAX_TARGET_SIZE,
 } from './patch';
 import { buildHackDex, HACK_VERSION, type HackDex, type RawHack } from './build';
 import { Dex } from '../../sim/dex';
@@ -323,6 +323,35 @@ export function hackExists(sha256: string) {
 	return /^[0-9a-f]{64}$/.test(sha256) && fs.existsSync(hackPath(sha256));
 }
 
+function gbChecksumsValid(rom: Buffer): boolean {
+	if (!isGB(rom)) return false;
+	let header = 0;
+	for (let i = 0x134; i <= 0x14c; i++) header = (header - rom[i] - 1) & 0xff;
+	if (header !== rom[0x14d]) return false;
+	let sum = 0;
+	for (let i = 0; i < rom.length; i++) sum += rom[i];
+	sum = (sum - rom[0x14e] - rom[0x14f]) & 0xffff;
+	return sum === ((rom[0x14e] << 8) | rom[0x14f]);
+}
+
+function gbChecksumBases<T extends { file: string, size: number }>(patch: Buffer, bases: T[]): T[] {
+	const hits: { base: T, changed: number }[] = [];
+	for (const base of bases) {
+		if (base.size > 0x800000) continue;
+		try {
+			const clean = fs.readFileSync(base.file);
+			if (!isGB(clean)) continue;
+			const rom = Buffer.from(applyPatch(patch, clean));
+			if (!gbChecksumsValid(rom)) continue;
+			let changed = Math.abs(rom.length - clean.length);
+			const shared = Math.min(rom.length, clean.length);
+			for (let i = 0; i < shared; i++) if (rom[i] !== clean[i]) changed++;
+			if (changed) hits.push({ base, changed });
+		} catch {}
+	}
+	return hits.sort((a, b) => a.changed - b.changed).map(hit => hit.base);
+}
+
 export function importPatch(patch: Buffer): HackDex {
 	if (patch.length > MAX_PATCH_SIZE) throw new Error('The patch is larger than 96 MB.');
 	const info = readPatchInfo(patch);
@@ -390,10 +419,14 @@ export function importPatch(patch: Buffer): HackDex {
 	} else {
 		let lastError: Error | null = null;
 		const small = bases.filter(b => b.size <= 32 * 1024 * 1024);
-		const candidates = info.format === 'bsp' ? small.sort((a, b) => a.size - b.size) : small.map(base => {
+		const ranked = info.format === 'bsp' ? small.sort((a, b) => a.size - b.size) : small.map(base => {
 			const rom = fs.readFileSync(base.file);
-			return { base, same: ipsUnchangedBytes(patch, rom) };
-		}).sort((a, b) => a.same - b.same || a.base.size - b.base.size).slice(0, 4).map(entry => entry.base);
+			return { base, edge: ipsBoundaryFit(patch, rom), same: ipsUnchangedBytes(patch, rom) };
+		}).sort((a, b) => a.edge.matches - b.edge.matches || b.edge.checked - a.edge.checked || a.same - b.same ||
+			a.base.size - b.base.size).slice(0, 4).map(entry => entry.base);
+		const candidates = info.format === 'ips' ? gbChecksumBases(patch, small).concat(ranked).filter(
+			(base, i, list) => list.indexOf(base) === i
+		) : ranked;
 		const deadline = Date.now() + BSP_TOTAL_MILLIS;
 		for (const base of candidates) {
 			const millis = deadline - Date.now();
