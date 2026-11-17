@@ -652,7 +652,7 @@ export class TeamEditorState extends PSModel {
 		return 16 * dv('atk') + 8 * dv('def') + dv('spe') + dv('spa');
 	}
 	hackBlankEVs(set: Dex.PokemonSet) {
-		if (this.gen <= 2 || !RomHacks.isFormat(this.format.id)) return false;
+		if (this.gen <= 2 || !RomHacks.isFormat(this.format.id) || RomHacks.cappedEVs(this.format.id, this.gen)) return false;
 		return set.evs?.hp !== 0 && !Dex.statNames.some(statID => set.evs?.[statID]);
 	}
 	getStat(stat: StatName, set: Dex.PokemonSet, ivOverride: number, evOverride?: number, natureOverride?: number) {
@@ -2150,7 +2150,8 @@ class TeamEditorForm extends preact.Component<{
 		} else if (set.moves.includes(name)) {
 			set.moves.splice(set.moves.indexOf(name), 1);
 		} else {
-			for (let i = 0; i < set.moves.length + 1; i++) {
+			const moveSlots = RomHacks.isPlain(editor.format.id) ? 4 : set.moves.length + 1;
+			for (let i = 0; i < moveSlots; i++) {
 				if (!set.moves[i]) {
 					set.moves[i] = name;
 					if (name.startsWith('Hidden Power ')) set.hpType = name.slice(13);
@@ -3781,7 +3782,7 @@ class StatForm extends preact.Component<{
 	maxEVs() {
 		const editor = this.props.editor;
 		const useCappedEVs = !editor.format.isLetsGo && editor.gen >= 3 && !editor.format.isChampions &&
-			!RomHacks.isFormat(editor.format.id);
+			(!RomHacks.isFormat(editor.format.id) || RomHacks.cappedEVs(editor.format.id, editor.gen));
 		return editor.format.isChampions ? 66 : useCappedEVs ? 510 : Infinity;
 	}
 	override render() {
@@ -4033,7 +4034,8 @@ class DetailsForm extends preact.Component<{
 				/></label></p>
 				<p><label class="label">{TL.label(TL`Level`)}<input
 					name="level" value={set.level ?? ''} placeholder={`${editor.format.defaultLevel}`}
-					type="number" inputMode="numeric" min="1" max="100" step="1"
+					type="number" inputMode="numeric" min="1"
+					max={RomHacks.isFormat(editor.format.id) ? RomHacks.maxLevel(editor.format.id, editor.gen) : 100} step="1"
 					class="textbox inputform numform default-placeholder" style="width: 50px"
 					onInput={this.changeLevel} onChange={this.changeLevel} disabled={editor.format.isChampions}
 				/></label><small>(You probably want to change the team's levels by changing the format, not here)</small></p>

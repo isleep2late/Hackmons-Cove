@@ -744,6 +744,7 @@ abstract class BattleTypedSearch<T extends SearchType> {
 	baseIllegalResults: SearchRow[] | null = null;
 	illegalReasons: { [id: string]: string } | null = null;
 	romHack = false;
+	romHackFormat = '';
 	results: SearchRow[] | null = null;
 
 	readonly sortRow: SearchRow | null = null;
@@ -758,6 +759,7 @@ abstract class BattleTypedSearch<T extends SearchType> {
 		if (customRulesIndex >= 0) format = format.slice(0, customRulesIndex) as ID;
 
 		const romHackFormat = RomHacks.isFormat(format);
+		const romHackId = format;
 		if (format.startsWith('gen')) {
 			const gen = (Number(format.charAt(3)) || 6);
 			format = (format.slice(4) || 'customgame') as ID;
@@ -770,6 +772,7 @@ abstract class BattleTypedSearch<T extends SearchType> {
 			if (RomHacks.active) {
 				this.dex = Dex.mod(RomHacks.modid);
 				this.romHack = true;
+				this.romHackFormat = romHackId;
 			}
 		}
 
@@ -941,13 +944,15 @@ abstract class BattleTypedSearch<T extends SearchType> {
 		}
 
 		if (!this.baseResults && this.romHack) {
-			this.baseResults = RomHacks.results(this.searchType) as SearchRow[];
-			this.baseIllegalResults = [];
+			const romHackLists = RomHacks.searchLists(this.searchType, this.romHackFormat, this.species);
+			this.baseResults = romHackLists.legal as SearchRow[];
+			this.baseIllegalResults = romHackLists.illegal as SearchRow[];
 			this.illegalReasons = {};
 			const romHackLegal = RomHacks.legal?.[this.searchType] || {};
 			for (const id in this.getTable()) {
 				if (!(id in romHackLegal)) this.illegalReasons[id] = 'Illegal';
 			}
+			for (const [, id] of this.baseIllegalResults) this.illegalReasons[id] = 'Illegal';
 		}
 		if (!this.baseResults) {
 			// Own copy: the legality pass below pushes into it, and a getter may return a shared array.

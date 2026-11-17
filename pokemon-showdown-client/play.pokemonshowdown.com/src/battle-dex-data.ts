@@ -95,6 +95,10 @@ export class BattleFormat implements FormatData {
 			this.formeLegality = 'custom';
 			this.abilityLegality = 'hackmons';
 		}
+		if (/^gen\d+romhacks/.test(id) && !/^gen\d+romhacks(regular|hackmons)/.test(id)) {
+			this.formeLegality = 'custom';
+			this.abilityLegality = 'hackmons';
+		}
 		if (
 			id.includes('vgc') || id.includes('bss') || id.includes('ultrasinnohclassic') ||
 			id.includes('battlespot') || id.includes('battlestadium') || id.includes('battlefestival') ||
