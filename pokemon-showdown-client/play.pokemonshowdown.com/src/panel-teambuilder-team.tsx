@@ -585,14 +585,25 @@ PS.addRoomType(TeamPanel, TeamStoragePanel, ViewTeamPanel);
 
 class RomHackUpload extends preact.Component<{ onLoaded: () => void, teamKey: string }> {
 	error = '';
-	finish = (promise: Promise<unknown>) => {
+	pending: { file: File, bases: { id: string, name: string }[] } | null = null;
+	baseId = '';
+	busy = false;
+	finish = (promise: Promise<unknown>, file?: File) => {
 		promise.then(() => {
 			this.error = '';
+			this.busy = false;
+			this.pending = null;
+			this.baseId = '';
 			if (RomHacks.active) RomHacks.setTeamHack(this.props.teamKey, RomHacks.active.sha256);
 			this.props.onLoaded();
 			this.forceUpdate();
 		}, (err: any) => {
 			this.error = String(err?.message || err);
+			this.busy = false;
+			if (file && err?.bases) {
+				this.pending = { file, bases: err.bases };
+				if (!this.pending.bases.some(entry => entry.id === this.baseId)) this.baseId = '';
+			}
 			this.forceUpdate();
 		});
 	};
@@ -600,8 +611,31 @@ class RomHackUpload extends preact.Component<{ onLoaded: () => void, teamKey: st
 		const file = (ev.currentTarget as HTMLInputElement).files?.[0];
 		if (!file) return;
 		this.error = 'Reading the patch...';
+		this.pending = null;
+		this.baseId = '';
+		this.busy = true;
 		this.forceUpdate();
-		this.finish(RomHacks.upload(file));
+		this.finish(RomHacks.upload(file), file);
+	};
+	handleBase = (ev: Event) => {
+		this.baseId = (ev.currentTarget as HTMLSelectElement).value;
+		this.forceUpdate();
+	};
+	handleBaseUpload = () => {
+		if (!this.pending || !this.baseId || this.busy) return;
+		const file = this.pending.file;
+		this.error = 'Reading the patch...';
+		this.busy = true;
+		this.forceUpdate();
+		this.finish(RomHacks.upload(file, this.baseId), file);
+	};
+	handleBaseCancel = () => {
+		this.pending = null;
+		this.baseId = '';
+		this.error = '';
+		const input = this.base?.querySelector<HTMLInputElement>('input[type=file]');
+		if (input) input.value = '';
+		this.forceUpdate();
 	};
 	handleSelect = (ev: Event) => {
 		this.finish(RomHacks.activate((ev.currentTarget as HTMLSelectElement).value));
@@ -635,10 +669,27 @@ class RomHackUpload extends preact.Component<{ onLoaded: () => void, teamKey: st
 				Upload the hack's patch file (.bps, .ups, .ips, .xdelta or .bsp) - never a ROM. EXPERIMENTAL: Game Boy, Game Boy Color, Game Boy Advance and DS hacks.
 			</small></p>
 			{this.error && <p class="message-error">{this.error}</p>}
+			{this.pending && <p class="romhack-basepicker">
+				<label>
+					Choose the base game this patch was made for: {}
+					<select class="button" name="romhackbase" disabled={this.busy} onChange={this.handleBase}>
+						<option value="" selected={!this.baseId}>(choose a game)</option>
+						{this.pending.bases.map(entry => <option value={entry.id} selected={this.baseId === entry.id}>
+							{entry.name}
+						</option>)}
+					</select>
+				</label> {}
+				<button
+					class="button" name="romhackbaseupload" disabled={!this.baseId || this.busy} onClick={this.handleBaseUpload}
+				>
+					<strong>Upload</strong>
+				</button> {}
+				<button class="button" name="romhackbasecancel" disabled={this.busy} onClick={this.handleBaseCancel}>Cancel</button>
+			</p>}
 			{hack && <p><small>
 				Loaded: <strong>{hack.name || 'ROM hack'}</strong> on {hack.baseGame} - {hack.legal.species.length} Pok&eacute;mon, {}
 				{hack.legal.moves.length} moves, {hack.legal.abilities.length} abilities, {hack.legal.items.length} items.<br />
-				SHA-256 <code>{hack.sha256}</code> - your opponent must upload the identical file.<br />
+				{hack.pickedBase ? 'Hack ID' : 'SHA-256'} <code>{hack.sha256}</code> - {RomHacks.matchRule(hack)}<br />
 				{hack.notes.join(' ')} {}
 				{hack.approximated.moves.length} new moves deal plain damage and {approximated} new abilities/items have no effect yet.
 			</small></p>}
