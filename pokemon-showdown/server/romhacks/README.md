@@ -70,6 +70,21 @@ that generation, so the rules are completed when the hack is known (`getRuleTabl
   when its base Pokemon is, whether or not the game has a separate row for it.
 - Regular refuses a set with the same move twice.
 
+## Bot accounts
+
+A battle bot cannot upload every patch its opponents use, so a short list of trusted bot accounts counts as holding
+every hack that is already stored on this server. The list is `Config.romhackbots` (`config/config-example.js`), by
+default `['multibot']`; an empty list switches this off. `userHoldsRomHack(user, id)` in `index.ts` is the one check,
+and `server/ladders.ts` uses it where a challenge is made and where it is accepted.
+
+- The account must be logged in as a registered name (`user.registered`, set only when the login server signed the
+  name after a password login). A guest or an unregistered user who takes a listed name gets nothing.
+- The hack must be stored (`hackExists`). An id nobody uploaded is refused for the bot like for everyone else.
+- Only challenges are covered. The other player still has to upload the patch and send `/romhack have`, tournament
+  and ladder battles still need the proof from everyone, and the four formats stay off the ladder (`searchShow: false`).
+- The bot does nothing to get this: no upload and no `/romhack have`. It only has to bring a team that is valid for
+  the hack and the mode named in the challenge, and it can read the hack from `/romhacks/<id>.full.json`.
+
 ## Movesets
 
 The readers (`learnsets-gb.ts`, `learnsets-gen3.ts`, `learnsets-nds.ts`) read each Pokemon's level-up moves, TM and HM
