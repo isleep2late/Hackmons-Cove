@@ -4,7 +4,7 @@ import { type CalcdexPokemon, type CalcdexPokemonPreset } from '@showdex/interfa
 import { env, nonEmptyObject } from '@showdex/utils/core';
 import { logger } from '@showdex/utils/debug';
 import { detectGenFromFormat, detectLegacyGen } from '@showdex/utils/dex';
-import { detectMaxEvsFormat, getMaxStatEv } from '@showdex/phnn';
+import { detectUncappedEvsFormat, getMaxStatEv } from '@showdex/phnn';
 import { calcPokemonStat } from './calcPokemonStat';
 
 const l = logger('@showdex/utils/calc/guessServerSpread()');
@@ -202,7 +202,7 @@ export const guessServerSpread = (
       && serverStats.spd === calculatedStats.spd
       && serverStats.spe === calculatedStats.spe;
 
-    const maxLegalEvs = (typeof format === 'string' && detectMaxEvsFormat(format))
+    const maxLegalEvs = (typeof format === 'string' && detectUncappedEvsFormat(format))
       ? (6 * getMaxStatEv(format))
       : env.int('calcdex-pokemon-max-legal-evs'); // 252 + 252 + 4 = 508
     const totalEvs = Object.values(guessedSpread.evs).reduce((sum, ev) => sum + ev, 0);

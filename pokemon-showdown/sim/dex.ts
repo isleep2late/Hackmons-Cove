@@ -41,6 +41,7 @@ import { Format, DexFormats } from './dex-formats';
 import { Utils } from '../lib/utils';
 import { Tags } from '../data/tags';
 import { installRomHackMechanics, type RomHackEngineTables, type RomHackMechanics } from './romhack-mechanics';
+import { romHackLearnsetTable, romHackMode, romHackRuleId, type RomHackLearnsetData } from './romhack-formats';
 
 const BASE_MOD = 'gen9' as ID;
 const DATA_DIR = path.resolve(__dirname, '../data');
@@ -122,6 +123,7 @@ export class ModdedDex {
 	romHack: {
 		sha256: string, species: Set<string>, moves: Set<string>, abilities: Set<string>, items: Set<string>,
 		mechanics: RomHackMechanics, engine: RomHackEngineTables, unappliedMechanics: string[],
+		learnsetStatus: 'read' | 'unreadable', learnsetNote: string, learnsets: RomHackLearnsetData | null,
 	} | null = null;
 	modsLoaded = false;
 
@@ -187,11 +189,8 @@ export class ModdedDex {
 	}
 
 	romHackOf(format: Format): string {
-		for (const rule of format.customRules || []) {
-			const match = /^rom ?hack ?= ?([0-9a-f]{64})$/i.exec(rule.trim());
-			if (match) return match[1].toLowerCase();
-		}
-		return '';
+		if (!format.customRules?.length || !romHackMode(format)) return '';
+		return romHackRuleId(format.customRules);
 	}
 
 	loadRomHack(mod: string) {
@@ -220,11 +219,29 @@ export class ModdedDex {
 			for (const id in hack[dataType] || {}) table[id] = { ...table[id], ...hack[dataType][id] };
 			dataCache[dataType] = table;
 		}
+		for (const id in hack.Pokedex || {}) {
+			if (parentData.Pokedex[id] || hack.Pokedex[id].name) continue;
+			const forme = parentDex.species.get(id);
+			if (!forme.exists || !forme.isCosmeticForme) continue;
+			dataCache.Pokedex[id] = { isCosmeticForme: true, forme: forme.forme, ...hack.Pokedex[id] };
+		}
 		const formatsData: AnyObject = { ...parentData.FormatsData };
 		for (const id in hack.Pokedex) {
-			if (!formatsData[id]) formatsData[id] = { tier: 'OU', doublesTier: 'DOU', natDexTier: 'OU' };
+			if (!formatsData[id] && !parentDex.getAlias(id as ID)) {
+				formatsData[id] = { tier: 'OU', doublesTier: 'DOU', natDexTier: 'OU' };
+			}
 		}
 		dataCache.FormatsData = formatsData;
+		const learnsets: RomHackLearnsetData | null = hack.learnsetStatus === 'read' && hack.learnsets?.species ?
+			hack.learnsets : null;
+		if (learnsets) {
+			let table: AnyObject | null = null;
+			Object.defineProperty(dataCache, 'Learnsets', {
+				enumerable: true,
+				configurable: true,
+				get: () => (table ||= romHackLearnsetTable(learnsets, parentDex.gen)),
+			});
+		}
 		const installed = installRomHackMechanics(parentDex.gen, dataCache, hack.mechanics);
 		dex.parentMod = parentDex.currentMod;
 		dex.gen = parentDex.gen;
@@ -238,6 +255,9 @@ export class ModdedDex {
 			mechanics: installed.mechanics,
 			engine: installed.engine,
 			unappliedMechanics: installed.unapplied,
+			learnsetStatus: learnsets ? 'read' : 'unreadable',
+			learnsetNote: learnsets ? '' : String(hack.learnsetNote || ''),
+			learnsets,
 		};
 		dexes[mod] = dex;
 		romHackDexes.add(mod);

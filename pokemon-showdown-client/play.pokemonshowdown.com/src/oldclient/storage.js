@@ -735,6 +735,7 @@ Storage.unpackAllTeams = function (buffer) {
 				capacity = 24;
 			}
 			if (format === 'gen9nonerfspurehackmons') format = 'gen9nonerfsextended';
+			if (format === 'gen9romhacksexperimental') format = 'gen9romhacksdisguisesexperimental';
 			return {
 				name: oldTeam.name || '',
 				format: format,
@@ -764,6 +765,7 @@ Storage.unpackLine = function (line) {
 	var format = bracketIndex > 0 ? line.slice((leftBracketIndex ? leftBracketIndex + 1 : 0), isBox ? bracketIndex - 4 : bracketIndex) : 'gen9';
 	if (format && format.slice(0, 3) !== 'gen') format = 'gen6' + format;
 	if (format === 'gen9nonerfspurehackmons') format = 'gen9nonerfsextended';
+	if (format === 'gen9romhacksexperimental') format = 'gen9romhacksdisguisesexperimental';
 	return {
 		teamid: leftBracketIndex > 0 ? Number(line.slice(0, leftBracketIndex)) : undefined,
 		name: line.slice(slashIndex + 1, pipeIndex),
@@ -1372,6 +1374,7 @@ Storage.importTeam = function (buffer, teams) {
 					capacity = 24;
 				}
 				if (format === 'gen9nonerfspurehackmons') format = 'gen9nonerfsextended';
+				if (format === 'gen9romhacksexperimental') format = 'gen9romhacksdisguisesexperimental';
 				line = $.trim(line.substr(bracketIndex + 1));
 			}
 			if (teams.length && typeof teams[teams.length - 1].team !== 'string') {
@@ -1926,6 +1929,7 @@ Storage.nwLoadTeamFile = function (filename, localApp) {
 			capacity = 24;
 		}
 		if (format === 'gen9nonerfspurehackmons') format = 'gen9nonerfsextended';
+		if (format === 'gen9romhacksexperimental') format = 'gen9romhacksdisguisesexperimental';
 		line = $.trim(line.slice(bracketIndex + 1));
 	}
 	fs.readFile(this.dir + 'Teams/' + filename, function (err, data) {

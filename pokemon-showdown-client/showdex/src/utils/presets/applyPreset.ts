@@ -16,7 +16,7 @@ import {
   evToStatPoint,
   legalLockedFormat,
 } from '@showdex/utils/dex';
-import { applyPhnnMinConfusionSpread, detectMaxEvsFormat, getMaxStatEv, getPhnnMinConfusionNature } from '@showdex/phnn';
+import { applyPhnnMinConfusionSpread, detectUncappedEvsFormat, getMaxStatEv, getPhnnMinConfusionNature } from '@showdex/phnn';
 import { detectCompletePreset } from './detectCompletePreset';
 import { detectUsageAlt, detectUsageAlts } from './detectUsageAlt';
 import { flattenAlt, flattenAlts } from './flattenAlts';
@@ -372,7 +372,7 @@ export const applyPreset = (
   if (
     auto
       && !legacy
-      && detectMaxEvsFormat(format)
+      && detectUncappedEvsFormat(format)
       && (pokemon.source === 'client' || !nonEmptyObject(pokemon.serverStats))
       && !revealingPreset
       && !transformed

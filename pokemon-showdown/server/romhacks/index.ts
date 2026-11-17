@@ -332,8 +332,13 @@ function writeFull(hack: HackDex) {
 		version: hack.version, sha256: hack.sha256, baseGame: hack.baseGame, baseGen: hack.baseGen, parentMod: hack.parentMod,
 		notes: hack.notes, approximated: hack.approximated, sprites: hack.sprites || null, TypeChart: hack.TypeChart || {},
 		mechanics: hack.mechanics || {}, mechanicsNotes: hack.mechanicsNotes || [], pokemon: {}, moves: {}, abilities: {},
-		items: {},
+		items: {}, learnsetStatus: hack.learnsetStatus,
 	};
+	if (hack.learnsetNote) full.learnsetNote = hack.learnsetNote;
+	if (hack.learnsets) {
+		full.learnsets = { moves: hack.learnsets.moves, species: hack.learnsets.species };
+		if (hack.learnsets.noSketch) full.learnsets.noSketch = hack.learnsets.noSketch;
+	}
 	for (const id of hack.legal.species) {
 		const species = dex.species.get(id);
 		if (!species.exists) continue;

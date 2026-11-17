@@ -56,6 +56,7 @@
 			'change input[name=phnncustomrules]': 'phnnCustomRulesChanged',
 			'change input[name=romhackfile]': 'romHackFileChanged',
 			'change select[name=romhackselect]': 'romHackSelected',
+			'change select[name=romhackmode]': 'romHackModeChanged',
 			'change select[name=romhackbase]': 'romHackBaseChanged',
 			'click button.formatselect': 'selectFormat',
 			'click button.statmodtoggle': 'toggleStatMod',
@@ -205,7 +206,7 @@
 					this.loadTeam();
 					return this.updateTeamView();
 				}
-				this.ignoreEVLimits = (this.curTeam.gen < 3 || RomHacks.isFormat(this.curTeam.format) ||
+				this.ignoreEVLimits = (this.curTeam.gen < 3 || this.romHackNoEVLimit() ||
 					(((this.curTeam.format.includes('hackmons') || this.curTeam.format.includes('phnn')) || this.curTeam.format.includes('bh')) && (this.curTeam.gen !== 6 || this.curTeam.format.includes('nolimit'))) ||
 					this.curTeam.format.includes('metronomebattle'));
 				if (this.curSet) {
@@ -1484,7 +1485,7 @@
 				}
 				if (this.curTeam.gen === 9 && !isChampions) {
 					var teraCellText;
-					if (this.curTeam.format.includes('customdisguise')) {
+					if (RomHacks.isDisguises(this.curTeam.format)) {
 						var teraCellList = (set.teraType || '').split('/').filter(function (t) { return !!t; });
 						teraCellText = !teraCellList.length ? 'None / Dyna' : (teraCellList.length > 1 ? 'Multi' : teraCellList[0]);
 					} else {
@@ -1494,13 +1495,13 @@
 				}
 			}
 			if (this.curTeam.format.includes('disguise') || this.curTeam.format.includes('status') || this.curTeam.format.includes('nonerfs')) {
-				if (this.curTeam.format.includes('customdisguise')) {
+				if (RomHacks.isDisguises(this.curTeam.format)) {
 					var cdCellTypes = (set.phType || '').split('/').filter(function (t) { return !!t; });
 					if (!cdCellTypes.length) cdCellTypes = species.types.slice();
 					buf += '<span class="detailcell"><label>Type(s)</label>' + (cdCellTypes.length > 2 ? 'Multi' : cdCellTypes.join('/')) + '</span>';
 					var cdAbilityCount = (set.ability ? 1 : 0) + (set.phAbilities ? set.phAbilities.split('/').length : 0);
 					buf += '<span class="detailcell"><label>Abilities</label>' + (cdAbilityCount > 1 ? 'Multi' : (set.ability || '(none)')) + '</span>';
-					buf += '<span class="detailcell"><label>Disguise</label>' + (set.disguise ? Dex.species.get(set.disguise).name : '(none)') + '</span>';
+					buf += '<span class="detailcell"><label>Disguise</label>' + (set.disguise ? this.curTeam.dex.species.get(set.disguise).name : '(none)') + '</span>';
 				} else if (this.curTeam.format.includes('spaceworlddisguises')) {
 					var swCellDex = this.curTeam.dex || Dex;
 					var swCellDisguise = set.disguise ? swCellDex.species.get(set.disguise) : null;
@@ -1514,7 +1515,7 @@
 					var phT = (set.phType || '').split('/');
 					buf += '<span class="detailcell"><label>Type 1</label>' + (phT[0] || species.types[0]) + '</span>';
 					buf += '<span class="detailcell"><label>Type 2</label>' + (phT[1] || species.types[1] || '(none)') + '</span>';
-					buf += '<span class="detailcell"><label>Disguise</label>' + (set.disguise ? Dex.species.get(set.disguise).name : '(none)') + '</span>';
+					buf += '<span class="detailcell"><label>Disguise</label>' + (set.disguise ? this.curTeam.dex.species.get(set.disguise).name : '(none)') + '</span>';
 				}
 				var startStatusCount = set.startStatus ? set.startStatus.split('/').length : 0;
 				buf += '<span class="detailcell"><label>Status</label>' + (startStatusCount > 1 ? 'Multi' : (set.startStatus || 'None')) + '</span>';
@@ -1541,7 +1542,7 @@
 
 			buf += '<div class="setrow">';
 			if (this.curTeam.gen > 1 && !isLetsGo) {
-				var itemCellVal = (this.curTeam.format.includes('customdisguise') && set.phItems) ? 'Multi' : set.item;
+				var itemCellVal = (RomHacks.isDisguises(this.curTeam.format) && set.phItems) ? 'Multi' : set.item;
 				buf += '<div class="setcell setcell-item"><label>Item' + (set.phItems ? '(s)' : '') + '</label><input type="text" name="item" class="textbox chartinput" value="' + BattleLog.escapeHTML(itemCellVal) + '" autocomplete="off" /></div>';
 			}
 			if (this.curTeam.gen > 2 && !isLetsGo) buf += '<div class="setcell setcell-ability"><label>Ability</label><input type="text" name="ability" class="textbox chartinput" value="' + BattleLog.escapeHTML(set.ability) + '" autocomplete="off" /></div>';
@@ -1924,6 +1925,7 @@
 			return { kw: kw, prefix: format.slice(0, idx), suffix: format.slice(idx + kwLen) };
 		},
 		romHackDex: function () {
+			this.curTeam.format = RomHacks.currentFormat(this.curTeam.format);
 			var active = RomHacks.isFormat(this.curTeam.format) && !!RomHacks.active;
 			if (active) {
 				this.curTeam.dex = Dex.mod(RomHacks.modid);
@@ -1931,8 +1933,40 @@
 			}
 			RomHacks.builderSprites = active;
 		},
+		romHackNoEVLimit: function () {
+			return RomHacks.isFormat(this.curTeam.format) && !RomHacks.cappedEVs(this.curTeam.format, this.curTeam.gen);
+		},
+		romHackModeChanged: function (e) {
+			var mode = e.currentTarget.value;
+			if (mode === 'regular' && !RomHacks.regularReadable(RomHacks.active)) {
+				this.update();
+				return;
+			}
+			var format = RomHacks.modeFormat(this.curTeam.format, mode);
+			var extras = RomHacks.disguiseExtras(this.curSetList, format, this.curTeam.gen);
+			if (extras) {
+				if (!confirm(RomHacks.extrasWarning(mode, extras))) {
+					this.update();
+					return;
+				}
+				RomHacks.disguiseExtras(this.curSetList, format, this.curTeam.gen, true);
+			}
+			this.changeFormat(format);
+		},
+		romHackNames: function (key, kind) {
+			var hack = RomHacks.active;
+			var dex = this.curTeam.dex;
+			var names = [];
+			if (!hack) return names;
+			for (var i = 0; i < hack.legal[key].length; i++) {
+				var entry = dex[kind].get(hack.legal[key][i]);
+				if (entry.exists && entry.id !== 'noability') names.push(entry.name);
+			}
+			names.sort();
+			return names;
+		},
 		romHackBlankEVs: function (set) {
-			if (this.curTeam.gen <= 2 || !RomHacks.isFormat(this.curTeam.format)) return false;
+			if (this.curTeam.gen <= 2 || !this.romHackNoEVLimit()) return false;
 			var evs = (set && set.evs) || {};
 			if (evs.hp === 0) return false;
 			for (var stat in BattleStatNames) {
@@ -1956,7 +1990,24 @@
 				romHackSelf.update();
 			});
 			var hack = RomHacks.active;
-			var buf = '<li class="format-select"><label class="label">ROM patch:</label>';
+			var mode = RomHacks.mode(this.curTeam.format);
+			var regularReadable = RomHacks.regularReadable(hack);
+			var regularProblem = RomHacks.regularProblem(this.curTeam.format);
+			var buf = '<li class="format-select"><label class="label">Mode:</label>';
+			buf += '<select name="romhackmode" class="button">';
+			var modeDesc = '';
+			for (var m = 0; m < RomHacks.modes.length; m++) {
+				var modeEntry = RomHacks.modes[m];
+				var modeOff = modeEntry.id === 'regular' && !regularReadable && mode !== 'regular';
+				if (modeEntry.id === mode) modeDesc = modeEntry.desc;
+				buf += '<option value="' + modeEntry.id + '"' + (modeEntry.id === mode ? ' selected' : '') + (modeOff ? ' disabled' : '') + '>' + modeEntry.name + '</option>';
+			}
+			buf += '</select> <small>' + BattleLog.escapeHTML(modeDesc) + '</small>';
+			if (regularProblem || !regularReadable) {
+				buf += '<p class="message-error romhack-regular-unavailable">' + BattleLog.escapeHTML(regularProblem || RomHacks.regularUnavailable) + '</p>';
+			}
+			buf += '</li>';
+			buf += '<li class="format-select"><label class="label">ROM patch:</label>';
 			var list = RomHacks.list();
 			if (list.length) {
 				buf += '<select name="romhackselect" class="button"' + (this.romHackBusy ? ' disabled' : '') + '>';
@@ -2166,7 +2217,7 @@
 		},
 		renderStatModToggle: function () {
 			var f = '' + (this.curTeam.format || '');
-			if (!f || /^gen\d+$/.test(f) || f.includes('customdisguise') || f.includes('customgame')) return '';
+			if (!f || /^gen\d+$/.test(f) || f.includes('customdisguise') || f.includes('customgame') || RomHacks.isFormat(f)) return '';
 			if (/^gen[12](spaceworld)?(ou|ubers)(@@@|$)/.test(f) && !this.phnnStatModAllowed(f)) return '';
 			var on = this.phnnStatModAllowed(f);
 			return ' <button class="button statmodtoggle' + (on ? ' cur' : '') + '" title="Allow manually overridden stats (1-65535), like cartridge save editing"><i class="fa fa-flask"></i> Stat Mod' + (on ? ': On' : '') + '</button>';
@@ -2191,7 +2242,7 @@
 		// Stat Mod wins - that is the order getStat() below and the server's setSpecies() agree on.
 		phnnBaseStatModAllowed: function (format) {
 			var f = '' + (format || this.curTeam && this.curTeam.format || '');
-			return f.includes('customdisguise');
+			return RomHacks.isDisguises(f);
 		},
 		renderBaseStatModToggle: function () {
 			if (!this.phnnBaseStatModAllowed(this.curTeam.format)) return '';
@@ -2215,7 +2266,8 @@
 		},
 		phnnStatModAllowed: function (format) {
 			var f = '' + (format || this.curTeam && this.curTeam.format || '');
-			if (f.includes('customdisguise')) return true;
+			if (RomHacks.isDisguises(f)) return true;
+			if (RomHacks.isFormat(f)) return false;
 			var atIdx = f.indexOf('@@@');
 			if (atIdx < 0) return false;
 			return f.slice(atIdx + 3).toLowerCase().replace(/\s/g, '').split(',').indexOf('statmod') >= 0;
@@ -2757,7 +2809,7 @@
 				totalev += (set.evs[stat] || 0);
 			}
 
-			var noEVLimit = RomHacks.isFormat(this.curTeam.format);
+			var noEVLimit = this.romHackNoEVLimit();
 			if (this.curTeam.gen > 2 && (usesStatPoints || supportsEVs) && !noEVLimit) buf += '<div><em>Remaining:</em></div>';
 			this.$chart.find('.graphcol').html(buf);
 
@@ -2963,8 +3015,8 @@
 			var fmt = this.curTeam.format;
 			var is252Format = (
 				(fmt.endsWith('hackmons') || fmt.includes('bh')) && this.curTeam.gen !== 6
-			) || RomHacks.isFormat(fmt) || fmt.includes('nonerfs') || fmt.includes('phnn') || fmt.includes('510') ||
-				fmt.includes('nolimit') || fmt.includes('disguise') || fmt.includes('statuses') ||
+			) || this.romHackNoEVLimit() || fmt.includes('nonerfs') || fmt.includes('phnn') || fmt.includes('510') ||
+				fmt.includes('nolimit') || (fmt.includes('disguise') && !RomHacks.isFormat(fmt)) || fmt.includes('statuses') ||
 				fmt.includes('anyability') || fmt.includes('unified') || fmt.includes('customgame');
 			if (is252Format && role !== '?') {
 				guessedEVs = { hp: 252, atk: 252, def: 252, spa: 252, spd: 252, spe: 252 };
@@ -3020,7 +3072,7 @@
 			var supportsEVs = !baseFormat.includes('letsgo') && !usesStatPoints;
 			// var supportsAVs = !supportsEVs && baseFormat.endsWith('norestrictions');
 			var defaultEV = this.defaultEVFor(set);
-			var noEVLimit = RomHacks.isFormat(this.curTeam.format);
+			var noEVLimit = this.romHackNoEVLimit();
 			var maxEV = usesStatPoints ? 32 : supportsEVs ? 252 : 200;
 			var stepEV = supportsEVs ? 4 : 1;
 			var isVGC = baseFormat.includes('battlespot') || baseFormat.includes('bss') ||
@@ -3715,7 +3767,7 @@
 				buf += '</select></div></div>';
 			}
 
-			var isCustomDisguiseEarly = this.curTeam.format.includes('customdisguise');
+			var isCustomDisguiseEarly = RomHacks.isDisguises(this.curTeam.format);
 			if (this.curTeam.gen === 9 && !isChampions && isCustomDisguiseEarly) {
 				var curTeras = (set.teraType || '').split('/').filter(function (t) { return !!t; });
 				buf += '<div class="formrow"><label class="formlabel" title="Tera Types (select any number; none = Dynamax)">Tera Type(s):</label><div>';
@@ -3739,7 +3791,8 @@
 			}
 
 			var isDisguise = this.curTeam.format.includes('disguise');
-			var isCustomDisguise = this.curTeam.format.includes('customdisguise');
+			var isCustomDisguise = RomHacks.isDisguises(this.curTeam.format);
+			var isRomHackDisguise = RomHacks.mode(this.curTeam.format) === 'disguises' && !!RomHacks.active;
 			var isSWDisguise = this.curTeam.format.includes('spaceworlddisguises');
 			var isModded = isDisguise || this.curTeam.format.includes('status') || this.curTeam.format.includes('nonerfs');
 			if (isModded) {
@@ -3764,6 +3817,7 @@
 						if (abilOptName) abilityNames.push(abilOptName);
 					}
 					abilityNames.sort();
+					if (isRomHackDisguise) abilityNames = this.romHackNames('abilities', 'abilities');
 					buf += '<div class="formrow"><label class="formlabel" title="Abilities (select any number; the first is the main ability, the rest are innate)">Abilities:</label><div>';
 					buf += this.renderPhnnMultiselect('phabilities', abilityNames, curAbilities, '(none)', true);
 					buf += '</div></div>';
@@ -3780,6 +3834,7 @@
 							if (itemOptName) itemNames.push(itemOptName);
 						}
 						itemNames.sort();
+						if (isRomHackDisguise) itemNames = this.romHackNames('items', 'items');
 						buf += '<div class="formrow"><label class="formlabel" title="Items (select any number; the first is the held item, the rest also apply in battle)">Item(s):</label><div>';
 						buf += this.renderPhnnMultiselect('phitems', itemNames, curItems, '(none)', true);
 						buf += '</div></div>';
@@ -3808,7 +3863,12 @@
 					buf += '<option value=""' + (!set.disguise ? ' selected="selected"' : '') + '>(none — show real sprite)</option>';
 					var disguiseMons = [];
 					var isGen1Disguises = this.curTeam.gen === 1 && !isCustomDisguise;
-					if (isSWDisguise) {
+					if (isRomHackDisguise) {
+						for (var rhi = 0; rhi < RomHacks.active.legal.species.length; rhi++) {
+							var rhsp = this.curTeam.dex.species.get(RomHacks.active.legal.species[rhi]);
+							if (rhsp.exists) disguiseMons.push(rhsp);
+						}
+					} else if (isSWDisguise) {
 						var swTable = window.BattleTeambuilderTable && BattleTeambuilderTable['gen2spaceworld'];
 						var swList = (swTable && (swTable.tierSet || swTable.tiers)) || [];
 						var swSeen = {};
@@ -3832,7 +3892,9 @@
 							}
 						}
 					}
-					if (isSWDisguise) {
+					if (isRomHackDisguise) {
+						disguiseMons.sort(function (a, b) { return a.name < b.name ? -1 : a.name > b.name ? 1 : 0; });
+					} else if (isSWDisguise) {
 						disguiseMons.sort(function (a, b) {
 							var an = a.num > 0 ? a.num : 10000 - a.num;
 							var bn = b.num > 0 ? b.num : 10000 - b.num;
@@ -3918,6 +3980,7 @@
 		},
 		phnnDefaultLevel: function (format) {
 			if (format === undefined) format = this.curTeam.format;
+			if (RomHacks.isFormat(format)) return 100;
 			if (format.includes('customdisguises')) return 9999;
 			if (format.includes('disguises') || format.includes('statuses') || format.includes('255')) return 255;
 			return 100;
@@ -3925,6 +3988,7 @@
 		phnnLevelCap: function (format, gen) {
 			if (format === undefined) format = this.curTeam.format;
 			if (gen === undefined) gen = this.curTeam.gen;
+			if (RomHacks.isFormat(format)) return RomHacks.maxLevel(format, gen);
 			if (format.includes('customdisguises') || format.includes('customgame')) return 9999;
 			if (gen === 9 && format.includes('nonerfsstandard')) return 100;
 			if (format.includes('disguises') || format.includes('255') ||
@@ -3938,7 +4002,7 @@
 		},
 		phnnCDTypeList: function () {
 			var gen = (this.curTeam && this.curTeam.gen) || 9;
-			var isCD = ('' + (this.curTeam && this.curTeam.format || '')).indexOf('customdisguise') >= 0;
+			var isCD = RomHacks.isDisguises(this.curTeam && this.curTeam.format);
 			var dex = (this.curTeam && this.curTeam.dex) || Dex;
 			var extras = (isCD || gen >= 9) ? ['Stellar', 'Shadow', 'Bird', '???'] :
 				gen <= 1 ? ['Bird', '???'] :
@@ -4190,7 +4254,7 @@
 						this.phnnUpdateMultiselectLabel('phitems');
 					}
 					var disguiseInput = this.$chart.find('select[name=disguise]').val();
-					var disguiseSpecies = Dex.species.get(disguiseInput);
+					var disguiseSpecies = this.curTeam.dex.species.get(disguiseInput);
 					if (disguiseInput && disguiseSpecies.exists) {
 						set.disguise = disguiseSpecies.name;
 					} else {
@@ -4247,13 +4311,13 @@
 				var ppSaveFmt = this.curTeam.format;
 				var ppSaveStatMod = this.curTeam.gen !== 3 && this.phnnStatModAllowed(ppSaveFmt);
 				var isOMForPPSave = ppSaveFmt.includes('disguise') || ppSaveFmt.includes('status') || ppSaveFmt.includes('nonerfs') || ppSaveFmt.includes('anyability') || ppSaveFmt.includes('nolimit') || ppSaveFmt.includes('unified') || ppSaveFmt.includes('255') || ppSaveFmt.includes('rage') || ppSaveStatMod;
-				var allowBasePPSave = ppSaveFmt.includes('customdisguise') || ppSaveFmt.includes('nonerfs') || (this.curTeam.gen <= 2 && isOMForPPSave) || ppSaveStatMod;
+				var allowBasePPSave = RomHacks.isDisguises(ppSaveFmt) || ppSaveFmt.includes('nonerfs') || (this.curTeam.gen <= 2 && isOMForPPSave) || ppSaveStatMod;
 				if (isOMForPPSave && !set.moves) set.moves = [];
 				for (var m = 0; isOMForPPSave && m < 4; m++) {
 					var mppRaw = allowBasePPSave ? String(this.$chart.find('input[name=move' + (m+1) + 'pp]').val() || '').trim() : '';
 					var mppInf = /^(inf|infinite|-|\u221E)$/i.test(mppRaw);
 					var mpp = parseInt(mppRaw, 10);
-					var ppSaveBig = this.curTeam.gen <= 2 || ppSaveFmt.includes('customdisguise') || ppSaveFmt.includes('nonerfs') || ppSaveFmt.includes('customgame');
+					var ppSaveBig = this.curTeam.gen <= 2 || RomHacks.isDisguises(ppSaveFmt) || ppSaveFmt.includes('nonerfs') || ppSaveFmt.includes('customgame');
 					var ppSaveMax = this.curTeam.gen === 1 ? 63 : ppSaveBig ? 65535 : 255;
 					if (!ppSaveBig && mppInf) {
 						mppInf = false;

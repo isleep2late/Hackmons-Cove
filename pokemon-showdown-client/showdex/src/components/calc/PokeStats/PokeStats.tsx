@@ -25,6 +25,7 @@ import {
   buildPhnnMinConfusionPatch,
   calcPhnnPokemonConfusion,
   detectMaxEvsFormat,
+  detectUncappedEvsFormat,
   detectPhnnKey,
   getMaxStatEv,
 } from '@showdex/phnn';
@@ -123,7 +124,7 @@ export const PokeStats = ({
     || (settings?.allowIllegalSpreads === 'meta' && !legalLockedFormat(format));
 
   const totalEvs = Object.values(pokemon?.evs || {}).reduce((sum, ev) => sum + (ev || 0), 0);
-  const maxLegalEvs = detectMaxEvsFormat(format)
+  const maxLegalEvs = detectUncappedEvsFormat(format)
     ? (6 * getMaxStatEv(format))
     : isChampions
     // randbats Champions have no total stat-point budget (only the per-stat <= 32 cap, so 6*32=192);

@@ -1,6 +1,14 @@
 import { Dex, toID, type ModdedDex } from '../../sim/dex';
 import type { RomHackMechanics } from '../../sim/romhack-mechanics';
+import { ROM_HACK_REGULAR_UNAVAILABLE } from '../../sim/romhack-formats';
 
+export interface RawLearnset {
+	levelup: { level: number, move: number }[];
+	machines: number[];
+	tutor: number[];
+	egg: number[];
+	other?: number[];
+}
 export interface RawSpecies {
 	index: number;
 	name: string;
@@ -8,6 +16,9 @@ export interface RawSpecies {
 	types?: string[];
 	abilities?: string[];
 	innates?: string[];
+	learnset?: RawLearnset;
+	evolvesFrom?: number;
+	evolvesFromAll?: number[];
 }
 export interface RawMove {
 	index: number;
@@ -83,6 +94,8 @@ export interface RawHack {
 	itemPockets?: (ItemPocket | undefined)[];
 	typeBasedCategories: boolean;
 	notes: string[];
+	learnsetStatus?: 'read' | 'unreadable';
+	learnsetNote?: string;
 }
 export type ItemPocket = 'key' | 'tm' | 'held';
 
@@ -158,7 +171,7 @@ export function votePockets(
 	});
 }
 
-export const HACK_VERSION = 16;
+export const HACK_VERSION = 18;
 
 export interface HackDex {
 	version: number;
@@ -185,6 +198,122 @@ export interface HackDex {
 		pokemon: number, icons: number, items: number, size?: number, overworld?: number, overworldIds?: string[],
 	};
 	legal: { species: string[], moves: string[], abilities: string[], items: string[] };
+	learnsetStatus: 'read' | 'unreadable';
+	learnsetNote?: string;
+	learnsets?: HackLearnsets;
+}
+export interface HackLearnset {
+	levelup: number[];
+	machines: number[];
+	tutor: number[];
+	egg: number[];
+	other?: number[];
+	prevos?: string[];
+}
+export interface HackLearnsets {
+	moves: string[];
+	species: { [id: string]: number[] };
+	own: { [id: string]: HackLearnset };
+	noSketch?: string[];
+}
+
+const LEARNSETS_UNREADABLE = 'The movesets of this game could not be read';
+
+function buildLearnsets(
+	raw: RawHack, moveByIndex: Map<number, string>, speciesByIndex: Map<number, string>, sameAs: Map<string, string>
+): { status: 'read' | 'unreadable', note?: string, learnsets?: HackLearnsets } {
+	if (raw.learnsetStatus !== 'read') {
+		return { status: 'unreadable', note: raw.learnsetNote || `${LEARNSETS_UNREADABLE}.` };
+	}
+	const rows = new Map<number, RawSpecies>();
+	for (const row of raw.species) {
+		if (!rows.has(row.index)) rows.set(row.index, row);
+	}
+	const moves: string[] = [];
+	const slots = new Map<string, number>();
+	let listed = 0;
+	let known = 0;
+	const slot = (index: number) => {
+		listed++;
+		const id = moveByIndex.get(index);
+		if (!id) return -1;
+		known++;
+		let at = slots.get(id);
+		if (at === undefined) {
+			at = moves.length;
+			moves.push(id);
+			slots.set(id, at);
+		}
+		return at;
+	};
+	const list = (indices: number[] | undefined) => {
+		const out: number[] = [];
+		for (const index of indices || []) {
+			const at = slot(index);
+			if (at >= 0 && !out.includes(at)) out.push(at);
+		}
+		return out;
+	};
+	const ownByIndex = new Map<number, HackLearnset>();
+	for (const [index, row] of rows) {
+		const learnset = row.learnset;
+		if (!learnset || !Array.isArray(learnset.levelup)) continue;
+		const levelup: number[] = [];
+		for (const entry of learnset.levelup) {
+			const at = slot(entry.move);
+			if (at >= 0 && entry.level >= 0 && entry.level <= 100) levelup.push(entry.level, at);
+		}
+		const own: HackLearnset = {
+			levelup, machines: list(learnset.machines), tutor: list(learnset.tutor), egg: list(learnset.egg),
+		};
+		const other = list(learnset.other);
+		if (other.length) own.other = other;
+		ownByIndex.set(index, own);
+	}
+	if (!ownByIndex.size || !known || known < listed * 0.9) {
+		return { status: 'unreadable', note: `${LEARNSETS_UNREADABLE}: its moves do not match the move list of the game.` };
+	}
+	const parents = (index: number) => {
+		const row = rows.get(index);
+		if (!row) return [];
+		const from = row.evolvesFromAll?.length ? row.evolvesFromAll : row.evolvesFrom !== undefined ? [row.evolvesFrom] : [];
+		return from.filter(parent => parent !== index);
+	};
+	const learnsets: HackLearnsets = { moves, species: {}, own: {} };
+	for (const [index, id] of speciesByIndex) {
+		const own = ownByIndex.get(index);
+		if (!own || learnsets.own[id]) continue;
+		const all = new Set<number>();
+		const seen = new Set<number>();
+		const queue = [index];
+		const prevos: string[] = [];
+		while (queue.length) {
+			const at = queue.shift()!;
+			if (seen.has(at)) continue;
+			seen.add(at);
+			const entry = ownByIndex.get(at);
+			if (entry) {
+				for (let i = 1; i < entry.levelup.length; i += 2) all.add(entry.levelup[i]);
+				for (const group of [entry.machines, entry.tutor, entry.egg, entry.other || []]) {
+					for (const move of group) all.add(move);
+				}
+			}
+			for (const parent of parents(at)) {
+				if (at === index) {
+					const parentId = speciesByIndex.get(parent);
+					if (parentId && parentId !== id && !prevos.includes(parentId)) prevos.push(parentId);
+				}
+				queue.push(parent);
+			}
+		}
+		learnsets.own[id] = prevos.length ? { ...own, prevos } : own;
+		learnsets.species[id] = [...all].sort((a, b) => a - b);
+	}
+	for (const [id, baseId] of sameAs) {
+		if (!learnsets.species[id] && learnsets.species[baseId]) learnsets.species[id] = learnsets.species[baseId];
+	}
+	if (!Object.keys(learnsets.species).length) return { status: 'unreadable', note: `${LEARNSETS_UNREADABLE}.` };
+	return { status: 'read', learnsets };
 }
 
 const SPECIAL_TYPES = ['Fire', 'Water', 'Grass', 'Electric', 'Psychic', 'Ice', 'Dragon', 'Dark'];
@@ -931,6 +1060,7 @@ function buildHackDexFrom(
 	const Moves: HackDex['Moves'] = {};
 	const legalMoves = new Set<string>();
 	const hackMoveIds = new Map<string, string>();
+	const moveByIndex = new Map<number, string>();
 	let specialTypes = SPECIAL_TYPES;
 	if (liveValues.category?.basis === 'type' && Array.isArray(liveValues.category.specialTypes)) {
 		specialTypes = liveValues.category.specialTypes.map((name: string) => fixType(name));
@@ -947,6 +1077,7 @@ function buildHackDexFrom(
 		const hasData = rawMove.pp !== undefined;
 		if (move.exists) {
 			if (!hackMoveIds.has(toID(rawMove.name))) hackMoveIds.set(toID(rawMove.name), move.id);
+			if (!move.isZ && !move.isMax && !moveByIndex.has(rawMove.index)) moveByIndex.set(rawMove.index, move.id);
 			if (legalMoves.has(move.id) || move.isZ || move.isMax) continue;
 			bump(move.gen);
 			legalMoves.add(move.id);
@@ -1000,6 +1131,7 @@ function buildHackDexFrom(
 		}
 		const name = freeName(properName(rawMove.name));
 		const id = toID(name);
+		if (id && !moveByIndex.has(rawMove.index)) moveByIndex.set(rawMove.index, id);
 		if (!id || Moves[id] || legalMoves.has(id)) continue;
 		const type = hasData ? fixType(rawMove.type) : 'Normal';
 		const basePower = rawMove.basePower || 0;
@@ -1068,13 +1200,16 @@ function buildHackDexFrom(
 	const legalSpecies = new Set<string>();
 	const addSpecies = legalSpecies.add.bind(legalSpecies);
 	let currentIndex = 0;
+	const speciesByIndex = new Map<number, string>();
 	legalSpecies.add = (id: string) => {
 		if (!(id in indices.species)) indices.species[id] = currentIndex;
+		if (!speciesByIndex.has(currentIndex) && !legalSpecies.has(id)) speciesByIndex.set(currentIndex, id);
 		return addSpecies(id);
 	};
 	const seen = new Map<string, number>();
 	const statKey = (stats: { [stat: string]: number }) => ['hp', 'atk', 'def', 'spa', 'spd', 'spe'].map(stat => stats[stat]).join();
 	const present = new Set<string>();
+	const dataless = new Set<string>();
 	for (const rawSpecies of raw.species) {
 		if (rawSpecies.baseStats) present.add(`${toID(rawSpecies.name)}|${statKey(rawSpecies.baseStats)}`);
 	}
@@ -1145,6 +1280,7 @@ function buildHackDexFrom(
 				}
 			}
 			bump(target.gen);
+			if (!stats && !legalSpecies.has(target.id)) dataless.add(target.id);
 			legalSpecies.add(target.id);
 			const patch: AnyObject = {};
 			if (stats && !(Object.keys(stats) as StatID[]).every(stat => target.baseStats[stat] === stats[stat])) {
@@ -1264,6 +1400,22 @@ function buildHackDexFrom(
 	}
 
 	const notes = raw.notes.slice();
+	const cosmeticBases = new Map<string, string>();
+	for (const id of legalSpecies) {
+		const forme = base.species.get(id);
+		if (!forme.exists || forme.baseSpecies === forme.name) continue;
+		if (forme.isCosmeticForme || dataless.has(id)) cosmeticBases.set(id, toID(forme.baseSpecies));
+	}
+	const learned = legalMoves.size < 50 ?
+		{ status: 'unreadable' as const, note: `${LEARNSETS_UNREADABLE}: the move list was not found.`, learnsets: undefined } :
+		buildLearnsets(raw, moveByIndex, speciesByIndex, cosmeticBases);
+	if (learned.learnsets?.moves.includes('sketch')) {
+		const parent = Dex.mod(`gen${maxGen}`);
+		learned.learnsets.noSketch = [...legalMoves].filter(id => {
+			const move = parent.moves.get(id);
+			return move.exists && !!(move.flags['nosketch'] || move.isZ || move.isMax);
+		});
+	}
 	const standard = (entry: { gen: number, isNonstandard: string | null }) => entry.gen <= maxGen && !entry.isNonstandard;
 	if (legalMoves.size < 50) {
 		for (const move of base.moves.all()) {
@@ -1282,6 +1434,15 @@ function buildHackDexFrom(
 			if (standard(item)) legalItems.add(item.id);
 		}
 		notes.push(`The hack's item list could not be read; every Generation ${maxGen} item is allowed.`);
+	}
+	if (learned.status === 'read') {
+		notes.push(
+			'Regular uses the movesets read from the game: level-up, TM and HM, tutor and egg moves, including those of ' +
+			'earlier evolutions. Moves that the game only teaches through events or scripted tutors are not included.'
+		);
+	} else {
+		notes.push(ROM_HACK_REGULAR_UNAVAILABLE);
+		if (learned.note) notes.push(learned.note);
 	}
 	if (extraTypes.size) notes.push(`New types in this hack: ${[...extraTypes].join(', ')}.`);
 	notes.push(...chartNotes);
@@ -1315,6 +1476,9 @@ function buildHackDexFrom(
 		legal: {
 			species: [...legalSpecies], moves: [...legalMoves], abilities: [...legalAbilities], items: [...legalItems],
 		},
+		learnsetStatus: learned.status,
 	};
+	if (learned.note) hack.learnsetNote = learned.note;
+	if (learned.learnsets) hack.learnsets = learned.learnsets;
 	return { hack, gen: maxGen, settled: maxGen === settledGen };
 }

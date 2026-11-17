@@ -370,6 +370,8 @@ export class MainMenuRoom extends PSRoom {
 			}
 		}
 
+		RomHacks.legacyFormat(BattleFormats);
+
 		// Match base formats to their variants, if they are unavailable in the server.
 		let multivariantFormats: { [id: string]: 1 } = {};
 		for (let id in BattleFormats) {

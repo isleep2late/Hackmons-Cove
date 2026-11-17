@@ -1,5 +1,6 @@
 import { Dex } from '../../sim/dex';
 import { readMechanics, slimMechanics, votePockets, type RawHack, type RawMove, type RawSpecies } from './build';
+import { readNdsLearnsets, type NdsLearnset, type NdsLearnsetRead } from './learnsets-nds';
 import { readNdsMechanics } from './mechanics-nds';
 import { requireSignatures } from './signatures';
 
@@ -366,10 +367,13 @@ export function extractNDS(rom: Buffer, base: Buffer | null = null): RawHack {
 	}));
 	const moves: RawMove[] = [];
 	const moveFile = findFile(rom, game.moves);
+	let moveLimit = 0;
 	if (!moveFile) {
 		notes.push('Move data was not found; moves are taken from the official games.');
 	} else {
-		readNarc(moveFile).forEach((entry, i) => {
+		const moveEntries = readNarc(moveFile);
+		moveLimit = moveEntries.length;
+		moveEntries.forEach((entry, i) => {
 			const name = (moveText ? moveText[i] : '') || moveByNum[i];
 			if (!name || !i) return;
 			if (game.gen === 4 && entry.length >= 12) {
@@ -401,7 +405,32 @@ export function extractNDS(rom: Buffer, base: Buffer | null = null): RawHack {
 	}
 	const chartRead = !!read?.typeChart && read.typeChart.length >= 20;
 	const newer = species.some(entry => entry.types!.includes('Fairy')) || moves.some(move => move.type === 'Fairy');
-	return {
+	let learnsets: NdsLearnsetRead;
+	try {
+		learnsets = moveLimit ? readNdsLearnsets(rom, base, {
+			code: rom.toString('latin1', 0x0c, 0x0f), gen: game.gen, personal, moveLimit, speciesLimit: maxSpecies + 1,
+			indices: species.map(entry => entry.index),
+			firstForm: game.firstForm, formBase: index => dex.species.get(game.forms[index - game.firstForm] || '').num || 0,
+		}) : { status: 'unreadable', note: 'the move data was not found', learnsets: [], evolvesFrom: [] };
+	} catch {
+		learnsets = { status: 'unreadable', note: 'the game data has an unknown layout', learnsets: [], evolvesFrom: [] };
+	}
+	if (learnsets.status === 'read') {
+		for (const entry of species) {
+			const target = entry as RawSpecies & { learnset?: NdsLearnset, evolvesFrom?: number };
+			const found = learnsets.learnsets[entry.index];
+			if (!found) continue;
+			target.learnset = found;
+			const from = learnsets.evolvesFrom[entry.index];
+			if (from !== undefined) target.evolvesFrom = from;
+		}
+	}
+	const learnsetFields: { learnsetStatus: 'read' | 'unreadable', learnsetNote?: string } = learnsets.status === 'read' ?
+		{ learnsetStatus: 'read' } : {
+			learnsetStatus: 'unreadable',
+			learnsetNote: `The movesets of this game could not be read: ${learnsets.note || 'unknown layout'}.`,
+		};
+	const raw: RawHack = {
 		mechanics: read ? slimMechanics(read) : undefined,
 		typeChart: chartRead ? read.typeChart : undefined,
 		baseGame: game.name,
@@ -415,4 +444,5 @@ export function extractNDS(rom: Buffer, base: Buffer | null = null): RawHack {
 		keepBaseEngine: !newer || (DS_FAIRY_KEEPS_BASE_ENGINE && chartRead),
 		notes,
 	};
+	return Object.assign(raw, learnsetFields);
 }

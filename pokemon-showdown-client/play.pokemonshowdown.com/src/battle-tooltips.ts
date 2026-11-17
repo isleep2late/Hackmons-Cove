@@ -3095,7 +3095,7 @@ export class BattleStatGuesser {
 		const romHack = RomHacks.isFormat(formatid);
 		if (romHack && RomHacks.active) this.dex = Dex.mod(RomHacks.modid);
 		this.ignoreEVLimits = (
-			this.dex.gen < 3 || romHack ||
+			this.dex.gen < 3 || (romHack && !RomHacks.cappedEVs(formatid, this.dex.gen)) ||
 			((this.formatid.endsWith('hackmons') || this.formatid.endsWith('bh')) && this.dex.gen !== 6) ||
 			this.formatid.includes('metronomebattle') ||
 			this.formatid.endsWith('norestrictions') ||
@@ -3726,7 +3726,8 @@ export function BattleStatOptimizer(set: Dex.PokemonSet, formatid: ID) {
 
 	const dex = Dex.mod(formatid.slice(0, 4) as ID);
 	const ignoreEVLimits = (
-		dex.gen < 3 || RomHacks.isFormat(formatid) ||
+		dex.gen < 3 ||
+		(RomHacks.isFormat(formatid) && !RomHacks.cappedEVs(formatid, RomHacks.parentGen(RomHacks.active))) ||
 		((formatid.endsWith('hackmons') || formatid.endsWith('bh')) && dex.gen !== 6) ||
 		formatid.includes('metronomebattle') || formatid.endsWith('norestrictions')
 	);

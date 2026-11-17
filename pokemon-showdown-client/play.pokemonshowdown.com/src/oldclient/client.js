@@ -1489,6 +1489,8 @@ function toId() {
 				}
 			}
 
+			if (window.RomHacks) window.RomHacks.legacyFormat(BattleFormats);
+
 			// Match base formats to their variants, if they are unavailable in the server.
 			var multivariantFormats = {};
 			for (var id in BattleFormats) {

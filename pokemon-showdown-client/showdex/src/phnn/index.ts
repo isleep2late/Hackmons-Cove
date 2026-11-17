@@ -124,6 +124,23 @@ export const detectMaxEvsFormat = (format: string): boolean => {
   return gen !== 6;
 };
 
+export const detectCappedEvsRomHack = (format: string): boolean => {
+  const mode = /romhacks(regular|hackmons)/i.exec(format || '')?.[1]?.toLowerCase();
+
+  if (!mode) {
+    return false;
+  }
+
+  const romHacks = typeof window === 'undefined' ? null
+    : (window as unknown as { RomHacks?: { modid?: string; active?: unknown; }; }).RomHacks;
+  const gen = romHacks?.active ? parseInt(String(romHacks.modid).slice(3), 10) || 9 : 9;
+
+  return gen >= 3 && (mode === 'regular' || gen === 6);
+};
+
+export const detectUncappedEvsFormat = (format: string): boolean => detectMaxEvsFormat(format)
+  && !detectCappedEvsRomHack(format);
+
 // in hackmons-style formats any Pokemon can carry any ability, so the dex's first ability is a
 // guess with no evidence behind it -- and guessing wrong silently doubles or halves the damage
 export const isPhnnAnyAbilityFormat = (format: string): boolean => {

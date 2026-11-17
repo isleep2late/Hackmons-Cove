@@ -37,7 +37,7 @@ class TeamRoom extends PSRoom {
 		const team = PS.teams.byKey[this.id.slice(5)] || null;
 		this.team = team!;
 		this.title = `[Team] ${this.team?.name || 'Not found'}`;
-		if (team) this.setFormat(team.format);
+		if (team) this.setFormat(RomHacks.currentFormat(team.format));
 		this.load();
 	}
 	override onParentKeyDown = (e?: Event) => {
@@ -273,6 +273,34 @@ class TeamPanel extends PSRoomPanel<TeamRoom> {
 		PS.teams.save();
 		this.forceUpdate();
 	};
+	handleRomHackMode = (mode: string) => {
+		const room = this.props.room;
+		const format = RomHacks.modeFormat(room.team.format, mode);
+		const gen = parseInt(String(RomHacks.active?.parentMod).slice(3), 10) || 9;
+		const sets = room.editor?.sets || Teams.unpack(room.team.packedTeam);
+		const extras = RomHacks.disguiseExtras(sets, format, gen);
+		if (extras) {
+			if (!confirm(RomHacks.extrasWarning(mode, extras))) {
+				this.forceUpdate();
+				return false;
+			}
+			RomHacks.disguiseExtras(sets, format, gen, true);
+			room.team.packedTeam = Teams.pack(sets);
+			room.team.iconCache = null;
+			if (room.editor) room.editor.lastPackedTeam = room.team.packedTeam;
+		}
+		room.setFormat(format);
+		if (room.editor) {
+			room.editor.setFormat(room.team.format);
+			room.editor.innerFocus = null;
+		}
+		room.save();
+		this.forceUpdate();
+		TeamPanel.getFormatResources(room.team.format).then(() => {
+			this.forceUpdate();
+		});
+		return true;
+	};
 	handleChangeFormat = (ev: Event) => {
 		const dropdown = ev.currentTarget as HTMLButtonElement;
 		const room = this.props.room;
@@ -377,7 +405,9 @@ class TeamPanel extends PSRoomPanel<TeamRoom> {
 					</small>}
 				</label>
 			</div>
-			{RomHacks.isFormat(team.format) && <RomHackUpload onLoaded={this.handleRomHack} teamKey={team.key || team.name} />}
+			{RomHacks.isFormat(team.format) && <RomHackUpload
+				onLoaded={this.handleRomHack} onMode={this.handleRomHackMode} format={team.format} teamKey={team.key || team.name}
+			/>}
 			<TeamEditor
 				team={team} onChange={this.save} readOnly={!!team.teamid && !team.uploadedPackedTeam} resources={this.renderResources()}
 				narrow={room.width < 550}
@@ -583,7 +613,9 @@ class TeamStoragePanel extends PSRoomPanel {
 
 PS.addRoomType(TeamPanel, TeamStoragePanel, ViewTeamPanel);
 
-class RomHackUpload extends preact.Component<{ onLoaded: () => void, teamKey: string }> {
+class RomHackUpload extends preact.Component<{
+	onLoaded: () => void, onMode: (mode: string) => boolean, format: string, teamKey: string,
+}> {
 	error = '';
 	pending: { file: File, bases: { id: string, name: string }[] } | null = null;
 	baseId = '';
@@ -642,6 +674,17 @@ class RomHackUpload extends preact.Component<{ onLoaded: () => void, teamKey: st
 		this.clearInput();
 		this.forceUpdate();
 	};
+	handleMode = (ev: Event) => {
+		const select = ev.currentTarget as HTMLSelectElement;
+		const mode = select.value;
+		const current = RomHacks.mode(this.props.format);
+		if (mode === 'regular' && !RomHacks.regularReadable(RomHacks.active)) {
+			select.value = current;
+			this.forceUpdate();
+			return;
+		}
+		if (!this.props.onMode(mode)) select.value = current;
+	};
 	handleSelect = (ev: Event) => {
 		if (this.busy) return;
 		this.pending = null;
@@ -665,7 +708,25 @@ class RomHackUpload extends preact.Component<{ onLoaded: () => void, teamKey: st
 				this.forceUpdate();
 			});
 		}
+		const mode = RomHacks.mode(this.props.format);
+		const regularReadable = RomHacks.regularReadable(hack);
+		const regularProblem = RomHacks.regularProblem(this.props.format);
 		return <div class="infobox" style="margin:8px 0">
+			<p style="margin:0 0 6px"><label>
+				<strong>Mode:</strong> {}
+				<select class="button" name="romhackmode" onChange={this.handleMode}>
+					{RomHacks.modes.map(entry => <option
+						value={entry.id} selected={mode === entry.id}
+						disabled={entry.id === 'regular' && !regularReadable && mode !== 'regular'}
+					>
+						{entry.name}
+					</option>)}
+				</select>
+			</label> {}
+			<small>{RomHacks.modes.find(entry => entry.id === mode)?.desc}</small></p>
+			{(regularProblem || !regularReadable) && <p class="message-error romhack-regular-unavailable">
+				{regularProblem || RomHacks.regularUnavailable}
+			</p>}
 			<strong>ROM patch:</strong> {}
 			{list.length > 0 && <select class="button" disabled={this.busy} onChange={this.handleSelect}>
 				{list.map(entry => <option value={entry.sha256} selected={hack?.sha256 === entry.sha256}>

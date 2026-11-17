@@ -2196,7 +2196,7 @@ export const RomHacks = new class {
 			if (this.active?.sha256 === sha256) {
 				this.install(fresh, true);
 			} else {
-				this.storageSet(`romhacks:data:${sha256}`, JSON.stringify(fresh));
+				this.cacheHack(fresh);
 			}
 			return true;
 		};
@@ -2407,6 +2407,168 @@ export const RomHacks = new class {
 	isFormat(format: string | null | undefined) {
 		return /^gen\d+romhacks/.test(format || '');
 	}
+	modes: { id: 'regular' | 'hackmons' | 'disguises', name: string, desc: string }[] = [
+		{ id: 'regular', name: 'Regular', desc: 'Only the moves and abilities each Pok\u00e9mon has in the hack.' },
+		{ id: 'hackmons', name: 'Hackmons', desc: 'Any move, ability and item of the hack on any of its Pok\u00e9mon.' },
+		{ id: 'disguises', name: 'Disguises', desc: 'Custom Disguises with the hack as the game.' },
+	];
+	regularUnavailable = 'Regular is not available for this hack: its movesets could not be read. Use Hackmons or Disguises.';
+	mode(format: string | null | undefined): '' | 'regular' | 'hackmons' | 'disguises' {
+		const id = String(format || '').split('@@@')[0];
+		if (!this.isFormat(id)) return '';
+		if (/^gen\d+romhacksregular/.test(id)) return 'regular';
+		if (/^gen\d+romhackshackmons/.test(id)) return 'hackmons';
+		return 'disguises';
+	}
+	modeFormat(format: string, mode: string) {
+		const rules = format.indexOf('@@@');
+		return `gen9romhacks${mode}experimental${rules >= 0 ? format.slice(rules) : ''}`;
+	}
+	currentFormat(format: string) {
+		return format.split('@@@')[0] === 'gen9romhacksexperimental' ? this.modeFormat(format, 'disguises') : format;
+	}
+	isDisguises(format: string | null | undefined) {
+		return String(format || '').includes('customdisguise') || this.mode(format) === 'disguises';
+	}
+	isPlain(format: string | null | undefined) {
+		const mode = this.mode(format);
+		return mode === 'regular' || mode === 'hackmons';
+	}
+	regularProblem(format: string | null | undefined) {
+		if (this.mode(format) !== 'regular' || !this.active) return '';
+		if (this.active.learnsetStatus === 'read' && this.active.learnsets) return '';
+		const note = typeof this.active.learnsetNote === 'string' ? this.active.learnsetNote : '';
+		return `${this.regularUnavailable}${note ? ` ${note}` : ''}`;
+	}
+	regularReadable(hack: any) {
+		return !hack || (hack.learnsetStatus === 'read' && !!hack.learnsets);
+	}
+	cappedEVs(format: string | null | undefined, gen: number) {
+		const mode = this.mode(format);
+		return gen >= 3 && (mode === 'regular' || (mode === 'hackmons' && gen === 6));
+	}
+	maxLevel(format: string | null | undefined, gen: number) {
+		const mode = this.mode(format);
+		return mode === 'disguises' ? 9999 : mode === 'hackmons' && gen === 1 ? 255 : 100;
+	}
+	maxMoves(format: string | null | undefined) {
+		return this.mode(format) === 'disguises' ? 24 : 4;
+	}
+	disguiseExtraKeys = ['phType', 'disguise', 'startStatus', 'phAbilities', 'phItems', 'phStats', 'phBaseStats'];
+	setExtras(set: any, maxLevel: number, remove?: boolean) {
+		const moves: string[] = set.moves || [];
+		const plain = moves.slice(0, 4).map(name => String(name).replace(/\s*\((?:\d+|inf)(?:\/\d+)?\)$/i, ''));
+		const extra = this.disguiseExtraKeys.some(key => set[key]) || set.startHp !== undefined || moves.length > 4 ||
+			plain.some((name, i) => name !== moves[i]) || (set.level || 100) > maxLevel;
+		if (!extra || !remove) return extra;
+		for (const key of this.disguiseExtraKeys) delete set[key];
+		delete set.startHp;
+		set.moves = plain;
+		if (set.level > maxLevel) set.level = maxLevel;
+		return true;
+	}
+	disguiseExtras(sets: any[] | null | undefined, format: string, gen: number, remove?: boolean) {
+		if (!this.isPlain(format)) return 0;
+		const maxLevel = this.maxLevel(format, gen);
+		let count = 0;
+		for (const set of sets || []) {
+			if (set && this.setExtras(set, maxLevel, remove)) count++;
+		}
+		return count;
+	}
+	extrasWarning(mode: string, count: number) {
+		const name = this.modes.find(entry => entry.id === mode)?.name || mode;
+		return `${name} does not allow what ${count === 1 ? 'one Pok\u00e9mon' : `${count} Pok\u00e9mon`} on this team ` +
+			`use from Disguises: more than 4 moves, several abilities or items, a disguise, custom typing, ` +
+			`a starting status or HP, changed stats or PP, or a level above the limit. ` +
+			`Remove these from the team and switch to ${name}?`;
+	}
+	legacyFormat(formats: { [id: string]: any }) {
+		const shown = formats['gen9romhacksdisguisesexperimental'];
+		if (!shown || formats['gen9romhacksexperimental']) return;
+		formats['gen9romhacksexperimental'] = {
+			...shown, id: 'gen9romhacksexperimental', name: '[Gen 9] ROM Hacks [EXPERIMENTAL]',
+			searchShow: false, challengeShow: false, tournamentShow: false, rated: false,
+			teambuilderFormat: 'gen9romhacksdisguisesexperimental', isTeambuilderFormat: false,
+		};
+	}
+	ownAbilitiesOnly(format: string | null | undefined, gen: number) {
+		const mode = this.mode(format);
+		return mode === 'regular' ? gen >= 3 : mode === 'hackmons' && gen === 3;
+	}
+	learnsetCache: { sha256: string, species: { [id: string]: { [move: string]: 1 } | null } } | null = null;
+	learnset(speciesId: string): { [move: string]: 1 } | null {
+		const hack = this.active;
+		if (hack?.learnsetStatus !== 'read') return null;
+		if (this.learnsetCache?.sha256 !== hack.sha256) this.learnsetCache = { sha256: hack.sha256, species: {} };
+		const cache = this.learnsetCache!.species;
+		if (speciesId in cache) return cache[speciesId];
+		const moves = hack.learnsets?.moves;
+		let list = hack.learnsets?.species?.[speciesId];
+		if (!Array.isArray(list)) {
+			const dex = Dex.mod(this.modid);
+			const baseId = toID(dex.species.get(speciesId).baseSpecies);
+			const formes: readonly string[] = dex.species.get(baseId).cosmeticFormes || [];
+			if (baseId !== speciesId && formes.some(forme => toID(forme) === speciesId)) list = hack.learnsets?.species?.[baseId];
+		}
+		let found: { [move: string]: 1 } | null = null;
+		if (Array.isArray(moves) && Array.isArray(list)) {
+			found = {};
+			for (const position of list) {
+				if (typeof moves[position] === 'string') found[moves[position]] = 1;
+			}
+			if (found['sketch']) {
+				const blocked: string[] = Array.isArray(hack.learnsets.noSketch) ? hack.learnsets.noSketch : [];
+				for (const id of hack.legal?.moves || []) {
+					if (!blocked.includes(id)) found[id] = 1;
+				}
+			}
+		}
+		cache[speciesId] = found;
+		return found;
+	}
+	abilitiesOf(speciesId: string): ID[] {
+		if (!this.active) return [];
+		const dex = Dex.mod(this.modid);
+		const changed = !!this.active.Pokedex?.[speciesId]?.abilities;
+		const abilities: { [slot: string]: string } = dex.species.get(speciesId).abilities || {};
+		const ids: ID[] = [];
+		for (const slot in abilities) {
+			if (!changed && ((slot === 'H' && dex.gen < 5) || (slot === 'S' && dex.gen < 7))) continue;
+			const id = toID(abilities[slot]);
+			if (id && id !== 'noability' && !ids.includes(id)) ids.push(id);
+		}
+		return ids;
+	}
+	searchLists(type: string, format: string, speciesId: string): { legal: [string, ID][], illegal: [string, ID][] } {
+		const rows = this.results(type);
+		const mode = this.mode(format);
+		const gen = this.parentGen(this.active);
+		let allowed: { [id: string]: 1 } | null = null;
+		if (mode === 'regular' && type === 'move') {
+			allowed = this.learnset(speciesId) || {};
+		} else if (mode === 'regular' && type === 'pokemon') {
+			allowed = {};
+			if (this.active?.learnsetStatus === 'read') {
+				for (const id in this.active.learnsets?.species || {}) allowed[id] = 1;
+			}
+		} else if (type === 'ability' && this.ownAbilitiesOnly(format, gen)) {
+			allowed = {};
+			for (const id of this.abilitiesOf(speciesId)) allowed[id] = 1;
+		} else if (type === 'ability' && gen < 3 && mode !== 'disguises') {
+			allowed = {};
+		} else if (type === 'item' && gen < 2 && mode !== 'disguises') {
+			allowed = {};
+		}
+		if (!allowed) return { legal: rows, illegal: [] };
+		const legal: [string, ID][] = [];
+		const illegal: [string, ID][] = [];
+		for (const row of rows) {
+			if (row[0] === 'header' || row[1] in allowed) legal.push(row);
+			else illegal.push(row);
+		}
+		return { legal, illegal };
+	}
 	storageGet(key: string): string | null {
 		try {
 			return localStorage.getItem(key);
@@ -2417,6 +2579,76 @@ export const RomHacks = new class {
 	storageSet(key: string, value: string) {
 		try {
 			localStorage.setItem(key, value);
+			return;
+		} catch {}
+		this.pruneCache(0, 0);
+		try {
+			localStorage.setItem(key, value);
+		} catch {}
+	}
+	cacheLimit = 4;
+	cacheChars = 2000000;
+	cachedHacks(): string[] {
+		const found: string[] = [];
+		try {
+			for (let i = 0; i < localStorage.length; i++) {
+				const key = localStorage.key(i) || '';
+				if (key.startsWith('romhacks:data:')) found.push(key.slice(14));
+			}
+		} catch {}
+		let order: string[] = [];
+		try {
+			order = JSON.parse(this.storageGet('romhacks:cache') || '[]');
+		} catch {}
+		if (!Array.isArray(order)) order = [];
+		const active = this.storageGet('romhacks:active') || '';
+		const rank = (sha256: string) => {
+			if (sha256 === active) return -1;
+			const at = order.indexOf(sha256);
+			return at < 0 ? order.length : at;
+		};
+		return found.sort((a, b) => rank(a) - rank(b));
+	}
+	pruneCache(limit = this.cacheLimit, chars = this.cacheChars, first = '') {
+		const kept: string[] = first ? [first] : [];
+		let used = 0;
+		try {
+			for (const sha256 of this.cachedHacks()) {
+				if (sha256 === first) continue;
+				const size = (localStorage.getItem(`romhacks:data:${sha256}`) || '').length;
+				if (kept.length < limit && used + size <= chars) {
+					kept.push(sha256);
+					used += size;
+				} else {
+					localStorage.removeItem(`romhacks:data:${sha256}`);
+				}
+			}
+			localStorage.setItem('romhacks:cache', JSON.stringify(kept));
+		} catch {}
+	}
+	cacheHack(hack: any) {
+		const key = `romhacks:data:${hack.sha256}`;
+		let learnsets = hack.learnsets;
+		if (learnsets?.own) {
+			learnsets = { ...learnsets };
+			delete learnsets.own;
+		}
+		const text = JSON.stringify(learnsets === hack.learnsets ? hack : { ...hack, learnsets });
+		try {
+			localStorage.removeItem(key);
+		} catch {}
+		if (text.length > this.cacheChars) {
+			this.pruneCache();
+			return;
+		}
+		this.pruneCache(this.cacheLimit, this.cacheChars - text.length, hack.sha256);
+		try {
+			localStorage.setItem(key, text);
+			return;
+		} catch {}
+		this.pruneCache(1, 0, hack.sha256);
+		try {
+			localStorage.setItem(key, text);
 		} catch {}
 	}
 	list(): { sha256: string, name: string, baseGame: string, proof?: string }[] {
@@ -2450,6 +2682,7 @@ export const RomHacks = new class {
 		if (this.loaded || !window.BattleTeambuilderTable) return;
 		this.loaded = true;
 		const sha256 = this.storageGet('romhacks:active');
+		this.pruneCache();
 		if (!sha256) return;
 		if (!this.trusted(sha256)) {
 			this.forget(sha256);
@@ -2618,7 +2851,7 @@ export const RomHacks = new class {
 			this.legal[type] = set;
 		}
 		this.storageSet('romhacks:active', hack.sha256);
-		this.storageSet(`romhacks:data:${hack.sha256}`, JSON.stringify(hack));
+		this.cacheHack(hack);
 		for (const listener of this.listeners) listener();
 	}
 	addToSearchIndex(added: [ID, string][]) {
