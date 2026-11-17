@@ -19,6 +19,7 @@ const SECONDS = 1000;
 const PERIODIC_MATCH_INTERVAL = 60 * SECONDS;
 
 import type { ChallengeType } from './room-battle';
+import { romHackIdOf, romHackMode } from '../sim/romhack-formats';
 import { BattleReady, BattleChallenge, GameChallenge, BattleInvite, challenges } from './ladders-challenges';
 
 export interface LadderRating {
@@ -93,7 +94,7 @@ class Ladder extends LadderStore {
 		}
 
 		const romHack = Ladder.romHackOf(this.formatid);
-		if (this.formatid.startsWith('gen9romhacks') && (!romHack || !user.romHacks?.has(romHack))) {
+		if (romHackMode(this.formatid) && (!romHack || !user.romHacks?.has(romHack))) {
 			connection.popup(
 				romHack ?
 					`This battle uses the ROM patch ${romHack.slice(0, 12)}, which you have not uploaded. ` +
@@ -211,8 +212,7 @@ class Ladder extends LadderStore {
 	}
 
 	static romHackOf(formatid: string) {
-		if (!formatid.startsWith('gen9romhacks')) return '';
-		return /@@@.*\brom ?hack ?= ?([0-9a-f]{64})/i.exec(formatid)?.[1].toLowerCase() || '';
+		return romHackIdOf(formatid);
 	}
 
 	static getChallenging(userid: ID) {

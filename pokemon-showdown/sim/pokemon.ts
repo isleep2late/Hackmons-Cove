@@ -7,6 +7,7 @@
 
 import { State } from './state';
 import { toID } from './dex';
+import { isCustomDisguisesFormat } from './romhack-formats';
 import type { DynamaxOptions, MoveRequestData, PokemonMoveRequestData, PokemonSwitchRequestData } from './side';
 
 /** A Pokemon's move slot. */
@@ -374,7 +375,7 @@ export class Pokemon {
 			throw new Error(`Set ${this.name} has no moves`);
 		}
 		const bigPP = this.battle.gen <= 2 || this.battle.format.mod.includes('phnn') ||
-			this.battle.format.id.includes('customdisguise') || this.battle.format.id.includes('customgame') ||
+			isCustomDisguisesFormat(this.battle.format.id) || this.battle.format.id.includes('customgame') ||
 			this.battle.format.id.includes('nonerfs');
 		for (const moveStr of this.set.moves) {
 			let moveid = moveStr;

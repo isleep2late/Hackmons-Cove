@@ -5,13 +5,113 @@ This folder reads a Pokemon ROM hack and turns it into a battle format.
 ## What the format does
 
 A player uploads a patch file for a ROM hack. The server applies the patch to its own clean copy of the base game,
-reads the hack's Pokemon, moves, abilities, items, type chart, sprites and battle mechanics, and stores the result.
+reads the hack's Pokemon, moves, movesets, abilities, items, type chart, sprites and battle mechanics, and stores the
+result.
 Teams can then be built and battles played with the hack's own data. Only the patch is uploaded, never a ROM.
 
 The result is stored in `databases/romhacks/<id>.json` (plus `<id>.full.json` and a sprite folder) and served under
 `/romhacks/`. `<id>` is the SHA-256 of the patch, except for an IPS patch whose base game the uploader chose (see
 Choosing the base game of an IPS patch). It is always 64 lowercase hex digits. A stored hack is read again when
 `HACK_VERSION` in `build.ts` changes and the patch is uploaded again.
+
+## The three formats
+
+A hack can be played in three ways. All three need an uploaded patch, use the same hack data and battle mechanics, and
+only let two players battle when both uploaded the identical patch.
+
+| Format id | Name | What it allows |
+| --- | --- | --- |
+| `gen9romhacksregularexperimental` | [Gen 9] ROM Hacks Regular [EXPERIMENTAL] | What the game itself allows. |
+| `gen9romhackshackmonsexperimental` | [Gen 9] ROM Hacks Hackmons [EXPERIMENTAL] | Pure Hackmons inside the hack. |
+| `gen9romhacksdisguisesexperimental` | [Gen 9] ROM Hacks Disguises [EXPERIMENTAL] | Custom Disguises inside the hack. |
+| `gen9romhacksexperimental` | [Gen 9] ROM Hacks [EXPERIMENTAL] | The earlier id. Same rules as Disguises. |
+
+The earlier id is hidden from the format lists and is kept so that saved teams, challenges and replays still work.
+`sim/romhack-formats.ts` is the one place that knows these ids: `romHackMode(format)` gives `regular`, `hackmons`,
+`disguises` or `null`, `romHackIdOf(formatid)` gives the hack id of a format string, and
+`isCustomDisguisesFormat(formatid)` is true for the Custom Disguises formats and for the two Disguises ids.
+
+The hack is named by the custom rule `ROM Hack = <id>`, for example
+`gen9romhacksregularexperimental@@@ROM Hack = <64 hex digits>`. Without that rule every team is refused with "This
+format needs a ROM patch: upload one in the teambuilder, then challenge someone who uploaded the same patch."
+
+Each hack runs on one generation's engine (`parentMod`, `gen1` to `gen9`). Regular and Hackmons take their limits from
+that generation, so the rules are completed when the hack is known (`getRuleTable` in `sim/dex-formats.ts`).
+
+| | Regular | Hackmons | Disguises |
+| --- | --- | --- | --- |
+| Pokemon | in the hack | in the hack | in the hack |
+| Team size | 6 | 6 | 24 |
+| Moves | 4, only moves the Pokemon learns in the hack | 4, any move of the hack | 24, any move of the hack |
+| Level | 1 to 100 | 1 to 100 (Generation 1: 1 to 255) | 1 to 9999 |
+| Ability | one of the Pokemon's own (Generation 3 and later; none before) | any ability of the hack; Generation 3 engine: one of the Pokemon's own; none before | any abilities of the hack, several allowed |
+| Item | one item of the hack (Generation 2 and later) | one item of the hack (Generation 2 and later) | any items of the hack, several allowed |
+| EVs | Generation 1 and 2: up to 255 each; later: 255 each, 510 in total | as [Gen N] Pure Hackmons: 255 each; Generation 6 also 510 in total; Generation 9 no limit | no limit |
+| IVs / DVs | Generation 1 and 2: DVs, HP follows the others, one Special DV in Generation 2 | the same, except Generation 9 | free |
+| Disguise, custom typing, starting status, custom HP, stat overrides, custom PP | no | no | yes |
+| Battle-only formes | must start as the base forme | as [Gen N] Pure Hackmons | free |
+| Team Preview | Generation 5 and later | Generation 5 and later | no |
+
+- **Regular** has the rules `-Nonexistent`, `Obtainable Formes`, `ROM Hack Legality` and `ROM Hack Regular`, plus
+  `EV Limit = 510` from Generation 3 and `Team Preview` from Generation 5. Where a Pokemon was caught, events, Poke
+  Balls and egg move combinations are not checked.
+- **Hackmons** takes the ruleset, bans and unbans of this server's `[Gen N] Pure Hackmons` format, N being the
+  generation of the hack's engine, and adds `ROM Hack Legality`. Nothing of the hack counts as nonexistent.
+- **Disguises** is the Custom Disguises ruleset with `Default Level = 100` and `ROM Hack Legality`.
+- In Regular and Hackmons a held item is refused in Generation 1, and an ability on a set is dropped without a
+  message in Generations 1 and 2, as in the official formats of those generations (a packed team always names one).
+
+## Movesets
+
+The readers (`learnsets-gb.ts`, `learnsets-gen3.ts`, `learnsets-nds.ts`) read each Pokemon's level-up moves, TM and HM
+compatibility, tutor moves, egg moves and its earlier evolution from the patched ROM. `build.ts` turns the game's move
+numbers into move ids, adds the moves of every earlier evolution and stores the result in the hack.
+
+- A clean base game reads the movesets of that game. They were compared with the decompilations and with the
+  simulator's own data for that generation.
+- If any part cannot be read with confidence the whole hack is marked `learnsetStatus: "unreadable"` with the reason in
+  `learnsetNote`. Regular then refuses every team with "Regular is not available for this hack: its movesets could not
+  be read. Use Hackmons or Disguises." Nothing is guessed and nothing is allowed by default.
+- A Pokemon without a readable list in a hack that was read cannot be used in Regular.
+- Level-up moves above level 100 are left out.
+- Not read, so Regular is stricter than the game for them: moves taught by scripts or events instead of a table
+  (Draco Meteor and the starter moves in Generations 4 and 5, Secret Sword, Relic Song, the Rotom appliance moves),
+  Pichu's Volt Tackle, tutors a hack adds outside the game's own tables (the Kanto Expansion Pak tradeback tutor, the
+  extra Crystal Clear tutors), and Mew learning every teachable move in pokeemerald-expansion hacks.
+- Without the clean base, binary FireRed hacks cannot be followed and come out unreadable.
+- Unreadable among the tested hacks: Prism (TM compatibility is stored outside the base stats), Elite Redux (rewritten
+  data layout), Inclement Emerald (TM compatibility does not decode, no tutor table), Vega (its level-up table uses
+  moves the move reader does not find), Un-Nerf HeartGold and SoulSilver (the code cannot be unpacked), and a hack
+  uploaded as an IPS patch of a game larger than 16 MB.
+
+## What clients read
+
+`/romhacks/<id>.json` (also the body of a successful upload, with `proof` added) and `/romhacks/<id>.full.json` both
+carry:
+
+```
+"learnsetStatus": "read",
+"learnsets": {
+  "moves": ["tackle", "growl", "vinewhip"],
+  "species": {"bulbasaur": [0, 1, 2], "ivysaur": [0, 1, 2]}
+}
+```
+
+- `learnsetStatus` is `"read"` or `"unreadable"`. When it is `"unreadable"` there is no `learnsets`, `learnsetNote`
+  holds the reason, and Regular is not available.
+- `learnsets.moves` is a list of move ids. `learnsets.species[<species id>]` lists every move that Pokemon may have
+  in Regular, earlier evolutions included, as positions in `learnsets.moves`. A Pokemon that is missing there cannot
+  be used in Regular.
+- `<id>.json` also has `learnsets.own[<species id>]`: the Pokemon's own lists `levelup` (pairs of level and move
+  position), `machines`, `tutor`, `egg`, sometimes `other` (moves learned on evolving), and `prevos` (species ids).
+- Abilities: `<id>.full.json` has `pokemon[<species id>].abilities` (`0`, `1`, `H`, `S`). In `<id>.json` the same
+  object is in `Pokedex[<species id>].abilities` when the hack changed it; otherwise the abilities of that Pokemon in
+  the generation named by `parentMod` apply. In Regular the ability has to be one of these.
+- `parentMod` (`gen1` to `gen9`) is the generation whose limits Regular and Hackmons use.
+
+In the simulator the same data is `dex.romHack.learnsetStatus`, `dex.romHack.learnsets` and, in the usual format,
+`dex.species.getLearnsetData(id)` and `dex.data.Learnsets` of the hack's dex (sources `<gen>L<level>`, `<gen>M`,
+`<gen>T`, `<gen>E`). A hack without readable movesets keeps the learnsets of its parent generation there.
 
 ## Supported patches and platforms
 
@@ -82,10 +182,13 @@ The upload limits below apply to every upload, with or without `base`.
 - `index.ts`: upload entry point, base selection, storage. `cli.ts`: the child process that does the reading.
 - `patch.ts`: the patch formats, including the BSP interpreter.
 - `gb.ts`, `prism.ts`, `gen3.ts`, `nds.ts`: data readers per platform.
+- `learnsets-gb.ts`, `learnsets-gen3.ts`, `learnsets-nds.ts`: moveset readers per platform.
 - `mechanics-gen1.ts`, `mechanics-gen2.ts`, `mechanics-gen3.ts`, `mechanics-nds.ts`, `nds-code.ts`: battle mechanics readers.
 - `sprites-*.ts`: sprite extraction.
 - `build.ts`: turns what the readers found into the stored data and the notes players see.
 - `signatures.ts`: loads the private signature data the readers search with (see Private files).
+- `sim/romhack-formats.ts`: the format ids and modes, shared by the simulator and the server.
+- `data/rulesets.ts`: the rules `ROM Hack`, `ROM Hack Legality` and `ROM Hack Regular`.
 
 ## Private files
 

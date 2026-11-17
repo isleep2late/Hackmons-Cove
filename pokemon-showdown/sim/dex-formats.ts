@@ -3,6 +3,7 @@ import { assignMissingFields, toID, BasicEffect } from './dex-data';
 import type { EventMethods } from './dex-conditions';
 import type { SpeciesData } from './dex-species';
 import { Tags } from '../data/tags';
+import { romHackMode } from './romhack-formats';
 
 const DEFAULT_MOD = 'gen9';
 const EXISTENCE_TAGS = ['past', 'future', 'lgpe', 'legends', 'unobtainable', 'cap', 'custom', 'demo', 'glitch', 'glitchgen1', 'glitchgen2', 'glitchgen3', 'nonexistent'];
@@ -845,6 +846,16 @@ export class DexFormats {
 		// apply rule repeals before other rules
 		// repeals is a ruleid:depth map (positive: unused, negative: used)
 		const ruleSpecs = ruleset.map(rule => this.validateRule(rule, format));
+		const hackMode = format.effectType === 'Format' ? romHackMode(format) : null;
+		const hack = hackMode && hackMode !== 'disguises' ? this.dex.romHackOf(format) : '';
+		if (hack && hackMode && hackMode !== 'disguises') {
+			const gen = this.dex.mod(`romhack${hack}`).gen;
+			const genFormats = this.dex.mod(`gen${gen}`).formats;
+			for (const rule of genFormats.romHackRules(hackMode)) {
+				const ruleSpec = genFormats.validateRule(rule, format);
+				if (!ruleSpecs.includes(ruleSpec)) ruleSpecs.push(ruleSpec);
+			}
+		}
 		for (let ruleSpec of ruleSpecs) {
 			if (typeof ruleSpec !== 'string') continue;
 			if (ruleSpec.startsWith('^')) ruleSpec = ruleSpec.slice(1);
@@ -1064,6 +1075,22 @@ export class DexFormats {
 
 		if (!repeals) format.ruleTable = ruleTable;
 		return ruleTable;
+	}
+
+	romHackRules(mode: 'regular' | 'hackmons'): string[] {
+		const gen = this.dex.gen;
+		if (mode === 'regular') {
+			const rules: string[] = [];
+			if (gen >= 3) rules.push('EV Limit = 510');
+			if (gen >= 5) rules.push('Team Preview');
+			return rules;
+		}
+		const source = this.get(`gen${gen}purehackmons`);
+		if (!source.exists) throw new Error(`There is no Pure Hackmons format for Generation ${gen}.`);
+		return [
+			...source.ruleset, ...source.banlist.map(ban => '-' + ban), ...source.restricted.map(ban => '*' + ban),
+			...source.unbanlist.map(ban => '+' + ban),
+		];
 	}
 
 	validateRule(rule: string, format: Format | null = null) {

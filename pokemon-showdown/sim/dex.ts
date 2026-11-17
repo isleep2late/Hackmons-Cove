@@ -41,6 +41,7 @@ import { Format, DexFormats } from './dex-formats';
 import { Utils } from '../lib/utils';
 import { Tags } from '../data/tags';
 import { installRomHackMechanics, type RomHackEngineTables, type RomHackMechanics } from './romhack-mechanics';
+import { romHackLearnsetTable, type RomHackLearnsetData } from './romhack-formats';
 
 const BASE_MOD = 'gen9' as ID;
 const DATA_DIR = path.resolve(__dirname, '../data');
@@ -122,6 +123,7 @@ export class ModdedDex {
 	romHack: {
 		sha256: string, species: Set<string>, moves: Set<string>, abilities: Set<string>, items: Set<string>,
 		mechanics: RomHackMechanics, engine: RomHackEngineTables, unappliedMechanics: string[],
+		learnsetStatus: 'read' | 'unreadable', learnsetNote: string, learnsets: RomHackLearnsetData | null,
 	} | null = null;
 	modsLoaded = false;
 
@@ -225,6 +227,16 @@ export class ModdedDex {
 			if (!formatsData[id]) formatsData[id] = { tier: 'OU', doublesTier: 'DOU', natDexTier: 'OU' };
 		}
 		dataCache.FormatsData = formatsData;
+		const learnsets: RomHackLearnsetData | null = hack.learnsetStatus === 'read' && hack.learnsets?.species ?
+			hack.learnsets : null;
+		if (learnsets) {
+			let table: AnyObject | null = null;
+			Object.defineProperty(dataCache, 'Learnsets', {
+				enumerable: true,
+				configurable: true,
+				get: () => (table ||= romHackLearnsetTable(learnsets, parentDex.gen)),
+			});
+		}
 		const installed = installRomHackMechanics(parentDex.gen, dataCache, hack.mechanics);
 		dex.parentMod = parentDex.currentMod;
 		dex.gen = parentDex.gen;
@@ -238,6 +250,9 @@ export class ModdedDex {
 			mechanics: installed.mechanics,
 			engine: installed.engine,
 			unappliedMechanics: installed.unapplied,
+			learnsetStatus: learnsets ? 'read' : 'unreadable',
+			learnsetNote: learnsets ? '' : String(hack.learnsetNote || ''),
+			learnsets,
 		};
 		dexes[mod] = dex;
 		romHackDexes.add(mod);

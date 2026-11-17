@@ -14,6 +14,7 @@ import { Tags } from '../data/tags';
 import { Teams } from './teams';
 import { PRNG } from './prng';
 import { type RuleTable } from './dex-formats';
+import { isCustomDisguisesFormat } from './romhack-formats';
 
 const EXISTENCE_TAGS = ['past', 'future', 'lgpe', 'legends', 'unobtainable', 'cap', 'custom', 'demo', 'glitch', 'glitchgen1', 'glitchgen2', 'glitchgen3', 'nonexistent'];
 const isCapContent = (thing: Species | Item | Move | Ability) => (
@@ -609,7 +610,7 @@ export class TeamValidator {
 		const isCustomHpAllowed = (
 			ruleTable.has('disguisemod') || dex.currentMod.includes('phnn') || format.id.includes('statuses')
 		) && !format.id.includes('nonerfsstandard');
-		const isCustomDisguises = ruleTable.has('disguisemod') && format.id.includes('customdisguise');
+		const isCustomDisguises = ruleTable.has('disguisemod') && isCustomDisguisesFormat(format.id);
 		const isArbitraryPPAllowed = isCustomDisguises ||
 			(dex.currentMod.includes('phnn') && dex.gen !== 3) ||
 			format.id.includes('disguises') || format.id.includes('statuses') ||
@@ -2163,6 +2164,17 @@ export class TeamValidator {
 		return null;
 	}
 
+	inRomHack(thing: Species | Item | Move | Ability) {
+		const hack = this.dex.romHack;
+		if (!hack) return false;
+		switch (thing.effectType) {
+		case 'Pokemon': return hack.species.has(thing.id);
+		case 'Move': return hack.moves.has(thing.id);
+		case 'Item': return hack.items.has(thing.id);
+		case 'Ability': return hack.abilities.has(thing.id);
+		}
+	}
+
 	checkTagRules(set: PokemonSet, thing: Species | Item | Move, setHas?: { [k: string]: true }) {
 		const dex = this.dex;
 		const ruleTable = this.ruleTable;
@@ -2174,7 +2186,8 @@ export class TeamValidator {
 		// We can't return here because the `-nonexistent` rule is a bit
 		// complicated in terms of what trumps it. We don't want e.g.
 		// +Mythical to unban Shaymin in Gen 1, for instance.
-		let nonexistentCheck = Tags.nonexistent.genericFilter!(thing) && ruleTable.check('nonexistent', setHas);
+		const inHack = this.inRomHack(thing);
+		let nonexistentCheck = Tags.nonexistent.genericFilter!(thing) && !inHack && ruleTable.check('nonexistent', setHas);
 		const capProblem = ruleTable.has('-tag:cap') && isCapContent(thing) ?
 			`${displayName} is made up for Smogon CAP and does not exist in this game.` : undefined;
 
@@ -2183,6 +2196,7 @@ export class TeamValidator {
 			const tagMatches = ruleTable.matchesTagRule(match, thing);
 			if (!tagMatches) continue;
 			const existenceTag = typeof match === 'string' && EXISTENCE_TAGS.includes(match as string);
+			if (existenceTag && inHack) continue;
 			if (type === '+') {
 				// We want rules like +CAP or +Past to trump -Nonexistent, but most tags shouldn't.
 				if (!existenceTag && nonexistentCheck) continue;
@@ -2344,7 +2358,7 @@ export class TeamValidator {
 			`${set.name}'s ability ${ability.name} is made up for Smogon CAP and does not exist in this game.` : null;
 
 		// obtainability
-		if (ability.isNonstandard) {
+		if (ability.isNonstandard && !this.inRomHack(ability)) {
 			banReason = ruleTable.check('tag:' + toID(ability.isNonstandard));
 			if (banReason) {
 				if (capProblem && !(this.format as any).upstreamCapAbilityMessage) return capProblem;

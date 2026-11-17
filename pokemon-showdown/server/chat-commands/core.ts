@@ -15,6 +15,7 @@
 
 import { isUpperStaff } from './admin';
 import { hackExists } from '../romhacks';
+import { romHackMode } from '../../sim/romhack-formats';
 import { Utils, ProcessManager } from '../../lib';
 import type { UserSettings } from '../users';
 import type { GlobalPermission, RoomPermission } from '../user-groups';
@@ -1668,7 +1669,7 @@ export const commands: Chat.ChatCommands = {
 		if (format.effectType !== 'Format') return this.popupReply(this.TL`Please provide a valid format.`);
 
 		let validatorFormat: string = format.id;
-		if (format.id.startsWith('gen9romhacks') && target.includes('@@@')) {
+		if (romHackMode(format) && target.includes('@@@')) {
 			try {
 				validatorFormat = Dex.formats.validate(target);
 			} catch (e: any) {

@@ -1,5 +1,6 @@
 import { readMechanics, slimMechanics, votePockets, type RawHack, type RawMove, type RawSpecies } from './build';
 import { readGen3Mechanics, readGen3TypeChart } from './mechanics-gen3';
+import { readGen3Learnsets, type Gen3Learnset, type Gen3LearnsetResult } from './learnsets-gen3';
 import { requireSignatures, signatureAnchor, signatureSection } from './signatures';
 import { Dex, toID } from '../../sim/dex';
 
@@ -1074,11 +1075,44 @@ export function extractGen3(rom: Buffer, base: Buffer | null = null): RawHack {
 		}
 	}
 
+	let learned: Gen3LearnsetResult;
+	try {
+		learned = readGen3Learnsets({
+			rom, base, rows: species, moves, embedded,
+			baseNames: () => {
+				if (!base) return null;
+				const speciesTable = findNameTable(base, 'BULBASAUR', 'IVYSAUR', 1, [11], 11, 3000);
+				const moveTable = findNameTable(base, 'POUND', 'KARATE CHOP', 1, [13], 13, 2048);
+				if (!speciesTable || !moveTable) return null;
+				const dex = Dex.mod('gen9');
+				return {
+					species: readNames(base, speciesTable, 11).map((name, index) => (
+						{ index, name, baseStats: dex.species.get(name).exists ? { hp: 1 } : undefined }
+					)).slice(1),
+					moves: readNames(base, moveTable, 13).map((name, index) => ({ index, name })).slice(1),
+				};
+			},
+		});
+	} catch {
+		learned = {
+			status: 'unreadable', note: 'The movesets of this game could not be read.',
+			learnsets: new Map(), evolvesFrom: new Map(),
+		};
+	}
+	if (learned.status === 'read') {
+		for (const entry of species as (RawSpecies & { learnset?: Gen3Learnset, evolvesFrom?: number })[]) {
+			const learnset = learned.learnsets.get(entry.index);
+			if (learnset) entry.learnset = learnset;
+			const from = learned.evolvesFrom.get(entry.index);
+			if (from) entry.evolvesFrom = from;
+		}
+	}
+
 	const code = rom.toString('latin1', 0xac, 0xb0);
 	const baseNames: { [k: string]: string } = {
 		BPR: 'FireRed', BPG: 'LeafGreen', BPE: 'Emerald', AXV: 'Ruby', AXP: 'Sapphire',
 	};
-	return {
+	const hack: RawHack = {
 		mechanics: read ? slimMechanics(read) : undefined,
 		typeChart: read?.typeChart,
 		baseGame: baseNames[code.slice(0, 3)] || code,
@@ -1092,4 +1126,8 @@ export function extractGen3(rom: Buffer, base: Buffer | null = null): RawHack {
 		typeBasedCategories: !hasSplit,
 		notes,
 	};
+	return Object.assign(
+		hack, learned.status === 'read' ? { learnsetStatus: learned.status } :
+		{ learnsetStatus: learned.status, learnsetNote: learned.note }
+	);
 }

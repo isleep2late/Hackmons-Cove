@@ -4,6 +4,9 @@ import {
 import { Dex, toID } from '../../sim/dex';
 import { readGen1Mechanics } from './mechanics-gen1';
 import { readGen2Mechanics } from './mechanics-gen2';
+import {
+	attachLearnsets, guarded, readGen1Learnsets, readGen2Learnsets, readPolishedLearnsets, unreadable,
+} from './learnsets-gb';
 import { extractPrism, isPrism } from './prism';
 import { requireSignatures, signatureAnchor } from './signatures';
 
@@ -650,7 +653,10 @@ function extractPolished(rom: Buffer, names: number, base: Buffer | null): RawHa
 	});
 
 	const mechanics = readMechanics(notes, () => slimMechanics(readGen2Mechanics(rom, base)));
-	return {
+	const learnsets = attachLearnsets(species, guarded(() => (hasStats ? readPolishedLearnsets(rom, {
+		stats: statsAt, stride, names: speciesNames, moveNames: moves.map(move => move.name),
+	}) : unreadable('the base stats were not found'))));
+	const raw: RawHack = {
 		mechanics: mechanics || undefined,
 		baseGame: 'Crystal',
 		baseGen: 2,
@@ -662,6 +668,7 @@ function extractPolished(rom: Buffer, names: number, base: Buffer | null): RawHa
 		typeBasedCategories: !hasSplit,
 		notes,
 	};
+	return Object.assign(raw, learnsets);
 }
 
 export function isGB(rom: Buffer): boolean {
@@ -678,7 +685,9 @@ export function extractGB(rom: Buffer, base: Buffer | null = null): RawHack {
 		const raw = extractPrism(rom);
 		if (raw.items.length) raw.itemPockets = scanPockets(rom, raw.items) || scanKeyPocket(rom, raw.items);
 		raw.mechanics = readMechanics(raw.notes, () => slimMechanics(readGen2Mechanics(rom, base))) || undefined;
-		return raw;
+		return Object.assign(raw, attachLearnsets(raw.species, unreadable(
+			'this game keeps its TM and HM compatibility outside the base stats, in a layout that is not known'
+		)));
 	}
 	const notes: string[] = [];
 	const typeNames = readTypeNames(rom);
@@ -689,6 +698,7 @@ export function extractGB(rom: Buffer, base: Buffer | null = null): RawHack {
 	const title = rom.toString('latin1', 0x134, 0x143).replace(/[^A-Za-z :.!-]/g, ' ').trim();
 
 	const species: RawSpecies[] = [];
+	let gen1Layout = { stats: -1, mew: -1, order: -1, internal: 0 };
 	if (isGen2) {
 		let names = findText(rom, 'BULBASAUR@IVYSAUR@@@');
 		if (names < 0) {
@@ -729,9 +739,11 @@ export function extractGB(rom: Buffer, base: Buffer | null = null): RawHack {
 		if (stats < 0 || rom[stats + 28] !== 2) notes.push('Base stats were not found; stats and types are taken from the official games.');
 		const mew = rom.indexOf(signatureAnchor('mewStats'));
 		const seen = new Set<number>();
+		gen1Layout = { stats, mew, order, internal: 0 };
 		for (let i = 0; i < 255; i++) {
 			const name = decodeFixed(rom, names + i * 10, 10);
 			if (name === null) break;
+			gen1Layout.internal = i + 1;
 			const dexNumber = rom[order + i];
 			if (!dexNumber || seen.has(dexNumber)) continue;
 			seen.add(dexNumber);
@@ -844,8 +856,10 @@ export function extractGB(rom: Buffer, base: Buffer | null = null): RawHack {
 		}
 	}
 	if (!typeChart.length) notes.push('The type chart was not found; the official chart is used.');
+	const learnsets = attachLearnsets(species, guarded(() => (isGen2 ?
+		readGen2Learnsets(rom, { stats: gen2Stats, moveNames }) : readGen1Learnsets(rom, { ...gen1Layout, moveNames }))));
 
-	return {
+	const raw: RawHack = {
 		mechanics,
 		baseGame: title || (isGen2 ? 'Gold/Silver/Crystal' : 'Red/Blue/Yellow'),
 		baseGen: isGen2 ? 2 : 1,
@@ -859,4 +873,5 @@ export function extractGB(rom: Buffer, base: Buffer | null = null): RawHack {
 		keepBaseEngine: true,
 		notes,
 	};
+	return Object.assign(raw, learnsets);
 }

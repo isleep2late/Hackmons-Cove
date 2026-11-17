@@ -1,6 +1,7 @@
 // Note: These are the rules that formats use
 
 import type { Learnset } from "../sim/dex-species";
+import { isCustomDisguisesFormat, romHackMode, ROM_HACK_REGULAR_UNAVAILABLE } from "../sim/romhack-formats";
 
 const PHNN_EVO_AVAILABLE = new Set([null, undefined, 'Past', 'Unobtainable']);
 
@@ -353,6 +354,10 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 				return [`This format needs a ROM patch: upload one in the teambuilder, then challenge someone who uploaded the same patch.`];
 			}
 		},
+		onChangeSet(set) {
+			const mode = romHackMode(this.format);
+			if (this.dex.romHack && this.dex.gen < 3 && (mode === 'regular' || mode === 'hackmons')) set.ability = 'No Ability';
+		},
 		onValidateSet(set) {
 			const hack = this.dex.romHack;
 			if (!hack) return;
@@ -364,13 +369,21 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 			if (disguise?.exists && !hack.species.has(disguise.id)) {
 				problems.push(`${disguise.name} does not exist in this ROM hack.`);
 			}
-			for (const name of [set.ability, ...(Array.isArray(extras.phAbilities) ? extras.phAbilities : [])]) {
+			const mode = romHackMode(this.format);
+			const plain = mode === 'regular' || mode === 'hackmons';
+			const listed = (value: unknown): string[] => (
+				Array.isArray(value) ? value : typeof value === 'string' ? value.split('/') : []
+			).map(part => String(part).trim()).filter(Boolean);
+			if (plain && this.dex.gen < 2 && this.toID(set.item)) {
+				problems.push(`${species.name} cannot hold an item: this ROM hack runs on Generation 1, which has no held items.`);
+			}
+			for (const name of [set.ability, ...listed(extras.phAbilities)]) {
 				const ability = this.dex.abilities.get(name);
 				if (this.dex.gen >= 3 && ability.id && ability.id !== 'noability' && !hack.abilities.has(ability.id)) {
 					problems.push(`${species.name}'s ability ${ability.name} does not exist in this ROM hack.`);
 				}
 			}
-			for (const name of [set.item, ...(Array.isArray(extras.phItems) ? extras.phItems : [])]) {
+			for (const name of [set.item, ...listed(extras.phItems)]) {
 				const item = this.dex.items.get(name);
 				if (this.dex.gen >= 2 && item.id && !hack.items.has(item.id)) {
 					problems.push(`${species.name}'s item ${item.name} does not exist in this ROM hack.`);
@@ -380,6 +393,45 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 				const move = this.dex.moves.get(name);
 				if (move.id && !hack.moves.has(move.id)) {
 					problems.push(`${species.name}'s move ${move.name} does not exist in this ROM hack.`);
+				}
+			}
+			return problems;
+		},
+	},
+	romhackregular: {
+		effectType: 'ValidatorRule',
+		name: 'ROM Hack Regular',
+		desc: "Pok&eacute;mon can only have the moves they learn and the abilities they have in the uploaded ROM hack.",
+		onValidateTeam() {
+			const hack = this.dex.romHack;
+			if (hack && !hack.learnsets) return [ROM_HACK_REGULAR_UNAVAILABLE];
+		},
+		onValidateSet(set) {
+			const hack = this.dex.romHack;
+			if (!hack?.learnsets) return;
+			const species = this.dex.species.get(set.species);
+			if (!hack.species.has(species.id)) return;
+			const problems: string[] = [];
+			const learnable = hack.learnsets.species[species.id];
+			if (!learnable) {
+				problems.push(`${species.name} cannot be used in Regular: its moveset could not be read from this ROM hack.`);
+			} else {
+				const moves = new Set(learnable.map(index => hack.learnsets!.moves[index]));
+				for (const name of set.moves || []) {
+					const move = this.dex.moves.get(/^(.*?)(\s+\((?:\d+|inf)(?:\/\d+)?\))?$/i.exec(name)?.[1] || name);
+					if (!move.id || !hack.moves.has(move.id)) continue;
+					if (!moves.has(move.id)) problems.push(`${species.name} cannot learn ${move.name} in this ROM hack.`);
+				}
+			}
+			if (this.dex.gen >= 3) {
+				const own = [...new Set(Object.values(species.abilities).filter(name => this.toID(name) !== 'noability'))];
+				const ability = this.dex.abilities.get(set.ability);
+				const none = !ability.id || ability.id === 'noability';
+				if (none ? own.length : !own.some(name => this.toID(name) === ability.id)) {
+					problems.push(own.length ?
+						`${species.name} cannot have ${none ? 'no ability' : `the ability ${ability.name}`} in this ROM hack; ` +
+						`it has ${own.join(' or ')}.` :
+						`${species.name} has no ability in this ROM hack, so it cannot have ${ability.name}.`);
 				}
 			}
 			return problems;
@@ -598,7 +650,7 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 		hasValue: 'positive-integer',
 		ruleset: ['MultiStatus Mod'],
 		onValidateRule(value) {
-			if (!this.format.id.includes('customdisguise')) {
+			if (!isCustomDisguisesFormat(this.format.id)) {
 				throw new Error(`MultiStatus is only available in Custom Disguises formats.`);
 			}
 			const num = parseInt(value);
@@ -613,7 +665,7 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 		name: 'MultiStatus Mod',
 		desc: "Custom Disguises only: allows each Pok&eacute;mon to have multiple major status conditions at the same time (one per family: sleep, poison, burn, freeze, paralysis). Poison and Toxic still can't stack with each other, and full-cure effects heal every status at once. Add \"MultiStatus Mod\" to the battle's custom rules to turn it on, or \"MultiStatus = 2\" to \"MultiStatus = 5\" to also cap the count.",
 		onValidateRule() {
-			if (!this.format.id.includes('customdisguise') && this.format.id !== 'multistatus') {
+			if (!isCustomDisguisesFormat(this.format.id) && this.format.id !== 'multistatus') {
 				throw new Error(`MultiStatus Mod is only available in Custom Disguises formats.`);
 			}
 		},
@@ -3677,8 +3729,9 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 		banlist: ['CAP', 'Future'],
 		onChangeSet(set, format, setHas, teamHas) {
 			let species = this.dex.species.get(set.species);
+			const hack = this.dex.romHack;
 			if (
-				(species.natDexTier === 'Illegal' || species.forme.includes('Totem')) &&
+				(species.natDexTier === 'Illegal' || species.forme.includes('Totem')) && !hack?.species.has(species.id) &&
 				!['Eevee-Starter', 'Floette-Eternal', 'Greninja-Ash', 'Pikachu-Starter', 'Xerneas-Neutral'].includes(species.name) &&
 				!this.ruleTable.has(`+pokemon:${species.id}`)
 			) {
@@ -3708,7 +3761,8 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 			for (const moveid of set.moves) {
 				const move = this.dex.moves.get(moveid);
 				if (
-					move.isNonstandard && move.isNonstandard !== 'Unobtainable' && !this.ruleTable.has(`+move:${move.id}`) &&
+					move.isNonstandard && move.isNonstandard !== 'Unobtainable' && !hack?.moves.has(move.id) &&
+					!this.ruleTable.has(`+move:${move.id}`) &&
 					!this.ruleTable.has(`+tag:${this.toID(move.isNonstandard)}`)
 				) {
 					return [`${move.name} is illegal.`];
@@ -3716,7 +3770,8 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 			}
 			const item = this.dex.items.get(set.item);
 			if (
-				item.isNonstandard && item.isNonstandard !== 'Unobtainable' && !this.ruleTable.has(`+item:${item.id}`) &&
+				item.isNonstandard && item.isNonstandard !== 'Unobtainable' && !hack?.items.has(item.id) &&
+				!this.ruleTable.has(`+item:${item.id}`) &&
 				!this.ruleTable.has(`+tag:${this.toID(item.isNonstandard)}`)
 			) {
 				return [`${item.name} is illegal.`];
