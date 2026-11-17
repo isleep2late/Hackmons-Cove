@@ -163,6 +163,9 @@ export const HACK_VERSION = 16;
 export interface HackDex {
 	version: number;
 	sha256: string;
+	patchSha256?: string;
+	autoBase?: string;
+	pickedBase?: { id: string, name: string };
 	patchFormat: string;
 	baseGame: string;
 	baseGen: number;

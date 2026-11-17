@@ -53,6 +53,8 @@ const IPS_BASE_UNKNOWN = 'The base game of this IPS patch could not be determine
 	'its base game, and this one fits no Game Boy or Game Boy Advance game this server has, or fits more than one ' +
 	'equally well. If this hack has a BPS or UPS patch, use that instead.';
 const IPS_EMPTY = 'This IPS patch changes nothing.';
+const BASE_NOT_OFFERED = 'This server does not offer the chosen base game. Choose one from the list.';
+const GB_MAX_SIZE = 0x800000;
 const STORE_FULL = 'This server cannot store more ROM hacks right now. Try again later.';
 
 const KNOWN_BASES: { [crc: string]: string } = {
@@ -70,6 +72,39 @@ const KNOWN_BASES: { [crc: string]: string } = {
 	ee6f5188: 'Pokemon Crystal (USA, 1.0)',
 	'3358e30a': 'Pokemon Crystal (USA, 1.1)',
 };
+
+export interface BaseChoice { id: string; name: string }
+
+const BASE_CHOICES: (BaseChoice & { crc: string })[] = [
+	{ crc: '9f7fdd53', id: 'red', name: 'Pokemon Red' },
+	{ crc: 'd6da8a1a', id: 'blue', name: 'Pokemon Blue' },
+	{ crc: '7d527d62', id: 'yellow', name: 'Pokemon Yellow' },
+	{ crc: '6bde3c3e', id: 'gold', name: 'Pokemon Gold' },
+	{ crc: '8ad48636', id: 'silver', name: 'Pokemon Silver' },
+	{ crc: 'ee6f5188', id: 'crystal', name: 'Pokemon Crystal' },
+	{ crc: '3358e30a', id: 'crystal-rev1', name: 'Pokemon Crystal (rev 1)' },
+	{ crc: 'f0815ee7', id: 'ruby', name: 'Pokemon Ruby' },
+	{ crc: '61641576', id: 'ruby-rev1', name: 'Pokemon Ruby (rev 1)' },
+	{ crc: 'aeac73e6', id: 'ruby-rev2', name: 'Pokemon Ruby (rev 2)' },
+	{ crc: '554dedc4', id: 'sapphire', name: 'Pokemon Sapphire' },
+	{ crc: 'bafedae5', id: 'sapphire-rev1', name: 'Pokemon Sapphire (rev 1)' },
+	{ crc: '9cc4410e', id: 'sapphire-rev2', name: 'Pokemon Sapphire (rev 2)' },
+	{ crc: '1f1c08fb', id: 'emerald', name: 'Pokemon Emerald' },
+	{ crc: 'dd88761c', id: 'firered', name: 'Pokemon FireRed' },
+	{ crc: '84ee4776', id: 'firered-rev1', name: 'Pokemon FireRed (rev 1)' },
+	{ crc: 'd69c96cc', id: 'leafgreen', name: 'Pokemon LeafGreen' },
+	{ crc: 'daffecec', id: 'leafgreen-rev1', name: 'Pokemon LeafGreen (rev 1)' },
+];
+
+export class ImportError extends Error {
+	code: string;
+	bases: BaseChoice[];
+	constructor(message: string, code: string, bases: BaseChoice[]) {
+		super(message);
+		this.code = code;
+		this.bases = bases;
+	}
+}
 
 interface BaseRom { file: string; size: number; mtime: number; crc: number; stock?: { key: string, digest: string } }
 let baseCache: BaseRom[] | null = null;
@@ -402,15 +437,114 @@ function siblingBases(a: Buffer, b: Buffer): boolean {
 	return differing < limit;
 }
 
-function readIps(patch: Buffer, bases: BaseRom[], sha256: string): RawHack {
+function ipsBases(bases: BaseRom[]): BaseRom[] {
+	return bases.filter(b => b.size <= 32 * 1024 * 1024);
+}
+
+function baseChoices(bases: BaseRom[]): BaseChoice[] {
+	const present = new Set(ipsBases(bases).map(base => hex8(base.crc)));
+	return BASE_CHOICES.filter(choice => present.has(choice.crc)).map(choice => ({ id: choice.id, name: choice.name }));
+}
+
+function baseUnknown(bases: BaseRom[]): Error {
+	const choices = baseChoices(bases);
+	return choices.length ? new ImportError(IPS_BASE_UNKNOWN, 'IPS_BASE_UNKNOWN', choices) : new Error(IPS_BASE_UNKNOWN);
+}
+
+export function pickedHackId(patchSha256: string, baseId: string): string {
+	return crypto.createHash('sha256').update(`${patchSha256}:${baseId}`).digest('hex');
+}
+
+function choiceId(base: BaseRom): string | undefined {
+	return BASE_CHOICES.find(choice => choice.crc === hex8(base.crc))?.id;
+}
+
+function detectedBase(stored: HackDex, patch: Buffer, bases: BaseRom[]): string | undefined {
+	if (stored.autoBase) return stored.autoBase;
+	try {
+		return choiceId(readIps(patch, bases, stored.sha256).base);
+	} catch {}
+	return undefined;
+}
+
+function storedHack(sha256: string): HackDex | null {
+	if (!hackExists(sha256)) return null;
+	try {
+		const stored = JSON.parse(fs.readFileSync(hackPath(sha256), 'utf8'));
+		if (stored.version === HACK_VERSION) return stored;
+	} catch {}
+	return null;
+}
+
+function reuseStored(stored: HackDex): HackDex {
+	if (!fs.existsSync(fullPath(stored.sha256))) writeFull(stored);
+	touchHack(stored.sha256);
+	return stored;
+}
+
+function checksumNames(patch: Buffer, bases: BaseRom[], picked: BaseRom): boolean {
+	for (const base of gbChecksumBases(patch, bases)) {
+		if (base === picked) return true;
+		try {
+			const clean = fs.readFileSync(base.file);
+			extractRom(Buffer.from(applyPatch(patch, clean)), clean);
+			return false;
+		} catch {}
+	}
+	return false;
+}
+
+function importPicked(patch: Buffer, sha256: string, baseId: string, bases: BaseRom[]): HackDex | null {
+	const small = ipsBases(bases);
+	const choices = baseChoices(bases);
+	const choice = choices.find(offered => offered.id === baseId);
+	const crc = BASE_CHOICES.find(offered => offered.id === baseId)?.crc;
+	const picked = small.find(base => hex8(base.crc) === crc);
+	if (!choice || !picked) throw new ImportError(BASE_NOT_OFFERED, 'UNKNOWN_BASE', choices);
 	if (!applyPatch(patch, Buffer.alloc(0)).length) throw new Error(IPS_EMPTY);
-	const small = bases.filter(b => b.size <= 32 * 1024 * 1024);
+	if (checksumNames(patch, small, picked)) return null;
+	const id = pickedHackId(sha256, choice.id);
+	const plain = storedHack(sha256);
+	if (plain && detectedBase(plain, patch, bases) === choice.id) return reuseStored(plain);
+	const derived = storedHack(id);
+	if (derived) return reuseStored(derived);
+	fs.mkdirSync(STORE_DIR, { recursive: true });
+	makeRoom(id);
+
+	const misfit = (reason: string) => new ImportError(
+		`This patch does not fit ${choice.name}: ${reason}. Choose the base game this patch was made for.`,
+		'IPS_BASE_MISFIT', choices
+	);
+	const clean = fs.readFileSync(picked.file);
+	if (!ipsBoundaryFit(patch, clean).checked) throw misfit('it changes nothing inside that game');
+	const rom = Buffer.from(applyPatch(patch, clean));
+	if (rom.equals(clean)) throw misfit('it changes nothing in that game');
+	if (isGB(clean) ? !isGB(rom) || rom.length > GB_MAX_SIZE : isGen3(clean) !== isGen3(rom)) {
+		throw misfit('the patched game is not a game of that kind any more');
+	}
+	let raw: RawHack;
+	let hack: HackDex;
+	try {
+		raw = extractRom(rom, clean);
+		hack = buildHackDex(raw, id, 'ips');
+	} catch (e: any) {
+		throw misfit(`the patched game could not be read (${String(e.message || 'unreadable').replace(/\.+$/, '')})`);
+	}
+	hack.patchSha256 = sha256;
+	hack.pickedBase = { ...choice };
+	hack.notes.push(`The base game of this IPS patch was chosen by the uploader: ${choice.name}.`);
+	return storeHack(hack, raw);
+}
+
+function readIps(patch: Buffer, bases: BaseRom[], sha256: string): { raw: RawHack, base: BaseRom } {
+	if (!applyPatch(patch, Buffer.alloc(0)).length) throw new Error(IPS_EMPTY);
+	const small = ipsBases(bases);
 	if (!small.length) throw new Error('This server has no base games to patch.');
 	let trustedError: Error | null = null;
 	for (const base of gbChecksumBases(patch, small)) {
 		try {
 			const clean = fs.readFileSync(base.file);
-			return extractRom(Buffer.from(applyPatch(patch, clean)), clean);
+			return { raw: extractRom(Buffer.from(applyPatch(patch, clean)), clean), base };
 		} catch (e: any) {
 			if (trustedError) continue;
 			const reason = String(e.message || 'the game could not be read').replace(/\.+$/, '');
@@ -463,14 +597,14 @@ function readIps(patch: Buffer, bases: BaseRom[], sha256: string): RawHack {
 	const pool = (changed.length ? changed : fits).sort((a, b) => b.kept - a.kept);
 	const best = pool.find(a => pool.every(b => a === b || beats(a, b))) ||
 		pool.find(a => pool.every(b => a === b || same(a, b) || beats(a, b)));
-	if (!best) throw new Error(IPS_BASE_UNKNOWN);
+	if (!best) throw baseUnknown(bases);
 	if (!best.changed) {
 		const others = tried.filter(other => (
 			other.base !== best.base && !related(best.clean, other.clean, pairKey(best.base, other.base))
 		));
 		const misses = others.reduce((sum, other) => sum + other.matches, 0);
 		if (misses < Math.max(others.length, 1) * IPS_MIN_MISSES || engineLost(best.raw, best.clean)) {
-			throw new Error(IPS_BASE_UNKNOWN);
+			throw baseUnknown(bases);
 		}
 	}
 	if (pool.some(other => other !== best && other.rom !== best.rom && !beats(best, other))) {
@@ -479,27 +613,32 @@ function readIps(patch: Buffer, bases: BaseRom[], sha256: string): RawHack {
 			`${KNOWN_BASES[hex8(best.base.crc)] || best.raw.baseGame}.`
 		);
 	}
-	return best.raw;
+	return { raw: best.raw, base: best.base };
 }
 
-export function importPatch(patch: Buffer): HackDex {
+export function importPatch(patch: Buffer, baseId = ''): HackDex {
 	if (patch.length > MAX_PATCH_SIZE) throw new Error('The patch is larger than 96 MB.');
 	const info = readPatchInfo(patch);
 	const sha256 = crypto.createHash('sha256').update(patch).digest('hex');
-	if (hackExists(sha256)) {
-		const stored = JSON.parse(fs.readFileSync(hackPath(sha256), 'utf8'));
-		if (stored.version === HACK_VERSION) {
-			if (!fs.existsSync(fullPath(sha256))) writeFull(stored);
-			touchHack(sha256);
-			return stored;
+	if (baseId) {
+		requireSignatures();
+		const offered = listBases();
+		if (info.format === 'ips') {
+			const picked = importPicked(patch, sha256, baseId, offered);
+			if (picked) return picked;
+		} else if (!baseChoices(offered).some(choice => choice.id === baseId)) {
+			throw new ImportError(BASE_NOT_OFFERED, 'UNKNOWN_BASE', baseChoices(offered));
 		}
 	}
+	const stored = storedHack(sha256);
+	if (stored) return reuseStored(stored);
 
 	requireSignatures();
 	fs.mkdirSync(STORE_DIR, { recursive: true });
 	makeRoom(sha256);
 	const bases = listBases();
 	let raw: RawHack | null = null;
+	let autoBase: string | undefined;
 	if (info.sourceCrc !== null) {
 		const base = bases.find(b => b.crc === info.sourceCrc && b.size === info.sourceSize);
 		if (!base) {
@@ -547,7 +686,9 @@ export function importPatch(patch: Buffer): HackDex {
 		}
 		if (!raw) throw lastError || new Error('This server has no base games to patch.');
 	} else if (info.format === 'ips') {
-		raw = readIps(patch, bases, sha256);
+		const read = readIps(patch, bases, sha256);
+		raw = read.raw;
+		autoBase = choiceId(read.base);
 	} else {
 		let lastError: Error | null = null;
 		const deadline = Date.now() + BSP_TOTAL_MILLIS;
@@ -568,7 +709,14 @@ export function importPatch(patch: Buffer): HackDex {
 		}
 		if (!raw) throw lastError || new Error('This server has no base games to patch.');
 	}
-	const hack = buildHackDex(raw, sha256, info.format);
+	const built = buildHackDex(raw, sha256, info.format);
+	if (autoBase) built.autoBase = autoBase;
+	return storeHack(built, raw);
+}
+
+function storeHack(hack: HackDex, raw: RawHack): HackDex {
+	const sha256 = hack.sha256;
+	const info = { format: hack.patchFormat };
 	if (raw.rom) {
 		try {
 			const spriteDir = path.join(STORE_DIR, sha256);
@@ -713,11 +861,16 @@ export function handleRequest(req: http.IncomingMessage, res: http.ServerRespons
 	}
 	if (req.method === 'POST' && url === '/romhacks/upload') {
 		const key = addressKey(req);
+		const baseId = new URLSearchParams((req.url || '').split('?').slice(1).join('?')).get('base') || '';
 		let status = 429;
 		let refusal: string | null = null;
 		if (!originAllowed(req)) {
 			status = 403;
 			refusal = 'Patches can only be uploaded from this site.';
+		} else if (!/^[a-z0-9-]{0,32}$/.test(baseId)) {
+			req.resume();
+			send(res, 400, JSON.stringify({ error: BASE_NOT_OFFERED, code: 'UNKNOWN_BASE' }));
+			return true;
 		} else if (storeFull()) {
 			status = 503;
 			refusal = STORE_FULL;
@@ -770,13 +923,13 @@ export function handleRequest(req: http.IncomingMessage, res: http.ServerRespons
 				return;
 			}
 			activeImports++;
-			const args = [`--max-old-space-size=${IMPORT_HEAP_MB}`, path.join(__dirname, 'cli.js'), tmp];
+			const args = [`--max-old-space-size=${IMPORT_HEAP_MB}`, path.join(__dirname, 'cli.js'), tmp, baseId];
 			child_process.execFile(process.execPath, args, {
 				maxBuffer: 1024 * 1024, timeout: IMPORT_MILLIS, killSignal: 'SIGKILL',
 			}, (err, stdout) => {
 				activeImports--;
 				fs.rmSync(tmp, { force: true });
-				let result: { sha256?: string, error?: string } = {};
+				let result: { sha256?: string, error?: string, code?: string, bases?: BaseChoice[] } = {};
 				try {
 					result = JSON.parse(stdout);
 				} catch {}
@@ -785,7 +938,9 @@ export function handleRequest(req: http.IncomingMessage, res: http.ServerRespons
 					send(res, 200, `{"proof":"${proofFor(result.sha256)}",${stored.slice(1)}`);
 				} else {
 					const error = result.error || 'The patch could not be read.';
-					send(res, error === STORE_FULL ? 503 : 400, JSON.stringify({ error }));
+					const code = typeof result.code === 'string' ? result.code : undefined;
+					const bases = code && Array.isArray(result.bases) ? result.bases : undefined;
+					send(res, error === STORE_FULL ? 503 : 400, JSON.stringify({ error, code, bases }));
 				}
 			});
 		});
