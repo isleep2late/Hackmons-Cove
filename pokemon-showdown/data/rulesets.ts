@@ -1,7 +1,9 @@
 // Note: These are the rules that formats use
 
 import type { Learnset } from "../sim/dex-species";
-import { isCustomDisguisesFormat, romHackMode, ROM_HACK_REGULAR_UNAVAILABLE } from "../sim/romhack-formats";
+import {
+	isCustomDisguisesFormat, romHackHasSpecies, romHackMode, ROM_HACK_REGULAR_UNAVAILABLE,
+} from "../sim/romhack-formats";
 
 const PHNN_EVO_AVAILABLE = new Set([null, undefined, 'Past', 'Unobtainable']);
 
@@ -329,6 +331,9 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 			if (!/^[0-9a-f]{64}$/.test(value.trim().toLowerCase())) {
 				throw new Error(`Invalid ROM Hack "${value}"; it must be the SHA-256 of an uploaded patch file.`);
 			}
+			if (!romHackMode(this.format)) {
+				throw new Error(`The rule "ROM Hack" can only be used in the ROM Hacks formats.`);
+			}
 		},
 		onBegin() {
 			if (!this.dex.romHack) return;
@@ -355,8 +360,12 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 			}
 		},
 		onChangeSet(set) {
+			const hack = this.dex.romHack;
+			if (!hack) return;
 			const mode = romHackMode(this.format);
-			if (this.dex.romHack && this.dex.gen < 3 && (mode === 'regular' || mode === 'hackmons')) set.ability = 'No Ability';
+			if (this.dex.gen < 3 && (mode === 'regular' || mode === 'hackmons' || !hack.abilities.size)) {
+				set.ability = 'No Ability';
+			}
 		},
 		onValidateSet(set) {
 			const hack = this.dex.romHack;
@@ -364,9 +373,9 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 			const problems: string[] = [];
 			const extras = set as AnyObject;
 			const species = this.dex.species.get(set.species);
-			if (!hack.species.has(species.id)) problems.push(`${species.name} does not exist in this ROM hack.`);
+			if (!romHackHasSpecies(hack, species)) problems.push(`${species.name} does not exist in this ROM hack.`);
 			const disguise = extras.disguise ? this.dex.species.get(extras.disguise) : null;
-			if (disguise?.exists && !hack.species.has(disguise.id)) {
+			if (disguise?.exists && !romHackHasSpecies(hack, disguise)) {
 				problems.push(`${disguise.name} does not exist in this ROM hack.`);
 			}
 			const mode = romHackMode(this.format);
@@ -379,13 +388,13 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 			}
 			for (const name of [set.ability, ...listed(extras.phAbilities)]) {
 				const ability = this.dex.abilities.get(name);
-				if (this.dex.gen >= 3 && ability.id && ability.id !== 'noability' && !hack.abilities.has(ability.id)) {
+				if (ability.id && ability.id !== 'noability' && !hack.abilities.has(ability.id)) {
 					problems.push(`${species.name}'s ability ${ability.name} does not exist in this ROM hack.`);
 				}
 			}
 			for (const name of [set.item, ...listed(extras.phItems)]) {
 				const item = this.dex.items.get(name);
-				if (this.dex.gen >= 2 && item.id && !hack.items.has(item.id)) {
+				if (item.id && !hack.items.has(item.id) && !(plain && this.dex.gen < 2)) {
 					problems.push(`${species.name}'s item ${item.name} does not exist in this ROM hack.`);
 				}
 			}
@@ -410,17 +419,27 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 			const hack = this.dex.romHack;
 			if (!hack?.learnsets) return;
 			const species = this.dex.species.get(set.species);
-			if (!hack.species.has(species.id)) return;
+			if (!romHackHasSpecies(hack, species)) return;
 			const problems: string[] = [];
-			const learnable = hack.learnsets.species[species.id];
+			const learnable = hack.learnsets.species[species.id] ||
+				(species.isCosmeticForme ? hack.learnsets.species[this.toID(species.baseSpecies)] : undefined);
+			const chosen = new Set<string>();
+			for (const name of set.moves || []) {
+				const move = this.dex.moves.get(/^(.*?)(\s+\((?:\d+|inf)(?:\/\d+)?\))?$/i.exec(name)?.[1] || name);
+				if (!move.id) continue;
+				if (chosen.has(move.id)) problems.push(`${species.name} has multiple copies of ${move.name}.`);
+				chosen.add(move.id);
+			}
 			if (!learnable) {
 				problems.push(`${species.name} cannot be used in Regular: its moveset could not be read from this ROM hack.`);
 			} else {
 				const moves = new Set(learnable.map(index => hack.learnsets!.moves[index]));
-				for (const name of set.moves || []) {
-					const move = this.dex.moves.get(/^(.*?)(\s+\((?:\d+|inf)(?:\/\d+)?\))?$/i.exec(name)?.[1] || name);
-					if (!move.id || !hack.moves.has(move.id)) continue;
-					if (!moves.has(move.id)) problems.push(`${species.name} cannot learn ${move.name} in this ROM hack.`);
+				const sketch = moves.has('sketch');
+				for (const id of chosen) {
+					const move = this.dex.moves.get(id);
+					if (!hack.moves.has(move.id) || moves.has(move.id)) continue;
+					if (sketch && !hack.learnsets.noSketch?.includes(move.id)) continue;
+					problems.push(`${species.name} cannot learn ${move.name} in this ROM hack.`);
 				}
 			}
 			if (this.dex.gen >= 3) {

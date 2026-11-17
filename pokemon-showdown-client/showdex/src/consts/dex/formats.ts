@@ -313,7 +313,7 @@ export const FormatSuffixes: [test: RegExp, replacement: string][] = [
   [/^dlc(\d)/, 'DLC $1'],
   [/series(\d+)/, 'Series $1'],
   [/regm([a-z])/, 'Reg M-$1'],
-  [/reg([a-z])(?!lation)/, 'Reg $1'],
+  [/reg(?!ular)([a-z])(?!lation)/, 'Reg $1'],
   [/regulation([a-z])/, 'Reg $1'],
   [/muk$/, `${times} Muk`], // saw a "[Gen 2] UU (+ Muk)" lol
   [/bo(\d+)$/, 'Bo$1'],

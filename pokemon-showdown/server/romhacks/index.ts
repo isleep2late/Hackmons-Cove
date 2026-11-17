@@ -335,7 +335,10 @@ function writeFull(hack: HackDex) {
 		items: {}, learnsetStatus: hack.learnsetStatus,
 	};
 	if (hack.learnsetNote) full.learnsetNote = hack.learnsetNote;
-	if (hack.learnsets) full.learnsets = { moves: hack.learnsets.moves, species: hack.learnsets.species };
+	if (hack.learnsets) {
+		full.learnsets = { moves: hack.learnsets.moves, species: hack.learnsets.species };
+		if (hack.learnsets.noSketch) full.learnsets.noSketch = hack.learnsets.noSketch;
+	}
 	for (const id of hack.legal.species) {
 		const species = dex.species.get(id);
 		if (!species.exists) continue;

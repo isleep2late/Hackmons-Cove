@@ -1942,7 +1942,16 @@
 				this.update();
 				return;
 			}
-			this.changeFormat(RomHacks.modeFormat(this.curTeam.format, mode));
+			var format = RomHacks.modeFormat(this.curTeam.format, mode);
+			var extras = RomHacks.disguiseExtras(this.curSetList, format, this.curTeam.gen);
+			if (extras) {
+				if (!confirm(RomHacks.extrasWarning(mode, extras))) {
+					this.update();
+					return;
+				}
+				RomHacks.disguiseExtras(this.curSetList, format, this.curTeam.gen, true);
+			}
+			this.changeFormat(format);
 		},
 		romHackNames: function (key, kind) {
 			var hack = RomHacks.active;

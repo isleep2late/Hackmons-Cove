@@ -5,6 +5,7 @@ export type RomHackMode = 'regular' | 'hackmons' | 'disguises';
 export interface RomHackLearnsetData {
 	moves: string[];
 	species: { [id: string]: number[] };
+	noSketch?: string[];
 	own?: { [id: string]: {
 		levelup: number[], machines: number[], tutor: number[], egg: number[], other?: number[], prevos?: string[],
 	}, };
@@ -25,9 +26,28 @@ export function romHackMode(format: string | { id: string }): RomHackMode | null
 	return ROM_HACK_FORMATS.get(id) || null;
 }
 
+export function romHackRuleId(rules: readonly string[]): string {
+	let found = '';
+	for (const rule of rules) {
+		const [name, value, ...rest] = rule.replace(/^[\s!^+*-]+/, '').split('=');
+		if (toID(name) !== 'romhack') continue;
+		const id = (value || '').trim().toLowerCase();
+		if (rest.length || !/^[0-9a-f]{64}$/.test(id) || (found && found !== id)) return '';
+		found = id;
+	}
+	return found;
+}
+
 export function romHackIdOf(formatid: string): string {
 	if (!romHackMode(formatid)) return '';
-	return /@@@.*\brom ?hack ?= ?([0-9a-f]{64})/i.exec(formatid)?.[1].toLowerCase() || '';
+	const at = formatid.indexOf('@@@');
+	return at < 0 ? '' : romHackRuleId(formatid.slice(at + 3).split(','));
+}
+
+export function romHackHasSpecies(
+	hack: { species: Set<string> }, species: { id: string, baseSpecies: string, isCosmeticForme?: boolean }
+): boolean {
+	return hack.species.has(species.id) || (!!species.isCosmeticForme && hack.species.has(toID(species.baseSpecies)));
 }
 
 export function isCustomDisguisesFormat(formatid: string): boolean {

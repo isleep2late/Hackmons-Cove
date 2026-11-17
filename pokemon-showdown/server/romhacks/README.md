@@ -30,10 +30,14 @@ The earlier id is hidden from the format lists and is kept so that saved teams, 
 `sim/romhack-formats.ts` is the one place that knows these ids: `romHackMode(format)` gives `regular`, `hackmons`,
 `disguises` or `null`, `romHackIdOf(formatid)` gives the hack id of a format string, and
 `isCustomDisguisesFormat(formatid)` is true for the Custom Disguises formats and for the two Disguises ids.
+`romHackRuleId(rules)` reads the id out of a list of custom rules; the challenge check and the simulator both use it,
+so they always agree on the hack.
 
 The hack is named by the custom rule `ROM Hack = <id>`, for example
 `gen9romhacksregularexperimental@@@ROM Hack = <64 hex digits>`. Without that rule every team is refused with "This
 format needs a ROM patch: upload one in the teambuilder, then challenge someone who uploaded the same patch."
+The rule is only accepted in these four formats ("The rule "ROM Hack" can only be used in the ROM Hacks formats."). A
+format that names two different hacks, for example with an override rule (`!! ROM Hack = ...`), counts as naming none.
 
 Each hack runs on one generation's engine (`parentMod`, `gen1` to `gen9`). Regular and Hackmons take their limits from
 that generation, so the rules are completed when the hack is known (`getRuleTable` in `sim/dex-formats.ts`).
@@ -60,6 +64,11 @@ that generation, so the rules are completed when the hack is known (`getRuleTabl
 - **Disguises** is the Custom Disguises ruleset with `Default Level = 100` and `ROM Hack Legality`.
 - In Regular and Hackmons a held item is refused in Generation 1, and an ability on a set is dropped without a
   message in Generations 1 and 2, as in the official formats of those generations (a packed team always names one).
+- In Disguises the same holds for a hack that has no abilities: the main ability is dropped without a message, and
+  extra abilities are refused. Items and extra items that are not in the hack are refused in every generation.
+- A cosmetic forme (Unown-B, Shellos-East, Burmy-Sandy, Deerling-Summer and the like) counts as being in the hack
+  when its base Pokemon is, whether or not the game has a separate row for it.
+- Regular refuses a set with the same move twice.
 
 ## Movesets
 
@@ -72,7 +81,13 @@ numbers into move ids, adds the moves of every earlier evolution and stores the 
 - If any part cannot be read with confidence the whole hack is marked `learnsetStatus: "unreadable"` with the reason in
   `learnsetNote`. Regular then refuses every team with "Regular is not available for this hack: its movesets could not
   be read. Use Hackmons or Disguises." Nothing is guessed and nothing is allowed by default.
-- A Pokemon without a readable list in a hack that was read cannot be used in Regular.
+- A Pokemon without a readable list in a hack that was read cannot be used in Regular. A forme the game lists
+  without data of its own (the Vivillon patterns in Gaia) and a cosmetic forme use the list of their base Pokemon.
+- A Pokemon inherits from every earlier evolution the game's evolution table names, not only the first.
+- A Pokemon that learns Sketch may have any move of the hack in Regular, except the moves Sketch cannot copy in the
+  hack's generation (`learnsets.noSketch`).
+- In the Generation 3 reader a list that fails the strict check is read again leniently (blank entries are skipped, a
+  level of 0 counts as level 1) instead of dropping the Pokemon.
 - Level-up moves above level 100 are left out.
 - Not read, so Regular is stricter than the game for them: moves taught by scripts or events instead of a table
   (Draco Meteor and the starter moves in Generations 4 and 5, Secret Sword, Relic Song, the Rotom appliance moves),
@@ -102,8 +117,11 @@ carry:
 - `learnsets.moves` is a list of move ids. `learnsets.species[<species id>]` lists every move that Pokemon may have
   in Regular, earlier evolutions included, as positions in `learnsets.moves`. A Pokemon that is missing there cannot
   be used in Regular.
+- `learnsets.noSketch` (only when the hack has Sketch) lists the move ids Sketch cannot copy. A Pokemon whose list
+  has `sketch` may have every other move of the hack.
 - `<id>.json` also has `learnsets.own[<species id>]`: the Pokemon's own lists `levelup` (pairs of level and move
   position), `machines`, `tutor`, `egg`, sometimes `other` (moves learned on evolving), and `prevos` (species ids).
+  The Cove clients leave `own` out of what they keep in browser storage, and keep at most four hacks there.
 - Abilities: `<id>.full.json` has `pokemon[<species id>].abilities` (`0`, `1`, `H`, `S`). In `<id>.json` the same
   object is in `Pokedex[<species id>].abilities` when the hack changed it; otherwise the abilities of that Pokemon in
   the generation named by `parentMod` apply. In Regular the ability has to be one of these.

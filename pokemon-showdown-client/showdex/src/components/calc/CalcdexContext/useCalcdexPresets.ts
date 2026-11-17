@@ -21,7 +21,7 @@ import { formatId, nonEmptyObject } from '@showdex/utils/core';
 import { logger, runtimer } from '@showdex/utils/debug';
 import { determineTerrain, determineWeather, getGenlessFormat } from '@showdex/utils/dex';
 import { PokemonNatureBoosts } from '@showdex/consts/dex';
-import { applyPhnnMinConfusionSpread, detectMaxEvsFormat, getMaxStatEv, getPhnnMinConfusionNature } from '@showdex/phnn';
+import { applyPhnnMinConfusionSpread, detectUncappedEvsFormat, getMaxStatEv, getPhnnMinConfusionNature } from '@showdex/phnn';
 import {
   type CalcdexBattlePresetsHookValue,
   applyPreset,
@@ -564,7 +564,7 @@ export const useCalcdexPresets = (
 
           pokemon.nature = state.legacy ? 'Hardy' : 'Adamant';
 
-          const maxEv = !state.legacy && detectMaxEvsFormat(state.format)
+          const maxEv = !state.legacy && detectUncappedEvsFormat(state.format)
             ? getMaxStatEv(state.format)
             : null;
 

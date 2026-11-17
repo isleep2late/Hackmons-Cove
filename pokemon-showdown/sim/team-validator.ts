@@ -14,7 +14,7 @@ import { Tags } from '../data/tags';
 import { Teams } from './teams';
 import { PRNG } from './prng';
 import { type RuleTable } from './dex-formats';
-import { isCustomDisguisesFormat } from './romhack-formats';
+import { isCustomDisguisesFormat, romHackHasSpecies } from './romhack-formats';
 
 const EXISTENCE_TAGS = ['past', 'future', 'lgpe', 'legends', 'unobtainable', 'cap', 'custom', 'demo', 'glitch', 'glitchgen1', 'glitchgen2', 'glitchgen3', 'nonexistent'];
 const isCapContent = (thing: Species | Item | Move | Ability) => (
@@ -2168,7 +2168,7 @@ export class TeamValidator {
 		const hack = this.dex.romHack;
 		if (!hack) return false;
 		switch (thing.effectType) {
-		case 'Pokemon': return hack.species.has(thing.id);
+		case 'Pokemon': return romHackHasSpecies(hack, thing);
 		case 'Move': return hack.moves.has(thing.id);
 		case 'Item': return hack.items.has(thing.id);
 		case 'Ability': return hack.abilities.has(thing.id);

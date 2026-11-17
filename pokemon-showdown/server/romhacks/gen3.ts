@@ -1,6 +1,6 @@
 import { readMechanics, slimMechanics, votePockets, type RawHack, type RawMove, type RawSpecies } from './build';
 import { readGen3Mechanics, readGen3TypeChart } from './mechanics-gen3';
-import { readGen3Learnsets, type Gen3Learnset, type Gen3LearnsetResult } from './learnsets-gen3';
+import { readGen3Learnsets, type Gen3LearnsetResult } from './learnsets-gen3';
 import { requireSignatures, signatureAnchor, signatureSection } from './signatures';
 import { Dex, toID } from '../../sim/dex';
 
@@ -1100,11 +1100,13 @@ export function extractGen3(rom: Buffer, base: Buffer | null = null): RawHack {
 		};
 	}
 	if (learned.status === 'read') {
-		for (const entry of species as (RawSpecies & { learnset?: Gen3Learnset, evolvesFrom?: number })[]) {
+		for (const entry of species) {
 			const learnset = learned.learnsets.get(entry.index);
 			if (learnset) entry.learnset = learnset;
 			const from = learned.evolvesFrom.get(entry.index);
-			if (from) entry.evolvesFrom = from;
+			if (!from?.length) continue;
+			entry.evolvesFrom = from[0];
+			if (from.length > 1) entry.evolvesFromAll = from;
 		}
 	}
 

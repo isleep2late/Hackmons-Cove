@@ -171,7 +171,7 @@ export function votePockets(
 	});
 }
 
-export const HACK_VERSION = 17;
+export const HACK_VERSION = 18;
 
 export interface HackDex {
 	version: number;
@@ -214,12 +214,13 @@ export interface HackLearnsets {
 	moves: string[];
 	species: { [id: string]: number[] };
 	own: { [id: string]: HackLearnset };
+	noSketch?: string[];
 }
 
 const LEARNSETS_UNREADABLE = 'The movesets of this game could not be read';
 
 function buildLearnsets(
-	raw: RawHack, moveByIndex: Map<number, string>, speciesByIndex: Map<number, string>
+	raw: RawHack, moveByIndex: Map<number, string>, speciesByIndex: Map<number, string>, sameAs: Map<string, string>
 ): { status: 'read' | 'unreadable', note?: string, learnsets?: HackLearnsets } {
 	if (raw.learnsetStatus !== 'read') {
 		return { status: 'unreadable', note: raw.learnsetNote || `${LEARNSETS_UNREADABLE}.` };
@@ -307,6 +308,9 @@ function buildLearnsets(
 		}
 		learnsets.own[id] = prevos.length ? { ...own, prevos } : own;
 		learnsets.species[id] = [...all].sort((a, b) => a - b);
+	}
+	for (const [id, baseId] of sameAs) {
+		if (!learnsets.species[id] && learnsets.species[baseId]) learnsets.species[id] = learnsets.species[baseId];
 	}
 	if (!Object.keys(learnsets.species).length) return { status: 'unreadable', note: `${LEARNSETS_UNREADABLE}.` };
 	return { status: 'read', learnsets };
@@ -1205,6 +1209,7 @@ function buildHackDexFrom(
 	const seen = new Map<string, number>();
 	const statKey = (stats: { [stat: string]: number }) => ['hp', 'atk', 'def', 'spa', 'spd', 'spe'].map(stat => stats[stat]).join();
 	const present = new Set<string>();
+	const dataless = new Set<string>();
 	for (const rawSpecies of raw.species) {
 		if (rawSpecies.baseStats) present.add(`${toID(rawSpecies.name)}|${statKey(rawSpecies.baseStats)}`);
 	}
@@ -1275,6 +1280,7 @@ function buildHackDexFrom(
 				}
 			}
 			bump(target.gen);
+			if (!stats && !legalSpecies.has(target.id)) dataless.add(target.id);
 			legalSpecies.add(target.id);
 			const patch: AnyObject = {};
 			if (stats && !(Object.keys(stats) as StatID[]).every(stat => target.baseStats[stat] === stats[stat])) {
@@ -1394,9 +1400,22 @@ function buildHackDexFrom(
 	}
 
 	const notes = raw.notes.slice();
+	const cosmeticBases = new Map<string, string>();
+	for (const id of legalSpecies) {
+		const forme = base.species.get(id);
+		if (!forme.exists || forme.baseSpecies === forme.name) continue;
+		if (forme.isCosmeticForme || dataless.has(id)) cosmeticBases.set(id, toID(forme.baseSpecies));
+	}
 	const learned = legalMoves.size < 50 ?
 		{ status: 'unreadable' as const, note: `${LEARNSETS_UNREADABLE}: the move list was not found.`, learnsets: undefined } :
-		buildLearnsets(raw, moveByIndex, speciesByIndex);
+		buildLearnsets(raw, moveByIndex, speciesByIndex, cosmeticBases);
+	if (learned.learnsets?.moves.includes('sketch')) {
+		const parent = Dex.mod(`gen${maxGen}`);
+		learned.learnsets.noSketch = [...legalMoves].filter(id => {
+			const move = parent.moves.get(id);
+			return move.exists && !!(move.flags['nosketch'] || move.isZ || move.isMax);
+		});
+	}
 	const standard = (entry: { gen: number, isNonstandard: string | null }) => entry.gen <= maxGen && !entry.isNonstandard;
 	if (legalMoves.size < 50) {
 		for (const move of base.moves.all()) {

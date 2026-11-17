@@ -275,7 +275,21 @@ class TeamPanel extends PSRoomPanel<TeamRoom> {
 	};
 	handleRomHackMode = (mode: string) => {
 		const room = this.props.room;
-		room.setFormat(RomHacks.modeFormat(room.team.format, mode));
+		const format = RomHacks.modeFormat(room.team.format, mode);
+		const gen = parseInt(String(RomHacks.active?.parentMod).slice(3), 10) || 9;
+		const sets = room.editor?.sets || Teams.unpack(room.team.packedTeam);
+		const extras = RomHacks.disguiseExtras(sets, format, gen);
+		if (extras) {
+			if (!confirm(RomHacks.extrasWarning(mode, extras))) {
+				this.forceUpdate();
+				return false;
+			}
+			RomHacks.disguiseExtras(sets, format, gen, true);
+			room.team.packedTeam = Teams.pack(sets);
+			room.team.iconCache = null;
+			if (room.editor) room.editor.lastPackedTeam = room.team.packedTeam;
+		}
+		room.setFormat(format);
 		if (room.editor) {
 			room.editor.setFormat(room.team.format);
 			room.editor.innerFocus = null;
@@ -285,6 +299,7 @@ class TeamPanel extends PSRoomPanel<TeamRoom> {
 		TeamPanel.getFormatResources(room.team.format).then(() => {
 			this.forceUpdate();
 		});
+		return true;
 	};
 	handleChangeFormat = (ev: Event) => {
 		const dropdown = ev.currentTarget as HTMLButtonElement;
@@ -599,7 +614,7 @@ class TeamStoragePanel extends PSRoomPanel {
 PS.addRoomType(TeamPanel, TeamStoragePanel, ViewTeamPanel);
 
 class RomHackUpload extends preact.Component<{
-	onLoaded: () => void, onMode: (mode: string) => void, format: string, teamKey: string,
+	onLoaded: () => void, onMode: (mode: string) => boolean, format: string, teamKey: string,
 }> {
 	error = '';
 	pending: { file: File, bases: { id: string, name: string }[] } | null = null;
@@ -660,12 +675,15 @@ class RomHackUpload extends preact.Component<{
 		this.forceUpdate();
 	};
 	handleMode = (ev: Event) => {
-		const mode = (ev.currentTarget as HTMLSelectElement).value;
+		const select = ev.currentTarget as HTMLSelectElement;
+		const mode = select.value;
+		const current = RomHacks.mode(this.props.format);
 		if (mode === 'regular' && !RomHacks.regularReadable(RomHacks.active)) {
+			select.value = current;
 			this.forceUpdate();
 			return;
 		}
-		this.props.onMode(mode);
+		if (!this.props.onMode(mode)) select.value = current;
 	};
 	handleSelect = (ev: Event) => {
 		if (this.busy) return;

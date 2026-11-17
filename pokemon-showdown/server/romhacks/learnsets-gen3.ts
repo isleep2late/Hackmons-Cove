@@ -20,7 +20,7 @@ export interface Gen3LearnsetResult {
 	status: 'read' | 'unreadable';
 	note?: string;
 	learnsets: Map<number, Gen3Learnset>;
-	evolvesFrom: Map<number, number>;
+	evolvesFrom: Map<number, number[]>;
 	layout?: { [k: string]: any };
 }
 
@@ -111,7 +111,7 @@ function officialMoves(game: Game): Map<number, Set<string>> {
 	return official;
 }
 
-function parseLevelUp(game: Game, at: number, format: number): LevelMove[] | null {
+function parseLevelUp(game: Game, at: number, format: number, lenient = false): LevelMove[] | null {
 	const rom = game.rom;
 	const out: LevelMove[] = [];
 	if (at < 0) return null;
@@ -124,7 +124,10 @@ function parseLevelUp(game: Game, at: number, format: number): LevelMove[] | nul
 			if (entry === 0xffff) return out;
 			move = entry & 0x1ff;
 			level = entry >> 9;
-			if (!level) return null;
+			if (!level) {
+				if (!lenient) return null;
+				level = 1;
+			}
 			if (!move && level > 100) continue;
 		} else if (format === 3) {
 			if (at + n * 3 + 3 > rom.length) return null;
@@ -137,6 +140,7 @@ function parseLevelUp(game: Game, at: number, format: number): LevelMove[] | nul
 			level = rom.readUInt16LE(at + n * 4 + 2);
 			if (move === 0xffff) return level === 0 ? out : null;
 		}
+		if (!move && lenient) continue;
 		if (!move || move >= game.moveCount || level > 255) return null;
 		if (level <= 100) out.push({ level, move });
 	}
@@ -603,6 +607,13 @@ function levelUpMoves(game: Game, table: LevelUpTable, index: number): LevelMove
 	return parseLevelUp(game, pointerAt(game.rom, table.table + index * 4), table.format);
 }
 
+function readLevelUp(game: Game, at: number, format: number): LevelMove[] | null {
+	const strict = parseLevelUp(game, at, format);
+	if (strict) return strict;
+	const loose = parseLevelUp(game, at, format, true);
+	return loose?.length ? loose : null;
+}
+
 function pickLevelUp(game: Game, found: LevelUpTable[]): LevelUpTable | null {
 	const good = found.filter(entry => entry.valid >= game.real.length * 0.97 && entry.filled >= game.real.length * 0.9);
 	if (good.length <= 1) return good[0] || null;
@@ -750,6 +761,10 @@ function embeddedEvolutions(game: Game, at: number, size: number): [number, numb
 		const method = rom.readUInt16LE(entry);
 		if (method === 0xffff) return out;
 		const target = rom.readUInt16LE(entry + 4);
+		if (method === 0xfffe) {
+			if (target && target < game.speciesCount) out.push([method, rom.readUInt16LE(entry + 2), target]);
+			continue;
+		}
 		if (!method || method > 0xff || !target || target >= game.speciesCount || rom.readUInt16LE(entry + 6)) return null;
 		if (size === 12 && rom.readUInt32LE(entry + 8) && pointerAt(rom, entry + 8) < 0) return null;
 		out.push([method, rom.readUInt16LE(entry + 2), target]);
@@ -803,21 +818,28 @@ function unique(moves: number[]): number[] {
 	return [...new Set(moves)];
 }
 
-function setEvolution(evolvesFrom: Map<number, number>, from: number, to: number) {
-	if (from === to || evolvesFrom.has(to)) return;
-	let walk: number | undefined = from;
-	for (let depth = 0; walk !== undefined && depth < 8; depth++) {
+function setEvolution(evolvesFrom: Map<number, number[]>, from: number, to: number) {
+	if (from === to) return;
+	const parents = evolvesFrom.get(to);
+	if (parents?.includes(from)) return;
+	const seen = new Set<number>();
+	const queue = [from];
+	while (queue.length) {
+		const walk = queue.pop()!;
 		if (walk === to) return;
-		walk = evolvesFrom.get(walk);
+		if (seen.has(walk)) continue;
+		seen.add(walk);
+		queue.push(...evolvesFrom.get(walk) || []);
 	}
-	evolvesFrom.set(to, from);
+	if (parents) parents.push(from);
+	else evolvesFrom.set(to, [from]);
 }
 
 const STARTER_TUTORS: [number, string][] = [[3, 'frenzyplant'], [6, 'blastburn'], [9, 'hydrocannon']];
 
 export function readGen3Learnsets(input: Gen3LearnsetInput): Gen3LearnsetResult {
 	const learnsets = new Map<number, Gen3Learnset>();
-	const evolvesFrom = new Map<number, number>();
+	const evolvesFrom = new Map<number, number[]>();
 	const fail = (reason: string, layout?: any): Gen3LearnsetResult => ({
 		status: 'unreadable', note: `The movesets of this game could not be read: ${reason}.`,
 		learnsets: new Map(), evolvesFrom: new Map(), layout,
@@ -840,7 +862,11 @@ export function readGen3Learnsets(input: Gen3LearnsetInput): Gen3LearnsetResult 
 		const row = (index: number) => table.start + index * table.stride;
 		let broken = 0;
 		for (const index of game.real) {
-			const levelup = parseLevelUp(game, pointerAt(rom, row(index) + layout.levelUp), 4);
+			if (layout.evolutions >= 0 && rom.readUInt32LE(row(index) + layout.evolutions)) {
+				const list = embeddedEvolutions(game, pointerAt(rom, row(index) + layout.evolutions), layout.evolutionSize);
+				for (const [, , target] of list || []) setEvolution(evolvesFrom, index, target);
+			}
+			const levelup = readLevelUp(game, pointerAt(rom, row(index) + layout.levelUp), 4);
 			const machines = parseMoveList(game, pointerAt(rom, row(index) + layout.teachable), 0xffff);
 			let egg: number[] | null = [];
 			if (layout.eggs >= 0 && rom.readUInt32LE(row(index) + layout.eggs)) {
@@ -851,10 +877,6 @@ export function readGen3Learnsets(input: Gen3LearnsetInput): Gen3LearnsetResult 
 				continue;
 			}
 			learnsets.set(index, { levelup, machines: unique(machines), tutor: [], egg: unique(egg) });
-			if (layout.evolutions >= 0 && rom.readUInt32LE(row(index) + layout.evolutions)) {
-				const list = embeddedEvolutions(game, pointerAt(rom, row(index) + layout.evolutions), layout.evolutionSize);
-				for (const [, , target] of list || []) setEvolution(evolvesFrom, index, target);
-			}
 		}
 		if (broken > game.real.length * 0.03) return fail('the moveset lists of the Pokemon table do not validate', debug);
 		if (layout.eggs < 0) return fail('the egg move lists were not found', debug);
@@ -888,7 +910,13 @@ export function readGen3Learnsets(input: Gen3LearnsetInput): Gen3LearnsetResult 
 			}
 		}
 		for (const index of game.real) {
-			const levelup = levelUpMoves(game, levelUp, index);
+			if (evolutions) {
+				const list = readEvolutions(game, evolutions.table, evolutions.perMon, index);
+				for (const [method, , target] of list || []) {
+					if (method < 0xf0) setEvolution(evolvesFrom, index, target);
+				}
+			}
+			const levelup = readLevelUp(game, pointerAt(rom, levelUp.table + index * 4), levelUp.format);
 			if (!levelup) continue;
 			let machineMoves: number[] | null = [];
 			if (machines) {
@@ -903,12 +931,6 @@ export function readGen3Learnsets(input: Gen3LearnsetInput): Gen3LearnsetResult 
 			learnsets.set(index, {
 				levelup, machines: unique(machineMoves), tutor: unique(tutorMoves), egg: unique(eggs.moves.get(index) || []),
 			});
-			if (evolutions) {
-				const list = readEvolutions(game, evolutions.table, evolutions.perMon, index);
-				for (const [method, , target] of list || []) {
-					if (method < 0xf0) setEvolution(evolvesFrom, index, target);
-				}
-			}
 		}
 		if (learnsets.size < game.real.length * 0.97) return fail('the moveset tables do not validate', debug);
 	}
