@@ -588,18 +588,24 @@ class RomHackUpload extends preact.Component<{ onLoaded: () => void, teamKey: st
 	pending: { file: File, bases: { id: string, name: string }[] } | null = null;
 	baseId = '';
 	busy = false;
+	clearInput() {
+		const input = this.base?.querySelector<HTMLInputElement>('input[type=file]');
+		if (input) input.value = '';
+	}
 	finish = (promise: Promise<unknown>, file?: File) => {
 		promise.then(() => {
 			this.error = '';
 			this.busy = false;
 			this.pending = null;
 			this.baseId = '';
+			this.clearInput();
 			if (RomHacks.active) RomHacks.setTeamHack(this.props.teamKey, RomHacks.active.sha256);
 			this.props.onLoaded();
 			this.forceUpdate();
 		}, (err: any) => {
 			this.error = String(err?.message || err);
 			this.busy = false;
+			this.clearInput();
 			if (file && err?.bases) {
 				this.pending = { file, bases: err.bases };
 				if (!this.pending.bases.some(entry => entry.id === this.baseId)) this.baseId = '';
@@ -609,7 +615,7 @@ class RomHackUpload extends preact.Component<{ onLoaded: () => void, teamKey: st
 	};
 	handleFile = (ev: Event) => {
 		const file = (ev.currentTarget as HTMLInputElement).files?.[0];
-		if (!file) return;
+		if (!file || this.busy) return;
 		this.error = 'Reading the patch...';
 		this.pending = null;
 		this.baseId = '';
@@ -633,11 +639,13 @@ class RomHackUpload extends preact.Component<{ onLoaded: () => void, teamKey: st
 		this.pending = null;
 		this.baseId = '';
 		this.error = '';
-		const input = this.base?.querySelector<HTMLInputElement>('input[type=file]');
-		if (input) input.value = '';
+		this.clearInput();
 		this.forceUpdate();
 	};
 	handleSelect = (ev: Event) => {
+		if (this.busy) return;
+		this.pending = null;
+		this.baseId = '';
 		this.finish(RomHacks.activate((ev.currentTarget as HTMLSelectElement).value));
 	};
 	override render() {
@@ -659,12 +667,14 @@ class RomHackUpload extends preact.Component<{ onLoaded: () => void, teamKey: st
 		}
 		return <div class="infobox" style="margin:8px 0">
 			<strong>ROM patch:</strong> {}
-			{list.length > 0 && <select class="button" onChange={this.handleSelect}>
+			{list.length > 0 && <select class="button" disabled={this.busy} onChange={this.handleSelect}>
 				{list.map(entry => <option value={entry.sha256} selected={hack?.sha256 === entry.sha256}>
 					{RomHacks.optionLabel(entry)}
 				</option>)}
 			</select>} {}
-			<input type="file" accept=".bps,.ups,.ips,.xdelta,.vcdiff,.bsp" onChange={this.handleFile} />
+			<input
+				type="file" accept=".bps,.ups,.ips,.xdelta,.vcdiff,.bsp" disabled={this.busy} onChange={this.handleFile}
+			/>
 			<p><small>
 				Upload the hack's patch file (.bps, .ups, .ips, .xdelta or .bsp) - never a ROM. EXPERIMENTAL: Game Boy, Game Boy Color, Game Boy Advance and DS hacks.
 			</small></p>

@@ -97,7 +97,8 @@ class Ladder extends LadderStore {
 			connection.popup(
 				romHack ?
 					`This battle uses the ROM patch ${romHack.slice(0, 12)}, which you have not uploaded. ` +
-					`Both players must upload the identical patch file in the teambuilder.` :
+					`Both players must upload the identical patch file in the teambuilder and, if it asks for the base game, ` +
+					`choose the same one.` :
 					`ROM Hacks needs a patch: pick the format in the teambuilder and upload the hack's patch file first.`
 			);
 			return null;
@@ -298,7 +299,8 @@ class Ladder extends LadderStore {
 			const mismatch = (other: string, missing: string) =>
 				`The battle with ${other} could not start because the two of you do not have the same ROM patch: ` +
 				`the challenge uses the patch ${romHack.slice(0, 12)}, which ${missing} not uploaded. ` +
-				`Both players must upload the identical patch file in the teambuilder. The challenge is still open.`;
+				`Both players must upload the identical patch file in the teambuilder and, if it asks for the base game, ` +
+				`choose the same one. The challenge is still open.`;
 			connection.popup(mismatch(challenger?.name || chall.from, 'you have'));
 			challenger?.popup(mismatch(connection.user.name, `${connection.user.name} has`));
 			return;

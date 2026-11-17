@@ -1959,15 +1959,19 @@
 			var buf = '<li class="format-select"><label class="label">ROM patch:</label>';
 			var list = RomHacks.list();
 			if (list.length) {
-				buf += '<select name="romhackselect" class="button">';
+				buf += '<select name="romhackselect" class="button"' + (this.romHackBusy ? ' disabled' : '') + '>';
 				for (var i = 0; i < list.length; i++) {
 					buf += '<option value="' + BattleLog.escapeHTML(list[i].sha256) + '"' + (hack && hack.sha256 === list[i].sha256 ? ' selected' : '') + '>' + BattleLog.escapeHTML(RomHacks.optionLabel(list[i])) + '</option>';
 				}
 				buf += '</select> ';
 			}
-			buf += '<input type="file" name="romhackfile" accept=".bps,.ups,.ips,.xdelta,.vcdiff,.bsp" />';
+			buf += '<input type="file" name="romhackfile" accept=".bps,.ups,.ips,.xdelta,.vcdiff,.bsp"' + (this.romHackBusy ? ' disabled' : '') + ' />';
 			buf += '<p><small>Upload the hack\'s patch file (.bps, .ups, .ips, .xdelta or .bsp) - never a ROM. EXPERIMENTAL: Game Boy, Game Boy Color, Game Boy Advance and DS hacks.</small></p>';
-			if (this.romHackError) buf += '<p class="message-error">' + BattleLog.escapeHTML(this.romHackError) + '</p>';
+			if (this.romHackError && this.romHackTeam === this.curTeam) {
+				buf += '<p class="message-error">' + BattleLog.escapeHTML(this.romHackError) + '</p>';
+			} else if (this.romHackBusy) {
+				buf += '<p class="message-error">A patch for another team is still being read...</p>';
+			}
 			var pending = this.romHackPending;
 			if (pending && pending.team === this.curTeam) {
 				var busy = this.romHackBusy ? ' disabled' : '';
@@ -2003,7 +2007,7 @@
 		},
 		romHackFileChanged: function (e) {
 			var file = e.currentTarget.files && e.currentTarget.files[0];
-			if (!file) return;
+			if (!file || this.romHackBusy) return;
 			this.romHackPending = null;
 			this.romHackBase = '';
 			this.romHackUpload(file, '');
@@ -2012,6 +2016,7 @@
 			var self = this;
 			var team = this.curTeam;
 			this.romHackError = 'Reading the patch...';
+			this.romHackTeam = team;
 			this.romHackBusy = true;
 			this.update();
 			RomHacks.upload(file, base).then(function () {
@@ -2019,12 +2024,13 @@
 				self.romHackBusy = false;
 				self.romHackPending = null;
 				self.romHackBase = '';
-				if (self.curTeam !== team) return;
-				RomHacks.setTeamHack(self.curTeam.name, RomHacks.active.sha256);
-				self.focus();
+				if (team && RomHacks.active) RomHacks.setTeamHack(team.name, RomHacks.active.sha256);
+				if (!self.curTeam || !RomHacks.isFormat(self.curTeam.format)) return;
+				if (self.curTeam === team) self.focus();
 				self.update();
 			}, function (err) {
 				self.romHackError = String(err && err.message || err);
+				self.romHackTeam = team;
 				self.romHackBusy = false;
 				if (err && err.bases) {
 					self.romHackPending = { file: file, bases: err.bases, team: team };
@@ -2034,7 +2040,7 @@
 					}
 					if (!offered) self.romHackBase = '';
 				}
-				if (self.curTeam !== team) return;
+				if (!self.curTeam || !RomHacks.isFormat(self.curTeam.format)) return;
 				self.update();
 			});
 		},
@@ -2055,13 +2061,20 @@
 		},
 		romHackSelected: function (e) {
 			var self = this;
+			var team = this.curTeam;
+			if (this.romHackBusy) return;
+			this.romHackPending = null;
+			this.romHackBase = '';
 			RomHacks.activate(e.currentTarget.value).then(function () {
 				self.romHackError = '';
-				RomHacks.setTeamHack(self.curTeam.name, RomHacks.active.sha256);
+				if (team && RomHacks.active) RomHacks.setTeamHack(team.name, RomHacks.active.sha256);
+				if (self.curTeam !== team) return;
 				self.focus();
 				self.update();
 			}, function (err) {
 				self.romHackError = String(err && err.message || err);
+				self.romHackTeam = team;
+				if (self.curTeam !== team) return;
 				self.update();
 			});
 		},

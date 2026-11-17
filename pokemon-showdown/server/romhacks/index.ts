@@ -28,6 +28,8 @@ const BSP_TOTAL_MILLIS = 30000;
 const TOOLS_DIR = path.join(ROOT, 'config/romhack-tools');
 const BASE_CACHE = path.join(STORE_DIR, '.bases.json');
 const USAGE_FILE = path.join(STORE_DIR, '.usage.json');
+const UNPLACED_FILE = path.join(STORE_DIR, '.unplaced.json');
+const MAX_UNPLACED = 4096;
 const BWRAP = '/usr/bin/bwrap';
 const XDELTA_RUN_MILLIS = 20000;
 const XDELTA_TOTAL_MILLIS = 45000;
@@ -425,6 +427,8 @@ function engineLost(read: RawHack, clean: Buffer): boolean {
 	return same(read) * 2 < same(extractRom(clean, clean));
 }
 
+interface IpsRead { raw: RawHack; base: BaseRom }
+
 interface IpsFit {
 	base: BaseRom; clean: Buffer; raw: RawHack; rom: string; data: string; changed: boolean; kept: number;
 }
@@ -459,14 +463,6 @@ function choiceId(base: BaseRom): string | undefined {
 	return BASE_CHOICES.find(choice => choice.crc === hex8(base.crc))?.id;
 }
 
-function detectedBase(stored: HackDex, patch: Buffer, bases: BaseRom[]): string | undefined {
-	if (stored.autoBase) return stored.autoBase;
-	try {
-		return choiceId(readIps(patch, bases, stored.sha256).base);
-	} catch {}
-	return undefined;
-}
-
 function storedHack(sha256: string): HackDex | null {
 	if (!hackExists(sha256)) return null;
 	try {
@@ -482,19 +478,45 @@ function reuseStored(stored: HackDex): HackDex {
 	return stored;
 }
 
-function checksumNames(patch: Buffer, bases: BaseRom[], picked: BaseRom): boolean {
-	for (const base of gbChecksumBases(patch, bases)) {
-		if (base === picked) return true;
-		try {
-			const clean = fs.readFileSync(base.file);
-			extractRom(Buffer.from(applyPatch(patch, clean)), clean);
-			return false;
-		} catch {}
-	}
-	return false;
+function unplacedKey(bases: BaseRom[]): string {
+	return `${HACK_VERSION}:${signatureStamp()}:${ipsBases(bases).map(base => hex8(base.crc)).join(',')}`;
 }
 
-function importPicked(patch: Buffer, sha256: string, baseId: string, bases: BaseRom[]): HackDex | null {
+function readUnplaced(bases: BaseRom[]): { key: string, patches: { [sha256: string]: number } } {
+	const key = unplacedKey(bases);
+	try {
+		const known = JSON.parse(fs.readFileSync(UNPLACED_FILE, 'utf8'));
+		if (known?.key === key && known.patches && typeof known.patches === 'object') return known;
+	} catch {}
+	return { key, patches: {} };
+}
+
+function rememberUnplaced(sha256: string, bases: BaseRom[]) {
+	try {
+		const known = readUnplaced(bases);
+		delete known.patches[sha256];
+		known.patches[sha256] = Date.now();
+		const names = Object.keys(known.patches);
+		for (const name of names.slice(0, Math.max(0, names.length - MAX_UNPLACED))) delete known.patches[name];
+		fs.mkdirSync(STORE_DIR, { recursive: true });
+		const tmp = `${UNPLACED_FILE}.${process.pid}.tmp`;
+		fs.writeFileSync(tmp, JSON.stringify(known));
+		fs.renameSync(tmp, UNPLACED_FILE);
+	} catch {}
+}
+
+function placeIps(patch: Buffer, bases: BaseRom[], sha256: string): IpsRead {
+	try {
+		return readIps(patch, bases, sha256);
+	} catch (e) {
+		if (e instanceof ImportError && e.code === 'IPS_BASE_UNKNOWN') rememberUnplaced(sha256, bases);
+		throw e;
+	}
+}
+
+function importPicked(
+	patch: Buffer, sha256: string, baseId: string, bases: BaseRom[]
+): { hack?: HackDex, read?: IpsRead } {
 	const small = ipsBases(bases);
 	const choices = baseChoices(bases);
 	const choice = choices.find(offered => offered.id === baseId);
@@ -502,12 +524,21 @@ function importPicked(patch: Buffer, sha256: string, baseId: string, bases: Base
 	const picked = small.find(base => hex8(base.crc) === crc);
 	if (!choice || !picked) throw new ImportError(BASE_NOT_OFFERED, 'UNKNOWN_BASE', choices);
 	if (!applyPatch(patch, Buffer.alloc(0)).length) throw new Error(IPS_EMPTY);
-	if (checksumNames(patch, small, picked)) return null;
-	const id = pickedHackId(sha256, choice.id);
 	const plain = storedHack(sha256);
-	if (plain && detectedBase(plain, patch, bases) === choice.id) return reuseStored(plain);
+	let auto = plain?.autoBase;
+	let read: IpsRead | undefined;
+	if (!auto && !readUnplaced(bases).patches[sha256]) {
+		try {
+			read = placeIps(patch, bases, sha256);
+			auto = choiceId(read.base);
+		} catch (e) {
+			if (!(e instanceof ImportError) && gbChecksumBases(patch, small).includes(picked)) throw e;
+		}
+	}
+	if (auto === choice.id) return plain ? { hack: reuseStored(plain) } : { read };
+	const id = pickedHackId(sha256, choice.id);
 	const derived = storedHack(id);
-	if (derived) return reuseStored(derived);
+	if (derived) return { hack: reuseStored(derived) };
 	fs.mkdirSync(STORE_DIR, { recursive: true });
 	makeRoom(id);
 
@@ -533,10 +564,10 @@ function importPicked(patch: Buffer, sha256: string, baseId: string, bases: Base
 	hack.patchSha256 = sha256;
 	hack.pickedBase = { ...choice };
 	hack.notes.push(`The base game of this IPS patch was chosen by the uploader: ${choice.name}.`);
-	return storeHack(hack, raw);
+	return { hack: storeHack(hack, raw) };
 }
 
-function readIps(patch: Buffer, bases: BaseRom[], sha256: string): { raw: RawHack, base: BaseRom } {
+function readIps(patch: Buffer, bases: BaseRom[], sha256: string): IpsRead {
 	if (!applyPatch(patch, Buffer.alloc(0)).length) throw new Error(IPS_EMPTY);
 	const small = ipsBases(bases);
 	if (!small.length) throw new Error('This server has no base games to patch.');
@@ -620,12 +651,14 @@ export function importPatch(patch: Buffer, baseId = ''): HackDex {
 	if (patch.length > MAX_PATCH_SIZE) throw new Error('The patch is larger than 96 MB.');
 	const info = readPatchInfo(patch);
 	const sha256 = crypto.createHash('sha256').update(patch).digest('hex');
+	let placed: IpsRead | undefined;
 	if (baseId) {
 		requireSignatures();
 		const offered = listBases();
 		if (info.format === 'ips') {
 			const picked = importPicked(patch, sha256, baseId, offered);
-			if (picked) return picked;
+			if (picked.hack) return picked.hack;
+			placed = picked.read;
 		} else if (!baseChoices(offered).some(choice => choice.id === baseId)) {
 			throw new ImportError(BASE_NOT_OFFERED, 'UNKNOWN_BASE', baseChoices(offered));
 		}
@@ -686,7 +719,7 @@ export function importPatch(patch: Buffer, baseId = ''): HackDex {
 		}
 		if (!raw) throw lastError || new Error('This server has no base games to patch.');
 	} else if (info.format === 'ips') {
-		const read = readIps(patch, bases, sha256);
+		const read = placed || placeIps(patch, bases, sha256);
 		raw = read.raw;
 		autoBase = choiceId(read.base);
 	} else {
@@ -768,9 +801,25 @@ const recentUploads = new Map<string, number[]>();
 const importTimes: number[] = [];
 const incoming = new Set<string>();
 
+let trustedProxy: ((ip: string) => boolean) | null = null;
+
+function clientAddress(req: http.IncomingMessage): string {
+	const direct = req.socket.remoteAddress || 'unknown';
+	if (!trustedProxy) {
+		const proxies = typeof Config === 'undefined' ? null : Config.proxyip;
+		trustedProxy = proxies ? (require('../ip-tools') as typeof import('../ip-tools')).IPTools.checker(proxies) : () => false;
+	}
+	const plain = (ip: string) => ip.replace(/^::ffff:(?=\d+\.\d+\.\d+\.\d+$)/, '');
+	if (!trustedProxy(plain(direct))) return direct;
+	for (const hop of String(req.headers['x-forwarded-for'] || '').split(',').reverse()) {
+		const ip = hop.trim();
+		if (ip && !trustedProxy(plain(ip))) return ip;
+	}
+	return direct;
+}
+
 function addressKey(req: http.IncomingMessage): string {
-	const forwarded = String(req.headers['cf-connecting-ip'] || req.headers['x-forwarded-for'] || '').split(',')[0].trim();
-	const ip = (forwarded || req.socket.remoteAddress || 'unknown').split('%')[0].toLowerCase();
+	const ip = clientAddress(req).split('%')[0].toLowerCase();
 	const mapped = /^::ffff:(\d+\.\d+\.\d+\.\d+)$/.exec(ip);
 	if (mapped) return mapped[1];
 	if (!ip.includes(':')) return ip;

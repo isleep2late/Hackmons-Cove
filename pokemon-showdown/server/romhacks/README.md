@@ -55,21 +55,25 @@ and paths are never sent.
 What `base` does:
 
 - BPS, UPS, xdelta and BSP patches ignore it, as long as it is an offered id.
-- For an IPS patch nothing is guessed. The patch is applied to that one game and read. This takes one to three
-  seconds instead of the 14 to 29 seconds of a refused guess.
-- The hack id of a chosen base is `sha256(<patch sha256 in lowercase hex> + ":" + <base id>)`, in lowercase hex. The
-  stored hack then also has `patchSha256` (the SHA-256 of the file) and `pickedBase` (`{id, name}`), and a note
-  names the chosen game. The same patch with two different chosen games gives two ids, two stored hacks and two
-  proofs, so those players cannot battle each other.
-- The plain patch SHA-256 stays the id when the chosen game is the one the server works out by itself: the Game Boy
-  checksum rule names it, or the patch is already stored under its plain id and was read from that game. Hacks
-  imported without `base` are stored with `autoBase`, the id of the game that was worked out; for a hack stored
-  before that field existed the base is worked out again when somebody sends `base` for the same patch.
-- A client should send `base` only after an `IPS_BASE_UNKNOWN` or `IPS_BASE_MISFIT` refusal. Sending it on the first
-  upload of a patch that is not stored yet, and that only the fit rule would have accepted, gives the chosen-base id
-  and not the plain one.
-- Nothing about the choice is remembered apart from the stored hack. Uploading the same file with the same `base`
-  again returns the stored hack.
+- For an IPS patch the server first finds out what it would have chosen without `base`. That answer is kept
+  with the hack (`autoBase`) or, for a patch it could not place, in `databases/romhacks/.unplaced.json` (a cache of
+  refused patch hashes; losing it changes no result, only the time). So the retry after a refusal applies the patch
+  to the chosen game only and takes one to three seconds. A first upload that already carries `base` runs the full
+  guess and can take as long as a refused one.
+- When the chosen game is the one the server works out by itself, the plain patch SHA-256 stays the id and the hack
+  is stored as if no `base` had been sent. Hacks imported without `base` are stored with `autoBase`, the id of the
+  game that was worked out; for a hack stored before that field existed the base is worked out again when somebody
+  sends `base` for the same patch.
+- Otherwise the hack id is `sha256(<patch sha256 in lowercase hex> + ":" + <base id>)`, in lowercase hex. The stored
+  hack then also has `patchSha256` (the SHA-256 of the file) and `pickedBase` (`{id, name}`), and a note names the
+  chosen game. The same patch with two different chosen games gives two ids, two stored hacks and two proofs, so
+  those players cannot battle each other.
+- The id depends only on the file, the chosen game and the games this server has, not on who uploaded first or in
+  which order. Uploading the same file with the same `base` again returns the stored hack.
+- A patch that the server reads as one of two versions with identical data (Red and Blue, for example) keeps the
+  plain id only for the version it names; choosing the other one gives a chosen-base id.
+- A wrong choice is usually not refused: most small patches apply to any game of the same platform. The hack is
+  then stored under its own id with meaningless data, and only the uploader's choice decides.
 
 The upload limits below apply to every upload, with or without `base`.
 
@@ -182,6 +186,8 @@ All of these are constants at the top of `index.ts`, except the dex cache bound,
 - **Patch size**: 96 MB. The body is written to a temporary file, not held in memory. It must arrive within 120 s and
   may not pause for more than 20 s.
 - **Per address**: 8 uploads per 10 minutes and one upload arriving at a time. An IPv6 address counts as its /64.
+  The address is the connecting one. `X-Forwarded-For` is read only when the connection comes from a proxy listed in
+  `Config.proxyip`, and then the last entry that is not such a proxy counts.
 - **Whole server**: 2 imports running at once, 300 imports per hour, 32 uploads arriving at once.
 - **Other sites**: an upload whose `Origin` header names another site is refused. Requests without an `Origin`
   header (the app, command-line tools) are accepted.
