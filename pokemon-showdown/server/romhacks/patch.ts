@@ -114,35 +114,80 @@ function applyIps(patch: Uint8Array, source: Uint8Array): Uint8Array {
 	return target.subarray(0, size);
 }
 
-export function ipsUnchangedBytes(patch: Uint8Array, source: Uint8Array): number {
-	let same = 0;
+interface IpsRecord { offset: number; length: number; at: number; run: boolean }
+
+function *ipsRecords(patch: Uint8Array): Generator<IpsRecord> {
 	let i = 5;
-	let budget = source.length * 2;
-	for (;;) {
-		if (budget <= 0 || i + 3 > patch.length) return same;
-		if (patch[i] === 0x45 && patch[i + 1] === 0x4f && patch[i + 2] === 0x46) return same;
+	for (let records = 0; records < 4000000 && i + 5 <= patch.length; records++) {
+		if (patch[i] === 0x45 && patch[i + 1] === 0x4f && patch[i + 2] === 0x46) break;
 		const offset = (patch[i] << 16) | (patch[i + 1] << 8) | patch[i + 2];
-		i += 3;
-		if (i + 2 > patch.length) return same;
-		const len = (patch[i] << 8) | patch[i + 1];
-		i += 2;
-		if (len) {
-			for (let n = 0; n < len && i + n < patch.length; n++) {
-				if (offset + n < source.length && source[offset + n] === patch[i + n]) same++;
-			}
-			i += len;
-			budget -= len;
+		const length = (patch[i + 3] << 8) | patch[i + 4];
+		i += 5;
+		if (length) {
+			if (i + length > patch.length) break;
+			yield { offset, length, at: i, run: false };
+			i += length;
 		} else {
-			const runLen = (patch[i] << 8) | patch[i + 1];
-			const value = patch[i + 2];
+			if (i + 3 > patch.length) break;
+			const runLength = (patch[i] << 8) | patch[i + 1];
+			if (runLength) yield { offset, length: runLength, at: i + 2, run: true };
 			i += 3;
-			const end = Math.min(runLen, source.length - offset);
-			for (let n = 0; n < end; n++) {
-				if (source[offset + n] === value) same++;
-			}
-			budget -= Math.max(end, 1);
 		}
 	}
+}
+
+export function ipsBoundaryFit(patch: Uint8Array, source: Uint8Array): { matches: number, checked: number } {
+	let matches = 0;
+	let checked = 0;
+	const at = (offset: number, value: number) => {
+		if (offset >= source.length) return;
+		checked++;
+		if (source[offset] === value) matches++;
+	};
+	let held: IpsRecord | null = null;
+	let heldJoined = false;
+	const close = (joinsAfter: boolean) => {
+		if (!held || joinsAfter || (held.length === 1 && !heldJoined)) return;
+		at(held.offset + held.length - 1, patch[held.run ? held.at : held.at + held.length - 1]);
+	};
+	for (const record of ipsRecords(patch)) {
+		const joined = !!held && held.offset + held.length === record.offset;
+		close(joined);
+		if (!joined) at(record.offset, patch[record.at]);
+		held = record;
+		heldJoined = joined;
+	}
+	close(false);
+	return { matches, checked };
+}
+
+export function ipsKeptBytes(patch: Uint8Array, source: Uint8Array): number {
+	let kept = 0;
+	for (const record of ipsRecords(patch)) {
+		const end = Math.min(record.offset + record.length, source.length);
+		for (let offset = record.offset; offset < end; offset++) {
+			if (source[offset] === patch[record.run ? record.at : record.at + offset - record.offset]) kept++;
+		}
+	}
+	return kept;
+}
+
+export function ipsPairFit(
+	patch: Uint8Array, first: Uint8Array, second: Uint8Array
+): { first: number, second: number, differing: number } {
+	const fit = { first: 0, second: 0, differing: 0 };
+	const shared = Math.min(first.length, second.length);
+	for (const record of ipsRecords(patch)) {
+		const end = Math.min(record.offset + record.length, shared);
+		for (let offset = record.offset; offset < end; offset++) {
+			if (first[offset] === second[offset]) continue;
+			fit.differing++;
+			const value = patch[record.run ? record.at : record.at + offset - record.offset];
+			if (value === first[offset]) fit.first++;
+			else if (value === second[offset]) fit.second++;
+		}
+	}
+	return fit;
 }
 
 function applyUps(patch: Uint8Array, source: Uint8Array, info: PatchInfo): Uint8Array {

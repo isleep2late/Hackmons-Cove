@@ -8,9 +8,10 @@ A player uploads a patch file for a ROM hack. The server applies the patch to it
 reads the hack's Pokemon, moves, abilities, items, type chart, sprites and battle mechanics, and stores the result.
 Teams can then be built and battles played with the hack's own data. Only the patch is uploaded, never a ROM.
 
-The result is stored in `databases/romhacks/<sha>.json` (plus `<sha>.full.json` and a sprite folder) and served under
-`/romhacks/`. `<sha>` is the SHA-256 of the patch. A stored hack is read again when `HACK_VERSION` in `build.ts`
-changes and the patch is uploaded again.
+The result is stored in `databases/romhacks/<id>.json` (plus `<id>.full.json` and a sprite folder) and served under
+`/romhacks/`. `<id>` is the SHA-256 of the patch, except for an IPS patch whose base game the uploader chose (see
+Choosing the base game of an IPS patch). It is always 64 lowercase hex digits. A stored hack is read again when
+`HACK_VERSION` in `build.ts` changes and the patch is uploaded again.
 
 ## Supported patches and platforms
 
@@ -23,6 +24,58 @@ Platforms and base games:
 - Nintendo DS: Diamond, Pearl, Platinum, HeartGold, SoulSilver, Black, White, Black 2, White 2 (Generations 4 and 5).
 
 A hack can only be imported when its clean base ROM is present in `config/romhack-bases`.
+
+## Choosing the base game of an IPS patch
+
+An IPS patch carries no checksum of its base game. When the server cannot work the base out, the upload is refused
+and the refusal lists the games the uploader can choose from. The client then sends the same file again with the
+chosen game.
+
+Request: `POST /romhacks/upload?base=<id>`, the body being the patch file as before. `base` is optional.
+
+Refusals are JSON with HTTP status 400. Three of them carry a `code` and the list `bases`:
+
+```
+{"error": "The base game of this IPS patch could not be determined. ...",
+ "code": "IPS_BASE_UNKNOWN",
+ "bases": [{"id": "red", "name": "Pokemon Red"}, {"id": "firered-rev1", "name": "Pokemon FireRed (rev 1)"}]}
+```
+
+- `IPS_BASE_UNKNOWN`: no `base` was sent and the base could not be worked out.
+- `IPS_BASE_MISFIT`: the patch does not fit the chosen game. It changes nothing inside it, the result equals the
+  clean game, the result is no longer a game of that platform (or a Game Boy game above 8 MB), or it cannot be read.
+- `UNKNOWN_BASE`: `base` is not one of the offered ids. A value that is not 1 to 32 characters of `a-z`, `0-9` and
+  `-` is refused before the patch is read, and that refusal has no `bases`.
+
+The ids are the fixed slugs in `BASE_CHOICES` in `index.ts` (`red`, `blue`, `yellow`, `gold`, `silver`, `crystal`,
+`crystal-rev1`, `ruby`, `ruby-rev1`, `ruby-rev2`, `sapphire`, `sapphire-rev1`, `sapphire-rev2`, `emerald`, `firered`,
+`firered-rev1`, `leafgreen`, `leafgreen-rev1`). Only the games this server has are offered, in that order. File names
+and paths are never sent.
+
+What `base` does:
+
+- BPS, UPS, xdelta and BSP patches ignore it, as long as it is an offered id.
+- For an IPS patch the server first finds out what it would have chosen without `base`. That answer is kept
+  with the hack (`autoBase`) or, for a patch it could not place, in `databases/romhacks/.unplaced.json` (a cache of
+  refused patch hashes; losing it changes no result, only the time). So the retry after a refusal applies the patch
+  to the chosen game only and takes one to three seconds. A first upload that already carries `base` runs the full
+  guess and can take as long as a refused one.
+- When the chosen game is the one the server works out by itself, the plain patch SHA-256 stays the id and the hack
+  is stored as if no `base` had been sent. Hacks imported without `base` are stored with `autoBase`, the id of the
+  game that was worked out; for a hack stored before that field existed the base is worked out again when somebody
+  sends `base` for the same patch.
+- Otherwise the hack id is `sha256(<patch sha256 in lowercase hex> + ":" + <base id>)`, in lowercase hex. The stored
+  hack then also has `patchSha256` (the SHA-256 of the file) and `pickedBase` (`{id, name}`), and a note names the
+  chosen game. The same patch with two different chosen games gives two ids, two stored hacks and two proofs, so
+  those players cannot battle each other.
+- The id depends only on the file, the chosen game and the games this server has, not on who uploaded first or in
+  which order. Uploading the same file with the same `base` again returns the stored hack.
+- A patch that the server reads as one of two versions with identical data (Red and Blue, for example) keeps the
+  plain id only for the version it names; choosing the other one gives a chosen-base id.
+- A wrong choice is usually not refused: most small patches apply to any game of the same platform. The hack is
+  then stored under its own id with meaningless data, and only the uploader's choice decides.
+
+The upload limits below apply to every upload, with or without `base`.
 
 ## Files
 
@@ -86,6 +139,39 @@ The type chart is stored as the cells that differ from the parent generation's c
   plain damage with its power, type, accuracy and PP. A new ability or item does nothing in battle.
 - **IPS**: IPS offsets are 24 bits, so an IPS patch cannot change anything past 16 MB. Hacks of larger games need
   another patch format.
+- **IPS base game**: an IPS patch carries no checksum of its base game, so the base has to be worked out, and an
+  upload is refused when it cannot be. Only Game Boy and Game Boy Advance bases are tried; an IPS patch of a DS game is
+  refused. An IPS patch with no records is refused, and a truncated one is reported as truncated.
+  - *Checksum*: for Game Boy games the base is the game whose patched result has valid header and global checksums,
+    provided the patch changed the global checksum. If that hack then cannot be read, the upload is refused with the
+    reason and no other base is tried.
+  - *Fit*: otherwise a base is a candidate only when no record of the patch begins or ends on a byte the base already
+    has (the joins between records that continue one another are not counted), the patched game differs from the base
+    and it can be read. Candidates whose Pokemon, moves, abilities, items, type chart or battle mechanics read
+    differently from their own clean base are kept; they must also build.
+  - *One answer*: one candidate has to win against every other. Two candidates count as the same answer when the
+    patched games are identical, or when they read the same data and their bases are versions of one game (fewer than
+    one byte in eight differs: Red and Blue, Gold and Silver, Ruby and Sapphire, revisions); the first by file name is
+    then taken and a note says so. Otherwise the bytes of the patch are compared at the places where the two bases
+    differ. Between versions of one game, a base wins when the patch repeats its bytes at least four times as often as
+    the other's, plus eight. Between unrelated games at least 256 such places are needed, and a base wins when it
+    leads by that margin and the patch repeats its bytes in more than one place of eight (unchanged bytes inside merged
+    records), or, over at least 2048 places, when the patch repeats its bytes in fewer than one place of 1024 while
+    repeating the other's at least eight times and in at most one place of eight (an exact diff of that base).
+  - *Nothing readable changed* (text, graphics, maps): accepted only when the unrelated bases average at least eight
+    record edges that equal their own bytes, the candidate wins against every other and at least half of the
+    battle-engine checks still read as stock.
+  - A small patch made with a hex editor, without a checksum fix, usually fits several games and is refused; Yellow
+    cannot be told from Red and Blue by a few changed stats. BPS and UPS patches name their base by checksum and are
+    always the safer upload. The refusal offers the list of games, and the uploader can choose one (see Choosing the
+    base game of an IPS patch).
+  - A chosen game is trusted. A patch applied to the wrong game is refused only when it does not fit; otherwise it is
+    stored under the id of that choice, with data that makes no sense, and nobody who chose the right game can meet it.
+- **Expanded Generation 1 hacks** (more than 151 Pokemon or more than 190 index slots, such as Kanto Expansion Pak):
+  read when the hack keeps the 10-byte name table, a one-byte index-to-Pokedex table (at most 255 slots) and 28-byte
+  base stat records. The game cuts names at 10 letters, so a Pokemon whose official name is longer (Sandy Shocks as
+  "SANDY SHOX") is imported as a new Pokemon under the game's spelling. Regional forms carry the same name as the
+  original and are matched to the official forme by stats and types.
 - **DS hacks with the Fairy type** stay on their own generation's engine (Generation 4 or 5) with the ROM's type chart.
   They are not moved to a later generation. This is one constant, `DS_FAIRY_KEEPS_BASE_ENGINE` in `nds.ts`.
 - **Edited formes**: a forme the hack changed is mapped to the nearest official forme.
@@ -100,6 +186,8 @@ All of these are constants at the top of `index.ts`, except the dex cache bound,
 - **Patch size**: 96 MB. The body is written to a temporary file, not held in memory. It must arrive within 120 s and
   may not pause for more than 20 s.
 - **Per address**: 8 uploads per 10 minutes and one upload arriving at a time. An IPv6 address counts as its /64.
+  The address is the connecting one. `X-Forwarded-For` is read only when the connection comes from a proxy listed in
+  `Config.proxyip`, and then the last entry that is not such a proxy counts.
 - **Whole server**: 2 imports running at once, 300 imports per hour, 32 uploads arriving at once.
 - **Other sites**: an upload whose `Origin` header names another site is refused. Requests without an `Origin`
   header (the app, command-line tools) are accepted.

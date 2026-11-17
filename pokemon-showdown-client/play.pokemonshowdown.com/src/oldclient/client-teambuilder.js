@@ -56,6 +56,7 @@
 			'change input[name=phnncustomrules]': 'phnnCustomRulesChanged',
 			'change input[name=romhackfile]': 'romHackFileChanged',
 			'change select[name=romhackselect]': 'romHackSelected',
+			'change select[name=romhackbase]': 'romHackBaseChanged',
 			'click button.formatselect': 'selectFormat',
 			'click button.statmodtoggle': 'toggleStatMod',
 			'click button.basestatmodtoggle': 'toggleBaseStatMod',
@@ -1958,18 +1959,35 @@
 			var buf = '<li class="format-select"><label class="label">ROM patch:</label>';
 			var list = RomHacks.list();
 			if (list.length) {
-				buf += '<select name="romhackselect" class="button">';
+				buf += '<select name="romhackselect" class="button"' + (this.romHackBusy ? ' disabled' : '') + '>';
 				for (var i = 0; i < list.length; i++) {
 					buf += '<option value="' + BattleLog.escapeHTML(list[i].sha256) + '"' + (hack && hack.sha256 === list[i].sha256 ? ' selected' : '') + '>' + BattleLog.escapeHTML(RomHacks.optionLabel(list[i])) + '</option>';
 				}
 				buf += '</select> ';
 			}
-			buf += '<input type="file" name="romhackfile" accept=".bps,.ups,.ips,.xdelta,.vcdiff,.bsp" />';
+			buf += '<input type="file" name="romhackfile" accept=".bps,.ups,.ips,.xdelta,.vcdiff,.bsp"' + (this.romHackBusy ? ' disabled' : '') + ' />';
 			buf += '<p><small>Upload the hack\'s patch file (.bps, .ups, .ips, .xdelta or .bsp) - never a ROM. EXPERIMENTAL: Game Boy, Game Boy Color, Game Boy Advance and DS hacks.</small></p>';
-			if (this.romHackError) buf += '<p class="message-error">' + BattleLog.escapeHTML(this.romHackError) + '</p>';
+			if (this.romHackError && this.romHackTeam === this.curTeam) {
+				buf += '<p class="message-error">' + BattleLog.escapeHTML(this.romHackError) + '</p>';
+			} else if (this.romHackBusy) {
+				buf += '<p class="message-error">A patch for another team is still being read...</p>';
+			}
+			var pending = this.romHackPending;
+			if (pending && pending.team === this.curTeam) {
+				var busy = this.romHackBusy ? ' disabled' : '';
+				buf += '<p class="romhack-basepicker"><label>Choose the base game this patch was made for: ';
+				buf += '<select name="romhackbase" class="button"' + busy + '>';
+				buf += '<option value=""' + (this.romHackBase ? '' : ' selected') + '>(choose a game)</option>';
+				for (var j = 0; j < pending.bases.length; j++) {
+					buf += '<option value="' + BattleLog.escapeHTML(pending.bases[j].id) + '"' + (this.romHackBase === pending.bases[j].id ? ' selected' : '') + '>' + BattleLog.escapeHTML(pending.bases[j].name) + '</option>';
+				}
+				buf += '</select></label> ';
+				buf += '<button type="button" name="romHackBaseUpload" class="button"' + (this.romHackBase && !this.romHackBusy ? '' : ' disabled') + '><strong>Upload</strong></button> ';
+				buf += '<button type="button" name="romHackBaseCancel" class="button"' + busy + '>Cancel</button></p>';
+			}
 			if (hack) {
 				buf += '<p><small>Loaded: <strong>' + BattleLog.escapeHTML(hack.name || 'ROM hack') + '</strong> on ' + BattleLog.escapeHTML(hack.baseGame) + ' - ' + hack.legal.species.length + ' Pok&eacute;mon, ' + hack.legal.moves.length + ' moves, ' + hack.legal.abilities.length + ' abilities, ' + hack.legal.items.length + ' items.<br />';
-				buf += 'SHA-256 <code>' + BattleLog.escapeHTML(hack.sha256) + '</code> - your opponent must upload the identical file.<br />';
+				buf += (hack.pickedBase ? 'Hack ID' : 'SHA-256') + ' <code>' + BattleLog.escapeHTML(hack.sha256) + '</code> - ' + BattleLog.escapeHTML(RomHacks.matchRule(hack)) + '<br />';
 				buf += BattleLog.escapeHTML(hack.notes.join(' '));
 				var approximated = hack.approximated.moves.length + hack.approximated.abilities.length + hack.approximated.items.length;
 				if (approximated) buf += ' ' + hack.approximated.moves.length + ' new moves deal plain damage and ' + (hack.approximated.abilities.length + hack.approximated.items.length) + ' new abilities/items have no effect yet.';
@@ -1989,29 +2007,74 @@
 		},
 		romHackFileChanged: function (e) {
 			var file = e.currentTarget.files && e.currentTarget.files[0];
-			if (!file) return;
+			if (!file || this.romHackBusy) return;
+			this.romHackPending = null;
+			this.romHackBase = '';
+			this.romHackUpload(file, '');
+		},
+		romHackUpload: function (file, base) {
 			var self = this;
+			var team = this.curTeam;
 			this.romHackError = 'Reading the patch...';
+			this.romHackTeam = team;
+			this.romHackBusy = true;
 			this.update();
-			RomHacks.upload(file).then(function () {
+			RomHacks.upload(file, base).then(function () {
 				self.romHackError = '';
-				RomHacks.setTeamHack(self.curTeam.name, RomHacks.active.sha256);
-				self.focus();
+				self.romHackBusy = false;
+				self.romHackPending = null;
+				self.romHackBase = '';
+				if (team && RomHacks.active) RomHacks.setTeamHack(team.name, RomHacks.active.sha256);
+				if (!self.curTeam || !RomHacks.isFormat(self.curTeam.format)) return;
+				if (self.curTeam === team) self.focus();
 				self.update();
 			}, function (err) {
 				self.romHackError = String(err && err.message || err);
+				self.romHackTeam = team;
+				self.romHackBusy = false;
+				if (err && err.bases) {
+					self.romHackPending = { file: file, bases: err.bases, team: team };
+					var offered = false;
+					for (var i = 0; i < err.bases.length; i++) {
+						if (err.bases[i].id === self.romHackBase) offered = true;
+					}
+					if (!offered) self.romHackBase = '';
+				}
+				if (!self.curTeam || !RomHacks.isFormat(self.curTeam.format)) return;
 				self.update();
 			});
 		},
+		romHackBaseChanged: function (e) {
+			this.romHackBase = e.currentTarget.value;
+			this.$('button[name=romHackBaseUpload]').prop('disabled', !this.romHackBase || !!this.romHackBusy);
+		},
+		romHackBaseUpload: function () {
+			var pending = this.romHackPending;
+			if (!pending || pending.team !== this.curTeam || !this.romHackBase || this.romHackBusy) return;
+			this.romHackUpload(pending.file, this.romHackBase);
+		},
+		romHackBaseCancel: function () {
+			this.romHackPending = null;
+			this.romHackBase = '';
+			this.romHackError = '';
+			this.update();
+		},
 		romHackSelected: function (e) {
 			var self = this;
+			var team = this.curTeam;
+			if (this.romHackBusy) return;
+			this.romHackPending = null;
+			this.romHackBase = '';
 			RomHacks.activate(e.currentTarget.value).then(function () {
 				self.romHackError = '';
-				RomHacks.setTeamHack(self.curTeam.name, RomHacks.active.sha256);
+				if (team && RomHacks.active) RomHacks.setTeamHack(team.name, RomHacks.active.sha256);
+				if (self.curTeam !== team) return;
 				self.focus();
 				self.update();
 			}, function (err) {
 				self.romHackError = String(err && err.message || err);
+				self.romHackTeam = team;
+				if (self.curTeam !== team) return;
 				self.update();
 			});
 		},

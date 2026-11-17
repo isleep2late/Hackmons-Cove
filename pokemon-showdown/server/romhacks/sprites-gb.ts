@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { png, type SpriteIndices } from './sprites-gen3';
-import { findGen1Order, findGen1Stats } from './gb';
+import { findGen1OrderByNames, findGen1Stats, findGen2Stats } from './gb';
 import { signatureAnchor } from './signatures';
 
 function reverseBits(b: number) {
@@ -206,10 +206,8 @@ function extractGen1Sprites(rom: Buffer, indices: SpriteIndices, outDir: string)
 	const result = { pokemon: 0, icons: 0, items: 0, size: 56 };
 	let stats = rom.indexOf(signatureAnchor('bulbasaurEntryGen1'));
 	let order = rom.indexOf(signatureAnchor('pokedexOrderGen1'));
-	if (stats < 0 || order < 0) {
-		stats = findGen1Stats(rom);
-		order = findGen1Order(rom);
-	}
+	if (order < 0) order = findGen1OrderByNames(rom);
+	if (stats < 0) stats = findGen1Stats(rom);
 	if (stats < 0 || order < 0 || rom[stats + 28] !== 2) return result;
 	const internal: { [dex: number]: number } = {};
 	for (let i = 0; i < 255; i++) {
@@ -265,7 +263,7 @@ function extractGen1Sprites(rom: Buffer, indices: SpriteIndices, outDir: string)
 		const front = load(rom.readUInt16LE(at + 11), internal[dexNumber], rom[at + 10], listed);
 		if (!front) continue;
 		const canvas = Buffer.alloc(56 * 56);
-		const left = Math.floor((56 - front.width) / 16) * 8;
+		const left = ((8 - (front.width >> 3)) >> 1) * 8;
 		const top = 56 - front.height;
 		for (let y = 0; y < front.height; y++) {
 			front.pixels.copy(canvas, (top + y) * 56 + left, y * front.width, (y + 1) * front.width);
@@ -519,12 +517,12 @@ function extractPolishedSprites(rom: Buffer, indices: SpriteIndices, outDir: str
 
 export function extractGBSprites(rom: Buffer, indices: SpriteIndices, outDir: string) {
 	const result = { pokemon: 0, icons: 0, items: 0, size: 56, overworld: 0 };
-	const stats = rom.indexOf(signatureAnchor('bulbasaurEntryGen2'));
+	const stats = findGen2Stats(rom);
 	if (stats < 0 && rom.indexOf(signatureAnchor('polishedBulbasaurStats')) >= 0) {
 		const polished = extractPolishedSprites(rom, indices, outDir);
 		if (polished) return polished;
 	}
-	if (stats < 0 || rom[stats + 32] !== 2) return extractGen1Sprites(rom, indices, outDir);
+	if (stats < 0) return extractGen1Sprites(rom, indices, outDir);
 	const validTable = (table: number) => {
 		for (let i = 0; i < 20; i++) {
 			const address = rom.readUInt16LE(table + i * 3 + 1);

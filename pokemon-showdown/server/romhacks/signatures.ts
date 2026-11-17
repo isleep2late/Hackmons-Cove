@@ -66,6 +66,15 @@ export function signatureProblem(): string {
 	return load() ? '' : problem;
 }
 
+export function signatureStamp(): string {
+	try {
+		const stat = fs.statSync(SIGNATURES_FILE);
+		return `${stat.size}:${stat.mtimeMs}`;
+	} catch {
+		return '';
+	}
+}
+
 export function requireSignatures() {
 	if (!load()) throw new Error(SIGNATURES_MISSING);
 }

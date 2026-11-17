@@ -2491,7 +2491,29 @@ export const RomHacks = new class {
 		this.install(hack);
 		return hack;
 	}
-	async upload(file: File) {
+	offeredBases(refusal: any): { id: string, name: string }[] {
+		if (!['IPS_BASE_UNKNOWN', 'IPS_BASE_MISFIT', 'UNKNOWN_BASE'].includes(refusal?.code)) return [];
+		if (!Array.isArray(refusal.bases)) return [];
+		const bases = [];
+		for (const entry of refusal.bases) {
+			if (typeof entry?.id !== 'string' || !/^[a-z0-9-]{1,32}$/.test(entry.id)) continue;
+			if (typeof entry.name !== 'string' || !entry.name) continue;
+			bases.push({ id: entry.id, name: entry.name.slice(0, 80) });
+		}
+		return bases;
+	}
+	async sha256Hex(bytes: Uint8Array) {
+		const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', bytes));
+		let hex = '';
+		for (let i = 0; i < digest.length; i++) hex += `0${digest[i].toString(16)}`.slice(-2);
+		return hex;
+	}
+	matchRule(hack: any) {
+		const picked = typeof hack?.pickedBase?.name === 'string' ? hack.pickedBase.name : '';
+		if (!picked) return 'your opponent must upload the identical file.';
+		return `your opponent must upload the identical file and choose the same base game (${picked}).`;
+	}
+	async upload(file: File, base?: string) {
 		const bytes = new Uint8Array(await file.arrayBuffer());
 		const magic = String.fromCharCode(bytes[0], bytes[1], bytes[2], bytes[3], bytes[4]);
 		const isXdelta = bytes[0] === 0xd6 && bytes[1] === 0xc3 && bytes[2] === 0xc4;
@@ -2501,7 +2523,8 @@ export const RomHacks = new class {
 		}
 		if (bytes.length > 96 * 1024 * 1024) throw new Error('The patch is larger than 96 MB.');
 		if (window.Config?.testclient) throw new Error('ROM hacks cannot be used in the test client.');
-		const response = await fetch(`${this.serverUrl()}/romhacks/upload`, {
+		const query = base ? `?base=${encodeURIComponent(base)}` : '';
+		const response = await fetch(`${this.serverUrl()}/romhacks/upload${query}`, {
 			method: 'POST', headers: { 'Content-Type': 'application/octet-stream' }, body: bytes,
 		});
 		let hack;
@@ -2510,12 +2533,25 @@ export const RomHacks = new class {
 		} catch {
 			throw new Error('The server did not accept the patch.');
 		}
-		if (!response.ok || hack.error) throw new Error(hack.error || 'The server did not accept the patch.');
+		if (!response.ok || hack.error) {
+			const refusal: any = new Error(hack.error || 'The server did not accept the patch.');
+			const bases = this.offeredBases(hack);
+			if (bases.length) refusal.bases = bases;
+			throw refusal;
+		}
+		if (!this.trusted(hack.sha256)) throw new Error('The server did not accept the patch.');
 		if (window.crypto?.subtle) {
-			const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', bytes));
-			let local = '';
-			for (let i = 0; i < digest.length; i++) local += `0${digest[i].toString(16)}`.slice(-2);
-			if (local !== hack.sha256) throw new Error('The server answered for a different patch file.');
+			const local = await this.sha256Hex(bytes);
+			let derived = '';
+			if (base) {
+				const text = `${local}:${base}`;
+				const ascii = new Uint8Array(text.length);
+				for (let i = 0; i < text.length; i++) ascii[i] = text.charCodeAt(i);
+				derived = await this.sha256Hex(ascii);
+			}
+			if (hack.sha256 !== local && hack.sha256 !== derived) {
+				throw new Error('The server answered for a different patch file.');
+			}
 		}
 		hack.name = file.name.replace(/\.(bps|ups|ips|xdelta|vcdiff|bsp)$/i, '');
 		const list = this.list().filter(entry => entry.sha256 !== hack.sha256);

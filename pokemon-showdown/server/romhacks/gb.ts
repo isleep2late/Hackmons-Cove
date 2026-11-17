@@ -215,6 +215,18 @@ export function findGen1Stats(rom: Buffer): number {
 	return -1;
 }
 
+export function findGen2Stats(rom: Buffer): number {
+	const anchored = rom.indexOf(signatureAnchor('bulbasaurEntryGen2'));
+	if (anchored >= 0 && rom[anchored + 32] === 2 && rom[anchored + 64] === 3) return anchored;
+	for (let at = 0; at + 32 * 250 < rom.length; at++) {
+		if (rom[at] !== 1 || rom[at + 32] !== 2 || rom[at + 64] !== 3) continue;
+		let count = 0;
+		while (rom[at + count * 32] === count + 1) count++;
+		if (count >= 200) return at;
+	}
+	return -1;
+}
+
 function findGen1Names(rom: Buffer): number {
 	const fits = (at: number) => {
 		let ended = false;
@@ -249,6 +261,57 @@ export function findGen1Order(rom: Buffer): number {
 		if (i < 190) at += i;
 	}
 	return -1;
+}
+
+export function findGen1OrderSized(rom: Buffer, names: number): number {
+	let count = 0;
+	while (count < 255 && decodeFixed(rom, names + count * 10, 10) !== null) count++;
+	if (count < 100 || rom.length < count) return -1;
+	const tally = new Uint32Array(256);
+	const tied: number[] = [];
+	let repeats = 0;
+	let fewest = 3;
+	for (let end = 0; end < rom.length; end++) {
+		const added = rom[end];
+		if (tally[added]++ && added) repeats++;
+		if (end >= count) {
+			const dropped = rom[end - count];
+			if (--tally[dropped] && dropped) repeats--;
+		}
+		if (end < count - 1 || repeats > fewest || (repeats === fewest && tied.length >= 16)) continue;
+		const distinct = count - tally[0] - repeats;
+		if (distinct < 100) continue;
+		let stray = false;
+		for (let value = 255; value > distinct && !stray; value--) stray = tally[value] > 0;
+		if (stray) continue;
+		if (repeats < fewest) tied.length = 0;
+		fewest = repeats;
+		tied.push(end - count + 1);
+	}
+	if (tied.length < 2) return tied.length ? tied[0] : -1;
+	let best = -1;
+	let bestClashes = Infinity;
+	for (const at of tied) {
+		const empty = new Set<string>();
+		const filled = new Set<string>();
+		for (let i = 0; i < count; i++) (rom[at + i] ? filled : empty).add(decodeFixed(rom, names + i * 10, 10)!);
+		let clashes = 0;
+		for (const name of empty) if (filled.has(name)) clashes++;
+		if (clashes < bestClashes) {
+			bestClashes = clashes;
+			best = at;
+		}
+	}
+	return best;
+}
+
+export function findGen1OrderByNames(rom: Buffer): number {
+	const stock = findText(rom, 'RHYDON@@@@KANGASKHAN');
+	if (stock >= 0) return findGen1OrderSized(rom, stock);
+	const usual = findGen1Order(rom);
+	if (usual >= 0) return usual;
+	const names = findGen1Names(rom);
+	return names < 0 ? -1 : findGen1OrderSized(rom, names);
 }
 
 function findMoveRecords(rom: Buffer, stride: number, count: number): number {
@@ -621,13 +684,17 @@ export function extractGB(rom: Buffer, base: Buffer | null = null): RawHack {
 	const typeNames = readTypeNames(rom);
 	const typeName = (id: number) => typeNames[id] || GEN1_TYPES[id] || '???';
 
-	const gen2Stats = rom.indexOf(signatureAnchor('bulbasaurEntryGen2'));
-	const isGen2 = gen2Stats >= 0 && rom[gen2Stats + 32] === 2 && rom[gen2Stats + 33] === 60;
-	const title = rom.toString('latin1', 0x134, 0x143).replace(/[^A-Za-z ]/g, ' ').trim();
+	const gen2Stats = findGen2Stats(rom);
+	const isGen2 = gen2Stats >= 0;
+	const title = rom.toString('latin1', 0x134, 0x143).replace(/[^A-Za-z :.!-]/g, ' ').trim();
 
 	const species: RawSpecies[] = [];
 	if (isGen2) {
-		const names = findText(rom, 'BULBASAUR@IVYSAUR@@@');
+		let names = findText(rom, 'BULBASAUR@IVYSAUR@@@');
+		if (names < 0) {
+			const second = findText(rom, 'IVYSAUR@@@VENUSAUR@@');
+			names = second >= 10 ? second - 10 : findGen1Names(rom);
+		}
 		if (names < 0) throw new Error('No Pokemon name table was found in this game.');
 		for (let i = 0; i < 255; i++) {
 			const name = decodeFixed(rom, names + i * 10, 10);
@@ -649,8 +716,14 @@ export function extractGB(rom: Buffer, base: Buffer | null = null): RawHack {
 		if (names < 0) {
 			names = findGen1Names(rom);
 			order = findGen1Order(rom);
+			if (order < 0 && names >= 0) order = findGen1OrderSized(rom, names);
 			stats = findGen1Stats(rom);
 			if (stats < 0) names = -1;
+		} else if (order < 0) {
+			order = findGen1OrderSized(rom, names);
+			if (stats < 0) stats = findGen1Stats(rom);
+		} else if (stats < 0) {
+			stats = findGen1Stats(rom);
 		}
 		if (names < 0 || order < 0) throw new Error('No Pokemon name table was found in this game.');
 		if (stats < 0 || rom[stats + 28] !== 2) notes.push('Base stats were not found; stats and types are taken from the official games.');
