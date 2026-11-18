@@ -383,7 +383,7 @@ export function userHoldsRomHack(
 	if (user.romHacks?.has(sha256)) return true;
 	if (!user.registered || !user.id) return false;
 	const configured: unknown = typeof Config === 'undefined' ? undefined : Config.romhackbots;
-	const bots = Array.isArray(configured) ? configured : DEFAULT_ROMHACK_BOTS;
+	const bots = configured === undefined ? DEFAULT_ROMHACK_BOTS : Array.isArray(configured) ? configured : [];
 	if (!bots.some(name => typeof name === 'string' && toID(name) === user.id)) return false;
 	return hackExists(sha256);
 }

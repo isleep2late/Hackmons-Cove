@@ -74,8 +74,9 @@ that generation, so the rules are completed when the hack is known (`getRuleTabl
 
 A battle bot cannot upload every patch its opponents use, so a short list of trusted bot accounts counts as holding
 every hack that is already stored on this server. The list is `Config.romhackbots` (`config/config-example.js`), by
-default `['multibot']`; an empty list switches this off. `userHoldsRomHack(user, id)` in `index.ts` is the one check,
-and `server/ladders.ts` uses it where a challenge is made and where it is accepted.
+default `['multibot']`; an empty list, or any value that is not a list (`false`, `null`, a string), switches this
+off. `userHoldsRomHack(user, id)` in `index.ts` is the one check, and `server/ladders.ts` uses it where a challenge is
+made and where it is accepted.
 
 - The account must be logged in as a registered name (`user.registered`, set only when the login server signed the
   name after a password login). A guest or an unregistered user who takes a listed name gets nothing.
