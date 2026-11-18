@@ -8,7 +8,7 @@ import {
 	applyPatch, crc32, ipsBoundaryFit, ipsKeptBytes, ipsPairFit, readPatchInfo, requireVcdiffChecksum, MAX_TARGET_SIZE,
 } from './patch';
 import { buildHackDex, HACK_VERSION, type HackDex, type RawHack } from './build';
-import { Dex } from '../../sim/dex';
+import { Dex, toID } from '../../sim/dex';
 import { extractGen3, isGen3 } from './gen3';
 import { extractGB, isGB } from './gb';
 import { extractNDS, isNDS } from './nds';
@@ -373,6 +373,19 @@ function writeFull(hack: HackDex) {
 
 export function hackExists(sha256: string) {
 	return /^[0-9a-f]{64}$/.test(sha256) && fs.existsSync(hackPath(sha256));
+}
+
+const DEFAULT_ROMHACK_BOTS = ['multibot'];
+
+export function userHoldsRomHack(
+	user: { id: string, registered: boolean, romHacks?: Set<string> }, sha256: string
+) {
+	if (user.romHacks?.has(sha256)) return true;
+	if (!user.registered || !user.id) return false;
+	const configured: unknown = typeof Config === 'undefined' ? undefined : Config.romhackbots;
+	const bots = configured === undefined ? DEFAULT_ROMHACK_BOTS : Array.isArray(configured) ? configured : [];
+	if (!bots.some(name => typeof name === 'string' && toID(name) === user.id)) return false;
+	return hackExists(sha256);
 }
 
 function gbChecksumsValid(rom: Buffer): boolean {

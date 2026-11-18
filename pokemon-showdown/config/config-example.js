@@ -473,6 +473,8 @@ exports.autolockdown = true;
  */
 exports.noguestsecurity = false;
 
+exports.romhackbots = ['multibot'];
+
 /**
  * tourroom - specify a room to receive tournament announcements (defaults to
  * the room 'tournaments').

@@ -20,6 +20,7 @@ const PERIODIC_MATCH_INTERVAL = 60 * SECONDS;
 
 import type { ChallengeType } from './room-battle';
 import { romHackIdOf, romHackMode } from '../sim/romhack-formats';
+import { userHoldsRomHack } from './romhacks';
 import { BattleReady, BattleChallenge, GameChallenge, BattleInvite, challenges } from './ladders-challenges';
 
 export interface LadderRating {
@@ -94,7 +95,10 @@ class Ladder extends LadderStore {
 		}
 
 		const romHack = Ladder.romHackOf(this.formatid);
-		if (romHackMode(this.formatid) && (!romHack || !user.romHacks?.has(romHack))) {
+		const holdsRomHack = !!romHack && (
+			challengeType === 'challenge' ? userHoldsRomHack(user, romHack) : !!user.romHacks?.has(romHack)
+		);
+		if (romHackMode(this.formatid) && !holdsRomHack) {
 			connection.popup(
 				romHack ?
 					`This battle uses the ROM patch ${romHack.slice(0, 12)}, which you have not uploaded. ` +
@@ -294,7 +298,7 @@ class Ladder extends LadderStore {
 	static async acceptChallenge(connection: Connection, chall: BattleChallenge) {
 		const ladder = Ladders(chall.format);
 		const romHack = Ladder.romHackOf(chall.format);
-		if (romHack && !connection.user.romHacks?.has(romHack)) {
+		if (romHack && !userHoldsRomHack(connection.user, romHack)) {
 			const challenger = Users.get(chall.from);
 			const mismatch = (other: string, missing: string) =>
 				`The battle with ${other} could not start because the two of you do not have the same ROM patch: ` +
