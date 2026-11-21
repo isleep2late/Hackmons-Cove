@@ -1,5 +1,6 @@
 import { Dex, toID } from './dex';
 import { isCustomDisguisesFormat } from './romhack-formats';
+import { baseItemId, extraItemId } from './enigma';
 
 const CHOOSABLE_TARGETS = new Set(['normal', 'any', 'adjacentAlly', 'adjacentAllyOrSelf', 'adjacentFoe']);
 
@@ -212,7 +213,8 @@ export class BattleActions {
 			for (const itemName of pokemon.set.phItems.split('/')) {
 				const extraItem = this.battle.dex.items.get(itemName);
 				if (!extraItem.exists || extraItem.id === pokemon.item) continue;
-				const effect = 'item:' + extraItem.id;
+				const effect = 'item:' + extraItemId(extraItem);
+				if (effect === 'item:' + pokemon.item) continue;
 				if (pokemon.m.usedExtraItems?.includes(effect)) continue;
 				pokemon.volatiles[effect] = this.battle.initEffectState({ id: effect as ID, target: pokemon });
 			}
@@ -881,7 +883,8 @@ export class BattleActions {
 					this.battle.add('-miss', pokemon, target);
 				}
 				if (!move.ohko && pokemon.hasItem('blunderpolicy') && pokemon.useItem(undefined,
-					pokemon.item === 'blunderpolicy' ? undefined : this.dex.conditions.get('item:blunderpolicy'))) {
+					baseItemId(pokemon.getItem()) === 'blunderpolicy' ? undefined :
+					this.dex.conditions.get('item:blunderpolicy'))) {
 					this.battle.boost({ spe: 2 }, pokemon);
 				}
 				hitResults[i] = false;

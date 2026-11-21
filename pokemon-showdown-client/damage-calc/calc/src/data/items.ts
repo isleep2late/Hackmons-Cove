@@ -783,10 +783,20 @@ const BERRIES: {[berry: string]: {t: I.TypeName; p: number}} = {
 
 export const MEGA_STONES = Object.assign({}, GEN_6_MEGA_STONES, ZA_MEGA_STONES);
 
+const EREADER_BERRIES = [
+  'Pumkin Berry', 'Drash Berry', 'Eggant Berry', 'Strib Berry', 'Chilan Berry (Gen 3)',
+  'Nutpea Berry', 'Ginema Berry', 'Kuo Berry', 'Yago Berry', 'Touga Berry', 'Niniku Berry',
+  'Topo Berry',
+];
+
 const NN = SV.concat(NN_ITEMS_EXTRA).sort();
 const SW = SW_ITEMS;
 
-export const ITEMS = [CHAMPIONS, RBY, GSC, ADV, DPP, BW, XY, SM, SS, SV, NN, SW];
+const DEX_ITEMS = [CHAMPIONS, RBY, GSC, ADV, DPP, BW, XY, SM, SS, SV, NN, SW];
+
+export const ITEMS = DEX_ITEMS.map((list, num) => (
+  num === 3 || num === 10 ? list.concat(EREADER_BERRIES).sort() : list
+));
 
 export class Items implements I.Items {
   private readonly gen: I.GenerationNum;
@@ -796,7 +806,9 @@ export class Items implements I.Items {
   }
 
   get(id: I.ID) {
-    return ITEMS_BY_ID[this.gen][id];
+    const item = ITEMS_BY_ID[this.gen][id];
+    if (item || this.gen < 3 || this.gen > 10) return item;
+    return Object.prototype.hasOwnProperty.call(EREADER_BY_ID, id) ? EREADER_BY_ID[id] : item;
   }
 
   *[Symbol.iterator]() {
@@ -833,7 +845,7 @@ class Item implements I.Item {
 const ITEMS_BY_ID: Array<{[id: string]: Item}> = [];
 
 let gen = 0;
-for (const items of ITEMS) {
+for (const items of DEX_ITEMS) {
   const map: {[id: string]: Item} = {};
   for (const item of items) {
     const i = new Item(item, gen);
@@ -841,6 +853,12 @@ for (const items of ITEMS) {
   }
   ITEMS_BY_ID.push(map);
   gen++;
+}
+
+const EREADER_BY_ID: {[id: string]: Item} = {};
+for (const name of EREADER_BERRIES) {
+  const berry = new Item(name, 3);
+  EREADER_BY_ID[berry.id] = berry;
 }
 
 export const extendItems = ((Kind: typeof Item) => (generation: number, names: string[]) => {

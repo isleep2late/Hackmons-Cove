@@ -15,6 +15,9 @@ import { Teams } from './teams';
 import { PRNG } from './prng';
 import { type RuleTable } from './dex-formats';
 import { isCustomDisguisesFormat, romHackHasSpecies } from './romhack-formats';
+import {
+	ENIGMA_GEN3_BASES, ENIGMA_PRESETS, enigmaExclusionReason, enigmaParamKind,
+} from './enigma';
 
 const EXISTENCE_TAGS = ['past', 'future', 'lgpe', 'legends', 'unobtainable', 'cap', 'custom', 'demo', 'glitch', 'glitchgen1', 'glitchgen2', 'glitchgen3', 'nonexistent'];
 const isCapContent = (thing: Species | Item | Move | Ability) => (
@@ -850,6 +853,12 @@ export class TeamValidator {
 		if (item.id && !item.exists) {
 			return [`"${set.item}" is an invalid item.`];
 		}
+		if (item.enigmaBase !== undefined) {
+			const enigmaProblem = this.validateEnigmaItem(set, item, setHas);
+			if (enigmaProblem.problem) problems.push(enigmaProblem.problem);
+			item = dex.items.get(enigmaProblem.name);
+			set.item = item.name;
+		}
 		if (ability.id && !ability.exists) {
 			if (dex.gen < 3) {
 				// gen 1-2 don't have abilities, just silently remove
@@ -877,6 +886,7 @@ export class TeamValidator {
 		}
 		if (set.phItems && isCustomDisguises) {
 			const extraItemNames: string[] = [];
+			const usedBases: string[] = [item.enigmaBase || item.id];
 			for (const part of set.phItems.split('/')) {
 				if (!part.trim()) continue;
 				const extraItem = dex.items.get(part.trim());
@@ -884,7 +894,16 @@ export class TeamValidator {
 					problems.push(`${name} has an invalid extra item "${part.trim()}".`);
 				} else if (ruleTable.has('-tag:cap') && isCapContent(extraItem) && !ruleTable.has(`+item:${extraItem.id}`)) {
 					problems.push(`${name}'s extra item ${extraItem.name} is made up for Smogon CAP and does not exist in this game.`);
-				} else if (extraItem.name !== item.name && !extraItemNames.includes(extraItem.name)) {
+				} else if (extraItem.enigmaBase !== undefined) {
+					const enigmaProblem = this.validateEnigmaItem(set, extraItem, setHas);
+					if (enigmaProblem.problem) {
+						problems.push(enigmaProblem.problem);
+					} else if (!usedBases.includes(extraItem.enigmaBase || extraItem.id)) {
+						usedBases.push(extraItem.enigmaBase || extraItem.id);
+						extraItemNames.push(enigmaProblem.name);
+					}
+				} else if (!usedBases.includes(extraItem.id)) {
+					usedBases.push(extraItem.id);
 					extraItemNames.push(extraItem.name);
 				}
 			}
@@ -991,7 +1010,7 @@ export class TeamValidator {
 		let problem = this.checkSpecies(set, species, tierSpecies, setHas);
 		if (problem) problems.push(problem);
 
-		problem = this.checkItem(set, item, setHas);
+		problem = item.enigmaBase !== undefined ? null : this.checkItem(set, item, setHas);
 		if (problem) problems.push(problem);
 
 		for (const typeName of species.types) {
@@ -1959,7 +1978,9 @@ export class TeamValidator {
 				// Impossible!
 				throw new Error(`Species ${species.name} has a required ability despite not being a battle-only forme; it should just be in its abilities table.`);
 			}
-			if (species.requiredItems && !species.requiredItems.includes(item.name)) {
+			if (species.requiredItems && !species.requiredItems.includes(
+				item.enigmaBase ? dex.items.getByID(item.enigmaBase as ID).name : item.name
+			)) {
 				if (dex.gen >= 8 && (species.baseSpecies === 'Arceus' || species.baseSpecies === 'Silvally')) {
 					problems.push(
 						`${name} needs to hold ${species.requiredItems.join(' or ')}.`,
@@ -2246,6 +2267,44 @@ export class TeamValidator {
 		}
 		if (nonexistentCheck === '') return capProblem || null;
 		return capProblem;
+	}
+
+	validateEnigmaItem(set: PokemonSet, item: Item, setHas: { [k: string]: true }): { problem: string | null, name: string } {
+		const dex = this.dex;
+		const ruleTable = this.ruleTable;
+		const name = set.name || set.species;
+		const fail = (problem: string) => ({ problem, name: item.name });
+		if (!ruleTable.has('enigmaitemsmod')) {
+			return fail(`${name}'s item ${item.name} is an Enigma item, which is only allowed in formats with Enigma Items Mod.`);
+		}
+		if (item.enigmaPreset && !ENIGMA_PRESETS[item.id]?.confirmed) {
+			return fail(`${name}'s item ${item.name} is not available yet: its real effect is awaiting confirmation.`);
+		}
+		setHas['item:' + item.id] = true;
+		if (!item.enigmaBase) return { problem: null, name: item.name };
+		const base = dex.items.getByID(item.enigmaBase as ID);
+		const refuse = (reason: string) => fail(`${name}'s item ${item.name} is not allowed: ${base.name} ${reason}.`);
+		if (dex.gen === 3) {
+			if (base.gen > 3) return refuse(`does not exist in Generation 3`);
+			if (!ENIGMA_GEN3_BASES.includes(base.id)) {
+				return refuse(`has no Generation 3 hold effect for an Enigma Berry to copy`);
+			}
+		} else {
+			const reason = enigmaExclusionReason(base);
+			if (reason) return refuse(`cannot be an Enigma item because it ${reason}`);
+		}
+		let resultName = item.name;
+		if (item.enigmaParam !== undefined) {
+			const kind = enigmaParamKind(base.id);
+			if (!kind) return refuse(`has no adjustable parameter`);
+			if (!ruleTable.has('enigmaparameters')) {
+				return fail(`${name}'s item ${item.name} is not allowed: Enigma parameters are turned off in this format.`);
+			}
+			if (dex.gen === 3 && item.enigmaParam === kind.stock) resultName = `Enigma ${base.name}`;
+		}
+		const baseProblem = this.checkItem(set, base, setHas);
+		if (baseProblem) return fail(`${baseProblem} (${item.name} copies ${base.name}.)`);
+		return { problem: null, name: resultName };
 	}
 
 	checkItem(set: PokemonSet, item: Item, setHas: { [k: string]: true }) {

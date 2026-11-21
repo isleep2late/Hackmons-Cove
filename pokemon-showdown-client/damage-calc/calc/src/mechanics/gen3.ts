@@ -1,5 +1,5 @@
 import type {Generation} from '../data/interface';
-import {getItemBoostType} from '../items';
+import {getItemBoostType, getEnigmaTypeBoost} from '../items';
 import type {RawDesc} from '../desc';
 import type {Pokemon} from '../pokemon';
 import type {Move} from '../move';
@@ -297,7 +297,14 @@ export function calculateAttackADV(
     desc.attackerAbility = attacker.ability;
   }
 
-  if (!attacker.hasItem('Sea Incense') && (move.hasType(getItemBoostType(attacker.item))) ||
+  const enigmaBoost = getEnigmaTypeBoost(attacker.item, attacker.enigmaParam);
+  if (enigmaBoost !== undefined) {
+    if (move.hasType(getItemBoostType(attacker.item)) ||
+      (move.named('Struggle') && getItemBoostType(attacker.item) === 'Normal')) {
+      at = Math.floor(at * (100 + enigmaBoost) / 100);
+      desc.attackerItem = attacker.item;
+    }
+  } else if (!attacker.hasItem('Sea Incense') && (move.hasType(getItemBoostType(attacker.item))) ||
     (move.named('Struggle') && getItemBoostType(attacker.item) === 'Normal')) {
     at = hackItemApply(attacker.item, at, Math.floor(at * 1.1));
     desc.attackerItem = attacker.item;

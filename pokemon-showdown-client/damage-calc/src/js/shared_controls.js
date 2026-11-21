@@ -619,6 +619,25 @@ $(".move-selector").change(function () {
 	moveGroupObj.children(".move-z").prop("checked", !!move.isZ);
 });
 
+function enigmaItemName(pokeInfo, itemName) {
+	if (!itemName || (gen !== 3 && gen !== 10)) return itemName;
+	if (!pokeInfo.find(".enigma-toggle").prop("checked")) return itemName;
+	var held = calc.parseEnigmaItem(calc.Generations.get(gen), itemName);
+	if (held && held.preset) return itemName;
+	var raw = $.trim(String(pokeInfo.find(".enigma-param").val() || ""));
+	var hasParam = /^(0|[1-9][0-9]{0,2})$/.test(raw) && Number(raw) <= 255;
+	return "Enigma " + itemName + (hasParam ? " (" + Number(raw) + ")" : "");
+}
+
+function applyEnigmaItem(pokeInfo, itemName) {
+	var parsed = (gen === 3 || gen === 10) && itemName ? calc.parseEnigmaItem(calc.Generations.get(gen), itemName) : undefined;
+	var copy = parsed && !parsed.preset ? parsed : undefined;
+	pokeInfo.find(".enigma-toggle").prop("checked", !!copy);
+	pokeInfo.find(".enigma-param").val(copy && copy.param !== undefined ? copy.param : "");
+	if (parsed && parsed.preset) return parsed.name;
+	return copy ? copy.base : itemName;
+}
+
 $(".item").change(function () {
 	var itemName = $(this).val();
 	var pokeObj = $(this).closest('.poke-info');
@@ -789,7 +808,7 @@ $(".set-selector").change(function () {
 				setSelectValueIfValid(itemObj, randset.items && randset.items[0], "");
 			} else {
 				setSelectValueIfValid(abilityObj, set.ability, abilityFallback);
-				setSelectValueIfValid(itemObj, set.item, "");
+				setSelectValueIfValid(itemObj, applyEnigmaItem(pokeObj, set.item), "");
 			}
 			var setMoves = set.moves;
 			if (randset) {
@@ -1214,7 +1233,7 @@ function createPokemon(pokeInfo) {
 		if (gen === 1) baseStats.spd = baseStats.spa;
 
 		var ability = pokeInfo.find(".ability").val();
-		var item = pokeInfo.find(".item").val();
+		var item = enigmaItemName(pokeInfo, pokeInfo.find(".item").val());
 		var gender = pokeInfo.find(".gender").val();
 		var isDynamaxed = pokeInfo.find(".max").prop("checked");
 		var overrideMove;

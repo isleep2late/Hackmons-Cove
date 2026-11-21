@@ -37,7 +37,12 @@ const l = logger('@showdex/utils/calc/createSmogonPokemon()');
  *
  * @since 0.1.0
  */
-import { getPhnnArceusTypes, getPhnnBaseStats, isPhnnAnyAbilityFormat } from '@showdex/phnn';
+import {
+  getPhnnArceusTypes,
+  getPhnnBaseItem,
+  getPhnnBaseStats,
+  isPhnnAnyAbilityFormat,
+} from '@showdex/phnn';
 
 export const createSmogonPokemon = (
   format: string,
@@ -56,7 +61,7 @@ export const createSmogonPokemon = (
 
   // nullish-coalescing (`??`) here since `item` can be cleared by the user (dirtyItem) in PokeInfo
   // (note: when cleared, `dirtyItem` will be set to null, which will default to `item`)
-  const item = (gen > 1 && (pokemon.dirtyItem ?? pokemon.item)) || null;
+  const item = (gen > 1 && getPhnnBaseItem(dex, pokemon.dirtyItem ?? pokemon.item)) || null;
 
   // shouldn't happen, but just in case, ja feel
   if (!pokemon.speciesForme) {

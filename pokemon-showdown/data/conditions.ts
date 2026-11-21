@@ -3,8 +3,8 @@ export const Conditions: import('../sim/dex-conditions').ConditionDataTable = {
 		name: 'brn',
 		effectType: 'Status',
 		onStart(target, source, sourceEffect) {
-			if (sourceEffect?.id === 'flameorb') {
-				this.add('-status', target, 'brn', '[from] item: Flame Orb');
+			if (sourceEffect?.id === 'flameorb' || sourceEffect?.id === 'enigmaflameorb') {
+				this.add('-status', target, 'brn', '[from] ' + sourceEffect.fullname);
 			} else if (sourceEffect?.effectType === 'Ability') {
 				this.add('-status', target, 'brn', '[from] ability: ' + sourceEffect.name, `[of] ${source}`);
 			} else {
@@ -140,8 +140,8 @@ export const Conditions: import('../sim/dex-conditions').ConditionDataTable = {
 		effectType: 'Status',
 		onStart(target, source, sourceEffect) {
 			this.effectState.stage = 0;
-			if (sourceEffect?.id === 'toxicorb') {
-				this.add('-status', target, 'tox', '[from] item: Toxic Orb');
+			if (sourceEffect?.id === 'toxicorb' || sourceEffect?.id === 'enigmatoxicorb') {
+				this.add('-status', target, 'tox', '[from] ' + sourceEffect.fullname);
 			} else if (sourceEffect?.effectType === 'Ability') {
 				this.add('-status', target, 'tox', '[from] ability: ' + sourceEffect.name, `[of] ${source}`);
 			} else {

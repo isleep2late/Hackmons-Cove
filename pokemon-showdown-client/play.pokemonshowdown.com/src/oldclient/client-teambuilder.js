@@ -91,6 +91,8 @@
 			'keyup .chartinput': 'chartKeyup',
 			'focus .chartinput': 'chartFocus',
 			'blur .chartinput': 'chartChange',
+			'change input[name=enigmaitem]': 'enigmaChange',
+			'change input[name=enigmaparam]': 'enigmaChange',
 			'keyup .searchinput': 'searchChange',
 
 			// drag/drop
@@ -1543,7 +1545,7 @@
 			buf += '<div class="setrow">';
 			if (this.curTeam.gen > 1 && !isLetsGo) {
 				var itemCellVal = (RomHacks.isDisguises(this.curTeam.format) && set.phItems) ? 'Multi' : set.item;
-				buf += '<div class="setcell setcell-item"><label>Item' + (set.phItems ? '(s)' : '') + '</label><input type="text" name="item" class="textbox chartinput" value="' + BattleLog.escapeHTML(itemCellVal) + '" autocomplete="off" /></div>';
+				buf += '<div class="setcell setcell-item"><label>Item' + (set.phItems ? '(s)' : '') + '</label><input type="text" name="item" class="textbox chartinput" value="' + BattleLog.escapeHTML(itemCellVal) + '" title="' + BattleLog.escapeHTML(itemCellVal) + '" style="' + Dex.enigma.fitStyle(itemCellVal) + '" autocomplete="off" /></div>';
 			}
 			if (this.curTeam.gen > 2 && !isLetsGo) buf += '<div class="setcell setcell-ability"><label>Ability</label><input type="text" name="ability" class="textbox chartinput" value="' + BattleLog.escapeHTML(set.ability) + '" autocomplete="off" /></div>';
 			buf += '</div></div>';
@@ -2855,7 +2857,7 @@
 			if (pokemonChanged || this.search.qName !== this.curChartName) {
 				var cur = {};
 				var stripPP = function (v) { return toID((v || '').replace(/\s*\(\d+(?:\/\d+)?\)\s*$/, '')); };
-				cur[stripPP(q)] = 1; // make sure selected one is first
+				cur[type === 'move' ? stripPP(q) : toID(q)] = 1; // make sure selected one is first
 				if (type === 'move') {
 					cur[stripPP(this.$('input[name=move1]').val())] = 1;
 					cur[stripPP(this.$('input[name=move2]').val())] = 1;
@@ -2866,6 +2868,7 @@
 					this.$chart.scrollTop(0);
 				}
 				this.search.$inputEl = $inputEl;
+				this.search.enigmaRow = type === 'item' ? this.renderEnigmaRow() : '';
 				this.search.setType(type, this.curTeam.format || 'gen9', this.curSet, cur);
 				this.qInitial = q;
 				this.search.qName = this.curChartName;
@@ -2880,6 +2883,43 @@
 					if (this.search.q) this.$chart.find('a').first().addClass('hover');
 				}
 			}
+		},
+		renderEnigmaRow: function () {
+			if (!this.curSet || !this.curTeam) return '';
+			var state = Dex.enigma.state(this.curSet.item, this.curTeam.format, this.curTeam.dex);
+			if (!state.rules.enabled) return '';
+			var esc = BattleLog.escapeHTML;
+			var buf = '<div class="enigma-controls" style="padding:4px 8px 6px 8px">';
+			buf += '<label class="checkbox" style="display:inline-block"' + (state.reason ? ' title="' + esc(state.reason) + '"' : '') + '>';
+			buf += '<input type="checkbox" name="enigmaitem"' + (state.isEnigma ? ' checked="checked"' : '') + (state.reason ? ' disabled="disabled"' : '') + ' /> ';
+			buf += 'Enigma item (cannot be Tricked or stolen)</label>';
+			if (state.reason && state.item) buf += ' <small>' + esc(state.reason) + '</small>';
+			if (state.kind) {
+				buf += ' <label style="display:inline-block;margin-left:8px">Parameter (0-255): <input type="number" name="enigmaparam" min="0" max="255" step="1" class="textbox" style="width:110px" value="' + (state.param === undefined ? '' : state.param) + '" placeholder="' + esc(state.placeholder) + '" /></label>';
+				buf += '<br /><small>' + esc(state.hint) + '</small>';
+			}
+			if (state.rules.gen3) buf += '<br /><small>Gen 3: every Enigma item on a team must have the same effect.</small>';
+			buf += '</div>';
+			return buf;
+		},
+		enigmaChange: function (e) {
+			if (!this.curSet || !this.curTeam) return;
+			var target = e.currentTarget;
+			var name = target.name === 'enigmaitem' ?
+				Dex.enigma.toggle(this.curSet.item, target.checked, this.curTeam.format, this.curTeam.dex) :
+				Dex.enigma.withParam(this.curSet.item, target.value, this.curTeam.format, this.curTeam.dex);
+			if (name !== null) {
+				this.curSet.item = name;
+				this.save();
+				this.updateSetTop();
+			}
+			this.curChartName = 'item';
+			this.curChartType = 'item';
+			this.updateChart(true);
+		},
+		enigmaCarry: function (val) {
+			if (this.curChartName !== 'item' || !this.curSet || !this.curTeam) return val;
+			return Dex.enigma.carry([this.$('input[name=item]').val(), this.curSet.item], val, this.curTeam.format);
 		},
 		selectPokemon: function (i) {
 			i = +i;
@@ -3835,6 +3875,9 @@
 						}
 						itemNames.sort();
 						if (isRomHackDisguise) itemNames = this.romHackNames('items', 'items');
+						for (var eci = 0; eci < curItems.length; eci++) {
+							if (itemNames.indexOf(curItems[eci]) < 0 && Dex.enigma.get(toID(curItems[eci]), Dex)) itemNames.push(curItems[eci]);
+						}
 						buf += '<div class="formrow"><label class="formlabel" title="Items (select any number; the first is the held item, the rest also apply in battle)">Item(s):</label><div>';
 						buf += this.renderPhnnMultiselect('phitems', itemNames, curItems, '(none)', true);
 						buf += '</div></div>';
@@ -4410,7 +4453,7 @@
 					return;
 				}
 			}
-			this.chartSet(val, true);
+			this.chartSet(this.enigmaCarry(val), true);
 		},
 		chartKeydown: function (e) {
 			var modifier = (e.shiftKey || e.ctrlKey || e.altKey || e.metaKey || e.cmdKey);
@@ -4432,7 +4475,7 @@
 				}
 				var entry = $firstResult.data('entry');
 				var val = entry.slice(entry.indexOf("|") + 1);
-				this.chartSet(val, true);
+				this.chartSet(this.enigmaCarry(val), true);
 			} else if (e.keyCode === 38) { // up
 				e.preventDefault();
 				e.stopPropagation();
@@ -4539,7 +4582,8 @@
 				} else if (id in BattleAbilities && format && (format.endsWith("multibility") || format.includes("biomechmons"))) {
 					val = BattleAbilities[id].name;
 				} else {
-					val = (id in BattleItems ? BattleItems[id].name : '');
+					var enigmaTyped = Dex.enigma.get(id, Dex);
+					val = enigmaTyped ? enigmaTyped.name : (id in BattleItems ? BattleItems[id].name : '');
 				}
 				break;
 			case 'move1': case 'move2': case 'move3': case 'move4':
@@ -4668,6 +4712,7 @@
 				break;
 			case 'item':
 				this.curSet.item = val;
+				input.attr('title', val).attr('style', Dex.enigma.fitStyle(val));
 				this.updatePokemonSprite();
 				if (selectNext) this.$(this.$('input[name=ability]').length ? 'input[name=ability]' : 'input[name=move1]').select();
 				break;

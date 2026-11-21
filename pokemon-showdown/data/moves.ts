@@ -727,8 +727,8 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 
 				if (effect.name === 'Cute Charm') {
 					this.add('-start', pokemon, 'Attract', '[from] ability: Cute Charm', `[of] ${source}`);
-				} else if (effect.name === 'Destiny Knot') {
-					this.add('-start', pokemon, 'Attract', '[from] item: Destiny Knot', `[of] ${source}`);
+				} else if (effect.name === 'Destiny Knot' || (effect as Item).enigmaBase === 'destinyknot') {
+					this.add('-start', pokemon, 'Attract', '[from] ' + effect.fullname, `[of] ${source}`);
 				} else {
 					this.add('-start', pokemon, 'Attract');
 				}
@@ -6443,7 +6443,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 				return false;
 			}
 			if (target.hasItem('Ability Shield')) {
-				this.add('-block', target, 'item: Ability Shield');
+				this.add('-block', target, target.getItem().enigmaBase === 'abilityshield' ? target.getItem().fullname : 'item: Ability Shield');
 				return null;
 			}
 		},

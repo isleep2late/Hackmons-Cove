@@ -4,6 +4,7 @@ import {
   getBerryResistType,
   getFlingPower,
   getItemBoostType,
+  getEnigmaTypeBoost,
   getMultiAttack,
   getNaturalGift,
   getTechnoBlast,
@@ -1310,7 +1311,13 @@ export function calculateBPModsNoNerfs(
 
   // Items
 
-  if (attacker.hasItem(`${move.type} Gem`)) {
+  const enigmaBoost = getEnigmaTypeBoost(attacker.item, attacker.enigmaParam);
+  if (enigmaBoost !== undefined) {
+    if (move.hasType(getItemBoostType(attacker.item))) {
+      bpMods.push(Math.trunc((100 + enigmaBoost) * 4096 / 100));
+      desc.attackerItem = attacker.item;
+    }
+  } else if (attacker.hasItem(`${move.type} Gem`)) {
     bpMods.push(5325);
     desc.attackerItem = attacker.item;
   } else if (

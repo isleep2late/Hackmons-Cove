@@ -4,6 +4,7 @@ import type { Learnset } from "../sim/dex-species";
 import {
 	isCustomDisguisesFormat, romHackHasSpecies, romHackMode, ROM_HACK_REGULAR_UNAVAILABLE,
 } from "../sim/romhack-formats";
+import { ENIGMA_REMOVERS, enigmaGen3Pair, itemClauseKey } from "../sim/enigma";
 
 const PHNN_EVO_AVAILABLE = new Set([null, undefined, 'Past', 'Unobtainable']);
 
@@ -1001,7 +1002,9 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 			const moves = (set.moves || []).map(m => this.dex.toID(m));
 			const problems: string[] = [];
 			const name = set.name || set.species;
-			const items = [set.item, ...(set.phItems || '').split('/')].map(i => this.dex.toID(i)).filter(Boolean);
+			const items = [set.item, ...(set.phItems || '').split('/')].map(
+				i => (this.dex.items.get(i).enigmaBase || this.dex.toID(i)) as ID
+			).filter(Boolean);
 			for (const id of items) {
 				if (cdItems.includes(id) && !isCD) {
 					problems.push(`${name}'s item ${this.dex.items.get(id).name} is only allowed in Custom Disguises.`);
@@ -1630,18 +1633,74 @@ export const Rulesets: import('../sim/dex-formats').FormatDataTable = {
 		},
 		onValidateTeam(team) {
 			const itemTable = new this.dex.Multiset<string>();
+			const itemNames = new Map<string, string>();
 			for (const set of team) {
 				const item = this.toID(set.item);
 				if (!item) continue;
-				itemTable.add(item);
+				const dexItem = this.dex.items.get(item);
+				const key = dexItem.exists ? itemClauseKey(dexItem, this.dex.gen) : item;
+				if (!itemNames.has(key)) itemNames.set(key, dexItem.name);
+				itemTable.add(key);
 			}
 			const itemLimit = Number(this.ruleTable.valueRules.get('itemclause') || 1);
 			for (const [itemid, num] of itemTable) {
 				if (num <= itemLimit) continue;
 				return [
 					`You are limited to ${itemLimit} of each item by Item Clause.`,
-					`(You have more than ${itemLimit} ${this.dex.items.get(itemid).name})`,
+					`(You have more than ${itemLimit} ${itemNames.get(itemid)})`,
 				];
+			}
+		},
+	},
+	enigmaitemsmod: {
+		effectType: 'Rule',
+		name: 'Enigma Items Mod',
+		desc: "Allows Enigma items: an item written as \"Enigma\" plus another item's name copies that item's held effect and cannot be Tricked or stolen. Based on the Generation 3 Enigma Berry, whose data is stored in the save file.",
+		onBegin() {
+			this.add('rule', 'Enigma Items Mod: Enigma items copy another item and cannot be Tricked or stolen');
+		},
+		onTryHit(target, source, move) {
+			if (move.id !== 'trick' && move.id !== 'switcheroo') return;
+			for (const pokemon of [source, target]) {
+				if (!pokemon.item.startsWith('enigma')) continue;
+				if (pokemon.getItem().enigmaBase !== undefined || (this.gen === 3 && pokemon.item === 'enigmaberry')) {
+					return false;
+				}
+			}
+		},
+		onTakeItemPriority: -11,
+		onTakeItem(item, pokemon, source) {
+			if (this.gen !== 3 || item.id !== 'enigmaberry') return;
+			const active = this.activeMove;
+			if (active && ENIGMA_REMOVERS.gen3.includes(active.id) && pokemon !== this.activePokemon) return;
+			return false;
+		},
+	},
+	enigmaparameters: {
+		effectType: 'ValidatorRule',
+		name: 'Enigma Parameters',
+		desc: "Allows Enigma items to carry a parameter from 0 to 255, written in parentheses after the name, for the held effects where the Generation 3 games read one.",
+	},
+	enigmasinglerecordclause: {
+		effectType: 'ValidatorRule',
+		name: 'Enigma Single Record Clause',
+		desc: "Every Enigma item on a team must have the same effect and parameter, because a Generation 3 save file stores one Enigma Berry record.",
+		onValidateTeam(team) {
+			let firstPair: string | null = null;
+			let firstName = '';
+			for (const set of team) {
+				const item = this.dex.items.get(set.item);
+				if (!item.exists) continue;
+				const pair = enigmaGen3Pair(item);
+				if (pair === null) continue;
+				if (firstPair === null) {
+					firstPair = pair;
+					firstName = item.name;
+				} else if (pair !== firstPair) {
+					return [
+						`Your team has Enigma items with different effects (${firstName} and ${item.name}). In Generation 3 the Enigma Berry's data is stored once per save file, so every Enigma item on a team must have the same effect and parameter.`,
+					];
+				}
 			}
 		},
 	},

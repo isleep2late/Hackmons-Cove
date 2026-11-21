@@ -1,6 +1,7 @@
 import { type AbilityName, type ItemName, type MoveName } from '@smogon/calc';
 import { PokemonNatures, PokemonNeutralNatures, PokemonTypes } from '@showdex/consts/dex';
 import { type CalcdexPokemonPreset } from '@showdex/interfaces/calc';
+import { getPhnnBaseItem } from '@showdex/phnn';
 import { calcPresetCalcdexId } from '@showdex/utils/calc';
 import { clamp } from '@showdex/utils/core';
 import { detectGenFromFormat, getDefaultSpreadValue, getDexForFormat } from '@showdex/utils/dex';
@@ -200,7 +201,7 @@ export const unpackStorageTeam = (
       const dexItem = dex.items.get(itemId);
 
       if (dexItem?.exists) {
-        preset.item = dexItem.name as ItemName;
+        preset.item = getPhnnBaseItem(dex, dexItem.name as ItemName);
       }
     }
 

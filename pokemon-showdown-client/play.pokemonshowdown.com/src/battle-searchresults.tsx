@@ -213,7 +213,8 @@ export class PSSearchResults extends preact.Component<{
 		return `<li class="result" value="${index}"><a href="${this.URL_ROOT}items/${id}" ` +
 			`class="${id === this.itemId ? 'cur' : ''}" data-target="push" data-entry="item|${escapeHTML(item.name)}">` +
 			`<span class="col itemiconcol"><span class="pixelated" style="${escapeHTML(Dex.getItemIcon(item))}"></span></span>` +
-			`<span class="col namecol">${itemName}</span>` +
+			`<span class="col namecol${Dex.enigma.isLongName(item.name, 118, 13.3) ? ' longnamecol' : ''}">` +
+			`${itemName}</span>` +
 			(id ? (errorMessage || '') : '') +
 			(!errorMessage ? `<span class="col itemdesccol">${escapeHTML(itemText.shortDesc)}</span>` : '') +
 			`</a></li>`;

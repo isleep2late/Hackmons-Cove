@@ -514,6 +514,11 @@
                     <label for="itemL1">Item</label>
                     <select class="item terrain-trigger calc-trigger" id="itemL1"></select>
                 </div>
+                <div class="gen-specific g3 g10 hide enigma-row">
+                    <label for="enigmaL1" title="Enigma item: acts as the selected item, cannot be Tricked or stolen">Enigma</label>
+                    <input class="enigma-toggle calc-trigger" type="checkbox" id="enigmaL1" />
+                    <input class="enigma-param calc-trigger" type="number" min="0" max="255" step="1" placeholder="Param" title="Enigma parameter (0-255); only type-boosting items change damage" id="enigmaParamL1" style="width:5em" />
+                </div>
                 <div>
                     <label for="statusL1">Status</label>
                     <select class="status calc-trigger" id="statusL1">
@@ -1474,6 +1479,11 @@
                 <div class="gen-specific g2 g11 g3 g4 g5 g6 g7 g8 g9 g10">
                     <label for="itemR1">Item</label>
                     <select class="item terrain-trigger calc-trigger" id="itemR1"></select>
+                </div>
+                <div class="gen-specific g3 g10 hide enigma-row">
+                    <label for="enigmaR1" title="Enigma item: acts as the selected item, cannot be Tricked or stolen">Enigma</label>
+                    <input class="enigma-toggle calc-trigger" type="checkbox" id="enigmaR1" />
+                    <input class="enigma-param calc-trigger" type="number" min="0" max="255" step="1" placeholder="Param" title="Enigma parameter (0-255); only type-boosting items change damage" id="enigmaParamR1" style="width:5em" />
                 </div>
                 <div>
                     <label for="statusR1">Status</label>

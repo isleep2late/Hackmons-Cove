@@ -1590,8 +1590,25 @@ class TeamTextbox extends preact.Component<{
 		} else if (!type) {
 			this.changeSet(this.innerFocus!.type, '');
 		} else {
+			if (type === 'item' && this.innerFocus?.type === 'item') {
+				const typed = this.textbox.value.slice(this.innerFocus.range[0], this.innerFocus.range[1]);
+				name = Dex.enigma.carry([typed], name, this.editor.format.id);
+			}
 			this.changeSet(type as InnerFocusType, name, moveSlot);
 		}
+	};
+	handleEnigmaItem = (name: string) => {
+		const focus = this.innerFocus;
+		if (focus?.type !== 'item') return;
+		const set = this.editor.sets[focus.setIndex];
+		if (!set) return;
+		set.item = name;
+		this.replaceSet(focus.setIndex);
+		let lineEnd = this.textbox.value.indexOf('\n', focus.range[0]);
+		if (lineEnd < 0) lineEnd = this.textbox.value.length;
+		focus.range[1] = lineEnd;
+		this.editor.setSearchType('item', focus.setIndex, name);
+		this.forceUpdate();
 	};
 	getSelectionTypeRange(): [number, number] | null {
 		const selection = this.selection;
@@ -1961,9 +1978,17 @@ class TeamTextbox extends preact.Component<{
 						)}
 						<PSSearchResults
 							class="searchresults" style={resultsCSS}
-							prepend={<button class="button closesearch" onClick={this.closeMenu}>
-								{!editor.narrow && <kbd>Esc</kbd>} <i class="fa fa-times" aria-hidden></i> {TL`[Close]`}
-							</button>}
+							prepend={<>
+									<button class="button closesearch" onClick={this.closeMenu}>
+										{!editor.narrow && <kbd>Esc</kbd>} <i class="fa fa-times" aria-hidden></i> {TL`[Close]`}
+									</button>
+									{(this.innerFocus.type === 'item' && Dex.enigmaRules(editor.format.id).enabled) && (
+										<EnigmaItemForm
+											editor={editor} set={this.editor.sets[this.innerFocus.setIndex]}
+											onItem={this.handleEnigmaItem}
+										/>
+									)}
+								</>}
 							search={editor.search}
 							onSelect={this.selectResult}
 						/>
@@ -2273,6 +2298,9 @@ class TeamEditorForm extends preact.Component<{
 					class="set-searchresults"
 					search={editor.search} hideFilters
 					onSelect={this.selectResult}
+					prepend={(type === 'item' && Dex.enigmaRules(editor.format.id).enabled) ? (
+						<EnigmaItemForm editor={editor} set={set} onItem={this.handleEnigmaItem} />
+					) : undefined}
 				>
 					{type === 'ability' && <SetSourceButtons
 						editor={editor} set={set}
@@ -2824,9 +2852,33 @@ class TeamEditorForm extends preact.Component<{
 			`input.set-field[data-focus="${this.props.editor.stringifyFocus(focus)}"]`
 		);
 		if (!input) return;
+		if (focus.type === 'item') {
+			name = Dex.enigma.carry(
+				[input.value, this.props.editor.sets[focus.setIndex]?.item], name, this.props.editor.format.id
+			);
+		}
 		input.value = name;
 		this.commitField(input, true, reverse);
 	}
+	handleEnigmaItem = (name: string) => {
+		const { editor } = this.props;
+		const focus = editor.innerFocus;
+		if (focus?.type !== 'item') return;
+		const set = editor.sets[focus.setIndex];
+		if (!set) return;
+		set.item = name;
+		const input = this.base!.querySelector<HTMLInputElement>(
+			`input.set-field[data-focus="${editor.stringifyFocus(focus)}"]`
+		);
+		if (input) {
+			input.value = name;
+			input.classList.remove('incomplete');
+		}
+		editor.save();
+		this.props.onChange?.();
+		editor.setSearchType('item', focus.setIndex, name);
+		this.forceUpdate();
+	};
 	setMoveResult(name: string, slot?: string, reverse?: boolean) {
 		this.selectMoveResult(name, slot, reverse);
 		this.props.editor.save();
@@ -2911,6 +2963,8 @@ class TeamEditorForm extends preact.Component<{
 			type="text" class="textbox default-placeholder set-field" name={type}
 			data-focus={editor.stringifyFocus({ setIndex, type, typeIndex })}
 			defaultValue={value || ''} placeholder={placeholder} autocomplete="off" readOnly={editor.readonly}
+			style={type === 'item' ? Dex.enigma.fitStyle(value) : undefined}
+			title={type === 'item' ? value || undefined : undefined}
 			onMouseDown={this.mouseDownField} onFocus={this.setFocusTextbox}
 			onInput={this.inputField} onKeyDown={this.keyDownField}
 			onBlur={this.blurField}
@@ -4174,6 +4228,57 @@ class DetailsForm extends preact.Component<{
 		this.props.onChange();
 		this.forceUpdate();
 	};
+}
+
+class EnigmaItemForm extends preact.Component<{
+	editor: TeamEditorState,
+	set: Dex.PokemonSet | undefined,
+	onItem: (name: string) => void,
+}> {
+	changeEnigma = (ev: Event) => {
+		const { editor, set } = this.props;
+		const target = ev.currentTarget as HTMLInputElement;
+		const name = Dex.enigma.toggle(set?.item, target.checked, editor.format.id, editor.dex);
+		if (name === null) {
+			this.forceUpdate();
+			return;
+		}
+		this.props.onItem(name);
+	};
+	changeParam = (ev: Event) => {
+		const { editor, set } = this.props;
+		const target = ev.currentTarget as HTMLInputElement;
+		const name = Dex.enigma.withParam(set?.item, target.value, editor.format.id, editor.dex);
+		if (name === null) {
+			this.forceUpdate();
+			return;
+		}
+		if (name !== set?.item) this.props.onItem(name);
+	};
+	render() {
+		const { editor, set } = this.props;
+		const state = Dex.enigma.state(set?.item, editor.format.id, editor.dex);
+		if (!state.rules.enabled) return null;
+		const formStyle = 'font-size:10pt;padding:6px 100px 6px 10px;background:rgba(0,0,0,0.05);' +
+			'border-bottom:1px solid #ccc;margin-bottom:5px';
+		return <div class="enigma-item-form" style={formStyle}>
+			<label class="checkbox inline" title={state.reason || undefined}><input
+				type="checkbox" name="enigmaitem" checked={state.isEnigma} disabled={!!state.reason || editor.readonly}
+				onChange={this.changeEnigma}
+			/> Enigma item (cannot be Tricked or stolen)</label>
+			{!!state.reason && !!state.item && <small> {state.reason}</small>}
+			{state.kind && <>
+				{} <label style="display:inline-block;margin-left:8px">Parameter (0-255): <input
+					type="number" inputMode="numeric" name="enigmaparam" min="0" max="255" step="1"
+					class="textbox numform" style="width: 110px" disabled={editor.readonly}
+					value={state.param ?? ''} placeholder={state.placeholder}
+					onChange={this.changeParam}
+				/></label>
+				<br /><small>{state.hint}</small>
+			</>}
+			{state.rules.gen3 && <><br /><small>Gen 3: every Enigma item on a team must have the same effect.</small></>}
+		</div>;
+	}
 }
 
 class MoveDetailsForm extends preact.Component<{

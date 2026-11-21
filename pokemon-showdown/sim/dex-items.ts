@@ -1,6 +1,7 @@
 import type { PokemonEventMethods, ConditionData, ModdedConditionData } from './dex-conditions';
 import { assignMissingFields, BasicEffect, toID, type ModdedEffectText } from './dex-data';
 import { Utils } from '../lib/utils';
+import { buildEnigmaData, enigmaParamKind, parseEnigmaId } from './enigma';
 
 interface FlingData {
 	basePower: number;
@@ -99,6 +100,9 @@ export class Item extends BasicEffect implements Readonly<BasicEffect> {
 	declare readonly naturalGift?: { basePower: number, type: string };
 	declare readonly spritenum?: number;
 	declare readonly boosts?: SparseBoostsTable | false;
+	declare readonly enigmaBase?: string;
+	declare readonly enigmaParam?: number;
+	declare readonly enigmaPreset?: boolean;
 
 	declare readonly onEat?: ((this: Battle, pokemon: Pokemon) => void) | false;
 	declare readonly onUse?: ((this: Battle, pokemon: Pokemon) => void) | false;
@@ -208,10 +212,31 @@ export class DexItems {
 				}
 			}
 		} else {
+			const derived = this.getEnigmaItem(id);
+			if (derived) return derived;
 			item = new Item({ name: id, exists: false });
 		}
 
 		if (item.exists) this.itemCache.set(id, this.dex.deepFreeze(item));
+		return item;
+	}
+
+	getEnigmaItem(id: ID): Item | null {
+		if (this.dex.gen < 3) return null;
+		const parsed = parseEnigmaId(id, stem => this.getByID(stem as ID));
+		if (!parsed) return null;
+		const canonical = parsed.canonical as ID;
+		let item = this.itemCache.get(canonical);
+		if (!item) {
+			const data = buildEnigmaData(
+				parsed, baseId => this.getByID(baseId as ID), base => this.dex.text.get(base).shortDesc
+			);
+			if (!data) return null;
+			item = this.dex.deepFreeze(new Item(data));
+			if (parsed.param !== undefined && !enigmaParamKind(item.enigmaBase!)) return item;
+			this.itemCache.set(canonical, item);
+		}
+		if (id !== canonical) this.itemCache.set(id, item);
 		return item;
 	}
 

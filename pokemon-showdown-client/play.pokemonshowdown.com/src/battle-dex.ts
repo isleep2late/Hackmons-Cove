@@ -566,7 +566,342 @@ const GLITCH_SPRITE_SIZES: {[id: string]: number} = {
 	z4: 112,
 };
 
+type EnigmaParsed = { id: string, base: string, param?: number, preset?: boolean };
+
+export const Enigma = new class {
+	readonly formats = ['gen3bhaaa', 'gen9nonerfsstandard', 'gen9nonerfsextended', 'gen9nonerfscustomdisguises'];
+	readonly excludedIds: { [id: string]: string } = {
+		mail: 'has no held effect',
+		rustedsword: 'is tied to a forme change',
+		rustedshield: 'is tied to a forme change',
+		legendplate: 'is tied to a forme change',
+	};
+	readonly gen3Bases = (
+		'oranberry berryjuice sitrusberry cheriberry chestoberry pechaberry rawstberry aspearberry leppaberry ' +
+		'persimberry lumberry figyberry wikiberry magoberry aguavberry iapapaberry liechiberry ganlonberry ' +
+		'salacberry petayaberry apicotberry lansatberry starfberry brightpowder laxincense whiteherb machobrace ' +
+		'quickclaw mentalherb choiceband kingsrock silverpowder souldew deepseatooth deepseascale focusband ' +
+		'scopelens metalcoat leftovers dragonscale lightball softsand hardstone miracleseed blackglasses ' +
+		'blackbelt magnet mysticwater seaincense sharpbeak poisonbarb nevermeltice spelltag twistedspoon ' +
+		'charcoal dragonfang silkscarf upgrade shellbell luckypunch metalpowder thickclub stick'
+	).split(' ');
+	readonly paramKinds: { [id: string]: { kind: string, stock: number, type?: string } } = {
+		oranberry: { kind: 'hp', stock: 10 },
+		berryjuice: { kind: 'hp', stock: 20 },
+		sitrusberry: { kind: 'hp', stock: 30 },
+		leppaberry: { kind: 'pp', stock: 10 },
+		figyberry: { kind: 'healdiv', stock: 8 },
+		wikiberry: { kind: 'healdiv', stock: 8 },
+		magoberry: { kind: 'healdiv', stock: 8 },
+		aguavberry: { kind: 'healdiv', stock: 8 },
+		iapapaberry: { kind: 'healdiv', stock: 8 },
+		liechiberry: { kind: 'pinch', stock: 4 },
+		ganlonberry: { kind: 'pinch', stock: 4 },
+		salacberry: { kind: 'pinch', stock: 4 },
+		petayaberry: { kind: 'pinch', stock: 4 },
+		apicotberry: { kind: 'pinch', stock: 4 },
+		lansatberry: { kind: 'pinch', stock: 4 },
+		starfberry: { kind: 'pinch', stock: 4 },
+		brightpowder: { kind: 'evasion', stock: 10 },
+		laxincense: { kind: 'evasion', stock: 5 },
+		quickclaw: { kind: 'quickclaw', stock: 20 },
+		kingsrock: { kind: 'flinch', stock: 10 },
+		silverpowder: { kind: 'typeboost', stock: 10, type: 'Bug' },
+		metalcoat: { kind: 'typeboost', stock: 10, type: 'Steel' },
+		softsand: { kind: 'typeboost', stock: 10, type: 'Ground' },
+		hardstone: { kind: 'typeboost', stock: 10, type: 'Rock' },
+		miracleseed: { kind: 'typeboost', stock: 10, type: 'Grass' },
+		blackglasses: { kind: 'typeboost', stock: 10, type: 'Dark' },
+		blackbelt: { kind: 'typeboost', stock: 10, type: 'Fighting' },
+		magnet: { kind: 'typeboost', stock: 10, type: 'Electric' },
+		mysticwater: { kind: 'typeboost', stock: 10, type: 'Water' },
+		seaincense: { kind: 'typeboost', stock: 5, type: 'Water' },
+		sharpbeak: { kind: 'typeboost', stock: 10, type: 'Flying' },
+		poisonbarb: { kind: 'typeboost', stock: 10, type: 'Poison' },
+		nevermeltice: { kind: 'typeboost', stock: 10, type: 'Ice' },
+		spelltag: { kind: 'typeboost', stock: 10, type: 'Ghost' },
+		twistedspoon: { kind: 'typeboost', stock: 10, type: 'Psychic' },
+		charcoal: { kind: 'typeboost', stock: 10, type: 'Fire' },
+		dragonfang: { kind: 'typeboost', stock: 10, type: 'Dragon' },
+		silkscarf: { kind: 'typeboost', stock: 10, type: 'Normal' },
+		focusband: { kind: 'focusband', stock: 10 },
+		shellbell: { kind: 'shellbell', stock: 8 },
+	};
+	readonly presets: { [id: string]: { name: string, base: string, confirmed: boolean } } = {
+		pumkinberry: { name: 'Pumkin Berry', base: 'aspearberry', confirmed: true },
+		drashberry: { name: 'Drash Berry', base: 'pechaberry', confirmed: true },
+		eggantberry: { name: 'Eggant Berry', base: 'mentalherb', confirmed: true },
+		stribberry: { name: 'Strib Berry', base: '', confirmed: true },
+		chilanberrygen3: { name: 'Chilan Berry (Gen 3)', base: '', confirmed: true },
+		nutpeaberry: { name: 'Nutpea Berry', base: '', confirmed: true },
+		ginemaberry: { name: 'Ginema Berry', base: 'whiteherb', confirmed: true },
+		kuoberry: { name: 'Kuo Berry', base: '', confirmed: true },
+		yagoberry: { name: 'Yago Berry', base: 'rawstberry', confirmed: true },
+		tougaberry: { name: 'Touga Berry', base: 'persimberry', confirmed: true },
+		ninikuberry: { name: 'Niniku Berry', base: '', confirmed: true },
+		topoberry: { name: 'Topo Berry', base: '', confirmed: true },
+	};
+	readonly suffix = 'Cannot be Tricked or stolen; Knock Off removes it.';
+	cache: { [modid: string]: { [id: string]: Item | null } } = {};
+
+	realId(id: string): string {
+		if (!id || !window.BattleItems) return '';
+		if (window.BattleAliases && BattleAliases.hasOwnProperty(id)) id = toID(BattleAliases[id]);
+		if (!id) return '';
+		for (const candidate of [id, `${id}berry`]) {
+			const data = BattleItems.hasOwnProperty(candidate) ? BattleItems[candidate] : null;
+			if (data && data.exists !== false) return candidate;
+		}
+		return '';
+	}
+	parse(id: string): EnigmaParsed | null {
+		if (this.presets.hasOwnProperty(id)) {
+			return { id, base: this.presets[id].base, preset: true };
+		}
+		if (!id.startsWith('enigma') || this.realId(id)) return null;
+		const match = /^(.*?)([0-9]*)$/.exec(id.slice(6))!;
+		const digits = match[2];
+		if (digits && (!/^(0|[1-9][0-9]{0,2})$/.test(digits) || Number(digits) > 255)) return null;
+		const base = this.realId(match[1]);
+		if (!base || base === 'enigmaberry' || /[0-9]$/.test(base) || (base === 'berry' && !digits)) return null;
+		return { id: `enigma${base}${digits}`, base, param: digits ? Number(digits) : undefined };
+	}
+	baseId(id: string): string {
+		if (!id.startsWith('enigma') && !this.presets.hasOwnProperty(id)) return id;
+		const parsed = this.parse(id);
+		return parsed ? (parsed.base || id) : id;
+	}
+	isCandidate(id: string) {
+		return id.startsWith('enigma') || this.presets.hasOwnProperty(id);
+	}
+	get(
+		id: string, dex: { modid: string, gen: number, items: { get: (name: string) => Item }, text: ClientDexText }
+	): Item | null {
+		if (!this.isCandidate(id) || !window.BattleItems) return null;
+		const cache = this.cache[dex.modid] ||= Object.create(null) as { [id: string]: Item | null };
+		if (id in cache) return cache[id];
+		const parsed = this.parse(id);
+		let item: Item | null = null;
+		if (parsed && !(parsed.preset && dex.gen < 3)) {
+			if (parsed.id in cache) {
+				item = cache[parsed.id];
+			} else {
+				item = this.derive(parsed, dex);
+				cache[parsed.id] = item;
+			}
+		}
+		cache[id] = item;
+		return item;
+	}
+	derive(
+		parsed: EnigmaParsed, dex: { items: { get: (name: string) => Item }, text: ClientDexText }
+	): Item {
+		const base = parsed.base ? dex.items.get(parsed.base) : null;
+		const baseText = base ? dex.text.get(base) : null;
+		const preset = parsed.preset ? this.presets[parsed.id] : null;
+		const name = preset ? preset.name : this.name(base!.name, parsed.param);
+		const lead = preset ? 'e-Reader berry (Gen 3). Acts' : 'Enigma item: acts';
+		const describe = (text: string) => {
+			if (!base) return `e-Reader berry (Gen 3). No effect when held. ${this.suffix}`;
+			const sentence = parsed.param === undefined || !this.kind(base.id) ?
+				text : this.sentence(base.id, base.name, parsed.param);
+			return `${lead} as ${base.name}. ${sentence ? `${sentence} ` : ''}${this.suffix}`;
+		};
+		const pending = preset && !preset.confirmed ? ' Its real effect is awaiting confirmation.' : '';
+		const data: any = {
+			...base,
+			name,
+			exists: true,
+			shortDesc: describe(baseText?.shortDesc || '') + pending,
+			desc: describe(baseText?.shortDesc || '') + pending,
+			enigmaBase: parsed.base,
+			enigmaParam: parsed.param,
+		};
+		if (preset) {
+			data.enigmaPreset = true;
+			data.spritenum = 124;
+			data.isBerry = true;
+			data.isNonstandard = 'Unobtainable';
+			data.gen = 3;
+			data.megaStone = null;
+			data.zMove = null;
+		}
+		return new Item(parsed.id as ID, name, data);
+	}
+	name(baseName: string, param?: number | null) {
+		return `Enigma ${baseName}${param === undefined || param === null ? '' : ` (${param})`}`;
+	}
+	kind(baseId: string) {
+		return this.paramKinds.hasOwnProperty(baseId) ? this.paramKinds[baseId] : null;
+	}
+	sentence(baseId: string, baseName: string, n: number | 'N'): string {
+		const entry = this.kind(baseId);
+		if (!entry) return '';
+		const num = typeof n === 'number' ? n : -1;
+		switch (entry.kind) {
+		case 'hp':
+			return `Restores ${n} HP when at 1/2 max HP or less. Single use.`;
+		case 'pp':
+			return `Restores ${n} PP to the first of the holder's moves to reach 0 PP. Single use.`;
+		case 'healdiv':
+			return `Restores ${num === 0 ? '1 HP' : `1/${n} max HP`} at 1/2 max HP or less; ` +
+				`confuses if the Nature dislikes the flavor. Single use.`;
+		case 'pinch':
+			if (num === 0) return `Never activates.`;
+			if (num === 1) return `Activates at any HP.`;
+			return `Activates at 1/${n} max HP or less, with the usual effect of ${baseName}. Single use.`;
+		case 'evasion':
+			if (num === 100) return `Attacks that check accuracy always miss the holder.`;
+			if (num > 100) {
+				return `Attacks that check accuracy either always miss or always hit the holder (Gen 3 overflow).`;
+			}
+			return `The accuracy of attacks against the holder is multiplied by (100 - ${n})%.`;
+		case 'quickclaw':
+			if (num > 100) return `Holder always moves first in its priority bracket.`;
+			return `Each turn, holder has a ${n}% chance to move first in its priority bracket.`;
+		case 'flinch':
+			if (num >= 100) return `Holder's attacks that King's Rock affects always make the target flinch.`;
+			return `Holder's attacks that King's Rock affects have a ${n}% chance to make the target flinch.`;
+		case 'typeboost':
+			return `Holder's ${entry.type || ''}-type attacks are multiplied by (100 + ${n})/100.`;
+		case 'focusband':
+			if (num >= 100) return `Holder always survives an attack that would KO it with 1 HP.`;
+			return `Holder has a ${n}% chance to survive an attack that would KO it with 1 HP.`;
+		case 'shellbell':
+			if (num === 0) return `After an attack, holder gains 1 HP.`;
+			return `After an attack, holder gains 1/${n} of the damage dealt.`;
+		}
+		return '';
+	}
+	rules(formatid: string | null | undefined) {
+		const id = toID((formatid || '').split('@@@')[0]);
+		const enabled = this.formats.includes(id);
+		return { enabled, gen3: enabled && id === 'gen3bhaaa', params: enabled };
+	}
+	ineligible(base: Item | null | undefined, formatid: string | null | undefined): string {
+		const rules = this.rules(formatid);
+		if (!rules.enabled) return 'Enigma items are not allowed in this format.';
+		if (!base?.exists) return 'Pick an item first.';
+		if (base.enigmaBase !== undefined || base.id === 'enigmaberry' || base.id === 'berry' || /[0-9]$/.test(base.id)) {
+			return `${base.name} cannot be an Enigma item.`;
+		}
+		if (rules.gen3) {
+			if (base.gen > 3) return `${base.name} does not exist in Generation 3.`;
+			if (!this.gen3Bases.includes(base.id)) {
+				return `${base.name} has no Generation 3 hold effect for an Enigma Berry to copy.`;
+			}
+			return '';
+		}
+		let reason = this.excludedIds.hasOwnProperty(base.id) ? this.excludedIds[base.id] : '';
+		if (!reason && base.isPokeball) reason = 'has no held effect';
+		if (!reason && (base.megaStone || base.zMove || base.isPrimalOrb)) {
+			reason = 'is a Mega Stone, Z-Crystal or Primal Orb';
+		}
+		return reason ? `${base.name} cannot be an Enigma item because it ${reason}.` : '';
+	}
+	intent(text: string | null | undefined): { enigma: boolean, param?: number } {
+		const id = toID(text);
+		if (!id.startsWith('enigma') || 'enigmaberry'.startsWith(id)) return { enigma: false };
+		const item = this.get(id, Dex);
+		if (item) return { enigma: !item.enigmaPreset, param: item.enigmaParam };
+		const digits = /([0-9]+)\s*\)?\s*$/.exec(text || '')?.[1];
+		const param = digits && /^(0|[1-9][0-9]{0,2})$/.test(digits) && Number(digits) <= 255 ? Number(digits) : undefined;
+		return { enigma: true, param };
+	}
+	carry(previous: (string | null | undefined)[], picked: string, formatid: string | null | undefined): string {
+		if (!picked || !this.rules(formatid).enabled) return picked;
+		const base = Dex.items.get(picked);
+		if (!base.exists || base.enigmaBase !== undefined) return picked;
+		let intent = { enigma: false } as { enigma: boolean, param?: number };
+		for (const text of previous) {
+			intent = this.intent(text);
+			if (intent.enigma) break;
+		}
+		if (!intent.enigma || this.ineligible(base, formatid)) return picked;
+		return this.name(base.name, this.kind(base.id) ? intent.param : undefined);
+	}
+	state(
+		itemName: string | null | undefined, formatid: string | null | undefined,
+		dex: { items: { get: (name: string) => Item } }
+	) {
+		const rules = this.rules(formatid);
+		const item = itemName ? dex.items.get(itemName) : null;
+		const held = item?.exists ? item : null;
+		const isEnigma = !!held && held.enigmaBase !== undefined && !held.enigmaPreset;
+		const base = isEnigma ? dex.items.get(held.enigmaBase) : held;
+		const reason = isEnigma ? '' : this.ineligible(held, formatid);
+		const kind = isEnigma && rules.params ? this.kind(base!.id) : null;
+		return {
+			rules, item: held, base, isEnigma, reason, kind, param: isEnigma ? held.enigmaParam : undefined,
+			placeholder: kind ? (rules.gen3 ? `stock: ${kind.stock}` : 'engine default') : '',
+			hint: kind ? this.sentence(base!.id, base!.name, 'N') : '',
+		};
+	}
+	toggle(
+		itemName: string | null | undefined, checked: boolean, formatid: string | null | undefined,
+		dex: { items: { get: (name: string) => Item } }
+	): string | null {
+		const state = this.state(itemName, formatid, dex);
+		if (!state.base || state.item?.enigmaPreset) return null;
+		if (!checked) return state.base.name;
+		if (state.isEnigma) return state.item!.name;
+		return state.reason ? null : this.name(state.base.name);
+	}
+	withParam(
+		itemName: string | null | undefined, raw: string, formatid: string | null | undefined,
+		dex: { items: { get: (name: string) => Item } }
+	): string | null {
+		const state = this.state(itemName, formatid, dex);
+		if (!state.isEnigma || !state.kind) return null;
+		const text = raw.trim();
+		if (!text) return this.name(state.base!.name);
+		if (!/^(0|[1-9][0-9]{0,2})$/.test(text) || Number(text) > 255) return null;
+		return this.name(state.base!.name, Number(text));
+	}
+	fitCanvas: HTMLCanvasElement | null = null;
+	textWidth(text: string, px: number): number {
+		if (typeof document === 'undefined') return 0;
+		const canvas = this.fitCanvas ||= document.createElement('canvas');
+		const context = canvas.getContext('2d');
+		if (!context) return 0;
+		context.font = `${px}px Verdana, Helvetica, Arial, sans-serif`;
+		return context.measureText(text).width;
+	}
+	fitStyle(text: string | null | undefined, width = 108, px = 12): string {
+		if (!text || !this.isCandidate(toID(text))) return '';
+		const needed = this.textWidth(text, px);
+		if (needed <= width) return '';
+		return `font-size:${Math.max(7, Math.floor(px * 10 * width / needed) / 10)}px`;
+	}
+	isLongName(text: string | null | undefined, width: number, px: number): boolean {
+		return !!text && this.isCandidate(toID(text)) && this.textWidth(text, px) > width;
+	}
+	presetRows(query: string, formatid: string | null | undefined): [string, string][] {
+		if (!this.rules(formatid).enabled) return [];
+		const rows: [string, string][] = [];
+		for (const id in this.presets) {
+			const preset = this.presets[id];
+			if (!preset.confirmed) continue;
+			const words = preset.name.split(' ');
+			if (query && !id.startsWith(query) && !words.some(word => toID(word).startsWith(query))) continue;
+			rows.push(['item', id]);
+		}
+		if (rows.length) rows.unshift(['header', 'e-Reader Berries']);
+		return rows;
+	}
+	searchQuery(query: string, formatid: string | null | undefined): string {
+		if (!this.rules(formatid).enabled) return query;
+		const id = toID(query);
+		if (!id.startsWith('enigma') || 'enigmaberry'.startsWith(id)) return query;
+		return query.replace(/^\s*enigma\s*/i, '').replace(/\s*\(?\s*[0-9]+\s*\)?\s*$/, '');
+	}
+};
+
 export const Dex = new class implements ModdedDex {
+	readonly enigma = Enigma;
+	enigmaRules(formatid: string | null | undefined) {
+		return Enigma.rules(formatid);
+	}
 	readonly Ability = Ability;
 	readonly Item = Item;
 	readonly Move = Move;
@@ -807,6 +1142,8 @@ export const Dex = new class implements ModdedDex {
 				id = toID(name);
 			}
 			if (!window.BattleItems) window.BattleItems = {};
+			const enigma = Enigma.get(id, this);
+			if (enigma) return enigma;
 			let data = window.BattleItems[id];
 			if (data && typeof data.exists === 'boolean') return data;
 			if (!data) data = { exists: false };
@@ -1670,9 +2007,11 @@ export const Dex = new class implements ModdedDex {
 		if (hackItemId && (RomHacks.battleSprites || RomHacks.builderSprites) && RomHacks.hasSprite('items', hackItemId)) {
 			return `background:transparent url(${RomHacks.spriteUrl('item', hackItemId)}) no-repeat scroll center;background-size:contain;image-rendering:pixelated`;
 		}
-		if (typeof item === 'string' && window.BattleItems) item = window.BattleItems[toID(item)];
+		if (typeof item === 'string' && window.BattleItems) {
+			item = window.BattleItems[toID(item)] || Enigma.get(toID(item), Dex);
+		}
 		const phnnPlateIcons: {[id: string]: string} = { shadowplate: 'shadowplate-icon', questionmarkplate: 'questionmarkplate-icon', blankplate: 'blankplate-icon', legendplate: 'legendplate-icon', shadowiniumz: 'shadowiniumz', questiniumz: 'questiniumz', shadowcloak: 'shadowcloak', brokendisk: 'brokendisk', apple: 'apple', calmberry: 'calmberry', earth: 'earth', firetail: 'firetail', focusorb: 'focusorb', prettytail: 'prettytail', quickneedle: 'quickneedle', sharpscythe: 'sharpscythe', snakeskin: 'snakeskin', stimulusorb: 'stimulusorb', strangethread: 'strangethread', thundertail: 'thundertail', watertail: 'watertail' };
-		const phnnPlateId = phnnPlateIcons[toID(item?.name)];
+		const phnnPlateId = phnnPlateIcons[item?.enigmaBase || toID(item?.name)];
 		if (phnnPlateId) {
 			const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
 			const host = window.Config ? Config.routes.client : 'beta.hackmons.com';
@@ -1868,8 +2207,11 @@ class ModdedDex {
 				id = toID(name);
 			}
 			if (this.cache.Items.hasOwnProperty(id)) return this.cache.Items[id];
+			const enigma = Enigma.get(id, this);
+			if (enigma) return enigma;
 
 			let data = { ...Dex.items.get(name) };
+			if (data.enigmaPreset) data = { exists: false } as any;
 
 			for (let i = Dex.gen - 1; i >= this.gen; i--) {
 				const table = window.BattleTeambuilderTable[`gen${i}`];

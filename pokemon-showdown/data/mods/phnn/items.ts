@@ -244,7 +244,7 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 		onFractionalPriority(priority, pokemon, target, move) {
 			if (move.category === 'Status' && pokemon.hasAbility('myceliummight')) return;
 			if (priority <= 0 && this.randomChance(60, 256)) {
-				this.add('-activate', pokemon, 'item: Quick Claw');
+				this.add('-activate', pokemon, this.effect.fullname);
 				return 0.1;
 			}
 		},
@@ -255,7 +255,7 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 		inherit: true,
 		onDamage(damage, target, source, effect) {
 			if (this.randomChance(30, 256) && damage >= target.hp && effect && effect.effectType === 'Move') {
-				this.add('-activate', target, 'item: Focus Band');
+				this.add('-activate', target, this.effect.fullname);
 				return target.hp - 1;
 			}
 		},
