@@ -494,4 +494,248 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 		shortDesc: "Any holder with Photon Geyser: Light That Burns the Sky. Necrozma-DM/DW: Ultra Burst.",
 		desc: "If held by a Pokemon with Photon Geyser, it can use Light That Burns the Sky. If held by Dusk Mane or Dawn Wings Necrozma, it can also Ultra Burst into Ultra Necrozma.",
 	},
+	bigleaf: {
+		inherit: true,
+		onBasePowerPriority: 15,
+		onBasePower(basePower, user, target, move) {
+			if (move?.type === 'Grass') {
+				return this.chainModify([4915, 4096]);
+			}
+		},
+		shortDesc: "SpaceWorld '97 demo item. Holder's Grass-type attacks have 1.2x power.",
+		desc: "SpaceWorld '97 demo item. Holder's Grass-type attacks have 1.2x power.",
+	},
+	sharpstone: {
+		inherit: true,
+		onBasePowerPriority: 15,
+		onBasePower(basePower, user, target, move) {
+			if (move?.type === 'Rock') {
+				return this.chainModify([4915, 4096]);
+			}
+		},
+		shortDesc: "SpaceWorld '97 demo item. Holder's Rock-type attacks have 1.2x power.",
+		desc: "SpaceWorld '97 demo item. Holder's Rock-type attacks have 1.2x power.",
+	},
+	blackfeather: {
+		inherit: true,
+		onBasePowerPriority: 15,
+		onBasePower(basePower, user, target, move) {
+			if (move?.type === 'Flying') {
+				return this.chainModify([4915, 4096]);
+			}
+		},
+		shortDesc: "SpaceWorld '97 demo item. Holder's Flying-type attacks have 1.2x power.",
+		desc: "SpaceWorld '97 demo item. Holder's Flying-type attacks have 1.2x power.",
+	},
+	sharpfang: {
+		inherit: true,
+		onBasePowerPriority: 15,
+		onBasePower(basePower, user, target, move) {
+			if (move?.type === 'Normal') {
+				return this.chainModify([4915, 4096]);
+			}
+		},
+		shortDesc: "SpaceWorld '97 demo item. Holder's Normal-type attacks have 1.2x power.",
+		desc: "SpaceWorld '97 demo item. Holder's Normal-type attacks have 1.2x power.",
+	},
+	toxicneedle: {
+		inherit: true,
+		onBasePowerPriority: 15,
+		onBasePower(basePower, user, target, move) {
+			if (move?.type === 'Poison') {
+				return this.chainModify([4915, 4096]);
+			}
+		},
+		shortDesc: "SpaceWorld '97 demo item. Holder's Poison-type attacks have 1.2x power.",
+		desc: "SpaceWorld '97 demo item. Holder's Poison-type attacks have 1.2x power.",
+	},
+	poisonfang: {
+		inherit: true,
+		onBasePowerPriority: 15,
+		onBasePower(basePower, user, target, move) {
+			if (move?.type === 'Poison') {
+				return this.chainModify([4915, 4096]);
+			}
+		},
+		shortDesc: "SpaceWorld '97 demo item. Holder's Poison-type attacks have 1.2x power.",
+		desc: "SpaceWorld '97 demo item. Holder's Poison-type attacks have 1.2x power.",
+	},
+	migraineseed: {
+		inherit: true,
+		onBasePowerPriority: 15,
+		onBasePower(basePower, user, target, move) {
+			if (move?.type === 'Psychic') {
+				return this.chainModify([4915, 4096]);
+			}
+		},
+		shortDesc: "SpaceWorld '97 demo item. Holder's Psychic-type attacks have 1.2x power.",
+		desc: "SpaceWorld '97 demo item. Holder's Psychic-type attacks have 1.2x power.",
+	},
+	attackneedle: {
+		inherit: true,
+		onBasePowerPriority: 15,
+		onBasePower(basePower, user, target, move) {
+			if (move?.type === 'Bug') {
+				return this.chainModify([4915, 4096]);
+			}
+		},
+		shortDesc: "SpaceWorld '97 demo item. Holder's Bug-type attacks have 1.2x power.",
+		desc: "SpaceWorld '97 demo item. Holder's Bug-type attacks have 1.2x power.",
+	},
+	powerbracersw: {
+		inherit: true,
+		onBasePowerPriority: 15,
+		onBasePower(basePower, user, target, move) {
+			if (move?.type === 'Fighting') {
+				return this.chainModify([4915, 4096]);
+			}
+		},
+		shortDesc: "SpaceWorld '97 demo item. Holder's Fighting-type attacks have 1.2x power.",
+		desc: "SpaceWorld '97 demo item. Holder's Fighting-type attacks have 1.2x power.",
+	},
+	icefang: {
+		inherit: true,
+		onBasePowerPriority: 15,
+		onBasePower(basePower, user, target, move) {
+			if (move?.type === 'Ice') {
+				return this.chainModify([4915, 4096]);
+			}
+		},
+		shortDesc: "SpaceWorld '97 demo item. Holder's Ice-type attacks have 1.2x power.",
+		desc: "SpaceWorld '97 demo item. Holder's Ice-type attacks have 1.2x power.",
+	},
+	wethorn: {
+		inherit: true,
+		onBasePowerPriority: 15,
+		onBasePower(basePower, user, target, move) {
+			if (move?.type === 'Water') {
+				return this.chainModify([4915, 4096]);
+			}
+		},
+		shortDesc: "SpaceWorld '97 demo item. Holder's Water-type attacks have 1.2x power.",
+		desc: "SpaceWorld '97 demo item. Holder's Water-type attacks have 1.2x power.",
+	},
+	thunderfang: {
+		inherit: true,
+		onBasePowerPriority: 15,
+		onBasePower(basePower, user, target, move) {
+			if (move?.type === 'Electric') {
+				return this.chainModify([4915, 4096]);
+			}
+		},
+		shortDesc: "SpaceWorld '97 demo item. Holder's Electric-type attacks have 1.2x power.",
+		desc: "SpaceWorld '97 demo item. Holder's Electric-type attacks have 1.2x power.",
+	},
+	fireclaw: {
+		inherit: true,
+		onBasePowerPriority: 15,
+		onBasePower(basePower, user, target, move) {
+			if (move?.type === 'Fire') {
+				return this.chainModify([4915, 4096]);
+			}
+		},
+		shortDesc: "SpaceWorld '97 demo item. Holder's Fire-type attacks have 1.2x power.",
+		desc: "SpaceWorld '97 demo item. Holder's Fire-type attacks have 1.2x power.",
+	},
+	spike: {
+		inherit: true,
+		onBasePowerPriority: 15,
+		onBasePower(basePower, user, target, move) {
+			if (move?.type === 'Ghost') {
+				return this.chainModify([4915, 4096]);
+			}
+		},
+		shortDesc: "SpaceWorld '97 demo item. Holder's Ghost-type attacks have 1.2x power.",
+		desc: "SpaceWorld '97 demo item. Holder's Ghost-type attacks have 1.2x power.",
+	},
+	buggem: {
+		inherit: true,
+		shortDesc: "Holder's first successful Bug-type attack will have 1.5x power. Single use.",
+		desc: "Holder's first successful Bug-type attack will have 1.5x power. Single use.",
+	},
+	darkgem: {
+		inherit: true,
+		shortDesc: "Holder's first successful Dark-type attack will have 1.5x power. Single use.",
+		desc: "Holder's first successful Dark-type attack will have 1.5x power. Single use.",
+	},
+	dragongem: {
+		inherit: true,
+		shortDesc: "Holder's first successful Dragon-type attack will have 1.5x power. Single use.",
+		desc: "Holder's first successful Dragon-type attack will have 1.5x power. Single use.",
+	},
+	electricgem: {
+		inherit: true,
+		shortDesc: "Holder's first successful Electric-type attack will have 1.5x power. Single use.",
+		desc: "Holder's first successful Electric-type attack will have 1.5x power. Single use.",
+	},
+	fairygem: {
+		inherit: true,
+		shortDesc: "Holder's first successful Fairy-type attack will have 1.5x power. Single use.",
+		desc: "Holder's first successful Fairy-type attack will have 1.5x power. Single use.",
+	},
+	fightinggem: {
+		inherit: true,
+		shortDesc: "Holder's first successful Fighting-type attack will have 1.5x power. Single use.",
+		desc: "Holder's first successful Fighting-type attack will have 1.5x power. Single use.",
+	},
+	firegem: {
+		inherit: true,
+		shortDesc: "Holder's first successful Fire-type attack will have 1.5x power. Single use.",
+		desc: "Holder's first successful Fire-type attack will have 1.5x power. Single use.",
+	},
+	flyinggem: {
+		inherit: true,
+		shortDesc: "Holder's first successful Flying-type attack will have 1.5x power. Single use.",
+		desc: "Holder's first successful Flying-type attack will have 1.5x power. Single use.",
+	},
+	ghostgem: {
+		inherit: true,
+		shortDesc: "Holder's first successful Ghost-type attack will have 1.5x power. Single use.",
+		desc: "Holder's first successful Ghost-type attack will have 1.5x power. Single use.",
+	},
+	grassgem: {
+		inherit: true,
+		shortDesc: "Holder's first successful Grass-type attack will have 1.5x power. Single use.",
+		desc: "Holder's first successful Grass-type attack will have 1.5x power. Single use.",
+	},
+	groundgem: {
+		inherit: true,
+		shortDesc: "Holder's first successful Ground-type attack will have 1.5x power. Single use.",
+		desc: "Holder's first successful Ground-type attack will have 1.5x power. Single use.",
+	},
+	icegem: {
+		inherit: true,
+		shortDesc: "Holder's first successful Ice-type attack will have 1.5x power. Single use.",
+		desc: "Holder's first successful Ice-type attack will have 1.5x power. Single use.",
+	},
+	normalgem: {
+		inherit: true,
+		shortDesc: "Holder's first successful Normal-type attack will have 1.5x power. Single use.",
+		desc: "Holder's first successful Normal-type attack will have 1.5x power. Single use.",
+	},
+	poisongem: {
+		inherit: true,
+		shortDesc: "Holder's first successful Poison-type attack will have 1.5x power. Single use.",
+		desc: "Holder's first successful Poison-type attack will have 1.5x power. Single use.",
+	},
+	psychicgem: {
+		inherit: true,
+		shortDesc: "Holder's first successful Psychic-type attack will have 1.5x power. Single use.",
+		desc: "Holder's first successful Psychic-type attack will have 1.5x power. Single use.",
+	},
+	rockgem: {
+		inherit: true,
+		shortDesc: "Holder's first successful Rock-type attack will have 1.5x power. Single use.",
+		desc: "Holder's first successful Rock-type attack will have 1.5x power. Single use.",
+	},
+	steelgem: {
+		inherit: true,
+		shortDesc: "Holder's first successful Steel-type attack will have 1.5x power. Single use.",
+		desc: "Holder's first successful Steel-type attack will have 1.5x power. Single use.",
+	},
+	watergem: {
+		inherit: true,
+		shortDesc: "Holder's first successful Water-type attack will have 1.5x power. Single use.",
+		desc: "Holder's first successful Water-type attack will have 1.5x power. Single use.",
+	},
 };
