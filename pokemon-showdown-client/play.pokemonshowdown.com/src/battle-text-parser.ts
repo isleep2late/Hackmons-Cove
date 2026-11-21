@@ -20,6 +20,7 @@ type RenderValue = string | {
 	table?: 'Items' | 'Default',
 	id?: string,
 	category?: string,
+	keepValue?: boolean,
 };
 
 export class BattleTextParser {
@@ -327,7 +328,7 @@ export class BattleTextParser {
 			if (modifiers.includes('classified') && entry?.classified && typeof entry.classified === 'object') {
 				form = entry.classified;
 			}
-			value = typeof form?.name === 'string' ? form.name : value;
+			value = typeof form?.name === 'string' && !source.keepValue ? form.name : value;
 			category = typeof form?.grammar === 'string' ? form.grammar : category;
 			articleRule = typeof form?.articleRule === 'string' ? form.articleRule : '';
 		}
@@ -631,12 +632,18 @@ export class BattleTextParser {
 
 	static effectId(effect?: string) {
 		if (!effect) return '';
-		if (effect.startsWith('item:') || effect.startsWith('move:')) {
+		let maybeItem = true;
+		if (effect.startsWith('item:')) {
 			effect = effect.slice(5);
+		} else if (effect.startsWith('move:')) {
+			effect = effect.slice(5);
+			maybeItem = false;
 		} else if (effect.startsWith('ability:')) {
 			effect = effect.slice(8);
+			maybeItem = false;
 		}
-		return toID(effect);
+		const id = toID(effect);
+		return maybeItem ? Dex.enigma.baseId(id) as ID : id;
 	}
 
 	effect(effect?: string) {
@@ -664,7 +671,10 @@ export class BattleTextParser {
 		return this.textName('Items', name);
 	}
 	private itemValue(name: string): RenderValue {
-		return { value: this.itemName(name), table: 'Items', id: toID(name) };
+		const id = toID(name);
+		const baseId = Dex.enigma.baseId(id) as ID;
+		if (baseId === id) return { value: this.itemName(name), table: 'Items', id };
+		return { value: Dex.items.get(id).name, table: 'Items', id: baseId, keepValue: true };
 	}
 	abilityName(name?: string) {
 		return this.textName('Abilities', name);
@@ -701,12 +711,22 @@ export class BattleTextParser {
 					id = template.slice(1) as ID;
 					template = this.textField(table, id, type);
 				}
+				if (template && table === 'Items') template = this.enigmaTemplate(template, namespace);
 				return template ? template + '\n' : '';
 			}
 		}
 		const template = this.defaultText(type);
 		if (!template) return '';
 		return template + '\n';
+	}
+
+	enigmaTemplate(template: string, namespace: string) {
+		const rawId = toID(namespace.startsWith('item:') ? namespace.slice(5) : namespace);
+		const baseId = Dex.enigma.baseId(rawId);
+		if (baseId === rawId) return template;
+		const baseName = this.textName('Items', baseId);
+		if (!baseName || baseName === baseId) return template;
+		return template.split(baseName).join(Dex.items.get(rawId).name);
 	}
 
 	maybeAbility(effect: string | undefined, holder: string) {

@@ -40,7 +40,13 @@ export const Scripts: ModdedBattleScriptsData = {
 			if (trickRoomCheck) {
 				speed = -speed;
 			}
-			if (this.battle.quickClawRoll && this.hasItem('quickclaw')) {
+			const claw = this.item.startsWith('enigmaquickclaw') ? this.getItem() : null;
+			if (claw && claw.enigmaParam !== undefined) {
+				if (!this.ignoringItem() &&
+					this.battle.enigmaClawRandom < Math.floor(65535 * claw.enigmaParam / 100)) {
+					speed = 65535;
+				}
+			} else if (this.battle.quickClawRoll && this.hasItem('quickclaw')) {
 				speed = 65535;
 			}
 			return speed;

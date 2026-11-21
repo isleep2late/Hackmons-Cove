@@ -1025,7 +1025,10 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
   }
   output = appendIfSet(output, attackerLevel);
   output = appendIfSet(output, description.attackEVs);
-  output = appendIfSet(output, description.attackerItem);
+  output = appendIfSet(
+    output, description.attackerItem && attacker.enigmaItem && description.attackerItem === attacker.item
+      ? attacker.enigmaItem : description.attackerItem
+  );
   output = appendIfSet(output, description.attackerAbility);
   output = appendIfSet(output, description.rivalry);
   if (description.isBurned) {
@@ -1095,7 +1098,10 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
   if (description.defenseEVs) {
     output += '/ ' + description.defenseEVs + ' ';
   }
-  output = appendIfSet(output, description.defenderItem);
+  output = appendIfSet(
+    output, description.defenderItem && defender.enigmaItem && description.defenderItem === defender.item
+      ? defender.enigmaItem : description.defenderItem
+  );
   output = appendIfSet(output, description.defenderAbility);
   if (description.isTabletsOfRuin) {
     output += 'Tablets of Ruin ';

@@ -22,6 +22,7 @@ import {
   sanitizeMoveTrack,
   sanitizeVolatiles,
 } from '@showdex/utils/battle';
+import { getPhnnBaseItem, getPhnnEnigmaItem } from '@showdex/phnn';
 import { calcPokemonSpreadStats } from '@showdex/utils/calc';
 import {
   env,
@@ -287,6 +288,13 @@ export const syncPokemon = (
         // run the item through the dex in case it's formatted as an id
         value = dex?.items.get(value as string)?.name || value;
 
+        if (value) {
+          const enigma = getPhnnEnigmaItem(dex, value as string);
+
+          syncedPokemon.enigmaItem = enigma?.enigmaItem || null;
+          value = enigma?.item || value;
+        }
+
         break;
       }
 
@@ -294,6 +302,8 @@ export const syncPokemon = (
         // check if the item was knocked-off and is the same as dirtyItem
         // if so, clear the dirtyItem
         // (note that `value` here is prevItem, NOT item!)
+        value = getPhnnBaseItem(dex, value as string);
+
         if (clientPokemon?.prevItemEffect && value === syncedPokemon.dirtyItem) {
           syncedPokemon.dirtyItem = null;
         }
@@ -566,7 +576,10 @@ export const syncPokemon = (
       const dexItem = dex.items.get(serverPokemon.item);
 
       if (dexItem?.exists && dexItem.name) {
-        syncedPokemon.item = dexItem.name as ItemName;
+        const enigma = getPhnnEnigmaItem(dex, dexItem.name);
+
+        syncedPokemon.item = enigma?.item || dexItem.name as ItemName;
+        syncedPokemon.enigmaItem = enigma?.enigmaItem || null;
         syncedPokemon.dirtyItem = null;
       }
     }

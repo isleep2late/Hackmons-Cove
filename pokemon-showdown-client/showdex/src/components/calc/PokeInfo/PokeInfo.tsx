@@ -1187,6 +1187,15 @@ export const PokeInfo = ({
               {t('poke.info.item.label', 'Item')}
 
               {
+                !!pokemon?.enigmaItem
+                  && (!pokemon.dirtyItem || pokemon.dirtyItem === pokemon.item)
+                  && !!pokemon.item
+                  && <span title={`${pokemon.enigmaItem}: acts as ${pokemon.item}, cannot be Tricked or stolen`}>
+                    {' '}({pokemon.enigmaItem.replace(pokemon.item, '').replace(/\s+/g, ' ').trim()})
+                  </span>
+              }
+
+              {
                 showResetItem &&
                 <ToggleButton
                   className={styles.toggleButton}

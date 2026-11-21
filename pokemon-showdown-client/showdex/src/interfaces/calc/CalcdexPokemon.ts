@@ -363,6 +363,8 @@ export interface CalcdexPokemon extends CalcdexLeanPokemon {
    */
   item?: ItemName;
 
+  enigmaItem?: string;
+
   /**
    * Alternative items from the currently applied `preset`.
    *

@@ -322,7 +322,7 @@ export const Teams = new class {
 				}
 				if (misc[11]) {
 					set.phItems = misc[11].split('-').map(
-						itemid => window.BattleItems?.[toID(itemid)]?.name || itemid
+						itemid => window.BattleItems?.[toID(itemid)]?.name || Dex.enigma.get(toID(itemid), Dex)?.name || itemid
 					).join('/');
 				}
 				// DO NOT use `for (const [i, x] of arr.entries())` in this file: the client's ES5
@@ -552,7 +552,7 @@ export const Teams = new class {
 			line = line.trim();
 			item = item?.trim();
 			if (item) {
-				set.item = item;
+				set.item = Dex.enigma.get(toID(item), Dex)?.name || item;
 				if (toID(set.item) === 'noitem') set.item = '';
 			}
 			if (line.endsWith(' (M)')) {
@@ -621,7 +621,8 @@ export const Teams = new class {
 			}
 			if (anyBase) set.phBaseStats = phBaseStats;
 		} else if (line.startsWith('Items: ')) {
-			const itemParts = line.slice(7).split('/').map(part => part.trim()).filter(part => part && part !== '(none)');
+			const itemParts = line.slice(7).split('/').map(part => part.trim()).filter(part => part && part !== '(none)')
+				.map(part => Dex.enigma.get(toID(part), Dex)?.name || part);
 			if (itemParts[0]) set.item = itemParts[0];
 			if (itemParts.length > 1) set.phItems = itemParts.slice(1).join('/');
 		} else if (line.startsWith('Nickname: ')) {

@@ -10,6 +10,8 @@ import {
   readRomHackStages,
 } from '@showdex/utils/dex';
 import phnnData from './phnn-data';
+
+export * from './enigma';
 import { calculatePhnnSpaceWorld, getPhnnSw97HiddenPower } from './spaceworld';
 
 const toPhnnId = (text: string): string => String(text || '').toLowerCase().replace(/[^a-z0-9]+/g, '');

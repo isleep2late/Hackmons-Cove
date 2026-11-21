@@ -418,3 +418,12 @@
 .dark .dexlist a:hover .col {
 	color: #FFF;
 }
+
+.dexlist .namecol.longnamecol,
+.utilichart .namecol.longnamecol {
+	padding-top: 1px;
+	height: 28px;
+	line-height: 14px;
+	font-size: 9pt;
+	white-space: normal;
+}

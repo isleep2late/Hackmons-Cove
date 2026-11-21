@@ -1,4 +1,4 @@
-import type {Generation, TypeName, StatID, GenerationNum} from './data/interface';
+import type {Generation, TypeName, StatID, GenerationNum, ID, ItemName} from './data/interface';
 import {toID} from './util';
 
 export const SEED_BOOSTED_STAT: {[item: string]: StatID} = {
@@ -7,6 +7,69 @@ export const SEED_BOOSTED_STAT: {[item: string]: StatID} = {
   'Misty Seed': 'spd',
   'Psychic Seed': 'spd',
 };
+
+const ENIGMA_TYPE_BOOSTERS = new Set([
+  'silverpowder', 'metalcoat', 'softsand', 'hardstone', 'miracleseed', 'blackglasses', 'blackbelt',
+  'magnet', 'mysticwater', 'seaincense', 'sharpbeak', 'poisonbarb', 'nevermeltice', 'spelltag',
+  'twistedspoon', 'charcoal', 'dragonfang', 'silkscarf',
+]);
+
+const ENIGMA_PRESETS: {[id: string]: {name: string; base: string}} = {
+  pumkinberry: {name: 'Pumkin Berry', base: 'aspearberry'},
+  drashberry: {name: 'Drash Berry', base: 'pechaberry'},
+  eggantberry: {name: 'Eggant Berry', base: 'mentalherb'},
+  stribberry: {name: 'Strib Berry', base: ''},
+  chilanberrygen3: {name: 'Chilan Berry (Gen 3)', base: ''},
+  nutpeaberry: {name: 'Nutpea Berry', base: ''},
+  ginemaberry: {name: 'Ginema Berry', base: 'whiteherb'},
+  kuoberry: {name: 'Kuo Berry', base: ''},
+  yagoberry: {name: 'Yago Berry', base: 'rawstberry'},
+  tougaberry: {name: 'Touga Berry', base: 'persimberry'},
+  ninikuberry: {name: 'Niniku Berry', base: ''},
+  topoberry: {name: 'Topo Berry', base: ''},
+};
+
+function ownItem(gen: Generation, id: string) {
+  const item = gen.items.get(id as ID);
+  if (!item || typeof item !== 'object') return undefined;
+  if (!Object.prototype.hasOwnProperty.call(item, 'id') || item.id !== id) return undefined;
+  return item;
+}
+
+export function parseEnigmaItem(gen: Generation, item: string | undefined) {
+  if (!item) return undefined;
+  const id = toID(item);
+  if (Object.prototype.hasOwnProperty.call(ENIGMA_PRESETS, id)) {
+    if (!ownItem(gen, id)) return undefined;
+    const preset = ENIGMA_PRESETS[id];
+    const presetBase = preset.base ? ownItem(gen, preset.base) : undefined;
+    return {
+      base: presetBase ? presetBase.name : preset.name as ItemName,
+      param: undefined,
+      name: preset.name,
+      preset: true,
+    };
+  }
+  if (!id.startsWith('enigma') || ownItem(gen, id)) return undefined;
+  const match = /^(.*?)([0-9]*)$/.exec(id.slice(6))!;
+  const digits = match[2];
+  if (digits && (!/^(0|[1-9][0-9]{0,2})$/.test(digits) || Number(digits) > 255)) return undefined;
+  const base = ownItem(gen, toID(match[1])) || ownItem(gen, toID(`${match[1]}berry`));
+  if (!base || base.id === 'enigmaberry' || /[0-9]$/.test(base.id)) return undefined;
+  if (Object.prototype.hasOwnProperty.call(ENIGMA_PRESETS, base.id)) return undefined;
+  if (base.id === 'berry' && !digits) return undefined;
+  const param = digits ? Number(digits) : undefined;
+  return {
+    base: base.name,
+    param,
+    name: `Enigma ${base.name}${param === undefined ? '' : ` (${param})`}`,
+  };
+}
+
+export function getEnigmaTypeBoost(item: string | undefined, param: number | undefined) {
+  if (param === undefined || !item || !ENIGMA_TYPE_BOOSTERS.has(toID(item))) return undefined;
+  return param;
+}
 
 export function getItemBoostType(item: string | undefined) {
   switch (item) {

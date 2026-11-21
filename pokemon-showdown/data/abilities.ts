@@ -174,7 +174,7 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 			const healingItems = [
 				'aguavberry', 'enigmaberry', 'figyberry', 'iapapaberry', 'magoberry', 'sitrusberry', 'wikiberry', 'oranberry', 'berryjuice',
 			];
-			if (healingItems.includes(item.id)) {
+			if (healingItems.includes(item.enigmaBase || item.id)) {
 				return this.effectState.checkedAngerShell;
 			}
 			return true;
@@ -468,7 +468,7 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 			const healingItems = [
 				'aguavberry', 'enigmaberry', 'figyberry', 'iapapaberry', 'magoberry', 'sitrusberry', 'wikiberry', 'oranberry', 'berryjuice',
 			];
-			if (healingItems.includes(item.id)) {
+			if (healingItems.includes(item.enigmaBase || item.id)) {
 				return this.effectState.checkedBerserk;
 			}
 			return true;
@@ -3079,7 +3079,7 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 			const strongWeathers = ['desolateland', 'primordialsea', 'deltastream'];
 			for (const target of this.getAllActive()) {
 				if (target.hasItem('Ability Shield')) {
-					this.add('-block', target, 'item: Ability Shield');
+					this.add('-block', target, target.getItem().enigmaBase === 'abilityshield' ? target.getItem().fullname : 'item: Ability Shield');
 					continue;
 				}
 				// Can't suppress a Tatsugiri inside of Dondozo already
@@ -3223,7 +3223,7 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 	},
 	opportunist: {
 		onFoeAfterBoost(boost, target, source, effect) {
-			if (effect?.name === 'Opportunist' || effect?.name === 'Mirror Herb') return;
+			if (effect?.name === 'Opportunist' || effect?.name === 'Mirror Herb' || (effect as Item)?.enigmaBase === 'mirrorherb') return;
 			if (!this.effectState.boosts) this.effectState.boosts = {} as SparseBoostsTable;
 			const boostPlus = this.effectState.boosts;
 			let i: BoostID;
@@ -3471,7 +3471,8 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 		onResidual(pokemon) {
 			if (pokemon.item) return;
 			const pickupTargets = this.getAllActive().filter(target => (
-				target.lastItem && target.usedItemThisTurn && pokemon.isAdjacent(target)
+				target.lastItem && target.usedItemThisTurn && pokemon.isAdjacent(target) &&
+				this.dex.items.getByID(target.lastItem).enigmaBase === undefined
 			));
 			if (!pickupTargets.length) return;
 			const randomTarget = this.sample(pickupTargets);
@@ -3763,7 +3764,7 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 		condition: {
 			noCopy: true,
 			onStart(pokemon, source, effect) {
-				if (effect?.name === 'Booster Energy') {
+				if (effect?.name === 'Booster Energy' || (effect as Item)?.enigmaBase === 'boosterenergy') {
 					this.effectState.fromBooster = true;
 					this.add('-activate', pokemon, 'ability: Protosynthesis', '[fromitem]');
 				} else {
@@ -3922,7 +3923,7 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 		condition: {
 			noCopy: true,
 			onStart(pokemon, source, effect) {
-				if (effect?.name === 'Booster Energy') {
+				if (effect?.name === 'Booster Energy' || (effect as Item)?.enigmaBase === 'boosterenergy') {
 					this.effectState.fromBooster = true;
 					this.add('-activate', pokemon, 'ability: Quark Drive', '[fromitem]');
 				} else {
@@ -4102,10 +4103,10 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 	ripen: {
 		onTryHeal(damage, target, source, effect) {
 			if (!effect) return;
-			if (effect.name === 'Berry Juice' || effect.name === 'Leftovers') {
+			if (['berryjuice', 'leftovers'].includes((effect as Item).enigmaBase || effect.id)) {
 				this.add('-activate', target, 'ability: Ripen');
 			}
-			if ((effect as Item).isBerry) return this.chainModify(2);
+			if ((effect as Item).isBerry && (effect as Item).enigmaParam === undefined) return this.chainModify(2);
 		},
 		onChangeBoost(boost, target, source, effect) {
 			if (effect && (effect as Item).isBerry) {
@@ -4131,7 +4132,9 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 				'Babiri Berry', 'Charti Berry', 'Chilan Berry', 'Chople Berry', 'Coba Berry', 'Colbur Berry', 'Haban Berry', 'Kasib Berry', 'Kebia Berry', 'Occa Berry', 'Passho Berry', 'Payapa Berry', 'Rindo Berry', 'Roseli Berry', 'Shuca Berry', 'Tanga Berry', 'Wacan Berry', 'Yache Berry',
 			];
 			// Record if the pokemon ate a berry to resist the attack
-			pokemon.abilityState.berryWeaken = weakenBerries.includes(item.name);
+			pokemon.abilityState.berryWeaken = weakenBerries.includes(
+				item.enigmaBase ? this.dex.items.getByID(item.enigmaBase as ID).name : item.name
+			);
 		},
 		flags: {},
 		name: "Ripen",
@@ -4904,7 +4907,7 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 	},
 	stickyhold: {
 		onTakeItem(item, pokemon, source) {
-			if (!pokemon.hp || pokemon.item === 'stickybarb') return;
+			if (!pokemon.hp || pokemon.item === 'stickybarb' || pokemon.item === 'enigmastickybarb') return;
 			if ((source && source !== pokemon) || this.activeMove?.id === 'knockoff') {
 				this.add('-activate', pokemon, 'ability: Sticky Hold');
 				return false;
@@ -5431,7 +5434,7 @@ export const Abilities: import('../sim/dex-abilities').AbilityDataTable = {
 			}
 			// interaction with Ability Shield is similar to No Ability
 			if (pokemon.hasItem('Ability Shield')) {
-				this.add('-block', pokemon, 'item: Ability Shield');
+				this.add('-block', pokemon, pokemon.getItem().enigmaBase === 'abilityshield' ? pokemon.getItem().fullname : 'item: Ability Shield');
 				this.effectState.seek = false;
 			}
 			if (this.effectState.seek) {

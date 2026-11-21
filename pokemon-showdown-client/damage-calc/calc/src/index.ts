@@ -149,6 +149,7 @@ export {type State} from './state';
 
 export {ABILITIES} from './data/abilities';
 export {ITEMS, MEGA_STONES} from './data/items';
+export {parseEnigmaItem} from './items';
 export {MOVES, extendMoves} from './data/moves';
 export {SPECIES, extendSpecies} from './data/species';
 export {extendAbilities} from './data/abilities';

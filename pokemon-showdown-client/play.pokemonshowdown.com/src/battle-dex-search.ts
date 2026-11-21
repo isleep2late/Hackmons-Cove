@@ -60,6 +60,7 @@ export class DexSearch {
 	dex: ModdedDex = Dex;
 
 	typedSearch: BattleTypedSearch<SearchType> | null = null;
+	formatid = '';
 
 	results: SearchRow[] | null = null;
 	prependResults: SearchRow[] | null = null;
@@ -143,6 +144,7 @@ export class DexSearch {
 	}
 
 	find(query: string) {
+		if (this.typedSearch?.searchType === 'item') query = Dex.enigma.searchQuery(query, this.formatid);
 		query = toID(query);
 		if (this.query === query && this.results) {
 			return false;
@@ -171,6 +173,14 @@ export class DexSearch {
 				} else {
 					this.results = [this.typedSearch.sortRow, ...this.results];
 				}
+			}
+		}
+		if (this.typedSearch?.searchType === 'item' && !this.sortCol) {
+			const presetRows = Dex.enigma.presetRows(query, this.formatid) as SearchRow[];
+			if (presetRows.length) {
+				const first = this.results[0];
+				const nearOnly = first?.[0] === 'html' && first[1].startsWith('<em>No exact match');
+				this.results = nearOnly ? presetRows : this.results.concat(presetRows);
 			}
 		}
 		this.selection = this.getFirstResultIndex();
@@ -238,6 +248,7 @@ export class DexSearch {
 	setType(searchType: SearchType | '', format = '' as ID, speciesOrSet: ID | Dex.PokemonSet = '' as ID) {
 		// invalidate caches
 		this.results = null;
+		this.formatid = format;
 
 		if (searchType !== this.typedSearch?.searchType) {
 			this.filters = null;

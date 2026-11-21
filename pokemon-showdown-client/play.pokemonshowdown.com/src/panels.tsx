@@ -428,6 +428,7 @@ export class PSView extends preact.Component {
 			document.documentElement.style.height = '100%';
 		}
 		PSView.updateScrollSnap();
+		if (PSView.narrowMode) PSView.jumpToRoom();
 	}
 	override componentWillUnmount() {
 		PSView.scrollFrame?.removeEventListener('scroll', PSView.handleFrameScroll);
@@ -1178,12 +1179,10 @@ export class PSView extends preact.Component {
 					}
 				}
 			}
-			if (!isNonEmptyTextInput) {
-				if (PS.room.onParentKeyDown?.(ev) === false) {
-					ev.stopImmediatePropagation();
-					ev.preventDefault();
-					return;
-				}
+			if (PS.room.onParentKeyDown?.(ev, isNonEmptyTextInput) === false) {
+				ev.stopImmediatePropagation();
+				ev.preventDefault();
+				return;
 			}
 			const modifierKey = ev.ctrlKey || ev.altKey || ev.metaKey || ev.shiftKey;
 			const altKey = !ev.ctrlKey && ev.altKey && !ev.metaKey && !ev.shiftKey;

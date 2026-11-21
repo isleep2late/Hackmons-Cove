@@ -1043,7 +1043,8 @@ Storage.fastUnpackTeam = function (buf) {
 			if (misc[11]) {
 				set.phItems = misc[11].split('-').map(function (itemid) {
 					var key = toID(itemid);
-					return (window.BattleItems && window.BattleItems[key] && window.BattleItems[key].name) || itemid;
+					var enigmaExtra = Dex.enigma.get(key, Dex);
+					return (window.BattleItems && window.BattleItems[key] && window.BattleItems[key].name) || (enigmaExtra && enigmaExtra.name) || itemid;
 				}).join('/');
 			}
 			if (misc[12]) {
@@ -1213,7 +1214,8 @@ Storage.unpackTeam = function (buf) {
 			if (misc[11]) {
 				set.phItems = misc[11].split('-').map(function (itemid) {
 					var key = toID(itemid);
-					return (window.BattleItems && window.BattleItems[key] && window.BattleItems[key].name) || itemid;
+					var enigmaExtra = Dex.enigma.get(key, Dex);
+					return (window.BattleItems && window.BattleItems[key] && window.BattleItems[key].name) || (enigmaExtra && enigmaExtra.name) || itemid;
 				}).join('/');
 			}
 			if (misc[12]) {
@@ -1416,6 +1418,8 @@ Storage.importTeam = function (buffer, teams) {
 			var atIndex = line.lastIndexOf(' @ ');
 			if (atIndex !== -1) {
 				curSet.item = line.substr(atIndex + 3);
+				var enigmaItem = Dex.enigma.get(toID(curSet.item), Dex);
+				if (enigmaItem) curSet.item = enigmaItem.name;
 				if (toID(curSet.item) === 'noitem') curSet.item = '';
 				line = line.substr(0, atIndex);
 			}
@@ -1480,7 +1484,10 @@ Storage.importTeam = function (buffer, teams) {
 			}
 			if (anyBaseImp) curSet.phBaseStats = phBaseStatsImp;
 		} else if (line.substr(0, 7) === 'Items: ') {
-			var itemParts = line.substr(7).split('/').map(function (part) { return $.trim(part); }).filter(function (part) { return !!part && part !== '(none)'; });
+			var itemParts = line.substr(7).split('/').map(function (part) { return $.trim(part); }).filter(function (part) { return !!part && part !== '(none)'; }).map(function (part) {
+				var enigmaPart = Dex.enigma.get(toID(part), Dex);
+				return enigmaPart ? enigmaPart.name : part;
+			});
 			if (itemParts[0]) curSet.item = itemParts[0];
 			if (itemParts.length > 1) curSet.phItems = itemParts.slice(1).join('/');
 		} else if (line === 'Shiny: Yes') {

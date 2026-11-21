@@ -1297,6 +1297,11 @@ export class Item implements Effect {
 	readonly isPokeball: boolean;
 	readonly itemUser?: readonly string[];
 	readonly isNonstandard: string | null;
+	readonly isBerry: boolean;
+	readonly isPrimalOrb: boolean;
+	readonly enigmaBase?: string;
+	readonly enigmaParam?: number;
+	readonly enigmaPreset?: true;
 
 	constructor(id: ID, name: string, data: any) {
 		if (!data || typeof data !== 'object') data = {};
@@ -1324,6 +1329,11 @@ export class Item implements Effect {
 		this.naturalGift = data.naturalGift || null;
 		this.isPokeball = !!data.isPokeball;
 		this.itemUser = data.itemUser;
+		this.isBerry = !!data.isBerry;
+		this.isPrimalOrb = !!data.isPrimalOrb;
+		if (data.enigmaBase !== undefined) this.enigmaBase = data.enigmaBase;
+		if (data.enigmaParam !== undefined) this.enigmaParam = data.enigmaParam;
+		if (data.enigmaPreset) this.enigmaPreset = true;
 
 		if (!this.gen) {
 			if (this.num >= 577) {

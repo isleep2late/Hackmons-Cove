@@ -12,7 +12,7 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 			if (effect?.effectType === 'Ability' && effect.name !== 'Trace') {
 				this.add('-ability', source, effect);
 			}
-			this.add('-block', target, 'item: Ability Shield');
+			this.add('-block', target, this.effect.fullname);
 			return null;
 		},
 		// Mold Breaker protection implemented in Battle.suppressingAbility() within sim/battle.ts
@@ -190,12 +190,12 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 		},
 		onStart(target) {
 			if (!target.ignoringItem() && !this.field.getPseudoWeather('gravity')) {
-				this.add('-item', target, 'Air Balloon');
+				this.add('-item', target, this.effect.name);
 			}
 		},
 		// airborneness implemented in sim/pokemon.js:Pokemon#isGrounded
 		onDamagingHit(damage, target, source, move) {
-			this.add('-enditem', target, 'Air Balloon');
+			this.add('-enditem', target, this.effect.name);
 			if (this.effect.id.startsWith('item:')) {
 				target.loseExtraItem(this.effect.id);
 				return;
@@ -207,7 +207,7 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 		onAfterSubDamage(damage, target, source, effect) {
 			this.debug('effect: ' + effect.id);
 			if (effect.effectType === 'Move') {
-				this.add('-enditem', target, 'Air Balloon');
+				this.add('-enditem', target, this.effect.name);
 				if (this.effect.id.startsWith('item:')) {
 					target.loseExtraItem(this.effect.id);
 					return;
@@ -1099,7 +1099,7 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 				}
 			}
 			if (showMsg && !(effect as ActiveMove).secondaries && effect.id !== 'octolock') {
-				this.add('-fail', target, 'unboost', '[from] item: Clear Amulet', `[of] ${target}`);
+				this.add('-fail', target, 'unboost', '[from] ' + this.effect.fullname, `[of] ${target}`);
 			}
 		},
 		num: 1882,
@@ -1269,7 +1269,7 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 					pokemon.hasAbility('gluttony') && pokemon.abilityState.gluttony))
 			) {
 				if (pokemon.eatItem()) {
-					this.add('-activate', pokemon, 'item: Custap Berry', '[consumed]');
+					this.add('-activate', pokemon, this.effect.fullname, '[consumed]');
 					return 0.1;
 				}
 			}
@@ -2279,7 +2279,7 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 		onDamagePriority: -40,
 		onDamage(damage, target, source, effect) {
 			if (this.randomChance(1, 10) && damage >= target.hp && effect?.effectType === 'Move') {
-				this.add("-activate", target, "item: Focus Band");
+				this.add("-activate", target, this.effect.fullname);
 				return target.hp - 1;
 			}
 		},
@@ -3415,7 +3415,7 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 			if (!moveSlot) return;
 			const addedPP = pokemon.hasAbility('ripen') ? 20 : 10;
 			moveSlot.pp = Math.min(moveSlot.pp + addedPP, moveSlot.maxpp);
-			this.add('-activate', pokemon, 'item: Leppa Berry', moveSlot.move, '[consumed]');
+			this.add('-activate', pokemon, this.effect.fullname, moveSlot.move, '[consumed]');
 		},
 		num: 154,
 		gen: 3,
@@ -3458,7 +3458,7 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 		},
 		onAfterMoveSecondarySelf(source, target, move) {
 			if (source && source !== target && move && move.category !== 'Status' && !source.forceSwitchFlag) {
-				this.damage(source.baseMaxhp / 10, source, source, this.dex.items.get('lifeorb'));
+				this.damage(source.baseMaxhp / 10, source, source, (this.effect as Item).enigmaBase ? this.effect : this.dex.items.get('lifeorb'));
 			}
 		},
 		num: 270,
@@ -3960,7 +3960,7 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 					for (const secondCondition of conditions) {
 						pokemon.removeVolatile(secondCondition);
 						if (firstCondition === 'attract' && secondCondition === 'attract') {
-							this.add('-end', pokemon, 'move: Attract', '[from] item: Mental Herb');
+							this.add('-end', pokemon, 'move: Attract', '[from] ' + this.effect.fullname);
 						}
 					}
 					return;
@@ -4131,12 +4131,14 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 		},
 		onEat(pokemon) {
 			pokemon.addVolatile('micleberry');
+			const state = pokemon.volatiles['micleberry'];
+			if (state && this.effect.effectType === 'Item') state.itemName = this.effect.name;
 		},
 		condition: {
 			duration: 2,
 			onSourceAccuracy(accuracy, target, source, move) {
 				if (!move.ohko) {
-					this.add('-enditem', source, 'Micle Berry');
+					this.add('-enditem', source, this.effectState.itemName || 'Micle Berry');
 					source.removeVolatile('micleberry');
 					if (typeof accuracy === 'number') {
 						return this.chainModify([4915, 4096]);
@@ -4200,7 +4202,7 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 			basePower: 30,
 		},
 		onFoeAfterBoost(boost, target, source, effect) {
-			if (effect?.name === 'Opportunist' || effect?.name === 'Mirror Herb') return;
+			if (effect?.name === 'Opportunist' || effect?.name === 'Mirror Herb' || (effect as Item)?.enigmaBase === 'mirrorherb') return;
 			if (!this.effectState.boosts) this.effectState.boosts = {} as SparseBoostsTable;
 			const boostPlus = this.effectState.boosts;
 			let i: BoostID;
@@ -5059,7 +5061,7 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 		onFractionalPriority(priority, pokemon, target, move) {
 			if (move.category === 'Status' && pokemon.hasAbility('myceliummight')) return;
 			if (priority <= 0 && this.randomChance(1, 5)) {
-				this.add('-activate', pokemon, 'item: Quick Claw');
+				this.add('-activate', pokemon, this.effect.fullname);
 				return 0.1;
 			}
 		},
@@ -5534,7 +5536,7 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 		},
 		onTryHit(pokemon, source, move) {
 			if (move.flags['powder'] && pokemon !== source && this.dex.getImmunity('powder', pokemon)) {
-				this.add('-activate', pokemon, 'item: Safety Goggles', move.name);
+				this.add('-activate', pokemon, this.effect.fullname, move.name);
 				return null;
 			}
 		},
@@ -8153,7 +8155,7 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 			}
 			moveSlot.pp += 5;
 			if (moveSlot.pp > moveSlot.maxpp) moveSlot.pp = moveSlot.maxpp;
-			this.add('-activate', pokemon, 'item: Mystery Berry', moveSlot.move);
+			this.add('-activate', pokemon, this.effect.fullname, moveSlot.move);
 		},
 		num: 154,
 		gen: 2,
@@ -8293,7 +8295,7 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 		onFractionalPriorityPriority: -2,
 		onFractionalPriority(priority, pokemon) {
 			if (priority <= 0 && this.randomChance(30, 256)) {
-				this.add('-activate', pokemon, 'item: Quick Needle');
+				this.add('-activate', pokemon, this.effect.fullname);
 				return 0.1;
 			}
 		},
@@ -8308,7 +8310,7 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 		onDamagePriority: -40,
 		onDamage(damage, target, source, effect) {
 			if (this.randomChance(30, 256) && damage >= target.hp && effect && effect.effectType === 'Move') {
-				this.add("-activate", target, "item: Focus Orb");
+				this.add("-activate", target, this.effect.fullname);
 				return target.hp - 1;
 			}
 		},
@@ -8359,7 +8361,7 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 		onSetStatus(status, target, source, effect) {
 			if (status.id !== 'psn' && status.id !== 'tox') return;
 			if ((effect as Move)?.status) {
-				this.add('-immune', target, '[from] item: Snakeskin');
+				this.add('-immune', target, '[from] ' + this.effect.fullname);
 			}
 			return false;
 		},
@@ -8374,7 +8376,7 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 		onSetStatus(status, target, source, effect) {
 			if (status.id !== 'psn' && status.id !== 'tox') return;
 			if ((effect as Move)?.status) {
-				this.add('-immune', target, '[from] item: Pretty Tail');
+				this.add('-immune', target, '[from] ' + this.effect.fullname);
 			}
 			return false;
 		},
@@ -8389,7 +8391,7 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 		onSetStatus(status, target, source, effect) {
 			if (status.id !== 'par') return;
 			if ((effect as Move)?.status) {
-				this.add('-immune', target, '[from] item: Earth');
+				this.add('-immune', target, '[from] ' + this.effect.fullname);
 			}
 			return false;
 		},
@@ -8404,7 +8406,7 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 		onSetStatus(status, target, source, effect) {
 			if (status.id !== 'par') return;
 			if ((effect as Move)?.status) {
-				this.add('-immune', target, '[from] item: Thunder Tail');
+				this.add('-immune', target, '[from] ' + this.effect.fullname);
 			}
 			return false;
 		},
@@ -8419,7 +8421,7 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 		onSetStatus(status, target, source, effect) {
 			if (status.id !== 'slp') return;
 			if ((effect as Move)?.status) {
-				this.add('-immune', target, '[from] item: Stimulus Orb');
+				this.add('-immune', target, '[from] ' + this.effect.fullname);
 			}
 			return false;
 		},
@@ -8434,7 +8436,7 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 		onSetStatus(status, target, source, effect) {
 			if (status.id !== 'brn') return;
 			if ((effect as Move)?.status) {
-				this.add('-immune', target, '[from] item: Water Tail');
+				this.add('-immune', target, '[from] ' + this.effect.fullname);
 			}
 			return false;
 		},
@@ -8449,7 +8451,7 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 		onSetStatus(status, target, source, effect) {
 			if (status.id !== 'frz') return;
 			if ((effect as Move)?.status) {
-				this.add('-immune', target, '[from] item: Fire Tail');
+				this.add('-immune', target, '[from] ' + this.effect.fullname);
 			}
 			return false;
 		},
@@ -8463,7 +8465,7 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 		isNonstandard: "Demo",
 		onTryAddVolatile(status, pokemon) {
 			if (status.id === 'confusion') {
-				this.add('-immune', pokemon, '[from] item: Calm Berry');
+				this.add('-immune', pokemon, '[from] ' + this.effect.fullname);
 				return null;
 			}
 		},

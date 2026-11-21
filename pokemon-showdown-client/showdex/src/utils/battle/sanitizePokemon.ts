@@ -9,7 +9,7 @@ import {
   nonEmptyObject,
   similarArrays,
 } from '@showdex/utils/core';
-import { getPhnnBaseStats } from '@showdex/phnn';
+import { getPhnnBaseItem, getPhnnBaseStats, getPhnnEnigmaItem } from '@showdex/phnn';
 import {
   detectAnyAbilityFormat,
   detectGenFromFormat,
@@ -118,16 +118,22 @@ export const sanitizePokemon = <
     item: (
       gen > 1
         && !!(pokemon as Partial<Showdown.Pokemon>)?.item
-        && dex.items.get(
+        && getPhnnBaseItem(dex, dex.items.get(
           (pokemon as Partial<Showdown.Pokemon>).item
             .replace('(exists)', ''),
-        )?.name as ItemName
+        )?.name as ItemName)
     ) || null,
+
+    enigmaItem: (
+      gen > 1
+        && !!(pokemon as Partial<Showdown.Pokemon>)?.item
+        && getPhnnEnigmaItem(dex, (pokemon as Partial<Showdown.Pokemon>).item)?.enigmaItem
+    ) || (pokemon as CalcdexPokemon)?.enigmaItem || null,
 
     dirtyItem: (pokemon as CalcdexPokemon)?.dirtyItem || null,
     altItems: (gen > 1 && (pokemon as CalcdexPokemon)?.altItems) || [],
     itemEffect: (pokemon as Partial<Showdown.Pokemon>)?.itemEffect || null,
-    prevItem: (pokemon as Partial<Showdown.Pokemon>)?.prevItem as ItemName || null,
+    prevItem: getPhnnBaseItem(dex, (pokemon as Partial<Showdown.Pokemon>)?.prevItem as ItemName) || null,
     prevItemEffect: (pokemon as Partial<Showdown.Pokemon>)?.prevItemEffect || null,
 
     nature: (!legacy && ((pokemon as CalcdexPokemon)?.nature || PokemonNatures.slice(-1)[0])) || null,

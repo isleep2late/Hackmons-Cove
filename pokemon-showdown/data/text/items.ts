@@ -564,7 +564,8 @@ export const ItemsText: { [id: IDEntry]: ItemText } = {
 		name: "Enigma Berry",
 		shortDesc: "Restores 1/4 max HP after holder is hit by a supereffective move. Single use.",
 		gen3: {
-			shortDesc: "No competitive use.",
+			shortDesc: "No effect by itself. Its data is in the save file, so it can copy any Gen 3 held item (Enigma items).",
+			desc: "In Generation 3 this is the e-Reader berry slot and its effect is stored in the save file, not the game. By itself it does nothing when held. With edited save data it takes the held effect of any other Gen 3 item and becomes an Enigma item: it works as that item, cannot be Tricked or stolen by Thief or Covet, and is still removed by Knock Off.",
 		},
 	},
 	eviolite: {

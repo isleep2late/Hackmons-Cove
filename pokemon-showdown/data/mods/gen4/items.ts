@@ -334,7 +334,7 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 		onUpdate(pokemon) {
 			if (pokemon.volatiles['attract'] && pokemon.useItem()) {
 				pokemon.removeVolatile('attract');
-				this.add('-end', pokemon, 'move: Attract', '[from] item: Mental Herb');
+				this.add('-end', pokemon, 'move: Attract', '[from] ' + this.effect.fullname);
 			}
 		},
 	},
@@ -366,7 +366,7 @@ export const Items: import('../../../sim/dex-items').ModdedItemDataTable = {
 			inherit: true,
 			onSourceModifyAccuracyPriority: 3,
 			onSourceModifyAccuracy(accuracy, target, source) {
-				this.add('-enditem', source, 'Micle Berry');
+				this.add('-enditem', source, this.effectState.itemName || 'Micle Berry');
 				source.removeVolatile('micleberry');
 				if (typeof accuracy === 'number') {
 					return accuracy * 1.2;

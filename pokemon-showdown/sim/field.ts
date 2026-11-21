@@ -15,7 +15,8 @@ export function applyInfinityExtender(
 	if (!source || source === 'debug' || !state.duration || state.duration <= 2) return false;
 	if (!source.hasItem('infinityextender')) return false;
 	state.duration = 0;
-	battle.add('-activate', source, 'item: Infinity Extender');
+	const held = source.getItem();
+	battle.add('-activate', source, held.enigmaBase === 'infinityextender' ? held.fullname : 'item: Infinity Extender');
 	return true;
 }
 

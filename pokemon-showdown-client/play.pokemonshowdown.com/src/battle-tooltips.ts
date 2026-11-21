@@ -23,6 +23,8 @@ export class ModifiableValue {
 	pokemon: Pokemon;
 	serverPokemon: ServerPokemon;
 	itemName: string;
+	enigmaName = '';
+	enigmaParam?: number;
 	abilityName: string;
 	weatherName: string;
 	isAccuracy = false;
@@ -32,7 +34,10 @@ export class ModifiableValue {
 		this.pokemon = pokemon;
 		this.serverPokemon = serverPokemon;
 
-		this.itemName = this.battle.dex.items.get(serverPokemon.item).name;
+		const heldItem = this.battle.dex.items.get(serverPokemon.item);
+		this.itemName = heldItem.enigmaBase ? this.battle.dex.items.get(heldItem.enigmaBase).name : heldItem.name;
+		this.enigmaName = heldItem.enigmaBase ? heldItem.name : '';
+		this.enigmaParam = heldItem.enigmaParam;
 		const ability = serverPokemon.ability || pokemon?.ability || serverPokemon.baseAbility;
 		this.abilityName = this.battle.dex.abilities.get(ability).name;
 		this.weatherName = this.battle.dex.moves.get(battle.weather).exists ?
@@ -91,7 +96,7 @@ export class ModifiableValue {
 		if (!itemName) itemName = this.itemName;
 		if (!itemName) return false;
 		if (!this.tryItem(itemName)) return false;
-		return this.modify(factor, itemName);
+		return this.modify(factor, this.enigmaName && itemName === this.itemName ? this.enigmaName : itemName);
 	}
 	abilityModify(factor: number, abilityName: string) {
 		if (!this.tryAbility(abilityName)) return false;
@@ -643,7 +648,7 @@ export class BattleTooltips {
 		// TODO: move this somewhere it makes more sense
 		if (pokemon.ability === '(suppressed)') serverPokemon.ability = '(suppressed)';
 		let ability = toID(serverPokemon.ability || pokemon.ability || serverPokemon.baseAbility);
-		let item = this.battle.dex.items.get(serverPokemon.item);
+		let item = this.baseItem(serverPokemon.item);
 
 		let value = new ModifiableValue(this.battle, pokemon, serverPokemon);
 		let [moveType, category] = this.getMoveType(move, value, gmaxMove || isZOrMax === 'maxmove');
@@ -1037,7 +1042,7 @@ export class BattleTooltips {
 			}
 			if (serverPokemon.item) item = TL(this.battle.dex.items.get(serverPokemon.item));
 			if (itemEffect) itemEffect = ' (' + itemEffect + ')';
-			if (item) itemText = `<small>${TL.label(TL`Item`)}</small>` + item + itemEffect;
+			if (item) itemText = `<small>${TL.label(TL`Item`)}</small>` + item + itemEffect + this.enigmaNote(serverPokemon.item);
 		} else if (clientPokemon) {
 			let item = '';
 			let itemEffect = clientPokemon.itemEffect || '';
@@ -1049,7 +1054,7 @@ export class BattleTooltips {
 			}
 			if (pokemon.item) item = TL(this.battle.dex.items.get(pokemon.item));
 			if (itemEffect) itemEffect = ' (' + itemEffect + ')';
-			if (item) itemText = `<small>${TL.label(TL`Item`)}</small>` + item + itemEffect;
+			if (item) itemText = `<small>${TL.label(TL`Item`)}</small>` + item + itemEffect + this.enigmaNote(pokemon.item);
 		}
 
 		if (abilityText || itemText) {
@@ -1213,7 +1218,7 @@ export class BattleTooltips {
 			return stats;
 		}
 
-		let item = toID(serverPokemon.item);
+		let item = this.baseItem(serverPokemon.item).id;
 		let speedHalvingEVItems = [
 			'machobrace', 'poweranklet', 'powerband', 'powerbelt', 'powerbracer', 'powerlens', 'powerweight',
 		];
@@ -2568,7 +2573,7 @@ export class BattleTooltips {
 		}
 		// Moves which have base power changed due to items
 		if (serverPokemon.item) {
-			let item = this.battle.dex.items.get(serverPokemon.item);
+			let item = this.baseItem(serverPokemon.item);
 			if (move.id === 'fling' && item.fling) {
 				value.itemModify(item.fling.basePower);
 			}
@@ -2915,14 +2920,29 @@ export class BattleTooltips {
 		'Struggle',
 		'Water Pledge',
 	];
+	baseItem(name: string | null | undefined) {
+		const item = this.battle.dex.items.get(name || '');
+		return item.enigmaBase ? this.battle.dex.items.get(item.enigmaBase) : item;
+	}
+	enigmaNote(name: string | null | undefined) {
+		const item = this.battle.dex.items.get(name || '');
+		if (item.enigmaBase === undefined) return '';
+		return `<br /><small>${BattleLog.escapeHTML(this.battle.dex.text.get(item).shortDesc)}</small>`;
+	}
 	getItemBoost(move: Dex.Move, value: ModifiableValue, moveType: Dex.TypeName) {
-		let item = this.battle.dex.items.get(value.serverPokemon.item);
+		let item = this.baseItem(value.serverPokemon.item);
 		let itemName = item.name;
 		let moveName = move.name;
 		let species = this.battle.dex.species.get(value.serverPokemon.speciesForme);
 		let isTransform = value.pokemon.volatiles.transform;
 		let speciesName = isTransform && value.pokemon.volatiles.formechange?.[1] && this.battle.gen <= 4 ?
 			this.battle.dex.species.get(value.pokemon.volatiles.formechange[1]).baseSpecies : species.baseSpecies;
+
+		const enigmaKind = value.enigmaParam === undefined ? null : Dex.enigma.kind(item.id);
+		if (enigmaKind?.kind === 'typeboost') {
+			if (enigmaKind.type === moveType) value.itemModify((100 + value.enigmaParam!) / 100);
+			return value;
+		}
 
 		// Plates
 		if (item.onPlate === moveType && !item.zMove) {

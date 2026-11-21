@@ -8,6 +8,7 @@
 import { State } from './state';
 import { toID } from './dex';
 import { isCustomDisguisesFormat } from './romhack-formats';
+import { baseItemId } from './enigma';
 import type { DynamaxOptions, MoveRequestData, PokemonMoveRequestData, PokemonSwitchRequestData } from './side';
 
 /** A Pokemon's move slot. */
@@ -947,7 +948,7 @@ export class Pokemon {
 		if (this.volatiles['gastroacid']) return true;
 
 		// Check if any active pokemon have the ability Neutralizing Gas
-		if ((this.item === 'abilityshield' || this.volatiles['item:abilityshield']) &&
+		if ((this.item === 'abilityshield' || this.item === 'enigmaabilityshield' || this.volatiles['item:abilityshield']) &&
 			!this.ignoringItem(false, 'abilityshield')) return false;
 		if (this.ability === ('neutralizinggas' as ID) && !this.set.phAbilities) return false;
 		if (ability.id === 'neutralizinggas' && this.set.phAbilities) return false;
@@ -1459,9 +1460,9 @@ export class Pokemon {
 		if (this.battle.gen === 4) {
 			if (this.species.num === 487) {
 				// Giratina formes
-				if (this.species.name === 'Giratina' && this.item === 'griseousorb') {
+				if (this.species.name === 'Giratina' && baseItemId(this.getItem()) === 'griseousorb') {
 					this.formeChange('Giratina-Origin');
-				} else if (this.species.name === 'Giratina-Origin' && this.item !== 'griseousorb') {
+				} else if (this.species.name === 'Giratina-Origin' && baseItemId(this.getItem()) !== 'griseousorb') {
 					this.formeChange('Giratina');
 				}
 			}
@@ -1928,7 +1929,7 @@ export class Pokemon {
 		const extraId = sourceEffect?.effectType === 'Item' && sourceEffect.id.startsWith('item:') ? sourceEffect.id : '';
 		if (extraId ? !this.volatiles[extraId] : !this.item) return false;
 		const item = extraId ? this.battle.dex.items.getByID(extraId.slice(5) as ID) : this.getItem();
-		if ((!this.hp && item.id !== 'jabocaberry' && item.id !== 'rowapberry') || !this.isActive) return false;
+		if ((!this.hp && !['jabocaberry', 'rowapberry'].includes(baseItemId(item))) || !this.isActive) return false;
 
 		if (!source && this.battle.event?.target) source = this.battle.event.target;
 		if (!extraId && sourceEffect?.effectType === 'Item' && this.item !== sourceEffect.id && source === this) {
@@ -1944,7 +1945,7 @@ export class Pokemon {
 			this.battle.singleEvent('Eat', item, extraId ? this.volatiles[extraId] : this.itemState, this, source, sourceEffect);
 			this.battle.runEvent('EatItem', this, source, sourceEffect, item);
 
-			if (RESTORATIVE_BERRIES.has(item.id)) {
+			if (RESTORATIVE_BERRIES.has(baseItemId(item) as ID)) {
 				switch (this.pendingStaleness) {
 				case 'internal':
 					if (this.staleness !== 'external') this.staleness = 'internal';
@@ -1984,7 +1985,7 @@ export class Pokemon {
 			return false;
 		}
 		if (this.battle.runEvent('UseItem', this, null, null, item)) {
-			switch (item.id) {
+			switch (baseItemId(item)) {
 			case 'redcard':
 				this.battle.add('-enditem', this, item, `[of] ${source!}`);
 				break;
@@ -2021,6 +2022,7 @@ export class Pokemon {
 		if (this.battle.gen === 4 && (this.itemKnockedOff || source.itemKnockedOff)) return false;
 		if (!this.item) return;
 		const item = this.getItem();
+		if (item.enigmaBase !== undefined && ['Ability', 'Item'].includes(this.battle.effect?.effectType)) return false;
 		if (this.battle.runEvent('TakeItem', this, source, null, item)) {
 			this.item = '';
 			const oldItemState = this.itemState;
@@ -2066,7 +2068,8 @@ export class Pokemon {
 			return true;
 		}
 		const itemid = toID(item);
-		if (this.item !== itemid && !this.volatiles['item:' + itemid]) return false;
+		if (this.item !== itemid && !this.volatiles['item:' + itemid] &&
+			!(this.item.startsWith('enigma') && this.getItem().enigmaBase === itemid)) return false;
 		return !this.ignoringItem(false, itemid);
 	}
 
@@ -2082,7 +2085,10 @@ export class Pokemon {
 
 	isDormantExtra(effectid: string) {
 		if (effectid === 'ability:' + this.ability) return !!this.set.phAbilities;
-		return effectid === 'item:' + this.item && !!this.set.phItems;
+		if (!this.set.phItems || typeof effectid !== 'string' || !effectid.startsWith('item:')) return false;
+		if (effectid === 'item:' + this.item) return true;
+		if (!this.item.startsWith('enigma') && !effectid.startsWith('item:enigma')) return false;
+		return baseItemId(this.getItem()) === baseItemId(this.battle.dex.items.getByID(effectid.slice(5) as ID));
 	}
 
 	loseExtraItem(effectid: string) {

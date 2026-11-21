@@ -15,7 +15,7 @@ function ExportPokemon(pokeInfo) {
 	var EV_counter = 0;
 	var finalText = checkExceptionsExport(pokemon.name);
 	if (gender !== 'N') finalText += " (" + gender + ")";
-	if (pokemon.item) finalText += " @ " + pokemon.item;
+	if (pokemon.item) finalText += " @ " + (pokemon.enigmaItem || pokemon.item);
 	finalText += "\n";
 	if (pokemon.ability) finalText += "Ability: " + pokemon.ability + "\n";
 	if (pokemon.level !== 100) finalText += "Level: " + pokemon.level + "\n";
@@ -359,6 +359,9 @@ function addSets(pokes, name) {
 			currentPoke.name = species.name;
 			currentPoke.gender = getGender(currentRow, species.offset + 1);
 			currentPoke.item = getItem(currentRow, species.offset + 1);
+			var enigmaImport = rows[i].indexOf(" @ ") >= 0 ?
+				calc.parseEnigmaItem(calc.Generations.get(gen), rows[i].slice(rows[i].indexOf(" @ ") + 3)) : undefined;
+			if (enigmaImport) currentPoke.item = enigmaImport.name;
 			currentPoke = getStats(currentPoke, rows, i + 1);
 			currentPoke = getMoves(currentPoke, rows, i + 1);
 			if (currentRow[species.offset].trim().endsWith('-Gmax')) currentPoke.isGmax = true;
@@ -668,7 +671,8 @@ function importSetToPanel(pokeInfo, text) {
 	pokeInfo.find(".set-selector").val(species + " (Blank Set)");
 	pokeInfo.find(".set-selector").change();
 
-	if (item !== "") pokeInfo.find(".item").val(item);
+	var importedItem = applyEnigmaItem(pokeInfo, item);
+	if (item !== "") pokeInfo.find(".item").val(importedItem);
 	if (gender) pokeInfo.find(".gender").val(gender);
 
 	var statIds = { hp: "hp", atk: "at", def: "df", spa: "sa", spd: "sd", spe: "sp",

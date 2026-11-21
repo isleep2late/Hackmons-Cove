@@ -77,6 +77,9 @@
 				this.resultSet[0] = sortRow;
 			}
 		}
+		if (this.enigmaRow) {
+			this.resultSet = [['html', this.enigmaRow]].concat(this.resultSet);
+		}
 		if (this.filters) {
 			this.resultSet = [['html', this.getFilterText()]].concat(this.resultSet);
 		}
@@ -501,7 +504,7 @@
 		if (matchLength) {
 			name = name.substr(0, matchStart) + '<b>' + name.substr(matchStart, matchLength) + '</b>' + name.substr(matchStart + matchLength);
 		}
-		buf += '<span class="col namecol">' + name + '</span> ';
+		buf += '<span class="col namecol' + (Dex.enigma.isLongName(item.name, 150, 13.3) ? ' longnamecol' : '') + '">' + name + '</span> ';
 
 		// error
 		if (errorMessage) {

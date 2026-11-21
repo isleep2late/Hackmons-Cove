@@ -1,6 +1,7 @@
 import type * as I from './data/interface';
 import {Stats} from './stats';
 import {toID, extend, assignWithout} from './util';
+import {parseEnigmaItem} from './items';
 import type {State} from './state';
 
 const STATS = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'] as I.StatID[];
@@ -27,6 +28,9 @@ export class Pokemon implements State.Pokemon {
   alliesFainted?: number;
   boostedStat?: I.StatIDExceptHP | 'auto';
   item?: I.ItemName;
+  enigma?: boolean;
+  enigmaParam?: number;
+  enigmaItem?: string;
   disabledItem?: I.ItemName;
   teraType?: I.TypeName;
 
@@ -73,7 +77,13 @@ export class Pokemon implements State.Pokemon {
     this.alliesFainted = options.alliesFainted;
     this.boostedStat = options.boostedStat;
     this.teraType = options.teraType;
-    this.item = options.item;
+    const enigma = parseEnigmaItem(gen, options.item);
+    this.item = enigma ? enigma.base : options.item;
+    if (enigma) {
+      this.enigma = true;
+      this.enigmaParam = enigma.param;
+      this.enigmaItem = enigma.name;
+    }
     this.nature = options.nature || ('Serious' as I.NatureName);
     this.ivs = Pokemon.withDefault(gen, gen.num === 0 ? {} : options.ivs, 31);
     this.evs = Pokemon.withDefault(
@@ -196,7 +206,7 @@ export class Pokemon implements State.Pokemon {
       gigantamax: this.gigantamax,
       alliesFainted: this.alliesFainted,
       boostedStat: this.boostedStat,
-      item: this.item,
+      item: (this.enigmaItem || this.item) as I.ItemName | undefined,
       gender: this.gender,
       nature: this.nature,
       ivs: extend(true, {}, this.ivs),

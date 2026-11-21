@@ -24,6 +24,7 @@ import { State } from './state';
 import { BattleQueue, type Action } from './battle-queue';
 import { BattleActions } from './battle-actions';
 import { Utils } from '../lib/utils';
+import { baseItemId, extraItemId, heldItemFullname } from './enigma';
 declare const __version: any;
 
 export type ChannelID = 0 | 1 | 2 | 3 | 4;
@@ -241,6 +242,7 @@ export class Battle {
 	lastDamage: number;
 	effectOrder: number;
 	quickClawRoll: boolean;
+	enigmaClawRandom: number;
 	speedOrder: number[];
 
 	teamGenerator: ReturnType<typeof Teams.getGenerator> | null;
@@ -329,6 +331,7 @@ export class Battle {
 		this.lastDamage = 0;
 		this.effectOrder = 0;
 		this.quickClawRoll = false;
+		this.enigmaClawRandom = 0;
 		this.speedOrder = [];
 		for (let i = 0; i < this.activePerHalf * 2; i++) {
 			this.speedOrder.push(i);
@@ -1398,7 +1401,7 @@ export class Battle {
 		if (move.flags['contact'] && attacker.hasItem('protectivepads')) {
 			if (announcePads) {
 				this.add('-activate', defender, this.effect.fullname);
-				this.add('-activate', attacker, 'item: Protective Pads');
+				this.add('-activate', attacker, heldItemFullname(attacker, 'protectivepads', 'item: Protective Pads'));
 			}
 			return false;
 		}
@@ -1982,6 +1985,12 @@ export class Battle {
 		} else if (this.gen === 3) {
 			this.quickClawRoll = this.randomChance(1, 5);
 		}
+		if (this.gen === 3 && this.getAllActive().some(pokemon => {
+			const item = pokemon.item.startsWith('enigmaquickclaw') ? pokemon.getItem() : null;
+			return item?.enigmaBase === 'quickclaw' && item.enigmaParam !== undefined;
+		})) {
+			this.enigmaClawRandom = this.random(65536);
+		}
 
 		this.makeRequest('move');
 	}
@@ -2066,7 +2075,10 @@ export class Battle {
 			let berry = false; // Restorative Berry
 			let cycle = false; // Harvest or Recycle
 			for (const pokemon of side.pokemon) {
-				berry = RESTORATIVE_BERRIES.has(toID(pokemon.set.item));
+				const setItem = toID(pokemon.set.item);
+				berry = RESTORATIVE_BERRIES.has(
+					setItem.startsWith('enigma') ? baseItemId(this.dex.items.getByID(setItem)) as ID : setItem
+				);
 				if (['harvest', 'pickup'].includes(toID(pokemon.set.ability)) ||
 					pokemon.set.moves.map(toID).includes('recycle' as ID)) {
 					cycle = true;
@@ -3203,7 +3215,8 @@ export class Battle {
 						for (const itemName of pokemon.set.phItems.split('/')) {
 							const extraItem = this.dex.items.get(itemName);
 							if (!extraItem.exists || extraItem.id === pokemon.item) continue;
-							const effect = 'item:' + extraItem.id;
+							const effect = 'item:' + extraItemId(extraItem);
+							if (effect === 'item:' + pokemon.item) continue;
 							if (pokemon.m.usedExtraItems?.includes(effect)) continue;
 							pokemon.volatiles[effect] = this.initEffectState({ id: effect as ID, target: pokemon });
 						}
