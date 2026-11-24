@@ -104,7 +104,7 @@ describe('[Gen 2] SpaceWorld decomp fixes, round 5', () => {
 
 		it('keeps the shared item rule outside SpaceWorld', () => {
 			const shared = Dex.mod('gen2').items.get('quickneedle');
-			const ctx = { randomChance: () => true, add() {} };
+			const ctx = { randomChance: () => true, add() {}, effect: shared };
 			assert.equal(shared.onFractionalPriority.call(ctx, 1, null), undefined);
 			assert.equal(shared.onFractionalPriority.call(ctx, 0, null), 0.1);
 		});

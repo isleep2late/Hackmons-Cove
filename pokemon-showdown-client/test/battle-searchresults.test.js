@@ -6,7 +6,7 @@ const vm = require('vm');
 
 global.preact = {Component: function () {}};
 global.Config = {routes: {dex: 'dex.pokemonshowdown.com'}};
-global.Dex = {resourcePrefix: '', getPokemonIcon() { return ''; }, getItemIcon() { return ''; }};
+global.Dex = {resourcePrefix: '', getPokemonIcon() { return ''; }, getItemIcon() { return ''; }, enigma: {isLongName() { return false; }}};
 // the shared UI catalog: TL`(no item)` etc. are tagged-template calls
 const localized = {'(no item)': '(localized no item)', '(no ability)': '(localized no ability)'};
 global.TL = strings => localized[strings[0]] ?? strings[0];

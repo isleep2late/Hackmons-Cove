@@ -15,6 +15,7 @@ npm-debug.log
 !/config/tsconfig.json
 /vendor/
 /caches/
+/.caches/
 
 /api/.dist/
 /api/.eslintcache
@@ -44,6 +45,7 @@ npm-debug.log
 
 /pokemonshowdown.com/.well-known/
 /pokemonshowdown.com/.pages-cached/
+/pokemonshowdown.com/.caches/
 /pokemonshowdown.com/files/
 /pokemonshowdown.com/images/
 /pokemonshowdown.com/ads.txt

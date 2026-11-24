@@ -1734,6 +1734,7 @@ export const Formats: import('../sim/dex-formats').FormatList = [
 		mod: 'gen9',
 		searchShow: false,
 		ruleset: ['ROM Hack Legality'],
+		banlist: ['CAP'],
 	},
 	{
 		name: "[Gen 9] ROM Hacks Disguises [EXPERIMENTAL]",
