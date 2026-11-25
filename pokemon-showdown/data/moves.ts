@@ -386,7 +386,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 		secondary: {
 			chance: 100,
 			onHit(target, source, move) {
-				if (source.isActive) target.addVolatile('trapped', source, move, 'trapper');
+				if (source.isActive && target.runTrappingImmunity()) target.addVolatile('trapped', source, move, 'trapper');
 			},
 		},
 		target: "normal",
@@ -1518,6 +1518,9 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 		pp: 5,
 		priority: 0,
 		flags: { reflectable: 1, mirror: 1, metronome: 1 },
+		onTryImmunity(target) {
+			return target.runTrappingImmunity();
+		},
 		onHit(target, source, move) {
 			return target.addVolatile('trapped', source, move, 'trapper');
 		},
@@ -9801,6 +9804,8 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 		priority: 0,
 		flags: { contact: 1, protect: 1, mirror: 1, metronome: 1, bite: 1 },
 		onHit(target, source, move) {
+			if (!source.runTrappingImmunity() || !target.runTrappingImmunity() ||
+				source.volatiles['trapped'] || target.volatiles['trapped']) return false;
 			source.addVolatile('trapped', target, move, 'trapper');
 			target.addVolatile('trapped', source, move, 'trapper');
 		},
@@ -11504,6 +11509,9 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 		pp: 5,
 		priority: 0,
 		flags: { reflectable: 1, mirror: 1, metronome: 1 },
+		onTryImmunity(target) {
+			return target.runTrappingImmunity();
+		},
 		onHit(target, source, move) {
 			return target.addVolatile('trapped', source, move, 'trapper');
 		},
@@ -17491,6 +17499,9 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 		pp: 10,
 		priority: 0,
 		flags: { protect: 1, reflectable: 1, mirror: 1, metronome: 1 },
+		onTryImmunity(target) {
+			return target.runTrappingImmunity();
+		},
 		onHit(target, source, move) {
 			return target.addVolatile('trapped', source, move, 'trapper');
 		},
@@ -17647,7 +17658,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 		secondary: {
 			chance: 100,
 			onHit(target, source, move) {
-				if (source.isActive) target.addVolatile('trapped', source, move, 'trapper');
+				if (source.isActive && target.runTrappingImmunity()) target.addVolatile('trapped', source, move, 'trapper');
 			},
 		},
 		target: "normal",
