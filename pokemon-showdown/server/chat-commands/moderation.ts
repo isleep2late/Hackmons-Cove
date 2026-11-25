@@ -2227,7 +2227,7 @@ export const commands: Chat.ChatCommands = {
 		this.globalModlog("BATTLEBAN", targetUser, reason);
 		if (targetUser) {
 			Ladders.cancelSearches(targetUser);
-			targetUser.popup(`|modal|${user.name} has prevented you from starting new battles for 2 days (${reason})`);
+			targetUser.popup(`|modal|${user.name} has prevented you from starting new battles for 30 days (${reason})`);
 		}
 		await Punishments.battleban(targetUser || targetID, null, null, reason);
 
@@ -2255,7 +2255,7 @@ export const commands: Chat.ChatCommands = {
 			throw new Chat.ErrorMessage(`User ${target} is not banned from battling.`);
 		}
 	},
-	unbattlebanhelp: [`/unbattleban [username] - [DEPRECATED] Allows a user to battle again. Requires: % @ ~`],
+	unbattlebanhelp: [`/unbattleban [username] - Allows a user to battle again. Requires: % @ ~`],
 
 	monthgroupchatban: 'groupchatban',
 	monthgcban: 'groupchatban',
