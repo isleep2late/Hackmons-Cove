@@ -666,17 +666,19 @@ export class TeamEditorState extends PSModel {
 		const baseStat = species.baseStats[stat];
 		const sw97HpDV = stat === 'hp' ? this.sw97HpDV(set) : null;
 		const iv = sw97HpDV === null ? ivOverride : 2 * sw97HpDV;
-		let ev = evOverride ?? (this.hackBlankEVs(set) ? 252 : set.evs?.[stat] ?? (this.gen > 2 ? 0 : 252));
-		if (this.format.isChampions) ev *= 8;
+		const ev = evOverride ?? (this.hackBlankEVs(set) ? 252 : set.evs?.[stat] ?? (this.gen > 2 ? 0 : 252));
 
 		if (stat === 'hp') {
 			if (baseStat === 1) return 1;
+			if (this.format.isChampions) return Dex.getChampionsStat(stat, baseStat, ev, Dex.phnnChampionsStatLevel(this.format.id, level));
 			if (this.format.isLetsGo) return Math.trunc(Math.trunc(2 * baseStat + iv + 100) * level / 100 + 10) + ev;
 			const hp = Math.trunc(Math.trunc(2 * baseStat + iv + Math.trunc(ev / 4) + 100) * level / 100 + 10);
 			return sw97HpDV === null ? hp : Math.min(999, hp);
 		}
 		let val = Math.trunc(Math.trunc(2 * baseStat + iv + Math.trunc(ev / 4)) * level / 100 + 5);
-		if (this.format.isLetsGo) {
+		if (this.format.isChampions) {
+			val = Dex.getChampionsStat(stat, baseStat, ev, Dex.phnnChampionsStatLevel(this.format.id, level));
+		} else if (this.format.isLetsGo) {
 			val = Math.trunc(Math.trunc(2 * baseStat + iv) * level / 100 + 5);
 		}
 		if (natureOverride) {
@@ -4091,7 +4093,8 @@ class DetailsForm extends preact.Component<{
 					type="number" inputMode="numeric" min="1"
 					max={RomHacks.isFormat(editor.format.id) ? RomHacks.maxLevel(editor.format.id, editor.gen) : 100} step="1"
 					class="textbox inputform numform default-placeholder" style="width: 50px"
-					onInput={this.changeLevel} onChange={this.changeLevel} disabled={editor.format.isChampions}
+					onInput={this.changeLevel} onChange={this.changeLevel}
+					disabled={editor.format.isChampions && editor.format.defaultLevel === 50}
 				/></label><small>(You probably want to change the team's levels by changing the format, not here)</small></p>
 				{ /nonerfs|disguise|status/.test(editor.format.id) && (
 					<p><label class="label">Starting HP: <input

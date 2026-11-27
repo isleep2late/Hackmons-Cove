@@ -3738,7 +3738,7 @@
 				'<input type="number" min="1" max="' + (this.phnnLevelCap()) + '" step="1" name="level" value="' +
 				(typeof set.level === 'number' ? set.level : this.phnnDefaultLevel()) +
 				'" class="textbox inputform numform"' +
-				(isChampions ? ' disabled' : '') +
+				(isChampions && Dex.formats.get(this.curTeam.format).defaultLevel === 50 ? ' disabled' : '') +
 				' /></div></div>';
 
 			if (this.curTeam.gen > 1) {
@@ -4916,7 +4916,7 @@
 				if (baseFormat.substr(-5) === 'draft') baseFormat = baseFormat.substr(0, baseFormat.length - 5);
 				if (!baseFormat) baseFormat = 'ou';
 				if (this.curTeam && this.curTeam.format) {
-					if (baseFormat.substr(0, 9) === 'champions' || baseFormat.substr(0, 10) === 'battlespot' ||
+					if ((baseFormat.substr(0, 9) === 'champions' && Dex.formats.get(this.curTeam.format).defaultLevel === 50) || baseFormat.substr(0, 10) === 'battlespot' ||
 						baseFormat.substr(0, 3) === 'bss' || baseFormat.substr(0, 3) === 'vgc' ||
 						baseFormat.substr(0, 14) === 'battlefestival') set.level = 50;
 					if (baseFormat.startsWith('lc') || baseFormat.endsWith('lc')) set.level = 5;
@@ -4957,7 +4957,7 @@
 
 		statbarRefs: function (set, baseFormat) {
 			var hp = 714, other = 499;
-			if (baseFormat.includes('champions') ||
+			if ((baseFormat.includes('champions') && set && set.level === 50) ||
 				baseFormat.includes('battlespot') || baseFormat.includes('bss') ||
 				baseFormat.includes('vgc') || baseFormat.includes('battlefestival')) {
 				hp = 362;
@@ -5021,7 +5021,7 @@
 			var species = this.curTeam.dex.species.get(set.species);
 			if (!species.exists || !species.baseStats) return 0;
 
-			if (!set.level) set.level = this.phnnDefaultLevel();
+			if (!set.level) set.level = usesStatPoints ? Dex.formats.get(this.curTeam.format).defaultLevel : this.phnnDefaultLevel();
 			if (typeof set.ivs[stat] === 'undefined') set.ivs[stat] = 31;
 
 			var speciesBaseStat = species.baseStats[stat];
@@ -5042,14 +5042,14 @@
 				// formula like any other number, which is what the server does. Getting this wrong
 				// would have the teambuilder print 1 where the battle gives 143.
 				if (speciesBaseStat === 1) return 1;
-				if (usesStatPoints) return baseStat + ev + 75;
+				if (usesStatPoints) return Dex.getChampionsStat(stat, baseStat, ev, Dex.phnnChampionsStatLevel(this.curTeam.format, set.level));
 				if (!supportsEVs) return Math.floor(Math.floor(2 * baseStat + iv + 100) * set.level / 100 + 10) + (supportsAVs ? ev : 0);
 				var hp = Math.floor(Math.floor(2 * baseStat + iv + Math.floor(ev / 4) + 100) * set.level / 100 + 10);
 				return this.isSpaceWorldDex() ? Math.min(999, hp) : hp;
 			}
 			var val = Math.floor(Math.floor(2 * baseStat + iv + Math.floor(ev / 4)) * set.level / 100 + 5);
 			if (usesStatPoints) {
-				val = baseStat + ev + 20;
+				val = Dex.getChampionsStat(stat, baseStat, ev, Dex.phnnChampionsStatLevel(this.curTeam.format, set.level));
 			} else if (!supportsEVs) {
 				val = Math.floor(Math.floor(2 * baseStat + iv) * set.level / 100 + 5);
 			}
