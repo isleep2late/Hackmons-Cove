@@ -739,7 +739,7 @@ abstract class BattleTypedSearch<T extends SearchType> {
 
 	protected formatType: 'doubles' | 'bdsp' | 'bdspdoubles' | 'rs' | 'frlg' | 'bw1' | 'letsgo' | 'metronome' | 'natdex' |
 		'nfe' | 'ssdlc1' | 'ssdlc1doubles' | 'predlc' | 'predlcdoubles' | 'svdlc1' | 'svdlc1doubles' | 'stadium' | 'lc' |
-		'champions' | 'natdexchampions' | null = null;
+		'champions' | 'championsdoubles' | 'natdexchampions' | null = null;
 	isDoubles = false;
 	spaceWorldStandard = false;
 
@@ -823,14 +823,13 @@ abstract class BattleTypedSearch<T extends SearchType> {
 			this.formatType = 'champions';
 			this.dex = Dex.mod('champions' as ID);
 			format = format.slice(9) as ID;
-			if (format.startsWith('natdex') || format.startsWith('nationaldex')) this.formatType = 'natdexchampions';
-			if (format.startsWith('natdex')) format = format.slice(6) as ID;
-			if (format.startsWith('nationaldex')) format = format.slice(11) as ID;
-			if (format.startsWith('vgc')) this.isDoubles = true;
+			if (format.includes('doubles') || format.startsWith('vgc')) {
+				this.formatType = 'championsdoubles';
+				this.isDoubles = true;
+			}
 			// we don't have Champions tables for VGC/BSS yet, so we're using Ubers for now
 			// also makes it so we don't override formatType later
 			if (format.startsWith('vgc') || format.startsWith('bss')) format = 'ubers' as ID;
-			if (format.endsWith('draft')) format = 'ag' as ID;
 		}
 		if ((format.includes('nonerfs') || format.includes('phnn')) && this.dex.gen === 9) {
 			this.dex = Dex.mod('gen9phnn' as ID);
@@ -906,7 +905,7 @@ abstract class BattleTypedSearch<T extends SearchType> {
 		if (format.includes('nationaldex') || format.startsWith('nd') || format.includes('natdex')) {
 			format = (format.startsWith('nd') ? format.slice(2) :
 				format.includes('natdex') ? format.slice(6) : format.slice(11)) as ID;
-			this.formatType = 'natdex';
+			this.formatType = this.formatType?.includes('champions') ? 'natdexchampions' : 'natdex';
 			if (!format) format = 'ou' as ID;
 			this.isDoubles = format.includes('doubles');
 		}
@@ -930,7 +929,7 @@ abstract class BattleTypedSearch<T extends SearchType> {
 			this.formatType = 'lc';
 		}
 		if (format.endsWith('draft')) {
-			format = format.slice(0, -5) as ID;
+			format = (this.formatType?.includes('champions') ? 'ag' : format.slice(0, -5)) as ID;
 			if (!format) format = 'anythinggoes' as ID;
 		}
 		this.format = format;
@@ -1075,18 +1074,45 @@ abstract class BattleTypedSearch<T extends SearchType> {
 		if (illegalResults?.length) {
 			results = [...results, ['header', TL`Illegal results`], ...illegalResults];
 		}
-		return withoutCap(results);
+		results = withoutCap(results);
+		return results;
+	}
+	protected getLearnsetTable() {
+		if (this.usesSpaceWorldLearnsets()) return BattleTeambuilderTable['gen2spaceworld'];
+		// Doubles tables share learnsets with their singles counterparts
+		const key = this.getTableKey().replace(/doubles$/, '');
+		// Only some tables have their own learnsets
+		return BattleTeambuilderTable[key]?.learnsets ? BattleTeambuilderTable[key] : BattleTeambuilderTable;
+	}
+	protected getTableKey() {
+		const gen = this.dex.gen;
+		switch (this.formatType) {
+		case 'doubles': return `gen${gen}doubles`;
+		case 'letsgo': return 'gen7letsgo';
+		case 'bdsp': return 'gen8bdsp';
+		case 'bdspdoubles': return 'gen8bdspdoubles';
+		case 'bw1': return 'gen5bw1';
+		case 'rs': return 'gen3rs';
+		case 'frlg': return 'gen3frlg';
+		case 'nfe': return `gen${gen}nfe`;
+		case 'lc': return `gen${gen}lc`;
+		case 'ssdlc1': return 'gen8dlc1';
+		case 'ssdlc1doubles': return 'gen8dlc1doubles';
+		case 'predlc': return 'gen9predlc';
+		case 'predlcdoubles': return 'gen9predlcdoubles';
+		case 'svdlc1': return 'gen9dlc1';
+		case 'svdlc1doubles': return 'gen9dlc1doubles';
+		case 'natdex': return `gen${gen}natdex`;
+		case 'metronome': return `gen${gen}metronome`;
+		case 'stadium': return `gen${gen}stadium${gen > 1 ? gen : ''}`;
+		case 'champions': return 'champions';
+		case 'championsdoubles': return 'championsdoubles';
+		case 'natdexchampions': return 'natdexchampions';
+		default: return `gen${gen}`;
+		}
 	}
 	protected firstLearnsetid(speciesid: ID) {
-		let table = BattleTeambuilderTable;
-		if (this.formatType?.startsWith('bdsp')) table = table['gen8bdsp'];
-		if (this.formatType === 'letsgo') table = table['gen7letsgo'];
-		if (this.formatType === 'bw1') table = table['gen5bw1'];
-		if (this.formatType === 'rs') table = table['gen3rs'];
-		if (this.formatType === 'frlg') table = table['gen3frlg'];
-		if (this.formatType === 'champions') table = table['champions'];
-		if (this.formatType === 'natdexchampions') table = table['natdexchampions'];
-		if (this.usesSpaceWorldLearnsets()) table = table['gen2spaceworld'];
+		const table = this.getLearnsetTable();
 		if (speciesid in table.learnsets) return speciesid;
 		const species = this.dex.species.get(speciesid);
 		if (!species.exists) return '' as ID;
@@ -1162,16 +1188,8 @@ abstract class BattleTypedSearch<T extends SearchType> {
 			}
 		}
 		let learnsetid = this.firstLearnsetid(speciesid);
+		const table = this.getLearnsetTable();
 		while (learnsetid) {
-			let table = BattleTeambuilderTable;
-			if (this.formatType?.startsWith('bdsp')) table = table['gen8bdsp'];
-			if (this.formatType === 'letsgo') table = table['gen7letsgo'];
-			if (this.formatType === 'bw1') table = table['gen5bw1'];
-			if (this.formatType === 'rs') table = table['gen3rs'];
-			if (this.formatType === 'frlg') table = table['gen3frlg'];
-			if (this.formatType === 'champions') table = table['champions'];
-			if (this.formatType === 'natdexchampions') table = table['natdexchampions'];
-			if (this.usesSpaceWorldLearnsets()) table = table['gen2spaceworld'];
 			let learnset = table.learnsets[learnsetid];
 			const eggMovesOnly = this.eggMovesOnly(learnsetid, speciesid);
 			if (learnset && (moveid in learnset) && (!this.format.startsWith('tradebacks') ? learnset[moveid].includes(genChar) :
@@ -1189,27 +1207,7 @@ abstract class BattleTypedSearch<T extends SearchType> {
 			return pokemon.num >= 0 ? String(pokemon.num) : pokemon.tier;
 		}
 		let table = window.BattleTeambuilderTable;
-		const gen = this.dex.gen;
-		const tableKey = this.formatType === 'doubles' ? `gen${gen}doubles` :
-			this.formatType === 'letsgo' ? 'gen7letsgo' :
-			this.formatType === 'bdsp' ? 'gen8bdsp' :
-			this.formatType === 'bdspdoubles' ? 'gen8bdspdoubles' :
-			this.formatType === 'bw1' ? 'gen5bw1' :
-			this.formatType === 'rs' ? 'gen3rs' :
-			this.formatType === 'frlg' ? 'gen3frlg' :
-			this.formatType === 'nfe' ? `gen${gen}nfe` :
-			this.formatType === 'lc' ? `gen${gen}lc` :
-			this.formatType === 'ssdlc1' ? 'gen8dlc1' :
-			this.formatType === 'ssdlc1doubles' ? 'gen8dlc1doubles' :
-			this.formatType === 'predlc' ? 'gen9predlc' :
-			this.formatType === 'predlcdoubles' ? 'gen9predlcdoubles' :
-			this.formatType === 'svdlc1' ? 'gen9dlc1' :
-			this.formatType === 'svdlc1doubles' ? 'gen9dlc1doubles' :
-			this.formatType === 'natdex' ? `gen${gen}natdex` :
-			this.formatType === 'stadium' ? `gen${gen}stadium${gen > 1 ? gen : ''}` :
-			this.formatType === 'champions' ? `champions` :
-			this.formatType === 'natdexchampions' ? `natdexchampions` :
-			`gen${gen}`;
+		const tableKey = this.getTableKey();
 		const phnnModTables = ['gen2spaceworld', 'gen2gs', 'gen1phnn', 'gen1phnneng', 'gen3phnn'];
 		if (phnnModTables.includes(this.dex.modid) && table[this.dex.modid]) {
 			table = table[this.dex.modid];
@@ -1314,10 +1312,6 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 			table = table[dex.modid];
 		} else if ((format.endsWith('cap') || format.endsWith('caplc')) && dex.gen < 9) {
 			table = table[`gen${dex.gen}`];
-		} else if (this.formatType === 'champions') {
-			table = table[`champions`];
-		} else if (this.formatType === 'natdexchampions') {
-			table = table[`natdexchampions`];
 		} else if (isVGCOrBS) {
 			table = table[`gen${dex.gen}vgc`];
 		} else if (dex.gen === 9 && isHackmons && !this.formatType) {
@@ -1328,7 +1322,8 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 			table[`gen${dex.gen}doubles`] && dex.gen > 4 &&
 			this.formatType !== 'letsgo' && this.formatType !== 'bdspdoubles' &&
 			this.formatType !== 'ssdlc1doubles' && this.formatType !== 'predlcdoubles' &&
-			this.formatType !== 'svdlc1doubles' && !this.formatType?.includes('natdex') &&
+			this.formatType !== 'svdlc1doubles' && !this.formatType?.includes('champions') &&
+			!this.formatType?.includes('natdex') &&
 			(
 				format.includes('doubles') || format.includes('triples') ||
 				format === 'freeforall' || format.startsWith('ffa') ||
@@ -1339,48 +1334,8 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 			isDoublesOrBS = true;
 		} else if (dex.gen < 9 && !this.formatType) {
 			table = table[`gen${dex.gen}`];
-		} else if (this.formatType?.startsWith('bdsp')) {
-			table = table['gen8' + this.formatType];
-		} else if (this.formatType === 'letsgo') {
-			table = table['gen7letsgo'];
-		} else if (this.formatType === 'bw1') {
-			table = table['gen5bw1'];
-		} else if (this.formatType === 'rs') {
-			table = table['gen3rs'];
-		} else if (this.formatType === 'frlg') {
-			table = table['gen3frlg'];
-		} else if (this.formatType === 'natdex') {
-			table = table[`gen${dex.gen}natdex`];
-		} else if (this.formatType === 'metronome') {
-			table = table[`gen${dex.gen}metronome`];
-		} else if (this.formatType === 'nfe') {
-			table = table[`gen${dex.gen}nfe`];
-		} else if (this.formatType === 'lc') {
-			table = table[`gen${dex.gen}lc`];
-		} else if (this.formatType?.startsWith('ssdlc1')) {
-			if (this.formatType.includes('doubles')) {
-				table = table['gen8dlc1doubles'];
-			} else {
-				table = table['gen8dlc1'];
-			}
-		} else if (this.formatType?.startsWith('predlc')) {
-			if (this.formatType.includes('doubles')) {
-				table = table['gen9predlcdoubles'];
-			} else if (this.formatType.includes('natdex')) {
-				table = table['gen9predlcnatdex'];
-			} else {
-				table = table['gen9predlc'];
-			}
-		} else if (this.formatType?.startsWith('svdlc1')) {
-			if (this.formatType.includes('doubles')) {
-				table = table['gen9dlc1doubles'];
-			} else if (this.formatType.includes('natdex')) {
-				table = table['gen9dlc1natdex'];
-			} else {
-				table = table['gen9dlc1'];
-			}
-		} else if (this.formatType === 'stadium') {
-			table = table[`gen${dex.gen}stadium${dex.gen > 1 ? dex.gen : ''}`];
+		} else if (this.formatType) {
+			table = table[this.getTableKey()];
 		}
 
 		if (!table.tierSet) {
@@ -1717,26 +1672,11 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 	getDefaultResults(): SearchRow[] {
 		let table = BattleTeambuilderTable;
 		const phnnModTables = ['gen2spaceworld', 'gen2gs', 'gen1phnn', 'gen1phnneng', 'gen3phnn'];
+		const formatTable = table[this.getTableKey()];
 		if (phnnModTables.includes(this.dex.modid) && (table[this.dex.modid]?.items || table[this.dex.modid]?.itemSet)) {
 			table = table[this.dex.modid];
-		} else if (this.formatType?.startsWith('bdsp')) {
-			table = table['gen8bdsp'];
-		} else if (this.formatType === 'bw1') {
-			table = table['gen5bw1'];
-		} else if (this.formatType === 'rs') {
-			table = table['gen3rs'];
-		} else if (this.formatType === 'frlg') {
-			table = table['gen3frlg'];
-		} else if (this.formatType === 'natdex') {
-			table = table[`gen${this.dex.gen}natdex`];
-		} else if (this.formatType?.endsWith('doubles')) { // no natdex/bdsp doubles support
-			table = table[`gen${this.dex.gen}doubles`];
-		} else if (this.formatType === 'metronome') {
-			table = table[`gen${this.dex.gen}metronome`];
-		} else if (this.formatType === 'champions') {
-			table = table[`champions`];
-		} else if (this.formatType === 'natdexchampions') {
-			table = table[`natdexchampions`];
+		} else if (formatTable?.itemSet || formatTable?.items) {
+			table = formatTable;
 		} else if (this.dex.gen < 9) {
 			table = table[`gen${this.dex.gen}`];
 		}
@@ -2133,18 +2073,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		let sketchMoves: string[] = [];
 		let sketch = false;
 		let gen = `${dex.gen}`;
-		let lsetTable = BattleTeambuilderTable;
-		if (this.formatType?.startsWith('bdsp')) lsetTable = lsetTable['gen8bdsp'];
-		if (this.formatType === 'letsgo') lsetTable = lsetTable['gen7letsgo'];
-		if (this.formatType === 'bw1') lsetTable = lsetTable['gen5bw1'];
-		if (this.formatType === 'rs') lsetTable = lsetTable['gen3rs'];
-		if (this.formatType === 'frlg') lsetTable = lsetTable['gen3frlg'];
-		if (this.formatType === 'champions') lsetTable = lsetTable['champions'];
-		if (this.formatType === 'natdexchampions') lsetTable = lsetTable['natdexchampions'];
-		if (this.formatType?.startsWith('ssdlc1')) lsetTable = lsetTable['gen8dlc1'];
-		if (this.formatType?.startsWith('predlc')) lsetTable = lsetTable['gen9predlc'];
-		if (this.formatType?.startsWith('svdlc1')) lsetTable = lsetTable['gen9dlc1'];
-		if (this.usesSpaceWorldLearnsets()) lsetTable = lsetTable['gen2spaceworld'];
+		const lsetTable = this.getLearnsetTable();
 		while (learnsetid) {
 			let learnset = lsetTable.learnsets[learnsetid];
 			if (learnset) {
