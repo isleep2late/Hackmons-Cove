@@ -445,7 +445,8 @@ export const commands: Chat.ChatCommands = {
 			if (result) {
 				connection.send(`|queryresponse|teamupload|` + JSON.stringify(result));
 			}
-			connection.popup(`Access your team now at https://psim.us/t/${result.teamid}!`);
+			const url = `${result.teamid}${result.privacy ? `-${result.privacy}` : ''}`;
+			connection.popup(`Access your team now at https://psim.us/t/${url}!`);
 		},
 		''(target) {
 			return this.parse('/teams user ' + toID(target) || this.user.id);
